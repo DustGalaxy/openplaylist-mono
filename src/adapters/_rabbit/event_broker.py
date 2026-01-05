@@ -1,0 +1,33 @@
+from faststream.rabbit import RabbitBroker, RabbitExchange, RabbitQueue, ExchangeType
+
+from config import settings
+
+broker = RabbitBroker(settings.RABBITMQ_URL)
+
+main_exchange = RabbitExchange("main_exchange", type=ExchangeType.DIRECT, durable=True)
+
+auth_user_da_all_request = RabbitQueue("auth.user.da.all.request", durable=True)
+auth_user_da_all_response = RabbitQueue("auth.user.da.all.response", durable=True)
+
+auth_user_da_tokens_refreshed = RabbitQueue("auth.user.da.tokens.refreshed", durable=True)
+auth_user_twitch_tokens_refreshed = RabbitQueue("auth.user.twtich.tokens.refreshed", durable=True)
+
+auth_user_twitch_all_request = RabbitQueue("auth.user.twitch.all.request", durable=True)
+
+bot_twitch_connect_request = RabbitQueue("bot.twitch.connect.request", durable=True)
+bot_twitch_connect_response = RabbitQueue("bot.twitch.connect.response", durable=True)
+bot_da_connect_request = RabbitQueue("bot.da.connect.request", durable=True)
+bot_da_connect_response = RabbitQueue("bot.da.connect.response", durable=True)
+
+playlist_order_created = RabbitQueue("playlist.order.created", durable=True)
+
+playlist_track_playnow = RabbitQueue("playlist.track.playnow", durable=True)
+playlist_track_added = RabbitQueue("playlist.track.added", durable=True)
+playlist_track_deleted = RabbitQueue("playlist.track.deleted", durable=True)
+playlist_settings_changed = RabbitQueue("playlist.settings.changed", durable=True)
+playlist_track_move = RabbitQueue("playlist.track.move", durable=True)
+
+playlist_privacy_private = RabbitQueue("playlist.privacy.private", durable=True)
+playlist_privacy_public = RabbitQueue("playlist.privacy.public", durable=True)
+
+playlist_settings_request = RabbitQueue("playlist.settings.request", durable=True, exclusive=True)

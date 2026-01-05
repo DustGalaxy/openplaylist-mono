@@ -1,0 +1,47 @@
+from datetime import datetime
+from typing import Literal
+from uuid import UUID
+from pydantic import BaseModel, ConfigDict
+
+from _types import Platform
+
+
+class UserDTO(BaseModel):
+    id: UUID
+    twitch_id: str
+
+
+class UserRead(BaseModel):
+    id: UUID
+    curr_platform: Platform
+    username: str
+    profile_image_url: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class IntegrationType(BaseModel):
+    type: Literal["twitch", "da"]
+
+
+class IntegrationRead(BaseModel):
+    id: UUID
+    platform: Platform
+    platform_avatar_url: str
+    platform_username: str
+    bot_connection: bool
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LinkedAccountWithTokensRead(BaseModel):
+    id: UUID
+    user_id: UUID
+    platform: Platform
+    platform_user_id: str
+
+    access_token: str
+    refresh_token: str
+    expires_at: int
+
+    model_config = ConfigDict(from_attributes=True)
