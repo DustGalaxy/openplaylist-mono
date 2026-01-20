@@ -1,0 +1,29 @@
+import uuid
+
+from twitchio.ext import commands
+
+from src.log_setup import LOGGER
+from src.utils import get_user_id
+from src.adapters._rabbit.dto.order import OrderNew, NewOrderPayload
+from src.adapters._rabbit.broker import broker, main_exchange
+
+
+class Listner(commands.Component):
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot = bot
+
+    @commands.Component.listener()
+    async def event_safe_new_order(self, payload: NewOrderPayload):
+        LOGGER.info(f"Event safe new order: {payload}")
+        uid = await get_user_id(str(payload.broadcaster_id))
+        event = OrderNew(
+            request_id=uuid.uuid4(),
+            owner_id=uuid.UUID(uid),
+            playlist_name=payload.playlist_name,
+            requester_id=payload.chatter_id,
+            requester_nickname=payload.chatter_nickname,
+            yt_video_id=payload.yt_video_id,
+            priority=payload.priority,
+            source="twitch",
+        )
+        await broker.publish(event, queue="order.new", exchange=main_exchange)

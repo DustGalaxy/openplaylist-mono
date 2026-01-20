@@ -1,0 +1,16 @@
+[project]
+name = "ttvbot"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "asqlite>=2.0.0",
+    "faststream[cli,rabbit]>=0.5.44",
+    "loguru>=0.7.3",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "redis>=6.2.0",
+    "twitchio>=3.0.1",
+    "uvicorn>=0.35.0",
+]

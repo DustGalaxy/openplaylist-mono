@@ -1,0 +1,42 @@
+# Этап 1: Сборка
+FROM node:18-alpine AS build
+WORKDIR /app
+
+# Переменные окружения для Vite (должны начинаться с VITE_)
+ARG VITE_WS_API_URL
+ARG VITE_PLST_API_URL
+ARG VITE_AUTH_API_URL
+ARG VITE_ORDER_API_URL
+ARG VITE_TWITCH_CLIENT_ID
+ARG VITE_TWITCH_REDIRECT_URI
+ARG VITE_TWITCH_SCOPES
+ARG VITE_DA_CLIENT_ID
+ARG VITE_DA_REDIRECT_URI
+ARG VITE_DA_SCOPES
+
+# Переводим ARG в ENV, чтобы Vite подхватил их при выполнении npm run build
+ENV VITE_WS_API_URL=$VITE_WS_API_URL
+ENV VITE_PLST_API_URL=$VITE_PLST_API_URL
+ENV VITE_AUTH_API_URL=$VITE_AUTH_API_URL
+ENV VITE_ORDER_API_URL=$VITE_ORDER_API_URL
+ENV VITE_TWITCH_CLIENT_ID=$VITE_TWITCH_CLIENT_ID
+ENV VITE_TWITCH_REDIRECT_URI=$VITE_TWITCH_REDIRECT_URI
+ENV VITE_TWITCH_SCOPES=$VITE_TWITCH_SCOPES
+ENV VITE_DA_CLIENT_ID=$VITE_DA_CLIENT_ID
+ENV VITE_DA_REDIRECT_URI=$VITE_DA_REDIRECT_URI
+ENV VITE_DA_SCOPES=$VITE_DA_SCOPES
+
+
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# Этап 2: Раздача статики
+FROM nginx:stable-alpine
+# Копируем билд из первого этапа
+COPY --from=build /app/dist /usr/share/nginx/html
+# Копируем конфиг Nginx (чтобы работал React Router)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
