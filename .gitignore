@@ -13,7 +13,7 @@ raw/
 .venv
 venv/*
 __pycache__/*
-
+__pycache__*
 *.pem
 *.log
 *.db
