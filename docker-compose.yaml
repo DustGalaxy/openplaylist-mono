@@ -1,0 +1,130 @@
+volumes:
+  postgres_data:
+    driver: local
+
+  rabbitmq_data:
+    driver: local
+
+networks:
+  default:
+    driver: bridge
+
+services:
+
+  rabbitmq:
+    image: rabbitmq:4.1.2-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - default
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - default
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  database:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U openplaylist_mono_user -d openplaylist_mono" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
+
+  traefik:
+    image: traefik:v3.1.5
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--log.level=DEBUG"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./certs:/etc/traefik/certs:ro
+      - ./traefik_conf/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml:ro
+    networks:
+      - default
+
+  backend:
+    build: ./back-end
+    ports:
+      - "8000:8000"
+    depends_on:
+      - database
+    env_file:
+      - ./back-end/.docker.env
+    volumes:
+      - ./back-end/src:/app/src
+    labels:
+      - "traefik.enable=true"
+      # Направляем все запросы, начинающиеся с /api, на бэкенд
+      - "traefik.http.routers.backend.rule=Host(`${PROJECT_DOMAIN:-openplaylist.localhost}`) && PathPrefix(`/api`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.backend.priority=100"
+      - "traefik.http.middlewares.api-strip.stripprefix.prefixes=/api"
+      - "traefik.http.routers.backend.middlewares=api-strip"
+    networks:
+      - default
+
+  frontend:
+    build:
+      context: ./new_ui
+      dockerfile: Dockerfile
+      args:
+      - VITE_WS_API_URL=${WS_URL}
+      - VITE_PLST_API_URL=${PLST_URL}
+      - VITE_AUTH_API_URL=${AUTH_URL}
+      - VITE_ORDER_API_URL=${ORDER_URL}
+      - VITE_TWITCH_CLIENT_ID=${TWITCH_ID}
+      - VITE_TWITCH_REDIRECT_URI=${TWITCH_REDIRECT}
+      - VITE_TWITCH_SCOPES=${TWITCH_SCOPES}
+      - VITE_DA_CLIENT_ID=${DA_ID}
+      - VITE_DA_REDIRECT_URI=${DA_REDIRECT}
+      - VITE_DA_SCOPES=${DA_SCOPES}
+    depends_on:
+      - backend
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`openplaylist.localhost`)"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+
+    networks:
+      - default
