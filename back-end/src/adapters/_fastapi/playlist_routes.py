@@ -183,7 +183,7 @@ async def set_play_now_for_playlist(
 ) -> None:
     try:
         await service.set_play_now(db_session, playlist_id, playnow.track_id, current_user)
-        dispatch(event_name_or_model="playlist_track_playnow", payload=playnow)
+        dispatch(event_name_or_model="playlist.track.playnow", payload=playnow)
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")
 
@@ -230,7 +230,7 @@ async def delete_track_from_playlist(
     try:
         await service.delete_track_from_playlist(db_session, playlist_id, track_id, current_user)
         dispatch(
-            event_name_or_model="playlist_track_deleted",
+            event_name_or_model="playlist.track.deleted",
             payload={"track_id": track_id, "playlist_id": str(playlist_id)},
         )
     except NotFoundException:

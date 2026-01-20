@@ -30,7 +30,8 @@ from adapters._redis.broker import redis_adapter
 @local_handler.register(event_name="playlist.track.playnow")
 async def playlist_track_playnow_handler(event: Event):
     event_name, payload = event
-    typed_payload = PlayNow.model_validate(payload)
+    print(payload)
+    typed_payload = PlayNow(track_id=payload.track_id, playlist_id=str(payload.playlist_id))
 
     await sio_service.set_playnow(typed_payload)
 
@@ -39,6 +40,7 @@ async def playlist_track_playnow_handler(event: Event):
 async def playlist_track_added_handler(event: Event):
     event_name, payload = event
     typed_payload: Added = Added.model_validate(payload)
+    print("playlist_track_added_handler")
     await sio_service.add_track(typed_payload)
 
 
