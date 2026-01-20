@@ -9,6 +9,9 @@ class PlayNow(BaseModel):
     track_id: str | None
     playlist_id: str
 
+    class Config:
+        from_attributes = True
+
 
 class Added(BaseModel):
     id: str

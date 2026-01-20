@@ -44,7 +44,7 @@ async def new_order(
                 created_at=new_order.created_at,
             ),
         )
-
+        print("order.created endpoint")
     except IntegrityConflictException as e:
         print(e)
         raise BadRequestException()

@@ -43,7 +43,7 @@ class PlstUpdsNamespace(socketio.AsyncNamespace):
             await sio.disconnect(sid)
 
     async def on_subscribe(self, sid, data):
-        user = await self.get_session(sid)
+        user = await self.get_session(sid)     
         if user:
             await sio_service.sub_plst_upds(sid, data["playlist_id"], user["user_id"])
 

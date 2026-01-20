@@ -6,6 +6,8 @@ COPY pyproject.toml .env ./
 
 RUN pip install uv
 
+RUN uv sync
+
 COPY . .
 
 EXPOSE 8000
