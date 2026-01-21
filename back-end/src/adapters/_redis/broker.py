@@ -87,5 +87,8 @@ class RedisAdapter:
     def hget(self, name: str, key: str) ->  str | None:
         return self.broker.hget(name=name, key=key)  # pyright: ignore[reportReturnType]
 
+    @ready_check
+    def hgetall(self, name: str) ->  dict | None:
+        return self.broker.hgetall(name=name) # pyright: ignore[reportReturnType]
 
 redis_adapter = RedisAdapter(settings.REDIS_URL)

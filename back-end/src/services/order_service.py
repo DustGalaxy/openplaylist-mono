@@ -1,4 +1,5 @@
 import re
+import json
 from uuid import UUID
 from pytubefix import YouTube
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from _types import Status
 from dal.postgres_impl import order_repository
 from dal.abstract import IOrderRepository
+from adapters._redis.broker import redis_adapter
 from dto.order import OrderNew
 from models.order import OrderCreate, OrderDomain, OrderPatch
 
@@ -16,38 +18,56 @@ class OrderService:
 
     # TODO Вынести запрос в ивент, он не должен тормозить работу сервиса
     async def init_order(self, order: OrderNew) -> OrderCreate:
-        yt = YouTube("https://www.youtube.com/watch?v=" + order.yt_video_id)
-        try:
-            first_part = yt.initial_data["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][0]
-            second_part = first_part.get("videoPrimaryInfoRenderer") or first_part.get("videoSecondaryInfoRenderer")
+        cached_info: bytes = redis_adapter.get(order.yt_video_id) # pyright: ignore[reportAssignmentType]
 
-            likes = second_part["videoActions"]["menuRenderer"]["topLevelButtons"][0][
-                "segmentedLikeDislikeButtonViewModel"
-            ]["likeButtonViewModel"]["likeButtonViewModel"]["toggleButtonViewModel"]["toggleButtonViewModel"][
-                "defaultButtonViewModel"
-            ]["buttonViewModel"]["accessibilityText"]
+        if not cached_info:
+            try:
+                yt = YouTube("https://www.youtube.com/watch?v=" + order.yt_video_id)
+                first_part = yt.initial_data["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][
+                    0
+                ]
+                second_part = first_part.get("videoPrimaryInfoRenderer") or first_part.get("videoSecondaryInfoRenderer")
 
-            likes_text = likes
-            like_template = r"like this video along with (.*?) other people"
-            text = str(likes_text)
-            matches = re.findall(like_template, text, re.MULTILINE)
-            likes = None
-            if len(matches) >= 1:
-                like_str = matches[0]
-                likes = int(like_str.replace(",", ""))
-        except Exception:
-            likes = None
+                likes = second_part["videoActions"]["menuRenderer"]["topLevelButtons"][0][
+                    "segmentedLikeDislikeButtonViewModel"
+                ]["likeButtonViewModel"]["likeButtonViewModel"]["toggleButtonViewModel"]["toggleButtonViewModel"][
+                    "defaultButtonViewModel"
+                ]["buttonViewModel"]["accessibilityText"]
+
+                likes_text = likes
+                like_template = r"like this video along with (.*?) other people"
+                text = str(likes_text)
+                matches = re.findall(like_template, text, re.MULTILINE)
+                likes = None
+                if len(matches) >= 1:
+                    like_str = matches[0]
+                    likes = int(like_str.replace(",", ""))
+            except Exception:
+                likes = None
+
+            data = {
+                "title": yt.title,
+                "length": yt.length,
+                "likes": likes if likes else 0,
+                "views": yt.views,
+            }
+
+            redis_adapter.set(order.yt_video_id, json.dumps(data))
+
+        else:
+            data = json.loads((cached_info.replace(b"'", b'"')))
+
         return OrderCreate(
             owner_id=order.owner_id,
             requester_nickname=order.requester_nickname,
             playlist_name=order.playlist_name,
             donation_currency_amount=order.donation_currency_amount,
-            yt_video_id=yt.video_id,
-            title=yt.title,
-            duration=yt.length,
+            yt_video_id=order.yt_video_id,
+            title=data["title"],
+            duration=data["length"],
             priority=order.priority,
-            views=yt.views,
-            likes=likes if likes else 0,
+            views=data["views"],
+            likes=data["likes"],
             request_id=order.request_id,
             source=order.source,
         )
