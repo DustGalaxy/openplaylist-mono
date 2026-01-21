@@ -2,7 +2,7 @@ from typing import Any
 from redis import Redis
 from redis.typing import ExpiryT, AbsExpiryT, ResponseT, EncodableT
 
-from config import settings
+from settings import settings
 import functools
 
 

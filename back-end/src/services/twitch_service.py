@@ -10,7 +10,7 @@ import jwt
 from _types import AsyncSession, Platform
 from models.linked_accounts import LinkedAccountsCreate, LinkedAccountsUpdate
 from repo import UserRepository, LinkedAccountsRepository
-from config import settings
+from settings import settings
 
 from dto.twitch import TwitchUserResponse, TwitchAuthResponse
 from models.auth_user import AuthUserCreate, AuthUserDomain, AuthUserUpdate
