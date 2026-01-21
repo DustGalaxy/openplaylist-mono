@@ -11,4 +11,6 @@ RUN uv sync --frozen --no-cache --no-dev
 
 COPY . .
 
-CMD ["uv", "run", "src/main.py"]
+WORKDIR /app/src
+
+CMD ["uv", "run", "taskiq", "worker","taskiq_broker:broker", "tasks.order", "tasks.playlist" ]

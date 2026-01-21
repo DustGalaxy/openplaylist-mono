@@ -2,7 +2,6 @@ from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi_events.dispatcher import dispatch
 from simple_repository.exceptions import NotFoundException
 
 # from adapters._rabbit.event_broker import (
