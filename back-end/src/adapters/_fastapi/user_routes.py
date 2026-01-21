@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated
 
 from _types import Platform
-from config import settings
+from settings import settings
 from database import get_async_session
 from dto.twitch import CodeDTO
 from dto.user import IntegrationRead, IntegrationType, UserRead

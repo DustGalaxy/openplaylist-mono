@@ -6,7 +6,7 @@ from services.twitch_service import auth_twitch_service
 from services.da_service import auth_da_service
 from database import get_async_session
 from dto.twitch import CodeDTO
-from config import settings
+from settings import settings
 
 router = APIRouter(prefix="/login")
 

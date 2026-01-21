@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 from sqlalchemy.dialects.postgresql import UUID as UUIDCOLUMN
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker, AsyncEngine
 
-from config import settings
+from settings import settings
 
 engine: AsyncEngine = create_async_engine(settings.DB_URL)
 async_session_maker = async_sessionmaker(

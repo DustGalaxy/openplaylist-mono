@@ -23,4 +23,6 @@ dependencies = [
     "alembic>=1.17.2",
     "fastapi-events>=0.12.2",
     "python-socketio>=5.16.0",
+    "taskiq>=0.12.1",
+    "taskiq-redis>=1.2.1",
 ]

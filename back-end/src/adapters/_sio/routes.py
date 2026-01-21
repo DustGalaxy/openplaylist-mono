@@ -1,7 +1,7 @@
 import jwt
 import socketio
 
-from config import settings
+from settings import settings
 from services.sio_service import sio_service
 from adapters._redis.broker import redis_adapter
 

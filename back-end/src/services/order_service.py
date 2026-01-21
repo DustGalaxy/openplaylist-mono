@@ -13,6 +13,7 @@ from models.order import OrderCreate, OrderDomain, OrderPatch
 class OrderService:
     def __init__(self, order_repository: IOrderRepository):
         self.order_repository = order_repository
+
     # TODO Вынести запрос в ивент, он не должен тормозить работу сервиса
     async def init_order(self, order: OrderNew) -> OrderCreate:
         yt = YouTube("https://www.youtube.com/watch?v=" + order.yt_video_id)

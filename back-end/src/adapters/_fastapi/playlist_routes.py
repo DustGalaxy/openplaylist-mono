@@ -28,6 +28,9 @@ from models.settings import PlaylistSettingsPatch
 from services.auth_service import auth_service
 from services.playlist_service import PlaylistService, get_playlist_service
 
+from utils import kick
+from taskiq_broker import broker as task_broker
+
 router = APIRouter(prefix="/playlist")
 
 DB_SESSION = Annotated[AsyncSession, Depends(get_async_session)]
@@ -58,10 +61,12 @@ async def patch_playlist_settings(
 ) -> ReadPlaylistSettings:
     try:
         plst_settings = await service.patch_playlist_settings(db_session, patch_schema, playlist_name, current_user)
-        dispatch(
-            event_name_or_model="playlist_settings_changed",
-            payload=ReadPlaylistSettings.model_validate(plst_settings),
-        )
+
+        await kick("playlist.settings_changed", task_broker, ReadPlaylistSettings.model_validate(plst_settings))
+        # dispatch(
+        #     event_name_or_model="playlist_settings_changed",
+        #     payload=ReadPlaylistSettings.model_validate(plst_settings),
+        # )
 
         # redis schema - {user_id}:{playlist_name}:settings
         redis_adapter.set(
@@ -183,7 +188,8 @@ async def set_play_now_for_playlist(
 ) -> None:
     try:
         await service.set_play_now(db_session, playlist_id, playnow.track_id, current_user)
-        dispatch(event_name_or_model="playlist.track.playnow", payload=playnow)
+
+        await kick("playlist.track.playnow", task_broker, playnow)
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")
 
@@ -229,9 +235,6 @@ async def delete_track_from_playlist(
 ) -> None:
     try:
         await service.delete_track_from_playlist(db_session, playlist_id, track_id, current_user)
-        dispatch(
-            event_name_or_model="playlist.track.deleted",
-            payload={"track_id": track_id, "playlist_id": str(playlist_id)},
-        )
+        await kick("playlist.track.deleted", task_broker, {"track_id": track_id, "playlist_id": str(playlist_id)})
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")
