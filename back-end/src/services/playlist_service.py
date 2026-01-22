@@ -69,7 +69,7 @@ class PlaylistService:
 
     async def add_to_playlist(self, session: AsyncSession, event: OrderCreated) -> dict:
         playlist = await self._playlist_repository.get_user_playlist_by_name(
-            session, event.owner_id, event.playlist_name
+            session, event.owner_id, event.source
         )
 
         track = playlist.add_track(event)

@@ -17,4 +17,4 @@ playlist_settings_request = RabbitQueue("playlist.settings.request", durable=Tru
 
 bot_da_connect_request = RabbitQueue("bot.da.connect.request", durable=True)
 
-order_new = RabbitQueue("order.new", durable=True)
+order_new = RabbitQueue("bot.da.order.new", durable=True)

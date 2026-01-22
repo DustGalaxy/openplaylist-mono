@@ -26,7 +26,6 @@ async def order_new(
             order_id=new_order.id,
             owner_id=new_order.owner_id,
             requester_nickname=order.requester_nickname,
-            playlist_name=order.playlist_name,
             priority=new_order.priority,
             yt_video_id=new_order.yt_video_id,
             title=new_order.title,

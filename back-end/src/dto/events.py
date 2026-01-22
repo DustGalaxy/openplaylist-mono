@@ -10,7 +10,6 @@ class OrderCreated(BaseModel):
     order_id: UUID
     owner_id: UUID
     requester_nickname: str
-    playlist_name: str
     yt_video_id: str
     donation_currency_amount: float = 0.0
     priority: str
@@ -26,7 +25,6 @@ class OrderUpdate(BaseModel):
     order_id: UUID
     owner_id: UUID
     requester_nickname: str
-    playlist_name: str
     status: Status
     priority: str
     details: str
