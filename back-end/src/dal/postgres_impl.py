@@ -33,6 +33,15 @@ class PlaylistRepository(
     crud_factory(Playlist, PlaylistDomain, PlaylistCreate, PlaylistPatch),
     IPlaylistRepository,
 ):
+    
+    async def get_user_playlist_by_sourse(self, session: AsyncSession, owner_id: UUID, source: str) -> list[PlaylistDomain]:
+        stmt = select(Playlist).where(Playlist.owner_id == owner_id).where(Playlist.name.any(source))
+        result = await session.execute(stmt)
+        result = result.unique().scalar_one_or_none()
+        if not result:
+            raise NotFoundException(f"User({owner_id}) playlist with name: {name}, not found")
+        return PlaylistDomain.model_validate(result)
+
     async def get_user_playlist_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistDomain:
         stmt = select(Playlist).where(Playlist.owner_id == owner_id).where(Playlist.name == name)
         result = await session.execute(stmt)

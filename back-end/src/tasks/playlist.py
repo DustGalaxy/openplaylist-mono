@@ -75,7 +75,6 @@ async def handle_settings_request(
 async def handle_order_created(
     typed_payload: OrderCreated,
 ):
-    print(typed_payload)
     event_order_update = OrderUpdate(
         order_id=typed_payload.order_id,
         owner_id=typed_payload.owner_id,
