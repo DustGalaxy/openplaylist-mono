@@ -11,7 +11,7 @@ from simple_repository.exceptions import NotFoundException
 #     playlist_track_playnow,
 #     playlist_track_deleted,
 # )
-from adapters._redis.broker import redis_adapter
+# from adapters._redis.broker import redis_adapter
 from database import AsyncSession, get_async_session
 from dto.playlist import (
     NewPlaylist,
@@ -55,11 +55,11 @@ async def patch_playlist_settings(
     db_session: DB_SESSION,
     service: PLST_SERVICE,
     current_user: CURR_USER,
-    playlist_name: str,
+    playlist_id: UUID,
     patch_schema: PlaylistSettingsPatch,
 ) -> ReadPlaylistSettings:
     try:
-        plst_settings = await service.patch_playlist_settings(db_session, patch_schema, playlist_name, current_user)
+        plst_settings = await service.patch_playlist_settings(db_session, patch_schema, playlist_id, current_user)
 
         await kick("playlist.settings_changed", task_broker, ReadPlaylistSettings.model_validate(plst_settings))
         # dispatch(
@@ -68,10 +68,10 @@ async def patch_playlist_settings(
         # )
 
         # redis schema - {user_id}:{playlist_name}:settings
-        redis_adapter.set(
-            f"{current_user.id}:{playlist_name}:settings",
-            plst_settings.model_dump_json(),
-        )
+        # redis_adapter.set(
+        #     f"{current_user.id}:{playlist_id}:settings",
+        #     plst_settings.model_dump_json(),
+        # )
 
         return ReadPlaylistSettings.model_validate(plst_settings)
     except StopIteration:

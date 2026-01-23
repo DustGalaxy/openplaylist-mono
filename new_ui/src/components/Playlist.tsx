@@ -58,7 +58,7 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
 
   const [toggled, setToggled] = React.useState(false)
   const [activePlst, setActivePlst] = React.useState(
-    playlist.settings.is_active,
+    playlist.settings.is_allow_external_requests,
   )
 
   const [repeatMode, setRepeatMode] = React.useState(

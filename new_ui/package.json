@@ -37,7 +37,9 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-youtube": "^10.1.0",
+    "seroval": "^1.5.0",
     "socket.io-client": "^4.8.1",
+    "solid-js": "^1.9.10",
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.0.6",
     "tailwindcss-animate": "^1.0.7",
@@ -57,6 +59,10 @@
     "typescript": "^5.7.2",
     "vite": "^6.1.0",
     "vitest": "^3.0.5",
-    "web-vitals": "^4.2.4"
+    "web-vitals": "^4.2.4",
+    "seroval": "^1.4.1"
+  },
+  "overrides": {
+    "seroval": "$seroval"
   }
 }

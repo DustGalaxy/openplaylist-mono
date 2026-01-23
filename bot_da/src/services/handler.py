@@ -9,7 +9,7 @@ from dto.da import DonationData
 from dto.order import OrderNew
 from dto.settings import ReadPlaylistSettings
 from adapters._rabbit.broker import rabbit_broker, order_new, main_exchange
-from adapters._redis.broker import redis_adapter
+# from adapters._redis.broker import redis_adapter
 from adapters._repository.user import user_repo
 
 from database import async_session_maker
@@ -19,16 +19,16 @@ from utils import video_id, extract_data_from_msg
 logger = logging.getLogger(__name__)
 
 
-async def get_settings(user_id, playlist_name) -> ReadPlaylistSettings:
-    # redis schema - {user_id}:{playlist_name}:settings
-    raw_settings = redis_adapter.get(f"{user_id}:{playlist_name}:settings")
+# async def get_settings(user_id, playlist_name) -> ReadPlaylistSettings:
+#     # redis schema - {user_id}:{playlist_name}:settings
+#     raw_settings = redis_adapter.get(f"{user_id}:{playlist_name}:settings")
 
-    if not raw_settings:
-        settings = await PlaylistACL.fetch_playlist_settings(user_id, playlist_name)
-    else:
-        settings = ReadPlaylistSettings.model_validate_json(raw_settings)
+#     if not raw_settings:
+#         settings = await PlaylistACL.fetch_playlist_settings(user_id, playlist_name)
+#     else:
+#         settings = ReadPlaylistSettings.model_validate_json(raw_settings)
 
-    return settings
+#     return settings
 
 
 async def _request_processing(donation: DonationData):

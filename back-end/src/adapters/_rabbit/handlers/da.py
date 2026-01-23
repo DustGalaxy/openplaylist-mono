@@ -24,7 +24,7 @@ async def order_new_from_da(
 ):
     await message.ack()
     event: OrderNew = OrderNew.model_validate_json(message.body)
-    await kick("order.new", taskiq_broker, event, labels={"user_id": str(event.owner_id)})
+    await kick("order.new", taskiq_broker, event, False, labels={"user_id": str(event.owner_id)})
 
 
 @broker.subscriber(auth_user_da_all_request, exchange=main_exchange)

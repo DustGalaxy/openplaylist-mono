@@ -79,7 +79,6 @@ async def handle_order_created(
         order_id=typed_payload.order_id,
         owner_id=typed_payload.owner_id,
         requester_nickname=typed_payload.requester_nickname,
-        playlist_name=typed_payload.playlist_name,
         priority=typed_payload.priority,
         status="processing",
         details="",

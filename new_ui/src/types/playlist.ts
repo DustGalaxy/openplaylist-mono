@@ -41,7 +41,6 @@ export type PlaylistSettings = {
 
   max_playlist_size: number
 
-  is_active: boolean
   is_public: boolean
   is_favorite: boolean
 
@@ -60,6 +59,9 @@ export type PlaylistSettings = {
   cost_follower: number
 
   cost_mode: 'add' | 'max'
+
+  is_allow_external_requests: boolean
+  allow_sources: Array<string>
 
   track_black_list: Array<string> // yt_video_id
   user_black_list: Array<string>

@@ -3,6 +3,8 @@ from typing import Literal
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
+from _types import Source
+
 
 class SortSettings(BaseModel):
     date: Literal["asc", "desc", "none"]
@@ -18,7 +20,6 @@ class PlaylistSettingsDomain(BaseModel):
     min_likes: int = Field(..., ge=0)
     max_duration: int = Field(..., ge=0)
 
-    is_active: bool
     is_public: bool
     is_favorite: bool
 
@@ -47,6 +48,9 @@ class PlaylistSettingsDomain(BaseModel):
     track_black_list: list[str] = Field(default_factory=list)
     user_black_list: list[str] = Field(default_factory=list)
 
+    allow_sources: list[Source] = Field(default_factory=list)
+    is_allow_external_requests: bool
+
     created_at: datetime
     updated_at: datetime
 
@@ -57,7 +61,6 @@ class PlaylistSettingsPatch(BaseModel):
     min_views: int | None = Field(None, ge=0, description="Minimum views required for the playlist")
     min_likes: int | None = Field(None, ge=0, description="Minimum likes required for the playlist")
     max_duration: int | None = Field(None, ge=0, description="Maximum duration in seconds for the playlist")
-    is_active: bool | None = Field(None, description="Indicates if the settings are active")
     is_public: bool | None = Field(None, description="Indicates if the playlist is public")
     is_favorite: bool | None = Field(None, description="Indicates if the playlist is marked as favorite")
 
@@ -79,6 +82,9 @@ class PlaylistSettingsPatch(BaseModel):
 
     track_black_list: list[str] | None = Field(None, description="List of track IDs to exclude from the playlist")
     user_black_list: list[int] | None = Field(None, description="List of user IDs to exclude from the playlist")
+
+    allow_sources: list[Source] | None = Field(None)
+    is_allow_external_requests: bool | None
 
 
 class PlaylistSettingsCreate(BaseModel): ...

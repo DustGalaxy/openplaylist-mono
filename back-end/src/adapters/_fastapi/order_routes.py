@@ -18,4 +18,5 @@ async def new_order(
     order: OrderNew,
     current_user: UserDTO = Depends(auth_service.get_current_user),
 ):
-    await kick("order.new", taskiq_broker, order, labels={"user_id": str(current_user.id)})
+    is_owner = order.owner_id == current_user.id
+    await kick("order.new", taskiq_broker, order, is_owner, labels={"user_id": str(current_user.id)})

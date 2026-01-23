@@ -9,6 +9,7 @@ from _types import Source, Status
 class OrderCreated(BaseModel):
     order_id: UUID
     owner_id: UUID
+    is_owner: bool
     requester_nickname: str
     yt_video_id: str
     donation_currency_amount: float = 0.0
