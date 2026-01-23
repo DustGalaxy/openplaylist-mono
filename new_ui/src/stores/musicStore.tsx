@@ -74,7 +74,7 @@ type StoreState = {
   // playPrev: (playlistId: string) => void
 
   requestPlSettings: (
-    playlist_name: string,
+    playlist_id: string,
     settings: Partial<PlaylistSettings>,
   ) => Promise<void>
   syncPlSettings: (playlistId: string, settings: PlaylistSettings) => void
@@ -372,18 +372,18 @@ export const useMusicStore = create<StoreState>((set, get) => {
       }
     },
 
-    async requestPlSettings(playlist_name, settings) {
-      const res = await changePlaylistSettings(playlist_name, settings)
-      get().syncPlSettings(playlist_name, res)
+    async requestPlSettings(playlist_id, settings) {
+      const res = await changePlaylistSettings(playlist_id, settings)
+      get().syncPlSettings(playlist_id, res)
     },
 
-    syncPlSettings(playlist_name, settings) {
-      const pl = get().playlists.find((p) => p.name === playlist_name)
+    syncPlSettings(playlist_id, settings) {
+      const pl = get().playlists.find((p) => p.id === playlist_id)
 
       if (!pl) return
       set((state) => ({
         playlists: state.playlists.map((p) =>
-          p.name === playlist_name ? { ...p, settings } : p,
+          p.id === playlist_id ? { ...p, settings } : p,
         ),
       }))
     },

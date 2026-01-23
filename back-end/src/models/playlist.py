@@ -43,46 +43,9 @@ class PlaylistDomain(BaseModel):
     def remove_track(self, track_id: str):
         self.track_data = list(filter(lambda x: x.get("id") != track_id, self.track_data))
 
-    def add_track(self, track_data: OrderCreated) -> dict:
-        if track_data.is_owner:
-            pass
-        elif not self.settings.is_allow_external_requests:
-            raise NotActivePlaylist()
-        elif (
-            track_data.source == "da" and self.settings.donation_currency_amount != track_data.donation_currency_amount
-        ):
-            raise WrongCurrencyAmount()
-        elif track_data.requester_nickname in self.settings.user_black_list:
-            raise BlackListUser()
-        elif track_data.yt_video_id in self.settings.track_black_list:
-            raise BlackListTrack()
-        elif not track_data.views >= self.settings.min_views:
-            raise NotEnoughViews()
-        elif not track_data.likes >= self.settings.min_likes:
-            raise NotEnoughLikes()
-        elif self.settings.max_duration < track_data.duration:
-            raise TooLong()
-        elif self.settings.max_playlist_size > 0 and self.settings.max_playlist_size <= len(self.track_data):
-            raise PlaylistIsFullException()
-        elif self.settings.track_cooldown > 0:
-            prevtrack = find(self.track_data, lambda x: x.get("yt_video_id") == track_data.yt_video_id)
-            if prevtrack is not None:
-                created_at: datetime = prevtrack["created_at"]
-                time_delta = datetime.now().timestamp() - created_at.timestamp()
-                if time_delta < (self.settings.track_cooldown * 60):
-                    raise TrackCooldownException()
-
-        elif self.settings.user_cooldown > 0:
-            prevtrack = find(self.track_data, lambda x: x.get("requester_nickname") == track_data.requester_nickname)
-            if prevtrack is not None:
-                created_at: datetime = (
-                    prevtrack["created_at"]
-                    if isinstance(prevtrack["created_at"], datetime)
-                    else datetime.fromisoformat(prevtrack["created_at"])
-                )
-                time_delta = datetime.now().timestamp() - created_at.timestamp()
-                if time_delta < (self.settings.user_cooldown * 60):
-                    raise UserCooldownException()
+    def add_track(self, track_data: OrderCreated) -> dict | list[str]:
+        if len(err := self._track_validation(track_data)) != 0:
+            return err
 
         new_track = {
             "id": str(uuid7()),
@@ -100,6 +63,57 @@ class PlaylistDomain(BaseModel):
 
     def set_play_now(self, track_id: str):
         self.now_playing = track_id
+
+    def _track_validation(self, track_data: OrderCreated) -> list:
+        if track_data.is_owner:
+            return []
+
+        rules = [
+            (lambda: not self.settings.is_allow_external_requests, "External requests are disabled"),
+            (
+                lambda: track_data.source == "da"
+                and self.settings.donation_currency_amount != track_data.donation_currency_amount,
+                "Wrong currency amount",
+            ),
+            (lambda: track_data.requester_nickname in self.settings.user_black_list, "Blacklisted user"),
+            (lambda: track_data.yt_video_id in self.settings.track_black_list, "Blacklisted track"),
+            (lambda: track_data.views < self.settings.min_views, "Not enough views"),
+            (lambda: track_data.likes < self.settings.min_likes, "Not enough likes"),
+            (lambda: self.settings.max_duration < track_data.duration, "Too long"),
+            (
+                lambda: self.settings.max_playlist_size > 0 and self.settings.max_playlist_size <= len(self.track_data),
+                "Playlist is full",
+            ),
+            (lambda: self.settings.track_cooldown > 0 and self._check_track_cooldown(track_data), "Track cooldown"),
+            (lambda: self.settings.user_cooldown > 0 and self._check_user_cooldown(track_data), "User cooldown"),
+        ]
+
+        errors = [error_msg for condition, error_msg in rules if condition()]
+        return errors
+
+    def _check_track_cooldown(self, track_data):
+        """if track on cooldown return true else false"""
+        prevtrack = find(self.track_data, lambda x: x.get("yt_video_id") == track_data.yt_video_id)
+        if prevtrack is not None:
+            created_at: datetime = prevtrack["created_at"]
+            time_delta = datetime.now().timestamp() - created_at.timestamp()
+            if time_delta < (self.settings.track_cooldown * 60):
+                return True
+        return False
+
+    def _check_user_cooldown(self, track_data):
+        """if user on cooldown return true else false"""
+        prevtrack = find(self.track_data, lambda x: x.get("requester_nickname") == track_data.requester_nickname)
+        if prevtrack is not None:
+            created_at: datetime = (
+                prevtrack["created_at"]
+                if isinstance(prevtrack["created_at"], datetime)
+                else datetime.fromisoformat(prevtrack["created_at"])
+            )
+            time_delta = datetime.now().timestamp() - created_at.timestamp()
+            if time_delta < (self.settings.user_cooldown * 60):
+                return True
+        return False
 
 
 class PlaylistPatch(BaseModel):

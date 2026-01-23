@@ -40,7 +40,7 @@ class SioPlaylistUpdateService:
         await self.sio.emit("move_track", data, room=data.playlist_id, namespace=self.namespace)
 
     async def settings_changed(self, data: ReadPlaylistSettings):
-        await self.sio.emit("settings_changed", data.model_dump_json(), room=data.playlist_id, namespace=self.namespace)
+        await self.sio.emit("settings_changed", data.model_dump_json(), room=str(data.playlist_id), namespace=self.namespace)
 
     async def set_private(self, data: Private):
         room_id = data.playlist_id

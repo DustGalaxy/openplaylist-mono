@@ -67,19 +67,25 @@ class PlaylistService:
     async def get_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistDomain:
         return await self._playlist_repository.get_user_playlist_by_name(session, owner_id, name)
 
-    async def add_to_playlist(self, session: AsyncSession, event: OrderCreated) -> dict:
-        playlist = await self._playlist_repository.get_user_playlist_by_name(
+    async def add_to_playlist(self, session: AsyncSession, event: OrderCreated) -> tuple[list[dict], list[tuple[list[str], str]]]:
+        playlists = await self._playlist_repository.get_user_playlists_by_sourse(
             session, event.owner_id, event.source
         )
+        tracks: list[dict] = []
+        errors = []
+        for playlist in playlists:
+            track = playlist.add_track(event)
+            if isinstance(track, list):
+                errors.append((track, playlist.name))
+            else:
+                tracks.append(track)
 
-        track = playlist.add_track(event)
-
-        await self._playlist_repository.patch(
-            session,
-            PlaylistPatch(track_data=playlist.track_data),
-            playlist.id,
-        )
-        return track
+                await self._playlist_repository.patch(
+                    session,
+                    PlaylistPatch(track_data=playlist.track_data),
+                    playlist.id,
+                )
+        return tracks, errors
 
     async def new_playlist(self, session: AsyncSession, data: NewPlaylist, user: User) -> PlaylistDomain:
         try:
