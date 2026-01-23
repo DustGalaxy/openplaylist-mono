@@ -5,6 +5,7 @@ from src.config import settings
 
 bot_order_completed = RabbitQueue("bot.order.completed", durable=True)
 bot_order_cancelled = RabbitQueue("bot.order.cancelled", durable=True)
+bot_order_partially_completed = RabbitQueue("bot.order.partially_completed", durable=True)
 
 playlist_settings_request = RabbitQueue("playlist.settings.request", durable=True)
 auth_user_twitch_tokens_refreshed = RabbitQueue("auth.user.twtich.tokens.refreshed", durable=True)

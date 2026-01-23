@@ -85,38 +85,25 @@ async def handle_order_created(
     )
     try:
         async with async_session_maker() as db_session:
-            track = await playlist_service.add_to_playlist(db_session, typed_payload)
+            tracks, errors = await playlist_service.add_to_playlist(db_session, typed_payload)
 
-        event_order_update.details = f"{track['title']} added to playlist."
-        event_order_update.status = "completed"
+        if errors:
+            text = ""
+            for err in errors:
+                text += f"{err[1]}: {', '.join(err[0])}\n"
 
-        await kick("playlist.track.added", taskiq_broker, PlaylistTrackAdded.model_validate(track))
+            event_order_update.status = "partially_completed" if len(tracks) > 0 else "cancelled"
+            event_order_update.details = text
+        else:
+            event_order_update.details = f"{typed_payload.title} added to playlist."
+            event_order_update.status = "completed"
 
-    except TrackAddException as e:
-        event_order_update.status = "cancelled"
-
-        match e:
-            case NotEnoughLikes():
-                event_order_update.details = "Not enough likes."
-            case NotEnoughViews():
-                event_order_update.details = "Not enough views."
-            case NotActivePlaylist():
-                event_order_update.details = "Playlist is not active."
-            case BlackListTrack():
-                event_order_update.details = "Track is blacklisted."
-            case BlackListUser():
-                event_order_update.details = "User is blacklisted."
-            case TooLong():
-                event_order_update.details = "Track is too long."
-            case WrongCurrencyAmount():
-                event_order_update.details = "Wrong currency amount."
-            case PlaylistIsFullException():
-                event_order_update.details = "Playlist is full."
-            case TrackCooldownException():
-                event_order_update.details = "Track is on cooldown."
-            case UserCooldownException():
-                event_order_update.details = "User is on cooldown."
-
+        for track in tracks:
+            await kick(
+                "playlist.track.added",
+                taskiq_broker,
+                PlaylistTrackAdded.model_validate(track),
+            )
     except Exception as e:
         event_order_update.details = "Failed to add track to playlist due to unexpected error."
         event_order_update.status = "cancelled"
@@ -126,5 +113,7 @@ async def handle_order_created(
     if typed_payload.source == "twitch":
         if event_order_update.status == "cancelled":
             await rabbit_broker.publish(event_order_update, "bot.order.cancelled", main_exchange)
+        elif event_order_update.status == "partially_completed":
+            await rabbit_broker.publish(event_order_update, "bot.order.partially_completed", main_exchange)
         else:
             await rabbit_broker.publish(event_order_update, "bot.order.completed", main_exchange)

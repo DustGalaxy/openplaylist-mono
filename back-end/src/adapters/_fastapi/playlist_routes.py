@@ -50,7 +50,7 @@ async def get_privacy_settings(
         raise HTTPException(status_code=404, detail="Playlist not found")
 
 
-@router.patch("/{playlist_name}/settings", status_code=status.HTTP_200_OK)
+@router.patch("/{playlist_id}/settings", status_code=status.HTTP_200_OK)
 async def patch_playlist_settings(
     db_session: DB_SESSION,
     service: PLST_SERVICE,

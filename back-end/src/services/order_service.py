@@ -60,7 +60,6 @@ class OrderService:
         return OrderCreate(
             owner_id=order.owner_id,
             requester_nickname=order.requester_nickname,
-            playlist_name=order.playlist_name,
             donation_currency_amount=order.donation_currency_amount,
             yt_video_id=order.yt_video_id,
             title=data["title"],
