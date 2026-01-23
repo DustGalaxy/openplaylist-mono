@@ -34,13 +34,11 @@ class PlaylistRepository(
     IPlaylistRepository,
 ):
     
-    async def get_user_playlist_by_sourse(self, session: AsyncSession, owner_id: UUID, source: str) -> list[PlaylistDomain]:
-        stmt = select(Playlist).where(Playlist.owner_id == owner_id).where(Playlist.name.any(source))
+    async def get_user_playlists_by_sourse(self, session: AsyncSession, owner_id: UUID, source: str) -> list[PlaylistDomain]:
+        stmt = select(Playlist).where(Playlist.owner_id == owner_id).where(PlaylistSettings.allow_sources.contains(source))
         result = await session.execute(stmt)
-        result = result.unique().scalar_one_or_none()
-        if not result:
-            raise NotFoundException(f"User({owner_id}) playlist with name: {name}, not found")
-        return PlaylistDomain.model_validate(result)
+        results = result.unique().all()
+        return [PlaylistDomain.model_validate(res) for res in results]
 
     async def get_user_playlist_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistDomain:
         stmt = select(Playlist).where(Playlist.owner_id == owner_id).where(Playlist.name == name)

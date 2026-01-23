@@ -19,10 +19,9 @@ class Listner(commands.Component):
         event = OrderNew(
             request_id=uuid.uuid4(),
             owner_id=uuid.UUID(uid),
-            playlist_name=payload.playlist_name,
             requester_id=payload.chatter_id,
             requester_nickname=payload.chatter_nickname,
-            yt_video_id=payload.yt_video_id,
+            yt_video_url=payload.yt_video_url,
             priority=payload.priority,
             source="twitch",
         )

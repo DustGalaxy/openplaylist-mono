@@ -14,6 +14,7 @@ from utils import kick
 @taskiq_broker.task(task_name="order.new")
 async def order_new(
     order: OrderNew,
+    is_owner: bool,
     db_session: Annotated[AsyncSession, TaskiqDepends(get_async_session)],
 ):
     new_order = await order_service.init_order(order)
@@ -25,6 +26,7 @@ async def order_new(
         OrderCreated(
             order_id=new_order.id,
             owner_id=new_order.owner_id,
+            is_owner=is_owner,
             requester_nickname=order.requester_nickname,
             priority=new_order.priority,
             yt_video_id=new_order.yt_video_id,

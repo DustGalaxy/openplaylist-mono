@@ -37,7 +37,7 @@ export const changePlaylistActive = async (
     method: 'PATCH',
     withCredentials: true,
     data: {
-      is_active: !is_active,
+      is_allow_external_requests: !is_active,
     },
   })
     .then((res) => res.data)

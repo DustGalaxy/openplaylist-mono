@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict
 
 from models.settings import SortSettings
-
+from _types import Source
 
 class ReadPlaylistSettings(BaseModel):
     id: UUID
@@ -18,7 +18,6 @@ class ReadPlaylistSettings(BaseModel):
     user_cooldown: int = Field(2, ge=0)
     max_playlist_size: int = Field(0, ge=0)
 
-    is_active: bool = Field(default=False, description="Indicates if the settings are active")
     is_public: bool = Field(default=False, description="Indicates if the playlist is public")
     is_favorite: bool = Field(default=False, description="Indicates if the playlist is marked as favorite")
 
@@ -37,6 +36,9 @@ class ReadPlaylistSettings(BaseModel):
     cost_follower: int
 
     cost_mode: Literal["add", "max"]
+
+    is_allow_external_requests: bool
+    allow_sources: list[Source]
 
     track_black_list: list[str] = Field(default_factory=list)
     user_black_list: list[int] = Field(default_factory=list)

@@ -44,7 +44,7 @@ class PlaylistService:
             id=plst.id,
             now_playing=plst.now_playing,
             owner_id=plst.owner_id,
-            is_active=plst.settings.is_active,
+            is_allow_external_requests=plst.settings.is_allow_external_requests,
             is_public=plst.settings.is_public,
         )
 
@@ -175,10 +175,10 @@ class PlaylistService:
         self,
         session: AsyncSession,
         data: PlaylistSettingsPatch,
-        playlist_name: str,
+        playlist_id: UUID,
         user: User,
     ) -> PlaylistSettingsDomain:
-        plst_list = await self.get_by_name(session, user.id, playlist_name)
+        plst_list = await self.get(session, playlist_id, user)
 
         return await self._playlist_settings_repository.patch(session, data, plst_list.settings.id)
 

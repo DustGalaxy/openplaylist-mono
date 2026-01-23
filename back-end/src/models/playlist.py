@@ -44,7 +44,9 @@ class PlaylistDomain(BaseModel):
         self.track_data = list(filter(lambda x: x.get("id") != track_id, self.track_data))
 
     def add_track(self, track_data: OrderCreated) -> dict:
-        if not self.settings.is_active:
+        if track_data.is_owner:
+            pass
+        elif not self.settings.is_allow_external_requests:
             raise NotActivePlaylist()
         elif (
             track_data.source == "da" and self.settings.donation_currency_amount != track_data.donation_currency_amount
