@@ -15,7 +15,7 @@ dependencies = [
     "pydantic>=2.11.3",
     "uuid6>=2024.7.10",
     "python-dotenv>=1.1.0",
-    "simple-repo-asyncsqla==2.0.1",
+    "simple-repo-asyncsqla==2.1.0",
     "faststream[rabbit]>=0.5.48",
     "asyncpg>=0.30.0",
     "pytubefix>=10.3.6",
@@ -23,4 +23,6 @@ dependencies = [
     "alembic>=1.17.2",
     "fastapi-events>=0.12.2",
     "python-socketio>=5.16.0",
+    "taskiq>=0.12.1",
+    "taskiq-redis>=1.2.1",
 ]
