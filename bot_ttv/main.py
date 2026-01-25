@@ -4,9 +4,7 @@ import logging
 
 
 from faststream import FastStream
-
 import twitchio
-
 
 from src.log_setup import LOGGER
 from src.adapters._rabbit.handlers import broker

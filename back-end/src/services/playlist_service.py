@@ -44,7 +44,7 @@ class PlaylistService:
             id=plst.id,
             now_playing=plst.now_playing,
             owner_id=plst.owner_id,
-            is_active=plst.settings.is_active,
+            is_allow_external_requests=plst.settings.is_allow_external_requests,
             is_public=plst.settings.is_public,
         )
 
@@ -67,19 +67,25 @@ class PlaylistService:
     async def get_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistDomain:
         return await self._playlist_repository.get_user_playlist_by_name(session, owner_id, name)
 
-    async def add_to_playlist(self, session: AsyncSession, event: OrderCreated) -> dict:
-        playlist = await self._playlist_repository.get_user_playlist_by_name(
-            session, event.owner_id, event.playlist_name
+    async def add_to_playlist(self, session: AsyncSession, event: OrderCreated) -> tuple[list[dict], list[tuple[list[str], str]]]:
+        playlists = await self._playlist_repository.get_user_playlists_by_sourse(
+            session, event.owner_id, event.source
         )
+        tracks: list[dict] = []
+        errors = []
+        for playlist in playlists:
+            track = playlist.add_track(event)
+            if isinstance(track, list):
+                errors.append((track, playlist.name))
+            else:
+                tracks.append(track)
 
-        track = playlist.add_track(event)
-
-        await self._playlist_repository.patch(
-            session,
-            PlaylistPatch(track_data=playlist.track_data),
-            playlist.id,
-        )
-        return track
+                await self._playlist_repository.patch(
+                    session,
+                    PlaylistPatch(track_data=playlist.track_data),
+                    playlist.id,
+                )
+        return tracks, errors
 
     async def new_playlist(self, session: AsyncSession, data: NewPlaylist, user: User) -> PlaylistDomain:
         try:
@@ -175,10 +181,10 @@ class PlaylistService:
         self,
         session: AsyncSession,
         data: PlaylistSettingsPatch,
-        playlist_name: str,
+        playlist_id: UUID,
         user: User,
     ) -> PlaylistSettingsDomain:
-        plst_list = await self.get_by_name(session, user.id, playlist_name)
+        plst_list = await self.get(session, playlist_id, user)
 
         return await self._playlist_settings_repository.patch(session, data, plst_list.settings.id)
 

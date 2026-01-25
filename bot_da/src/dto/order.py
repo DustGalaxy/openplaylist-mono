@@ -11,7 +11,6 @@ class OrderNew(BaseModel):
     requester_id: int
     requester_nickname: str
     donation_currency_amount: float = 0.0
-    playlist_name: str
-    yt_video_id: str
+    yt_video_url: str
     priority: str
     source: Source

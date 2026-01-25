@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import ARRAY, UUID as PGUUID, JSONB
 
 from database import Base, UUIDMixin, TimestampMixin
+from _types import Source
 
 
 class PlaylistSettings(Base, UUIDMixin, TimestampMixin):
@@ -21,7 +22,8 @@ class PlaylistSettings(Base, UUIDMixin, TimestampMixin):
     min_likes: Mapped[int] = mapped_column(default=500, nullable=False)
     max_duration: Mapped[int] = mapped_column(default=600, nullable=False)
 
-    is_active: Mapped[bool] = mapped_column(default=False, nullable=False)
+    # is_active должен быть удалён
+    
     is_public: Mapped[bool] = mapped_column(default=False, nullable=False)
     is_favorite: Mapped[bool] = mapped_column(default=False, nullable=False)
 
@@ -51,10 +53,13 @@ class PlaylistSettings(Base, UUIDMixin, TimestampMixin):
     track_black_list: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True, default=list)
     user_black_list: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True, default=list)
 
+    allow_sources: Mapped[list[Source]] = mapped_column(ARRAY(String), nullable=True, default=list)
+    is_allow_external_requests: Mapped[bool] = mapped_column(default=False, nullable=False)
+
     def __repr__(self):
         return (
             f"<PlaylistSettings({self.id=}, {self.playlist_id=}, {self.min_views=}, "
-            f"{self.min_likes=}, {self.is_active=}, {self.is_public=}, "
+            f"{self.min_likes=}, {self.is_allow_external_requests=}, {self.is_public=}, "
             f"{self.is_favorite=}, {self.track_black_list=}, {self.user_black_list=}, {self.created_at=}, "
             f"{self.updated_at=})>"
         )

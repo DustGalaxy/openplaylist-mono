@@ -20,8 +20,7 @@ class NewOrderPayload(BaseModel):
     broadcaster_id: int
     chatter_id: int
     chatter_nickname: str
-    playlist_name: str
-    yt_video_id: str
+    yt_video_url: str
     priority: str
 
 
@@ -30,7 +29,6 @@ class OrderNew(BaseModel):
     owner_id: UUID
     requester_id: int
     requester_nickname: str
-    playlist_name: str
-    yt_video_id: str
+    yt_video_url: str
     priority: str
     source: Source

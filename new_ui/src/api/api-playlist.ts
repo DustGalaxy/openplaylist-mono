@@ -37,7 +37,7 @@ export const changePlaylistActive = async (
     method: 'PATCH',
     withCredentials: true,
     data: {
-      is_active: !is_active,
+      is_allow_external_requests: !is_active,
     },
   })
     .then((res) => res.data)
@@ -89,12 +89,12 @@ export const removeTrackFromPlaylist = async (
 }
 
 export const changePlaylistSettings = async (
-  playlist_name: string,
+  playlist_id: string,
   settings: Partial<PlaylistSettings>,
 ): Promise<PlaylistSettings> => {
   const config = getConfig()
   const response = await apiClient(
-    config.PLST_API_URL + `/${playlist_name}/settings`,
+    config.PLST_API_URL + `/${playlist_id}/settings`,
     {
       method: 'PATCH',
       withCredentials: true,

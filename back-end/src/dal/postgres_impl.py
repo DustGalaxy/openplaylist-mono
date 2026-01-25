@@ -29,10 +29,28 @@ from exceptions import NotActivePlaylist
 
 from _types import Platform
 
+
 class PlaylistRepository(
     crud_factory(Playlist, PlaylistDomain, PlaylistCreate, PlaylistPatch),
     IPlaylistRepository,
 ):
+    async def get_user_playlists_by_sourse(
+        self, session: AsyncSession, owner_id: UUID, source: str
+    ) -> list[PlaylistDomain]:
+        stmt = (
+            select(Playlist)
+            .join(Playlist.settings)
+            .where(
+                Playlist.owner_id == owner_id,
+                Playlist.settings.has(
+                    PlaylistSettings.allow_sources.contains([source]),
+                ),
+            )
+        )
+        result = await session.execute(stmt)
+        results = result.unique().scalars().all()
+        return [PlaylistDomain.model_validate(res) for res in results]
+
     async def get_user_playlist_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistDomain:
         stmt = select(Playlist).where(Playlist.owner_id == owner_id).where(Playlist.name == name)
         result = await session.execute(stmt)
@@ -46,7 +64,7 @@ class PlaylistRepository(
             select(Playlist)
             .where(Playlist.owner_id == owner_id)
             .join(PlaylistSettings)
-            .where(PlaylistSettings.is_active)
+            .where(PlaylistSettings.is_allow_external_requests)
         )
         result = await session.execute(stmt)
         result = result.scalar_one_or_none()

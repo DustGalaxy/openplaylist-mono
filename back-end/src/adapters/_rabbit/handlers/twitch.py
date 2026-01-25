@@ -11,12 +11,23 @@ from adapters._rabbit.event_broker import (
     main_exchange,
     auth_user_twitch_all_request,
     auth_user_twitch_tokens_refreshed,
+    bot_twitch_order_new
 )
-
+from dto.order import OrderNew
 from _types import Platform
 from database import async_session_maker
 from repo import user_repository, linked_accounts_repository
-from utils import find
+from utils import find, kick
+from taskiq_broker import broker as taskiq_broker
+
+
+@broker.subscriber(bot_twitch_order_new, exchange=main_exchange)
+async def order_new_from_twitch(
+    message: RabbitMessage = Context(),
+):
+    await message.ack()
+    event: OrderNew = OrderNew.model_validate_json(message.body)
+    await kick("order.new", taskiq_broker, event, False, labels={"user_id": str(event.owner_id)})
 
 
 @broker.subscriber(auth_user_twitch_all_request, exchange=main_exchange)

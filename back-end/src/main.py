@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
-from fastapi_events.middleware import EventHandlerASGIMiddleware
 import socketio
 
 from adapters._fastapi.login_routes import router as login_router
@@ -14,8 +13,7 @@ from adapters._sio.init import sio
 from adapters._rabbit.event_broker import broker, declare
 from adapters._redis.broker import redis_adapter
 from adapters._sio.routes import PlstUpdsNamespace
-from inner_events.handlers import local_handler
-from config import settings
+from settings import settings
 
 
 @asynccontextmanager
@@ -33,7 +31,6 @@ app = FastAPI(lifespan=lifespan)
 sio.register_namespace(PlstUpdsNamespace("/plst_upds"))
 sio_asgi_app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=app)
 
-app.add_middleware(EventHandlerASGIMiddleware, handlers=[local_handler])
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[

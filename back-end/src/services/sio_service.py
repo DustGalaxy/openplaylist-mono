@@ -2,9 +2,9 @@ from uuid import UUID
 
 import socketio
 
-from inner_events.schemas import (
+from dto.events import (
     PlayNow,
-    Added,
+    PlaylistTrackAdded,
     Deleted,
     Moved,
     Private,
@@ -24,7 +24,7 @@ class SioPlaylistUpdateService:
     async def set_playnow(self, data: PlayNow):
         await self.sio.emit("playnow", data.model_dump_json(), room=data.playlist_id, namespace=self.namespace)
 
-    async def add_track(self, data: Added):
+    async def add_track(self, data: PlaylistTrackAdded):
         await self.sio.emit("add_track", data.model_dump_json(), room=data.playlist_id, namespace=self.namespace)
         print(f"Трек {data.id} добавлен в плейлист {data.playlist_id}")
 
@@ -40,7 +40,7 @@ class SioPlaylistUpdateService:
         await self.sio.emit("move_track", data, room=data.playlist_id, namespace=self.namespace)
 
     async def settings_changed(self, data: ReadPlaylistSettings):
-        await self.sio.emit("settings_changed", data.model_dump_json(), room=data.playlist_id, namespace=self.namespace)
+        await self.sio.emit("settings_changed", data.model_dump_json(), room=str(data.playlist_id), namespace=self.namespace)
 
     async def set_private(self, data: Private):
         room_id = data.playlist_id

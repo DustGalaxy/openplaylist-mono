@@ -1,6 +1,6 @@
 import socketio
 
-from config import settings
+from settings import settings
 
 mgr = socketio.AsyncRedisManager(url=f"{settings.REDIS_URL}/0")
 sio = socketio.AsyncServer(
