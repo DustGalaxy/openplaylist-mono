@@ -8,12 +8,23 @@ from adapters._rabbit.event_broker import (
     main_exchange,
     auth_user_da_all_request,
     auth_user_da_tokens_refreshed,
+    bot_da_order_new,
 )
-
+from dto.order import OrderNew
 from _types import Platform
 from database import async_session_maker
 from repo import user_repository, linked_accounts_repository
-from utils import find
+from taskiq_broker import broker as taskiq_broker
+from utils import find, kick
+
+
+@broker.subscriber(bot_da_order_new, exchange=main_exchange)
+async def order_new_from_da(
+    message: RabbitMessage = Context(),
+):
+    await message.ack()
+    event: OrderNew = OrderNew.model_validate_json(message.body)
+    await kick("order.new", taskiq_broker, event, False, labels={"user_id": str(event.owner_id)})
 
 
 @broker.subscriber(auth_user_da_all_request, exchange=main_exchange)

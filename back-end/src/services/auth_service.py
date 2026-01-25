@@ -12,7 +12,7 @@ from simple_repository.exceptions import NotFoundException
 
 from _types import Platform
 from database import get_async_session
-from config import settings
+from settings import settings
 from dto.user import LinkedAccountWithTokensRead
 from repo import LinkedAccountsRepository, UserRepository
 

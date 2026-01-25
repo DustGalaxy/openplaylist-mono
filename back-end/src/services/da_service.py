@@ -9,7 +9,7 @@ from fastapi import HTTPException
 from simple_repository.exceptions import NotFoundException
 
 from _types import AsyncSession, Platform
-from config import settings
+from settings import settings
 from dto.da import DAToken, DAUser
 from models.auth_user import AuthUserCreate, AuthUserDomain, AuthUserUpdate
 from models.linked_accounts import LinkedAccountsCreate, LinkedAccountsUpdate

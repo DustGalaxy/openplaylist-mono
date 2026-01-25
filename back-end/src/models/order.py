@@ -11,7 +11,6 @@ class OrderDomain(BaseModel):
     owner_id: UUID
 
     requester_nickname: str
-    playlist_name: str
 
     donation_currency_amount: float
 
@@ -42,7 +41,6 @@ class OrderCreate(BaseModel):
     owner_id: UUID
 
     requester_nickname: str
-    playlist_name: str
 
     donation_currency_amount: float
 

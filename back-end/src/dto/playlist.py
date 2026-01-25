@@ -33,7 +33,7 @@ class PlaylistBaseinfo(BaseModel):
     id: UUID = Field(..., description="Unique identifier for the playlist")
     now_playing: str | None = Field(None, description="Currently playing track ID")
     owner_id: UUID = Field(..., description="ID of the owner of the playlist")
-    is_active: bool = Field(..., description="Indicates if the playlist is active")
+    is_allow_external_requests: bool = Field(..., description="Indicates if the playlist is active")
     is_public: bool = Field(..., description="Indicates if the playlist is public")
 
     model_config = ConfigDict(from_attributes=True)

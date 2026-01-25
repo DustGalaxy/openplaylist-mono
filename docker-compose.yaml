@@ -85,6 +85,8 @@ services:
       - "8000:8000"
     depends_on:
       - database
+      - redis
+      - rabbitmq
     env_file:
       - ./back-end/.docker.env
     volumes:
@@ -99,6 +101,47 @@ services:
       - "traefik.http.routers.backend.priority=100"
       - "traefik.http.middlewares.api-strip.stripprefix.prefixes=/api"
       - "traefik.http.routers.backend.middlewares=api-strip"
+    networks:
+      - default
+
+  task-worker:
+    build: 
+      context: ./back-end
+      dockerfile: ./Dockerfile.tasks
+    depends_on:
+      - database
+      - redis
+      - rabbitmq
+    env_file:
+      - ./back-end/.docker.env
+    volumes:
+      - ./back-end/src:/app/src
+    networks:
+      - default
+
+  bot-ttv:
+    build: 
+      context: ./bot_ttv
+      dockerfile: ./Dockerfile
+    depends_on:
+      - backend
+    env_file:
+      - ./bot_ttv/.docker.env
+    volumes:
+      - ./bot_ttv/src:/app/src
+    networks:
+      - default
+
+  bot-da:
+    build: 
+      context: ./bot_da
+      dockerfile: ./Dockerfile
+    depends_on:
+      - backend
+    env_file:
+      - ./bot_da/.docker.env
+    volumes:
+      - ./bot_da/src:/app/src
     networks:
       - default
 

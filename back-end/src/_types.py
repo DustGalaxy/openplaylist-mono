@@ -10,5 +10,5 @@ class Platform(Enum):
     GOOGLE = "google"
 
 
-Status = Literal["processing", "completed", "cancelled"]
+Status = Literal["processing", "completed", "cancelled", "partially_completed"]
 Source = Literal["twitch", "youtube", "web", "da"]

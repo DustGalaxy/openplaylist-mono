@@ -5,7 +5,7 @@ import { Label } from './ui/label'
 import Btn from './ui/my-btn'
 import { RadioGroup, RadioGroupItem } from './ui/radio-group'
 import BlockList from './block-list'
-import Add from './icons/icon-add'
+
 import type { ClientPlaylist, PlaylistSettings } from '@/types/playlist'
 import {
   Dialog,
@@ -17,6 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import useMusicStore from '@/stores/musicStore'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import { deletePlaylist } from '@/api/api-playlist'
@@ -84,7 +85,7 @@ export default function SettingsModal({
     async () => {
       if (!canRequest.current) return
       canRequest.current = false
-      await requestPlSettings(playlist.name, settings)
+      await requestPlSettings(playlist.id, settings)
     },
     2000,
   )
@@ -221,6 +222,35 @@ export default function SettingsModal({
               </Label>
             </div>
           </RadioGroup>
+        </div>
+        <div>
+          <ToggleGroup
+            type="multiple"
+            defaultValue={settings.allow_sources}
+            onValueChange={async (value) => {
+              console.log('ToggleGroup value:', value)
+
+              setSettings({
+                ...settings,
+                allow_sources: value,
+              })
+              canRequest.current = true
+            }}
+            className="border-2 border-level-3 rounded-(--rounded-std) p-[1px]"
+          >
+            <ToggleGroupItem value="web" className="">
+              web
+            </ToggleGroupItem>
+            <ToggleGroupItem value="twitch" className="">
+              ttv
+            </ToggleGroupItem>
+            <ToggleGroupItem value="da" className="">
+              da
+            </ToggleGroupItem>
+            <ToggleGroupItem value="youtube" className="">
+              youtube
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
         {/* Video validation */} <div className="h-[1px] bg-level-3" />
         <div className="gap-1 flex flex-col">

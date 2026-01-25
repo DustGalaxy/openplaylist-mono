@@ -13,7 +13,7 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
     owner_nickname: Mapped[str]
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(String(255), nullable=True)
-
+    
     track_data: Mapped[list[dict]] = mapped_column(ARRAY(JSONB), nullable=True, default=list)
     now_playing: Mapped[str] = mapped_column(String, nullable=True)
 

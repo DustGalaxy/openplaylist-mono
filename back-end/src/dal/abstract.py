@@ -39,4 +39,9 @@ class IPlaylistRepository(IAsyncCrud[Playlist, PlaylistDomain, PlaylistCreate, P
     async def get_user_playlist_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistDomain: ...
 
     @abstractmethod
+    async def get_user_playlists_by_sourse(
+        self, session: AsyncSession, owner_id: UUID, source: str
+    ) -> list[PlaylistDomain]: ...
+
+    @abstractmethod
     async def get_by_string(self, session: AsyncSession, query: str) -> list[PlaylistDomain]: ...

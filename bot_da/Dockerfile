@@ -2,12 +2,12 @@ FROM python:3.13.6-alpine3.22
 
 WORKDIR /app
 
-COPY pyproject.toml .env ./
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-RUN pip install uv
+COPY pyproject.toml uv.lock .docker.env ./
+
+RUN uv sync --frozen --no-cache --no-dev
 
 COPY . .
-
-EXPOSE 8005
 
 CMD ["uv", "run", "src/main.py"]

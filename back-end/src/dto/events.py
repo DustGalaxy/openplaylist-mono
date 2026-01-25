@@ -9,8 +9,8 @@ from _types import Source, Status
 class OrderCreated(BaseModel):
     order_id: UUID
     owner_id: UUID
+    is_owner: bool
     requester_nickname: str
-    playlist_name: str
     yt_video_id: str
     donation_currency_amount: float = 0.0
     priority: str
@@ -26,7 +26,6 @@ class OrderUpdate(BaseModel):
     order_id: UUID
     owner_id: UUID
     requester_nickname: str
-    playlist_name: str
     status: Status
     priority: str
     details: str
@@ -42,3 +41,29 @@ class PlaylistTrackAdded(BaseModel):
     requester_nickname: str
     created_at: datetime
     source: Source
+
+
+class PlayNow(BaseModel):
+    track_id: str | None
+    playlist_id: str
+
+
+class Deleted(BaseModel):
+    track_id: str
+    playlist_id: str
+
+
+class Moved(BaseModel):
+    track_id: str
+
+    playlist_id: str
+
+
+class Private(BaseModel):
+    owner_id: str
+    playlist_id: str
+
+
+class Public(BaseModel):
+    owner_id: str
+    playlist_id: str

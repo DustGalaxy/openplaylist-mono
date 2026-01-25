@@ -11,13 +11,15 @@ from src.adapters._rabbit.broker import (
     bot_twitch_disconnect_request,
     bot_order_completed,
     bot_order_cancelled,
+    bot_order_partially_completed
 )
 from src.bot_setup import Bot, context, eventsub
-from src.utils import get_twiich_id
+from src.utils import get_twitch_id
 
 
 @broker.subscriber(bot_order_completed, exchange=main_exchange)
 @broker.subscriber(bot_order_cancelled, exchange=main_exchange)
+@broker.subscriber(bot_order_partially_completed, exchange=main_exchange)
 async def order_status(message: RabbitMessage = Context()) -> None:
     await message.ack()
     bot: Bot = context["bot"]  # pyright: ignore[reportAssignmentType]
@@ -25,7 +27,7 @@ async def order_status(message: RabbitMessage = Context()) -> None:
     if bot is None:
         return
     event: OrderUpdate = OrderUpdate.model_validate_json(message.body)
-    ttv_id = await get_twiich_id(str(event.owner_id))
+    ttv_id = await get_twitch_id(str(event.owner_id))
     user = bot.create_partialuser(user_id=ttv_id)
     await user.send_message(sender=bot.bot_id, message=f"@{event.requester_nickname} {event.details}")
 

@@ -2,7 +2,7 @@ from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
-class ConfigClass(BaseSettings):
+class Settings(BaseSettings):
     SESSION_LIVE_TIME: int = Field(alias="SESSION_LIVE_TIME")
     COOKIE_NAME: str = Field(alias="COOKIE_NAME")
 
@@ -35,5 +35,9 @@ class ConfigClass(BaseSettings):
     RABBITMQ_URL: str = Field(alias="RABBITMQ_URL")
     REDIS_URL: str = Field(alias="REDIS_URL")
 
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
 
-settings = ConfigClass()  # pyright: ignore[reportCallIssue]
+
+settings = Settings()  # pyright: ignore[reportCallIssue]

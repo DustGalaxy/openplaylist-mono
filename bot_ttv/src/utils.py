@@ -24,7 +24,7 @@ async def get_user_id(twitch_id: str) -> str:
             return row["user_id"]
 
 
-async def get_twiich_id(user_id: str) -> str:
+async def get_twitch_id(user_id: str) -> str:
     async with asqlite.create_pool("users.db") as udb:
         async with udb.acquire() as connection:
             row: sqlite3.Row = await connection.fetchone(

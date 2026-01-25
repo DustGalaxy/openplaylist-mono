@@ -2,7 +2,6 @@ from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi_events.dispatcher import dispatch
 from simple_repository.exceptions import NotFoundException
 
 # from adapters._rabbit.event_broker import (
@@ -12,7 +11,7 @@ from simple_repository.exceptions import NotFoundException
 #     playlist_track_playnow,
 #     playlist_track_deleted,
 # )
-from adapters._redis.broker import redis_adapter
+# from adapters._redis.broker import redis_adapter
 from database import AsyncSession, get_async_session
 from dto.playlist import (
     NewPlaylist,
@@ -27,6 +26,9 @@ from models.playlist import PlaylistPatch
 from models.settings import PlaylistSettingsPatch
 from services.auth_service import auth_service
 from services.playlist_service import PlaylistService, get_playlist_service
+
+from utils import kick
+from taskiq_broker import broker as task_broker
 
 router = APIRouter(prefix="/playlist")
 
@@ -48,26 +50,28 @@ async def get_privacy_settings(
         raise HTTPException(status_code=404, detail="Playlist not found")
 
 
-@router.patch("/{playlist_name}/settings", status_code=status.HTTP_200_OK)
+@router.patch("/{playlist_id}/settings", status_code=status.HTTP_200_OK)
 async def patch_playlist_settings(
     db_session: DB_SESSION,
     service: PLST_SERVICE,
     current_user: CURR_USER,
-    playlist_name: str,
+    playlist_id: UUID,
     patch_schema: PlaylistSettingsPatch,
 ) -> ReadPlaylistSettings:
     try:
-        plst_settings = await service.patch_playlist_settings(db_session, patch_schema, playlist_name, current_user)
-        dispatch(
-            event_name_or_model="playlist_settings_changed",
-            payload=ReadPlaylistSettings.model_validate(plst_settings),
-        )
+        plst_settings = await service.patch_playlist_settings(db_session, patch_schema, playlist_id, current_user)
+
+        await kick("playlist.settings_changed", task_broker, ReadPlaylistSettings.model_validate(plst_settings))
+        # dispatch(
+        #     event_name_or_model="playlist_settings_changed",
+        #     payload=ReadPlaylistSettings.model_validate(plst_settings),
+        # )
 
         # redis schema - {user_id}:{playlist_name}:settings
-        redis_adapter.set(
-            f"{current_user.id}:{playlist_name}:settings",
-            plst_settings.model_dump_json(),
-        )
+        # redis_adapter.set(
+        #     f"{current_user.id}:{playlist_id}:settings",
+        #     plst_settings.model_dump_json(),
+        # )
 
         return ReadPlaylistSettings.model_validate(plst_settings)
     except StopIteration:
@@ -183,7 +187,8 @@ async def set_play_now_for_playlist(
 ) -> None:
     try:
         await service.set_play_now(db_session, playlist_id, playnow.track_id, current_user)
-        dispatch(event_name_or_model="playlist.track.playnow", payload=playnow)
+
+        await kick("playlist.track.playnow", task_broker, playnow)
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")
 
@@ -229,9 +234,6 @@ async def delete_track_from_playlist(
 ) -> None:
     try:
         await service.delete_track_from_playlist(db_session, playlist_id, track_id, current_user)
-        dispatch(
-            event_name_or_model="playlist.track.deleted",
-            payload={"track_id": track_id, "playlist_id": str(playlist_id)},
-        )
+        await kick("playlist.track.deleted", task_broker, {"track_id": track_id, "playlist_id": str(playlist_id)})
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")

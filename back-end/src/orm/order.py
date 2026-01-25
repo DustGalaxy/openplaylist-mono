@@ -11,7 +11,6 @@ class Order(Base, UUIDMixin, TimestampMixin):
     owner_id: Mapped[UUID]
 
     requester_nickname: Mapped[str]
-    playlist_name: Mapped[str]
 
     donation_currency_amount: Mapped[float]
 
