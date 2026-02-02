@@ -31,7 +31,7 @@ from _types import Platform
 
 
 class PlaylistRepository(
-    crud_factory(Playlist, PlaylistDomain, PlaylistCreate, PlaylistPatch),
+    crud_factory(Playlist, PlaylistDomain, PlaylistCreate, PlaylistPatch, strict_attrs=False),
     IPlaylistRepository,
 ):
     async def get_user_playlists_by_sourse(
@@ -129,7 +129,7 @@ class PlaylistSettingsRepository(
 playlist_settings_repository = PlaylistSettingsRepository()
 
 
-class OrderRepository(IOrderRepository, crud_factory(OrderORM, OrderDomain, OrderCreate, OrderPatch)):
+class OrderRepository(IOrderRepository, crud_factory(OrderORM, OrderDomain, OrderCreate, OrderPatch, strict_attrs=False)):
     pass
 
 
