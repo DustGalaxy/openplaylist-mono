@@ -28,6 +28,7 @@ from services.auth_service import auth_service
 from services.playlist_service import PlaylistService, get_playlist_service
 
 from utils import kick
+from _types import DeleteStatus
 from taskiq_broker import broker as task_broker
 
 router = APIRouter(prefix="/playlist")
@@ -62,31 +63,10 @@ async def patch_playlist_settings(
         plst_settings = await service.patch_playlist_settings(db_session, patch_schema, playlist_id, current_user)
 
         await kick("playlist.settings_changed", task_broker, ReadPlaylistSettings.model_validate(plst_settings))
-        # dispatch(
-        #     event_name_or_model="playlist_settings_changed",
-        #     payload=ReadPlaylistSettings.model_validate(plst_settings),
-        # )
-
-        # redis schema - {user_id}:{playlist_name}:settings
-        # redis_adapter.set(
-        #     f"{current_user.id}:{playlist_id}:settings",
-        #     plst_settings.model_dump_json(),
-        # )
 
         return ReadPlaylistSettings.model_validate(plst_settings)
     except StopIteration:
         raise HTTPException(status_code=404, detail="Playlist not found")
-
-
-@router.post("/new", status_code=201)
-async def create_playlist(
-    db_session: DB_SESSION,
-    service: PLST_SERVICE,
-    current_user: CURR_USER,
-    data: NewPlaylist,
-) -> ReadPlaylist:
-    created_playlist = await service.new_playlist(db_session, data, current_user)
-    return ReadPlaylist.model_validate(created_playlist)
 
 
 @router.get("/me")
@@ -206,6 +186,17 @@ async def get_play_now_for_playlist(
         raise HTTPException(status_code=404, detail="Playlist not found")
 
 
+@router.post("/", status_code=201)
+async def create_playlist(
+    db_session: DB_SESSION,
+    service: PLST_SERVICE,
+    current_user: CURR_USER,
+    data: NewPlaylist,
+) -> ReadPlaylist:
+    created_playlist = await service.new_playlist(db_session, data, current_user)
+    return ReadPlaylist.model_validate(created_playlist)
+
+
 @router.get("/")
 async def get_playlists(query: str, db_session: DB_SESSION, service: PLST_SERVICE) -> list[ReadPlaylistPreview]:
     res = await service.search_playlist(db_session, query)
@@ -224,16 +215,17 @@ async def get_playlists(query: str, db_session: DB_SESSION, service: PLST_SERVIC
     return data
 
 
-@router.delete("/{playlist_id}/tracks/{track_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{playlist_id}/track/{track_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_track_from_playlist(
     db_session: DB_SESSION,
     service: PLST_SERVICE,
     current_user: CURR_USER,
     playlist_id: UUID,
-    track_id: str,
+    track_id: UUID,
+    reason: DeleteStatus = "listened",
 ) -> None:
     try:
-        await service.delete_track_from_playlist(db_session, playlist_id, track_id, current_user)
+        await service.delete_track_from_playlist(db_session, playlist_id, track_id, current_user, reason)
         await kick("playlist.track.deleted", task_broker, {"track_id": track_id, "playlist_id": str(playlist_id)})
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")

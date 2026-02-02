@@ -29,8 +29,8 @@ context = {"bot": None}
 
 
 class Bot(commands.AutoBot):
-    def __init__(self, *, token_database: asqlite.Pool, subs: list[eventsub.SubscriptionPayload]) -> None:
-        self.token_database = token_database
+    def __init__(self, *, subs: list[eventsub.SubscriptionPayload]) -> None:
+
 
         super().__init__(
             client_id=settings.TWITCH_CLIENT_ID,
@@ -100,16 +100,18 @@ class Bot(commands.AutoBot):
             refresh = excluded.refresh;
         """
 
-        async with self.token_database.acquire() as connection:
-            await connection.execute(query, (resp.user_id, token, refresh))
+        async with asqlite.create_pool("tokens.db") as token_database:
+            async with token_database.acquire() as connection:
+                await connection.execute(query, (resp.user_id, token, refresh))
 
         LOGGER.info("Added token to the database for user: %s", resp.user_id)
         return resp
 
     async def remove_token(self, user_id: str) -> None:
         await super().remove_token(user_id)
-        async with self.token_database.acquire() as connection:
-            await connection.execute("DELETE FROM tokens WHERE user_id = ?", (user_id,))
+        async with asqlite.create_pool("tokens.db") as token_database:
+            async with token_database.acquire() as connection:
+                await connection.execute("DELETE FROM tokens WHERE user_id = ?", (user_id,))
 
         LOGGER.info("Removed token from the database for user: %s", user_id)
 
@@ -132,7 +134,7 @@ async def setup_bot() -> commands.AutoBot:
     async with asqlite.create_pool("tokens.db") as tdb:
         tokens, subs = await setup_database(tdb)
 
-        ttvbot = Bot(token_database=tdb, subs=subs)
+        ttvbot = Bot(subs=subs)
         for pair in tokens:
             await ttvbot.add_token(*pair)
         global context

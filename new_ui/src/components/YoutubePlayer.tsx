@@ -68,7 +68,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
           // event.target.seekTo(0)
           return
         }
-        playNext(playlist)
+        playNext(playlist, 'listened')
       }}
     />
   )

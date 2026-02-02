@@ -10,9 +10,11 @@ from adapters._fastapi.user_routes import router as user_router
 from adapters._fastapi.order_routes import router as order_router
 from adapters._fastapi.playlist_routes import router as playlist_router
 from adapters._sio.init import sio
+from adapters._rabbit.handlers.twitch import order_new_from_twitch, get_all_twitch_users, twitch_refresh_tokens
+from adapters._rabbit.handlers.da import order_new_from_da, get_all_da_users, da_refresh_tokens
 from adapters._rabbit.event_broker import broker, declare
 from adapters._redis.broker import redis_adapter
-from adapters._sio.routes import PlstUpdsNamespace
+from adapters._sio.routes import PlstUpdsNamespace, BasicNamespace
 from settings import settings
 
 
@@ -29,6 +31,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 sio.register_namespace(PlstUpdsNamespace("/plst_upds"))
+sio.register_namespace(BasicNamespace("/"))
 sio_asgi_app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=app)
 
 app.add_middleware(
@@ -38,6 +41,9 @@ app.add_middleware(
         "https://localhost:3000",
         "http://127.0.0.1:3000",
         "https://127.0.0.1:3000",
+        "http://localhost:8000https://localhost:8000",
+        "http://127.0.0.1:8000",
+        "https://127.0.0.1:8000",
         "https://openplaylist.localhost",
     ],
     allow_credentials=True,

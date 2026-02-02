@@ -2,6 +2,9 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
+COPY package*.json ./
+RUN npm install
+
 # Переменные окружения для Vite (должны начинаться с VITE_)
 ARG VITE_WS_API_URL
 ARG VITE_PLST_API_URL
@@ -26,9 +29,6 @@ ENV VITE_DA_CLIENT_ID=$VITE_DA_CLIENT_ID
 ENV VITE_DA_REDIRECT_URI=$VITE_DA_REDIRECT_URI
 ENV VITE_DA_SCOPES=$VITE_DA_SCOPES
 
-
-COPY package*.json ./
-RUN npm install
 COPY . .
 RUN npm run build
 

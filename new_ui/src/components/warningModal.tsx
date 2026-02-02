@@ -99,11 +99,15 @@ export default function WarningModal({
                   )
                 }
                 if (Object.keys(data).length > 0) {
-                  await requestPlSettings(playlist.name, data)
+                  await requestPlSettings(playlist.id, data)
                   if (tracks.length > 0) {
                     tracks.forEach(async (track) => {
                       if (!track) return
-                      await requestRemoveTrack(playlist.id, track.id)
+                      await requestRemoveTrack(
+                        playlist.id,
+                        track.id,
+                        'reported',
+                      )
                     })
                   }
                 }

@@ -23,6 +23,5 @@ class Listner(commands.Component):
             requester_nickname=payload.chatter_nickname,
             yt_video_url=payload.yt_video_url,
             priority=payload.priority,
-            source="twitch",
         )
-        await broker.publish(event, queue="order.new", exchange=main_exchange)
+        await broker.publish(event, queue="bot.twitch.order.new", exchange=main_exchange)

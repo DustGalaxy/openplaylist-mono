@@ -31,4 +31,3 @@ class OrderNew(BaseModel):
     requester_nickname: str
     yt_video_url: str
     priority: str
-    source: Source
