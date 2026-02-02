@@ -1,28 +1,24 @@
 import re
 import json
-from uuid import UUID
-from pytubefix import YouTube
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Union
 
-from _types import Status
-from dal.postgres_impl import order_repository
-from dal.abstract import IOrderRepository
+from pytubefix import YouTube, extract
+
 from adapters._redis.broker import redis_adapter
-from dto.order import OrderNew
-from models.order import OrderCreate, OrderDomain, OrderPatch
+from dto.order import WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder
+from models.order import OrderCreate, STRATEGIES
 
 
 class OrderService:
-    def __init__(self, order_repository: IOrderRepository):
-        self.order_repository = order_repository
-
-    # TODO Вынести запрос в ивент, он не должен тормозить работу сервиса
-    async def init_order(self, order: OrderNew) -> OrderCreate:
-        cached_info: bytes = redis_adapter.get(order.yt_video_id) # pyright: ignore[reportAssignmentType]
+    async def init_order(
+        self, order: Union[WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder], from_owner: bool = False
+    ) -> OrderCreate:
+        yt_video_id = extract.video_id(order.yt_video_url)
+        cached_info: bytes = redis_adapter.get(yt_video_id)  # pyright: ignore[reportAssignmentType]
 
         if not cached_info:
             try:
-                yt = YouTube("https://www.youtube.com/watch?v=" + order.yt_video_id)
+                yt = YouTube(order.yt_video_url)
                 first_part = yt.initial_data["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][
                     0
                 ]
@@ -52,33 +48,29 @@ class OrderService:
                 "views": yt.views,
             }
 
-            redis_adapter.set(order.yt_video_id, json.dumps(data))
+            redis_adapter.set(yt_video_id, json.dumps(data))
 
         else:
             data = json.loads((cached_info.replace(b"'", b'"')))
 
+        print(f"Получен заказ: {order}")
+        extra_data = STRATEGIES[order.source].model_validate(order, from_attributes=True)
+
+
         return OrderCreate(
             owner_id=order.owner_id,
+            from_owner=from_owner,
             requester_nickname=order.requester_nickname,
-            donation_currency_amount=order.donation_currency_amount,
-            yt_video_id=order.yt_video_id,
+            yt_video_id=yt_video_id,
             title=data["title"],
             duration=data["length"],
             priority=order.priority,
             views=data["views"],
             likes=data["likes"],
+            extra_data=extra_data,
             request_id=order.request_id,
             source=order.source,
         )
 
-    async def create_order(self, session: AsyncSession, new_order: OrderCreate) -> OrderDomain:
-        return await self.order_repository.create(session, new_order)
 
-    async def status_udpate(self, session: AsyncSession, order_id: UUID, status: Status) -> None:
-        await self.order_repository.patch(session, OrderPatch(status=status), order_id)
-
-    async def get_order(self, session: AsyncSession, order_id: UUID) -> OrderDomain:
-        return await self.order_repository.get_one(session, order_id)
-
-
-order_service = OrderService(order_repository)
+order_service = OrderService()

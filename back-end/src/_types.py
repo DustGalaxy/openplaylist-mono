@@ -10,5 +10,7 @@ class Platform(Enum):
     GOOGLE = "google"
 
 
-Status = Literal["processing", "completed", "cancelled", "partially_completed"]
+
+Status = Literal["in playlist", "removed", "listened", "skipped", "reported"]
+DeleteStatus = Literal["removed", "listened", "skipped", "reported"]
 Source = Literal["twitch", "youtube", "web", "da"]

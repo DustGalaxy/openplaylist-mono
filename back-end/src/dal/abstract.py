@@ -5,18 +5,14 @@ from simple_repository.abctract import IAsyncCrud
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.order import OrderDomain, OrderPatch, OrderCreate
+from models.order import OrderCreate, OrderDomain
 from models.settings import PlaylistSettingsDomain, PlaylistSettingsPatch, PlaylistSettingsCreate
 from models.playlist import PlaylistDomain, PlaylistCreate, PlaylistPatch
 
-from orm.order import Order
 from orm.playlist import Playlist
 from orm.settings import PlaylistSettings
 
-
-class IOrderRepository(IAsyncCrud[Order, OrderDomain, OrderCreate, OrderPatch]):
-    pass
-
+from _types import DeleteStatus
 
 class IPlaylistSettingsRepository(
     IAsyncCrud[PlaylistSettings, PlaylistSettingsDomain, PlaylistSettingsCreate, PlaylistSettingsPatch]
@@ -45,3 +41,9 @@ class IPlaylistRepository(IAsyncCrud[Playlist, PlaylistDomain, PlaylistCreate, P
 
     @abstractmethod
     async def get_by_string(self, session: AsyncSession, query: str) -> list[PlaylistDomain]: ...
+
+    @abstractmethod
+    async def add_order_to_playlist(self, session: AsyncSession, playlist_id: UUID, order: OrderCreate) -> OrderDomain: ...
+
+    @abstractmethod
+    async def remove_order_from_playlist(self, session: AsyncSession, playlist_id: UUID, order_id: UUID, user_id: UUID, reason: DeleteStatus): ...

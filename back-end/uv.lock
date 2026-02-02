@@ -233,7 +233,7 @@ requires-dist = [
     { name = "python-socketio", specifier = ">=5.16.0" },
     { name = "pytubefix", specifier = ">=10.3.6" },
     { name = "redis", specifier = ">=7.1.0" },
-    { name = "simple-repo-asyncsqla", specifier = "==2.0.1" },
+    { name = "simple-repo-asyncsqla", specifier = "==2.1.0" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.40" },
     { name = "taskiq", specifier = ">=0.12.1" },
     { name = "taskiq-redis", specifier = ">=1.2.1" },
@@ -1089,14 +1089,14 @@ wheels = [
 
 [[package]]
 name = "simple-repo-asyncsqla"
-version = "2.0.1"
+version = "2.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "sqlalchemy", extra = ["asyncio"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0f/02/1377b6fc938f92f9f91b5b931dcf2a47ccf84c55d7cfe08b20bba7c6f2f2/simple_repo_asyncsqla-2.0.1.tar.gz", hash = "sha256:8d9c825fd70dec8d45421251f8d5c7e0dd44d7a9b25e57f2d4b3c8f858614cf5", size = 32773, upload-time = "2025-07-05T10:28:57.308Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/80/0a0bf80790da9f4a966091230a16a9447e858a3baac34a930118e01e8c3f/simple_repo_asyncsqla-2.1.0.tar.gz", hash = "sha256:5651fd5a9fd39fb562de6ba366a179641a3dec6d085507cfdde62258a52ea27b", size = 34447, upload-time = "2026-01-25T15:05:23.659Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c4/fc/657571fa84c9636b8096182ad313427800660325b0dc0d525fe223383846/simple_repo_asyncsqla-2.0.1-py3-none-any.whl", hash = "sha256:4b6a88e6174a28a70cecd2eac717c39fee30fab9f35d7f3406ece115a7ed1f0a", size = 12293, upload-time = "2025-07-05T10:28:56.08Z" },
+    { url = "https://files.pythonhosted.org/packages/10/b3/b9cebf226500e726652a02e9577d19dd3cb5abc0ad4b627f3df13edf2169/simple_repo_asyncsqla-2.1.0-py3-none-any.whl", hash = "sha256:d1f3891bc6640a4d4793e4a63459fab0c1b2937422e549b303533f01ad59d77a", size = 12557, upload-time = "2026-01-25T15:05:22.785Z" },
 ]
 
 [[package]]

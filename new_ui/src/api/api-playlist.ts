@@ -29,17 +29,20 @@ export const fetchUserPlaylistData = async () => {
 }
 
 export const changePlaylistActive = async (
-  name: string,
+  playlist_id: string,
   is_active: boolean,
 ) => {
   const config = getConfig()
-  const response = await apiClient(config.PLST_API_URL + `/${name}/settings`, {
-    method: 'PATCH',
-    withCredentials: true,
-    data: {
-      is_allow_external_requests: !is_active,
+  const response = await apiClient(
+    config.PLST_API_URL + `/${playlist_id}/settings`,
+    {
+      method: 'PATCH',
+      withCredentials: true,
+      data: {
+        is_allow_external_requests: !is_active,
+      },
     },
-  })
+  )
     .then((res) => res.data)
     .catch((error) => {})
   return response
@@ -74,12 +77,15 @@ export const addTrackToPlaylist = async (order: Order) => {
 export const removeTrackFromPlaylist = async (
   playlist_id: string,
   track_id: string,
+  reason?: string,
 ) => {
   const { user } = useAuthStore.getState()
   if (!user) return
   const config = getConfig()
   const response = await apiClient(
-    config.PLST_API_URL + `/${playlist_id}/tracks/${track_id}`,
+    config.PLST_API_URL +
+      `/${playlist_id}/track/${track_id}` +
+      `?reason=${reason}`,
     {
       method: 'DELETE',
       withCredentials: true,
@@ -127,7 +133,7 @@ export const postPlayNow = async (
 
 export const createNewPlaylist = async (name: string, description?: string) => {
   const config = getConfig()
-  const response = await apiClient(config.PLST_API_URL + `/new`, {
+  const response = await apiClient(config.PLST_API_URL + `/`, {
     method: 'POST',
     withCredentials: true,
     data: {

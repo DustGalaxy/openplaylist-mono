@@ -16,9 +16,11 @@ from src.bot_setup import setup_bot
 async def lifespan(_app: FastStream):
     twitchio.utils.setup_logging(level=logging.INFO)
     await broker.start()
+    LOGGER.info("RabbitMQ adapter connected.")
 
     redis_adapter.connect()
-
+    LOGGER.info("Redis adapter connected.")
+    
     bot = await setup_bot()
     LOGGER.info("FastStream application starting up...")
 

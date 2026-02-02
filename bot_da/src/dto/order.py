@@ -13,4 +13,3 @@ class OrderNew(BaseModel):
     donation_currency_amount: float = 0.0
     yt_video_url: str
     priority: str
-    source: Source

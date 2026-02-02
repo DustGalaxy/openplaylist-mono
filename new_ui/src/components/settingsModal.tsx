@@ -224,6 +224,7 @@ export default function SettingsModal({
           </RadioGroup>
         </div>
         <div>
+          <Label className=" text-lg">Content sources</Label>
           <ToggleGroup
             type="multiple"
             defaultValue={settings.allow_sources}
@@ -236,19 +237,33 @@ export default function SettingsModal({
               })
               canRequest.current = true
             }}
-            className="border-2 border-level-3 rounded-(--rounded-std) p-[1px]"
+            className="border-2 border-level-3 rounded-(--rounded-std) p-[1px] w-full bg-level-2"
           >
-            <ToggleGroupItem value="web" className="">
-              web
+            <ToggleGroupItem
+              value="twitch"
+              className="data-[state=on]:bg-accent-3 hover:bg-level-3 px-2"
+            >
+              <div className="px-2">Twitch</div>
             </ToggleGroupItem>
-            <ToggleGroupItem value="twitch" className="">
-              ttv
+            <ToggleGroupItem
+              value="da"
+              className="data-[state=on]:bg-accent-3 hover:bg-level-3"
+            >
+              <div className="px-2">DonationAlerts</div>
             </ToggleGroupItem>
-            <ToggleGroupItem value="da" className="">
-              da
+            <ToggleGroupItem
+              disabled
+              value="youtube"
+              className="data-[state=on]:bg-accent-3 hover:bg-level-3"
+            >
+              Youtube
             </ToggleGroupItem>
-            <ToggleGroupItem value="youtube" className="">
-              youtube
+            <ToggleGroupItem
+              disabled
+              value="youtube"
+              className="data-[state=on]:bg-accent-3 hover:bg-level-3"
+            >
+              Discord
             </ToggleGroupItem>
           </ToggleGroup>
         </div>

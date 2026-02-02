@@ -1,10 +1,6 @@
-import os
-
 from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from dotenv import dotenv_values
+from pydantic_settings import BaseSettings
 
-_config = dotenv_values(".env" if not os.environ.get("IS_CONTAINER", False) else ".docker.env")
 
 class ConfigClass(BaseSettings):
     RABBITMQ_URL: str = Field(alias="RABBITMQ_URL")
@@ -17,4 +13,4 @@ class ConfigClass(BaseSettings):
     OWNER_ID: str = Field(alias="OWNER_ID")
 
 
-settings = ConfigClass.model_validate(_config)
+settings = ConfigClass() # pyright: ignore[reportCallIssue]

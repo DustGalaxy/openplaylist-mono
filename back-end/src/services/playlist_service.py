@@ -1,20 +1,19 @@
-from dataclasses import MISSING
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from _types import AsyncSession
+from _types import AsyncSession, DeleteStatus
 from simple_repository.exceptions import NotFoundException
 
 # from adapters._elastic_search.es_adapter import elastic_adapter
 from dal.abstract import IPlaylistRepository, IPlaylistSettingsRepository
 from dal.postgres_impl import playlist_repository, playlist_settings_repository
 
-from dto.events import OrderCreated
 from dto.playlist import NewPlaylist, PlaylistBaseinfo
 from models.auth_user import AuthUserDomain as User
 from exceptions import NotAuthorizedException
 from models.playlist import PlaylistCreate, PlaylistDomain, PlaylistPatch
 from models.settings import PlaylistSettingsPatch, PlaylistSettingsDomain
+from models.order import OrderDomain, OrderCreate, WebExtraData
 
 
 class PlaylistService:
@@ -67,24 +66,26 @@ class PlaylistService:
     async def get_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistDomain:
         return await self._playlist_repository.get_user_playlist_by_name(session, owner_id, name)
 
-    async def add_to_playlist(self, session: AsyncSession, event: OrderCreated) -> tuple[list[dict], list[tuple[list[str], str]]]:
-        playlists = await self._playlist_repository.get_user_playlists_by_sourse(
-            session, event.owner_id, event.source
-        )
-        tracks: list[dict] = []
+    async def add_to_playlist(
+        self, session: AsyncSession, event: OrderCreate
+    ) -> tuple[list[tuple[OrderDomain, UUID]], list[tuple[list[str], str]]]:
+        if isinstance(event.extra_data, WebExtraData):
+            playlists = [
+                await self._playlist_repository.get_one(session, event.extra_data.playlist_id),
+            ]
+        else:
+            playlists = await self._playlist_repository.get_user_playlists_by_sourse(
+                session, event.owner_id, event.source
+            )
+        tracks: list[tuple[OrderDomain, UUID]] = []
         errors = []
         for playlist in playlists:
-            track = playlist.add_track(event)
+            track = playlist.track_validation(event) or event
             if isinstance(track, list):
                 errors.append((track, playlist.name))
             else:
-                tracks.append(track)
-
-                await self._playlist_repository.patch(
-                    session,
-                    PlaylistPatch(track_data=playlist.track_data),
-                    playlist.id,
-                )
+                track = await self._playlist_repository.add_order_to_playlist(session, playlist.id, event)
+                tracks.append((track, playlist.id))
         return tracks, errors
 
     async def new_playlist(self, session: AsyncSession, data: NewPlaylist, user: User) -> PlaylistDomain:
@@ -172,7 +173,7 @@ class PlaylistService:
         if plst.now_playing == track_id:
             return
 
-        if track_id not in [track.get("id", MISSING) for track in plst.track_data] and track_id is not None:
+        if track_id not in [str(track.id) for track in plst.track_data] and track_id is not None:
             raise HTTPException(detail="Track is not in playlist", status_code=status.HTTP_400_BAD_REQUEST)
 
         await self._playlist_repository.patch(session, PlaylistPatch(now_playing=track_id), playlist_id)
@@ -189,15 +190,9 @@ class PlaylistService:
         return await self._playlist_settings_repository.patch(session, data, plst_list.settings.id)
 
     async def delete_track_from_playlist(
-        self, session: AsyncSession, playlist_id: UUID, track_id: str, user: User
+        self, session: AsyncSession, playlist_id: UUID, track_id: UUID, user: User, reason: DeleteStatus
     ) -> None:
-        plst = await self._playlist_repository.get_one(session, playlist_id)
-        if user.id != plst.owner_id:
-            raise NotAuthorizedException()
-
-        plst.remove_track(track_id)
-
-        await self._playlist_repository.patch(session, PlaylistPatch(track_data=plst.track_data), playlist_id)
+        await self._playlist_repository.remove_order_from_playlist(session, playlist_id, track_id, user.id, reason)
 
 
 playlist_service = PlaylistService(playlist_repository, playlist_settings_repository)

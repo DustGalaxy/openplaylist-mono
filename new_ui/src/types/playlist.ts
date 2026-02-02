@@ -2,8 +2,8 @@ export type Order = {
   request_id: string
   owner_id: string
   requester_nickname: string
-  playlist_name: string
-  yt_video_id: string
+  playlist_id: string
+  yt_video_url: string
   priority: string
   source: 'web'
 }

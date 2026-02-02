@@ -51,15 +51,7 @@ export function ExpandingInputButtons({
           onClick={async () => {
             handleToggle('input1')
             if (youtubeurl) {
-              const id = extractYouTubeVideoId(youtubeurl)
-              console.log(id)
-
-              if (id) {
-                await requestAddTrack(playlist.name, id)
-              } else {
-                // TODO show error
-              }
-
+              await requestAddTrack(playlist.id, youtubeurl)
               setYoutubeurl('')
             }
           }}

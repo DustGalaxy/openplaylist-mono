@@ -84,7 +84,7 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
       >
         <YoutubePlayer
           playlist={playlist}
-          playOnReady={playlist.settings.is_active}
+          playOnReady={true}
           nowPlay={nowPlaying}
           className="[@media_(min-width:640px)]:row-span-2 flex items-center justify-center "
         />
@@ -149,7 +149,7 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
                 className={`px-4 py-1  bg-level-2`}
                 onClick={() => {
                   setActivePlst(!activePlst)
-                  changePlaylistActive(playlist.name, activePlst)
+                  changePlaylistActive(playlist.id, activePlst)
                   console.log('Button clicked, activePlst:', !toggled)
                 }}
               />
@@ -169,14 +169,14 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
                 onClick={() => {
                   if (repeatMode === 'all') {
                     setRepeatMode('once')
-                    requestPlSettings(playlist.name, { repeat_mode: 'once' })
+                    requestPlSettings(playlist.id, { repeat_mode: 'once' })
                   } else if (repeatMode === 'once') {
                     setRepeatMode('none')
-                    requestPlSettings(playlist.name, { repeat_mode: 'none' })
+                    requestPlSettings(playlist.id, { repeat_mode: 'none' })
                     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                   } else if (repeatMode === 'none') {
                     setRepeatMode('all')
-                    requestPlSettings(playlist.name, { repeat_mode: 'all' })
+                    requestPlSettings(playlist.id, { repeat_mode: 'all' })
                   }
                 }}
               />
@@ -192,7 +192,7 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
                 className="px-2 bg-level-2"
                 onClick={() => {
                   console.log('Button clicked, Next clicked')
-                  playNext(playlist)
+                  playNext(playlist, 'skipped')
                 }}
               />
 

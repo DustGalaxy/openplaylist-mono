@@ -84,7 +84,7 @@ class PlaylistSettingsPatch(BaseModel):
     user_black_list: list[int] | None = Field(None, description="List of user IDs to exclude from the playlist")
 
     allow_sources: list[Source] | None = Field(None)
-    is_allow_external_requests: bool | None
+    is_allow_external_requests: bool | None = Field(None)
 
 
 class PlaylistSettingsCreate(BaseModel): ...
