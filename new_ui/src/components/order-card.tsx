@@ -33,7 +33,7 @@ export default function OrderCard({
   const playlistButtons = [
     {
       icon: <Play />,
-      on_click: () => requestPlayNow(track.playlist_id, track.id),
+      on_click: () => requestPlayNow(playlist.id, track.id),
       className: 'px-1 bg-level-2',
       glow: 'white',
     },
@@ -64,7 +64,7 @@ export default function OrderCard({
     },
     {
       icon: <Trash />,
-      on_click: () => requestRemoveTrack(track.playlist_id, track.id),
+      on_click: () => requestRemoveTrack(playlist.id, track.id, 'removed'),
       className: 'px-1 bg-level-2',
       glow: 'red',
     },

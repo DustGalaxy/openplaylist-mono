@@ -47,7 +47,7 @@ export default function BlockList({
     } else {
       console.log('Unblocking track:', item)
 
-      await requestPlSettings(playlist.name, {
+      await requestPlSettings(playlist.id, {
         track_black_list: playlist.settings.track_black_list.filter(
           (track) => track.toString() !== item.toString(),
         ),

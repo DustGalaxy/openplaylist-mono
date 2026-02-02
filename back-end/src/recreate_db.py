@@ -3,8 +3,7 @@ import asyncio
 
 from orm.auth_user import User
 from orm.linked_accounts import LinkedAccounts
-from orm.order import Order
-from orm.playlist import Playlist
+from orm.playlist import Playlist, OrderPlaylistStatus, Order
 from orm.settings import PlaylistSettings
 
 

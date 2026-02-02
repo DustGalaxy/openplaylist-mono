@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status
 
-from dto.order import OrderNew
+from dto.order import WebNewOrder
 from dto.user import UserDTO
 from services.auth_service import auth_service
 
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/order")
     status_code=status.HTTP_201_CREATED,
 )
 async def new_order(
-    order: OrderNew,
+    order: WebNewOrder,
     current_user: UserDTO = Depends(auth_service.get_current_user),
 ):
     is_owner = order.owner_id == current_user.id

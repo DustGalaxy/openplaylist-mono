@@ -129,6 +129,7 @@ services:
       - ./bot_ttv/.docker.env
     volumes:
       - ./bot_ttv/src:/app/src
+      - ./bot_ttv/main.py:/app/main.py
     networks:
       - default
 
@@ -157,11 +158,10 @@ services:
       - VITE_TWITCH_CLIENT_ID=${TWITCH_ID}
       - VITE_TWITCH_REDIRECT_URI=${TWITCH_REDIRECT}
       - VITE_TWITCH_SCOPES=${TWITCH_SCOPES}
-      - VITE_DA_CLIENT_ID=${DA_ID}
-      - VITE_DA_REDIRECT_URI=${DA_REDIRECT}
+      - VITE_DA_CLIENT_ID=${DA_CLIENT_ID}
+      - VITE_DA_REDIRECT_URI=${DA_REDIRECT_URI}
       - VITE_DA_SCOPES=${DA_SCOPES}
     depends_on:
-      - backend
       - traefik
     labels:
       - "traefik.enable=true"

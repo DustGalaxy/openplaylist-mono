@@ -17,9 +17,12 @@ auth_user_twitch_all_request = RabbitQueue("auth.user.twitch.all.request", durab
 bot_twitch_connect_request = RabbitQueue("bot.twitch.connect.request", durable=True)
 bot_twitch_connect_response = RabbitQueue("bot.twitch.connect.response", durable=True)
 bot_twitch_order_new = RabbitQueue("bot.twitch.order.new", durable=True)
+bot_twitch_ack_connection = RabbitQueue("bot.twitch.ack.connection", durable=True)
+
 bot_da_connect_request = RabbitQueue("bot.da.connect.request", durable=True)
 bot_da_connect_response = RabbitQueue("bot.da.connect.response", durable=True)
 bot_da_order_new = RabbitQueue("bot.da.order.new", durable=True)
+bot_da_ack_connection = RabbitQueue("bot.da.ack.connection", durable=True)
 
 playlist_order_created = RabbitQueue("playlist.order.created", durable=True)
 

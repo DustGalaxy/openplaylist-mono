@@ -13,6 +13,7 @@ from dto.settings import ReadPlaylistSettings
 from adapters._sio.init import sio
 from adapters._redis.broker import redis_adapter
 from services.playlist_service import playlist_service
+from models.order import OrderDomain
 from database import async_session_maker
 
 
@@ -21,17 +22,23 @@ class SioPlaylistUpdateService:
         self.sio: socketio.AsyncServer = sio
         self.namespace = "/plst_upds"
 
-    async def set_playnow(self, data: PlayNow):
-        await self.sio.emit("playnow", data.model_dump_json(), room=data.playlist_id, namespace=self.namespace)
+    async def uid_from_sid(self, sid):
+        return await self.sio.get_session(sid)
+    
+    def sid_from_uid(self, user_id):
+        return str(redis_adapter.hget(f"playlist:users:{user_id}", "sid"))
 
-    async def add_track(self, data: PlaylistTrackAdded):
-        await self.sio.emit("add_track", data.model_dump_json(), room=data.playlist_id, namespace=self.namespace)
-        print(f"Трек {data.id} добавлен в плейлист {data.playlist_id}")
+    async def set_playnow(self, data: PlayNow):
+        await self.sio.emit(f"playnow:{data.playlist_id}", data.model_dump_json(), room=data.playlist_id, namespace=self.namespace)
+
+    async def add_track(self, data: OrderDomain, playlist_id: UUID):
+        await self.sio.emit(f"add_track:{playlist_id}", data.model_dump_json(), room=str(playlist_id), namespace=self.namespace)
+        print(f"Трек {data.id} добавлен в плейлист {playlist_id}")
 
     async def delete_track(self, data: Deleted):
         await self.sio.emit(
-            "delete_track",
-            {"track_id": data.track_id, "playlist_id": data.playlist_id},
+            f"delete_track:{data.playlist_id}",
+            {"track_id": data.track_id},
             room=data.playlist_id,
             namespace=self.namespace,
         )
@@ -40,7 +47,13 @@ class SioPlaylistUpdateService:
         await self.sio.emit("move_track", data, room=data.playlist_id, namespace=self.namespace)
 
     async def settings_changed(self, data: ReadPlaylistSettings):
-        await self.sio.emit("settings_changed", data.model_dump_json(), room=str(data.playlist_id), namespace=self.namespace)
+        await self.sio.emit(f"settings_changed:{str(data.playlist_id)}", data.model_dump_json(), room=str(data.playlist_id), namespace=self.namespace)
+
+    async def ack_bot_connection(self, type: str, user_id: str):
+        sid = str(redis_adapter.hget(f"basic:users:{user_id}", "sid"))[2:-1]
+        await self.sio.emit(f"ack_bot_connected:{type}", to=sid, namespace="/")
+        print(f"Пользователь {user_id} подключился к боту {type}")
+        print(f"данные sid: {sid}, namespace: /, event: ack_bot_connected:{type}")
 
     async def set_private(self, data: Private):
         room_id = data.playlist_id
@@ -48,7 +61,8 @@ class SioPlaylistUpdateService:
 
         if room_id and owner_id:
             # Получаем sid владельца по его user_id
-            owner_sid = redis_adapter.hget(f"users:{owner_id}", "sid")
+            owner_sid = self.sid_from_uid(owner_id)
+
 
             # Получаем список всех sid в комнате
             for sid in self.sio.manager.get_participants(room=room_id, namespace=self.namespace):
@@ -56,7 +70,7 @@ class SioPlaylistUpdateService:
                     continue
 
                 # Отправляем событие клиенту, чтобы он знал, что его выгнали
-                await self.sio.emit("kicked_from_room", {"room_id": room_id}, to=sid, namespace="/personal_rooms")
+                await self.sio.emit("kicked_from_playlist", to=sid)
 
                 # Отключаем клиента от комнаты на сервере
                 await self.sio.leave_room(sid, room_id)

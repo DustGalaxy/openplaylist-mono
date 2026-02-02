@@ -49,7 +49,7 @@ async def connect_to_twitch(message: RabbitMessage = Context()) -> None:
     ])
 
     await bot.add_token(event.access_token, event.refresh_token, event.platform_user_id)
-
+    await broker.publish(str(event.user_id), "bot.twitch.ack.connection", main_exchange)
 
 @broker.subscriber(bot_twitch_disconnect_request, exchange=main_exchange)
 async def disconnect_from_twitch(message: RabbitMessage = Context()) -> None:
