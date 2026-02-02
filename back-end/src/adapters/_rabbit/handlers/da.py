@@ -9,11 +9,13 @@ from adapters._rabbit.event_broker import (
     auth_user_da_all_request,
     auth_user_da_tokens_refreshed,
     bot_da_order_new,
+    bot_da_ack_connection
 )
-from dto.order import OrderNew
+from dto.order import DANewOrder
 from _types import Platform
 from database import async_session_maker
 from repo import user_repository, linked_accounts_repository
+from services.sio_service import sio_service
 from taskiq_broker import broker as taskiq_broker
 from utils import find, kick
 
@@ -23,9 +25,16 @@ async def order_new_from_da(
     message: RabbitMessage = Context(),
 ):
     await message.ack()
-    event: OrderNew = OrderNew.model_validate_json(message.body)
+    event: DANewOrder = DANewOrder.model_validate_json(message.body)
     await kick("order.new", taskiq_broker, event, False, labels={"user_id": str(event.owner_id)})
 
+@broker.subscriber(bot_da_ack_connection, exchange=main_exchange)
+async def ack_da_connection(
+    message: RabbitMessage = Context(),
+):
+    await message.ack()
+    user_id = message.body.decode()
+    await sio_service.ack_bot_connection("da", user_id)
 
 @broker.subscriber(auth_user_da_all_request, exchange=main_exchange)
 async def get_all_da_users(

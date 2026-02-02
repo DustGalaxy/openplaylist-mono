@@ -37,7 +37,7 @@ export default function OrderMiniCard({
     {
       icon: <Play />,
       on_click: () => {
-        requestPlayNow(track.playlist_id, track.id)
+        requestPlayNow(playlist.id, track.id)
       },
       className: 'px-1 bg-level-2',
       glow: 'white',

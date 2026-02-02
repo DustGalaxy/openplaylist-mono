@@ -213,9 +213,10 @@ class AuthDAService:
 
     async def add_integration(self, db_session: AsyncSession, user_id: UUID, code: str) -> AuthUserDomain:
         try:
+            print(1)
             db_user = await self.user_repo.get_one(db_session, user_id, column="id")
-            print(db_user)
             integration = find(db_user.linked_accounts, lambda x: x.platform == self.platform)
+            print(2)
             if not integration:
                 data = {
                     "grant_type": "authorization_code",
@@ -224,13 +225,17 @@ class AuthDAService:
                     "code": code,
                     "redirect_uri": settings.DA_REDIRECT_URI,
                 }
+                print(data)
                 async with httpx.AsyncClient() as client:
                     try:
                         response = await client.post(settings.DA_TOKEN_URL, data=data)
-                        response.raise_for_status()
+                        print(3)
+                        if response.status_code in [400, 401]:
+                            raise Exception(response.text)
+                        print(4)
                         token_data = response.json()
                         user_info: dict = await self._make_api_request("GET", "/user/oauth", token_data["access_token"])
-
+                        print(5)
                         data = user_info["data"]
                         data["id"] = str(data["id"])
                         da_user = DAUser.model_validate(data)
@@ -261,6 +266,10 @@ class AuthDAService:
 
                     except json.JSONDecodeError as e:
                         logger.error(f"Failed to decode JSON token response: {e}")
+                        raise HTTPException(status_code=400)
+                    except Exception as e:
+                        print(e)
+                        logger.error(f"An unexpected error occurred: {e}")
                         raise HTTPException(status_code=400)
             else:
                 raise HTTPException(status_code=400, detail="User already has a da integration")

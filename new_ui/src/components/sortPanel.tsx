@@ -21,7 +21,7 @@ export default function SortPanel({ playlist }: { playlist: ClientPlaylist }) {
     async () => {
       if (!canRequest.current) return
       canRequest.current = false
-      await requestPlSettings(playlist.name, { sort_settings: sortSettings })
+      await requestPlSettings(playlist.id, { sort_settings: sortSettings })
     },
     2000,
   )

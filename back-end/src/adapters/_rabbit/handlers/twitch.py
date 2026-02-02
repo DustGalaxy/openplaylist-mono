@@ -4,16 +4,18 @@ from simple_repository.exceptions import NotFoundException
 from faststream import Context
 from faststream.rabbit.message import RabbitMessage
 
-
 from adapters._rabbit.dto import TwitchUser, TwitchTokenRefreshed
 from adapters._rabbit.event_broker import (
     broker,
     main_exchange,
     auth_user_twitch_all_request,
     auth_user_twitch_tokens_refreshed,
-    bot_twitch_order_new
+    bot_twitch_order_new,
+    bot_twitch_ack_connection,
 )
-from dto.order import OrderNew
+from dto.order import OrderNew, TTVNewOrder
+from services.sio_service import sio_service
+from services.auth_service import auth_service
 from _types import Platform
 from database import async_session_maker
 from repo import user_repository, linked_accounts_repository
@@ -26,8 +28,17 @@ async def order_new_from_twitch(
     message: RabbitMessage = Context(),
 ):
     await message.ack()
-    event: OrderNew = OrderNew.model_validate_json(message.body)
+    event: TTVNewOrder = TTVNewOrder.model_validate_json(message.body)
     await kick("order.new", taskiq_broker, event, False, labels={"user_id": str(event.owner_id)})
+
+
+@broker.subscriber(bot_twitch_ack_connection, exchange=main_exchange)
+async def ack_twitch_connection(
+    message: RabbitMessage = Context(),
+):
+    await message.ack()
+    user_id = message.body.decode()
+    await sio_service.ack_bot_connection("twitch", user_id)
 
 
 @broker.subscriber(auth_user_twitch_all_request, exchange=main_exchange)
@@ -35,7 +46,7 @@ async def get_all_twitch_users(
     message: RabbitMessage = Context(),
 ):
     await message.ack()
-
+    print("get_all_twitch_users event")
     async with async_session_maker() as session:
         users, count = await user_repository.get_all(session)
 

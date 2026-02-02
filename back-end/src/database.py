@@ -1,7 +1,9 @@
+import json
 from typing import AsyncGenerator
 from uuid import UUID as UUIDTYPE
 from datetime import datetime
 
+from pydantic import BaseModel
 from uuid6 import uuid7
 from sqlalchemy import DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
@@ -10,11 +12,17 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 
 from settings import settings
 
-engine: AsyncEngine = create_async_engine(settings.DB_URL)
+def custom_serializer(obj):
+    if isinstance(obj, BaseModel):
+        return obj.model_dump_json()
+    return json.dumps(obj)
+
+engine: AsyncEngine = create_async_engine(settings.DB_URL, json_serializer=custom_serializer)
 async_session_maker = async_sessionmaker(
     engine,
     class_=AsyncSession,
     expire_on_commit=False,
+    
 )
 
 

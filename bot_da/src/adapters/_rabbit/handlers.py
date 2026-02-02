@@ -15,3 +15,4 @@ async def add_connection(
     link: LinkedAccountWithTokensRead = LinkedAccountWithTokensRead.model_validate_json(message.body)
     if context.manager is not None:
         await context.manager.add_connection(link)
+        await rabbit_broker.publish(str(link.user_id), "bot.da.ack.connection", main_exchange)

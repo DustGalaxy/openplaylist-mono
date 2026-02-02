@@ -3,6 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from dto.settings import ReadPlaylistSettings
+from models.order import OrderDomain
 
 
 class ReadPlaylist(BaseModel):
@@ -11,7 +12,7 @@ class ReadPlaylist(BaseModel):
     owner_nickname: str
     name: str = Field(..., max_length=100)
     description: str | None = Field(None, max_length=500)
-    track_data: list[dict] = Field(default_factory=list)
+    track_data: list[OrderDomain] = Field(default_factory=list)
     now_playing: str | None = Field(None)
     settings: ReadPlaylistSettings
     created_at: datetime

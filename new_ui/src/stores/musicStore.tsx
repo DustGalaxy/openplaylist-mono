@@ -66,11 +66,15 @@ type StoreState = {
   ) => Promise<void>
   syncPlayNow: (playlistId: string, track: Track | undefined) => void // вызывается из socket
 
-  requestRemoveTrack: (playlistId: string, orderId: string) => Promise<void>
+  requestRemoveTrack: (
+    playlistId: string,
+    orderId: string,
+    reason?: string,
+  ) => Promise<void>
   syncRemoveTrack: (playlistId: string, orderId: string) => void
 
   // playback controls (local)
-  playNext: (pl: ClientPlaylist) => void
+  playNext: (pl: ClientPlaylist, reason?: string) => void
   // playPrev: (playlistId: string) => void
 
   requestPlSettings: (
@@ -104,7 +108,6 @@ export const useMusicStore = create<StoreState>((set, get) => {
         payload && typeof payload === 'string' ? JSON.parse(payload) : payload
       if (!parsed) return
       const tr: Track = parsed.track ?? parsed
-      if (parsed.playlist_id && parsed.playlist_id !== playlistId) return
       get().syncAddTrack(playlistId, tr)
     }
 
@@ -113,8 +116,6 @@ export const useMusicStore = create<StoreState>((set, get) => {
       if (!payload) return
 
       const parsed: PlayNow = JSON.parse(payload)
-
-      if (!parsed.playlist_id || parsed.playlist_id !== playlistId) return
 
       if (!parsed.track_id) {
         get().syncPlayNow(playlistId, undefined)
@@ -132,7 +133,6 @@ export const useMusicStore = create<StoreState>((set, get) => {
     // removed handler (server may broadcast removals) payload { playlist_id, order_id }
     const removedHandler = (payload: any) => {
       if (!payload) return
-      if (payload.playlist_id && payload.playlist_id !== playlistId) return
       get().syncRemoveTrack(playlistId, payload.track_id)
     }
 
@@ -141,16 +141,15 @@ export const useMusicStore = create<StoreState>((set, get) => {
       const parsed = JSON.parse(payload)
       console.debug('parsed settings', parsed)
 
-      if (parsed.playlist_id && parsed.playlist_id !== playlistId) return
       const { user } = useAuthStore.getState()
       if (user && user.id === parsed.streamer_id) return
       get().syncPlSettings(playlistId, parsed)
     }
 
-    s.on('add_track', addHandler)
-    s.on('playnow', playNowHandler)
-    s.on('delete_track', removedHandler)
-    s.on('settings_changed', settingsChangedHandler)
+    s.on('add_track:' + playlistId, addHandler)
+    s.on('playnow:' + playlistId, playNowHandler)
+    s.on('delete_track:' + playlistId, removedHandler)
+    s.on('settings_changed:' + playlistId, settingsChangedHandler)
 
     set((st) => ({
       socketHandlers: {
@@ -171,11 +170,11 @@ export const useMusicStore = create<StoreState>((set, get) => {
     const handlers = get().socketHandlers || {}
     const h = handlers[playlistId]
     if (!h) return
-    if (h.addHandler) s.off('add_track', h.addHandler)
-    if (h.playNowHandler) s.off('playnow', h.playNowHandler)
-    if (h.removedHandler) s.off('delete_track', h.removedHandler)
+    if (h.addHandler) s.off('add_track:' + playlistId, h.addHandler)
+    if (h.playNowHandler) s.off('playnow:' + playlistId, h.playNowHandler)
+    if (h.removedHandler) s.off('delete_track:' + playlistId, h.removedHandler)
     if (h.settingsChangedHandler)
-      s.off('settings_changed', h.settingsChangedHandler)
+      s.off('settings_changed:' + playlistId, h.settingsChangedHandler)
     const newHandlers = { ...handlers }
     delete newHandlers[playlistId]
     set(() => ({ socketHandlers: newHandlers }))
@@ -258,7 +257,7 @@ export const useMusicStore = create<StoreState>((set, get) => {
     },
 
     /* ---- ADD flow ---- */
-    async requestAddTrack(playlist_name, yt_video_id) {
+    async requestAddTrack(playlistId, yt_video_url) {
       // optimistic: add to playlist
       const { user } = useAuthStore.getState()
 
@@ -271,8 +270,8 @@ export const useMusicStore = create<StoreState>((set, get) => {
         request_id: uuidv4(),
         owner_id: user.id,
         requester_nickname: user.username,
-        playlist_name: playlist_name,
-        yt_video_id,
+        playlist_id: playlistId,
+        yt_video_url: yt_video_url,
         priority: 'bms',
         source: 'web',
       }
@@ -284,6 +283,7 @@ export const useMusicStore = create<StoreState>((set, get) => {
     // server sync (socket handler должен вызвать это)
     syncAddTrack(playlistId, track) {
       const pl = get().playlists.find((p) => p.id === playlistId)
+      console.debug('syncAddTrack', playlistId, track)
       if (!pl) {
         console.debug('no playlist in syncAddTrack')
         return
@@ -341,14 +341,14 @@ export const useMusicStore = create<StoreState>((set, get) => {
     },
 
     /* ---- REMOVE flow ---- */
-    async requestRemoveTrack(playlistId, orderId) {
+    async requestRemoveTrack(playlistId, orderId, reason?: string) {
       console.debug(
         'requestRemoveTrack, playlistId - ',
         playlistId,
         'orderId - ',
         orderId,
       )
-      await removeTrackFromPlaylist(playlistId, orderId)
+      await removeTrackFromPlaylist(playlistId, orderId, reason)
     },
 
     syncRemoveTrack(playlistId, orderId) {
@@ -368,7 +368,7 @@ export const useMusicStore = create<StoreState>((set, get) => {
       }))
 
       if (pl.now_playing?.id === orderId) {
-        get().playNext(pl)
+        get().playNext(pl, 'removed')
       }
     },
 
@@ -389,7 +389,7 @@ export const useMusicStore = create<StoreState>((set, get) => {
     },
 
     /* ---- Playback navigation ---- */
-    playNext(pl) {
+    playNext(pl, reason?: string) {
       const repeatHandler = () => {
         if (pl.settings.repeat_mode === 'all') {
           if (
@@ -423,7 +423,7 @@ export const useMusicStore = create<StoreState>((set, get) => {
       }
 
       if (pl.settings.mode === 'flow' && pl.now_playing) {
-        get().requestRemoveTrack(pl.id, pl.now_playing.id)
+        get().requestRemoveTrack(pl.id, pl.now_playing.id, reason)
       }
 
       get().requestPlayNow(pl.id, nextTrack?.id || undefined)

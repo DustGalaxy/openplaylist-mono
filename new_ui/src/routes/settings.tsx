@@ -1,17 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
 import type { Integration } from '@/types/user'
 import { connectBot, getUserIntegrations } from '@/api/api-user'
 import DonationAlerts from '@/components/icons/icon-da'
 import Twitch from '@/components/icons/icon-twtich'
 import { useAuthStore } from '@/stores/authStore'
 import { useDaLoginUrl, useTwitchLoginUrl } from '@/hooks/useAuthUrl'
+import { global_socket } from '@/api/io-sockets'
 
 export const Route = createFileRoute('/settings')({
   component: RouteComponent,
   loader: async () => {
     const integrations: Array<Integration> = await getUserIntegrations()
-    console.log('integrations', integrations)
-
     return { integrations }
   },
 })
@@ -19,9 +19,64 @@ export const Route = createFileRoute('/settings')({
 function RouteComponent() {
   const { isAuthenticated, user } = useAuthStore()
   const { integrations } = Route.useLoaderData()
-
+  const [integrationsState, setIntegrationsState] = useState<
+    Array<Integration>
+  >([])
   const handleTwitchLogin = useTwitchLoginUrl()
   const handleDaLogin = useDaLoginUrl()
+
+  useEffect(() => {
+    console.log('loaded integrations - ', integrations)
+
+    setIntegrationsState(integrations)
+  }, [])
+
+  useEffect(() => {
+    console.log('integrationsState before ON twitch ack', integrationsState)
+    global_socket.on('ack_bot_connected:twitch', () => {
+      console.log('catch ack_bot_connected:twitch')
+      console.log('integrationsState before twitch ack', integrationsState)
+      const updatedIntegrations = integrationsState.map((integration) => {
+        if (integration.platform === 'twitch') {
+          return { ...integration, bot_connection: true }
+        } else {
+          return integration
+        }
+      })
+      console.log('updatedIntegrations  -  ', updatedIntegrations)
+      setIntegrationsState(updatedIntegrations)
+    })
+
+    return () => {
+      global_socket.off('ack_bot_connected:twitch')
+    }
+  }, [])
+
+  useEffect(() => {
+    console.log('integrationsState before ON da ack', integrationsState)
+    global_socket.on('ack_bot_connected:da', () => {
+      console.log('catch ack_bot_connected:da')
+      console.log('integrationsState before da ack', integrationsState)
+
+      const updatedIntegrations = integrationsState.map((integration) => {
+        if (integration.platform === 'da') {
+          return { ...integration, bot_connection: true }
+        } else {
+          return integration
+        }
+      })
+      console.log('updatedIntegrations  -  ', updatedIntegrations)
+
+      setIntegrationsState(updatedIntegrations)
+    })
+    return () => {
+      global_socket.off('ack_bot_connected:da')
+    }
+  }, [])
+
+  useEffect(() => {
+    console.log('integrationsState new - ', integrationsState)
+  }, [integrationsState])
 
   if (!isAuthenticated) {
     return (
@@ -76,14 +131,14 @@ function RouteComponent() {
 
               <div className="text-lg font-bold">Twitch</div>
 
-              {integrations.some(
+              {integrationsState.some(
                 (i: Integration) => i.platform === 'twitch',
               ) ? (
                 <>
                   <div className="ml-auto px-3 py-1 rounded-full bg-green-600 text-sm">
                     Connected
                   </div>
-                  {integrations.find(
+                  {integrationsState.find(
                     (i: Integration) => i.platform === 'twitch',
                   )?.bot_connection ? (
                     <div className="ml-2 px-3 py-1 rounded-full bg-green-600 text-sm">
@@ -122,14 +177,17 @@ function RouteComponent() {
 
               <div className="text-lg font-bold">Donation Alerts</div>
 
-              {integrations.some((i: Integration) => i.platform === 'da') ? (
+              {integrationsState.some(
+                (i: Integration) => i.platform === 'da',
+              ) ? (
                 <>
                   <div className="ml-auto px-3 py-1 rounded-full bg-green-600 text-sm">
                     Connected
                   </div>
                   <div>
-                    {integrations.find((i: Integration) => i.platform === 'da')
-                      ?.bot_connection ? (
+                    {integrationsState.find(
+                      (i: Integration) => i.platform === 'da',
+                    )?.bot_connection ? (
                       <div className="ml-2 px-3 py-1 rounded-full bg-green-600 text-sm">
                         Bot connected
                       </div>

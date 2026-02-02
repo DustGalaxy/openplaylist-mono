@@ -8,12 +8,8 @@ from sqlalchemy import or_, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-from orm.order import Order as OrderORM
-from models.order import OrderDomain, OrderPatch, OrderCreate
-from dal.abstract import IOrderRepository
-
 from models.playlist import PlaylistDomain, PlaylistCreate, PlaylistPatch
-from orm.playlist import Playlist
+from orm.playlist import OrderPlaylistStatus, Playlist, Order
 
 from models.settings import PlaylistSettingsDomain, PlaylistSettingsPatch, PlaylistSettingsCreate
 from orm.settings import PlaylistSettings
@@ -27,7 +23,9 @@ from orm.linked_accounts import LinkedAccounts
 from dal.abstract import IPlaylistRepository, IPlaylistSettingsRepository
 from exceptions import NotActivePlaylist
 
-from _types import Platform
+from models.order import OrderCreate, OrderDomain
+
+from _types import Platform, DeleteStatus
 
 
 class PlaylistRepository(
@@ -81,6 +79,7 @@ class PlaylistRepository(
         try:
             db_model = self.sqla_model(**playlist_data.model_dump(exclude_unset=True))
             db_model.settings = PlaylistSettings()
+            db_model.track_data = []
             session.add(db_model)
 
             await session.commit()
@@ -115,6 +114,109 @@ class PlaylistRepository(
 
         return [PlaylistDomain.model_validate(item) for item in result]
 
+    async def add_order_to_playlist(self, session: AsyncSession, playlist_id: UUID, order: OrderCreate) -> OrderDomain:
+        try:
+            plst = (
+                (await session.execute(select(Playlist).where(Playlist.id == playlist_id)))
+                .unique()
+                .scalar_one_or_none()
+            )
+            if not plst:
+                raise NotFoundException()
+
+            orm_order = Order(**order.model_dump())
+
+            plst.order_links.append(orm_order)
+            await session.commit()
+            await session.refresh(orm_order)
+            return OrderDomain.model_validate(orm_order)
+        except IntegrityError as e:
+            await session.rollback()
+            raise IntegrityConflictException(
+                f"{self.sqla_model.__tablename__} conflicts with existing data: {e}",
+            ) from e
+        except Exception as e:
+            await session.rollback()
+            raise RepositoryException(f"Unexpected error in model {self.sqla_model.__tablename__}: {e}") from e
+
+    async def remove_order_from_playlist(
+        self, session: AsyncSession, playlist_id: UUID, order_id: UUID, user_id: UUID, reason: DeleteStatus
+    ):
+        try:
+            plst = (
+                (
+                    await session.execute(
+                        select(Playlist).where(Playlist.id == playlist_id and Playlist.owner_id == user_id)
+                    )
+                )
+                .unique()
+                .scalar_one_or_none()
+            )
+            if not plst:
+                raise NotFoundException()
+
+            orm_order = (
+                (
+                    await session.execute(
+                        select(OrderPlaylistStatus).where(
+                            OrderPlaylistStatus.order_id == order_id and OrderPlaylistStatus.playlist_id == playlist_id
+                        )
+                    )
+                )
+                .unique()
+                .scalar_one_or_none()
+            )
+
+            if not orm_order:
+                raise NotFoundException()
+
+            orm_order.status = reason
+            await session.commit()
+            return
+        except IntegrityError as e:
+            await session.rollback()
+            raise IntegrityConflictException(
+                f"{self.sqla_model.__tablename__} conflicts with existing data: {e}",
+            ) from e
+        except Exception as e:
+            await session.rollback()
+            raise RepositoryException(f"Unexpected error in model {self.sqla_model.__tablename__}: {e}") from e
+
+    async def patch(
+        self,
+        session: AsyncSession,
+        data: PlaylistPatch,
+        id_: IdValue,
+        column: str = "id",
+    ) -> PlaylistDomain:
+        """Patch entity by id and return the updated model"""
+        try:
+            await self.get_one(session, id_, column)
+
+            q = (
+                update(self.sqla_model)
+                .where(getattr(self.sqla_model, column) == id_)
+                .values(**self.to_inner(data))
+                .returning(self.sqla_model)
+            )
+
+            result = await session.execute(q)
+            updated_entity = result.unique().scalar_one()
+            await session.commit()
+            await session.refresh(updated_entity)
+            return self.to_repr(updated_entity)
+
+        except IntegrityError as e:
+            await session.rollback()
+            raise IntegrityConflictException(
+                f"{self.sqla_model.__tablename__} {column}={id_} conflict with existing data: {e}",
+            ) from e
+        except Exception as e:
+            await session.rollback()
+            if not isinstance(e, RepositoryException):
+                raise RepositoryException(f"Failed to update {self.sqla_model.__tablename__}: {e}") from e
+            raise
+
 
 playlist_repository = PlaylistRepository()
 
@@ -127,13 +229,6 @@ class PlaylistSettingsRepository(
 
 
 playlist_settings_repository = PlaylistSettingsRepository()
-
-
-class OrderRepository(IOrderRepository, crud_factory(OrderORM, OrderDomain, OrderCreate, OrderPatch, strict_attrs=False)):
-    pass
-
-
-order_repository = OrderRepository()
 
 
 class UserRepository(crud_factory(User, AuthUserDomain, AuthUserCreate, AuthUserUpdate)):
