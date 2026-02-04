@@ -14,7 +14,7 @@ from exceptions import NotAuthorizedException
 from models.playlist import PlaylistCreate, PlaylistDomain, PlaylistPatch
 from models.settings import PlaylistSettingsPatch, PlaylistSettingsDomain
 from models.order import OrderDomain, OrderCreate, WebExtraData
-
+from services.sio_service import Private, sio_service
 
 class PlaylistService:
     def __init__(
@@ -186,6 +186,8 @@ class PlaylistService:
         user: User,
     ) -> PlaylistSettingsDomain:
         plst_list = await self.get(session, playlist_id, user)
+        if not data.is_public:
+            await sio_service.set_private(Private(playlist_id=str(playlist_id), owner_id=str(user.id)))
 
         return await self._playlist_settings_repository.patch(session, data, plst_list.settings.id)
 

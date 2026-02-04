@@ -19,64 +19,33 @@ export const Route = createFileRoute('/settings')({
 function RouteComponent() {
   const { isAuthenticated, user } = useAuthStore()
   const { integrations } = Route.useLoaderData()
-  const [integrationsState, setIntegrationsState] = useState<
-    Array<Integration>
-  >([])
+  const [integrationsState, setIntegrationsState] =
+    useState<Array<Integration>>(integrations)
   const handleTwitchLogin = useTwitchLoginUrl()
   const handleDaLogin = useDaLoginUrl()
 
   useEffect(() => {
-    console.log('loaded integrations - ', integrations)
-
-    setIntegrationsState(integrations)
-  }, [])
-
-  useEffect(() => {
-    console.log('integrationsState before ON twitch ack', integrationsState)
     global_socket.on('ack_bot_connected:twitch', () => {
-      console.log('catch ack_bot_connected:twitch')
-      console.log('integrationsState before twitch ack', integrationsState)
-      const updatedIntegrations = integrationsState.map((integration) => {
-        if (integration.platform === 'twitch') {
-          return { ...integration, bot_connection: true }
-        } else {
-          return integration
-        }
-      })
-      console.log('updatedIntegrations  -  ', updatedIntegrations)
-      setIntegrationsState(updatedIntegrations)
+      setIntegrationsState((prevItems) =>
+        prevItems.map((item) =>
+          item.platform === 'twitch' ? { ...item, bot_connection: true } : item,
+        ),
+      )
+    })
+
+    global_socket.on('ack_bot_connected:da', () => {
+      setIntegrationsState((prevItems) =>
+        prevItems.map((item) =>
+          item.platform === 'da' ? { ...item, bot_connection: true } : item,
+        ),
+      )
     })
 
     return () => {
+      global_socket.off('ack_bot_connected:da')
       global_socket.off('ack_bot_connected:twitch')
     }
   }, [])
-
-  useEffect(() => {
-    console.log('integrationsState before ON da ack', integrationsState)
-    global_socket.on('ack_bot_connected:da', () => {
-      console.log('catch ack_bot_connected:da')
-      console.log('integrationsState before da ack', integrationsState)
-
-      const updatedIntegrations = integrationsState.map((integration) => {
-        if (integration.platform === 'da') {
-          return { ...integration, bot_connection: true }
-        } else {
-          return integration
-        }
-      })
-      console.log('updatedIntegrations  -  ', updatedIntegrations)
-
-      setIntegrationsState(updatedIntegrations)
-    })
-    return () => {
-      global_socket.off('ack_bot_connected:da')
-    }
-  }, [])
-
-  useEffect(() => {
-    console.log('integrationsState new - ', integrationsState)
-  }, [integrationsState])
 
   if (!isAuthenticated) {
     return (

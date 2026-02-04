@@ -15,8 +15,6 @@ const apiClient: AxiosInstance = axios.create({
   },
 })
 
-
-
 // apiClient.interceptors.request.use(
 //   (config) => {
 //     console.log('Axios request URL:', config.url)
@@ -55,7 +53,7 @@ apiClient.interceptors.response.use(
       // так как 401/403 от них должны обрабатываться вызывающим кодом.
       const isAuthEndpoint = originalRequest?.url?.includes('/login') // /login/twitch или другие /login/*
 
-      if ((status === 401 || status === 403) && !isAuthEndpoint) {
+      if (status === 401 && !isAuthEndpoint) {
         // Проверяем флаг, чтобы избежать множественных вызовов
         if (!isClearingAuth) {
           isClearingAuth = true // Устанавливаем флаг

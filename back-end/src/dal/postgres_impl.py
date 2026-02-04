@@ -110,7 +110,7 @@ class PlaylistRepository(
         stmt = select(Playlist).where(combined_condition)
 
         result = await session.execute(stmt)
-        result = result.scalars().all()
+        result = result.scalars().unique().all()
 
         return [PlaylistDomain.model_validate(item) for item in result]
 

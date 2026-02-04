@@ -11,6 +11,7 @@ import {
 import ViewPlayNowCard from './view-track-card'
 import Priority from './icons/icon-priority'
 import type { ClientPlaylist } from '@/types/playlist'
+import AddBar from './addbar'
 
 const InfoCard = ({
   icon,
@@ -41,10 +42,14 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
         <div className="flex items-center gap-3">
           <div
             className={`px-3 py-1 text-sm font-medium rounded-full ${
-              playlist.settings.is_active ? 'bg-green-600' : 'bg-red-600'
+              playlist.settings.is_allow_external_requests
+                ? 'bg-green-600'
+                : 'bg-red-600'
             }`}
           >
-            {playlist.settings.is_active ? 'Active' : 'Inactive'}
+            {playlist.settings.is_allow_external_requests
+              ? 'Active'
+              : 'Inactive'}
           </div>
           <h2 className="text-xl font-semibold">{playlist.name}</h2>
         </div>
@@ -109,6 +114,14 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
             value={playlist.settings.cost_mode}
           />
         </div>
+
+        <div className="mb-3">
+          <h3 className="text-sm uppercase tracking-wide text-gray-400 mb-3">
+            Add a track
+          </h3>
+          <AddBar playlistId={playlist.id} />
+        </div>
+
         <div className="mb-3">
           <h3 className="text-sm uppercase tracking-wide text-gray-400 mb-3">
             Now playing

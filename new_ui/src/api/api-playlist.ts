@@ -6,14 +6,19 @@ import { getConfig, removeNullAndUndefined } from '@/lib/utils'
 
 export const fetchPlaylistPublic = async (
   playlist_id: string,
-): Promise<ClientPlaylist> => {
+): Promise<ClientPlaylist | null> => {
   const config = getConfig()
   const response = await apiClient(
     config.PLST_API_URL + `/${playlist_id}/public`,
     {
       method: 'GET',
     },
-  )
+  ).catch((error) => {
+    if (error.response.status === 403) {
+      return null
+    }
+  })
+  if (!response) return null
   return response.data
 }
 
@@ -154,9 +159,14 @@ export const deletePlaylist = async (playlist_id: string) => {
 
 export const getPublicPlaylists = async (query: string) => {
   const config = getConfig()
-  const response = await apiClient(config.PLST_API_URL + +`?query=${query}`, {
+  const response = await apiClient(config.PLST_API_URL + `?query=${query}`, {
     method: 'GET',
     withCredentials: true,
+  }).catch((error) => {
+    if (error.response.status === 403) {
+      return null
+    }
   })
+  if (!response) return null
   return response.data
 }

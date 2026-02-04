@@ -89,13 +89,8 @@ class PlstUpdsNamespace(socketio.AsyncNamespace):
         if user:
             await sio_service.unsub_plst_upds(sid, data["playlist_id"], user["user_id"])
 
-    async def on_disconnect(self, sid, reason, namespace=None):
+    async def on_disconnect(self, sid, namespace=None):
         print("disconnect ", sid)
         user_id = await self.get_session(sid)
         redis_adapter.hdel(f"playlist:users:{user_id}", "sid")
         await self.disconnect(sid)
-
-
-@sio.event(namespace="/personal_rooms")
-async def connect(sid, environ, auth):  # noqa: F811
-    await sio.enter_room(sid, sid, namespace="/personal_rooms")
