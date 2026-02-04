@@ -37,17 +37,19 @@ sio_asgi_app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=app)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://admin.socket.io",
         "http://localhost:3000",
         "https://localhost:3000",
         "http://127.0.0.1:3000",
         "https://127.0.0.1:3000",
-        "http://localhost:8000https://localhost:8000",
+        "http://localhost:8000",
+        "https://localhost:8000",
         "http://127.0.0.1:8000",
         "https://127.0.0.1:8000",
         "https://openplaylist.localhost",
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 

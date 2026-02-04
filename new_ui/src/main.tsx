@@ -15,6 +15,7 @@ declare global {
   interface Window {
     appConfig: {
       WS_API_URL: string
+      SOCKET_PATH: string
       PLST_API_URL: string
       AUTH_API_URL: string
       ORDER_API_URL: string
@@ -27,9 +28,9 @@ declare global {
     }
   }
 }
-
 window.appConfig = {
   WS_API_URL: import.meta.env.VITE_WS_API_URL,
+  SOCKET_PATH: import.meta.env.VITE_SOCKET_PATH,
   PLST_API_URL: import.meta.env.VITE_PLST_API_URL,
   AUTH_API_URL: import.meta.env.VITE_AUTH_API_URL,
   ORDER_API_URL: import.meta.env.VITE_ORDER_API_URL,

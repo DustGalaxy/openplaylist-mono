@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Playlist from '@/components/Playlist'
 import { useAuthStore } from '@/stores/authStore'
 import { usePlstUpdates } from '@/hooks/usePlstUpdates'
-import { plst_upds_socket } from '@/api/io-sockets'
+import { getPlsUpdsSocket } from '@/api/io-sockets'
 import {
   addTrackToPlaylist,
   createNewPlaylist,
@@ -74,6 +74,8 @@ function RouteComponent() {
         removeTrack: removeTrackFromPlaylist,
         playNow: postPlayNow,
       })
+
+      const plst_upds_socket = getPlsUpdsSocket()
       useMusicStore.getState().setSocket(plst_upds_socket)
 
       setPlsts(useMusicStore.getState().playlists)
@@ -88,14 +90,6 @@ function RouteComponent() {
       }
     }
   }, [isLoading])
-
-  const text2 =
-    ` Далеко-далеко за словесными горами в стране гласных и согласных живут рыбные тексты. 
-Вдали от всех живут они в буквенных домах
-на берегу Семантика большого языкового океана. Маленький ручеек
-Даль журчит по всей стране и обеспечивает ее всеми необходимыми
-правилами. Эта парадигматическая страна, в которой жаренные
-члены предложения залетают прямо в рот.`.replace(/(\r\n|\n|\r)/gm, ' ')
 
   return (
     <div className="bg-level-1 min-h-[90vh] h-full text-white w-full">
@@ -124,7 +118,7 @@ function RouteComponent() {
                 </div> */}
               </div>
               <span className="text-3xl pb-1 text-muted">{'{'}</span>
-              <div className="flex overflow-x-scroll w-full mx-1">
+              <div className="flex overflow-x-auto w-full mx-1">
                 {plsts &&
                   plsts
                     .sort((a, b) => (a.name > b.name ? 1 : -1))

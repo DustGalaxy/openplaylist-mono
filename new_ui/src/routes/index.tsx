@@ -93,7 +93,7 @@ function App() {
       </div>
 
       <div className=" h-[90vh] mt-15 w-full bg-level-1 shadow-2xl">
-        <div>Немного статистики</div>
+        {/* <div>Немного статистики</div> */}
         <div>
           <SearchPlaylist />
         </div>

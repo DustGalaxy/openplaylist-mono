@@ -50,7 +50,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
           {/* <TanStackRouterDevtools />
 
           <TanStackQueryLayout /> */}
-          <div className="bg-level-1 min-w-[360px] flex flex-col items-center w-full mt-5 ">
+          <div className="bg-level-1 min-w-[360px] flex flex-col items-center w-full mt-10 ">
             <footer className="bg-level-2  w-[90vw] min-h-10 border-2 border-level-3 border-b-0 rounded-t-(--rounded-std)">
               <p className="text-center text-white p-2">Footer</p>
             </footer>

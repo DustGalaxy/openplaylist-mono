@@ -260,3 +260,45 @@ code {
     @apply bg-background text-foreground;
   }
 }
+
+/* Убираем угол скроллбара в Chromium (Edge) — он мог резервировать место */
+*::-webkit-scrollbar-corner {
+  background: transparent;
+  display: none;
+  height: 0;
+  width: 0;
+} /* Кастомный нативный скроллбар — вертикальный только (не резервируем высоту) */
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin; /* "auto"/"thin"/"none" */
+  scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+  -ms-overflow-style: auto; /* IE 10+ и Edge (legacy) — стандартное поведение */
+  scrollbar-gutter: auto; /* не резервировать лишний гаттер */
+}
+
+/* Утилита для полного скрытия скроллбара на конкретных элементах */
+.no-native-scrollbar::-webkit-scrollbar {
+  display: none;
+  height: 0;
+  width: 0;
+}
+.no-native-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Подсказка: скроллбар вообще не появится, если у элемента нет переполнения (overflow). */

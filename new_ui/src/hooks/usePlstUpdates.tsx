@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
-import { plst_upds_socket } from '@/api/io-sockets'
+import { getPlsUpdsSocket } from '@/api/io-sockets'
 
 export function usePlstUpdates(event: string, callback: CallableFunction) {
   useEffect(() => {
+    const plst_upds_socket = getPlsUpdsSocket()
     plst_upds_socket.on(event, callback)
 
     return () => {
