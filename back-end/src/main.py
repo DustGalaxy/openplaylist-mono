@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Response
+from fastapi import APIRouter, FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 import socketio
@@ -32,7 +32,7 @@ app = FastAPI(lifespan=lifespan)
 
 sio.register_namespace(PlstUpdsNamespace("/plst_upds"))
 sio.register_namespace(BasicNamespace("/"))
-sio_asgi_app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=app)
+sio_asgi_app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=app, socketio_path="/api/socket.io")
 
 app.add_middleware(
     CORSMiddleware,
@@ -52,16 +52,18 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
+api_route = APIRouter(prefix="/api")
+api_route.include_router(login_router)
+api_route.include_router(user_router)
+api_route.include_router(order_router)
+api_route.include_router(playlist_router)
+app.add_route("/api/socket.io/", route=sio_asgi_app, methods=["GET", "POST"])
+app.add_websocket_route("/api/socket.io/", sio_asgi_app)
 
-app.include_router(login_router)
-app.include_router(user_router)
-app.include_router(order_router)
-app.include_router(playlist_router)
-app.add_route("/socket.io/", route=sio_asgi_app, methods=["GET", "POST"])
-app.add_websocket_route("/socket.io/", sio_asgi_app)
+app.include_router(api_route)
 
 
-@app.post("/logout")
+@app.post("/api/logout")
 async def logout(response: Response):
     response.delete_cookie(settings.COOKIE_NAME)
 

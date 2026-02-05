@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from redis import Redis
 
@@ -17,29 +17,28 @@ if TYPE_CHECKING:
 else:
 
     class RedisAdapter:
-        def __init__(self, redis_url: str):
+        def __init__(self, redis_url: str, **kwargs: Any):
             self.redis_url = redis_url
+            self.kwargs = kwargs
             self.ready = False
-            self.broker: Redis
-
-        def close(self) -> None:
-            self.broker.close()
-            self.ready = False
+            self.broker: Redis | None = None
 
         def connect(self) -> None:
-            self.broker = Redis.from_url(self.redis_url)
+            self.broker = Redis.from_url(self.redis_url, **self.kwargs)
             self.ready = True
 
-        def __getattribute__(self, name: str):
-            # Получаем атрибуты самого адаптера (connect, ready и т.д.)
-            if name in ("broker", "ready", "redis_url", "connect", "close"):
-                return super().__getattribute__(name)
+        def close(self) -> None:
+            if self.broker:
+                self.broker.close()
+            self.ready = False
 
-            # Проверка готовности перед доступом к методам Redis
-            if not super().__getattribute__("ready"):
+        def __getattr__(self, name: str):
+            # Если мы здесь, значит запрашиваемого метода нет в RedisAdapter.
+            # Проверяем готовность и пробрасываем запрос в self.broker.
+            if not self.ready:
                 raise RuntimeError("RedisAdapter is not ready")
 
-            return getattr(super().__getattribute__("broker"), name)
+            return getattr(self.broker, name)
 
 
-redis_adapter = RedisAdapter(settings.REDIS_URL)
+redis_adapter = RedisAdapter(settings.REDIS_URL + "/0", decode_responses=True)

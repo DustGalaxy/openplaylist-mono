@@ -5,6 +5,9 @@ volumes:
   rabbitmq_data:
     driver: local
 
+  redis_data:
+    driver: local
+
 networks:
   default:
     driver: bridge
@@ -28,10 +31,13 @@ services:
 
   redis:
     image: redis:alpine
+    command: redis-server --appendonly yes
     ports:
       - "6379:6379"
     networks:
       - default
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 1s
@@ -99,13 +105,12 @@ services:
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.priority=100"
-      - "traefik.http.middlewares.api-strip.stripprefix.prefixes=/api"
-      - "traefik.http.routers.backend.middlewares=api-strip"
     networks:
       - default
+    stop_grace_period: 30s
 
   task-worker:
-    build: 
+    build:
       context: ./back-end
       dockerfile: ./Dockerfile.tasks
     depends_on:
@@ -120,7 +125,7 @@ services:
       - default
 
   bot-ttv:
-    build: 
+    build:
       context: ./bot_ttv
       dockerfile: ./Dockerfile
     depends_on:
@@ -134,7 +139,7 @@ services:
       - default
 
   bot-da:
-    build: 
+    build:
       context: ./bot_da
       dockerfile: ./Dockerfile
     depends_on:
@@ -151,17 +156,17 @@ services:
       context: ./new_ui
       dockerfile: Dockerfile
       args:
-      - VITE_WS_API_URL=${WS_URL}
-      - VITE_SOCKET_PATH=${SOCKET_PATH}
-      - VITE_PLST_API_URL=${PLST_URL}
-      - VITE_AUTH_API_URL=${AUTH_URL}
-      - VITE_ORDER_API_URL=${ORDER_URL}
-      - VITE_TWITCH_CLIENT_ID=${TWITCH_ID}
-      - VITE_TWITCH_REDIRECT_URI=${TWITCH_REDIRECT}
-      - VITE_TWITCH_SCOPES=${TWITCH_SCOPES}
-      - VITE_DA_CLIENT_ID=${DA_CLIENT_ID}
-      - VITE_DA_REDIRECT_URI=${DA_REDIRECT_URI}
-      - VITE_DA_SCOPES=${DA_SCOPES}
+        - VITE_WS_API_URL=${WS_URL}
+        - VITE_SOCKET_PATH=${SOCKET_PATH}
+        - VITE_PLST_API_URL=${PLST_URL}
+        - VITE_AUTH_API_URL=${AUTH_URL}
+        - VITE_ORDER_API_URL=${ORDER_URL}
+        - VITE_TWITCH_CLIENT_ID=${TWITCH_ID}
+        - VITE_TWITCH_REDIRECT_URI=${TWITCH_REDIRECT}
+        - VITE_TWITCH_SCOPES=${TWITCH_SCOPES}
+        - VITE_DA_CLIENT_ID=${DA_CLIENT_ID}
+        - VITE_DA_REDIRECT_URI=${DA_REDIRECT_URI}
+        - VITE_DA_SCOPES=${DA_SCOPES}
     depends_on:
       - traefik
     labels:

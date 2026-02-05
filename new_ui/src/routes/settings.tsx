@@ -6,7 +6,7 @@ import DonationAlerts from '@/components/icons/icon-da'
 import Twitch from '@/components/icons/icon-twtich'
 import { useAuthStore } from '@/stores/authStore'
 import { useDaLoginUrl, useTwitchLoginUrl } from '@/hooks/useAuthUrl'
-import { global_socket } from '@/api/io-sockets'
+import { getGlobalSocket } from '@/api/io-sockets'
 
 export const Route = createFileRoute('/settings')({
   component: RouteComponent,
@@ -25,6 +25,7 @@ function RouteComponent() {
   const handleDaLogin = useDaLoginUrl()
 
   useEffect(() => {
+    const global_socket = getGlobalSocket()
     global_socket.on('ack_bot_connected:twitch', () => {
       setIntegrationsState((prevItems) =>
         prevItems.map((item) =>

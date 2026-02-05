@@ -6,10 +6,8 @@ from adapters._rabbit.event_broker import broker as rabbit_broker
 from adapters._redis.broker import redis_adapter
 from adapters._sio.init import sio
 
-# 1. Настраиваем бэкенд для хранения результатов (чтобы знать, что задача выполнена)
 result_backend = RedisAsyncResultBackend(redis_url=settings.REDIS_URL + "/2")
 
-# 2. Настраиваем брокер (очередь сообщений)
 broker = ListQueueBroker(
     url=settings.REDIS_URL + "/2",
 ).with_result_backend(result_backend)

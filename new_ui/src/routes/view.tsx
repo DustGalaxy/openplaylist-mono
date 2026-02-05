@@ -44,9 +44,29 @@ function RouteComponent() {
   )
 
   useEffect(() => {
+    const plst_upds_socket = getPlsUpdsSocket()
+    const handleConnect = () => {
+      if (plst?.id) {
+        console.log('Восстановление подписки для комнаты:', plst.id)
+        plst_upds_socket.emit('subscribe', { playlist_id: plst.id })
+      }
+    }
+
+    plst_upds_socket.on('connect', handleConnect)
+
+    // Если сокет уже подключен в момент монтирования, вызываем вручную
+    if (plst_upds_socket.connected) {
+      handleConnect()
+    }
+
+    return () => {
+      plst_upds_socket.off('connect', handleConnect)
+    }
+  }, [plst?.id])
+
+  useEffect(() => {
     if (!plst) return
     const plst_upds_socket = getPlsUpdsSocket()
-    plst_upds_socket.emit('subscribe', { playlist_id: plst.id })
 
     plst_upds_socket.on('add_track:' + plst.id, (payload) => {
       setPlaylistState((prevState) => {
@@ -104,8 +124,8 @@ function RouteComponent() {
     })
 
     plst_upds_socket.on('kicked_from_playlist', (payload) => {
-      alert('You have been kicked from the playlist viewer.')
-      console.log('kicked_from_playlist')
+      alert('You have been kicked from the playlist.')
+      window.location.href = '/view'
     })
 
     return () => {
