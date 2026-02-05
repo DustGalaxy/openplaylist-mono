@@ -186,7 +186,7 @@ async def get_play_now_for_playlist(
         raise HTTPException(status_code=404, detail="Playlist not found")
 
 
-@router.post("/", status_code=201)
+@router.post("", status_code=201)
 async def create_playlist(
     db_session: DB_SESSION,
     service: PLST_SERVICE,
@@ -197,7 +197,7 @@ async def create_playlist(
     return ReadPlaylist.model_validate(created_playlist)
 
 
-@router.get("/")
+@router.get("")
 async def get_playlists(query: str, db_session: DB_SESSION, service: PLST_SERVICE) -> list[ReadPlaylistPreview]:
     res = await service.search_playlist(db_session, query)
     data = [
