@@ -64,7 +64,7 @@ services:
       - default
 
   traefik:
-    image: traefik:v3.1.5
+    image: traefik:v3.6.7
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
@@ -74,12 +74,12 @@ services:
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--log.level=DEBUG"
+      - "--providers.docker.endpoint=tcp://host.docker.internal:2375"
     ports:
       - "80:80"
       - "443:443"
       - "8080:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - ./certs:/etc/traefik/certs:ro
       - ./traefik_conf/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml:ro
     networks:
