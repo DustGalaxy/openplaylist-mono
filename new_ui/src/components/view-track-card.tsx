@@ -6,15 +6,17 @@ import Copy from './icons/icon-copy'
 import Person from './icons/icon-person'
 import DurationChip from './ui/duration-chip'
 
-import type { PlaylistSettings, Track } from '@/types/playlist'
+import type { ClientPlaylist, Track } from '@/types/playlist'
 import { computePriority, formatTime } from '@/lib/utils'
 
 export default function ViewTrackCard({
   track,
-  settings,
+  playlist,
+  now_playing = false,
 }: {
   track: Track
-  settings: PlaylistSettings
+  playlist: ClientPlaylist | null
+  now_playing?: boolean
 }) {
   const bgUrl = `https://img.youtube.com/vi/${track.yt_video_id}/mqdefault.jpg`
 
@@ -28,6 +30,10 @@ export default function ViewTrackCard({
       className: 'px-1 bg-level-2',
     },
   ]
+
+  if (!playlist) {
+    return null
+  }
 
   return (
     <div className="@container w-full ">
@@ -71,7 +77,7 @@ export default function ViewTrackCard({
                     number={
                       track.priority instanceof Number
                         ? track.priority
-                        : computePriority(track.priority, settings)
+                        : computePriority(track.priority, playlist.settings)
                     }
                   />
                 </div>
@@ -98,7 +104,7 @@ export default function ViewTrackCard({
         {/* main grid */}
 
         <div
-          className={`grid bg-level-2 rounded-(--rounded-std) grid-cols-[150px_1fr] gap-2 h-[100px]  `}
+          className={`grid ${track.id === playlist.now_playing?.id && !now_playing && 'transition-all duration-300 ring-3 ring-level-3'} bg-level-2 rounded-(--rounded-std) grid-cols-[150px_1fr] gap-2 h-[100px]  `}
         >
           <div className="h-[100px] w-full flex items-center justify-center">
             {/* img container */}
@@ -140,7 +146,7 @@ export default function ViewTrackCard({
                     number={
                       track.priority instanceof Number
                         ? track.priority
-                        : computePriority(track.priority, settings)
+                        : computePriority(track.priority, playlist.settings)
                     }
                   />
                 </div>

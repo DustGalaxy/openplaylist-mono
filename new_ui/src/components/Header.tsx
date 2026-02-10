@@ -1,10 +1,11 @@
-import { Link, useRouterState } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import Disc from './icons/icon-disc'
-import News from './icons/icon-news'
 import Dashboard from './icons/icon-dashboard'
-import Notifications from './icons/icon-notifications'
-import Menu from './icons/icon-menu'
+// import News from './icons/icon-news'
+// import Notifications from './icons/icon-notifications'
+// import Menu from './icons/icon-menu'
 import MenuDropdown from './menu-dropdown'
+import Search from './icons/icon-search'
 import { useAuthStore } from '@/stores/authStore'
 
 import { useTwitchLoginUrl } from '@/hooks/useAuthUrl'
@@ -33,24 +34,32 @@ export default function Header() {
                   bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)]  
                   bg-clip-text bg-[length:200%_auto]  leading-normal animate-bg-move transition-all"
                 >
-                  OpenPlaylist
+                  OpenPlaylist v2026.1b
                 </h1>
               </Link>
             </div>
 
-            <div className="px-2 ">
-              <Link to="/news">
+            {/* <div className="px-2">
+              <Link to="/news" disabled >
                 <News />
               </Link>
-            </div>
+            </div> */}
+            {isAuthenticated && (
+              <div className="px-2 ">
+                <Link to="/dashboard">
+                  <Dashboard />
+                </Link>
+              </div>
+            )}
+
             <div className="px-2 ">
-              <Link to="/dashboard">
-                <Dashboard />
+              <Link to="/view">
+                <Search />
               </Link>
             </div>
           </div>
           {!isAuthenticated ? (
-            <div>
+            <div className="pr-1">
               <button onClick={() => handleTwitchLogin()}>
                 Login with Twitch
               </button>

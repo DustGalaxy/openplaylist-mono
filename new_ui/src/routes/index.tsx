@@ -68,11 +68,8 @@ function App() {
               >
                 OpenPlaylist
               </span>{' '}
-              это платформа для создания плейлистов с музыкой и вожможностью
-              получать треки от других пользователей в свои плейлисты.
+              место где плейлисты это нечто общее, а не просто набор треков.
             </p>
-            <p></p>
-            <p> Отлично подходит для любителей новой музыки и стримеров!</p>
           </h2>
         </div>
         <div className="flex  p-2">
@@ -92,12 +89,12 @@ function App() {
         </div>
       </div>
 
-      <div className=" h-[90vh] mt-15 w-full bg-level-1 shadow-2xl">
-        {/* <div>Немного статистики</div> */}
+      {/* <div className=" h-[90vh] mt-15 w-full bg-level-1 shadow-2xl">
+        <div>Немного статистики</div>
         <div>
           <SearchPlaylist />
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

@@ -138,7 +138,7 @@ export const postPlayNow = async (
 
 export const createNewPlaylist = async (name: string, description?: string) => {
   const config = getConfig()
-  const response = await apiClient(config.PLST_API_URL + `/`, {
+  const response = await apiClient(config.PLST_API_URL + ``, {
     method: 'POST',
     withCredentials: true,
     data: {

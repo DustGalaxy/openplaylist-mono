@@ -205,15 +205,10 @@ export const useMusicStore = create<StoreState>((set, get) => {
     },
 
     setPlaylist(pls: ClientPlaylist) {
-      set((state) => ({
-        playlists: state.playlists.map((p) =>
-          p.id === pls.id ? get().sortPlaylist(pls) : p,
-        ),
+      const sorted = get().sortPlaylist(pls)
+      set(() => ({
+        playlists: get().playlists.map((p) => (p.id === pls.id ? sorted : p)),
       }))
-      console.debug(
-        'setPlaylist',
-        get().playlists.find((p) => p.id === pls.id),
-      )
     },
 
     addPlaylist(pls: ClientPlaylist) {
@@ -226,10 +221,8 @@ export const useMusicStore = create<StoreState>((set, get) => {
     deletePlaylist(playlistId: string) {
       // unsubscribe if subscribed
       get().unsubscribePlaylist(playlistId)
-
-      set((state) => ({
-        playlists: state.playlists.filter((p) => p.id !== playlistId),
-      }))
+      const pls = get().playlists.filter((p) => p.id !== playlistId)
+      set(() => ({ playlists: pls }))
     },
 
     setPlaylistsFromServer(pls) {

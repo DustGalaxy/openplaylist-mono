@@ -113,15 +113,15 @@ function RouteComponent() {
                   className="flex w-fit  py-1 px-4 text-transparent  relative drop-shadow-2xl
                   bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)]  
                   bg-clip-text bg-[length:200%_auto]  leading-normal animate-bg-move transition-all "
-                >
+                  >
                   Playlists
                 </div> */}
               </div>
               <span className="text-3xl pb-1 text-muted">{'{'}</span>
               <div className="flex overflow-x-auto w-full mx-1">
-                {plsts &&
+                {plsts?.length > 0 ? (
                   plsts
-                    .sort((a, b) => (a.name > b.name ? 1 : -1))
+                    .sort((a, b) => (a.created_at > b.created_at ? 1 : -1))
                     .map(
                       (plst) =>
                         plst && (
@@ -135,7 +135,10 @@ function RouteComponent() {
                             </TabsTrigger>
                           </div>
                         ),
-                    )}
+                    )
+                ) : (
+                  <div> ⬅️ Press + to create you first playlist </div>
+                )}
               </div>
 
               <span className="text-3xl pb-1 text-muted">{'}'}</span>

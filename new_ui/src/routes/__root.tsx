@@ -5,6 +5,7 @@ import Header from '../components/Header'
 
 import { useCurrentUserQuery } from '@/hooks/useAuth.tsx'
 import { useAuthStore } from '@/stores/authStore.tsx'
+import { Toaster } from '@/components/ui/sonner'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -41,6 +42,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     <QueryClientProvider client={queryClient}>
       <AppProviders>
         <div className="bg-level-1 min-w-[360px] min-h-screen">
+          <Toaster richColors />
           <div className=" min-h-screen">
             <Header />
 
@@ -50,11 +52,13 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
           {/* <TanStackRouterDevtools />
 
           <TanStackQueryLayout /> */}
-          <div className="bg-level-1 min-w-[360px] flex flex-col items-center w-full mt-10 ">
+          {/* <div className="bg-level-1 min-w-[360px] flex flex-col items-center w-full mt-10 ">
             <footer className="bg-level-2  w-[90vw] min-h-10 border-2 border-level-3 border-b-0 rounded-t-(--rounded-std)">
-              <p className="text-center text-white p-2">Footer</p>
+              <p className="text-center text-white p-2">
+                Openplaylist Beta ver. 2026.1
+              </p>
             </footer>
-          </div>
+          </div> */}
         </div>
       </AppProviders>
     </QueryClientProvider>

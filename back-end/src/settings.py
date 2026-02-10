@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     COOKIE_NAME: str = Field(alias="COOKIE_NAME")
 
     JWT_SECRET_KEY: str = Field(alias="JWT_SECRET_KEY")
-    JWT_PUBLIC_KEY: str = Field(alias="JWT_PUBLIC_KEY")
+    JWT_PUBLIC_KEY: str = Field(alias="JWT_PUBLIC_KEY") 
     JWT_ALGORITHM: str = Field(alias="JWT_ALGORITHM")
     JWT_ISSUER: str = Field(alias="JWT_ISSUER")
 
