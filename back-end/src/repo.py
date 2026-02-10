@@ -34,6 +34,23 @@ class UserRepository(crud_factory(User, AuthUserDomain, AuthUserCreate, AuthUser
 
         return AuthUserDomain.model_validate(user)
 
+    async def get_by_tokens(self, session, access_token: str, refresh_token: str, platform: Platform):
+        stmt = (
+            select(User)
+            .join(LinkedAccounts)
+            .where(
+                LinkedAccounts.access_token == access_token,
+                LinkedAccounts.refresh_token == refresh_token,
+                LinkedAccounts.platform == platform,
+            )
+        )
+        res = await session.execute(stmt)
+        user = res.unique().scalars().one_or_none()
+        if not user:
+            raise NotFoundException()
+
+        return AuthUserDomain.model_validate(user)
+
     async def patch(
         self,
         session: AsyncSession,

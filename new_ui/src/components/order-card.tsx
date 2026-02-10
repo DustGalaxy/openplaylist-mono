@@ -27,7 +27,7 @@ export default function OrderCard({
   playlist: ClientPlaylist
   btns_type?: 'playlist' | 'non-playlist'
 }) {
-  const { requestPlayNow, requestRemoveTrack, requestPlSettings } =
+  const { requestPlayNow, requestRemoveTrack, requestAddTrack } =
     useMusicStore()
   const { isSaved, addTrack, removeTrack } = useSavedStore()
   const playlistButtons = [
@@ -105,7 +105,12 @@ export default function OrderCard({
     },
     {
       icon: <Add />,
-      on_click: () => console.log('Add clicked'),
+      on_click: async () => {
+        await requestAddTrack(
+          playlist.id,
+          'https://www.youtube.com/watch?v=' + track.yt_video_id,
+        )
+      },
       glow: 'white',
       className: 'px-1 bg-level-2',
     },
@@ -116,7 +121,7 @@ export default function OrderCard({
 
   return (
     <div
-      className={`bg-level-2 rounded-(--rounded-std) h-[100px] min-w-[600px] w-full pr-2`}
+      className={`${track.id === playlist.now_playing?.id && 'transition-all duration-300 ring-3 ring-level-3'} bg-level-2 rounded-(--rounded-std) h-[100px] min-w-[600px] w-full pr-2`}
     >
       {/* main grid */}
 
@@ -158,11 +163,11 @@ export default function OrderCard({
                     onClick={btn.on_click}
                   />
                 ))}
-                <WarningModal
+                {/* <WarningModal
                   playlist={playlist}
                   yt_video_id={track.yt_video_id}
                   requester_nickname={track.requester_nickname}
-                />
+                /> */}
               </div>
               <div className="flex gap-2">
                 <DateChip date={track.created_at} />

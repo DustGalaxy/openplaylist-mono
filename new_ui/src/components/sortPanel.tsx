@@ -63,6 +63,8 @@ export default function SortPanel({ playlist }: { playlist: ClientPlaylist }) {
         } else if (newSettings.date !== 'none') {
           newSettings = { ...newSettings, date: 'none' }
         }
+        console.log('new sort settings', newSettings)
+
         setSortSettings(newSettings)
         setPlaylist({
           ...playlist,

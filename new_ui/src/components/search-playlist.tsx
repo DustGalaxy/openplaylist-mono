@@ -26,7 +26,12 @@ const SearchPlaylist = () => {
 
   return (
     <div className="w-full">
-      <SearchBar value={search} setValue={setSearch} action={handleSearch} />
+      <SearchBar
+        value={search}
+        setValue={setSearch}
+        action={handleSearch}
+        placeholder="Name of playlist, username or something in discription..."
+      />
       <div className="grid grid-cols-1 [@media_(min-width:1150px)]:grid-cols-4 mt-4">
         {playlists.map((playlist: any) => (
           <div

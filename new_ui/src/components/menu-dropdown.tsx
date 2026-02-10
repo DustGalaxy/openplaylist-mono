@@ -34,12 +34,12 @@ export default function MenuDropdown({ user }: any) {
       <DropdownMenuContent className="bg-level-2 border-level-3 text-white scale-125">
         <DropdownMenuLabel>{user.username}</DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-level-3" />
-        <DropdownMenuItem>
+        <DropdownMenuItem disabled>
           <Link to="/statistic" className="flex gap-2 items-center">
             <Statistic strokeWidth={3.5} /> Statistic
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem disabled>
           <Link to="/history" className="flex gap-2 items-center">
             <History strokeWidth={3.5} /> History
           </Link>

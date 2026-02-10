@@ -30,7 +30,7 @@ export default function OrderMiniCard({
 }) {
   const bgUrl = `https://img.youtube.com/vi/${track.yt_video_id}/mqdefault.jpg`
   const [hovered, setHovered] = React.useState(false)
-  const { requestPlayNow } = useMusicStore()
+  const { requestPlayNow, requestAddTrack } = useMusicStore()
   const { isSaved, addTrack, removeTrack } = useSavedStore()
 
   const playlistButtons = [
@@ -103,7 +103,12 @@ export default function OrderMiniCard({
     },
     {
       icon: <Add />,
-      on_click: () => console.log('Add clicked'),
+      on_click: async () => {
+        await requestAddTrack(
+          playlist.id,
+          'https://www.youtube.com/watch?v=' + track.yt_video_id,
+        )
+      },
       glow: 'white',
       className: 'px-1 bg-level-2',
     },
@@ -193,13 +198,13 @@ export default function OrderMiniCard({
             onClick={btn.on_click}
           />
         ))}
-        {btns_type === 'playlist' && (
+        {/* {btns_type === 'playlist' && (
           <WarningModal
             playlist={playlist}
             yt_video_id={track.yt_video_id}
             requester_nickname={track.requester_nickname}
           />
-        )}
+        )} */}
       </div>
     </div>
   )

@@ -68,54 +68,59 @@ function RouteComponent() {
     if (!plst) return
     const plst_upds_socket = getPlsUpdsSocket()
 
-    plst_upds_socket.on('add_track:' + plst.id, (payload) => {
+    plst_upds_socket.on('add_track:' + plst.id, (payload: any) => {
       setPlaylistState((prevState) => {
         if (!prevState) return prevState
         const parsed =
           payload && typeof payload === 'string' ? JSON.parse(payload) : payload
-        if (!parsed) return
+        if (!parsed) return prevState
         console.log('add track', parsed)
         return {
           ...prevState,
           track_data: [...prevState.track_data, parsed],
-        }
+        } as ClientPlaylist
       })
     })
-    plst_upds_socket.on('playnow:' + plst.id, (payload) => {
+
+    plst_upds_socket.on('playnow:' + plst.id, (payload: any) => {
       setPlaylistState((prevState) => {
         console.log('play now', payload)
         if (!prevState) return prevState
         const parsed =
           payload && typeof payload === 'string' ? JSON.parse(payload) : payload
-        if (!parsed) return
+        if (!parsed) return prevState
         const tr: Track | null =
           prevState.track_data.find((t) => t.id === parsed.track_id) || null
 
         return {
           ...prevState,
           now_playing: tr,
-        }
+        } as ClientPlaylist
       })
     })
 
-    plst_upds_socket.on('delete_track:' + plst.id, (payload) => {
-      setPlaylistState((prevState) => {
-        return {
-          ...prevState,
-          track_data: prevState.track_data.filter(
-            (t) => t.id !== payload.track_id,
-          ),
-        }
-      })
-    })
+    plst_upds_socket.on(
+      'delete_track:' + plst.id,
+      (payload: { track_id: string }) => {
+        setPlaylistState((prevState) => {
+          if (!prevState) return prevState
+          return {
+            ...prevState,
+            track_data: prevState.track_data.filter(
+              (t) => t.id !== payload.track_id,
+            ),
+          } as ClientPlaylist
+        })
+      },
+    )
 
-    plst_upds_socket.on('settings_changed:' + plst.id, (payload) => {
+    plst_upds_socket.on('settings_changed:' + plst.id, (payload: any) => {
       setPlaylistState((prevState) => {
         console.log('settings changed', payload)
         if (!prevState) return prevState
         const parsed =
           payload && typeof payload === 'string' ? JSON.parse(payload) : payload
-        if (!parsed) return
+        if (!parsed) return prevState
         return {
           ...prevState,
           settings: parsed,
@@ -123,8 +128,7 @@ function RouteComponent() {
       })
     })
 
-    plst_upds_socket.on('kicked_from_playlist', (payload) => {
-      alert('You have been kicked from the playlist.')
+    plst_upds_socket.on('kicked_from_playlist', () => {
       window.location.href = '/view'
     })
 
@@ -138,7 +142,7 @@ function RouteComponent() {
     }
   }, [])
 
-  if (!plst) {
+  if (!plst || playlistState === null) {
     return (
       <div className="px-6 pt-6">
         <SearchPlaylist />
@@ -165,7 +169,7 @@ function RouteComponent() {
         ) : (
           <div className="mt-2 flex flex-col gap-4 items-center">
             {playlistState.track_data.map((track) => (
-              <ViewTrackCard track={track} settings={plst.settings} />
+              <ViewTrackCard track={track} playlist={playlistState} />
             ))}
           </div>
         )}

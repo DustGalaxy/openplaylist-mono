@@ -224,7 +224,19 @@ export default function SettingsModal({
           </RadioGroup>
         </div>
         <div>
-          <Label className=" text-lg">Content sources</Label>
+          <Label className=" text-lg">Externat content sources</Label>
+          <DialogDescription>
+            <div className="py-1">
+              This setting allows users to add tracks from different sources. If
+              no sources are selected, users can add tracks only by web view if
+              they are logged in and playlist are public.
+            </div>
+            <div className="py-1">
+              If you enable any external source in a few playlists in same time,
+              requests will be set in all selected playlists, so be careful with
+              it.
+            </div>
+          </DialogDescription>
           <ToggleGroup
             type="multiple"
             defaultValue={settings.allow_sources}
@@ -243,13 +255,13 @@ export default function SettingsModal({
               value="twitch"
               className="data-[state=on]:bg-accent-3 hover:bg-level-3 px-2"
             >
-              <div className="px-2">Twitch</div>
+              <div className="">Twitch</div>
             </ToggleGroupItem>
             <ToggleGroupItem
               value="da"
               className="data-[state=on]:bg-accent-3 hover:bg-level-3"
             >
-              <div className="px-2">DonationAlerts</div>
+              <div className="px-2">Donation Alerts</div>
             </ToggleGroupItem>
             <ToggleGroupItem
               disabled

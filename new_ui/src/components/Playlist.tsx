@@ -7,7 +7,9 @@ import {
   Settings,
   ThumbsUp,
   User,
+  Share2 as ShareIcon,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import OrderCard from './order-card'
 import OrderMiniCard from './order-mini-card'
 import Btn from './ui/my-btn'
@@ -28,7 +30,6 @@ import SavedList from './saved-list'
 import SortPanel from './sortPanel'
 import type { ClientPlaylist } from '@/types/playlist'
 import { changePlaylistActive } from '@/api/api-playlist'
-
 import { useMusicStore } from '@/stores/musicStore'
 
 const InfoCard = ({
@@ -137,20 +138,33 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
             {/* <ModesBar playlist={playlist} /> */}
             <div className="flex gap-2">
               <Btn
+                text={<ShareIcon />}
+                className="px-2 bg-level-2"
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    'https://openplaylist.localhost/view?p=' + playlist.id,
+                  )
+                  toast.success('Playlist link copied to clipboard!')
+                }}
+              ></Btn>
+              <Btn
                 text={
-                  <div className="flex gap-1 justify-center w-25 items-center">
+                  <div className="flex gap-2 justify-center  items-center">
                     <div
                       className={`${activePlst ? 'bg-green-600 shadow-green-600' : 'bg-red-600 shadow-red-600'} 
-                    shadow-[0px_0px_10px] w-2 h-2 rounded-full `}
-                    />{' '}
-                    {activePlst ? 'ACTIVE' : 'INACTIVE'}
+                    shadow-[0px_0px_10px] w-2 h-3 rounded-full `}
+                    />
+                    <div>
+                      {activePlst
+                        ? 'Accept external requests'
+                        : 'No external requests'}
+                    </div>
                   </div>
                 }
                 className={`px-4 py-1  bg-level-2`}
                 onClick={() => {
                   setActivePlst(!activePlst)
                   changePlaylistActive(playlist.id, activePlst)
-                  console.log('Button clicked, activePlst:', !toggled)
                 }}
               />
             </div>

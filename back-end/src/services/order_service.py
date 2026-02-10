@@ -14,7 +14,7 @@ class OrderService:
         self, order: Union[WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder], from_owner: bool = False
     ) -> OrderCreate:
         yt_video_id = extract.video_id(order.yt_video_url)
-        cached_info: bytes = redis_adapter.get(yt_video_id)  # pyright: ignore[reportAssignmentType]
+        cached_info: str = redis_adapter.get(yt_video_id)  # pyright: ignore[reportAssignmentType]
 
         if not cached_info:
             try:
@@ -51,7 +51,7 @@ class OrderService:
             redis_adapter.set(yt_video_id, json.dumps(data))
 
         else:
-            data = json.loads((cached_info.replace(b"'", b'"')))
+            data = json.loads((cached_info))
 
         print(f"Получен заказ: {order}")
         extra_data = STRATEGIES[order.source].model_validate(order, from_attributes=True)

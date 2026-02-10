@@ -3,10 +3,11 @@ from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
+from repo import user_repository
 import jwt
 from faststream.rabbit import RabbitQueue
 from fastapi.security import APIKeyCookie
-from fastapi import Depends, HTTPException, logger
+from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from simple_repository.exceptions import NotFoundException
 
@@ -23,9 +24,7 @@ from adapters._rabbit.event_broker import (
     broker,
     main_exchange,
     bot_twitch_connect_request,
-    bot_twitch_connect_response,
     bot_da_connect_request,
-    bot_da_connect_response,
 )
 from utils import find
 
@@ -127,6 +126,16 @@ class AuthService:
         link.bot_connection = True
 
         await broker.publish(LinkedAccountWithTokensRead.model_validate(link), q, main_exchange)
+        await self.link_repo.update(db_session, link)
+
+    async def bot_was_disconnected(self, db_session: AsyncSession, tokens: dict, type: Platform) -> None:
+        user = await user_repository.get_by_tokens(db_session, tokens["access_token"], tokens["refresh_token"], type)
+
+        link = find(user.linked_accounts, lambda x: x.platform == type)
+        if not link:
+            raise HTTPException(status_code=400, detail="User does not have a needed integration")
+        link.bot_connection = False
+
         await self.link_repo.update(db_session, link)
 
 

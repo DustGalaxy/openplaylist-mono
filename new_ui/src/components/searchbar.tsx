@@ -7,10 +7,12 @@ export default function SearchBar({
   value,
   setValue,
   action,
+  placeholder = 'Search',
 }: {
   value: string
   setValue: (value: string) => void
   action: () => void
+  placeholder?: string
 }) {
   const [visibility, setVisibility] = useState(false)
   return (
@@ -25,7 +27,7 @@ export default function SearchBar({
       />
       <Input
         type="text"
-        placeholder="Search"
+        placeholder={placeholder}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         className={`w-full ${visibility ? 'w-full opacity-100' : 'opacity-0 w-0'} border-[2px] border-level-3 rounded-(--rounded-std) bg-level-2 text-white 

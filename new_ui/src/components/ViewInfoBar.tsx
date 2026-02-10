@@ -12,6 +12,7 @@ import ViewPlayNowCard from './view-track-card'
 import Priority from './icons/icon-priority'
 import type { ClientPlaylist } from '@/types/playlist'
 import AddBar from './addbar'
+import { useAuthStore } from '@/stores/authStore'
 
 const InfoCard = ({
   icon,
@@ -35,6 +36,7 @@ const InfoCard = ({
 }
 
 const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
+  const { isAuthenticated } = useAuthStore()
   return (
     <div className="bg-level-1 rounded-(--rounded-std) shadow-lg flex flex-col gap-6">
       {/* Header */}
@@ -48,8 +50,8 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
             }`}
           >
             {playlist.settings.is_allow_external_requests
-              ? 'Active'
-              : 'Inactive'}
+              ? 'Accept external requests'
+              : 'No external requests'}
           </div>
           <h2 className="text-xl font-semibold">{playlist.name}</h2>
         </div>
@@ -115,12 +117,14 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
           />
         </div>
 
-        <div className="mb-3">
-          <h3 className="text-sm uppercase tracking-wide text-gray-400 mb-3">
-            Add a track
-          </h3>
-          <AddBar playlistId={playlist.id} />
-        </div>
+        {isAuthenticated && (
+          <div className="mb-3">
+            <h3 className="text-sm uppercase tracking-wide text-gray-400 mb-3">
+              Add a track
+            </h3>
+            <AddBar playlistId={playlist.id} />
+          </div>
+        )}
 
         <div className="mb-3">
           <h3 className="text-sm uppercase tracking-wide text-gray-400 mb-3">
@@ -129,7 +133,8 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
           {playlist.now_playing ? (
             <ViewPlayNowCard
               track={playlist.now_playing}
-              settings={playlist.settings}
+              playlist={playlist}
+              now_playing={true}
             />
           ) : (
             <div className="text-gray-400 text-sm uppercase tracking-wide">

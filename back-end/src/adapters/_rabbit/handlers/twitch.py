@@ -1,3 +1,4 @@
+import json
 import time
 
 from simple_repository.exceptions import NotFoundException
@@ -16,6 +17,7 @@ from adapters._rabbit.event_broker import (
 from dto.order import OrderNew, TTVNewOrder
 from services.sio_service import sio_service
 from services.auth_service import auth_service
+from services.twitch_service import auth_twitch_service
 from _types import Platform
 from database import async_session_maker
 from repo import user_repository, linked_accounts_repository
@@ -81,3 +83,14 @@ async def twitch_refresh_tokens(
         link.refresh_token = event.refresh_token
         link.expires_at = event.expires_in + int(time.time())
         await linked_accounts_repository.update(session, link)
+
+
+
+@broker.subscriber("user.token.died", exchange=main_exchange)
+async def user_token_died(
+    message: RabbitMessage = Context(),
+):
+    await message.ack()
+    event: dict = json.loads(message.body)
+    async with async_session_maker() as session:
+        await auth_service.bot_was_disconnected(session, event, Platform.TWITCH)

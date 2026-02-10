@@ -15,8 +15,10 @@ import asqlite
 import twitchio
 from twitchio import eventsub
 from twitchio.ext import commands
+from twitchio.exceptions import InvalidTokenException
 
-from src.adapters._rabbit.broker import broker, main_exchange, auth_user_twitch_tokens_refreshed
+
+from src.adapters._rabbit.broker import broker, main_exchange, auth_user_twitch_tokens_refreshed, user_token_died
 from src.acl.user import get_users
 from src.components.listners import Listner
 from src.components.music_request import MusicRequest
@@ -30,7 +32,6 @@ context = {"bot": None}
 
 class Bot(commands.AutoBot):
     def __init__(self, *, subs: list[eventsub.SubscriptionPayload]) -> None:
-
 
         super().__init__(
             client_id=settings.TWITCH_CLIENT_ID,
@@ -76,6 +77,7 @@ class Bot(commands.AutoBot):
         self, token: str, refresh: str, user_id: str | None = None
     ) -> twitchio.authentication.ValidateTokenPayload:
         # Make sure to call super() as it will add the tokens interally and return us some data...
+
         resp: twitchio.authentication.ValidateTokenPayload = await super().add_token(token, refresh)
 
         # Publish an event to RabbitMQ
@@ -136,7 +138,14 @@ async def setup_bot() -> commands.AutoBot:
 
         ttvbot = Bot(subs=subs)
         for pair in tokens:
-            await ttvbot.add_token(*pair)
+            try:
+                await ttvbot.add_token(*pair)
+            except InvalidTokenException:
+                await broker.publish(
+                    {"access_token": pair[0], "refresh_token": pair[1]}, user_token_died, exchange=main_exchange
+                )
+                continue
+
         global context
         context["bot"] = ttvbot  # pyright: ignore[reportArgumentType]
         return ttvbot
