@@ -41,11 +41,16 @@ const InfoCard = ({
   label: string
   value: string | number
 }) => {
+  const windowWidth = window.innerWidth
   return (
-    <div className="bg-level-2 rounded-(--rounded-std) p-2 md:p3 flex flex-col items-center gap-1 text-center">
+    <div
+      className={`bg-level-2 rounded-(--rounded-std) p-2 md:p3 flex ${windowWidth > 600 ? 'flex-col' : 'flex-row'} items-center gap-1 text-center`}
+    >
       <div className="text-gray-400 flex items-center gap-1">
         {icon}
-        <div className="text-xs text-gray-400">{label}</div>
+        {windowWidth > 600 && (
+          <div className="text-xs text-gray-400">{label}</div>
+        )}
       </div>
 
       <div className="text-sm font-semibold">{value}</div>
@@ -54,7 +59,6 @@ const InfoCard = ({
 }
 
 export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
-  const [tracks, setTracks] = React.useState([1, 2, 3, 4, 5]) // Example tracks array
   const [loading, setLoading] = React.useState(true)
 
   const [toggled, setToggled] = React.useState(false)
@@ -154,11 +158,7 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
                       className={`${activePlst ? 'bg-green-600 shadow-green-600' : 'bg-red-600 shadow-red-600'} 
                     shadow-[0px_0px_10px] w-2 h-3 rounded-full `}
                     />
-                    <div>
-                      {activePlst
-                        ? 'Accept external requests'
-                        : 'No external requests'}
-                    </div>
+                    <div>{activePlst ? 'Online' : 'Offline'}</div>
                   </div>
                 }
                 className={`px-4 py-1  bg-level-2`}
