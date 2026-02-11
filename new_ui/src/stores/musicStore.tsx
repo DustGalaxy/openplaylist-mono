@@ -411,12 +411,12 @@ export const useMusicStore = create<StoreState>((set, get) => {
 
       if (pl.now_playing === undefined) {
         nextTrack = pl.track_data[0] || undefined
+      } else if (pl.settings.mode === 'flow') {
+        nextTrack = pl.track_data[0] || undefined
+        pl.now_playing &&
+          get().requestRemoveTrack(pl.id, pl.now_playing.id, reason)
       } else {
         nextTrack = repeatHandler()
-      }
-
-      if (pl.settings.mode === 'flow' && pl.now_playing) {
-        get().requestRemoveTrack(pl.id, pl.now_playing.id, reason)
       }
 
       get().requestPlayNow(pl.id, nextTrack?.id || undefined)

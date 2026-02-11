@@ -14,6 +14,7 @@ export default function Header() {
   const { isAuthenticated, user } = useAuthStore()
 
   const handleTwitchLogin = useTwitchLoginUrl()
+  const windowWidth = window.innerWidth
 
   return (
     <div className="w-full flex sticky top-0 z-50 justify-center">
@@ -34,7 +35,7 @@ export default function Header() {
                   bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)]  
                   bg-clip-text bg-[length:200%_auto]  leading-normal animate-bg-move transition-all"
                 >
-                  OpenPlaylist v2026.1b
+                  OpenPlaylist {windowWidth > 600 && 'v2026.1beta'}
                 </h1>
               </Link>
             </div>

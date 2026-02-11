@@ -90,9 +90,12 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - database
-      - redis
-      - rabbitmq
+          database:
+            condition: service_healthy
+          redis:
+            condition: service_healthy
+          rabbitmq:
+            condition: service_healthy
     env_file:
       - ./back-end/.docker.env
     volumes:
@@ -114,9 +117,12 @@ services:
       context: ./back-end
       dockerfile: ./Dockerfile.tasks
     depends_on:
-      - database
-      - redis
-      - rabbitmq
+          database:
+            condition: service_healthy
+          redis:
+            condition: service_healthy
+          rabbitmq:
+            condition: service_healthy
     env_file:
       - ./back-end/.docker.env
     volumes:
