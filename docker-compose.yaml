@@ -179,7 +179,7 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`openplaylist.localhost`)"
+      - "traefik.http.routers.frontend.rule=Host(`${PROJECT_DOMAIN:-openplaylist.localhost}`)"
       - "traefik.http.routers.frontend.tls=true"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
 
