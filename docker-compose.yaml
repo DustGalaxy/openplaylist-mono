@@ -69,28 +69,20 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
-
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
       - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.myresolver.acme.email=nikitavolov444@gmail.com" # Укажите ваш email
+      - "--certificatesresolvers.myresolver.acme.email=nikitavolov444@gmail.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-
-      - "--providers.file.filename=/etc/traefik/dynamic_conf.yml"
-      - "--providers.file.watch=true"
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
     volumes:
-      - ./traefik_conf/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml:ro
-      - ./letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
     networks:
       - default
 
