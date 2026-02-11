@@ -69,12 +69,20 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
+
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
-      - "--log.level=DEBUG"
-      - "--providers.docker.endpoint=tcp://host.docker.internal:2375"
+
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=nikitavolov444@gmail.com" # Укажите ваш email
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+
+      - "--providers.file.filename=/etc/traefik/dynamic_conf.yml"
+      - "--providers.file.watch=true"
     ports:
       - "80:80"
       - "443:443"
@@ -82,6 +90,8 @@ services:
     volumes:
       - ./certs:/etc/traefik/certs:ro
       - ./traefik_conf/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml:ro
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       - default
 
@@ -108,6 +118,7 @@ services:
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.priority=100"
+      - "traefik.http.routers.backend.tls.certresolver=myresolver"
     networks:
       - default
     stop_grace_period: 30s

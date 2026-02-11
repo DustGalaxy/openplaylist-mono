@@ -1,4 +1,13 @@
+http:
+  middlewares:
+    # Пример: сжатие ответов
+    gzip-compress:
+      compress: {}
+
 tls:
-  certificates:
-    - certFile: /etc/traefik/certs/cert.pem
-      keyFile: /etc/traefik/certs/key.pem
+  options:
+    default:
+      minVersion: VersionTLS12
+      cipherSuites:
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
