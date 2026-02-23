@@ -146,7 +146,7 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
                 className="px-2 bg-level-2"
                 onClick={() => {
                   navigator.clipboard.writeText(
-                    'https://openplaylist.localhost/view?p=' + playlist.id,
+                    window.location.origin + '/view?p=' + playlist.id,
                   )
                   toast.success('Playlist link copied to clipboard!')
                 }}
