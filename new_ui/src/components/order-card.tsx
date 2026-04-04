@@ -27,13 +27,12 @@ export default function OrderCard({
   playlist: ClientPlaylist
   btns_type?: 'playlist' | 'non-playlist'
 }) {
-  const { requestPlayNow, requestRemoveTrack, requestAddTrack } =
-    useMusicStore()
+  const { playNext, requestRemoveTrack, requestAddTrack } = useMusicStore()
   const { isSaved, addTrack, removeTrack } = useSavedStore()
   const playlistButtons = [
     {
       icon: <Play />,
-      on_click: () => requestPlayNow(playlist.id, track.id),
+      on_click: () => playNext(playlist, undefined, track),
       className: 'px-1 bg-level-2',
       glow: 'white',
     },

@@ -2,7 +2,7 @@ from uuid import UUID
 from sqlalchemy import String, ForeignKey
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
+from sqlalchemy.dialects.postgresql import ARRAY, UUID as PGUUID, JSONB
 
 from database import Base, UUIDMixin, TimestampMixin
 from _types import Source, Status
@@ -38,6 +38,8 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
     owner_nickname: Mapped[str]
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(String(255), nullable=True)
+
+    tags: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True, default=list)
 
     now_playing: Mapped[str] = mapped_column(String, nullable=True)
 

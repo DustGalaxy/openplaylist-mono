@@ -25,7 +25,7 @@ import PlayNowCard from './playnow-card'
 import Counter from './order-counter'
 import { ExpandingInputButtons } from './bar'
 
-import SettingsModal from './settingsModal'
+import SettingsModal from './settingsModalWidget/settingsModal'
 import SavedList from './saved-list'
 import SortPanel from './sortPanel'
 import type { ClientPlaylist } from '@/types/playlist'
@@ -74,7 +74,7 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
     playlist.now_playing?.yt_video_id,
   )
 
-  const { playNext, requestPlSettings } = useMusicStore()
+  const { playNext, requestPlSettings, playPrev } = useMusicStore()
 
   useEffect(() => {
     setNowPlaying(playlist.now_playing?.yt_video_id)
@@ -198,7 +198,9 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
                 <Btn
                   text={<Next width={33} height={33} className=" rotate-180" />}
                   className="px-2 bg-level-2"
-                  onClick={() => {}}
+                  onClick={() => {
+                    playPrev(playlist.id)
+                  }}
                 />
               )}
               <Btn

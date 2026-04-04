@@ -74,8 +74,12 @@ type StoreState = {
   syncRemoveTrack: (playlistId: string, orderId: string) => void
 
   // playback controls (local)
-  playNext: (pl: ClientPlaylist, reason?: string) => void
-  // playPrev: (playlistId: string) => void
+  playNext: (
+    pl: ClientPlaylist,
+    reason?: string,
+    forceNextTrack?: Track,
+  ) => void
+  playPrev: (playlistId: string) => void
 
   requestPlSettings: (
     playlist_id: string,
@@ -139,7 +143,6 @@ export const useMusicStore = create<StoreState>((set, get) => {
     const settingsChangedHandler = (payload: any) => {
       if (!payload) return
       const parsed = JSON.parse(payload)
-      console.debug('parsed settings', parsed)
 
       const { user } = useAuthStore.getState()
       if (user && user.id === parsed.streamer_id) return
@@ -256,7 +259,6 @@ export const useMusicStore = create<StoreState>((set, get) => {
 
       if (!user) {
         console.debug('no user in requestAddTrack')
-
         return
       }
       const order: Order = {
@@ -382,7 +384,7 @@ export const useMusicStore = create<StoreState>((set, get) => {
     },
 
     /* ---- Playback navigation ---- */
-    playNext(pl, reason?: string) {
+    playNext(pl, reason?: string, forceNextTrack?: Track) {
       const repeatHandler = () => {
         if (pl.settings.repeat_mode === 'all') {
           if (
@@ -394,8 +396,6 @@ export const useMusicStore = create<StoreState>((set, get) => {
               pl.track_data.findIndex((t) => t.id === pl.now_playing?.id) + 1
             ]
           }
-          // } else if (pl.settings.repeat_mode === 'once') {
-          //   return pl.now_playing
         } else {
           return pl.track_data.length > 0
             ? pl.track_data[pl.track_data.length - 1].id === pl.now_playing?.id
@@ -407,6 +407,25 @@ export const useMusicStore = create<StoreState>((set, get) => {
             : undefined
         }
       }
+
+      set((state) => ({
+        playlists: state.playlists.map((p) =>
+          p.id === pl.id
+            ? {
+                ...p,
+                history: pl.now_playing
+                  ? [...p.history, pl.now_playing].slice(-99)
+                  : p.history,
+              }
+            : p,
+        ),
+      }))
+
+      if (forceNextTrack) {
+        get().requestPlayNow(pl.id, forceNextTrack.id)
+        return
+      }
+
       let nextTrack = undefined
 
       if (pl.now_playing === undefined) {
@@ -420,6 +439,17 @@ export const useMusicStore = create<StoreState>((set, get) => {
       }
 
       get().requestPlayNow(pl.id, nextTrack?.id || undefined)
+    },
+
+    playPrev(playlistId: string) {
+      const pl = get().playlists.find((p) => p.id === playlistId)
+      if (!pl) return
+
+      const track = pl.history.pop()
+      console.log('playPrev, track from history', track)
+
+      if (!track) return
+      get().requestPlayNow(pl.id, track.id || undefined)
     },
 
     sortPlaylist(playlist: ClientPlaylist) {

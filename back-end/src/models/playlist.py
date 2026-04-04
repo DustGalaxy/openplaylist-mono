@@ -14,6 +14,8 @@ class PlaylistDomain(BaseModel):
     owner_nickname: str
     name: str = Field(..., max_length=100)
     description: str | None = Field(None, max_length=500)
+    tags: list[str] = Field(default_factory=list)
+
     track_data: list[OrderDomain] = Field(default_factory=list)
     active_tracks: list[OrderDomain] = Field(default_factory=list)
     now_playing: str | None = Field(None)
