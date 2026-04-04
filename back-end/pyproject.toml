@@ -15,7 +15,7 @@ dependencies = [
     "pydantic>=2.11.3",
     "uuid6>=2024.7.10",
     "python-dotenv>=1.1.0",
-    "simple-repo-asyncsqla==2.1.0",
+    "simple-repo-asyncsqla==2.2.0",
     "faststream[rabbit]>=0.5.48",
     "asyncpg>=0.30.0",
     "pytubefix>=10.3.6",

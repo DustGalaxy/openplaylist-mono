@@ -16,5 +16,7 @@ class User(Base, UUIDMixin, TimestampMixin):
     last_login: Mapped[datetime]
     username: Mapped[str]
     main_platform: Mapped[Platform]
+    vip_before: Mapped[datetime | None]
+
 
     linked_accounts: Mapped[list["LinkedAccounts"]] = relationship(lazy="joined")

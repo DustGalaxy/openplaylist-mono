@@ -29,9 +29,15 @@ from _types import Platform, DeleteStatus
 
 
 class PlaylistRepository(
-    crud_factory(Playlist, PlaylistDomain, PlaylistCreate, PlaylistPatch, strict_attrs=False),
+    crud_factory(Playlist, PlaylistDomain, PlaylistCreate, PlaylistPatch),
     IPlaylistRepository,
 ):
+    def to_repr(self, object: Playlist) -> PlaylistDomain:
+        return self.domain_model.model_validate(object)
+
+    def to_inner(self, data: PlaylistCreate | PlaylistDomain | PlaylistPatch) -> dict:
+        return data.model_dump(exclude_unset=True)
+
     async def get_user_playlists_by_sourse(
         self, session: AsyncSession, owner_id: UUID, source: str
     ) -> list[PlaylistDomain]:
@@ -225,13 +231,23 @@ class PlaylistSettingsRepository(
     crud_factory(PlaylistSettings, PlaylistSettingsDomain, PlaylistSettingsCreate, PlaylistSettingsPatch),
     IPlaylistSettingsRepository,
 ):
-    pass
+    def to_inner(self, data: PlaylistSettingsCreate | PlaylistSettingsDomain | PlaylistSettingsPatch) -> dict:
+        return data.model_dump(exclude_unset=True)
+
+    def to_repr(self, object: PlaylistSettings) -> PlaylistSettingsDomain:
+        return self.domain_model.model_validate(object)
 
 
 playlist_settings_repository = PlaylistSettingsRepository()
 
 
 class UserRepository(crud_factory(User, AuthUserDomain, AuthUserCreate, AuthUserUpdate)):
+    def to_inner(self, data: AuthUserCreate | AuthUserDomain | AuthUserUpdate) -> dict:
+        return data.model_dump(exclude_unset=True)
+
+    def to_repr(self, object: User) -> AuthUserDomain:
+        return self.domain_model.model_validate(object)
+
     async def get_user_by_link(
         self, session: AsyncSession, platform: Platform, platform_user_id: str
     ) -> AuthUserDomain:
@@ -288,7 +304,12 @@ class UserRepository(crud_factory(User, AuthUserDomain, AuthUserCreate, AuthUser
 
 class LinkedAccountsRepository(
     crud_factory(LinkedAccounts, LinkedAccountsDomain, LinkedAccountsCreate, LinkedAccountsUpdate)
-): ...
+):
+    def to_inner(self, data: LinkedAccountsCreate | LinkedAccountsDomain | LinkedAccountsUpdate) -> dict:
+        return data.model_dump(exclude_unset=True)
+
+    def to_repr(self, object: LinkedAccounts) -> LinkedAccountsDomain:
+        return self.domain_model.model_validate(object)
 
 
 user_repository = UserRepository()
