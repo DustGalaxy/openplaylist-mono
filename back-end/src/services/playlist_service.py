@@ -10,9 +10,6 @@ from models.order import OrderDomain, OrderCreate, WebExtraData
 from _types import AsyncSession
 
 
-
-
-
 async def add_to_playlist(
     session: AsyncSession, event: OrderCreate, user: User
 ) -> tuple[list[tuple[OrderDomain, UUID]], list[tuple[list[str], str]]]:
@@ -24,15 +21,15 @@ async def add_to_playlist(
         ]
     else:
         playlists = await playlist_repository.get_user_playlists_by_sourse(session, event.owner_id, event.source)
-        
+
     tracks: list[tuple[OrderDomain, UUID]] = []
-    errors = []
+    errors: list[tuple[list[str], str]] = []
     for playlist in playlists:
-        if not playlist.is_allow_external_requests:
+        if not playlist.is_allow_external_requests and playlist.owner_id != user.id:
             errors.append((["playlist is not active"], playlist.name))
             continue
-        
-        track = settings_service.validate_track(session, playlist.id, playlist.track_data, event, user) or event
+
+        track = await settings_service.validate_track(session, playlist.id, playlist.track_data, event, user) or event
         if isinstance(track, list):
             errors.append((track, playlist.name))
         else:

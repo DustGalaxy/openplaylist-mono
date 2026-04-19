@@ -10,8 +10,8 @@ import {
 } from 'lucide-react'
 import ViewPlayNowCard from './view-track-card'
 import Priority from './icons/icon-priority'
-import type { ClientPlaylist } from '@/types/playlist'
 import AddBar from './addbar'
+import type { ClientPlaylist } from '@/types/playlist'
 import { useAuthStore } from '@/stores/authStore'
 
 const InfoCard = ({
@@ -37,6 +37,8 @@ const InfoCard = ({
 
 const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
   const { isAuthenticated } = useAuthStore()
+  const [selectedContentSettingIndex, setSelectedContentSettingIndex] =
+    React.useState(0)
   return (
     <div className="bg-level-1 rounded-(--rounded-std) shadow-lg flex flex-col gap-6">
       {/* Header */}
@@ -74,47 +76,74 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
         <h3 className="text-sm uppercase tracking-wide text-gray-400 mb-3">
           Preferences
         </h3>
+
+        {playlist.settings.content_settings.length > 1 && (
+          <div className="flex gap-2 flex-wrap mb-3">
+            {playlist.settings.content_settings.map((setting, index) => (
+              <button
+                key={index}
+                onClick={() => setSelectedContentSettingIndex(index)}
+                className={`px-3 py-1 text-sm rounded-(--rounded-std) transition-colors ${
+                  selectedContentSettingIndex === index
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-level-2 text-gray-400 hover:bg-level-3'
+                }`}
+              >
+                {setting.platform}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-4 mb-3">
-          <InfoCard
-            icon={<Settings size={16} />}
-            label="Mode"
-            value={playlist.settings.mode}
-          />
-          <InfoCard
-            icon={<Eye size={16} />}
-            label="Min views"
-            value={playlist.settings.min_views}
-          />
-          <InfoCard
-            icon={<ThumbsUp size={16} />}
-            label="Min likes"
-            value={playlist.settings.min_likes}
-          />
-          <InfoCard
-            icon={<Clock size={16} />}
-            label="Max duration"
-            value={`${playlist.settings.max_duration} sec`}
-          />
-          <InfoCard
-            icon={<RefreshCcw size={16} />}
-            label="Track CD"
-            value={`${playlist.settings.track_cooldown}m`}
-          />
-          <InfoCard
-            icon={<User size={16} />}
-            label="User CD"
-            value={`${playlist.settings.user_cooldown}m`}
-          />
-          <InfoCard
-            icon={<List size={16} />}
-            label="Max size"
-            value={playlist.settings.max_playlist_size || '∞'}
-          />
-          <InfoCard
-            icon={<Priority width={16} height={16} />}
-            label="Priority mode"
-            value={playlist.settings.cost_mode}
-          />
+          {(() => {
+            const contentSettings =
+              playlist.settings.content_settings[selectedContentSettingIndex]
+            return (
+              <>
+                <InfoCard
+                  icon={<Settings size={16} />}
+                  label="Mode"
+                  value={playlist.settings.mode}
+                />
+                <InfoCard
+                  icon={<Eye size={16} />}
+                  label="Min views"
+                  value={contentSettings.min_views}
+                />
+                <InfoCard
+                  icon={<ThumbsUp size={16} />}
+                  label="Min likes"
+                  value={contentSettings.min_likes}
+                />
+                <InfoCard
+                  icon={<Clock size={16} />}
+                  label="Max duration"
+                  value={`${contentSettings.max_duration} sec`}
+                />
+                <InfoCard
+                  icon={<RefreshCcw size={16} />}
+                  label="Track CD"
+                  value={`${contentSettings.track_cooldown}m`}
+                />
+                <InfoCard
+                  icon={<User size={16} />}
+                  label="User CD"
+                  value={`${contentSettings.user_cooldown}m`}
+                />
+                <InfoCard
+                  icon={<List size={16} />}
+                  label="Max size"
+                  value={playlist.settings.max_playlist_size || '∞'}
+                />
+                <InfoCard
+                  icon={<Priority width={16} height={16} />}
+                  label="Priority mode"
+                  value={playlist.settings.cost_mode}
+                />
+              </>
+            )
+          })()}
         </div>
 
         {isAuthenticated && (

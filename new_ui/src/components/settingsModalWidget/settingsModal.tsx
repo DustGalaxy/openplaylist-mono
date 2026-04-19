@@ -144,9 +144,6 @@ export default function SettingsModal({
             <TabsTrigger className={retroTabStyles} value="chat-roles">
               Chat Roles
             </TabsTrigger>
-            <TabsTrigger className={retroTabStyles} value="priority">
-              Priority
-            </TabsTrigger>
             <TabsTrigger className={retroTabStyles} value="block">
               Block
             </TabsTrigger>
@@ -185,14 +182,6 @@ export default function SettingsModal({
               playlist={playlist}
               settings={settings}
               setSettings={setSettings}
-            />
-          </TabsContent>
-          <TabsContent key="prioritytab" value="priority">
-            <ChatRoles
-              playlist={playlist}
-              settings={settings}
-              setSettings={setSettings}
-              canRequest={canPatchSettings}
             />
           </TabsContent>
           <TabsContent key="blocktab" value="block">

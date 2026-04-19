@@ -128,6 +128,7 @@ export type InputPlaylist = {
   is_public: boolean
   is_favorite: boolean
   is_allow_external_requests: boolean
+  tags: Array<string>
   allow_sources: Array<string>
   track_data: Array<Track>
   now_playing: string | undefined
