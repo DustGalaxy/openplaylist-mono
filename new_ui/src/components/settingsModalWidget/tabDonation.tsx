@@ -13,6 +13,7 @@ import { DonationPlatform } from '@/types/playlist'
 import {
   createDonationRule,
   initPlatformDonation,
+  deleteDonationRule,
 } from '@/api/settings/donation'
 
 const TabDonation = ({
@@ -40,14 +41,27 @@ const TabDonation = ({
   })
 
   const createNewRule = React.useCallback(
-    (platform: DonationPlatform) => {
+    (
+      platform: DonationPlatform,
+      name: string,
+      slug: string,
+      priority: number,
+      amount: number,
+      currency: string,
+    ) => {
+      if (!name || !slug || !currency) {
+        toast.error('Please fill in all fields')
+        return
+      }
       const newRuleData = {
         data: {
           platform: platform,
           settings_id: settings.id,
-          name: '',
-          slug: '',
-          priority: 0,
+          name: name,
+          slug: slug,
+          priority: priority,
+          amount: amount,
+          currency: currency,
         },
         playlist_id: playlist.id,
       }
@@ -74,6 +88,35 @@ const TabDonation = ({
         })
     },
     [settings.id, playlist.id, setSettings],
+  )
+
+  const handleDeleteRule = React.useCallback(
+    async (
+      platform: DonationPlatform,
+      playlist_id: string,
+      rule_id: string,
+    ) => {
+      try {
+        await deleteDonationRule({
+          playlist_id: playlist_id,
+          donation_id: rule_id,
+        }).then(() => {
+          setRules((prev) => ({
+            ...prev,
+            [platform]: prev[platform].filter((r) => r.id !== rule_id),
+          }))
+          setSettings((prev) => ({
+            ...prev,
+            donation_rules: prev.donation_rules.filter((r) => r.id !== rule_id),
+          }))
+          toast.success('Rule deleted successfully')
+        })
+      } catch (error) {
+        console.error('Error deleting rule:', error)
+        toast.error('Error deleting rule')
+      }
+    },
+    [setSettings],
   )
 
   return (
@@ -111,6 +154,7 @@ const TabDonation = ({
                     rules={rules[val]}
                     playlist_id={playlist.id}
                     createNewRule={createNewRule}
+                    handleDeleteRule={handleDeleteRule}
                   />
                 )
               })}
