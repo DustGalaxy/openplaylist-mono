@@ -1,18 +1,29 @@
 import React from 'react'
+
 import { Label } from '../ui/label'
 import UpDownBtn from '../ui/funny-btn'
 import { Input } from '../ui/input'
 import { CurrencySelect } from '../ui/currency-selector'
-import type { ReadDonationRules } from '@/types/playlist'
+import MyBtn from '../ui/my-btn'
+import type { DonationPlatform, ReadDonationRules } from '@/types/playlist'
 import { updateDonation } from '@/api/settings/donation'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 
 interface DonationItemProps {
   rule: ReadDonationRules
   playlist_id: string
+  handleDeleteRule: (
+    platform: DonationPlatform,
+    playlist_id: string,
+    rule_id: string,
+  ) => void
 }
 
-const DonationItem = ({ rule, playlist_id }: DonationItemProps) => {
+const DonationItem = ({
+  rule,
+  playlist_id,
+  handleDeleteRule,
+}: DonationItemProps) => {
   const [localRule, setLocalRule] = React.useState(rule)
   const [isDirty, setIsDirty] = React.useState(false)
   const [isSaving, setIsSaving] = React.useState(false)
@@ -67,9 +78,15 @@ const DonationItem = ({ rule, playlist_id }: DonationItemProps) => {
     setIsDirty(true)
   }
 
+  const handleDelete = () => {
+    if (confirm('Are you sure you want to delete this donation rule?')) {
+      handleDeleteRule(localRule.platform, playlist_id, localRule.id)
+    }
+  }
+
   return (
     <div
-      className="border border-level-3 rounded-lg p-3 sm:p-4 bg-level-1 space-y-0 sm:space-y-1 opacity-opacity transition-opacity"
+      className="border border-level-3 rounded-lg p-3 sm:p-4 bg-level-1 space-y-0 sm:space-y-1 opacity-opacity transition-opacity relative"
       style={{
         opacity: isSaving ? 0.7 : 1,
       }}
@@ -161,6 +178,18 @@ const DonationItem = ({ rule, playlist_id }: DonationItemProps) => {
             <UpDownBtn getInputRef={() => priorityInputRef.current} />
           </div>
         </div>
+      </div>
+      <div className=" absolute top-0.5 right-0.5">
+        <MyBtn
+          text="✕"
+          onClick={() => {
+            handleDelete()
+          }}
+          className="px-2 h-7 text-xs bg-level-2 border border-level-3
+               hover:bg-red-900/30 text-red-400 flex-shrink-0 
+               "
+          onPointerDown={(e) => e.stopPropagation()}
+        />
       </div>
     </div>
   )

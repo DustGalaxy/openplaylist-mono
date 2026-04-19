@@ -87,3 +87,27 @@ export const createDonationRule = async ({
   })
   return response?.data as ReadDonationRules | null
 }
+
+export const deleteDonationRule = async ({
+  playlist_id,
+  donation_id,
+}: {
+  playlist_id: string
+  donation_id: string
+}) => {
+  const config = getConfig()
+  const response = await apiClient(
+    config.AUTH_API_URL + `/settings/${playlist_id}/donation/${donation_id}`,
+    {
+      method: 'DELETE',
+      withCredentials: true,
+    },
+  ).catch((error) => {
+    console.error(
+      'Error deleting donation rule:',
+      error.response?.data || error,
+    )
+    return null
+  })
+  return response?.status === 204
+}
