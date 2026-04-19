@@ -12,7 +12,11 @@ import TabChatPlatformRoles from './tabChatPlatformRoles.tsx'
 import TabBlock from './tabBlock'
 
 import TabDonation from './tabDonation.tsx'
-import type { ClientPlaylist, PlaylistSettings } from '@/types/playlist'
+import type {
+  ClientPlaylist,
+  PlaylistPatch,
+  PlaylistSettings,
+} from '@/types/playlist'
 import {
   Dialog,
   DialogContent,
@@ -33,24 +37,50 @@ export default function SettingsModal({
   const [settings, setSettings] = React.useState<PlaylistSettings>(
     playlist.settings,
   )
+  const [plst, setPlst] = React.useState<ClientPlaylist>(playlist)
 
   const [countToDelete, setCountToDelete] = React.useState(3)
   const [deleteTimeout, setDeleteTimeout] = React.useState(false)
 
-  const { requestPlSettings } = useMusicStore()
+  const { requestPlSettings, requestPlaylistPatch } = useMusicStore()
 
-  const canRequest = React.useRef(false)
+  const canPatchSettings = React.useRef(false)
   useDebouncedEffect(
     settings,
     async () => {
-      if (!canRequest.current) return
-      canRequest.current = false
+      if (!canPatchSettings.current) return
+      canPatchSettings.current = false
       try {
         await requestPlSettings(playlist.id, settings)
+        toast.success('Settings saved')
       } catch (err) {
         toast.error('Failed to save settings')
       }
-      toast.success('Settings saved')
+    },
+    2000,
+  )
+
+  const canPatchPlaylist = React.useRef(false)
+  useDebouncedEffect(
+    plst,
+    async () => {
+      if (!canPatchPlaylist.current) return
+      canPatchPlaylist.current = false
+      try {
+        const obj: PlaylistPatch = {
+          name: plst.name,
+          description: plst.description,
+          is_public: plst.is_public,
+          is_favorite: plst.is_favorite,
+          is_allow_external_requests: plst.is_allow_external_requests,
+          allow_sources: plst.allow_sources,
+          tags: plst.tags,
+        }
+        await requestPlaylistPatch(plst.id, obj)
+        toast.success('Playlist saved')
+      } catch (err) {
+        toast.error('Failed to save playlist')
+      }
     },
     2000,
   )
@@ -129,9 +159,11 @@ export default function SettingsModal({
           <TabsContent key="generaltab" value="general" className="h-full">
             <TabBasic
               playlist={playlist}
+              setPlst={setPlst}
+              canPatchPlaylist={canPatchPlaylist}
               settings={settings}
               setSettings={setSettings}
-              canRequest={canRequest}
+              canPatchSettings={canPatchSettings}
             />
           </TabsContent>
           <TabsContent key="validationtab" value="validation">
@@ -160,7 +192,7 @@ export default function SettingsModal({
               playlist={playlist}
               settings={settings}
               setSettings={setSettings}
-              canRequest={canRequest}
+              canRequest={canPatchSettings}
             />
           </TabsContent>
           <TabsContent key="blocktab" value="block">

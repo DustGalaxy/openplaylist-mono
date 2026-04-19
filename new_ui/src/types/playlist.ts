@@ -136,6 +136,16 @@ export type InputPlaylist = {
   settings: PlaylistSettings
 }
 
+export type PlaylistPatch = {
+  name?: string
+  description?: string
+  tags?: Array<string>
+  allow_sources?: Array<string>
+  is_public?: boolean
+  is_favorite?: boolean
+  is_allow_external_requests?: boolean
+}
+
 export type ClientPlaylist = {
   id: string
   name: string
@@ -143,6 +153,7 @@ export type ClientPlaylist = {
   is_public: boolean
   is_favorite: boolean
   is_allow_external_requests: boolean
+  tags: Array<string>
   allow_sources: Array<string>
   track_data: Array<Track>
 

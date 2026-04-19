@@ -44,12 +44,12 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
         <div className="flex items-center gap-3">
           <div
             className={`px-3 py-1 text-sm font-medium rounded-full ${
-              playlist.settings.is_allow_external_requests
+              playlist.is_allow_external_requests
                 ? 'bg-green-600'
                 : 'bg-red-600'
             }`}
           >
-            {playlist.settings.is_allow_external_requests
+            {playlist.is_allow_external_requests
               ? 'Accept external requests'
               : 'No external requests'}
           </div>
