@@ -6,7 +6,7 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.auth_user import AuthUserDomain, AuthUserCreate, AuthUserUpdate
+from models.auth_user import AuthUserSchema, AuthUserCreate, AuthUserUpdate
 from orm.auth_user import User
 
 from models.linked_accounts import LinkedAccountsDomain, LinkedAccountsCreate, LinkedAccountsUpdate
@@ -15,10 +15,16 @@ from orm.linked_accounts import LinkedAccounts
 from _types import Platform
 
 
-class UserRepository(crud_factory(User, AuthUserDomain, AuthUserCreate, AuthUserUpdate)):
+class UserRepository(crud_factory(User, AuthUserSchema, AuthUserCreate, AuthUserUpdate)):
+    def to_inner(self, data: AuthUserCreate | AuthUserSchema | AuthUserUpdate) -> dict:
+        return data.model_dump(exclude_unset=True)
+
+    def to_repr(self, object: User) -> AuthUserSchema:
+        return self.domain_model.model_validate(object)
+
     async def get_user_by_link(
         self, session: AsyncSession, platform: Platform, platform_user_id: str
-    ) -> AuthUserDomain:
+    ) -> AuthUserSchema:
         stmt = (
             select(User)
             .join(LinkedAccounts)
@@ -32,7 +38,7 @@ class UserRepository(crud_factory(User, AuthUserDomain, AuthUserCreate, AuthUser
                 f"{self.sqla_model.__tablename__} with platform_user_id={platform_user_id} and platform={platform} not found"
             )
 
-        return AuthUserDomain.model_validate(user)
+        return AuthUserSchema.model_validate(user)
 
     async def get_by_tokens(self, session, access_token: str, refresh_token: str, platform: Platform):
         stmt = (
@@ -49,7 +55,7 @@ class UserRepository(crud_factory(User, AuthUserDomain, AuthUserCreate, AuthUser
         if not user:
             raise NotFoundException()
 
-        return AuthUserDomain.model_validate(user)
+        return AuthUserSchema.model_validate(user)
 
     async def patch(
         self,
@@ -57,7 +63,7 @@ class UserRepository(crud_factory(User, AuthUserDomain, AuthUserCreate, AuthUser
         data: AuthUserUpdate,
         id_: IdValue,
         column: str = "id",
-    ) -> AuthUserDomain:
+    ) -> AuthUserSchema:
         """Patch entity by id and return the updated model"""
         try:
             await self.get_one(session, id_, column)
@@ -89,7 +95,12 @@ class UserRepository(crud_factory(User, AuthUserDomain, AuthUserCreate, AuthUser
 
 class LinkedAccountsRepository(
     crud_factory(LinkedAccounts, LinkedAccountsDomain, LinkedAccountsCreate, LinkedAccountsUpdate)
-): ...
+):
+    def to_inner(self, data: LinkedAccountsCreate | LinkedAccountsDomain | LinkedAccountsUpdate) -> dict:
+        return data.model_dump(exclude_unset=True)
+
+    def to_repr(self, object: LinkedAccounts) -> LinkedAccountsDomain:
+        return self.domain_model.model_validate(object)
 
 
 user_repository = UserRepository()

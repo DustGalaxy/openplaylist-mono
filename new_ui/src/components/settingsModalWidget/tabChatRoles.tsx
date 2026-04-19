@@ -12,7 +12,7 @@ import {
 import TwitchPriority from './twitchPriority'
 import type { ClientPlaylist, PlaylistSettings } from '@/types/playlist'
 
-const TabPriority = ({
+const ChatRoles = ({
   playlist,
   setSettings,
   settings,
@@ -159,4 +159,4 @@ const TabPriority = ({
   )
 }
 
-export default TabPriority
+export default ChatRoles

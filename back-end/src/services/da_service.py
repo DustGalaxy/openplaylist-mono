@@ -11,7 +11,7 @@ from simple_repository.exceptions import NotFoundException
 from _types import AsyncSession, Platform
 from settings import settings
 from dto.da import DAToken, DAUser
-from models.auth_user import AuthUserCreate, AuthUserDomain, AuthUserUpdate
+from models.auth_user import AuthUserCreate, AuthUserSchema, AuthUserUpdate
 from models.linked_accounts import LinkedAccountsCreate, LinkedAccountsUpdate
 from repo import LinkedAccountsRepository, UserRepository
 from utils import find
@@ -186,7 +186,7 @@ class AuthDAService:
         refresh_token: str,
         expires_in: int,
     ):
-        db_user: AuthUserDomain = await self.user_repo.create(
+        db_user: AuthUserSchema = await self.user_repo.create(
             db_session,
             AuthUserCreate(
                 last_login=datetime.now(),
@@ -211,7 +211,7 @@ class AuthDAService:
         db_user.linked_accounts.append(db_link)
         return db_user
 
-    async def add_integration(self, db_session: AsyncSession, user_id: UUID, code: str) -> AuthUserDomain:
+    async def add_integration(self, db_session: AsyncSession, user_id: UUID, code: str) -> AuthUserSchema:
         try:
             print(1)
             db_user = await self.user_repo.get_one(db_session, user_id, column="id")
@@ -276,7 +276,7 @@ class AuthDAService:
         except NotFoundException:
             raise HTTPException(status_code=404, detail="User not found")
 
-    async def delete_integration(self, db_session: AsyncSession, user_id: UUID) -> AuthUserDomain:
+    async def delete_integration(self, db_session: AsyncSession, user_id: UUID) -> AuthUserSchema:
         try:
             db_user = await self.user_repo.get_one(db_session, user_id, column="id")
             da_acc = find(db_user.linked_accounts, lambda x: x.platform == self.platform)

@@ -1,12 +1,13 @@
-from typing import Annotated
-from fastapi import APIRouter, Depends, Response
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Response
+
 
 from services.twitch_service import auth_twitch_service
 from services.da_service import auth_da_service
-from database import get_async_session
+
 from dto.twitch import CodeDTO
+
 from settings import settings
+from .dependencies import DB_SESSION
 
 router = APIRouter(prefix="/login")
 
@@ -14,7 +15,7 @@ router = APIRouter(prefix="/login")
 @router.post("/twitch")
 async def twitch_login(
     response: Response,
-    db_session: Annotated[AsyncSession, Depends(get_async_session)],
+    db_session: DB_SESSION,
     code: CodeDTO,
 ):
     token = await auth_twitch_service.login(db_session, code.code)
@@ -24,7 +25,7 @@ async def twitch_login(
 @router.post("/da")
 async def da_login(
     response: Response,
-    db_session: Annotated[AsyncSession, Depends(get_async_session)],
+    db_session: DB_SESSION,
     code: CodeDTO,
 ):
     token = await auth_da_service.login(db_session, code.code)

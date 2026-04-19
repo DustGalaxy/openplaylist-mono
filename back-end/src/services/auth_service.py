@@ -17,7 +17,7 @@ from settings import settings
 from dto.user import LinkedAccountWithTokensRead
 from repo import LinkedAccountsRepository, UserRepository
 
-from models.auth_user import AuthUserDomain
+from models.auth_user import AuthUserSchema
 from services.twitch_service import auth_twitch_service
 from services.da_service import auth_da_service
 from adapters._rabbit.event_broker import (
@@ -36,7 +36,7 @@ class AuthService:
         self.user_repo: UserRepository = user_repo
         self.link_repo: LinkedAccountsRepository = link_repo
 
-    def intergations(self, user: AuthUserDomain) -> list[dict]:
+    def intergations(self, user: AuthUserSchema) -> list[dict]:
         return [x.model_dump() for x in user.linked_accounts]
 
     def encode_jwt(self, id: UUID, user_name: str) -> str:
@@ -53,7 +53,7 @@ class AuthService:
         )
         return encoded_jwt
 
-    async def refresh_account_tokens(self, db_session: AsyncSession, user: AuthUserDomain) -> AuthUserDomain:
+    async def refresh_account_tokens(self, db_session: AsyncSession, user: AuthUserSchema) -> AuthUserSchema:
         for link in user.linked_accounts:
             if link.platform == Platform.TWITCH:
                 if link.expires_at < int(time.time()):
@@ -105,13 +105,13 @@ class AuthService:
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
             raise HTTPException(status_code=401, detail="Not authenticated")
         try:
-            user: AuthUserDomain = await self.user_repo.get_one(db_session, UUID(user_id))
+            user: AuthUserSchema = await self.user_repo.get_one(db_session, UUID(user_id))
         except NotFoundException:
             raise HTTPException(status_code=404, detail="User not found")
 
         return user
 
-    async def connect_bot(self, db_session: AsyncSession, user: AuthUserDomain, type: Platform) -> None:
+    async def connect_bot(self, db_session: AsyncSession, user: AuthUserSchema, type: Platform) -> None:
         q: RabbitQueue
         if type == Platform.TWITCH:
             q = bot_twitch_connect_request

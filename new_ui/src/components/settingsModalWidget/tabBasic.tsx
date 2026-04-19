@@ -5,7 +5,7 @@ import { DialogDescription } from '../ui/dialog'
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
 import type { ClientPlaylist, PlaylistSettings } from '@/types/playlist'
 
-const TabGeneral = ({
+const TabBasic = ({
   playlist,
   setSettings,
   canRequest,
@@ -17,7 +17,7 @@ const TabGeneral = ({
   settings: PlaylistSettings
 }) => {
   const [plstMode, setPlstMode] = React.useState(playlist.settings.mode)
-  const [privacy, setPrivacy] = React.useState(playlist.settings.is_public)
+  const [privacy, setPrivacy] = React.useState(playlist.is_public)
   return (
     <div>
       <div className="grid gap-4">
@@ -152,7 +152,7 @@ const TabGeneral = ({
         </DialogDescription>
         <ToggleGroup
           type="multiple"
-          defaultValue={settings.allow_sources}
+          defaultValue={playlist.allow_sources}
           onValueChange={(value) => {
             console.log('ToggleGroup value:', value)
 
@@ -196,4 +196,4 @@ const TabGeneral = ({
   )
 }
 
-export default TabGeneral
+export default TabBasic

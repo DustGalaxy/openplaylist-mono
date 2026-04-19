@@ -17,8 +17,8 @@ class OrderService:
         cached_info: str = redis_adapter.get(yt_video_id)  # pyright: ignore[reportAssignmentType]
 
         if not cached_info:
+            yt = YouTube(order.yt_video_url)
             try:
-                yt = YouTube(order.yt_video_url)
                 first_part = yt.initial_data["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][
                     0
                 ]

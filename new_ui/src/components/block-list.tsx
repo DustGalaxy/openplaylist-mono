@@ -2,6 +2,7 @@ import Trash from './icons/icon-trash'
 import Btn from './ui/my-btn'
 import type { ClientPlaylist } from '@/types/playlist'
 import { useMusicStore } from '@/stores/musicStore'
+import type { ReadBlockList } from '@/types/playlist'
 
 const BlockItem = ({
   text,
@@ -31,15 +32,17 @@ export default function BlockList({
   type,
   playlist,
 }: {
-  list: Array<string>
+  list: Array<ReadBlockList>
   type: 'user' | 'track'
   playlist: ClientPlaylist
 }) {
   const { requestPlSettings } = useMusicStore()
   const handleUnblock = async (item: string) => {
+    return
+
     if (type === 'user') {
       await requestPlSettings(playlist.id, {
-        user_black_list: playlist.settings.user_black_list.filter(
+        block_list: playlist.settings.block_list.filter(
           (user) =>
             user.toString().toLowerCase() !== item.toString().toLowerCase(),
         ),

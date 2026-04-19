@@ -12,7 +12,7 @@ from dto.events import (
 from dto.settings import ReadPlaylistSettings
 from adapters._sio.init import sio
 from adapters._redis.broker import redis_adapter, RedisAdapter
-from dal.postgres_impl import playlist_repository
+from dal.postgres_impl import playlist_settings_repository, playlist_repository
 from models.order import OrderDomain
 from database import async_session_maker
 
@@ -120,7 +120,7 @@ class SioPlaylistUpdateService:
         owner_id = data.owner_id
         owner_sid = self.sid_from_uid(owner_id)
         for sid in room_manager.get_sids(room_id, self.namespace):
-            print(f'sid: {sid}, is owner: {sid == owner_sid}')
+            print(f"sid: {sid}, is owner: {sid == owner_sid}")
             if sid == owner_sid:
                 continue
 
@@ -130,10 +130,10 @@ class SioPlaylistUpdateService:
 
     async def sub_plst_upds(self, sid, playlist_id: UUID, user_id: str):
         async with async_session_maker() as session:
-            info = await playlist_repository.get_one(session, playlist_id)
+            plst = await playlist_repository.get_one(session, playlist_id)
 
-        print(f"ℹ️ Пользователь {user_id} хочет войти в комнату {playlist_id}, owner_id={info.owner_id}")
-        if (user_id == str(info.owner_id)) or info.settings.is_public:
+        print(f"ℹ️ Пользователь {user_id} хочет войти в комнату {playlist_id}, owner_id={plst.owner_id}")
+        if (user_id == str(plst.owner_id)) or plst.is_public:
             await self.sio.emit("subscribe_success", to=sid, namespace=self.namespace)
             room_manager.enter_room(sid, str(playlist_id), self.namespace)
             print(f"➡️ Пользователь {user_id} вошел в комнату {playlist_id}")

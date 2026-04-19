@@ -1,3 +1,31 @@
+import type { ReactElement } from 'react'
+
+export enum Platform {
+  General = '__general__',
+  Twitch = 'twitch',
+  YouTube = 'youtube',
+  Web = 'web',
+  DonationAlerts = 'donationalerts',
+}
+
+export enum DonationPlatform {
+  General = '__general__',
+  DonationAlerts = 'donationalerts',
+}
+
+export enum ChatPlatform {
+  Twitch = 'twitch',
+  YouTube = 'youtube',
+}
+
+export type Role = {
+  key: string
+  name: string
+  platform: ChatPlatform
+  badge_type: 'svg' | 'img'
+  badge_url: string | ReactElement | null
+}
+
 export type Order = {
   request_id: string
   owner_id: string
@@ -17,8 +45,51 @@ export type Track = {
   duration: string
   requester_nickname: string
   created_at: string // ISO
-  source: string // twitch | youtube | web
+  source: Platform // twitch | youtube | web
   loading?: boolean // для оптимистичного состояния
+}
+
+export type ContentSettings = {
+  id: string
+  settings_id: string
+  platform: Platform
+
+  min_views: number
+  min_likes: number
+  max_duration: number
+  track_cooldown: number
+  user_cooldown: number
+}
+
+export interface ReadDonationRules {
+  id: string
+  settings_id: string
+  platform: DonationPlatform
+  name: string
+  slug: string
+  currency: string
+  amount: number
+  priority: number
+  content_settings?: Record<string, any> | null
+}
+
+export interface ReadChatRules {
+  id: string
+  settings_id: string
+  platform: ChatPlatform
+  key: string
+  priority: number
+  content_settings?: Record<string, any> | null
+  overrive_order?: number | null
+}
+
+export type ReadBlockList = {
+  id: string
+  settings_id: string
+
+  platform: Platform | null
+  trigger_type: string
+  trigger_value: string
 }
 
 export type SortSettings = {
@@ -31,40 +102,21 @@ export type PlaylistSettings = {
   id: string
   playlist_id: string
 
-  min_views: number
-  min_likes: number
-  max_duration: number
-
-  donation_currency_amount: number
-  track_cooldown: number
-  user_cooldown: number
-
   max_playlist_size: number
-
-  is_public: boolean
-  is_favorite: boolean
 
   mode: 'flow' | 'static'
   repeat_mode: 'all' | 'once' | 'none'
   sort_settings: SortSettings
 
-  cost_broacaster: number
-  cost_donater: number
-  cost_vip: number
-  cost_mod: number
-  cost_subscriber: number
-  cost_turbo: number
-  cost_artist: number
-  cost_fonder: number
-  cost_follower: number
-
   cost_mode: 'add' | 'max'
 
-  is_allow_external_requests: boolean
-  allow_sources: Array<string>
+  content_settings: Array<ContentSettings>
+  donation_rules: Array<ReadDonationRules>
+  chat_rules: Array<ReadChatRules>
+  block_list: Array<ReadBlockList>
 
   track_black_list: Array<string> // yt_video_id
-  user_black_list: Array<string>
+
   created_at: string
   updated_at: string
 }
@@ -73,6 +125,10 @@ export type InputPlaylist = {
   id: string
   name: string
   description?: string
+  is_public: boolean
+  is_favorite: boolean
+  is_allow_external_requests: boolean
+  allow_sources: Array<string>
   track_data: Array<Track>
   now_playing: string | undefined
   created_at: string
@@ -84,7 +140,12 @@ export type ClientPlaylist = {
   id: string
   name: string
   description?: string
+  is_public: boolean
+  is_favorite: boolean
+  is_allow_external_requests: boolean
+  allow_sources: Array<string>
   track_data: Array<Track>
+
   isSub: boolean
   history: Array<Track>
   now_playing: Track | undefined

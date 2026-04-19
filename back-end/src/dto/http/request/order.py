@@ -2,6 +2,6 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from _types import Status, Source
+from _types import Status, Platform
 
 

@@ -1,15 +1,17 @@
-from typing import Literal
+import enum
+from typing import Literal, Optional
 from uuid import UUID
-from sqlalchemy import ForeignKey, Integer, String, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+
+from sqlalchemy import CheckConstraint, Enum, ForeignKey, Index, Integer, String, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ARRAY, UUID as PGUUID, JSONB
 
 from database import Base, UUIDMixin, TimestampMixin
-from _types import Source
+from _types import Platform, DonationPlatform, ChatPlatform
 
 
-class PlaylistSettings(Base, UUIDMixin, TimestampMixin):
-    __tablename__ = "playlist_settings"
+class Settings(Base, UUIDMixin, TimestampMixin):
+    __tablename__ = "settings"
 
     playlist_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True),
@@ -17,17 +19,6 @@ class PlaylistSettings(Base, UUIDMixin, TimestampMixin):
         nullable=False,
         index=True,
     )
-
-    min_views: Mapped[int] = mapped_column(default=10_000, nullable=False)
-    min_likes: Mapped[int] = mapped_column(default=500, nullable=False)
-    max_duration: Mapped[int] = mapped_column(default=600, nullable=False)
-    track_cooldown: Mapped[int] = mapped_column(default=0, nullable=False)
-    user_cooldown: Mapped[int] = mapped_column(default=2, nullable=False)
-    
-    is_public: Mapped[bool] = mapped_column(default=False, nullable=False)
-    is_favorite: Mapped[bool] = mapped_column(default=False, nullable=False)
-
-    donation_currency_amount: Mapped[float] = mapped_column(default=50.0, nullable=False)
 
     max_playlist_size: Mapped[int] = mapped_column(default=0, nullable=False)
 
@@ -37,68 +28,186 @@ class PlaylistSettings(Base, UUIDMixin, TimestampMixin):
         JSONB, nullable=False, default={"date": "desc", "priority": "none", "shuffle": "none"}
     )
 
-    cost_broacaster: Mapped[int] = mapped_column(default=0, nullable=False)
-    cost_donater: Mapped[int] = mapped_column(default=0, nullable=False)
-    cost_vip: Mapped[int] = mapped_column(default=0, nullable=False)
-    cost_mod: Mapped[int] = mapped_column(default=0, nullable=False)
-    cost_subscriber: Mapped[int] = mapped_column(default=0, nullable=False)
-    cost_turbo: Mapped[int] = mapped_column(default=0, nullable=False)
-    cost_artist: Mapped[int] = mapped_column(default=0, nullable=False)
-    cost_fonder: Mapped[int] = mapped_column(default=0, nullable=False)
-    cost_follower: Mapped[int] = mapped_column(default=0, nullable=False)
-
     cost_mode: Mapped[Literal["add", "max"]] = mapped_column(default="max", nullable=False)
 
-    track_black_list: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True, default=list)
-    user_black_list: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True, default=list)
+    content_settings: Mapped[list["ContentSettings"]] = relationship(
+        back_populates="settings",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
 
-    allow_sources: Mapped[list[Source]] = mapped_column(ARRAY(String), nullable=True, default=list)
-    is_allow_external_requests: Mapped[bool] = mapped_column(default=False, nullable=False)
+    chat_rules: Mapped[list["ChatRules"]] = relationship(
+        back_populates="settings",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    donation_rules: Mapped[list["DonationRules"]] = relationship(
+        back_populates="settings",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    track_black_list: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True, default=list)
+    block_list: Mapped[list["BlockList"]] = relationship(
+        back_populates="settings",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
 
     def __repr__(self):
         return (
-            f"<PlaylistSettings({self.id=}, {self.playlist_id=}, {self.min_views=}, "
-            f"{self.min_likes=}, {self.is_allow_external_requests=}, {self.is_public=}, "
-            f"{self.is_favorite=}, {self.track_black_list=}, {self.user_black_list=}, {self.created_at=}, "
+            f"<PlaylistSettings({self.id=}, {self.playlist_id=}, "
+            f"{self.track_black_list=}, {self.block_list=}, {self.created_at=}, "
             f"{self.updated_at=})>"
         )
 
-class PlaylistRoleCost(Base, UUIDMixin, TimestampMixin):
-    __tablename__ = "playlist_role_costs"
 
-    playlist_settings_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("playlist_settings.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True
+class ContentSettings(Base, UUIDMixin, TimestampMixin):
+    __tablename__ = "content_settings"
+
+    settings_id: Mapped[UUID] = mapped_column(ForeignKey("settings.id", ondelete="CASCADE"))
+    settings: Mapped["Settings"] = relationship(
+        back_populates="content_settings",
+        lazy="selectin",
+    )
+    platform: Mapped[Platform] = mapped_column(Enum(Platform), nullable=False)
+
+    min_views: Mapped[int | None] = mapped_column(default=10_000, nullable=False)
+    min_likes: Mapped[int] = mapped_column(default=500, nullable=False)
+    max_duration: Mapped[int] = mapped_column(default=600, nullable=False)
+    track_cooldown: Mapped[int] = mapped_column(default=0, nullable=False)
+    user_cooldown: Mapped[int] = mapped_column(default=2, nullable=False)
+
+
+# class PaymentSettings(Base, UUIDMixin, TimestampMixin):
+#     __tablename__ = "payment_settings"
+
+#     settings_id: Mapped[UUID] = mapped_column(ForeignKey("settings.id", ondelete="CASCADE"))
+#     settings: Mapped["Settings"] = relationship(
+#         back_populates="payment_settings",
+#         lazy="selectin",
+#     )
+#     platform: Mapped[Platform] = mapped_column(
+#         Enum(Platform), nullable=False
+#     )  # 'donation_alerts', 'donate_pay', not vip = 'general'
+
+#     donation_currency_amount: Mapped[float] = mapped_column(default=50.0, nullable=False)
+#     currency: Mapped[str] = mapped_column(String(3), default="RUB")
+
+
+# class RoleTrigger(enum.Enum):
+#     BADGE = "badge"
+#     USER_ID = "user_id"
+
+
+# class RoleRule(Base, UUIDMixin, TimestampMixin):
+#     __tablename__ = "role_rules"
+
+#     # NULL означает глобальное правило (дефолт для всех)
+#     settings_id: Mapped[UUID] = mapped_column(ForeignKey("settings.id", ondelete="CASCADE"), index=True)
+#     settings: Mapped[Optional["Settings"]] = relationship(
+#         back_populates="role_costs",
+#         lazy="selectin",
+#     )
+
+#     name: Mapped[str] = mapped_column(String(50))  # "Subscriber", "Олды"
+#     cost: Mapped[int] = mapped_column(Integer, default=0)
+
+#     platform: Mapped[Platform] = mapped_column(Enum(Platform), nullable=False)  # "twitch", "youtube"
+
+#     trigger_type: Mapped[RoleTrigger] = mapped_column(Enum(RoleTrigger), default=RoleTrigger.BADGE)
+
+#     # "sub", "mod" или "user_id"
+#     trigger_value: Mapped[str] = mapped_column(String(255))
+
+#     __table_args__ = (
+#         # Уникальность правила в рамках одного плейлиста/платформы
+#         Index(
+#             "ix_role_rules_unique_trigger",
+#             "settings_id",
+#             "platform",
+#             "trigger_type",
+#             "trigger_value",
+#             unique=True,
+#         ),
+#     )
+
+
+class BlockTrigger(enum.Enum):
+    USER_ID = "user_id"
+    USER_NAME = "user_name"
+
+
+class BlockList(Base, UUIDMixin, TimestampMixin):
+    __tablename__ = "block_list"
+
+    settings_id: Mapped[UUID] = mapped_column(ForeignKey("settings.id", ondelete="CASCADE"))
+    settings: Mapped["Settings"] = relationship(
+        back_populates="block_list",
+        lazy="selectin",
     )
 
-    # Платформа: twitch, youtube, donatepay, etc.
-    platform: Mapped[str] = mapped_column(String(50), nullable=False)
-    
-    # Роль: vip, mod, subscriber, etc.
-    role_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    
-    cost: Mapped[int] = mapped_column(default=0, nullable=False)
+    trigger_type: Mapped[BlockTrigger] = mapped_column(Enum(BlockTrigger))
+    trigger_value: Mapped[str] = mapped_column(String(255))
 
-    # Уникальность: для одного плейлиста роль на платформе встречается один раз
+    platform: Mapped[Platform] = mapped_column(Enum(Platform), nullable=False)
+
+
+class DonationRules(Base, UUIDMixin, TimestampMixin):
+    __tablename__ = "donation_rules"
+
+    settings_id: Mapped[UUID] = mapped_column(ForeignKey("settings.id", ondelete="CASCADE"))
+    settings: Mapped["Settings"] = relationship(
+        back_populates="donation_rules",
+        lazy="selectin",
+    )
+    platform: Mapped[DonationPlatform] = mapped_column(Enum(DonationPlatform), nullable=False)
+
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    slug: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    currency: Mapped[str] = mapped_column(String(3), default="USD")
+    amount: Mapped[float] = mapped_column(default=5.0, nullable=False)
+
+    priority: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    content_settings: Mapped[dict] = mapped_column(JSONB, nullable=True)
+
     __table_args__ = (
-        UniqueConstraint("playlist_settings_id", "platform", "role_name", name="uq_playlist_platform_role"),
+        Index(
+            "ix_donation_rules_unique_trigger",
+            "settings_id",
+            "platform",
+            "currency",
+            "amount",
+            unique=True,
+        ),
     )
 
 
-class PlaylistContentSettings(Base, UUIDMixin, TimestampMixin):
-    __tablename__ = "playlist_content_settings"
+class ChatRules(Base, UUIDMixin, TimestampMixin):
+    __tablename__ = "chat_rules"
 
-    playlist_settings_id: Mapped[UUID] = mapped_column(ForeignKey("playlist_settings.id", ondelete="CASCADE"))
-    platform: Mapped[str]  # 'twitch', 'youtube'
+    settings_id: Mapped[UUID] = mapped_column(ForeignKey("settings.id", ondelete="CASCADE"))
+    settings: Mapped["Settings"] = relationship(
+        back_populates="chat_rules",
+        lazy="selectin",
+    )
+    platform: Mapped[ChatPlatform] = mapped_column(Enum(ChatPlatform), nullable=False)
 
+    key: Mapped[str] = mapped_column(String(255), nullable=False)
+    priority: Mapped[int] = mapped_column(Integer, nullable=False)
 
-class PlaylistPaymentSettings(Base, UUIDMixin, TimestampMixin):
-    __tablename__ = "playlist_payment_settings"
+    content_settings: Mapped[dict] = mapped_column(JSONB, nullable=True)
+    overrive_order: Mapped[int] = mapped_column(Integer, nullable=True)
 
-    playlist_settings_id: Mapped[UUID] = mapped_column(ForeignKey("playlist_settings.id", ondelete="CASCADE"))
-    provider: Mapped[str]  # 'donation_alerts', 'donate_pay'
-
-    donation_currency_amount: Mapped[float] = mapped_column(default=50.0, nullable=False)
-    currency: Mapped[str] = mapped_column(String(3), default="RUB")
+    __table_args__ = (
+        Index(
+            "ix_chat_rules_unique_trigger",
+            "settings_id",
+            "platform",
+            "key",
+            unique=True,
+        ),
+    )
