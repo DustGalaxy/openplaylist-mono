@@ -4,7 +4,7 @@ import asyncio
 from orm.auth_user import User
 from orm.linked_accounts import LinkedAccounts
 from orm.playlist import Playlist, OrderPlaylistStatus, Order
-from orm.settings import PlaylistSettings
+from orm.settings import Settings
 
 
 async def recreate_db():

@@ -7,7 +7,7 @@ from src.orm.auth_user import User  # noqa: F401
 from src.orm.linked_accounts import LinkedAccounts  # noqa: F401
 from src.orm.order import Order  # noqa: F401
 from src.orm.playlist import Playlist  # noqa: F401
-from src.orm.settings import PlaylistSettings  # noqa: F401
+from src.orm.settings import Settings  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

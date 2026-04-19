@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from _types import Status, Source
+from _types import Status, Platform
 
 
 class DANewOrder(BaseModel):
@@ -13,7 +13,7 @@ class DANewOrder(BaseModel):
     donation_currency_amount: float = 0.0
     yt_video_url: str
     priority: str = "d"
-    source: Source = "da"
+    source: Platform = Platform.DA
 
 
 class TTVNewOrder(BaseModel):
@@ -23,7 +23,7 @@ class TTVNewOrder(BaseModel):
     requester_nickname: str
     yt_video_url: str
     priority: str
-    source: Source = "twitch"
+    source: Platform = Platform.TWITCH
 
 
 class WebNewOrder(BaseModel):
@@ -33,7 +33,7 @@ class WebNewOrder(BaseModel):
     playlist_id: str
     yt_video_url: str
     priority: str
-    source: Source = "web"
+    source: Platform = Platform.WEB
 
 
 class YTNewOrder(BaseModel):
@@ -42,7 +42,9 @@ class YTNewOrder(BaseModel):
     requester_nickname: str
     yt_video_url: str
     priority: str
-    source: Source = "youtube"
+    source: Platform = Platform.YOUTUBE
+
+
 
 
 class OrderNew(BaseModel):
@@ -52,7 +54,7 @@ class OrderNew(BaseModel):
     donation_currency_amount: float = 0.0
     yt_video_id: str
     priority: str
-    source: Source
+    source: Platform
 
 
 class OrderUpdate(BaseModel):
@@ -70,4 +72,4 @@ class HTTPOrderNew(BaseModel):
     requester_nickname: str
     playlist_id: str
     yt_video_id: str
-    source: Source
+    source: Platform

@@ -1,18 +1,18 @@
 from datetime import datetime
-from typing import Annotated
 
-from _types import Platform
-from settings import settings
-from database import get_async_session
+from fastapi import APIRouter, HTTPException, Response
+
 from dto.twitch import CodeDTO
 from dto.user import IntegrationRead, IntegrationType, UserRead
-from fastapi import APIRouter, Depends, HTTPException, Response
-from models.auth_user import AuthUserDomain
+
 from services.auth_service import auth_service
 from services.da_service import auth_da_service
 from services.twitch_service import auth_twitch_service
-from sqlalchemy.ext.asyncio import AsyncSession
+
+from .dependencies import DB_SESSION, CURR_USER
 from utils import find
+from _types import Platform
+from settings import settings
 
 router = APIRouter(prefix="/user")
 
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/user")
 @router.get("/me")
 async def me(
     response: Response,
-    curr_user: Annotated[AuthUserDomain, Depends(auth_service.get_current_user)],
+    curr_user: CURR_USER,
 ):
     token = auth_service.encode_jwt(curr_user.id, curr_user.username)
     response.set_cookie(settings.COOKIE_NAME, token, httponly=True, secure=True, max_age=settings.SESSION_LIVE_TIME)
@@ -50,8 +50,8 @@ async def me(
 
 @router.post("/bots/{type}/connect")
 async def connect_bot(
-    db_session: Annotated[AsyncSession, Depends(get_async_session)],
-    curr_user: Annotated[AuthUserDomain, Depends(auth_service.get_current_user)],
+    db_session: DB_SESSION,
+    curr_user: CURR_USER,
     type: Platform,
 ):
     await auth_service.connect_bot(db_session, curr_user, type)
@@ -60,7 +60,7 @@ async def connect_bot(
 
 @router.get("/integration")
 async def get_integration(
-    curr_user: Annotated[AuthUserDomain, Depends(auth_service.get_current_user)],
+    curr_user: CURR_USER,
 ):
     integrations = auth_service.intergations(curr_user)
     return [IntegrationRead.model_validate(i) for i in integrations]
@@ -68,10 +68,10 @@ async def get_integration(
 
 @router.post("/integration")
 async def integration(
-    db_session: Annotated[AsyncSession, Depends(get_async_session)],
+    db_session: DB_SESSION,
     code: CodeDTO,
     type: IntegrationType,
-    curr_user: Annotated[AuthUserDomain, Depends(auth_service.get_current_user)],
+    curr_user: CURR_USER,
 ):
     if type.type == "twitch":
         await auth_twitch_service.add_integration(db_session, curr_user.id, code.code)
@@ -83,9 +83,9 @@ async def integration(
 
 @router.delete("/integration", status_code=204)
 async def delete_integration(
-    db_session: Annotated[AsyncSession, Depends(get_async_session)],
+    db_session: DB_SESSION,
     type: IntegrationType,
-    curr_user: Annotated[AuthUserDomain, Depends(auth_service.get_current_user)],
+    curr_user: CURR_USER,
 ):
     if type.type == "twitch":
         await auth_twitch_service.delete_integration(db_session, curr_user.id)

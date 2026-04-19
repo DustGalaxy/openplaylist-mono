@@ -1,46 +1,84 @@
-from typing import Literal
+from datetime import datetime
+from typing import Literal, Optional
 from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict
 
 from models.settings import SortSettings
-from _types import Source
+from _types import Platform, DonationPlatform, ChatPlatform
+
+
+class ReadContentSettings(BaseModel):
+    id: UUID
+    settings_id: UUID
+
+    platform: Platform
+    min_views: int
+    min_likes: int
+    max_duration: int
+    track_cooldown: int
+    user_cooldown: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReadBlockList(BaseModel):
+    id: UUID
+    settings_id: UUID
+
+    platform: Platform
+    trigger_type: str
+    trigger_value: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReadDonationRules(BaseModel):
+    id: UUID
+    settings_id: UUID
+
+    platform: DonationPlatform
+    name: str
+    slug: str
+    currency: str = Field("USD", min_length=3, max_length=3)
+    amount: float = Field(5.0, ge=0.0)
+    priority: int
+    content_settings: Optional[dict] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReadChatRules(BaseModel):
+    id: UUID
+    settings_id: UUID
+
+    platform: ChatPlatform
+    key: str
+    priority: int
+    content_settings: Optional[dict] = None
+    overrive_order: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
 
 class ReadPlaylistSettings(BaseModel):
     id: UUID
     playlist_id: UUID
 
-    min_views: int = Field(10_000, ge=0, description="Minimum views required for the playlist")
-    min_likes: int = Field(500, ge=0, description="Minimum likes required for the playlist")
-    max_duration: int = Field(600, ge=0)
-
-    donation_currency_amount: float = Field(50.0, ge=0.0)
-    track_cooldown: int = Field(0, ge=0)
-    user_cooldown: int = Field(2, ge=0)
     max_playlist_size: int = Field(0, ge=0)
-
-    is_public: bool = Field(default=False, description="Indicates if the playlist is public")
-    is_favorite: bool = Field(default=False, description="Indicates if the playlist is marked as favorite")
 
     mode: Literal["flow", "static"]
     repeat_mode: Literal["all", "once", "none"]
     sort_settings: SortSettings
-
-    cost_broacaster: int
-    cost_donater: int
-    cost_vip: int
-    cost_mod: int
-    cost_subscriber: int
-    cost_turbo: int
-    cost_artist: int
-    cost_fonder: int
-    cost_follower: int
-
     cost_mode: Literal["add", "max"]
 
-    is_allow_external_requests: bool
-    allow_sources: list[Source]
-
     track_black_list: list[str] = Field(default_factory=list)
-    user_black_list: list[int] = Field(default_factory=list)
+
+    content_settings: list[ReadContentSettings] = Field(default_factory=list)
+    block_list: list[ReadBlockList] = Field(default_factory=list)
+    donation_rules: list[ReadDonationRules] = Field(default_factory=list)
+    chat_rules: list[ReadChatRules] = Field(default_factory=list)
+
+    created_at: datetime
+    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

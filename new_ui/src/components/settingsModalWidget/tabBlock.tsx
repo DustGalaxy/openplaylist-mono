@@ -20,9 +20,9 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
         </div>
 
         <div className="flex flex-col gap-2 mt-2 w-full">
-          {playlist.settings.user_black_list.length > 0 ? (
+          {playlist.settings.block_list.length > 0 ? (
             <BlockList
-              list={playlist.settings.user_black_list}
+              list={playlist.settings.block_list}
               type="user"
               playlist={playlist}
             />

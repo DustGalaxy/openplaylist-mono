@@ -6,9 +6,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 class Platform(Enum):
     TWITCH = "twitch"
-    DA = "da"
+    DA = "donationalerts"
+    YOUTUBE = "youtube"
     GOOGLE = "google"
+    WEB = "web"
+    GENERAL = "__general__"
 
+
+class ChatPlatform(Enum):
+    TWITCH = "twitch"
+    YOUTUBE = "youtube"
+    WEB = "web"
+
+
+class DonationPlatform(Enum):
+    GENERAL = "__general__"
+    DA = "donationalerts"
 
 
 Status = Literal["in playlist", "removed", "listened", "skipped", "reported"]

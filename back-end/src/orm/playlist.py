@@ -1,11 +1,11 @@
 from uuid import UUID
-from sqlalchemy import String, ForeignKey
+from sqlalchemy import Enum, String, ForeignKey
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ARRAY, UUID as PGUUID, JSONB
 
 from database import Base, UUIDMixin, TimestampMixin
-from _types import Source, Status
+from _types import Status, Platform
 
 
 class Order(Base, UUIDMixin, TimestampMixin):
@@ -24,7 +24,7 @@ class Order(Base, UUIDMixin, TimestampMixin):
     owner_id: Mapped[UUID]
     from_owner: Mapped[bool]
 
-    source: Mapped[Source]
+    source: Mapped[Platform] = mapped_column(Enum(Platform), nullable=False)
 
     extra_data: Mapped[dict] = mapped_column(JSONB, nullable=True)
 
@@ -39,17 +39,14 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(String(255), nullable=True)
 
+    is_public: Mapped[bool] = mapped_column(default=False, nullable=False)
+    is_favorite: Mapped[bool] = mapped_column(default=False, nullable=False)
     tags: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True, default=list)
 
-    now_playing: Mapped[str] = mapped_column(String, nullable=True)
+    allow_sources: Mapped[list[Platform]] = mapped_column(ARRAY(Enum(Platform, native_enum=False)), nullable=True, default=list)
+    is_allow_external_requests: Mapped[bool] = mapped_column(default=False, nullable=False)
 
-    settings: Mapped["PlaylistSettings"] = relationship(  # noqa: F821 # type: ignore
-        "PlaylistSettings",
-        uselist=False,
-        lazy="joined",
-        cascade="all, delete-orphan",
-        single_parent=True,
-    )
+    now_playing: Mapped[str] = mapped_column(String, nullable=True)
 
     order_associations: Mapped[list["OrderPlaylistStatus"]] = relationship(back_populates="playlist", lazy="selectin")
 
@@ -67,7 +64,7 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
     )
 
     def __repr__(self):
-        return f"<Playlist(id={self.id}, name='{self.name}', owner_id={self.owner_id} settings={self.settings}, )>"
+        return f"<Playlist(id={self.id}, name='{self.name}', owner_id={self.owner_id} )>"
 
 
 class OrderPlaylistStatus(Base, TimestampMixin):

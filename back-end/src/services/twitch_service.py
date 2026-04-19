@@ -13,7 +13,7 @@ from repo import UserRepository, LinkedAccountsRepository
 from settings import settings
 
 from dto.twitch import TwitchUserResponse, TwitchAuthResponse
-from models.auth_user import AuthUserCreate, AuthUserDomain, AuthUserUpdate
+from models.auth_user import AuthUserCreate, AuthUserSchema, AuthUserUpdate
 from utils import find
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ class AuthTwitchService:
 
         return TwitchAuthResponse.model_validate(response.json())
 
-    def get_data(self, access_token: str, user: AuthUserDomain | None = None) -> TwitchUserResponse:
+    def get_data(self, access_token: str, user: AuthUserSchema | None = None) -> TwitchUserResponse:
         twitch_acc = find(user.linked_accounts, lambda x: x.platform == Platform.TWITCH) if user else None
 
         response = httpx.get(
@@ -127,7 +127,7 @@ class AuthTwitchService:
         access_token: str,
         refresh_token: str,
         expires_in: int,
-    ) -> AuthUserDomain:
+    ) -> AuthUserSchema:
         created_user = await self.user_repo.create(
             session,
             AuthUserCreate(
@@ -152,7 +152,7 @@ class AuthTwitchService:
         created_user.linked_accounts.append(db_link)
         return created_user
 
-    async def add_integration(self, db_session: AsyncSession, user_id: UUID, code: str) -> AuthUserDomain:
+    async def add_integration(self, db_session: AsyncSession, user_id: UUID, code: str) -> AuthUserSchema:
         try:
             db_user = await self.user_repo.get_one(db_session, user_id, column="id")
             integration = find(db_user.linked_accounts, lambda x: x.platform == self.platform)

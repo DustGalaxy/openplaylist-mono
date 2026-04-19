@@ -7,13 +7,14 @@ from _types import Platform
 from models.linked_accounts import LinkedAccountsDomain
 
 
-class AuthUserDomain(BaseModel):
+class AuthUserSchema(BaseModel):
     id: UUID
 
     last_login: datetime
     username: str
     main_platform: Platform
     linked_accounts: list[LinkedAccountsDomain]
+    vip_expires_at: datetime | None
 
     created_at: datetime
     updated_at: datetime

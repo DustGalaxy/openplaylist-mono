@@ -6,44 +6,47 @@ from simple_repository.abctract import IAsyncCrud
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.order import OrderCreate, OrderDomain
-from models.settings import PlaylistSettingsDomain, PlaylistSettingsPatch, PlaylistSettingsCreate
-from models.playlist import PlaylistDomain, PlaylistCreate, PlaylistPatch
+from models.settings import SettingsSchema, SettingsPatch, SettingsCreate
+from models.playlist import PlaylistSchema, PlaylistCreate, PlaylistPatch
 
 from orm.playlist import Playlist
-from orm.settings import PlaylistSettings
+from orm.settings import Settings
 
-from _types import DeleteStatus
-
-class IPlaylistSettingsRepository(
-    IAsyncCrud[PlaylistSettings, PlaylistSettingsDomain, PlaylistSettingsCreate, PlaylistSettingsPatch]
-):
-    pass
+from _types import DeleteStatus, Platform
 
 
-class IPlaylistRepository(IAsyncCrud[Playlist, PlaylistDomain, PlaylistCreate, PlaylistPatch]):
+class IPlaylistSettingsRepository(IAsyncCrud[Settings, SettingsSchema, SettingsCreate, SettingsPatch]):
     @abstractmethod
-    async def get_active_streamer_playlist(self, session: AsyncSession, owner_id: UUID) -> PlaylistDomain: ...
+    async def get_merged(self, session: AsyncSession, settings_id: UUID) -> SettingsSchema: ...
 
     @abstractmethod
-    async def create_with_settings(
-        self,
-        session: AsyncSession,
-        playlist_data: PlaylistCreate,
-    ) -> PlaylistDomain: ...
+    async def get_by_plst(self, session: AsyncSession, playlist_id: UUID, user_id: UUID) -> SettingsSchema: ...
+
+
+class IPlaylistRepository(IAsyncCrud[Playlist, PlaylistSchema, PlaylistCreate, PlaylistPatch]):
+    @abstractmethod
+    async def get_active_streamer_playlist(self, session: AsyncSession, owner_id: UUID) -> PlaylistSchema: ...
 
     @abstractmethod
-    async def get_user_playlist_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistDomain: ...
+    async def get_user_playlist_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistSchema: ...
+
+    @abstractmethod
+    async def get_by_string(self, session: AsyncSession, query: str) -> list[PlaylistSchema]: ...
 
     @abstractmethod
     async def get_user_playlists_by_sourse(
-        self, session: AsyncSession, owner_id: UUID, source: str
-    ) -> list[PlaylistDomain]: ...
+        self, session: AsyncSession, owner_id: UUID, source: Platform
+    ) -> list[PlaylistSchema]: ...
 
     @abstractmethod
-    async def get_by_string(self, session: AsyncSession, query: str) -> list[PlaylistDomain]: ...
+    async def create_with_settings(self, session: AsyncSession, data: PlaylistCreate) -> PlaylistSchema: ...
 
     @abstractmethod
-    async def add_order_to_playlist(self, session: AsyncSession, playlist_id: UUID, order: OrderCreate) -> OrderDomain: ...
+    async def add_order_to_playlist(
+        self, session: AsyncSession, playlist_id: UUID, order: OrderCreate
+    ) -> OrderDomain: ...
 
     @abstractmethod
-    async def remove_order_from_playlist(self, session: AsyncSession, playlist_id: UUID, order_id: UUID, user_id: UUID, reason: DeleteStatus): ...
+    async def remove_order_from_playlist(
+        self, session: AsyncSession, playlist_id: UUID, order_id: UUID, user_id: UUID, reason: DeleteStatus
+    ): ...

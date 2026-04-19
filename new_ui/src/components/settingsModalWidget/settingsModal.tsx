@@ -6,10 +6,12 @@ import Btn from '../ui/my-btn'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import TabValidation from './tabValidation'
-import TabGeneral from './tabGeneral'
-import TabPriority from './tabPriority'
+import TabBasic from './tabBasic.tsx'
+import ChatRoles from './tabChatRoles.tsx'
+import TabChatPlatformRoles from './tabChatPlatformRoles.tsx'
 import TabBlock from './tabBlock'
 
+import TabDonation from './tabDonation.tsx'
 import type { ClientPlaylist, PlaylistSettings } from '@/types/playlist'
 import {
   Dialog,
@@ -101,10 +103,16 @@ export default function SettingsModal({
             className="w-full flex items-center justify-start bg-transparent px-0 mx-0 gap-1"
           >
             <TabsTrigger className={retroTabStyles} value="general">
-              General
+              Basic
             </TabsTrigger>
             <TabsTrigger className={retroTabStyles} value="validation">
               Validation
+            </TabsTrigger>
+            <TabsTrigger className={retroTabStyles} value="donation">
+              Donation
+            </TabsTrigger>
+            <TabsTrigger className={retroTabStyles} value="chat-roles">
+              Chat Roles
             </TabsTrigger>
             <TabsTrigger className={retroTabStyles} value="priority">
               Priority
@@ -119,7 +127,7 @@ export default function SettingsModal({
 
           {/* <div className="h-[1px] bg-level-3" /> */}
           <TabsContent key="generaltab" value="general" className="h-full">
-            <TabGeneral
+            <TabBasic
               playlist={playlist}
               settings={settings}
               setSettings={setSettings}
@@ -131,11 +139,24 @@ export default function SettingsModal({
               playlist={playlist}
               settings={settings}
               setSettings={setSettings}
-              canRequest={canRequest}
+            />
+          </TabsContent>
+          <TabsContent key="donationtab" value="donation">
+            <TabDonation
+              playlist={playlist}
+              settings={settings}
+              setSettings={setSettings}
+            />
+          </TabsContent>
+          <TabsContent key="chatroles" value="chat-roles">
+            <TabChatPlatformRoles
+              playlist={playlist}
+              settings={settings}
+              setSettings={setSettings}
             />
           </TabsContent>
           <TabsContent key="prioritytab" value="priority">
-            <TabPriority
+            <ChatRoles
               playlist={playlist}
               settings={settings}
               setSettings={setSettings}

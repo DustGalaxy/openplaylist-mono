@@ -5,16 +5,34 @@ from simple_repository.abctract import IdValue
 from simple_repository.exceptions import IntegrityConflictException, RepositoryException, NotFoundException
 
 from sqlalchemy import or_, select, text, update
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-from models.playlist import PlaylistDomain, PlaylistCreate, PlaylistPatch
+from models.playlist import PlaylistSchema, PlaylistCreate, PlaylistPatch
 from orm.playlist import OrderPlaylistStatus, Playlist, Order
 
-from models.settings import PlaylistSettingsDomain, PlaylistSettingsPatch, PlaylistSettingsCreate
-from orm.settings import PlaylistSettings
+from models.settings import (
+    SettingsSchema,
+    SettingsPatch,
+    SettingsCreate,
+    ContentSettingsCreate,
+    ContentSettingsPatch,
+    ContentSettingsSchema,
+    DonationRulesPatch,
+    DonationRulesCreate,
+    DonationRulesSchema,
+    ChatRulesCreate,
+    ChatRulesPatch,
+    ChatRulesSchema,
+    BlockListSchema,
+    BlockListCreate,
+    BlockListPatch,
+)
+from orm.settings import Settings, ContentSettings, DonationRules, ChatRules, BlockList
 
-from models.auth_user import AuthUserDomain, AuthUserCreate, AuthUserUpdate
+
+from models.auth_user import AuthUserSchema, AuthUserCreate, AuthUserUpdate
 from orm.auth_user import User
 
 from models.linked_accounts import LinkedAccountsDomain, LinkedAccountsCreate, LinkedAccountsUpdate
@@ -25,82 +43,40 @@ from exceptions import NotActivePlaylist
 
 from models.order import OrderCreate, OrderDomain
 
-from _types import Platform, DeleteStatus
+from _types import DonationPlatform, Platform, DeleteStatus
 
 
 class PlaylistRepository(
-    crud_factory(Playlist, PlaylistDomain, PlaylistCreate, PlaylistPatch),
+    crud_factory(Playlist, PlaylistSchema, PlaylistCreate, PlaylistPatch),
     IPlaylistRepository,
 ):
-    def to_repr(self, object: Playlist) -> PlaylistDomain:
+    def to_repr(self, object: Playlist) -> PlaylistSchema:
         return self.domain_model.model_validate(object)
 
-    def to_inner(self, data: PlaylistCreate | PlaylistDomain | PlaylistPatch) -> dict:
+    def to_inner(self, data: PlaylistCreate | PlaylistSchema | PlaylistPatch) -> dict:
         return data.model_dump(exclude_unset=True)
 
-    async def get_user_playlists_by_sourse(
-        self, session: AsyncSession, owner_id: UUID, source: str
-    ) -> list[PlaylistDomain]:
-        stmt = (
-            select(Playlist)
-            .join(Playlist.settings)
-            .where(
-                Playlist.owner_id == owner_id,
-                Playlist.settings.has(
-                    PlaylistSettings.allow_sources.contains([source]),
-                ),
-            )
-        )
-        result = await session.execute(stmt)
-        results = result.unique().scalars().all()
-        return [PlaylistDomain.model_validate(res) for res in results]
-
-    async def get_user_playlist_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistDomain:
+    async def get_user_playlist_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistSchema:
         stmt = select(Playlist).where(Playlist.owner_id == owner_id).where(Playlist.name == name)
         result = await session.execute(stmt)
         result = result.unique().scalar_one_or_none()
         if not result:
             raise NotFoundException(f"User({owner_id}) playlist with name: {name}, not found")
-        return PlaylistDomain.model_validate(result)
+        return PlaylistSchema.model_validate(result)
 
-    async def get_active_streamer_playlist(self, session: AsyncSession, owner_id: UUID) -> PlaylistDomain:
+    async def get_active_streamer_playlist(self, session: AsyncSession, owner_id: UUID) -> PlaylistSchema:
         stmt = (
             select(Playlist)
             .where(Playlist.owner_id == owner_id)
-            .join(PlaylistSettings)
-            .where(PlaylistSettings.is_allow_external_requests)
+            .where(Playlist.is_allow_external_requests)
         )
         result = await session.execute(stmt)
         result = result.scalar_one_or_none()
         if not result:
             raise NotActivePlaylist("Active playlist not found")
-        return PlaylistDomain.model_validate(result)
+        return PlaylistSchema.model_validate(result)
 
-    async def create_with_settings(
-        self,
-        session: AsyncSession,
-        playlist_data: PlaylistCreate,
-    ) -> PlaylistDomain:
-        """Create a single entity"""
-        try:
-            db_model = self.sqla_model(**playlist_data.model_dump(exclude_unset=True))
-            db_model.settings = PlaylistSettings()
-            db_model.track_data = []
-            session.add(db_model)
-
-            await session.commit()
-            await session.refresh(db_model)
-            return self.domain_model.model_validate(db_model)
-        except IntegrityError as e:
-            await session.rollback()
-            raise IntegrityConflictException(
-                f"{self.sqla_model.__tablename__} conflicts with existing data: {e}",
-            ) from e
-        except Exception as e:
-            await session.rollback()
-            raise RepositoryException(f"Failed to create {self.sqla_model.__tablename__}: {e}") from e
-
-    async def get_by_string(self, session: AsyncSession, query: str) -> list[PlaylistDomain]:
+    async def get_by_string(self, session: AsyncSession, query: str) -> list[PlaylistSchema]:
         superstring_condition = or_(
             text(f"'{query}' ILIKE ('%' || playlists.name || '%')"),
             text(f"'{query}' ILIKE ('%' || playlists.owner_nickname || '%')"),
@@ -118,7 +94,64 @@ class PlaylistRepository(
         result = await session.execute(stmt)
         result = result.scalars().unique().all()
 
-        return [PlaylistDomain.model_validate(item) for item in result]
+        return [PlaylistSchema.model_validate(item) for item in result]
+
+    async def get_user_playlists_by_sourse(
+        self, session: AsyncSession, owner_id: UUID, source: Platform
+    ) -> list[PlaylistSchema]:
+        stmt = select(Playlist).where(Playlist.owner_id == owner_id).where(Playlist.allow_sources.contains(source))
+        result = await session.execute(stmt)
+        result = result.unique().scalars().all()
+        return [PlaylistSchema.model_validate(item) for item in result]
+
+    async def create_with_settings(self, session: AsyncSession, data: PlaylistCreate) -> PlaylistSchema:
+        try:
+            new_playlist = Playlist(**data.model_dump())
+            session.add(new_playlist)
+            await session.flush()
+
+            new_settings = Settings(playlist_id=new_playlist.id)
+            session.add(new_settings)
+            await session.flush()
+
+            general_content_settings = ContentSettingsCreate(
+                settings_id=new_settings.id,
+                platform=Platform.GENERAL,
+                min_views=10_000,
+                min_likes=500,
+                max_duration=600,
+                track_cooldown=0,
+                user_cooldown=2,
+            )
+            general_donation_rule = DonationRulesCreate(
+                settings_id=new_settings.id,
+                platform=DonationPlatform.GENERAL,
+                name="General",
+                slug="general",
+                currency="USD",
+                amount=5.0,
+                priority=0,
+            )
+            session.add_all(
+                [
+                    DonationRules(**general_donation_rule.model_dump()),
+                    ContentSettings(**general_content_settings.model_dump()),
+                ]
+            )
+
+            await session.commit()
+            await session.refresh(new_settings)
+            await session.refresh(new_playlist)
+
+            return self.domain_model.model_validate(new_playlist)
+        except IntegrityError as e:
+            await session.rollback()
+            raise IntegrityConflictException(
+                f"{self.sqla_model.__tablename__} conflicts with existing data: {e}",
+            ) from e
+        except Exception as e:
+            await session.rollback()
+            raise RepositoryException(f"Unexpected error in model {self.sqla_model.__tablename__}: {e}") from e
 
     async def add_order_to_playlist(self, session: AsyncSession, playlist_id: UUID, order: OrderCreate) -> OrderDomain:
         try:
@@ -194,7 +227,7 @@ class PlaylistRepository(
         data: PlaylistPatch,
         id_: IdValue,
         column: str = "id",
-    ) -> PlaylistDomain:
+    ) -> PlaylistSchema:
         """Patch entity by id and return the updated model"""
         try:
             await self.get_one(session, id_, column)
@@ -227,30 +260,134 @@ class PlaylistRepository(
 playlist_repository = PlaylistRepository()
 
 
-class PlaylistSettingsRepository(
-    crud_factory(PlaylistSettings, PlaylistSettingsDomain, PlaylistSettingsCreate, PlaylistSettingsPatch),
-    IPlaylistSettingsRepository,
+class ContentSettingsRepository(
+    crud_factory(ContentSettings, ContentSettingsSchema, ContentSettingsCreate, ContentSettingsPatch),
 ):
-    def to_inner(self, data: PlaylistSettingsCreate | PlaylistSettingsDomain | PlaylistSettingsPatch) -> dict:
+    def to_inner(self, data: ContentSettingsCreate | ContentSettingsSchema | ContentSettingsPatch) -> dict:
         return data.model_dump(exclude_unset=True)
 
-    def to_repr(self, object: PlaylistSettings) -> PlaylistSettingsDomain:
+    def to_repr(self, object: ContentSettings) -> ContentSettingsSchema:
         return self.domain_model.model_validate(object)
+
+
+content_settings_repository = ContentSettingsRepository()
+
+
+class ChatRulesRepository(
+    crud_factory(ChatRules, ChatRulesSchema, ChatRulesCreate, ChatRulesPatch),
+):
+    def to_inner(self, data: ChatRulesCreate | ChatRulesSchema | ChatRulesPatch) -> dict:
+        return data.model_dump(exclude_unset=True)
+
+    def to_repr(self, object: ChatRules) -> ChatRulesSchema:
+        return self.domain_model.model_validate(object)
+
+    async def reorder(self, session: AsyncSession, id_list: list[UUID], settings_id: UUID):
+        try:
+            stmt = select(ChatRules).where(ChatRules.settings_id == settings_id, ChatRules.id.in_(id_list))
+            result = await session.execute(stmt)
+            result = result.unique().scalars().all()
+
+            for i, id in enumerate(id_list):
+                for item in result:
+                    if item.id == id:
+                        item.overrive_order = i
+            await session.commit()
+            return True
+        except IntegrityError as e:
+            await session.rollback()
+            raise IntegrityConflictException(
+                f"{self.sqla_model.__tablename__} conflicts with existing data: {e}",
+            )
+        except Exception as e:
+            await session.rollback()
+            raise RepositoryException(f"Unexpected error in model {self.sqla_model.__tablename__}: {e}") from e
+
+
+chat_rules_repository = ChatRulesRepository()
+
+
+class DonationRulesRepository(
+    crud_factory(DonationRules, DonationRulesSchema, DonationRulesCreate, DonationRulesPatch),
+):
+    def to_inner(self, data: DonationRulesCreate | DonationRulesSchema | DonationRulesPatch) -> dict:
+        return data.model_dump(exclude_unset=True)
+
+    def to_repr(self, object: DonationRules) -> DonationRulesSchema:
+        return self.domain_model.model_validate(object)
+
+
+donation_rules_repository = DonationRulesRepository()
+
+
+class BlockListRepository(
+    crud_factory(BlockList, BlockListSchema, BlockListCreate, BlockListPatch),
+):
+    def to_inner(self, data: BlockListCreate | BlockListSchema | BlockListPatch) -> dict:
+        return data.model_dump(exclude_unset=True)
+
+    def to_repr(self, object: BlockList) -> BlockListSchema:
+        return self.domain_model.model_validate(object)
+
+
+user_black_list_repository = BlockListRepository()
+
+
+class PlaylistSettingsRepository(
+    crud_factory(Settings, SettingsSchema, SettingsCreate, SettingsPatch),
+    IPlaylistSettingsRepository,
+):
+    def to_inner(self, data: SettingsCreate | SettingsSchema | SettingsPatch) -> dict:
+        return data.model_dump(exclude_unset=True)
+
+    def to_repr(self, object: Settings) -> SettingsSchema:
+        return self.domain_model.model_validate(object)
+
+    async def get_by_plst(self, session: AsyncSession, playlist_id: UUID, user_id: UUID) -> SettingsSchema:
+        stmt = (
+            select(Settings)
+            .join(Playlist, Settings.playlist_id == Playlist.id)
+            .where(Settings.playlist_id == playlist_id, Playlist.owner_id == user_id)
+        )
+        result = await session.execute(stmt)
+        result = result.unique().scalar_one_or_none()
+        if not result:
+            raise NotFoundException()
+        return SettingsSchema.model_validate(result)
+
+    async def get_merged(self, session: AsyncSession, settings_id: UUID) -> SettingsSchema:
+
+        stmt = (
+            select(Settings)
+            .options(
+                selectinload(Settings.content_settings),
+                selectinload(Settings.donation_rules),
+                selectinload(Settings.chat_rules),
+                selectinload(Settings.block_list),
+            )
+            .where(Settings.id == settings_id)
+        )
+
+        result = await session.execute(stmt)
+        result = result.unique().scalar_one_or_none()
+        if not result:
+            raise NotFoundException()
+        return SettingsSchema.model_validate(result)
 
 
 playlist_settings_repository = PlaylistSettingsRepository()
 
 
-class UserRepository(crud_factory(User, AuthUserDomain, AuthUserCreate, AuthUserUpdate)):
-    def to_inner(self, data: AuthUserCreate | AuthUserDomain | AuthUserUpdate) -> dict:
+class UserRepository(crud_factory(User, AuthUserSchema, AuthUserCreate, AuthUserUpdate)):
+    def to_inner(self, data: AuthUserCreate | AuthUserSchema | AuthUserUpdate) -> dict:
         return data.model_dump(exclude_unset=True)
 
-    def to_repr(self, object: User) -> AuthUserDomain:
+    def to_repr(self, object: User) -> AuthUserSchema:
         return self.domain_model.model_validate(object)
 
     async def get_user_by_link(
         self, session: AsyncSession, platform: Platform, platform_user_id: str
-    ) -> AuthUserDomain:
+    ) -> AuthUserSchema:
         stmt = (
             select(User)
             .join(LinkedAccounts)
@@ -264,7 +401,7 @@ class UserRepository(crud_factory(User, AuthUserDomain, AuthUserCreate, AuthUser
                 f"{self.sqla_model.__tablename__} with platform_user_id={platform_user_id} and platform={platform} not found"
             )
 
-        return AuthUserDomain.model_validate(user)
+        return AuthUserSchema.model_validate(user)
 
     async def patch(
         self,
@@ -272,7 +409,7 @@ class UserRepository(crud_factory(User, AuthUserDomain, AuthUserCreate, AuthUser
         data: AuthUserUpdate,
         id_: IdValue,
         column: str = "id",
-    ) -> AuthUserDomain:
+    ) -> AuthUserSchema:
         """Patch entity by id and return the updated model"""
         try:
             await self.get_one(session, id_, column)

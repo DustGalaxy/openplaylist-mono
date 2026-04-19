@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
-from _types import Status, Source
+from _types import Status, Platform
 
 
 class WebExtraData(BaseModel):
@@ -22,15 +22,16 @@ class TTVExtraData(BaseModel):
 class DAExtraData(BaseModel):
     requester_id: int
     donation_currency_amount: float
+    currency_code: str
 
 
 ExtraData = TTVExtraData | DAExtraData | YTExtraData | WebExtraData
 
-STRATEGIES: dict[str, Type[ExtraData]] = {
-    "twitch": TTVExtraData,
-    "youtube": YTExtraData,
-    "web": WebExtraData,
-    "da": DAExtraData,
+STRATEGIES: dict[Platform, Type[ExtraData]] = {
+    Platform.TWITCH: TTVExtraData,
+    Platform.YOUTUBE: YTExtraData,
+    Platform.WEB: WebExtraData,
+    Platform.DA: DAExtraData,
 }
 
 
@@ -49,7 +50,7 @@ class OrderDomain(BaseModel):
     views: int
     likes: int
 
-    source: Source
+    source: Platform
 
     extra_data: ExtraData
 
@@ -67,7 +68,7 @@ class OrderDomain(BaseModel):
             source: str = getattr(data, "source", "")
             extra_data = getattr(data, "extra_data", None)
 
-        strategy_class = STRATEGIES.get(source)
+        strategy_class = STRATEGIES.get(Platform(source))
         if not strategy_class:
             raise ValueError(f"Unknown source strategy: {source}")
 
@@ -103,4 +104,4 @@ class OrderCreate(BaseModel):
 
     extra_data: ExtraData
 
-    source: Source
+    source: Platform

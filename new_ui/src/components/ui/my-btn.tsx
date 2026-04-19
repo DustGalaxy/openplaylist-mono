@@ -6,11 +6,13 @@ export default function Btn({
   onClick,
   className,
   disabled = false,
+  ...props
 }: {
   text: string | React.ReactNode
   onClick?: () => void
   className?: string
   disabled?: boolean
+  props?: React.ButtonHTMLAttributes<HTMLButtonElement>
 }) {
   return (
     <button
@@ -50,6 +52,7 @@ export default function Btn({
       `,
         className,
       )}
+      {...props}
     >
       {text}
     </button>
