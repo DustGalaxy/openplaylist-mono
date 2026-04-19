@@ -82,5 +82,5 @@ async def handle_order_created(
             playlist_id,
         )
 
-    for errors, playlist_name in errors:
+    for error_list, playlist_name in errors:
         ...  # TODO process errors and notify user about them

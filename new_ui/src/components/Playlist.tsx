@@ -5,9 +5,9 @@ import {
   List,
   RefreshCcw,
   Settings,
+  Share2 as ShareIcon,
   ThumbsUp,
   User,
-  Share2 as ShareIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import OrderCard from './order-card'
@@ -59,11 +59,9 @@ const InfoCard = ({
 }
 
 export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
-  const [loading, setLoading] = React.useState(true)
-
   const [toggled, setToggled] = React.useState(false)
   const [activePlst, setActivePlst] = React.useState(
-    playlist.settings.is_allow_external_requests,
+    playlist.is_allow_external_requests,
   )
 
   const [repeatMode, setRepeatMode] = React.useState(
@@ -74,7 +72,13 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
     playlist.now_playing?.yt_video_id,
   )
 
+  const [selectedContentSettingIndex, setSelectedContentSettingIndex] =
+    React.useState(0)
+
   const { playNext, requestPlSettings, playPrev } = useMusicStore()
+
+  const contentSettings =
+    playlist.settings.content_settings[selectedContentSettingIndex]
 
   useEffect(() => {
     setNowPlaying(playlist.now_playing?.yt_video_id)
@@ -95,6 +99,23 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
         />
 
         <div className="w-full gap-4 grid ">
+          {playlist.settings.content_settings.length > 1 && (
+            <div className="flex gap-2 flex-wrap">
+              {playlist.settings.content_settings.map((setting, index) => (
+                <Btn
+                  key={index}
+                  text={setting.platform}
+                  className={`px-3 py-1 text-sm ${
+                    selectedContentSettingIndex === index
+                      ? 'bg-blue-600'
+                      : 'bg-level-2'
+                  }`}
+                  onClick={() => setSelectedContentSettingIndex(index)}
+                />
+              ))}
+            </div>
+          )}
+
           <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-4 ">
             <InfoCard
               icon={<Settings size={16} />}
@@ -104,27 +125,27 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
             <InfoCard
               icon={<Eye size={16} />}
               label="Min views"
-              value={playlist.settings.min_views}
+              value={contentSettings.min_views}
             />
             <InfoCard
               icon={<ThumbsUp size={16} />}
               label="Min likes"
-              value={playlist.settings.min_likes}
+              value={contentSettings.min_likes}
             />
             <InfoCard
               icon={<Clock size={16} />}
               label="Max duration"
-              value={`${playlist.settings.max_duration} sec`}
+              value={`${contentSettings.max_duration} sec`}
             />
             <InfoCard
               icon={<RefreshCcw size={16} />}
               label="Track CD"
-              value={`${playlist.settings.track_cooldown}m`}
+              value={`${contentSettings.track_cooldown}m`}
             />
             <InfoCard
               icon={<User size={16} />}
               label="User CD"
-              value={`${playlist.settings.user_cooldown}m`}
+              value={`${contentSettings.user_cooldown}m`}
             />
             <InfoCard
               icon={<List size={16} />}
