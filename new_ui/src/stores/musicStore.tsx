@@ -11,6 +11,7 @@ import type {
   InputPlaylist,
   Order,
   PlayNow,
+  PlaylistPatch,
   PlaylistSettings,
   SocketLike,
   Track,
@@ -18,6 +19,7 @@ import type {
 import {
   addTrackToPlaylist,
   changePlaylistSettings,
+  patchPlaylist,
   postPlayNow,
   removeTrackFromPlaylist,
 } from '@/api/api-playlist'
@@ -86,6 +88,9 @@ type StoreState = {
     settings: Partial<PlaylistSettings>,
   ) => Promise<void>
   syncPlSettings: (playlistId: string, settings: PlaylistSettings) => void
+
+  requestPlaylistPatch: (id: string, plst: PlaylistPatch) => Promise<void>
+  syncPlaylistPatch: (plst: ClientPlaylist) => void
 
   // flags & sort
   sortPlaylist: (plst: ClientPlaylist) => ClientPlaylist
@@ -365,6 +370,24 @@ export const useMusicStore = create<StoreState>((set, get) => {
       if (pl.now_playing?.id === orderId) {
         get().playNext(pl, 'removed')
       }
+    },
+
+    async requestPlaylistPatch(id: string, plst: PlaylistPatch) {
+      const response = await patchPlaylist(id, plst)
+      get().syncPlaylistPatch(response)
+    },
+
+    syncPlaylistPatch(plst) {
+      set((state) => ({
+        playlists: state.playlists.map((p) =>
+          p.id === plst.id
+            ? {
+                ...p,
+                plst,
+              }
+            : p,
+        ),
+      }))
     },
 
     async requestPlSettings(playlist_id, settings) {

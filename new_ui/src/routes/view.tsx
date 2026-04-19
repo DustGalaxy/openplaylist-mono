@@ -24,7 +24,7 @@ export const Route = createFileRoute('/view')({
 
       if (plst.now_playing) {
         plst.now_playing = plst.track_data.find(
-          (t) => t.id === plst.now_playing,
+          (t) => t.id === plst.now_playing?.id,
         )
         if (!plst.now_playing) {
           plst.now_playing = undefined

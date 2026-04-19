@@ -7,17 +7,21 @@ import type { ClientPlaylist, PlaylistSettings } from '@/types/playlist'
 
 const TabBasic = ({
   playlist,
-  setSettings,
-  canRequest,
+  setPlst,
+  canPatchPlaylist,
   settings,
+  setSettings,
+  canPatchSettings,
 }: {
   playlist: ClientPlaylist
+  setPlst: React.Dispatch<React.SetStateAction<ClientPlaylist>>
+  canPatchPlaylist: React.RefObject<boolean>
   setSettings: React.Dispatch<React.SetStateAction<PlaylistSettings>>
-  canRequest: React.RefObject<boolean>
+  canPatchSettings: React.RefObject<boolean>
   settings: PlaylistSettings
 }) => {
   const [plstMode, setPlstMode] = React.useState(playlist.settings.mode)
-  const [privacy, setPrivacy] = React.useState(playlist.is_public)
+  const [isPublic, setIsPublic] = React.useState(playlist.is_public)
   return (
     <div>
       <div className="grid gap-4">
@@ -30,11 +34,11 @@ const TabBasic = ({
               if (e === 'flow') {
                 setPlstMode('flow')
                 setSettings({ ...settings, mode: 'flow' })
-                canRequest.current = true
+                canPatchSettings.current = true
               } else if (e === 'static') {
                 setPlstMode('static')
                 setSettings({ ...settings, mode: 'static' })
-                canRequest.current = true
+                canPatchSettings.current = true
               }
             }}
           >
@@ -86,17 +90,23 @@ const TabBasic = ({
         <Label className=" text-lg">Privacy</Label>
 
         <RadioGroup
-          defaultValue={privacy ? 'public' : 'private'}
+          defaultValue={isPublic ? 'public' : 'private'}
           className="flex gap-0 justify-end"
           onValueChange={(e) => {
             if (e === 'public') {
-              setPrivacy(true)
-              setSettings({ ...settings, is_public: true })
-              canRequest.current = true
+              setIsPublic(true)
+              setPlst({
+                ...playlist,
+                is_public: true,
+              })
+              canPatchPlaylist.current = true
             } else if (e === 'private') {
-              setPrivacy(false)
-              setSettings({ ...settings, is_public: false })
-              canRequest.current = true
+              setIsPublic(false)
+              setPlst({
+                ...playlist,
+                is_public: false,
+              })
+              canPatchPlaylist.current = true
             }
           }}
         >
@@ -111,7 +121,7 @@ const TabBasic = ({
             />
             <Label
               htmlFor="public-id"
-              className={`${privacy ? 'text-shadow-accent-1 text-shadow-md font-bold ' : ''} 
+              className={`${isPublic ? 'text-shadow-accent-1 text-shadow-md font-bold ' : ''} 
             flex cursor-pointer transition-all duration-100 text-lg`}
             >
               PUBLIC
@@ -128,7 +138,7 @@ const TabBasic = ({
             />
             <Label
               htmlFor="private-id"
-              className={`${!privacy ? 'text-shadow-accent-3 text-shadow-md font-bold' : ''} 
+              className={`${!isPublic ? 'text-shadow-accent-3 text-shadow-md font-bold' : ''} 
             cursor-pointer transition-all duration-100 text-lg`}
             >
               PRIVATE
@@ -156,11 +166,11 @@ const TabBasic = ({
           onValueChange={(value) => {
             console.log('ToggleGroup value:', value)
 
-            setSettings({
-              ...settings,
+            setPlst({
+              ...playlist,
               allow_sources: value,
             })
-            canRequest.current = true
+            canPatchPlaylist.current = true
           }}
           className="border-2 border-level-3 rounded-(--rounded-std) p-[1px] w-full bg-level-2"
         >

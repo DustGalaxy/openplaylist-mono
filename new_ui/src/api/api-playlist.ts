@@ -1,5 +1,10 @@
 import { v4 as uuidv4 } from 'uuid'
-import type { ClientPlaylist, Order, PlaylistSettings } from '@/types/playlist'
+import type {
+  ClientPlaylist,
+  Order,
+  PlaylistPatch,
+  PlaylistSettings,
+} from '@/types/playlist'
 import apiClient from '@/lib/axios'
 import { useAuthStore } from '@/stores/authStore'
 import { getConfig, removeNullAndUndefined } from '@/lib/utils'
@@ -53,12 +58,25 @@ export const changePlaylistActive = async (
   return response
 }
 
+export const patchPlaylist = async (
+  playlist_id: string,
+  data: PlaylistPatch,
+) => {
+  const config = getConfig()
+  const response = await apiClient(config.PLST_API_URL + `/${playlist_id}`, {
+    method: 'PATCH',
+    withCredentials: true,
+    data: removeNullAndUndefined(data),
+  })
+  return response.data as ClientPlaylist
+}
+
 export const changePlaylistPriority = async (
   id: string,
   prioriry_mode: boolean,
 ) => {
   const config = getConfig()
-  const response = await apiClient(config.PLST_API_URL + `/${id}/settings`, {
+  const response = await apiClient(config.AUTH_API_URL + `/settings/${id}`, {
     method: 'PATCH',
     withCredentials: true,
     data: {
@@ -105,7 +123,7 @@ export const changePlaylistSettings = async (
 ): Promise<PlaylistSettings> => {
   const config = getConfig()
   const response = await apiClient(
-    config.PLST_API_URL + `/${playlist_id}/settings`,
+    config.AUTH_API_URL + `/settings/${playlist_id}`,
     {
       method: 'PATCH',
       withCredentials: true,
