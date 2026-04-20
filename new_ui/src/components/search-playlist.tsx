@@ -36,18 +36,18 @@ const SearchPlaylist = () => {
         {playlists.map((playlist: any) => (
           <div
             key={playlist.id}
-            className="text-white flex flex-col items-start bg-level-2 p-4 gap-1 rounded-(--rounded-std)"
+            className="text-text-main flex flex-col items-start bg-level-2 p-4 gap-1 rounded-(--rounded-std)"
           >
             <div className="font-bold">
               <a href={`/view?p=${playlist.id}`}>{playlist.name}</a>
             </div>
             <div className="">{playlist.owner_nickname}</div>
-            <div className="text-muted-foreground text-sm">
+            <div className="text-text-secondary text-sm">
               {playlist.discription || 'Нет описания'}
             </div>
           </div>
         ))}
-        {notFound && <div className="text-white">Плейлисты не найдены</div>}
+        {notFound && <div className="text-text-main">Плейлисты не найдены</div>}
       </div>
     </div>
   )

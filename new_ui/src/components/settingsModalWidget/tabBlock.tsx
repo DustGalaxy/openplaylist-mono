@@ -27,7 +27,7 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
               playlist={playlist}
             />
           ) : (
-            <div className="flex text-muted-foreground text-sm justify-center w-full">
+            <div className="flex text-text-secondary text-sm justify-center w-full">
               <p>No users block.</p>
             </div>
           )}
@@ -41,7 +41,7 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
               playlist={playlist}
             />
           ) : (
-            <div className="flex text-muted-foreground text-sm justify-center w-full">
+            <div className="flex text-text-secondary text-sm justify-center w-full">
               <p>No tracks block.</p>
             </div>
           )}

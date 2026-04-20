@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import type {
   ClientPlaylist,
+  InputPlaylist,
   Order,
   PlaylistPatch,
   PlaylistSettings,
@@ -11,7 +12,7 @@ import { getConfig, removeNullAndUndefined } from '@/lib/utils'
 
 export const fetchPlaylistPublic = async (
   playlist_id: string,
-): Promise<ClientPlaylist | null> => {
+): Promise<InputPlaylist | null> => {
   const config = getConfig()
   const response = await apiClient(
     config.PLST_API_URL + `/${playlist_id}/public`,
@@ -43,16 +44,13 @@ export const changePlaylistActive = async (
   is_active: boolean,
 ) => {
   const config = getConfig()
-  const response = await apiClient(
-    config.PLST_API_URL + `/${playlist_id}/settings`,
-    {
-      method: 'PATCH',
-      withCredentials: true,
-      data: {
-        is_allow_external_requests: !is_active,
-      },
+  const response = await apiClient(config.PLST_API_URL + `/${playlist_id}`, {
+    method: 'PATCH',
+    withCredentials: true,
+    data: {
+      is_allow_external_requests: !is_active,
     },
-  )
+  })
     .then((res) => res.data)
     .catch((error) => {})
   return response

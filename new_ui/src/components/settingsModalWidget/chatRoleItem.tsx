@@ -129,7 +129,7 @@ const ChatRoleItem = ({
             )}
           </>
         )}
-        <span className="text-sm font-medium truncate">
+        <span className="text-sm text-text-main font-medium truncate">
           {roleData?.name || localRole.key}
         </span>
       </div>
@@ -144,7 +144,7 @@ const ChatRoleItem = ({
           dir="rtl"
           ref={priorityInputRef}
           value={localRole.priority || 0}
-          className="border-0 bg-level-2 focus-visible:ring-0 rounded-r-none px-1 text-xs w-10 h-7
+          className="border-0 bg-level-2 text-text-main focus-visible:ring-0 rounded-r-none px-1 text-xs w-10 h-7
             [appearance:textfield] 
             [&::-webkit-inner-spin-button]:m-0 
             [&::-webkit-inner-spin-button]:appearance-none 
@@ -154,19 +154,22 @@ const ChatRoleItem = ({
         />
         <UpDownBtn
           getInputRef={() => priorityInputRef.current}
-          className="h-7 rounded-r-xl"
+          className="h-7 rounded-r-(--rounded-std) rounded-l-none overflow-clip"
         />
       </div>
 
       {/* Delete button */}
-      <MyBtn
-        text="✕"
-        onClick={handleDelete}
-        className="px-2 h-7 text-xs bg-level-2 border border-level-3
-         hover:bg-red-900/30 text-red-400 flex-shrink-0
-         "
+      <button
+        onClick={() => {
+          handleDelete()
+        }}
+        className="px-2 h-6 text-xs 
+                text-text-main/70 cursor-pointer opacity-80 hover:opacity-100 transition-opacity
+               "
         onPointerDown={(e) => e.stopPropagation()}
-      />
+      >
+        ✕
+      </button>
     </div>
   )
 }

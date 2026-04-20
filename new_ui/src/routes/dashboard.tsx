@@ -92,7 +92,7 @@ function RouteComponent() {
   }, [isLoading])
 
   return (
-    <div className="bg-level-1 min-h-[90vh] h-full text-white w-full">
+    <div className="bg-level-1 min-h-[90vh] mb-14 h-full text-text-main w-full">
       {/* <div className="relative flex  overflow-hidden border-2 border-dashed border-level-3 rounded-(--rounded-std) mx-4 my-2">
         <p className=" inline-block whitespace-pre animate-marquee ">{text2}</p>
       </div> */}
@@ -100,7 +100,7 @@ function RouteComponent() {
       <div className="px-4">
         <Tabs className="w-full ">
           <div
-            className="w-full text-center text-white  rounded-[var(--rounded-std)] 
+            className="w-full text-center text-text-main  rounded-[var(--rounded-std)] 
            gap-1 group  transition-all
           "
           >

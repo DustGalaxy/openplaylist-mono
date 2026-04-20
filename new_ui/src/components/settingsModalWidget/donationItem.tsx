@@ -95,7 +95,7 @@ const DonationItem = ({
       <div className="grid grid-cols-2 gap-1 sm:gap-2">
         {/* Name */}
         <div className="col-span-1 flex flex-col gap-1">
-          <Label className="text-xs text-muted-foreground">Name</Label>
+          <Label className="text-xs text-text-secondary">Name</Label>
           <Input
             value={localRule.name || ''}
             placeholder="Rule name"
@@ -106,11 +106,11 @@ const DonationItem = ({
 
         {/* Slug */}
         <div className="col-span-1 flex flex-col gap-1">
-          <Label className="text-xs text-muted-foreground">Slug</Label>
+          <Label className="text-xs text-text-secondary">Slug</Label>
           <Input
             value={localRule.slug || ''}
             placeholder="rule-slug"
-            className="text-sm sm:text-base bg-level-2 border-0"
+            className="text-sm text-text-main sm:text-base bg-level-2 border-0"
             onChange={(e) => handleInputChange('slug', e.target.value)}
           />
         </div>
@@ -120,7 +120,7 @@ const DonationItem = ({
       <div className="grid grid-cols-3 gap-2 sm:gap-3">
         {/* Amount */}
         <div className="col-span-1 flex flex-col gap-1">
-          <Label className="text-xs text-muted-foreground">Amount</Label>
+          <Label className="text-xs text-text-secondary">Amount</Label>
           <div className="flex rounded-[--rounded-std] items-center gap-0 overflow-hidden">
             <Input
               type="number"
@@ -135,13 +135,16 @@ const DonationItem = ({
                 [&::-webkit-outer-spin-button]:appearance-none"
               onChange={(e) => handleInputChange('amount', e.target.value)}
             />
-            <UpDownBtn getInputRef={() => inputRef.current} />
+            <UpDownBtn
+              getInputRef={() => inputRef.current}
+              className="rounded-r-(--rounded-std) rounded-l-none overflow-clip"
+            />
           </div>
         </div>
 
         {/* Currency */}
         <div className="col-span-1 flex flex-col gap-1">
-          <Label className="text-xs text-muted-foreground">Currency</Label>
+          <Label className="text-xs text-text-secondary">Currency</Label>
           <CurrencySelect
             name="currency"
             value={localRule.currency}
@@ -160,7 +163,7 @@ const DonationItem = ({
 
         {/* Priority */}
         <div className="col-span-1 flex flex-col gap-1">
-          <Label className="text-xs text-muted-foreground">Priority</Label>
+          <Label className="text-xs text-text-secondary">Priority</Label>
           <div className="flex rounded-[--rounded-std] items-center gap-0 overflow-hidden">
             <Input
               type="number"
@@ -175,21 +178,26 @@ const DonationItem = ({
                 [&::-webkit-outer-spin-button]:appearance-none"
               onChange={(e) => handleInputChange('priority', e.target.value)}
             />
-            <UpDownBtn getInputRef={() => priorityInputRef.current} />
+            <UpDownBtn
+              getInputRef={() => priorityInputRef.current}
+              className="rounded-r-(--rounded-std) rounded-l-none overflow-clip"
+            />
           </div>
         </div>
       </div>
-      <div className=" absolute top-0.5 right-0.5">
-        <MyBtn
-          text="✕"
+
+      <div className=" absolute top-0 right-0.5">
+        <button
           onClick={() => {
             handleDelete()
           }}
-          className="px-2 h-7 text-xs bg-level-2 border border-level-3
-               hover:bg-red-900/30 text-red-400 flex-shrink-0 
+          className="px-2 h-6 text-xs 
+                text-text-main/70 cursor-pointer opacity-80 hover:opacity-100 transition-opacity
                "
           onPointerDown={(e) => e.stopPropagation()}
-        />
+        >
+          ✕
+        </button>
       </div>
     </div>
   )

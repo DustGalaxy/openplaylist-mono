@@ -147,7 +147,7 @@ export default function OrderCard({
           <div className="text-[18px] font-semibold text-left truncate">
             {track.title}
           </div>
-          <div className="text-[16px] text-[#888888] text-left flex gap-1 items-center">
+          <div className="text-[16px] text-text-secondary text-left flex gap-1 items-center">
             <Person width={20} height={20} /> {track.requester_nickname}
           </div>
           {/* date + priority + btn grid */}

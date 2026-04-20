@@ -55,7 +55,7 @@ export function ExpandingInputButtons({
               setYoutubeurl('')
             }
           }}
-          className=" text-white px-1 bg-level-2 transition-all duration-300"
+          className=" text-text-main px-1 bg-level-2 transition-all duration-300"
         />
         {visibleInput === 'input1' && (
           <Input
@@ -63,7 +63,7 @@ export function ExpandingInputButtons({
             value={youtubeurl}
             onChange={(e) => setYoutubeurl(e.target.value)}
             placeholder="Paste url here"
-            className={`p-2 border-[2px] border-level-3 rounded-(--rounded-std) bg-level-2 text-white overflow-hidden ${animationClass}`}
+            className={`p-2 border-[2px] border-level-3 rounded-(--rounded-std) bg-level-2 text-text-main overflow-hidden ${animationClass}`}
           />
         )}
       </div>
@@ -73,13 +73,13 @@ export function ExpandingInputButtons({
         <Btn
           text={<Search />}
           onClick={() => handleToggle('input2')}
-          className=" text-white px-1  bg-level-2 transition-all duration-300"
+          className=" text-text-main px-1  bg-level-2 transition-all duration-300"
         />
         {visibleInput === 'input2' && (
           <Input
             type="text"
             placeholder="Search"
-            className={`p-2 border-[2px] border-level-3 rounded-(--rounded-std) bg-level-2 text-white overflow-hidden ${animationClass}`}
+            className={`p-2 border-[2px] border-level-3 rounded-(--rounded-std) bg-level-2 text-text-main overflow-hidden ${animationClass}`}
           />
         )}
       </div>

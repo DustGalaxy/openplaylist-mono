@@ -13,7 +13,7 @@ const BlockItem = ({
 }) => {
   return (
     <div className="flex gap-2 justify-between border-1 rounded-(--rounded-std) border-level-3">
-      <p className="text-white flex items-center px-2 py-1">{text}</p>
+      <p className="text-text-main flex items-center px-2 py-1">{text}</p>
       <button
         onClick={async () => {
           await unBlockCallback(text)

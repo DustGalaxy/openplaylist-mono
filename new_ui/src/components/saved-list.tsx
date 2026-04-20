@@ -15,7 +15,7 @@ export default function SavedList({ playlist }: { playlist: ClientPlaylist }) {
           />
         ))
       ) : (
-        <p className="text-muted-foreground">No saved tracks</p>
+        <p className="text-text-secondary">No saved tracks</p>
       )}
     </div>
   )
