@@ -119,7 +119,7 @@ export default function SettingsModal({
           onClick={() => setCountToDelete(3)}
         />
       </DialogTrigger>
-      <DialogContent className="max-w-[425px] md:max-w-[1200px] bg-level-1 border-level-3 text-white h-[700px] overflow-scroll">
+      <DialogContent className="max-w-[425px] md:max-w-[1200px] bg-level-1 border-level-3 text-text-main h-[700px] overflow-scroll">
         <Tabs className="w-full flex justify-start min-h-full">
           <DialogHeader>
             <DialogTitle className="text-xl">Playlist settings</DialogTitle>
@@ -194,7 +194,7 @@ export default function SettingsModal({
                 <Label className="text-red-500 text-xl"> {countToDelete}</Label>
                 <Btn
                   text={<div className="py-1 px-2">Delete</div>}
-                  className=""
+                  className="bg-level-2"
                   disabled={deleteTimeout || countToDelete === 0}
                   onClick={async () => {
                     if (countToDelete > 1) {

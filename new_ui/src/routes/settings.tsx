@@ -51,7 +51,7 @@ function RouteComponent() {
   if (!isAuthenticated) {
     return (
       <div className="flex  w-full items-center justify-center">
-        <div className="flex flex-col max-w-[800px] w-full mt-10 p-4 rounded-(--rounded-std) gap-5 text-white bg-level-2  ">
+        <div className="flex flex-col max-w-[800px] w-full mt-10 p-4 rounded-(--rounded-std) gap-5 text-text-main bg-level-2  ">
           <div className="text-2xl font-bold">Settings</div>
           <div className="text-lg text-level-4">You need to login first</div>
         </div>
@@ -61,7 +61,7 @@ function RouteComponent() {
 
   return (
     <div className="flex  w-full items-center justify-center">
-      <div className="flex flex-col max-w-[800px] w-full mt-10 p-4 rounded-(--rounded-std) gap-5 text-white bg-level-2  ">
+      <div className="flex flex-col max-w-[800px] w-full mt-10 p-4 rounded-(--rounded-std) gap-5 text-text-main bg-level-2  ">
         {/* basic user info */}
         <div className="flex items-center justify-start gap-5 ">
           <div className=" rounded-full w-[150px] bg-level-3">

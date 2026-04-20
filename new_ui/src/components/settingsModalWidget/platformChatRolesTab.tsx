@@ -169,7 +169,7 @@ const PlatformChatRolesTab = React.memo(
                       value={role.key}
                       className="bg-level-2 focus:bg-level-3 text-xs cursor-pointer"
                     >
-                      <div className="flex items-center gap-1.5 text-white">
+                      <div className="flex items-center gap-1.5 text-text-main">
                         {role.badge_type === 'img' &&
                           typeof role.badge_url === 'string' && (
                             <img
@@ -191,7 +191,7 @@ const PlatformChatRolesTab = React.memo(
               </Select>
             </div>
 
-            <div className="flex rounded-[--rounded-std] items-center gap-0 overflow-hidden">
+            <div className="flex rounded-(--rounded-std) items-center gap-0 overflow-hidden">
               <Input
                 type="number"
                 dir="rtl"
@@ -212,7 +212,7 @@ const PlatformChatRolesTab = React.memo(
               />
               <UpDownBtn
                 getInputRef={() => priorityInputRef.current}
-                className="h-8 rounded-r-xl"
+                className="h-8 rounded-r-(--rounded-std) rounded-l-none overflow-clip"
               />
             </div>
 
@@ -220,7 +220,7 @@ const PlatformChatRolesTab = React.memo(
               text="Add"
               onClick={handleAddRole}
               disabled={!selectedRole || isCreating}
-              className="px-3 h-8 text-xs bg-level-2 border border-level-3 hover:bg-level-3"
+              className="px-3 h-8 text-xs bg-level-2 border border-level-3"
             />
           </div>
         )}

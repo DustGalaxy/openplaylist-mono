@@ -41,7 +41,7 @@ function App() {
   const navigate = useNavigate()
   const handleTwitchLogin = useTwitchLoginUrl()
   return (
-    <div className="text-center text-white bg-level-1 w-full ">
+    <div className="text-center text-text-main bg-level-1 w-full ">
       <div className="h-[90vh] flex flex-col items-center">
         <div
           className="
@@ -58,7 +58,7 @@ function App() {
             OPEN PLAYLIST
           </h1>
 
-          <h2 className="text-xl [@media_(min-width:1150px)]:text-2xl  flex flex-col text-white text-left gap-2">
+          <h2 className="text-xl [@media_(min-width:1150px)]:text-2xl  flex flex-col text-text-main text-left gap-2">
             <p>
               <span
                 className="

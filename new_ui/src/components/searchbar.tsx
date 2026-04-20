@@ -30,7 +30,7 @@ export default function SearchBar({
         placeholder={placeholder}
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className={`w-full ${visibility ? 'w-full opacity-100' : 'opacity-0 w-0'} border-[2px] border-level-3 rounded-(--rounded-std) bg-level-2 text-white 
+        className={`w-full ${visibility ? 'w-full opacity-100' : 'opacity-0 w-0'} border-[2px] border-level-3 rounded-(--rounded-std) bg-level-2 text-text-main 
         transition-all duration-500 ease-in-out`}
       />
     </div>

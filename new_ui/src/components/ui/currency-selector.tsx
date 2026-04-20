@@ -174,11 +174,13 @@ const CurrencySelectComponent = React.forwardRef<
                 className=" focus:bg-level-3"
               >
                 <div className="flex items-center w-full gap-2">
-                  <span className="text-sm text-white w-8 text-left">
+                  <span className="text-sm text-text-main w-8 text-left">
                     {currency?.code}
                   </span>
                   <span className="hidden">{currency?.symbol}</span>
-                  <span className="text-sm text-white">{currency?.name}</span>
+                  <span className="text-sm text-text-main">
+                    {currency?.name}
+                  </span>
                 </div>
               </SelectItem>
             ))}

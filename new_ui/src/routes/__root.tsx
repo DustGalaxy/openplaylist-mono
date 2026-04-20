@@ -54,7 +54,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
           <TanStackQueryLayout /> */}
           {/* <div className="bg-level-1 min-w-[360px] flex flex-col items-center w-full mt-10 ">
             <footer className="bg-level-2  w-[90vw] min-h-10 border-2 border-level-3 border-b-0 rounded-t-(--rounded-std)">
-              <p className="text-center text-white p-2">
+              <p className="text-center text-text-main p-2">
                 Openplaylist Beta ver. 2026.1
               </p>
             </footer>

@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import type { ClientPlaylist, Track } from '@/types/playlist'
+import type { ClientPlaylist, InputPlaylist, Track } from '@/types/playlist'
 import ViewInfoBar from '@/components/ViewInfoBar'
 import { fetchPlaylistPublic } from '@/api/api-playlist'
 
@@ -17,38 +17,43 @@ export const Route = createFileRoute('/view')({
     if (plst_id) {
       console.log('Playlist ID:', plst_id)
 
-      const plst: ClientPlaylist | null = await fetchPlaylistPublic(plst_id)
+      const plst: InputPlaylist | null = await fetchPlaylistPublic(plst_id)
+
       if (!plst) {
-        return { plst: null }
+        return { playlist: null }
       }
+      const playlist: ClientPlaylist = {
+        ...plst,
+        isSub: false,
+        history: [],
+      } as ClientPlaylist
 
       if (plst.now_playing) {
-        plst.now_playing = plst.track_data.find(
-          (t) => t.id === plst.now_playing?.id,
+        playlist.now_playing = plst.track_data.find(
+          (t) => t.id === plst.now_playing,
         )
-        if (!plst.now_playing) {
-          plst.now_playing = undefined
-        }
+      } else if (!plst.now_playing) {
+        plst.now_playing = undefined
       }
 
-      return { plst }
+      return { playlist }
     }
-    return { plst: null }
+    return { playlist: null }
   },
 })
 
 function RouteComponent() {
-  const { plst } = Route.useLoaderData()
+  const { playlist } = Route.useLoaderData()
   const [playlistState, setPlaylistState] = useState<ClientPlaylist | null>(
-    plst,
+    playlist,
   )
 
   useEffect(() => {
     const plst_upds_socket = getPlsUpdsSocket()
     const handleConnect = () => {
-      if (plst?.id) {
-        console.log('Восстановление подписки для комнаты:', plst.id)
-        plst_upds_socket.emit('subscribe', { playlist_id: plst.id })
+      if (playlist?.id) {
+        console.log('Восстановление подписки для комнаты:', playlist.id)
+        plst_upds_socket.emit('subscribe', { playlist_id: playlist.id })
       }
     }
 
@@ -62,13 +67,13 @@ function RouteComponent() {
     return () => {
       plst_upds_socket.off('connect', handleConnect)
     }
-  }, [plst?.id])
+  }, [playlist?.id])
 
   useEffect(() => {
-    if (!plst) return
+    if (!playlist) return
     const plst_upds_socket = getPlsUpdsSocket()
 
-    plst_upds_socket.on('add_track:' + plst.id, (payload: any) => {
+    plst_upds_socket.on('add_track:' + playlist.id, (payload: any) => {
       setPlaylistState((prevState) => {
         if (!prevState) return prevState
         const parsed =
@@ -82,7 +87,7 @@ function RouteComponent() {
       })
     })
 
-    plst_upds_socket.on('playnow:' + plst.id, (payload: any) => {
+    plst_upds_socket.on('playnow:' + playlist.id, (payload: any) => {
       setPlaylistState((prevState) => {
         console.log('play now', payload)
         if (!prevState) return prevState
@@ -100,7 +105,7 @@ function RouteComponent() {
     })
 
     plst_upds_socket.on(
-      'delete_track:' + plst.id,
+      'delete_track:' + playlist.id,
       (payload: { track_id: string }) => {
         setPlaylistState((prevState) => {
           if (!prevState) return prevState
@@ -114,7 +119,7 @@ function RouteComponent() {
       },
     )
 
-    plst_upds_socket.on('settings_changed:' + plst.id, (payload: any) => {
+    plst_upds_socket.on('settings_changed:' + playlist.id, (payload: any) => {
       setPlaylistState((prevState) => {
         console.log('settings changed', payload)
         if (!prevState) return prevState
@@ -133,20 +138,20 @@ function RouteComponent() {
     })
 
     return () => {
-      plst_upds_socket.emit('unsubscribe', { playlist_id: plst.id })
-      plst_upds_socket.off('add_track:' + plst.id)
-      plst_upds_socket.off('playnow:' + plst.id)
-      plst_upds_socket.off('delete_track:' + plst.id)
-      plst_upds_socket.off('settings_changed:' + plst.id)
+      plst_upds_socket.emit('unsubscribe', { playlist_id: playlist.id })
+      plst_upds_socket.off('add_track:' + playlist.id)
+      plst_upds_socket.off('playnow:' + playlist.id)
+      plst_upds_socket.off('delete_track:' + playlist.id)
+      plst_upds_socket.off('settings_changed:' + playlist.id)
       plst_upds_socket.off('kicked_from_playlist')
     }
   }, [])
 
-  if (!plst || playlistState === null) {
+  if (!playlist || playlistState === null) {
     return (
       <div className="px-6 pt-6">
         <SearchPlaylist />
-        <div className="text-white justify-self-center mt-10 ">
+        <div className="text-text-main justify-self-center mt-10 ">
           Start searching for a playlist
         </div>
       </div>
@@ -154,7 +159,7 @@ function RouteComponent() {
   }
 
   return (
-    <div className="text-white px-6 pt-6 w-full gap-y-6 flex flex-col">
+    <div className="text-text-main px-6 pt-6 w-full gap-y-6 flex flex-col">
       <SearchPlaylist />
       <ViewInfoBar playlist={playlistState} />
       {/* Track list header */}

@@ -21,7 +21,7 @@ export default function Header() {
       <header
         className="px-1 py-2 mx-5 mt-2 flex 
       w-full md:w-[900px] rounded-full bg-level-2 
-      text-white text-2xl justify-between
+      text-text-main text-2xl justify-between
       border-2 border-level-3 shadow-[-1px_1px_6px_rgba(0,0,0,0.4),-1px_1px_4px_rgba(0,0,0,0.3)]
       sm:shadow-[-2px_2px_10px_rgba(0,0,0,0.45),-2px_2px_4px_rgba(0,0,0,0.35)]"
       >

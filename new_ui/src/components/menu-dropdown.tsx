@@ -31,7 +31,7 @@ export default function MenuDropdown({ user }: any) {
           </div>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-level-2 border-level-3 text-white scale-125">
+      <DropdownMenuContent className="bg-level-2 border-level-3 text-text-main scale-125">
         <DropdownMenuLabel>{user.username}</DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-level-3" />
         <DropdownMenuItem disabled>

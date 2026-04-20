@@ -73,7 +73,7 @@ function DACallbackPage() {
   }, [])
 
   return (
-    <div className="text-center text-white p-[20px]">
+    <div className="text-center text-text-main p-[20px]">
       <h1>Авторизация через Donation Alerts...</h1>
       {mutation.isPending && <p>Отправка кода авторизации на сервер...</p>}
       {mutation.isSuccess && (

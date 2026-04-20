@@ -31,7 +31,7 @@ export default function AddPlaylistModal() {
           className="flex p-1 bg-level-2 mr-1"
         />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-level-1 border-level-3 text-white ">
+      <DialogContent className="sm:max-w-[425px] bg-level-1 border-level-3 text-text-main ">
         <DialogHeader>
           <DialogTitle className="text-xl">New playlist</DialogTitle>
           <DialogDescription>Form to create new playlist</DialogDescription>

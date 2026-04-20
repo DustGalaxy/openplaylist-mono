@@ -37,7 +37,7 @@ export default function WarningModal({
       <DialogTrigger asChild>
         <Btn text={<Warning />} className="px-1 bg-level-2" />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-level-1 border-level-3 text-white  overflow-scroll">
+      <DialogContent className="sm:max-w-[425px] bg-level-1 border-level-3 text-text-main  overflow-scroll">
         <DialogHeader>
           <DialogTitle className="text-xl">Report</DialogTitle>
           <DialogDescription>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { use } from 'react'
 import {
   Clock,
   Eye,
@@ -39,6 +39,10 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
   const { isAuthenticated } = useAuthStore()
   const [selectedContentSettingIndex, setSelectedContentSettingIndex] =
     React.useState(0)
+  React.useEffect(() => {
+    console.log(playlist)
+  }, [])
+
   return (
     <div className="bg-level-1 rounded-(--rounded-std) shadow-lg flex flex-col gap-6">
       {/* Header */}
@@ -85,7 +89,7 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
                 onClick={() => setSelectedContentSettingIndex(index)}
                 className={`px-3 py-1 text-sm rounded-(--rounded-std) transition-colors ${
                   selectedContentSettingIndex === index
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-blue-600 text-text-main'
                     : 'bg-level-2 text-gray-400 hover:bg-level-3'
                 }`}
               >

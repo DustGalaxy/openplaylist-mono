@@ -96,7 +96,7 @@ export default function SortPanel({ playlist }: { playlist: ClientPlaylist }) {
       </ToggleGroupItem>
       <ToggleGroupItem
         value="dir:priority"
-        className="data-[state=on]:bg-level-1 hover:bg-level-3 data-[state=on]:text-white hover:text-white data-[state=on]:rotate-x-180"
+        className="data-[state=on]:bg-level-1 hover:bg-level-3 data-[state=on]:text-text-main hover:text-text-main data-[state=on]:rotate-x-180"
       >
         <Arrow className="size-[33px]  " />
       </ToggleGroupItem>
@@ -108,7 +108,7 @@ export default function SortPanel({ playlist }: { playlist: ClientPlaylist }) {
       </ToggleGroupItem>
       <ToggleGroupItem
         value="dir:date"
-        className="data-[state=on]:bg-level-1 hover:bg-level-3 data-[state=on]:text-white hover:text-white data-[state=on]:rotate-x-180"
+        className="data-[state=on]:bg-level-1 hover:bg-level-3 data-[state=on]:text-text-main hover:text-text-main data-[state=on]:rotate-x-180"
       >
         <Arrow className="size-[33px]  " />
       </ToggleGroupItem>

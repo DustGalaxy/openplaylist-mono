@@ -71,11 +71,11 @@ const PlatformDonationEditor = React.memo(
                 newRuleData.currency,
               )
             }
-            className="px-2 text-sm h-8 self-end"
+            className="px-2 text-sm h-8 self-end bg-level-2"
           />
           {/* Name */}
           <div className=" flex flex-col gap-1">
-            <Label className="text-xs text-muted-foreground">Name</Label>
+            <Label className="text-xs text-text-secondary">Name</Label>
             <Input
               value={newRuleData.name || ''}
               placeholder="Rule name"
@@ -91,7 +91,7 @@ const PlatformDonationEditor = React.memo(
 
           {/* Slug */}
           <div className=" flex flex-col gap-1">
-            <Label className="text-xs text-muted-foreground">Slug</Label>
+            <Label className="text-xs text-text-secondary">Slug</Label>
             <Input
               value={newRuleData.slug || ''}
               placeholder="rule-slug"
@@ -107,7 +107,7 @@ const PlatformDonationEditor = React.memo(
 
           {/* Amount */}
           <div className=" flex flex-col gap-1">
-            <Label className="text-xs text-muted-foreground">Amount</Label>
+            <Label className="text-xs text-text-secondary">Amount</Label>
             <div className="flex rounded-[--rounded-std] items-center gap-0 overflow-hidden">
               <Input
                 type="number"
@@ -127,13 +127,16 @@ const PlatformDonationEditor = React.memo(
                   }))
                 }
               />
-              <UpDownBtn getInputRef={() => amountInputRef.current} />
+              <UpDownBtn
+                getInputRef={() => amountInputRef.current}
+                className="rounded-r-(--rounded-std) rounded-l-none overflow-clip"
+              />
             </div>
           </div>
 
           {/* Currency */}
           <div className="col-span-1 flex flex-col gap-1">
-            <Label className="text-xs text-muted-foreground">Currency</Label>
+            <Label className="text-xs text-text-secondary">Currency</Label>
             <CurrencySelect
               name="currency"
               value={newRuleData.currency}
@@ -156,7 +159,7 @@ const PlatformDonationEditor = React.memo(
 
           {/* Priority */}
           <div className="col-span-1 flex flex-col gap-1">
-            <Label className="text-xs text-muted-foreground">Priority</Label>
+            <Label className="text-xs text-text-secondary">Priority</Label>
             <div className="flex rounded-[--rounded-std] items-center gap-0 overflow-hidden">
               <Input
                 type="number"
@@ -176,7 +179,10 @@ const PlatformDonationEditor = React.memo(
                   }))
                 }
               />
-              <UpDownBtn getInputRef={() => priorityInputRef.current} />
+              <UpDownBtn
+                getInputRef={() => priorityInputRef.current}
+                className="rounded-r-(--rounded-std) rounded-l-none overflow-clip"
+              />
             </div>
           </div>
         </div>

@@ -154,10 +154,14 @@ async def get_public_playlist(
     db_session: DB_SESSION,
     service: PLST_SERVICE,
     playlist_id: UUID,
+    settings_service: SE,
 ) -> ReadPlaylist:
     plst = await service.get_public_playlist(db_session, playlist_id)
+    settings = await settings_service.get_by_plst(db_session, plst.id, plst.owner_id)
+    res = plst.model_dump()
+    res["settings"] = settings.model_dump()
 
-    return ReadPlaylist.model_validate(plst)
+    return ReadPlaylist.model_validate(res)
 
 
 @router.get("/{playlist_id}/baseinfo")
