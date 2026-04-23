@@ -27,11 +27,11 @@ from models.settings import (
     BlockListCreate,
     BlockListPatch,
 )
-from models.order import OrderCreate, DAExtraData
+from models.order import OrderCreate, DAExtraData, OrderDomain
 from models.playlist import PlaylistSchema
 from models.auth_user import AuthUserSchema
 from exceptions import NotAuthorizedException
-from _types import AsyncSession, ChatPlatform, DonationPlatform, Platform
+from _types import _All_Platforms, AsyncSession, ChatPlatform, DonationPlatform, Platform
 from utils import find
 
 
@@ -96,17 +96,17 @@ class ValidationEngine:
     def __init__(self, owner_is_vip: bool):
         self.owner_is_vip = owner_is_vip
 
-    def get_effective_settings(
+    def get_content_settigs(
         self, settings: SettingsSchema, platform: Platform, user_roles: list[str] | None = None
     ) -> dict:
         base_obj = next(
             (c for c in settings.content_settings if c.platform == platform),
-            find(settings.content_settings, lambda x: x.platform is Platform.GENERAL),
+            find(settings.content_settings, lambda x: x.platform == _All_Platforms.GENERAL),
         )
         if base_obj is None:
             raise ValueError(f"Cannot find base settings for {platform} and Platform.GENERAL settings not found")
 
-        effective = self._to_dict(base_obj)
+        effective = self._to_content_dict(base_obj)
 
         if not self.owner_is_vip:
             return effective
@@ -134,30 +134,116 @@ class ValidationEngine:
 
         return effective
 
+    def get_donations_settings(self, settings: SettingsSchema, platform: Platform) -> dict:
+        base_obj = next(
+            (c for c in settings.donation_rules if c.platform == platform),
+            find(settings.donation_rules, lambda x: x.platform == _All_Platforms.GENERAL),
+        )
+        if base_obj is None:
+            raise ValueError("Cannot find base settings for platform")
+
+        return self._to_donation_dict(base_obj)
+
     def identify_roles(self, role_str: str) -> list[str]:
         return role_str.split(":") if role_str else []
 
-    def validate_track(self, track_data: OrderCreate, settings: SettingsSchema) -> list:
-        if track_data.from_owner:
+    def validate_track(self, new_track: OrderCreate, settings: SettingsSchema, playlist: PlaylistSchema) -> list:
+        if new_track.from_owner:
             return []
 
-        requester_roles = self.identify_roles(track_data.priority)
+        requester_roles = self.identify_roles(new_track.priority)
 
+        effective_content_settings = self.get_content_settigs(settings, new_track.source, requester_roles)
 
-        
+        effective_donation_settings = self.get_donations_settings(settings, new_track.source)
 
+        rules = [
+            (
+                lambda: (
+                    new_track.source in DonationPlatform
+                    and effective_donation_settings.get("donation_currency_amount", 0)
+                    != new_track.extra_data.donation_currency_amount  # type: ignore
+                ),
+                "Wrong currency amount",
+            ),
+            (
+                lambda: (
+                    new_track.requester_nickname
+                    in [
+                        block.trigger_value
+                        for block in settings.block_list
+                        if block.trigger_type == "user_name" and new_track.source == block.platform
+                    ]
+                ),
+                "Blacklisted user",
+            ),
+            (lambda: new_track.yt_video_id in settings.track_black_list, "Blacklisted track"),
+            (lambda: new_track.views < effective_content_settings.get("min_views", 0), "Not enough views"),
+            (lambda: new_track.likes < effective_content_settings.get("min_likes", 0), "Not enough likes"),
+            (lambda: effective_content_settings.get("max_duration", 0) < new_track.duration, "Too long"),
+            (
+                lambda: settings.max_playlist_size > 0 and settings.max_playlist_size <= len(playlist.track_data),
+                "Playlist is full",
+            ),
+            (
+                lambda: (
+                    effective_content_settings.get("track_cooldown", 0) > 0
+                    and self._check_track_cooldown(
+                        new_track, playlist.track_data, effective_content_settings.get("track_cooldown", 0)
+                    )
+                ),
+                "Track cooldown",
+            ),
+            (
+                lambda: (
+                    effective_content_settings.get("user_cooldown", 0) > 0
+                    and self._check_user_cooldown(
+                        new_track, playlist.track_data, effective_content_settings.get("user_cooldown", 0)
+                    )
+                ),
+                "User cooldown",
+            ),
+        ]
 
-        effective_content_settings = self.get_effective_settings(settings, track_data.source, requester_roles)
+        return [error for condition, error in rules if condition()]
 
+    def _check_track_cooldown(self, new_track, list_of_tracks, track_cooldown: int):
+        """if track on cooldown return true else false"""
+        prevtrack = find(list_of_tracks, lambda x: x.yt_video_id == new_track.yt_video_id)
+        if prevtrack is not None:
+            created_at: datetime = prevtrack.created_at
+            time_delta = datetime.now().timestamp() - created_at.timestamp()
+            if time_delta < (track_cooldown * 60):
+                return True
+        return False
 
+    def _check_user_cooldown(self, new_track: OrderCreate, list_of_tracks: list[OrderDomain], user_cooldown: float):
+        """if user on cooldown return true else false"""
+        prevtrack = find(list_of_tracks, lambda x: x.requester_nickname == new_track.requester_nickname)
+        if prevtrack is not None:
+            created_at: datetime = (
+                prevtrack.created_at
+                if isinstance(prevtrack.created_at, datetime)
+                else datetime.fromisoformat(prevtrack.created_at)
+            )
+            time_delta = datetime.now().timestamp() - created_at.timestamp()
+            if time_delta < (user_cooldown * 60):
+                return True
+        return False
 
-    def _to_dict(self, obj: ContentSettingsSchema) -> dict:
+    def _to_content_dict(self, obj: ContentSettingsSchema) -> dict:
         return {
             "min_views": obj.min_views,
             "min_likes": obj.min_likes,
             "max_duration": obj.max_duration,
             "track_cooldown": obj.track_cooldown,
             "user_cooldown": obj.user_cooldown,
+        }
+
+    def _to_donation_dict(self, obj: DonationRulesSchema) -> dict:
+        return {
+            "currency": obj.currency,
+            "amount": obj.amount,
         }
 
 
@@ -247,81 +333,13 @@ class SettingsLowService:
         playlsit: PlaylistSchema,
         new_track: OrderCreate,
         user: AuthUserSchema,
-    ):
+    ) -> list[str]:
 
         settings = await self.repository.get_one(session, playlsit.id, "playlist_id")
         is_vip = (user.vip_expires_at and user.vip_expires_at > datetime.now()) or False
 
-        content_settings: ContentSettingsSchema = self.extract_sub_setting(
-            settings.content_settings, new_track.source, is_vip
-        )  # type: ignore
-        payment_settings: DonationRulesSchema = self.extract_sub_setting(
-            settings.donation_rules, new_track.source, is_vip
-        )  # type: ignore
-
-        def track_validation(track_data: OrderCreate, settings: SettingsSchema) -> list:
-            if track_data.from_owner:
-                return []
-
-            rules = [
-                (
-                    lambda: (
-                        isinstance(track_data.extra_data, DAExtraData)
-                        and payment_settings.amount != track_data.extra_data.donation_currency_amount
-                    ),
-                    "Wrong currency amount",
-                ),
-                (
-                    lambda: (
-                        track_data.requester_nickname
-                        in [
-                            block.trigger_value
-                            for block in settings.block_list
-                            if block.trigger_type == "user_name" and track_data.source == block.platform
-                        ]
-                    ),
-                    "Blacklisted user",
-                ),
-                (lambda: track_data.yt_video_id in settings.track_black_list, "Blacklisted track"),
-                (lambda: track_data.views < content_settings.min_views, "Not enough views"),
-                (lambda: track_data.likes < content_settings.min_likes, "Not enough likes"),
-                (lambda: content_settings.max_duration < track_data.duration, "Too long"),
-                (
-                    lambda: settings.max_playlist_size > 0 and settings.max_playlist_size <= len(playlsit.track_data),
-                    "Playlist is full",
-                ),
-                (lambda: content_settings.track_cooldown > 0 and _check_track_cooldown(track_data, playlsit.track_data), "Track cooldown"),
-                (lambda: content_settings.user_cooldown > 0 and _check_user_cooldown(track_data, playlsit.track_data), "User cooldown"),
-            ]
-
-            errors = [error_msg for condition, error_msg in rules if condition()]
-            return errors
-
-        def _check_track_cooldown(new_track, list_of_tracks):
-            """if track on cooldown return true else false"""
-            prevtrack = find(list_of_tracks, lambda x: x.yt_video_id == new_track.yt_video_id)
-            if prevtrack is not None:
-                created_at: datetime = prevtrack.created_at
-                time_delta = datetime.now().timestamp() - created_at.timestamp()
-                if time_delta < (content_settings.track_cooldown * 60):
-                    return True
-            return False
-
-        def _check_user_cooldown(new_track, list_of_tracks):
-            """if user on cooldown return true else false"""
-            prevtrack = find(list_of_tracks, lambda x: x.requester_nickname == new_track.requester_nickname)
-            if prevtrack is not None:
-                created_at: datetime = (
-                    prevtrack.created_at
-                    if isinstance(prevtrack.created_at, datetime)
-                    else datetime.fromisoformat(prevtrack.created_at)
-                )
-                time_delta = datetime.now().timestamp() - created_at.timestamp()
-                if time_delta < (content_settings.user_cooldown * 60):
-                    return True
-            return False
-
-        return track_validation(new_track, settings)
+        validation_engine = ValidationEngine(owner_is_vip=is_vip)
+        return validation_engine.validate_track(new_track, settings, playlsit)
 
 
 settings_service = SettingsLowService(playlist_settings_repository)
