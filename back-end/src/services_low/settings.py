@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import Protocol, Any
 from uuid import UUID
 
-
 from dal.abstract import IAsyncCrud, IPlaylistSettingsRepository
 from dal.postgres_impl import (
     playlist_settings_repository,
@@ -29,9 +28,10 @@ from models.settings import (
     BlockListPatch,
 )
 from models.order import OrderCreate, DAExtraData
+from models.playlist import PlaylistSchema
 from models.auth_user import AuthUserSchema
 from exceptions import NotAuthorizedException
-from _types import AsyncSession, Platform
+from _types import AsyncSession, ChatPlatform, DonationPlatform, Platform
 from utils import find
 
 
@@ -90,6 +90,75 @@ class ChatRulesStrategy(Strategy):
 class BlockListStrategy(Strategy):
     def get_repo(self):
         return user_black_list_repository
+
+
+class ValidationEngine:
+    def __init__(self, owner_is_vip: bool):
+        self.owner_is_vip = owner_is_vip
+
+    def get_effective_settings(
+        self, settings: SettingsSchema, platform: Platform, user_roles: list[str] | None = None
+    ) -> dict:
+        base_obj = next(
+            (c for c in settings.content_settings if c.platform == platform),
+            find(settings.content_settings, lambda x: x.platform is Platform.GENERAL),
+        )
+        if base_obj is None:
+            raise ValueError(f"Cannot find base settings for {platform} and Platform.GENERAL settings not found")
+
+        effective = self._to_dict(base_obj)
+
+        if not self.owner_is_vip:
+            return effective
+
+        match platform:
+            case p if p in ChatPlatform:
+                if user_roles is None:
+                    return effective
+
+                chat_rules = sorted(
+                    [r for r in settings.chat_rules if r.key in user_roles and r.platform == platform],
+                    key=lambda x: x.priority,
+                )
+                for rule in chat_rules:
+                    if rule.content_settings:
+                        effective.update(rule.content_settings)
+
+            case p if p in DonationPlatform:
+                donation_rules = find(settings.donation_rules, lambda x: x.platform == platform)
+                if donation_rules and donation_rules.content_settings:
+                    effective.update(donation_rules.content_settings)
+
+            case _:
+                raise ValueError(f"Unknown platform: {platform}")
+
+        return effective
+
+    def identify_roles(self, role_str: str) -> list[str]:
+        return role_str.split(":") if role_str else []
+
+    def validate_track(self, track_data: OrderCreate, settings: SettingsSchema) -> list:
+        if track_data.from_owner:
+            return []
+
+        requester_roles = self.identify_roles(track_data.priority)
+
+
+        
+
+
+        effective_content_settings = self.get_effective_settings(settings, track_data.source, requester_roles)
+
+
+
+    def _to_dict(self, obj: ContentSettingsSchema) -> dict:
+        return {
+            "min_views": obj.min_views,
+            "min_likes": obj.min_likes,
+            "max_duration": obj.max_duration,
+            "track_cooldown": obj.track_cooldown,
+            "user_cooldown": obj.user_cooldown,
+        }
 
 
 class SettingsLowService:
@@ -160,14 +229,12 @@ class SettingsLowService:
     ):
         return await chat_rules_repository.reorder(session, id_list, settings_id)
 
-
-
     def extract_sub_setting(self, setting: list, platform: Platform, is_vip: bool):
         result = None
 
         if len(setting) > 1:
-            result = find(setting, lambda x: x.platform == (platform if is_vip else None)) or find(
-                setting, lambda x: x.platform is None
+            result = find(setting, lambda x: x.platform == (platform if is_vip else Platform.GENERAL)) or find(
+                setting, lambda x: x.platform is Platform.GENERAL
             )
         else:
             result = setting[0]
@@ -177,20 +244,19 @@ class SettingsLowService:
     async def validate_track(
         self,
         session: AsyncSession,
-        playlist_id: UUID,
-        tracks: list,
-        track_data: OrderCreate,
+        playlsit: PlaylistSchema,
+        new_track: OrderCreate,
         user: AuthUserSchema,
     ):
 
-        settings = await self.repository.get_one(session, playlist_id, "playlist_id")
+        settings = await self.repository.get_one(session, playlsit.id, "playlist_id")
         is_vip = (user.vip_expires_at and user.vip_expires_at > datetime.now()) or False
 
         content_settings: ContentSettingsSchema = self.extract_sub_setting(
-            settings.content_settings, track_data.source, is_vip
+            settings.content_settings, new_track.source, is_vip
         )  # type: ignore
         payment_settings: DonationRulesSchema = self.extract_sub_setting(
-            settings.donation_rules, track_data.source, is_vip
+            settings.donation_rules, new_track.source, is_vip
         )  # type: ignore
 
         def track_validation(track_data: OrderCreate, settings: SettingsSchema) -> list:
@@ -221,19 +287,19 @@ class SettingsLowService:
                 (lambda: track_data.likes < content_settings.min_likes, "Not enough likes"),
                 (lambda: content_settings.max_duration < track_data.duration, "Too long"),
                 (
-                    lambda: settings.max_playlist_size > 0 and settings.max_playlist_size <= len(tracks),
+                    lambda: settings.max_playlist_size > 0 and settings.max_playlist_size <= len(playlsit.track_data),
                     "Playlist is full",
                 ),
-                (lambda: content_settings.track_cooldown > 0 and _check_track_cooldown(track_data), "Track cooldown"),
-                (lambda: content_settings.user_cooldown > 0 and _check_user_cooldown(track_data), "User cooldown"),
+                (lambda: content_settings.track_cooldown > 0 and _check_track_cooldown(track_data, playlsit.track_data), "Track cooldown"),
+                (lambda: content_settings.user_cooldown > 0 and _check_user_cooldown(track_data, playlsit.track_data), "User cooldown"),
             ]
 
             errors = [error_msg for condition, error_msg in rules if condition()]
             return errors
 
-        def _check_track_cooldown(track_data):
+        def _check_track_cooldown(new_track, list_of_tracks):
             """if track on cooldown return true else false"""
-            prevtrack = find(tracks, lambda x: x.yt_video_id == track_data.yt_video_id)
+            prevtrack = find(list_of_tracks, lambda x: x.yt_video_id == new_track.yt_video_id)
             if prevtrack is not None:
                 created_at: datetime = prevtrack.created_at
                 time_delta = datetime.now().timestamp() - created_at.timestamp()
@@ -241,9 +307,9 @@ class SettingsLowService:
                     return True
             return False
 
-        def _check_user_cooldown(track_data):
+        def _check_user_cooldown(new_track, list_of_tracks):
             """if user on cooldown return true else false"""
-            prevtrack = find(tracks, lambda x: x.requester_nickname == track_data.requester_nickname)
+            prevtrack = find(list_of_tracks, lambda x: x.requester_nickname == new_track.requester_nickname)
             if prevtrack is not None:
                 created_at: datetime = (
                     prevtrack.created_at
@@ -255,7 +321,7 @@ class SettingsLowService:
                     return True
             return False
 
-        return track_validation(track_data, settings)
+        return track_validation(new_track, settings)
 
 
 settings_service = SettingsLowService(playlist_settings_repository)

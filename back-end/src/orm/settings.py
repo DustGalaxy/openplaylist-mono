@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ARRAY, UUID as PGUUID, JSONB
 
 from database import Base, UUIDMixin, TimestampMixin
-from _types import Platform, DonationPlatform, ChatPlatform
+from _types import _All_Platforms, DB_DonationPlatform, ChatPlatform, Platform
 
 
 class Settings(Base, UUIDMixin, TimestampMixin):
@@ -71,67 +71,13 @@ class ContentSettings(Base, UUIDMixin, TimestampMixin):
         back_populates="content_settings",
         lazy="selectin",
     )
-    platform: Mapped[Platform] = mapped_column(Enum(Platform), nullable=False)
+    platform: Mapped[_All_Platforms] = mapped_column(Enum(_All_Platforms), nullable=False)
 
     min_views: Mapped[int | None] = mapped_column(default=10_000, nullable=False)
     min_likes: Mapped[int] = mapped_column(default=500, nullable=False)
     max_duration: Mapped[int] = mapped_column(default=600, nullable=False)
     track_cooldown: Mapped[int] = mapped_column(default=0, nullable=False)
     user_cooldown: Mapped[int] = mapped_column(default=2, nullable=False)
-
-
-# class PaymentSettings(Base, UUIDMixin, TimestampMixin):
-#     __tablename__ = "payment_settings"
-
-#     settings_id: Mapped[UUID] = mapped_column(ForeignKey("settings.id", ondelete="CASCADE"))
-#     settings: Mapped["Settings"] = relationship(
-#         back_populates="payment_settings",
-#         lazy="selectin",
-#     )
-#     platform: Mapped[Platform] = mapped_column(
-#         Enum(Platform), nullable=False
-#     )  # 'donation_alerts', 'donate_pay', not vip = 'general'
-
-#     donation_currency_amount: Mapped[float] = mapped_column(default=50.0, nullable=False)
-#     currency: Mapped[str] = mapped_column(String(3), default="RUB")
-
-
-# class RoleTrigger(enum.Enum):
-#     BADGE = "badge"
-#     USER_ID = "user_id"
-
-
-# class RoleRule(Base, UUIDMixin, TimestampMixin):
-#     __tablename__ = "role_rules"
-
-#     # NULL означает глобальное правило (дефолт для всех)
-#     settings_id: Mapped[UUID] = mapped_column(ForeignKey("settings.id", ondelete="CASCADE"), index=True)
-#     settings: Mapped[Optional["Settings"]] = relationship(
-#         back_populates="role_costs",
-#         lazy="selectin",
-#     )
-
-#     name: Mapped[str] = mapped_column(String(50))  # "Subscriber", "Олды"
-#     cost: Mapped[int] = mapped_column(Integer, default=0)
-
-#     platform: Mapped[Platform] = mapped_column(Enum(Platform), nullable=False)  # "twitch", "youtube"
-
-#     trigger_type: Mapped[RoleTrigger] = mapped_column(Enum(RoleTrigger), default=RoleTrigger.BADGE)
-
-#     # "sub", "mod" или "user_id"
-#     trigger_value: Mapped[str] = mapped_column(String(255))
-
-#     __table_args__ = (
-#         # Уникальность правила в рамках одного плейлиста/платформы
-#         Index(
-#             "ix_role_rules_unique_trigger",
-#             "settings_id",
-#             "platform",
-#             "trigger_type",
-#             "trigger_value",
-#             unique=True,
-#         ),
-#     )
 
 
 class BlockTrigger(enum.Enum):
@@ -162,7 +108,7 @@ class DonationRules(Base, UUIDMixin, TimestampMixin):
         back_populates="donation_rules",
         lazy="selectin",
     )
-    platform: Mapped[DonationPlatform] = mapped_column(Enum(DonationPlatform), nullable=False)
+    platform: Mapped[DB_DonationPlatform] = mapped_column(Enum(DB_DonationPlatform), nullable=False)
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(255), nullable=False)

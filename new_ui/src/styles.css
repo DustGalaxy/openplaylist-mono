@@ -129,7 +129,7 @@ code {
 @theme inline {
   --color-text-main: rgba(255, 255, 255, 1);
   --color-text-secondary: oklch(0.552 0.016 285.938);
-  --color-text-placeholder: oklch(0.552 0.016 285.938);
+  --color-text-placeholder: rgba(255, 255, 255, 0.5);
 
   --color-danger: rgba(255, 69, 58, 1);
 

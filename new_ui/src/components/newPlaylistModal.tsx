@@ -21,7 +21,7 @@ export default function AddPlaylistModal() {
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
 
-  const addPlaylist = useMusicStore((state) => state.addPlaylist)
+  const { addPlaylist } = useMusicStore()
 
   return (
     <Dialog>

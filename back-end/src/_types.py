@@ -1,27 +1,38 @@
-from enum import Enum
+from enum import StrEnum
 from typing import Literal
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class Platform(Enum):
+class _All_Platforms(StrEnum):
     TWITCH = "twitch"
-    DA = "donationalerts"
     YOUTUBE = "youtube"
     GOOGLE = "google"
     WEB = "web"
-    GENERAL = "__general__"
-
-
-class ChatPlatform(Enum):
-    TWITCH = "twitch"
-    YOUTUBE = "youtube"
-    WEB = "web"
-
-
-class DonationPlatform(Enum):
-    GENERAL = "__general__"
     DA = "donationalerts"
+    GENERAL = "__general__"
+
+
+class Platform(StrEnum):
+    TWITCH = _All_Platforms.TWITCH
+    DA = _All_Platforms.DA
+    YOUTUBE = _All_Platforms.YOUTUBE
+    GOOGLE = _All_Platforms.GOOGLE
+    WEB = _All_Platforms.WEB
+
+
+class ChatPlatform(StrEnum):
+    TWITCH = _All_Platforms.TWITCH
+    YOUTUBE = _All_Platforms.YOUTUBE
+
+
+class DonationPlatform(StrEnum):
+    DA = _All_Platforms.DA
+
+
+class DB_DonationPlatform(StrEnum):
+    GENERAL = _All_Platforms.GENERAL
+    DA = _All_Platforms.DA
 
 
 Status = Literal["in playlist", "removed", "listened", "skipped", "reported"]
