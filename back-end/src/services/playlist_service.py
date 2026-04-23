@@ -24,15 +24,18 @@ async def add_to_playlist(
 
     tracks: list[tuple[OrderDomain, UUID]] = []
     errors: list[tuple[list[str], str]] = []
+
     for playlist in playlists:
         if not playlist.is_allow_external_requests and playlist.owner_id != user.id:
             errors.append((["playlist is not active"], playlist.name))
             continue
 
-        track = await settings_service.validate_track(session, playlist.id, playlist.track_data, event, user) or event
+        track = await settings_service.validate_track(session, playlist, event, user) or event
+
         if isinstance(track, list):
             errors.append((track, playlist.name))
         else:
             track = await playlist_repository.add_order_to_playlist(session, playlist.id, event)
             tracks.append((track, playlist.id))
+
     return tracks, errors

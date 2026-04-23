@@ -30,7 +30,7 @@ export default function DateChip({ date }: { date: string }) {
         h-[28px] sm:h-[32px] md:h-[40px]         
         px-1.5 sm:px-2 md:px-3           
         shadow-[-1px_1px_6px_rgba(0,0,0,0.4),-1px_1px_4px_rgba(0,0,0,0.3)]         
-        sm:shadow-[-2px_2px_10px_rgba(0,0,0,0.75),-2px_2px_4px_rgba(0,0,0,0.35)]
+        sm:shadow-[-2px_2px_10px_rgba(0,0,0,0.45),-2px_2px_4px_rgba(0,0,0,0.35)]
         inline-flex items-center justify-center   
       "
     >
