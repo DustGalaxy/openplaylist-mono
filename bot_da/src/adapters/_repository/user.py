@@ -7,6 +7,13 @@ from orm.user import User as ORMUser
 
 
 class UserRepository(crud_factory(ORMUser, User, UserCreate, UserPatch)):
+    def to_inner(self, data: UserCreate | User | UserPatch) -> dict:
+
+        return data.model_dump(exclude_unset=True)
+
+    def to_repr(self, object: ORMUser) -> User:
+        return self.domain_model.model_validate(object)
+
     async def get_one_or_create(self, session, da_id: str, id: str):
         try:
             return await self.get_one(session, id)
