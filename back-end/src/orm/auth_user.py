@@ -13,10 +13,14 @@ if TYPE_CHECKING:
 class User(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "users"
 
-    last_login: Mapped[datetime]
     username: Mapped[str]
-    main_platform: Mapped[Platform]
+    avatar_url: Mapped[str] = mapped_column(nullable=True)
+
+    email: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
+
+    is_active: Mapped[bool]
     vip_expires_at: Mapped[datetime | None]
 
-
     linked_accounts: Mapped[list["LinkedAccounts"]] = relationship(lazy="joined")
+
+    last_login: Mapped[datetime]
