@@ -14,11 +14,10 @@ class User(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "users"
 
     username: Mapped[str]
+    email: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
     avatar_url: Mapped[str] = mapped_column(nullable=True)
 
-    email: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
-
-    is_active: Mapped[bool]
+    is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     vip_expires_at: Mapped[datetime | None]
 
     linked_accounts: Mapped[list["LinkedAccounts"]] = relationship(lazy="joined")

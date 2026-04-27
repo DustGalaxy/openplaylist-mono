@@ -1,16 +1,16 @@
+import json
+import uuid
+
 from fastapi import APIRouter, HTTPException, Response
 
-
-from services.twitch_service import auth_twitch_service
-from services.da_service import auth_da_service
-
-from dto.twitch import CodeDTO
+from dto.token import CodeDTO
+from adapters._redis.broker import redis_adapter
 
 from settings import settings
-from .dependencies import DB_SESSION
+from .dependencies import DB_SESSION, auth_service
+from exceptions import NeedConfirmationException
 
 router = APIRouter(prefix="/login")
-
 
 
 async def login_classic(
@@ -18,41 +18,52 @@ async def login_classic(
     db_session: DB_SESSION,
     username: str,
     password: str,
-):
-    token = await auth_service.login(db_session, username, password)
-    response.set_cookie(settings.COOKIE_NAME, token, httponly=True, secure=True)
+): ...
 
+
+@router.post("/social/{type}", status_code=200)
 async def login_by_social(
     response: Response,
     db_session: DB_SESSION,
     code: CodeDTO,
     type: str,
-):
-    if type == "twitch":
-        await twitch_login(response, db_session, code)
-    elif type == "da":
-        await da_login(response, db_session, code)
-    else:
-        raise HTTPException(status_code=400, detail="Invalid integration type")
+) -> dict | None:
+    try:
+        token = await auth_service.login_by_social(db_session, code.code, type)
+        response.set_cookie(settings.COOKIE_NAME, token, httponly=True, secure=True)
+        response.status_code = 200
+        return None
 
-    return {"message": "Login successful"}
+    except NeedConfirmationException as e:
+        link_session_id = str(uuid.uuid4())
+        redis_adapter.set(
+            f"link_sessions:{link_session_id}",
+            json.dumps(e.data),
+            ex=600,
+        )
+
+        response.status_code = 202
+        return {
+            "action": "NEED_CONFIRMATION",
+            "link_session_id": link_session_id,
+            "display_info": {"username": e.data["username"], "platform": e.data["platform"]},
+        }
 
 
-@router.post("/twitch")
-async def twitch_login(
+@router.post("/confirm-merge")
+async def confirm_account_merge(
     response: Response,
     db_session: DB_SESSION,
-    code: CodeDTO,
+    link_session_id: str,
 ):
-    token = await auth_twitch_service.login(db_session, code.code)
+    raw_data: str = str(redis_adapter.getdel(f"link_sessions:{link_session_id}"))
+
+    if not raw_data:
+        raise HTTPException(status_code=400, detail="Link session expired")
+
+    data: dict = json.loads(raw_data)
+
+    token = await auth_service.confirm_account_merge(db_session, data)
     response.set_cookie(settings.COOKIE_NAME, token, httponly=True, secure=True)
 
-
-@router.post("/da")
-async def da_login(
-    response: Response,
-    db_session: DB_SESSION,
-    code: CodeDTO,
-):
-    token = await auth_da_service.login(db_session, code.code)
-    response.set_cookie(settings.COOKIE_NAME, token, httponly=True, secure=True)
+    return {"status": "ok"}

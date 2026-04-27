@@ -16,6 +16,7 @@ class LinkedAccountsDomain(BaseModel):
     platform_user_id: str
     platform_username: str
     platform_avatar_url: str
+    platform_user_email: str
 
     bot_connection: bool
 
@@ -35,6 +36,7 @@ class LinkedAccountsCreate(BaseModel):
     platform_user_id: str
     platform_username: str
     platform_avatar_url: str
+    platform_user_email: str
 
     access_token: str
     refresh_token: str

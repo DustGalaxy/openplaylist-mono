@@ -9,7 +9,7 @@ from models.settings import SettingsSchema
 
 from services_low.settings import get_settings_service, SettingsLowService
 from services_low.playlist import get_playlist_service, PlaylistLowService
-from services.auth_service import auth_service
+from services.auth.auth_service import auth_service
 from orm.playlist import Playlist
 from orm.settings import Settings
 
@@ -20,6 +20,7 @@ from exceptions import NotAuthorizedException
 DB_SESSION = Annotated[AsyncSession, Depends(get_async_session)]
 SETTINGS_SERVICE = Annotated[SettingsLowService, Depends(get_settings_service)]
 PLST_SERVICE = Annotated[PlaylistLowService, Depends(get_playlist_service)]
+
 CURR_USER = Annotated[User, Depends(auth_service.get_current_user)]
 
 

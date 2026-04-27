@@ -6,6 +6,12 @@ class NotAuthorizedException(HTTPException):
         super().__init__(status_code=401, detail="Not authorized")
 
 
+class NeedConfirmationException(Exception):
+    def __init__(self, data: dict, detail: str = "Need confirmation"):
+        self.data = data
+        super().__init__(detail)
+
+
 class BadRequestException(HTTPException):
     def __init__(self):
         super().__init__(status_code=400, detail="Bad request")

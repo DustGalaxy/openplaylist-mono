@@ -102,6 +102,21 @@ class LinkedAccountsRepository(
     def to_repr(self, object: LinkedAccounts) -> LinkedAccountsDomain:
         return self.domain_model.model_validate(object)
 
+    async def get_by_email_platform(self, session: AsyncSession, email: str, platform: Platform):
+        stmt = select(LinkedAccounts).where(
+            LinkedAccounts.platfrom_user_email == email, LinkedAccounts.platform == platform
+        )
+
+        res = await session.execute(stmt)
+        user = res.unique().scalars().one_or_none()
+
+        if not user:
+            raise NotFoundException(
+                f"{self.sqla_model.__tablename__} with email={email} and platform={platform} not found"
+            )
+
+        return LinkedAccountsDomain.model_validate(user)
+
 
 user_repository = UserRepository()
 linked_accounts_repository = LinkedAccountsRepository()
