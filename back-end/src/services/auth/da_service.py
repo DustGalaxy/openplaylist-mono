@@ -11,14 +11,16 @@ from simple_repository.exceptions import NotFoundException
 from _types import AsyncSession, Platform
 from settings import settings
 from dto.da import DAToken, DAUser
-from models.auth_user import AuthUserCreate, AuthUserSchema, AuthUserUpdate
-from models.linked_accounts import LinkedAccountsCreate, LinkedAccountsUpdate
+from models.auth_user import AuthUserSchema
+from models.linked_accounts import LinkedAccountsCreate
 from repo import LinkedAccountsRepository, UserRepository
+from services.auth.strategy_manager import manager, PlatformUser
 from utils import find
 
 logger = logging.getLogger(__name__)
 
 
+@manager.register("da", user_repo=UserRepository(), link_repo=LinkedAccountsRepository())
 class AuthDAService:
     def __init__(self, user_repo: UserRepository, link_repo: LinkedAccountsRepository):
         self.user_repo = user_repo
@@ -38,6 +40,9 @@ class AuthDAService:
             algorithm=settings.JWT_ALGORITHM,
         )
         return encoded_jwt
+
+    def allow_email_collision(self) -> bool:
+        return False
 
     async def _make_api_request(self, method: str, endpoint: str, access_token: str, **kwargs):
         """Helper to make authenticated requests to the DA API."""
@@ -134,89 +139,27 @@ class AuthDAService:
                 logger.error(f"Failed to decode JSON refresh token response: {e}")
                 raise HTTPException(status_code=400)
 
-    async def login(self, db_session: AsyncSession, code: str):
-        try:
-            token_data = await self.get_token(code)
-            da_user = await self.get_data(token_data.access_token)
-
-            try:
-                db_user = await self.user_repo.get_user_by_link(db_session, self.platform, da_user.id)
-                db_user = await self.user_repo.patch(
-                    db_session, AuthUserUpdate(main_platform=self.platform, last_login=datetime.now()), db_user.id
-                )
-                await self.link_repo.patch(
-                    db_session,
-                    LinkedAccountsUpdate(
-                        platform_avatar_url=da_user.avatar,
-                        platform_username=da_user.name,
-                        access_token=token_data.access_token,
-                        refresh_token=token_data.refresh_token,
-                        expires_at=token_data.expires_at,
-                    ),
-                    find(db_user.linked_accounts, lambda x: x.platform == self.platform).id,  # pyright: ignore[reportOptionalMemberAccess]
-                )
-            except NotFoundException:
-                db_user = await self.register(
-                    db_session,
-                    da_user,
-                    token_data.access_token,
-                    token_data.refresh_token,  # type: ignore
-                    token_data.expires_in,
-                )
-
-            return self.encode_jwt(db_user.id, da_user.name)
-
-        except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP Error exchanging code for token: {e.response.status_code} - {e.response.text}")
-            raise HTTPException(status_code=400)
-
-        except httpx.RequestError as e:
-            logger.error(f"Network error exchanging code for token: {e}")
-            raise HTTPException(status_code=400)
-
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to decode JSON token response: {e}")
-            raise HTTPException(status_code=400)
-
-    async def register(
-        self,
-        db_session: AsyncSession,
-        da_user: DAUser,
-        access_token: str,
-        refresh_token: str,
-        expires_in: int,
-    ):
-        db_user: AuthUserSchema = await self.user_repo.create(
-            db_session,
-            AuthUserCreate(
-                last_login=datetime.now(),
-                username=da_user.name,
-                main_platform=self.platform,
-            ),
-        )
-        db_link = await self.link_repo.create(
-            db_session,
-            LinkedAccountsCreate(
-                user_id=db_user.id,
-                platform=self.platform,
-                platform_user_id=da_user.id,
-                platform_username=da_user.name,
-                platform_avatar_url=da_user.avatar,
-                access_token=access_token,
-                refresh_token=refresh_token,
-                expires_at=expires_in,
-            ),
+    async def fetch_identity(self, code: str) -> PlatformUser:
+        token = await self.get_token(code)
+        da_user = await self.get_data(token.access_token)
+        user = PlatformUser(
+            id=da_user.id,
+            username=da_user.name,
+            avatar_url=da_user.avatar,
+            email=da_user.email,
+            email_verified=True,
+            access_token=token.access_token,
+            refresh_token=token.refresh_token,
+            expires_at=token.expires_in,
         )
 
-        db_user.linked_accounts.append(db_link)
-        return db_user
+        return user
 
     async def add_integration(self, db_session: AsyncSession, user_id: UUID, code: str) -> AuthUserSchema:
         try:
-            print(1)
             db_user = await self.user_repo.get_one(db_session, user_id, column="id")
             integration = find(db_user.linked_accounts, lambda x: x.platform == self.platform)
-            print(2)
+
             if not integration:
                 data = {
                     "grant_type": "authorization_code",
@@ -225,17 +168,17 @@ class AuthDAService:
                     "code": code,
                     "redirect_uri": settings.DA_REDIRECT_URI,
                 }
-                print(data)
+
                 async with httpx.AsyncClient() as client:
                     try:
                         response = await client.post(settings.DA_TOKEN_URL, data=data)
-                        print(3)
+
                         if response.status_code in [400, 401]:
                             raise Exception(response.text)
-                        print(4)
+
                         token_data = response.json()
                         user_info: dict = await self._make_api_request("GET", "/user/oauth", token_data["access_token"])
-                        print(5)
+
                         data = user_info["data"]
                         data["id"] = str(data["id"])
                         da_user = DAUser.model_validate(data)
@@ -243,6 +186,7 @@ class AuthDAService:
                             user_id=user_id,
                             platform=self.platform,
                             platform_user_id=da_user.id,
+                            platform_user_email=da_user.email,
                             platform_username=da_user.name,
                             platform_avatar_url=da_user.avatar,
                             access_token=token_data["access_token"],

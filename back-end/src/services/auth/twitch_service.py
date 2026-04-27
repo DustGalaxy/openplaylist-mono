@@ -12,18 +12,23 @@ from models.linked_accounts import LinkedAccountsCreate, LinkedAccountsUpdate
 from repo import UserRepository, LinkedAccountsRepository
 from settings import settings
 
-from dto.twitch import TwitchUserResponse, TwitchAuthResponse
+from dto.internal.twitch import TwitchUserResponse, TwitchAuthResponse
 from models.auth_user import AuthUserCreate, AuthUserSchema, AuthUserUpdate
+from services.auth.strategy_manager import manager, PlatformUser
 from utils import find
 
 logger = logging.getLogger(__name__)
 
 
+@manager.register("twitch", user_repo=UserRepository(), link_repo=LinkedAccountsRepository())
 class AuthTwitchService:
     def __init__(self, user_repo: UserRepository, link_repo: LinkedAccountsRepository):
         self.user_repo = user_repo
         self.link_repo = link_repo
         self.platform = Platform.TWITCH
+
+    def allow_email_collision(self) -> bool:
+        return True
 
     def get_token(self, code) -> TwitchAuthResponse:
         response = httpx.post(
@@ -89,68 +94,20 @@ class AuthTwitchService:
         print(encoded_jwt)
         return encoded_jwt
 
-    async def login(self, db_session: AsyncSession, code: str) -> str:
+    async def fetch_identity(self, code: str) -> PlatformUser:
         token = self.get_token(code)
-
         twitch_user = self.get_data(token.access_token)
-
-        try:
-            db_user = await self.user_repo.get_user_by_link(db_session, self.platform, twitch_user.id)
-            db_user = await self.user_repo.patch(
-                db_session, AuthUserUpdate(main_platform=self.platform, last_login=datetime.now()), db_user.id
-            )
-            await self.link_repo.patch(
-                db_session,
-                LinkedAccountsUpdate(
-                    platform_avatar_url=twitch_user.profile_image_url,
-                    platform_username=twitch_user.display_name,
-                    access_token=token.access_token,
-                    refresh_token=token.refresh_token,
-                    expires_at=token.expires_in,
-                ),
-                find(db_user.linked_accounts, lambda x: x.platform == self.platform).id,  # pyright: ignore[reportOptionalMemberAccess]
-            )
-        except NotFoundException:
-            db_user = await self.register(
-                db_session,
-                twitch_user,
-                token.access_token,
-                token.refresh_token,
-                token.expires_in,
-            )
-        return self.encode_jwt(db_user.id, twitch_user.display_name)
-
-    async def register(
-        self,
-        session: AsyncSession,
-        user: TwitchUserResponse,
-        access_token: str,
-        refresh_token: str,
-        expires_in: int,
-    ) -> AuthUserSchema:
-        created_user = await self.user_repo.create(
-            session,
-            AuthUserCreate(
-                main_platform=self.platform,
-                username=user.display_name,
-                last_login=datetime.now(),
-            ),
+        user = PlatformUser(
+            id=twitch_user.id,
+            username=twitch_user.display_name,
+            avatar_url=twitch_user.profile_image_url,
+            email=twitch_user.email,
+            email_verified=twitch_user.email_verified,
+            access_token=token.access_token,
+            refresh_token=token.refresh_token,
+            expires_at=token.expires_in,
         )
-        db_link = await self.link_repo.create(
-            session,
-            LinkedAccountsCreate(
-                user_id=created_user.id,
-                platform=self.platform,
-                platform_user_id=user.id,
-                platform_username=user.display_name,
-                platform_avatar_url=user.profile_image_url,
-                access_token=access_token,
-                refresh_token=refresh_token,
-                expires_at=expires_in,
-            ),
-        )
-        created_user.linked_accounts.append(db_link)
-        return created_user
+        return user
 
     async def add_integration(self, db_session: AsyncSession, user_id: UUID, code: str) -> AuthUserSchema:
         try:
@@ -163,6 +120,7 @@ class AuthTwitchService:
                     user_id=user_id,
                     platform=self.platform,
                     platform_user_id=twitch_user.id,
+                    platform_user_email=twitch_user.email,
                     platform_username=twitch_user.display_name,
                     platform_avatar_url=twitch_user.profile_image_url,
                     access_token=token.access_token,
@@ -188,6 +146,3 @@ class AuthTwitchService:
             await self.link_repo.remove(db_session, twitch_acc.id)
         except NotFoundException:
             raise HTTPException(status_code=404, detail="User not found")
-
-
-auth_twitch_service = AuthTwitchService(user_repo=UserRepository(), link_repo=LinkedAccountsRepository())
