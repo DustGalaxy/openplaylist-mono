@@ -1,0 +1,7 @@
+/**
+ * Auth Strategies - Index File
+ * Centralized export point for all auth strategies
+ */
+
+export { TwitchAuthStrategy } from './TwitchAuthStrategy'
+export { DaAuthStrategy } from './DaAuthStrategy'
