@@ -1,31 +1,25 @@
-from datetime import datetime
 import logging
-from uuid import UUID
 
 from fastapi import HTTPException
-from simple_repository.exceptions import NotFoundException
 import httpx
-import jwt
-
-from _types import AsyncSession, Platform
-from models.linked_accounts import LinkedAccountsCreate, LinkedAccountsUpdate
-from repo import UserRepository, LinkedAccountsRepository
-from settings import settings
+from faststream.rabbit import RabbitQueue
 
 from dto.internal.twitch import TwitchUserResponse, TwitchAuthResponse
-from models.auth_user import AuthUserCreate, AuthUserSchema, AuthUserUpdate
-from services.auth.strategy_manager import manager, PlatformUser
+from models.auth_user import AuthUserSchema
+from services.auth.strategy_manager import manager, PlatformUser, AuthStrategy
+from adapters._rabbit.event_broker import bot_twitch_connect_request
+
+from settings import settings
+from _types import Platform
 from utils import find
 
 logger = logging.getLogger(__name__)
 
 
-@manager.register("twitch", user_repo=UserRepository(), link_repo=LinkedAccountsRepository())
-class AuthTwitchService:
-    def __init__(self, user_repo: UserRepository, link_repo: LinkedAccountsRepository):
-        self.user_repo = user_repo
-        self.link_repo = link_repo
-        self.platform = Platform.TWITCH
+@manager.register("twitch", queue=bot_twitch_connect_request)
+class AuthTwitchService(AuthStrategy):
+    def __init__(self, queue: RabbitQueue):
+        self.bot_connect_request_queue = queue
 
     def allow_email_collision(self) -> bool:
         return True
@@ -75,24 +69,14 @@ class AuthTwitchService:
             logger.error(f"Failed to get user data from Twitch: {response.text}")
             raise HTTPException(400, f"Failed to get user data from Twitch: {response.text}")
 
-        return TwitchUserResponse.model_validate(
-            response.json().get("data")[0] if response.json().get("data") else response.json()
-        )
+        result = response.json().get("data")[0] if response.json().get("data") else response.json()
+        if not result.get("email"):
+            result["email"] = ""
+            result["email_verified"] = False
+        else:
+            result["email_verified"] = True
 
-    def encode_jwt(self, id: UUID, user_name: str) -> str:
-        encoded_jwt = jwt.encode(
-            {
-                "sub": str(id),
-                "username": user_name,
-                "exp": settings.SESSION_LIVE_TIME + int(datetime.now().timestamp()),
-                "iat": int(datetime.now().timestamp()),
-                "iss": settings.JWT_ISSUER,
-            },
-            settings.JWT_SECRET_KEY,
-            algorithm=settings.JWT_ALGORITHM,
-        )
-        print(encoded_jwt)
-        return encoded_jwt
+        return TwitchUserResponse.model_validate(result)
 
     async def fetch_identity(self, code: str) -> PlatformUser:
         token = self.get_token(code)
@@ -109,40 +93,5 @@ class AuthTwitchService:
         )
         return user
 
-    async def add_integration(self, db_session: AsyncSession, user_id: UUID, code: str) -> AuthUserSchema:
-        try:
-            db_user = await self.user_repo.get_one(db_session, user_id, column="id")
-            integration = find(db_user.linked_accounts, lambda x: x.platform == self.platform)
-            if not integration:
-                token = self.get_token(code)
-                twitch_user = self.get_data(token.access_token, db_user)
-                link = LinkedAccountsCreate(
-                    user_id=user_id,
-                    platform=self.platform,
-                    platform_user_id=twitch_user.id,
-                    platform_user_email=twitch_user.email,
-                    platform_username=twitch_user.display_name,
-                    platform_avatar_url=twitch_user.profile_image_url,
-                    access_token=token.access_token,
-                    refresh_token=token.refresh_token,
-                    expires_at=token.expires_in,
-                )
-                db_link = await self.link_repo.create(db_session, link)
-                db_user.linked_accounts.append(db_link)
-                return db_user
 
-            else:
-                raise HTTPException(status_code=400, detail="User already has a da integration")
-        except NotFoundException:
-            raise HTTPException(status_code=404, detail="User not found")
-
-    async def delete_integration(self, db_session: AsyncSession, user_id: UUID) -> None:
-        try:
-            db_user = await self.user_repo.get_one(db_session, user_id, column="id")
-            twitch_acc = find(db_user.linked_accounts, lambda x: x.platform == self.platform)
-            if not twitch_acc:
-                raise HTTPException(status_code=400, detail="User does not have a twitch integration")
-
-            await self.link_repo.remove(db_session, twitch_acc.id)
-        except NotFoundException:
-            raise HTTPException(status_code=404, detail="User not found")
+auth_twitch_service = AuthTwitchService(bot_twitch_connect_request)

@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from _types import Platform
@@ -22,4 +23,4 @@ class User(Base, UUIDMixin, TimestampMixin):
 
     linked_accounts: Mapped[list["LinkedAccounts"]] = relationship(lazy="joined")
 
-    last_login: Mapped[datetime]
+    last_login: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now())

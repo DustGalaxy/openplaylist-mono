@@ -43,7 +43,7 @@ from exceptions import NotActivePlaylist
 
 from models.order import OrderCreate, OrderDomain
 
-from _types import DonationPlatform, Platform, DeleteStatus
+from _types import DonationPlatform, Platform, DeleteStatus, _All_Platforms
 
 
 class PlaylistRepository(
@@ -116,7 +116,7 @@ class PlaylistRepository(
 
             general_content_settings = ContentSettingsCreate(
                 settings_id=new_settings.id,
-                platform=Platform.GENERAL,
+                platform=_All_Platforms.GENERAL,
                 min_views=10_000,
                 min_likes=500,
                 max_duration=600,
@@ -125,7 +125,7 @@ class PlaylistRepository(
             )
             general_donation_rule = DonationRulesCreate(
                 settings_id=new_settings.id,
-                platform=DonationPlatform.GENERAL,
+                platform=_All_Platforms.GENERAL,
                 name="General",
                 slug="general",
                 currency="USD",

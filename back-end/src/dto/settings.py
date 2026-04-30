@@ -4,14 +4,14 @@ from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict
 
 from models.settings import SortSettings
-from _types import Platform, DonationPlatform, ChatPlatform
+from _types import Platform, DonationPlatform, ChatPlatform, _All_Platforms, DB_DonationPlatform
 
 
 class ReadContentSettings(BaseModel):
     id: UUID
     settings_id: UUID
 
-    platform: Platform
+    platform: _All_Platforms
     min_views: int
     min_likes: int
     max_duration: int
@@ -36,7 +36,7 @@ class ReadDonationRules(BaseModel):
     id: UUID
     settings_id: UUID
 
-    platform: DonationPlatform
+    platform: DB_DonationPlatform
     name: str
     slug: str
     currency: str = Field("USD", min_length=3, max_length=3)

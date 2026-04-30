@@ -1,16 +1,13 @@
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, Response
 
-from dto.twitch import CodeDTO
-from dto.user import IntegrationRead, IntegrationType, UserRead
+from dto.token import CodeDTO
+from dto.user import IntegrationRead, UserRead
 
-from services.auth_service import auth_service
-from services.da_service import auth_da_service
-from services.twitch_service import auth_twitch_service
+from services.auth.auth_service import auth_service
 
 from .dependencies import DB_SESSION, CURR_USER
-from utils import find
 from _types import Platform
 from settings import settings
 
@@ -24,15 +21,11 @@ async def me(
 ):
     token = auth_service.encode_jwt(curr_user.id, curr_user.username)
     response.set_cookie(settings.COOKIE_NAME, token, httponly=True, secure=True, max_age=settings.SESSION_LIVE_TIME)
-    link = find(curr_user.linked_accounts, lambda x: x.platform == curr_user.main_platform)
-    if link is None:
-        link = curr_user.linked_accounts[0]
     return {
         "user": UserRead(
             id=curr_user.id,
-            username=link.platform_username,
-            profile_image_url=link.platform_avatar_url,
-            curr_platform=curr_user.main_platform,
+            username=curr_user.username,
+            profile_image_url=curr_user.avatar_url or "",
         ),
         "expired_at": settings.SESSION_LIVE_TIME + int(datetime.now().timestamp()),
     }
@@ -66,31 +59,25 @@ async def get_integration(
     return [IntegrationRead.model_validate(i) for i in integrations]
 
 
-@router.post("/integration")
+@router.post("/integration/{type}")
 async def integration(
     db_session: DB_SESSION,
     code: CodeDTO,
-    type: IntegrationType,
+    type: Platform,
     curr_user: CURR_USER,
 ):
-    if type.type == "twitch":
-        await auth_twitch_service.add_integration(db_session, curr_user.id, code.code)
-    elif type.type == "da":
-        await auth_da_service.add_integration(db_session, curr_user.id, code.code)
-    else:
-        raise HTTPException(status_code=400, detail="Invalid integration type")
+
+    await auth_service.add_integration(db_session, curr_user.id, code.code, type)
+    return {"message": "Integration added"}
 
 
-@router.delete("/integration", status_code=204)
+@router.delete("/integration/{type}/{platform_user_id}", status_code=204)
 async def delete_integration(
     db_session: DB_SESSION,
-    type: IntegrationType,
+    type: Platform,
+    platform_user_id: str,
     curr_user: CURR_USER,
 ):
-    if type.type == "twitch":
-        await auth_twitch_service.delete_integration(db_session, curr_user.id)
-    elif type.type == "da":
-        await auth_da_service.delete_integration(db_session, curr_user.id)
-    else:
-        raise HTTPException(status_code=400, detail="Invalid integration type")
+
+    await auth_service.delete_integration(db_session, curr_user.id, type, platform_user_id)
     return {"message": "Integration deleted"}

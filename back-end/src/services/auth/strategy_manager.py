@@ -1,5 +1,7 @@
 from typing import Protocol
+from abc import abstractmethod
 
+from faststream.rabbit import RabbitQueue
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -7,8 +9,12 @@ from dto.internal.auth import PlatformUser
 
 
 class AuthStrategy(Protocol):
-    async def fetch_identity(self, db_session: AsyncSession, code: str) -> PlatformUser: ...
+    bot_connect_request_queue: RabbitQueue
 
+    @abstractmethod
+    async def fetch_identity(self, code: str) -> PlatformUser: ...
+
+    @abstractmethod
     def allow_email_collision(self) -> bool: ...
 
 

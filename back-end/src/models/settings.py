@@ -4,7 +4,7 @@ from typing import List, Literal, Optional
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
-from _types import Platform, DonationPlatform, ChatPlatform
+from _types import Platform, DonationPlatform, ChatPlatform, _All_Platforms, DB_DonationPlatform
 
 
 class SortSettings(BaseModel):
@@ -39,7 +39,7 @@ class SubSchema(BaseSchema):
 
 
 class ContentSettingsSchema(SubSchema):
-    platform: Platform | None
+    platform: _All_Platforms
     min_views: int
     min_likes: int
     max_duration: int
@@ -50,11 +50,11 @@ class ContentSettingsSchema(SubSchema):
 class BlockListSchema(SubSchema):
     trigger_type: BlockTrigger
     trigger_value: str
-    platform: Platform | None
+    platform: Platform
 
 
 class DonationRulesSchema(SubSchema):
-    platform: DonationPlatform
+    platform: _All_Platforms
     name: str
     slug: str
     currency: str
@@ -97,7 +97,7 @@ class SettingsSchema(BaseSchema):
 class ContentSettingsPatch(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    platform: Optional[Platform] = None
+    platform: Optional[_All_Platforms] = None
     min_views: Optional[int] = None
     min_likes: Optional[int] = None
     max_duration: Optional[int] = None
@@ -116,7 +116,7 @@ class BlockListPatch(BaseModel):
 class DonationRulesPatch(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    platform: Optional[DonationPlatform] = None
+    platform: Optional[DB_DonationPlatform] = None
     name: Optional[str] = None
     slug: Optional[str] = None
     currency: Optional[str] = None
@@ -153,7 +153,7 @@ class DonationRulesCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     settings_id: UUID
-    platform: DonationPlatform
+    platform: DB_DonationPlatform
     name: str = "Donation"
     slug: str = "donation"
     currency: str = Field("USD", min_length=3, max_length=3)
@@ -176,7 +176,7 @@ class ChatRulesCreate(BaseModel):
 class ContentSettingsCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    platform: Platform
+    platform: _All_Platforms
     settings_id: UUID
     min_views: int = 10_000
     min_likes: int = 500

@@ -104,7 +104,7 @@ class LinkedAccountsRepository(
 
     async def get_by_email_platform(self, session: AsyncSession, email: str, platform: Platform):
         stmt = select(LinkedAccounts).where(
-            LinkedAccounts.platfrom_user_email == email, LinkedAccounts.platform == platform
+            LinkedAccounts.platform_user_email == email, LinkedAccounts.platform == platform
         )
 
         res = await session.execute(stmt)
