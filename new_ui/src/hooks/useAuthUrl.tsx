@@ -3,64 +3,135 @@ import {
   OAUTH_STATE_KEY,
   REDIRECT_AFTER_LOGIN_KEY,
   generateOAuthState,
-  getConfig,
 } from '@/lib/utils'
+import { buildOAuthUrl, isOAuthPlatformSupported } from '@/lib/oauthConfig'
 
-export const useTwitchLoginUrl = () => {
+/**
+ * OAuth State Structure
+ * Format: "${platform}|${operationType}|${randomState}"
+ * Example: "twitch|login|abc123def456"
+ * Example: "da|integration|xyz789"
+ *
+ * This compact format is stored in state parameter and can be extracted
+ * in the callback page to determine which platform and operation was initiated
+ */
+export interface OAuthStateData {
+  platform: string
+  operationType: 'login' | 'integration'
+  randomState: string
+}
+
+/**
+ * Serialize OAuth state data into a compact state parameter
+ * Used in OAuth redirect URL: ?state=${serializedState}
+ */
+export function serializeOAuthState(data: OAuthStateData): string {
+  return `${data.platform}|${data.operationType}|${data.randomState}`
+}
+
+/**
+ * Deserialize OAuth state parameter back to structured data
+ * Called in callback page to extract platform and operation type
+ */
+export function deserializeOAuthState(stateParam: string): OAuthStateData | null {
+  try {
+    const parts = stateParam.split('|')
+    if (parts.length !== 3) {
+      console.error('Invalid state format:', stateParam)
+      return null
+    }
+
+    const [platform, operationType, randomState] = parts
+    if (operationType !== 'login' && operationType !== 'integration') {
+      console.error('Invalid operation type:', operationType)
+      return null
+    }
+
+    return { platform, operationType, randomState }
+  } catch (error) {
+    console.error('Failed to deserialize OAuth state:', error)
+    return null
+  }
+}
+
+/**
+ * Generic OAuth URL generator for all social platforms
+ * Supports: Twitch, DA, and any platform added to oauthConfig.ts
+ *
+ * Usage:
+ *   const handleOAuthRedirect = useOAuthUrl()
+ *   handleOAuthRedirect('twitch', false)  // login with twitch
+ *   handleOAuthRedirect('da', true)       // integration with da
+ */
+export const useOAuthUrl = () => {
   const routerState = useRouterState()
 
-  const handleTwitchLogin = (isIntegration: boolean = false) => {
-    console.log(getConfig())
-    const config = getConfig()
-    console.log("handleTwitchLogin", isIntegration);
-    // 1. Генерируем уникальное состояние для защиты от CSRF-атак
-    const state = generateOAuthState()
-    localStorage.setItem(OAUTH_STATE_KEY, state)
+  const handleOAuthRedirect = (
+    platform: string,
+    isIntegration: boolean = false,
+  ) => {
+    // 1. Validate platform is supported
+    if (!isOAuthPlatformSupported(platform)) {
+      console.error(`OAuth not configured for platform: ${platform}`)
+      throw new Error(`Platform "${platform}" is not configured for OAuth`)
+    }
 
-    // Вычисляем текущий полный путь для последующего редиректа
+    // 2. Generate CSRF protection state
+    const randomState = generateOAuthState()
+    const oauthStateData: OAuthStateData = {
+      platform,
+      operationType: isIntegration ? 'integration' : 'login',
+      randomState,
+    }
+    const serializedState = serializeOAuthState(oauthStateData)
+
+    // 3. Store state for validation in callback
+    localStorage.setItem(OAUTH_STATE_KEY, serializedState)
+
+    // 4. Save current location for redirect after OAuth completes
     const currentPath =
       routerState.location.pathname +
       routerState.location.searchStr +
       routerState.location.hash
-
-    // 2. Сохраняем текущий путь, чтобы вернуться на него после логина
     localStorage.setItem(REDIRECT_AFTER_LOGIN_KEY, currentPath)
-    // 3. Формируем URL для авторизации Twitch
-    const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=${config.TWITCH_CLIENT_ID}&redirect_uri=${config.TWITCH_REDIRECT_URI}&scope=${config.TWITCH_SCOPES}&state=${(isIntegration ? 'integration:' : '') + state}`
 
-    // 4. Перенаправляем пользователя на Twitch
+    // 5. Build complete OAuth authorization URL
+    const redirectUri = `${window.location.origin}/oauth-callback`
+    const authUrl = buildOAuthUrl(platform, serializedState, redirectUri)
 
-    window.location.href = twitchAuthUrl
+    // 6. Redirect to OAuth provider
+    console.log(
+      `Redirecting to ${platform} OAuth with ${isIntegration ? 'integration' : 'login'} operation`,
+    )
+    window.location.href = authUrl
+  }
+
+  return handleOAuthRedirect
+}
+
+/**
+ * @deprecated Use useOAuthUrl() instead
+ * Backward compatibility wrapper for Twitch
+ */
+export const useTwitchLoginUrl = () => {
+  const handleOAuthRedirect = useOAuthUrl()
+
+  const handleTwitchLogin = (isIntegration: boolean = false) => {
+    handleOAuthRedirect('twitch', isIntegration)
   }
 
   return handleTwitchLogin
 }
 
+/**
+ * @deprecated Use useOAuthUrl() instead
+ * Backward compatibility wrapper for DA
+ */
 export const useDaLoginUrl = () => {
-  const routerState = useRouterState()
+  const handleOAuthRedirect = useOAuthUrl()
 
   const handleDaLogin = (isIntegration: boolean = false) => {
-    // 1. Генерируем уникальное состояние для защиты от CSRF-атак
-    const state = generateOAuthState()
-    localStorage.setItem(OAUTH_STATE_KEY, state)
-    console.log(getConfig())
-    console.log("handleDaLogin", isIntegration);
-    
-    const config = getConfig()
-    // Вычисляем текущий полный путь для последующего редиректа
-    const currentPath =
-      routerState.location.pathname +
-      routerState.location.searchStr +
-      routerState.location.hash
-
-    // 2. Сохраняем текущий путь, чтобы вернуться на него после логина
-    localStorage.setItem(REDIRECT_AFTER_LOGIN_KEY, currentPath)
-    // 3. Формируем URL для авторизации DA
-    const daAuthUrl = `https://www.donationalerts.com/oauth/authorize?response_type=code&client_id=${config.DA_CLIENT_ID}&redirect_uri=${config.DA_REDIRECT_URI}&scope=${config.DA_SCOPES}&state=${(isIntegration ? 'integration:' : '') + state}`
-
-    // 4. Перенаправляем пользователя на DA
-
-    window.location.href = daAuthUrl
+    handleOAuthRedirect('da', isIntegration)
   }
 
   return handleDaLogin

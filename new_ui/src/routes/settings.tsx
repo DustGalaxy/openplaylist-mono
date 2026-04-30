@@ -139,13 +139,13 @@ function RouteComponent() {
             </div>
 
             {/* donation alerts */}
-
-            <div className="flex items-center gap-3">
-              <div className="w-[45px] h-[45px] ">
+            
+            {/* <div className="flex items-center gap-3" aria-disabled={true}>
+              <div className="w-[45px] h-[45px] disabled:opacity-50">
                 <DonationAlerts width={45} height={45} />
               </div>
 
-              <div className="text-lg font-bold">Donation Alerts</div>
+              <div className="text-lg font-bold disabled:opacity-50">Donation Alerts</div>
 
               {integrationsState.some(
                 (i: Integration) => i.platform === 'da',
@@ -185,7 +185,7 @@ function RouteComponent() {
                   </button>
                 </>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
