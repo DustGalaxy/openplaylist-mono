@@ -341,13 +341,14 @@ export const useTwitchAuthMutation = ({
     mutationFn: async (payload: { code: string }) => {
       try {
         const config = getConfig()
-        await apiClient.post(
+        const result = await apiClient.post(
           `${config.AUTH_API_URL}/login/social/twitch`,
           payload,
           {
             withCredentials: true,
           },
         )
+        return result
       } catch (error) {
         if (axios.isAxiosError(error)) {
           const axiosError = error as AxiosError
@@ -372,45 +373,74 @@ export const useTwitchAuthMutation = ({
         throw error
       }
     },
-    onSuccess: async () => {
-      console.log(
-        'Twitch code exchange successful. Now manually re-fetching user profile to update.',
-      )
-      // После успешного обмена кода, НЕМЕДЛЕННО ЗАПРОСИТЬ профиль пользователя.
-      // Этот запрос должен быть успешным, так как кука уже установлена.
-      try {
-        const userProfileResponse = await queryClient.fetchQuery({
-          queryKey: ['currentUserProfile'],
-          queryFn: fetchCurrentUserProfile,
-          staleTime: 0,
-          gcTime: 0,
-        })
-
-        if (userProfileResponse && userProfileResponse.user) {
-          setUser(userProfileResponse.user, userProfileResponse.expired_at)
-          const redirectToPath =
-            localStorage.getItem(REDIRECT_AFTER_LOGIN_KEY) || '/dashboard'
-
-          localStorage.removeItem(OAUTH_STATE_KEY)
-          localStorage.removeItem(REDIRECT_AFTER_LOGIN_KEY)
-
-          navigate({ to: redirectToPath })
-        } else {
-          console.error(
-            'Backend exchange successful, but /api/me returned no user data.',
-          )
-          clearAuth()
-          throw new Error(
-            'User profile not retrieved after successful code exchange.',
-          )
-        }
-      } catch (profileError) {
-        console.error(
-          'Failed to fetch user profile after successful code exchange:',
-          profileError,
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      const fetchProfileAndRedirect = async () => {
+        console.log(
+          'Twitch code exchange successful. Now manually re-fetching user profile to update.',
         )
-        clearAuth() // При любой ошибке профиля, сбрасываем авторизацию
-        throw profileError // Пробрасываем дальше, чтобы mutationResult.isError сработал
+        // После успешного обмена кода, НЕМЕДЛЕННО ЗАПРОСИТЬ профиль пользователя.
+        // Этот запрос должен быть успешным, так как кука уже установлена.
+        try {
+          const userProfileResponse = await queryClient.fetchQuery({
+            queryKey: ['currentUserProfile'],
+            queryFn: fetchCurrentUserProfile,
+            staleTime: 0,
+            gcTime: 0,
+          })
+
+          if (userProfileResponse && userProfileResponse.user) {
+            setUser(userProfileResponse.user, userProfileResponse.expired_at)
+            const redirectToPath =
+              localStorage.getItem(REDIRECT_AFTER_LOGIN_KEY) || '/dashboard'
+
+            localStorage.removeItem(OAUTH_STATE_KEY)
+            localStorage.removeItem(REDIRECT_AFTER_LOGIN_KEY)
+
+            navigate({ to: redirectToPath })
+          } else {
+            console.error(
+              'Backend exchange successful, but /api/me returned no user data.',
+            )
+            clearAuth()
+            throw new Error(
+              'User profile not retrieved after successful code exchange.',
+            )
+          }
+        } catch (profileError) {
+          console.error(
+            'Failed to fetch user profile after successful code exchange:',
+            profileError,
+          )
+          clearAuth() // При любой ошибке профиля, сбрасываем авторизацию
+          throw profileError // Пробрасываем дальше, чтобы mutationResult.isError сработал
+        }
+      }
+
+      if (data.status === 202) {
+        const confirmed = window.confirm(
+          `We find account with same email as Twitch account, is ${data.data.display_info.username}. Do you want to link Twitch account to existing account or create new one?`,
+        )
+
+        try {
+          const res = await apiClient.post(
+            `${getConfig().AUTH_API_URL}/login/resolve_email_colision`,
+            {
+              is_confirmed: confirmed,
+              link_session_id: data.data.link_session_id,
+            },
+            {
+              withCredentials: true,
+            },
+          )
+          if (res.status === 200) {
+            await fetchProfileAndRedirect()
+          }
+        } catch (error) {
+          console.error('Error confirming Twitch account linking:', error)
+          throw new Error('Failed to link Twitch account. Please try again.')
+        }
+      } else if (data.status === 200) {
+        await fetchProfileAndRedirect()
       }
     },
     onError: (error) => {
