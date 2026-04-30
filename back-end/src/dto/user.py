@@ -13,7 +13,6 @@ class UserDTO(BaseModel):
 
 class UserRead(BaseModel):
     id: UUID
-    curr_platform: Platform
     username: str
     profile_image_url: str
 

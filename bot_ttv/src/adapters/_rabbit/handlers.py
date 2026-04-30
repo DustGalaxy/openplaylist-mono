@@ -11,7 +11,7 @@ from src.adapters._rabbit.broker import (
     bot_twitch_disconnect_request,
     bot_order_completed,
     bot_order_cancelled,
-    bot_order_partially_completed
+    bot_order_partially_completed,
 )
 from src.bot_setup import Bot, context, eventsub
 from src.utils import get_twitch_id
@@ -33,23 +33,30 @@ async def order_status(message: RabbitMessage = Context()) -> None:
 
 
 @broker.subscriber(bot_twitch_connect_request, exchange=main_exchange)
-async def connect_to_twitch(message: RabbitMessage = Context()) -> None:
+async def connect_to_twitch(message: RabbitMessage = Context()):
     await message.ack()
     bot: Bot = context["bot"]  # pyright: ignore[reportAssignmentType]
     LOGGER.info(f"ttvbot inst - {bot}")
     if bot is None:
-        return
+        return False
 
     event: LinkedAccountWithTokensRead = LinkedAccountWithTokensRead.model_validate_json(message.body)
-    await bot.multi_subscribe([
-        eventsub.ChatMessageSubscription(
-            broadcaster_user_id=event.platform_user_id,
-            user_id=bot.bot_id,
+    try:
+        await bot.multi_subscribe(
+            [
+                eventsub.ChatMessageSubscription(
+                    broadcaster_user_id=event.platform_user_id,
+                    user_id=bot.bot_id,
+                )
+            ]
         )
-    ])
 
-    await bot.add_token(event.access_token, event.refresh_token, event.platform_user_id)
-    await broker.publish(str(event.user_id), "bot.twitch.ack.connection", main_exchange)
+        await bot.add_token(event.access_token, event.refresh_token, event.platform_user_id)
+        return True
+    except Exception as e:
+        LOGGER.error(e)
+        return False
+
 
 @broker.subscriber(bot_twitch_disconnect_request, exchange=main_exchange)
 async def disconnect_from_twitch(message: RabbitMessage = Context()) -> None:

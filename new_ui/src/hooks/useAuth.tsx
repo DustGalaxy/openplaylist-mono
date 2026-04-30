@@ -225,9 +225,13 @@ export const useDAAuthMutation = ({
     mutationFn: async (payload: { code: string }) => {
       try {
         const config = getConfig()
-        await apiClient.post(`${config.AUTH_API_URL}/login/da`, payload, {
-          withCredentials: true,
-        })
+        await apiClient.post(
+          `${config.AUTH_API_URL}/login/social/da`,
+          payload,
+          {
+            withCredentials: true,
+          },
+        )
       } catch (error) {
         if (axios.isAxiosError(error)) {
           const axiosError = error as AxiosError
@@ -337,10 +341,13 @@ export const useTwitchAuthMutation = ({
     mutationFn: async (payload: { code: string }) => {
       try {
         const config = getConfig()
-        await apiClient.post(`${config.AUTH_API_URL}/login/twitch`, payload, {
-          withCredentials: true,
-        })
-        
+        await apiClient.post(
+          `${config.AUTH_API_URL}/login/social/twitch`,
+          payload,
+          {
+            withCredentials: true,
+          },
+        )
       } catch (error) {
         if (axios.isAxiosError(error)) {
           const axiosError = error as AxiosError

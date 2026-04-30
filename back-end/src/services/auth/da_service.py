@@ -1,45 +1,23 @@
 import json
 import logging
 from datetime import datetime
-from uuid import UUID
 
 import httpx
-import jwt
 from fastapi import HTTPException
-from simple_repository.exceptions import NotFoundException
+from faststream.rabbit import RabbitQueue
 
-from _types import AsyncSession, Platform
 from settings import settings
 from dto.da import DAToken, DAUser
-from models.auth_user import AuthUserSchema
-from models.linked_accounts import LinkedAccountsCreate
-from repo import LinkedAccountsRepository, UserRepository
-from services.auth.strategy_manager import manager, PlatformUser
-from utils import find
+from adapters._rabbit.event_broker import bot_da_connect_request
+from services.auth.strategy_manager import AuthStrategy, manager, PlatformUser
 
 logger = logging.getLogger(__name__)
 
 
-@manager.register("da", user_repo=UserRepository(), link_repo=LinkedAccountsRepository())
-class AuthDAService:
-    def __init__(self, user_repo: UserRepository, link_repo: LinkedAccountsRepository):
-        self.user_repo = user_repo
-        self.link_repo = link_repo
-        self.platform = Platform.DA
-
-    def encode_jwt(self, id: UUID, user_name: str) -> str:
-        encoded_jwt = jwt.encode(
-            {
-                "sub": str(id),
-                "username": user_name,
-                "exp": settings.SESSION_LIVE_TIME + int(datetime.now().timestamp()),
-                "iat": int(datetime.now().timestamp()),
-                "iss": settings.JWT_ISSUER,
-            },
-            settings.JWT_SECRET_KEY,
-            algorithm=settings.JWT_ALGORITHM,
-        )
-        return encoded_jwt
+@manager.register("donationalerts", queue=bot_da_connect_request)
+class AuthDAService(AuthStrategy):
+    def __init__(self, queue: RabbitQueue):
+        self.bot_connect_request_queue = queue
 
     def allow_email_collision(self) -> bool:
         return False
@@ -149,90 +127,11 @@ class AuthDAService:
             email=da_user.email,
             email_verified=True,
             access_token=token.access_token,
-            refresh_token=token.refresh_token,
-            expires_at=token.expires_in,
+            refresh_token=token.refresh_token,  # type: ignore
+            expires_at=token.expires_at,
         )
 
         return user
 
-    async def add_integration(self, db_session: AsyncSession, user_id: UUID, code: str) -> AuthUserSchema:
-        try:
-            db_user = await self.user_repo.get_one(db_session, user_id, column="id")
-            integration = find(db_user.linked_accounts, lambda x: x.platform == self.platform)
 
-            if not integration:
-                data = {
-                    "grant_type": "authorization_code",
-                    "client_id": settings.DA_APP_ID,
-                    "client_secret": settings.DA_API_KEY,
-                    "code": code,
-                    "redirect_uri": settings.DA_REDIRECT_URI,
-                }
-
-                async with httpx.AsyncClient() as client:
-                    try:
-                        response = await client.post(settings.DA_TOKEN_URL, data=data)
-
-                        if response.status_code in [400, 401]:
-                            raise Exception(response.text)
-
-                        token_data = response.json()
-                        user_info: dict = await self._make_api_request("GET", "/user/oauth", token_data["access_token"])
-
-                        data = user_info["data"]
-                        data["id"] = str(data["id"])
-                        da_user = DAUser.model_validate(data)
-                        link = LinkedAccountsCreate(
-                            user_id=user_id,
-                            platform=self.platform,
-                            platform_user_id=da_user.id,
-                            platform_user_email=da_user.email,
-                            platform_username=da_user.name,
-                            platform_avatar_url=da_user.avatar,
-                            access_token=token_data["access_token"],
-                            refresh_token=token_data["refresh_token"],
-                            expires_at=int(datetime.now().timestamp()) + token_data["expires_in"],
-                        )
-
-                        db_link = await self.link_repo.create(db_session, link)
-                        db_user.linked_accounts.append(db_link)
-                        return db_user
-
-                    except httpx.HTTPStatusError as e:
-                        logger.error(
-                            f"HTTP Error exchanging code for token: {e.response.status_code} - {e.response.text}"
-                        )
-                        raise HTTPException(status_code=400)
-
-                    except httpx.RequestError as e:
-                        logger.error(f"Network error exchanging code for token: {e}")
-                        raise HTTPException(status_code=400)
-
-                    except json.JSONDecodeError as e:
-                        logger.error(f"Failed to decode JSON token response: {e}")
-                        raise HTTPException(status_code=400)
-                    except Exception as e:
-                        print(e)
-                        logger.error(f"An unexpected error occurred: {e}")
-                        raise HTTPException(status_code=400)
-            else:
-                raise HTTPException(status_code=400, detail="User already has a da integration")
-        except NotFoundException:
-            raise HTTPException(status_code=404, detail="User not found")
-
-    async def delete_integration(self, db_session: AsyncSession, user_id: UUID) -> AuthUserSchema:
-        try:
-            db_user = await self.user_repo.get_one(db_session, user_id, column="id")
-            da_acc = find(db_user.linked_accounts, lambda x: x.platform == self.platform)
-
-            if not da_acc:
-                raise HTTPException(status_code=400, detail="User does not have a twitch integration")
-
-            await self.link_repo.remove(db_session, da_acc.id)
-
-            return await self.user_repo.update(db_session, db_user)
-        except NotFoundException:
-            raise HTTPException(status_code=404, detail="User not found")
-
-
-auth_da_service = AuthDAService(UserRepository(), LinkedAccountsRepository())
+auth_da_service = AuthDAService(bot_da_connect_request)

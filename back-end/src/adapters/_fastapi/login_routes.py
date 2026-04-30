@@ -1,7 +1,7 @@
 import json
 import uuid
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, Body, HTTPException, Response
 
 from dto.token import CodeDTO
 from adapters._redis.broker import redis_adapter
@@ -13,11 +13,12 @@ from exceptions import NeedConfirmationException
 router = APIRouter(prefix="/login")
 
 
+@router.post("/classic", status_code=200)
 async def login_classic(
     response: Response,
     db_session: DB_SESSION,
-    username: str,
-    password: str,
+    username: str = Body(),
+    password: str = Body(),
 ): ...
 
 
