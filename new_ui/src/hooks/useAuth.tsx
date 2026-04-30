@@ -9,6 +9,7 @@ import type { AxiosError } from 'axios'
 
 import apiClient from '@/lib/axios'
 import { useAuthStore } from '@/stores/authStore'
+import { authStrategyManager } from '@/lib/authStrategyManager'
 import {
   OAUTH_STATE_KEY,
   REDIRECT_AFTER_LOGIN_KEY,
@@ -163,57 +164,7 @@ export const useDaIntegration = ({
 }: {
   navigate: UseNavigateResult<string>
 }) => {
-  return useMutation({
-    mutationFn: async (payload: { code: string }) => {
-      try {
-        const config = getConfig()
-        await apiClient.post(
-          `${config.AUTH_API_URL}/user/integration`,
-          {
-            code: { code: payload.code },
-            type: { type: 'da' },
-          },
-          {
-            withCredentials: true,
-          },
-        )
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError
-          if (axiosError.code === 'ERR_NETWORK' || !axiosError.response) {
-            console.error(
-              'Network Error: Could not connect to backend for DA auth code exchange.',
-              axiosError.message,
-            )
-            throw new Error(
-              'Server is unreachable. Cannot complete DA authentication.',
-            )
-          }
-          if (
-            axiosError.response.status === 400 ||
-            axiosError.response.status === 401
-          ) {
-            throw new Error(
-              'DA authentication failed on backend (invalid code or internal error).',
-            )
-          }
-        }
-        throw error
-      }
-    },
-    onSuccess: () => {
-      const redirectToPath =
-        localStorage.getItem(REDIRECT_AFTER_LOGIN_KEY) || '/dashboard'
-
-      localStorage.removeItem(OAUTH_STATE_KEY)
-      localStorage.removeItem(REDIRECT_AFTER_LOGIN_KEY)
-
-      navigate({ to: redirectToPath })
-    },
-    onError: (error) => {
-      console.error('DA authentication error:', error)
-    },
-  })
+  return useIntegration('da', { navigate })
 }
 
 export const useDAAuthMutation = ({
@@ -221,54 +172,7 @@ export const useDAAuthMutation = ({
 }: {
   navigate: UseNavigateResult<string>
 }) => {
-  return useMutation({
-    mutationFn: async (payload: { code: string }) => {
-      try {
-        const config = getConfig()
-        await apiClient.post(
-          `${config.AUTH_API_URL}/login/social/da`,
-          payload,
-          {
-            withCredentials: true,
-          },
-        )
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError
-          if (axiosError.code === 'ERR_NETWORK' || !axiosError.response) {
-            console.error(
-              'Network Error: Could not connect to backend for DA auth code exchange.',
-              axiosError.message,
-            )
-            throw new Error(
-              'Server is unreachable. Cannot complete DA authentication.',
-            )
-          }
-          if (
-            axiosError.response.status === 400 ||
-            axiosError.response.status === 401
-          ) {
-            throw new Error(
-              'DA authentication failed on backend (invalid code or internal error).',
-            )
-          }
-        }
-        throw error
-      }
-    },
-    onSuccess: () => {
-      const redirectToPath =
-        localStorage.getItem(REDIRECT_AFTER_LOGIN_KEY) || '/dashboard'
-
-      localStorage.removeItem(OAUTH_STATE_KEY)
-      localStorage.removeItem(REDIRECT_AFTER_LOGIN_KEY)
-
-      navigate({ to: redirectToPath })
-    },
-    onError: (error) => {
-      console.error('DA authentication error:', error)
-    },
-  })
+  return useAuthLogin('da', { navigate })
 }
 
 export const useTwitchIntegration = ({
@@ -276,16 +180,36 @@ export const useTwitchIntegration = ({
 }: {
   navigate: UseNavigateResult<string>
 }) => {
+  return useIntegration('twitch', { navigate })
+}
+
+export const useTwitchAuthMutation = ({
+  navigate,
+}: {
+  navigate: UseNavigateResult<string>
+}) => {
+  return useAuthLogin('twitch', { navigate })
+}
+
+/**
+ * Generic integration hook that works with any registered platform
+ * Links an existing social account to the current user
+ */
+export const useIntegration = (
+  platform: string,
+  { navigate }: { navigate: UseNavigateResult<string> },
+) => {
   return useMutation({
     mutationFn: async (payload: { code: string }) => {
       try {
+        const strategy = authStrategyManager.getIntegrationStrategy(platform)
         const config = getConfig()
+        const endpoint = strategy.getIntegrationEndpoint()
+        const formattedPayload = strategy.formatIntegrationPayload(payload.code)
+
         await apiClient.post(
-          `${config.AUTH_API_URL}/user/integration`,
-          {
-            code: { code: payload.code },
-            type: { type: 'twitch' },
-          },
+          `${config.AUTH_API_URL}${endpoint}`,
+          formattedPayload,
           {
             withCredentials: true,
           },
@@ -294,21 +218,21 @@ export const useTwitchIntegration = ({
         if (axios.isAxiosError(error)) {
           const axiosError = error as AxiosError
           if (axiosError.code === 'ERR_NETWORK' || !axiosError.response) {
+            const strategy = authStrategyManager.getIntegrationStrategy(platform)
             console.error(
-              'Network Error: Could not connect to backend for Twitch auth code exchange.',
+              strategy.getErrorMessage('network'),
               axiosError.message,
             )
             throw new Error(
-              'Server is unreachable. Cannot complete Twitch authentication.',
+              `Server is unreachable. Cannot complete ${platform} authentication.`,
             )
           }
           if (
             axiosError.response.status === 400 ||
             axiosError.response.status === 401
           ) {
-            throw new Error(
-              'Twitch authentication failed on backend (invalid code or internal error).',
-            )
+            const strategy = authStrategyManager.getIntegrationStrategy(platform)
+            throw new Error(strategy.getErrorMessage('auth_failed'))
           }
         }
         throw error
@@ -324,26 +248,33 @@ export const useTwitchIntegration = ({
       navigate({ to: redirectToPath })
     },
     onError: (error) => {
-      console.error('DA authentication error:', error)
+      console.error(`${platform} integration error:`, error)
     },
   })
 }
 
-export const useTwitchAuthMutation = ({
-  navigate,
-}: {
-  navigate: UseNavigateResult<string>
-}) => {
+/**
+ * Generic auth login hook that works with any registered platform
+ * Handles complete login flow including email collision resolution
+ */
+export const useAuthLogin = (
+  platform: string,
+  { navigate }: { navigate: UseNavigateResult<string> },
+) => {
   const queryClient = useQueryClient()
   const { clearAuth, setUser } = useAuthStore()
 
   const mutationResult = useMutation({
     mutationFn: async (payload: { code: string }) => {
       try {
+        const strategy = authStrategyManager.getLoginStrategy(platform)
         const config = getConfig()
+        const endpoint = strategy.getLoginEndpoint()
+        const formattedPayload = strategy.formatLoginPayload(payload.code)
+
         const result = await apiClient.post(
-          `${config.AUTH_API_URL}/login/social/twitch`,
-          payload,
+          `${config.AUTH_API_URL}${endpoint}`,
+          formattedPayload,
           {
             withCredentials: true,
           },
@@ -353,33 +284,30 @@ export const useTwitchAuthMutation = ({
         if (axios.isAxiosError(error)) {
           const axiosError = error as AxiosError
           if (axiosError.code === 'ERR_NETWORK' || !axiosError.response) {
-            console.error(
-              'Network Error: Could not connect to backend for Twitch auth code exchange.',
-              axiosError.message,
-            )
+            const strategy = authStrategyManager.getLoginStrategy(platform)
+            console.error(strategy.getErrorMessage('network'), axiosError.message)
             throw new Error(
-              'Server is unreachable. Cannot complete Twitch authentication.',
+              `Server is unreachable. Cannot complete ${platform} authentication.`,
             )
           }
           if (
             axiosError.response.status === 400 ||
             axiosError.response.status === 401
           ) {
-            throw new Error(
-              'Twitch authentication failed on backend (invalid code or internal error).',
-            )
+            const strategy = authStrategyManager.getLoginStrategy(platform)
+            throw new Error(strategy.getErrorMessage('auth_failed'))
           }
         }
         throw error
       }
     },
-    onSuccess: async (data, variables, onMutateResult, context) => {
+    onSuccess: async (data) => {
+      const strategy = authStrategyManager.getLoginStrategy(platform)
+
       const fetchProfileAndRedirect = async () => {
         console.log(
-          'Twitch code exchange successful. Now manually re-fetching user profile to update.',
+          `${platform} code exchange successful. Now manually re-fetching user profile to update.`,
         )
-        // После успешного обмена кода, НЕМЕДЛЕННО ЗАПРОСИТЬ профиль пользователя.
-        // Этот запрос должен быть успешным, так как кука уже установлена.
         try {
           const userProfileResponse = await queryClient.fetchQuery({
             queryKey: ['currentUserProfile'],
@@ -411,14 +339,14 @@ export const useTwitchAuthMutation = ({
             'Failed to fetch user profile after successful code exchange:',
             profileError,
           )
-          clearAuth() // При любой ошибке профиля, сбрасываем авторизацию
-          throw profileError // Пробрасываем дальше, чтобы mutationResult.isError сработал
+          clearAuth()
+          throw profileError
         }
       }
 
-      if (data.status === 202) {
+      if (data.status === 202 && strategy.allowsEmailCollision()) {
         const confirmed = window.confirm(
-          `We find account with same email as Twitch account, is ${data.data.display_info.username}. Do you want to link Twitch account to existing account or create new one?`,
+          strategy.getEmailCollisionMessage(data.data.display_info.username),
         )
 
         try {
@@ -436,20 +364,23 @@ export const useTwitchAuthMutation = ({
             await fetchProfileAndRedirect()
           }
         } catch (error) {
-          console.error('Error confirming Twitch account linking:', error)
-          throw new Error('Failed to link Twitch account. Please try again.')
+          console.error(`Error confirming ${platform} account linking:`, error)
+          throw new Error(
+            `Failed to link ${platform} account. Please try again.`,
+          )
         }
       } else if (data.status === 200) {
         await fetchProfileAndRedirect()
       }
     },
     onError: (error) => {
-      console.error('Twitch authentication error:', error)
-      clearAuth() // Всегда очищаем, если мутация провалилась
+      console.error(`${platform} authentication error:`, error)
+      clearAuth()
     },
   })
   return mutationResult
 }
+
 
 // --- 3. Мутация для выхода из системы ---
 async function logoutBackend(): Promise<void> {
