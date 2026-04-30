@@ -16,7 +16,7 @@ from dto.user import LinkedAccountWithTokensRead
 from repo import LinkedAccountsRepository, UserRepository
 
 from models.auth_user import AuthUserSchema, AuthUserCreate
-from models.linked_accounts import LinkedAccountsCreate
+from models.linked_accounts import LinkedAccountsCreate, LinkedAccountsDomain
 from services.auth.strategy_manager import manager
 from adapters._rabbit.event_broker import (
     broker,
@@ -77,7 +77,7 @@ class AuthService:
         await self.link_repo.create(
             db_session,
             LinkedAccountsCreate(
-                user_id=data["existing_user_id"],
+                user_id=data["user_id"],
                 platform=data["platform"],
                 platform_user_id=data["platform_user_id"],
                 platform_username=data["platform_username"],
@@ -88,7 +88,7 @@ class AuthService:
                 expires_at=data["expires_at"],
             ),
         )
-        user = await self.user_repo.get_one(db_session, data["existing_user_id"], column="id")
+        user = await self.user_repo.get_one(db_session, data["user_id"], column="id")
         if not user:
             raise HTTPException(status_code=400, detail="User not found")
 
@@ -219,6 +219,12 @@ class AuthService:
             raise HTTPException(status_code=404, detail="User not found")
 
         return user
+
+    async def create_user(self, db_session: AsyncSession, user: AuthUserCreate) -> AuthUserSchema:
+        return await self.user_repo.create(db_session, user)
+
+    async def create_link(self, db_session: AsyncSession, link: LinkedAccountsCreate) -> LinkedAccountsDomain:
+        return await self.link_repo.create(db_session, link)
 
     async def add_integration(
         self, db_session: AsyncSession, user_id: UUID, code: str, type: Platform

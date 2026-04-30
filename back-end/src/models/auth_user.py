@@ -30,6 +30,7 @@ class AuthUserCreate(BaseModel):
     username: str
     email: str
     avatar_url: str | None = None
+    password: str | None = None
 
 
 class AuthUserUpdate(BaseModel):
