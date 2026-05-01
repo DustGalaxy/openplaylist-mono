@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 
 from fastapi import HTTPException
@@ -89,7 +90,7 @@ class AuthTwitchService(AuthStrategy):
             email_verified=twitch_user.email_verified,
             access_token=token.access_token,
             refresh_token=token.refresh_token,
-            expires_at=token.expires_in,
+            expires_at=int(datetime.now().timestamp()) + token.expires_in,
         )
         return user
 

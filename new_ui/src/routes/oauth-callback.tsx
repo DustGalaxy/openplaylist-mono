@@ -32,7 +32,7 @@ function UnifiedOAuthCallbackPage() {
 
   // Get the appropriate mutation based on operation type
   // We use conditional hooks to avoid issues, but store the platform first
-  const [platform, operationType] = (() => {
+  const [platform, detectedOperationType] = (() => {
     const params = new URLSearchParams(window.location.search)
     const stateFromUrl = params.get('state')
     const oauthState = deserializeOAuthState(stateFromUrl || '')
@@ -46,7 +46,7 @@ function UnifiedOAuthCallbackPage() {
   })
 
   // Choose the right mutation based on operation type
-  const mutation = operationType === 'integration' ? integrationMutation : loginMutation
+  const mutation = detectedOperationType === 'integration' ? integrationMutation : loginMutation
 
   useEffect(() => {
     // Ensure this runs only once

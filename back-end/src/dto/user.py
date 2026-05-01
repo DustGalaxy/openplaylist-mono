@@ -26,6 +26,7 @@ class IntegrationType(BaseModel):
 class IntegrationRead(BaseModel):
     id: UUID
     platform: Platform
+    platform_user_id: str
     platform_avatar_url: str
     platform_username: str
     bot_connection: bool

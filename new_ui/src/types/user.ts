@@ -1,6 +1,7 @@
 export interface Integration {
   id: string
   platform: string
+  platform_user_id: string
   platform_avatar_url: string
   platform_username: string
   bot_connection: boolean

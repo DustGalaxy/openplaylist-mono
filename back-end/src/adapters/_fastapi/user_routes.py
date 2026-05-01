@@ -1,6 +1,7 @@
 from datetime import datetime
+from typing import Any
 
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Body, Response
 
 from dto.token import CodeDTO
 from dto.user import IntegrationRead, UserRead
@@ -41,13 +42,14 @@ async def me(
 #     return UserRead.model_validate(upd_user)
 
 
-@router.post("/bots/{type}/connect")
+@router.post("/bots/{type_}/connect")
 async def connect_bot(
     db_session: DB_SESSION,
     curr_user: CURR_USER,
-    type: Platform,
+    type_: Platform,
+    body: dict = Body(),
 ):
-    await auth_service.connect_bot(db_session, curr_user, type)
+    await auth_service.connect_bot(db_session, curr_user, type_, body.get("platform_user_id", ""))
     return {"message": "Bot connected"}
 
 

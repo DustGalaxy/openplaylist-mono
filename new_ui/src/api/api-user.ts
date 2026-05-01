@@ -32,14 +32,27 @@ export const unlinkIntegration = async (platform: string) => {
   return response.data
 }
 
-export const connectBot = async (platform: string) => {
+export const deleteIntegration = async (platform: string, platformUserId: string) => {
   const config = getConfig()
   const response = await apiClient(
-    config.AUTH_API_URL + `/user/bots/${platform}/connect`,
+    config.AUTH_API_URL + `/user/integration/${platform}/${platformUserId}`,
     {
-      method: 'POST',
+      method: 'DELETE',
       withCredentials: true,
     },
   )
-  return response.data
+  return response.status === 204
+}
+
+export const connectBot = async (platform: string, platform_user_id: string) => {
+  const config = getConfig()
+  const response = await apiClient(
+    config.AUTH_API_URL + `/user/bots/${platform}/connect`, 
+    {
+      method: 'POST',
+      withCredentials: true,
+      data: { platform_user_id: platform_user_id.toString() },
+    },
+  )
+  return response.status === 200
 }
