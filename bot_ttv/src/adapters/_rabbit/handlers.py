@@ -51,6 +51,7 @@ async def connect_to_twitch(message: RabbitMessage = Context()):
             ]
         )
 
+        LOGGER.info("Complete 1 step. Now adding tokens...")
         await bot.add_token(event.access_token, event.refresh_token, event.platform_user_id)
         return True
     except Exception as e:

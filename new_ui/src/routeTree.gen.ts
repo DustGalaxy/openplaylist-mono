@@ -13,6 +13,7 @@ import { Route as ViewRouteImport } from './routes/view'
 import { Route as TwitchCallbackRouteImport } from './routes/twitch-callback'
 import { Route as StatisticRouteImport } from './routes/statistic'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as OauthCallbackRouteImport } from './routes/oauth-callback'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -37,6 +38,11 @@ const StatisticRoute = StatisticRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OauthCallbackRoute = OauthCallbackRouteImport.update({
+  id: '/oauth-callback',
+  path: '/oauth-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LogoutRoute = LogoutRouteImport.update({
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/history': typeof HistoryRoute
   '/logout': typeof LogoutRoute
+  '/oauth-callback': typeof OauthCallbackRoute
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
   '/twitch-callback': typeof TwitchCallbackRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/history': typeof HistoryRoute
   '/logout': typeof LogoutRoute
+  '/oauth-callback': typeof OauthCallbackRoute
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
   '/twitch-callback': typeof TwitchCallbackRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/history': typeof HistoryRoute
   '/logout': typeof LogoutRoute
+  '/oauth-callback': typeof OauthCallbackRoute
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
   '/twitch-callback': typeof TwitchCallbackRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/logout'
+    | '/oauth-callback'
     | '/settings'
     | '/statistic'
     | '/twitch-callback'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/logout'
+    | '/oauth-callback'
     | '/settings'
     | '/statistic'
     | '/twitch-callback'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/logout'
+    | '/oauth-callback'
     | '/settings'
     | '/statistic'
     | '/twitch-callback'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   HistoryRoute: typeof HistoryRoute
   LogoutRoute: typeof LogoutRoute
+  OauthCallbackRoute: typeof OauthCallbackRoute
   SettingsRoute: typeof SettingsRoute
   StatisticRoute: typeof StatisticRoute
   TwitchCallbackRoute: typeof TwitchCallbackRoute
@@ -175,6 +188,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth-callback': {
+      id: '/oauth-callback'
+      path: '/oauth-callback'
+      fullPath: '/oauth-callback'
+      preLoaderRoute: typeof OauthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/logout': {
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   HistoryRoute: HistoryRoute,
   LogoutRoute: LogoutRoute,
+  OauthCallbackRoute: OauthCallbackRoute,
   SettingsRoute: SettingsRoute,
   StatisticRoute: StatisticRoute,
   TwitchCallbackRoute: TwitchCallbackRoute,

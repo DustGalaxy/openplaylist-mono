@@ -107,6 +107,10 @@ class AuthService:
         platform_user = await strtg.fetch_identity(code)
         try:
             link_by_id = await self.link_repo.get_one(db_session, platform_user.get("id"), column="platform_user_id")
+            link_by_id.access_token = platform_user.get("access_token")
+            link_by_id.refresh_token = platform_user.get("refresh_token")
+            link_by_id.expires_at = platform_user.get("expires_at")
+            link_by_id = await self.link_repo.update(db_session, link_by_id)
         except NotFoundException:
             link_by_id = None
 
@@ -265,26 +269,29 @@ class AuthService:
     ) -> AuthUserSchema:
         try:
             db_user = await self.user_repo.get_one(db_session, user_id, column="id")
-            da_integration = find(
+            integration = find(
                 db_user.linked_accounts,
-                lambda x: x.platform == type and x.platform_user_id == platform_user_id,
+                lambda x: x.platform == Platform(type) and x.platform_user_id == platform_user_id,
             )
+            for link in db_user.linked_accounts:
+                if link.platform == Platform(type) and link.platform_user_id == platform_user_id:
+                    print(link)
+            print(f"type: {type}, platform_user_id: {platform_user_id}")
+            if not integration:
+                raise HTTPException(status_code=400, detail=f"User does not have a {type} integration")
 
-            if not da_integration:
-                raise HTTPException(status_code=400, detail="User does not have a twitch integration")
-
-            await self.link_repo.remove(db_session, da_integration.id)
+            await self.link_repo.remove(db_session, integration.id)
 
             return await self.user_repo.get_one(db_session, db_user.id)
         except NotFoundException:
             raise HTTPException(status_code=404, detail="User not found")
 
-    async def connect_bot(self, db_session: AsyncSession, user: AuthUserSchema, type: Platform) -> None:
+    async def connect_bot(self, db_session: AsyncSession, user: AuthUserSchema, type: Platform, platform_user_id: str) -> None:
         strtg = manager.get_strategy(type)
         if strtg is None:
             raise HTTPException(status_code=400, detail="Platform not supported")
 
-        link = find(user.linked_accounts, lambda x: x.platform == type)
+        link = find(user.linked_accounts, lambda x: x.platform == type and x.platform_user_id == platform_user_id)
         if not link:
             raise HTTPException(status_code=403, detail="User does not have a needed integration")
 
