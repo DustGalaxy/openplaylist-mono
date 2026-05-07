@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import type { ClientPlaylist, InputPlaylist, Track } from '@/types/playlist'
-import ViewInfoBar from '@/components/ViewInfoBar'
+import ViewInfoBar from '@/features/public-playlist/components/ViewInfoBar'
 import { fetchPlaylistPublic } from '@/api/api-playlist'
 
-import ViewTrackCard from '@/components/view-track-card'
-import SearchPlaylist from '@/components/search-playlist'
+import ViewTrackCard from '@/features/public-playlist/components/view-track-card'
+import SearchPlaylist from '@/features/public-playlist/components/search-playlist'
 import { getPlsUpdsSocket } from '@/api/io-sockets'
 
 export const Route = createFileRoute('/view')({

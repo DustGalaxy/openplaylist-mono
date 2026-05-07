@@ -10,24 +10,20 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ViewRouteImport } from './routes/view'
-import { Route as TwitchCallbackRouteImport } from './routes/twitch-callback'
 import { Route as StatisticRouteImport } from './routes/statistic'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as OauthCallbackRouteImport } from './routes/oauth-callback'
 import { Route as LogoutRouteImport } from './routes/logout'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as HistoryRouteImport } from './routes/history'
+import { Route as EmailConfirmRouteImport } from './routes/email-confirm'
 import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as DaCallbackRouteImport } from './routes/da-callback'
 import { Route as IndexRouteImport } from './routes/index'
 
 const ViewRoute = ViewRouteImport.update({
   id: '/view',
   path: '/view',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TwitchCallbackRoute = TwitchCallbackRouteImport.update({
-  id: '/twitch-callback',
-  path: '/twitch-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StatisticRoute = StatisticRouteImport.update({
@@ -40,6 +36,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OauthCallbackRoute = OauthCallbackRouteImport.update({
   id: '/oauth-callback',
   path: '/oauth-callback',
@@ -50,19 +51,24 @@ const LogoutRoute = LogoutRouteImport.update({
   path: '/logout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HistoryRoute = HistoryRouteImport.update({
   id: '/history',
   path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmailConfirmRoute = EmailConfirmRouteImport.update({
+  id: '/email-confirm',
+  path: '/email-confirm',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DaCallbackRoute = DaCallbackRouteImport.update({
-  id: '/da-callback',
-  path: '/da-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -73,90 +79,97 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/da-callback': typeof DaCallbackRoute
   '/dashboard': typeof DashboardRoute
+  '/email-confirm': typeof EmailConfirmRoute
   '/history': typeof HistoryRoute
+  '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/oauth-callback': typeof OauthCallbackRoute
+  '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
-  '/twitch-callback': typeof TwitchCallbackRoute
   '/view': typeof ViewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/da-callback': typeof DaCallbackRoute
   '/dashboard': typeof DashboardRoute
+  '/email-confirm': typeof EmailConfirmRoute
   '/history': typeof HistoryRoute
+  '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/oauth-callback': typeof OauthCallbackRoute
+  '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
-  '/twitch-callback': typeof TwitchCallbackRoute
   '/view': typeof ViewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/da-callback': typeof DaCallbackRoute
   '/dashboard': typeof DashboardRoute
+  '/email-confirm': typeof EmailConfirmRoute
   '/history': typeof HistoryRoute
+  '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/oauth-callback': typeof OauthCallbackRoute
+  '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
-  '/twitch-callback': typeof TwitchCallbackRoute
   '/view': typeof ViewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/da-callback'
     | '/dashboard'
+    | '/email-confirm'
     | '/history'
+    | '/login'
     | '/logout'
     | '/oauth-callback'
+    | '/register'
     | '/settings'
     | '/statistic'
-    | '/twitch-callback'
     | '/view'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/da-callback'
     | '/dashboard'
+    | '/email-confirm'
     | '/history'
+    | '/login'
     | '/logout'
     | '/oauth-callback'
+    | '/register'
     | '/settings'
     | '/statistic'
-    | '/twitch-callback'
     | '/view'
   id:
     | '__root__'
     | '/'
-    | '/da-callback'
     | '/dashboard'
+    | '/email-confirm'
     | '/history'
+    | '/login'
     | '/logout'
     | '/oauth-callback'
+    | '/register'
     | '/settings'
     | '/statistic'
-    | '/twitch-callback'
     | '/view'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DaCallbackRoute: typeof DaCallbackRoute
   DashboardRoute: typeof DashboardRoute
+  EmailConfirmRoute: typeof EmailConfirmRoute
   HistoryRoute: typeof HistoryRoute
+  LoginRoute: typeof LoginRoute
   LogoutRoute: typeof LogoutRoute
   OauthCallbackRoute: typeof OauthCallbackRoute
+  RegisterRoute: typeof RegisterRoute
   SettingsRoute: typeof SettingsRoute
   StatisticRoute: typeof StatisticRoute
-  TwitchCallbackRoute: typeof TwitchCallbackRoute
   ViewRoute: typeof ViewRoute
 }
 
@@ -167,13 +180,6 @@ declare module '@tanstack/react-router' {
       path: '/view'
       fullPath: '/view'
       preLoaderRoute: typeof ViewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/twitch-callback': {
-      id: '/twitch-callback'
-      path: '/twitch-callback'
-      fullPath: '/twitch-callback'
-      preLoaderRoute: typeof TwitchCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/statistic': {
@@ -190,6 +196,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/oauth-callback': {
       id: '/oauth-callback'
       path: '/oauth-callback'
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LogoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/history': {
       id: '/history'
       path: '/history'
@@ -211,18 +231,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/email-confirm': {
+      id: '/email-confirm'
+      path: '/email-confirm'
+      fullPath: '/email-confirm'
+      preLoaderRoute: typeof EmailConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/da-callback': {
-      id: '/da-callback'
-      path: '/da-callback'
-      fullPath: '/da-callback'
-      preLoaderRoute: typeof DaCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -237,14 +257,15 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DaCallbackRoute: DaCallbackRoute,
   DashboardRoute: DashboardRoute,
+  EmailConfirmRoute: EmailConfirmRoute,
   HistoryRoute: HistoryRoute,
+  LoginRoute: LoginRoute,
   LogoutRoute: LogoutRoute,
   OauthCallbackRoute: OauthCallbackRoute,
+  RegisterRoute: RegisterRoute,
   SettingsRoute: SettingsRoute,
   StatisticRoute: StatisticRoute,
-  TwitchCallbackRoute: TwitchCallbackRoute,
   ViewRoute: ViewRoute,
 }
 export const routeTree = rootRouteImport

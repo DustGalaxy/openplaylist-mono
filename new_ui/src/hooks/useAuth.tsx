@@ -19,6 +19,8 @@ import {
 interface UserProfile {
   id: string
   username: string
+  email?: string
+  email_confirmed: boolean
   curr_platform: string
   profile_image_url: string
   // ... другие данные

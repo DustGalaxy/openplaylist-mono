@@ -1,4 +1,4 @@
-import Priority from '../icons/icon-priority' // Предполагается, что это SVG-компонент
+import Priority from '@/components/icons/icon-priority' // Предполагается, что это SVG-компонент
 
 export default function PriorityChip({ number }: { number: number }) {
   return (

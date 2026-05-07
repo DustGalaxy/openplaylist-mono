@@ -1,4 +1,4 @@
-import Time from '../icons/icon-time'
+import Time from '@/components/icons/icon-time'
 
 import { formatTime } from '@/lib/utils'
 

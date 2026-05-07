@@ -8,13 +8,12 @@ from faststream.rabbit import RabbitQueue
 
 from settings import settings
 from dto.da import DAToken, DAUser
+from dto.internal.auth import AuthStrategy, PlatformUser
 from adapters._rabbit.event_broker import bot_da_connect_request
-from services.auth.strategy_manager import AuthStrategy, manager, PlatformUser
 
 logger = logging.getLogger(__name__)
 
 
-@manager.register("donationalerts", queue=bot_da_connect_request)
 class AuthDAService(AuthStrategy):
     def __init__(self, queue: RabbitQueue):
         self.bot_connect_request_queue = queue

@@ -4,7 +4,7 @@ from simple_repository import crud_factory
 from simple_repository.abctract import IdValue
 from simple_repository.exceptions import IntegrityConflictException, RepositoryException, NotFoundException
 
-from sqlalchemy import or_, select, text, update
+from sqlalchemy import func, literal, or_, select, update
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
@@ -78,9 +78,9 @@ class PlaylistRepository(
 
     async def get_by_string(self, session: AsyncSession, query: str) -> list[PlaylistSchema]:
         superstring_condition = or_(
-            text(f"'{query}' ILIKE ('%' || playlists.name || '%')"),
-            text(f"'{query}' ILIKE ('%' || playlists.owner_nickname || '%')"),
-            text(f"'{query}' ILIKE ('%' || playlists.description || '%')"),
+            literal(query).ilike(func.concat("%", Playlist.name, "%")),
+            literal(query).ilike(func.concat("%", Playlist.owner_nickname, "%")),
+            literal(query).ilike(func.concat("%", Playlist.description, "%")),
         )
         search_pattern = f"%{query}%"
         search_condition = or_(
@@ -185,7 +185,7 @@ class PlaylistRepository(
             plst = (
                 (
                     await session.execute(
-                        select(Playlist).where(Playlist.id == playlist_id and Playlist.owner_id == user_id)
+                        select(Playlist).where(Playlist.id == playlist_id, Playlist.owner_id == user_id)
                     )
                 )
                 .unique()
@@ -198,7 +198,8 @@ class PlaylistRepository(
                 (
                     await session.execute(
                         select(OrderPlaylistStatus).where(
-                            OrderPlaylistStatus.order_id == order_id and OrderPlaylistStatus.playlist_id == playlist_id
+                            OrderPlaylistStatus.order_id == order_id,
+                            OrderPlaylistStatus.playlist_id == playlist_id,
                         )
                     )
                 )

@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     COOKIE_NAME: str = Field(alias="COOKIE_NAME")
 
     JWT_SECRET_KEY: str = Field(alias="JWT_SECRET_KEY")
-    JWT_PUBLIC_KEY: str = Field(alias="JWT_PUBLIC_KEY") 
+    JWT_PUBLIC_KEY: str = Field(alias="JWT_PUBLIC_KEY")
     JWT_ALGORITHM: str = Field(alias="JWT_ALGORITHM")
     JWT_ISSUER: str = Field(alias="JWT_ISSUER")
 
@@ -34,6 +34,12 @@ class Settings(BaseSettings):
     DB_URL: str = Field(alias="DB_URL")
     RABBITMQ_URL: str = Field(alias="RABBITMQ_URL")
     REDIS_URL: str = Field(alias="REDIS_URL")
+
+    EMAIL_COMFIRM_ADRESS: str = Field(alias="EMAIL_COMFIRM_ADRESS")
+    SMTP_EMAIL_ADDRESS: str = Field(alias="SMTP_EMAIL_ADDRESS")
+    SMTP_EMAIL_PASSWORD: str = Field(alias="SMTP_EMAIL_PASSWORD")
+    SMTP_PORT: int = Field(alias="SMTP_PORT", default=587)
+    SMTP_SERVER: str = Field(alias="SMTP_SERVER", default="smtp.gmail.com")
 
     class Config:
         env_file = ".env"

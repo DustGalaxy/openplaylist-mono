@@ -13,4 +13,4 @@ COPY . .
 
 WORKDIR /app/src
 
-CMD ["uv", "run", "taskiq", "worker","taskiq_broker:broker", "tasks.order", "tasks.playlist" ]
+CMD ["uv", "run", "taskiq", "worker","taskiq_broker:broker", "tasks.order", "tasks.playlist", "tasks.email"]

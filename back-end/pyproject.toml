@@ -7,7 +7,6 @@ requires-python = ">=3.13"
 dependencies = [
     "aiosqlite>=0.21.0",
     "cryptography>=45.0.5",
-    "fastapi[standard]>=0.115.12",
     "pydantic-settings>=2.9.1",
     "pyjwt>=2.10.1",
     "sqlalchemy[asyncio]>=2.0.40",
@@ -25,4 +24,7 @@ dependencies = [
     "python-socketio>=5.16.0",
     "taskiq>=0.12.1",
     "taskiq-redis>=1.2.1",
+    "argon2-cffi>=25.1.0",
+    "fastapi>=0.136.1",
+    "httpx>=0.28.1",
 ]
