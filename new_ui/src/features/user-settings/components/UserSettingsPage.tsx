@@ -71,7 +71,7 @@ export function UserSettingsPage({
             <div className="rounded-full w-[80px] h-[80px] bg-gradient-to-br from-accent-1 to-accent-2 p-1 flex-shrink-0 shadow-lg">
               <div className="w-full h-full rounded-full bg-level-2 overflow-hidden">
                 <img
-                  src={user?.profile_image_url || ''}
+                  src={user?.avatar_url || ''}
                   className="w-full h-full object-cover"
                 />
               </div>

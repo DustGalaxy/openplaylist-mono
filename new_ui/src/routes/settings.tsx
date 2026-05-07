@@ -6,7 +6,6 @@ import { UserSettingsPage } from '@/features/user-settings'
 import Btn from '@/components/ui/my-btn'
 import type { Integration } from '@/types/user'
 
-
 export const Route = createFileRoute('/settings')({
   component: RouteComponent,
   loader: async () => {
@@ -61,13 +60,15 @@ function RouteComponent() {
   }
 
   return (
-    <UserSettingsPage
-      user={user}
-      expired_at={expired_at}
-      integrations={integrations}
-      onUserUpdate={handleUserUpdate}
-      useTwitchLoginUrl={() => handleTwitchLogin}
-      useDaLoginUrl={() => handleDaLogin}
-    />
+    <>
+      <UserSettingsPage
+        user={user}
+        expired_at={expired_at}
+        integrations={integrations}
+        onUserUpdate={handleUserUpdate}
+        useTwitchLoginUrl={() => handleTwitchLogin}
+        useDaLoginUrl={() => handleDaLogin}
+      />
+    </>
   )
 }

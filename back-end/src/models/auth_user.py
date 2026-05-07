@@ -19,6 +19,8 @@ class AuthUserSchema(BaseModel):
     is_active: bool
 
     linked_accounts: list[LinkedAccountsDomain]
+    social_links: dict[str, str] | None = None
+
 
     last_login: datetime
     created_at: datetime
@@ -43,3 +45,4 @@ class AuthUserUpdate(BaseModel):
     email_confirmed: bool | None = None
     password: str | None = None
     avatar_url: str | None = None
+    social_links: dict[str, str] | None = None

@@ -77,7 +77,7 @@ export default function Header() {
             </Link>
           </div> */}
               <div className="px-2   flex items-center">
-                <MenuDropdown user={user} />
+                {user && <MenuDropdown {...user} />}
               </div>
             </div>
           )}

@@ -83,22 +83,12 @@ export const updateUserPassword = async (
   return response.status === 200 || response.status === 204
 }
 
-export const addSocialLink = async (platform: string, url: string) => {
+export const patchSocialLink = async (social_links: object) => {
   const config = getConfig()
   const response = await apiClient(config.AUTH_API_URL + '/user/me', {
     method: 'PATCH',
     withCredentials: true,
-    data: { socials_add: { platform, url } },
-  })
-  return response.data
-}
-
-export const deleteSocialLink = async (platform: string) => {
-  const config = getConfig()
-  const response = await apiClient(config.AUTH_API_URL + '/user/me', {
-    method: 'PATCH',
-    withCredentials: true,
-    data: { socials_delete: { platform } },
+    data: { social_links },
   })
   return response.data
 }
