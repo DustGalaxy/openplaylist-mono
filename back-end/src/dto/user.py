@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 from uuid import UUID
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from _types import Platform
 
@@ -25,8 +25,10 @@ class HttpClassicRegister(BaseModel):
 class UserRead(BaseModel):
     id: UUID
     username: str
+    email: str
     email_confirmed: bool
-    profile_image_url: str
+    profile_image_url: str = Field(alias="avatar_url")
+    social_links: dict[str, str] | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

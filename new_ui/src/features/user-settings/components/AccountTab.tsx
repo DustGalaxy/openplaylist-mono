@@ -65,7 +65,7 @@ const getInitialFormState = (
 ): AccountFormState => ({
   username: user?.username ?? '',
   email: user?.email ?? '',
-  profile_image_url: user?.profile_image_url ?? '',
+  profile_image_url: user?.avatar_url ?? '',
   currentPassword: '',
   newPassword: '',
   confirmPassword: '',
@@ -226,7 +226,7 @@ export function AccountTab({ user, onUserUpdate }: AccountTabProps) {
 
   useEffect(() => {
     setFormState(getInitialFormState(user))
-  }, [user?.email, user?.username, user?.profile_image_url])
+  }, [user?.email, user?.username, user?.avatar_url])
 
   const handleValueChange = (name: keyof AccountFormState, value: string) => {
     setFormState((prev) => ({ ...prev, [name]: value }))

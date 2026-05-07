@@ -4,7 +4,7 @@ import Logout from '@/components/icons/icon-logout'
 import Menu from '@/components/icons/icon-menu'
 import Settings from '@/components/icons/icon-settings'
 import Statistic from '@/components/icons/icon-statistic'
-
+import { type UserProfile } from '@/types/user'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-export default function MenuDropdown({ user }: any) {
+export default function MenuDropdown(user: UserProfile) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -24,10 +24,7 @@ export default function MenuDropdown({ user }: any) {
           </div>
 
           <div className=" rounded-full w-[33px] bg-level-3">
-            <img
-              src={user ? user.profile_image_url : ''}
-              className=" rounded-full"
-            />
+            <img src={user ? user.avatar_url : ''} className=" rounded-full" />
           </div>
         </div>
       </DropdownMenuTrigger>

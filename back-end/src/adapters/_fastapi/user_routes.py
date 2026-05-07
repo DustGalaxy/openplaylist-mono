@@ -7,7 +7,7 @@ from dto.token import CodeDTO
 from dto.user import IntegrationRead, UserRead
 
 from services.auth.auth_service import auth_service
-
+from models.auth_user import AuthUserUpdate
 from .dependencies import DB_SESSION, CURR_USER
 from _types import Platform
 from settings import settings
@@ -26,11 +26,23 @@ async def me(
         "user": UserRead(
             id=curr_user.id,
             username=curr_user.username,
+            email=curr_user.email,
             email_confirmed=curr_user.email_confirmed,
-            profile_image_url=curr_user.avatar_url or "",
+            avatar_url=curr_user.avatar_url or "",
+            social_links=curr_user.social_links,
         ),
         "expired_at": settings.SESSION_LIVE_TIME + int(datetime.now().timestamp()),
     }
+
+
+@router.patch("/me")
+async def patch_me(
+    db_session: DB_SESSION,
+    curr_user: CURR_USER,
+    data: AuthUserUpdate,
+):
+    upd_user = await auth_service.user_repo.patch(db_session, data, curr_user.id)
+    return UserRead.model_validate(upd_user)
 
 
 # @router.get("/update_data")

@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import func
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from _types import Platform
@@ -23,6 +24,7 @@ class User(Base, UUIDMixin, TimestampMixin):
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     vip_expires_at: Mapped[datetime | None]
 
+    social_links: Mapped[dict[str, str]] = mapped_column(JSONB, nullable=True)
     linked_accounts: Mapped[list["LinkedAccounts"]] = relationship(lazy="joined")
 
     last_login: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now())

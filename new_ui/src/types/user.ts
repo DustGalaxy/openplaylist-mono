@@ -14,8 +14,8 @@ export interface UserProfile {
   username: string
   email?: string
   email_confirmed: boolean
-  profile_image_url: string
-  socials?: Array<{ platform: string; url: string }>
+  avatar_url: string
+  social_links?: Record<string, string>
 }
 
 export interface UserProfileUpdatePayload {
