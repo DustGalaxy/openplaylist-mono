@@ -5,7 +5,7 @@ import Btn from '@/components/ui/my-btn'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuthStore } from '@/stores/authStore'
 import { useTwitchLoginUrl } from '@/hooks/useAuthUrl'
-import SearchPlaylist from '@/components/search-playlist'
+import SearchPlaylist from '@/features/public-playlist/components/search-playlist'
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -83,7 +83,7 @@ function App() {
             <Btn
               text="Войти"
               className="px-4 w-[250px] h-[70px] "
-              onClick={() => handleTwitchLogin()}
+              onClick={() =>  navigate({ to: '/login' })}
             />
           )}
         </div>

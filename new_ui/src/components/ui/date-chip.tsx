@@ -1,5 +1,5 @@
 import React from 'react'
-import DateOutline from '../icons/icon-date' // Предполагается, что это SVG-компонент
+import DateOutline from '@/components/icons/icon-date' // Предполагается, что это SVG-компонент
 
 import {
   Tooltip,

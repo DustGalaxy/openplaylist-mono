@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import type { ClientPlaylist, Track } from '@/types/playlist'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import Playlist from '@/components/Playlist'
+import Playlist from '@/features/playlist/components/Playlist'
 import { useAuthStore } from '@/stores/authStore'
 import { usePlstUpdates } from '@/hooks/usePlstUpdates'
 import { getPlsUpdsSocket } from '@/api/io-sockets'
@@ -20,7 +20,7 @@ import {
 import { useMusicStore } from '@/stores/musicStore'
 import Btn from '@/components/ui/my-btn'
 import Add from '@/components/icons/icon-add'
-import AddPlaylistModal from '@/components/newPlaylistModal'
+import AddPlaylistModal from '@/features/playlist/components/newPlaylistModal'
 
 export const Route = createFileRoute('/dashboard')({
   component: RouteComponent,

@@ -11,8 +11,6 @@ from adapters._fastapi.order_routes import router as order_router
 from adapters._fastapi.playlist_routes import router as playlist_router
 from adapters._fastapi.settings_routes import router as settings_router
 from adapters._sio.init import sio
-from adapters._rabbit.handlers.twitch import order_new_from_twitch, get_all_twitch_users, twitch_refresh_tokens
-from adapters._rabbit.handlers.da import order_new_from_da, get_all_da_users, da_refresh_tokens
 from adapters._rabbit.event_broker import broker, declare
 from adapters._redis.broker import redis_adapter
 from adapters._sio.routes import PlstUpdsNamespace, BasicNamespace
@@ -60,7 +58,7 @@ api_route.include_router(order_router)
 api_route.include_router(playlist_router)
 api_route.include_router(settings_router)
 app.add_route("/api/socket.io/", route=sio_asgi_app, methods=["GET", "POST"])
-app.add_websocket_route("/api/socket.io/", sio_asgi_app)
+app.add_api_websocket_route("/api/socket.io/", sio_asgi_app)
 
 app.include_router(api_route)
 

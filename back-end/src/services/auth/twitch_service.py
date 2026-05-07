@@ -6,8 +6,8 @@ import httpx
 from faststream.rabbit import RabbitQueue
 
 from dto.internal.twitch import TwitchUserResponse, TwitchAuthResponse
+from dto.internal.auth import PlatformUser, AuthStrategy
 from models.auth_user import AuthUserSchema
-from services.auth.strategy_manager import manager, PlatformUser, AuthStrategy
 from adapters._rabbit.event_broker import bot_twitch_connect_request
 
 from settings import settings
@@ -16,8 +16,6 @@ from utils import find
 
 logger = logging.getLogger(__name__)
 
-
-@manager.register("twitch", queue=bot_twitch_connect_request)
 class AuthTwitchService(AuthStrategy):
     def __init__(self, queue: RabbitQueue):
         self.bot_connect_request_queue = queue

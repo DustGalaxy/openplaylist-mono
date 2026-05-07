@@ -26,6 +26,7 @@ async def me(
         "user": UserRead(
             id=curr_user.id,
             username=curr_user.username,
+            email_confirmed=curr_user.email_confirmed,
             profile_image_url=curr_user.avatar_url or "",
         ),
         "expired_at": settings.SESSION_LIVE_TIME + int(datetime.now().timestamp()),

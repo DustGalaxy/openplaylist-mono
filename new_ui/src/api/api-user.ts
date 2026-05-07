@@ -1,3 +1,7 @@
+import type {
+  UserPasswordUpdatePayload,
+  UserProfileUpdatePayload,
+} from '@/types/user'
 import apiClient from '@/lib/axios'
 import { getConfig } from '@/lib/utils'
 
@@ -55,4 +59,46 @@ export const connectBot = async (platform: string, platform_user_id: string) => 
     },
   )
   return response.status === 200
+}
+
+export const updateUserProfile = async (payload: UserProfileUpdatePayload) => {
+  const config = getConfig()
+  const response = await apiClient(config.AUTH_API_URL + '/user/me', {
+    method: 'PATCH',
+    withCredentials: true,
+    data: payload,
+  })
+  return response.data
+}
+
+export const updateUserPassword = async (
+  payload: UserPasswordUpdatePayload,
+) => {
+  const config = getConfig()
+  const response = await apiClient(config.AUTH_API_URL + '/user/password', {
+    method: 'PATCH',
+    withCredentials: true,
+    data: payload,
+  })
+  return response.status === 200 || response.status === 204
+}
+
+export const addSocialLink = async (platform: string, url: string) => {
+  const config = getConfig()
+  const response = await apiClient(config.AUTH_API_URL + '/user/me', {
+    method: 'PATCH',
+    withCredentials: true,
+    data: { socials_add: { platform, url } },
+  })
+  return response.data
+}
+
+export const deleteSocialLink = async (platform: string) => {
+  const config = getConfig()
+  const response = await apiClient(config.AUTH_API_URL + '/user/me', {
+    method: 'PATCH',
+    withCredentials: true,
+    data: { socials_delete: { platform } },
+  })
+  return response.data
 }

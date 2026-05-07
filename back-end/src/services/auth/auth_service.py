@@ -1,29 +1,34 @@
 from datetime import datetime
+import json
 from typing import Annotated
 from uuid import UUID
+import uuid
 
-from repo import user_repository
 import jwt
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError, VerificationError, InvalidHashError
 from fastapi.security import APIKeyCookie
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from simple_repository.exceptions import NotFoundException
+from simple_repository.exceptions import NotFoundException, IntegrityConflictException
 
-from _types import Platform
-from database import get_async_session
-from settings import settings
+from tasks.email import send_email
 from dto.user import LinkedAccountWithTokensRead
-from repo import LinkedAccountsRepository, UserRepository
-
-from models.auth_user import AuthUserSchema, AuthUserCreate
-from models.linked_accounts import LinkedAccountsCreate, LinkedAccountsDomain
-from services.auth.strategy_manager import manager
+from adapters._redis.broker import redis_adapter
 from adapters._rabbit.event_broker import (
     broker,
     main_exchange,
 )
-from exceptions import NeedConfirmationException
+from models.auth_user import AuthUserSchema, AuthUserCreate
+from models.linked_accounts import LinkedAccountsCreate, LinkedAccountsDomain
+from services.auth.strategy_manager import manager
 
+from repo import LinkedAccountsRepository, UserRepository
+from _types import Platform
+from database import get_async_session
+from settings import settings
+from exceptions import NeedConfirmationException
+from repo import user_repository
 from utils import find
 
 security_scheme = APIKeyCookie(name=settings.COOKIE_NAME)
@@ -33,6 +38,7 @@ class AuthService:
     def __init__(self, user_repo: UserRepository, link_repo: LinkedAccountsRepository):
         self.user_repo: UserRepository = user_repo
         self.link_repo: LinkedAccountsRepository = link_repo
+        self.hasher = PasswordHasher()
 
     def intergations(self, user: AuthUserSchema) -> list[dict]:
         return [x.model_dump() for x in user.linked_accounts]
@@ -72,21 +78,80 @@ class AuthService:
         # return user
         ...
 
+    async def login_classic(self, db_session: AsyncSession, email: str, password: str) -> str:
+
+        try:
+            user = await self.user_repo.get_one(db_session, email, column="email")
+            if not user.password:
+                raise HTTPException(status_code=400, detail="Wrong password or email")
+
+            self.hasher.verify(user.password, password)
+
+            if self.hasher.check_needs_rehash(user.password):
+                user.password = self.hasher.hash(password)
+                await self.user_repo.update(db_session, user)
+
+        except (VerifyMismatchError, NotFoundException):
+            raise HTTPException(status_code=400, detail="Wrong password or email")
+
+        return self.encode_jwt(user.id, user.username)
+
+    async def set_up_email_confirm(self, email: str, session_id: str | None = None) -> None:
+        if not session_id:
+            session_id = str(uuid.uuid4())
+
+        redis_adapter.set(
+            f"email_comfirmation:{email}:{session_id}",
+            "True",
+            ex=600,
+        )
+        await send_email.kiq(
+            email,
+            "Open Playlist - Confirm email",
+            "<p>Please confirm your email by clicking the link below.</p> "
+            f"<p><a href='{settings.EMAIL_COMFIRM_ADRESS}?email={email}&session_id={session_id}'>Confirm email</a></p>",
+        )
+
+    async def register_classic(self, db_session: AsyncSession, username: str, email: str, password: str) -> None:
+        try:
+            await self.user_repo.get_one(db_session, email, column="email")
+            raise HTTPException(status_code=400, detail="Email already exists")
+
+        except NotFoundException:
+            session_id = str(uuid.uuid4())
+            new_user = AuthUserCreate(
+                username=username,
+                email=email,
+                password=self.hasher.hash(password),
+            )
+
+            redis_adapter.set(
+                f"email_new_user_data:{email}:{session_id}",
+                str(new_user.model_dump_json()),
+                ex=600,
+            )
+            await self.set_up_email_confirm(email, session_id)
+
+        return None
+
+    async def confirm_email(self, db_session: AsyncSession, email: str, session_id: UUID) -> str:
+        is_exists = bool(redis_adapter.getdel(f"email_comfirmation:{email}:{session_id}"))
+        if not is_exists:
+            raise HTTPException(status_code=403, detail="Session expired")
+
+        try:
+            user = await self.user_repo.get_one(db_session, email, column="email")
+            user.email_confirmed = True
+            await self.user_repo.update(db_session, user)
+            return self.encode_jwt(user.id, user.username)
+        except NotFoundException:
+            raise HTTPException(status_code=400, detail="User not found")
+
     async def confirm_account_merge(self, db_session: AsyncSession, data: dict) -> str:
 
         await self.link_repo.create(
             db_session,
-            LinkedAccountsCreate(
-                user_id=data["user_id"],
-                platform=data["platform"],
-                platform_user_id=data["platform_user_id"],
-                platform_username=data["platform_username"],
-                platform_avatar_url=data["platform_avatar_url"],
-                platform_user_email=data["platform_user_email"],
-                access_token=data["access_token"],
-                refresh_token=data["refresh_token"],
-                expires_at=data["expires_at"],
-            ),
+            LinkedAccountsCreate.model_validate(data),
         )
         user = await self.user_repo.get_one(db_session, data["user_id"], column="id")
         if not user:
@@ -180,6 +245,7 @@ class AuthService:
                 AuthUserCreate(
                     username=platform_user.get("username"),
                     email=platform_user.get("email"),
+                    email_confirmed=True,
                     avatar_url=platform_user.get("avatar_url"),
                 ),
             )
@@ -286,7 +352,9 @@ class AuthService:
         except NotFoundException:
             raise HTTPException(status_code=404, detail="User not found")
 
-    async def connect_bot(self, db_session: AsyncSession, user: AuthUserSchema, type: Platform, platform_user_id: str) -> None:
+    async def connect_bot(
+        self, db_session: AsyncSession, user: AuthUserSchema, type: Platform, platform_user_id: str
+    ) -> None:
         strtg = manager.get_strategy(type)
         if strtg is None:
             raise HTTPException(status_code=400, detail="Platform not supported")

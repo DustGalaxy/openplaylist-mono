@@ -15,7 +15,9 @@ class User(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "users"
 
     username: Mapped[str]
+    password: Mapped[str] = mapped_column(nullable=True)
     email: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
+    email_confirmed: Mapped[bool] = mapped_column(default=False, nullable=False)
     avatar_url: Mapped[str] = mapped_column(nullable=True)
 
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)

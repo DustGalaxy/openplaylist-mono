@@ -1,7 +1,7 @@
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import Header from '../components/Header'
+import Header from '@/components/layout/Header'
 
 import { useCurrentUserQuery } from '@/hooks/useAuth.tsx'
 import { useAuthStore } from '@/stores/authStore.tsx'

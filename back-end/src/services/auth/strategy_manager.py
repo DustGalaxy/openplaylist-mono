@@ -1,21 +1,8 @@
-from typing import Protocol
-from abc import abstractmethod
+from dto.internal.auth import AuthStrategy
 
-from faststream.rabbit import RabbitQueue
-from sqlalchemy.ext.asyncio import AsyncSession
-
-
-from dto.internal.auth import PlatformUser
-
-
-class AuthStrategy(Protocol):
-    bot_connect_request_queue: RabbitQueue
-
-    @abstractmethod
-    async def fetch_identity(self, code: str) -> PlatformUser: ...
-
-    @abstractmethod
-    def allow_email_collision(self) -> bool: ...
+from adapters._rabbit.event_broker import bot_twitch_connect_request, bot_da_connect_request
+from services.auth.twitch_service import AuthTwitchService
+from services.auth.da_service import AuthDAService
 
 
 class AuthStrategyManager:
@@ -43,6 +30,9 @@ class AuthStrategyManager:
 
         return wrapper
 
+    def add_strategy(self, mark: str, strategy: AuthStrategy):
+        self._registry[mark] = strategy
+
     def get_strategy(self, obj: str) -> AuthStrategy:
         strategy = self._registry.get(obj)
         if strategy is None:
@@ -51,3 +41,5 @@ class AuthStrategyManager:
 
 
 manager = AuthStrategyManager()
+manager.add_strategy("twitch", AuthTwitchService(bot_twitch_connect_request))
+manager.add_strategy("da", AuthDAService(bot_da_connect_request))

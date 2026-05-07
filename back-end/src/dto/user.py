@@ -11,9 +11,21 @@ class UserDTO(BaseModel):
     twitch_id: str
 
 
+class HttpClassicLogin(BaseModel):
+    email: str
+    password: str
+
+
+class HttpClassicRegister(BaseModel):
+    username: str
+    email: str
+    password: str
+
+
 class UserRead(BaseModel):
     id: UUID
     username: str
+    email_confirmed: bool
     profile_image_url: str
 
     model_config = ConfigDict(from_attributes=True)

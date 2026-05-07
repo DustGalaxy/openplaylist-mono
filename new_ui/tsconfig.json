@@ -6,7 +6,7 @@
     "prettier.config.js",
     "vite.config.js",
     "src/components/settingsModalWidget/tabBasic.tsx"
-  ],
+, "src/routes/da-callback.tsx.depricated"  ],
 
   "compilerOptions": {
     "target": "ES2022",
@@ -28,7 +28,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
+
     "paths": {
       "@/*": ["./src/*"]
     }
