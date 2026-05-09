@@ -3,6 +3,12 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from .order import OrderDomain
+from _types import Platform
+
+
+class AllowedSource(BaseModel):
+    platform: Platform
+    platform_user_id: str
 
 
 class PlaylistSchema(BaseModel):
@@ -15,7 +21,7 @@ class PlaylistSchema(BaseModel):
     tags: list[str] = Field(default_factory=list)
 
     is_allow_external_requests: bool
-    allow_sources: list[str] = Field(default_factory=list)
+    allow_sources: list[AllowedSource] = Field(default_factory=list)
     is_public: bool
     is_favorite: bool
 
@@ -38,7 +44,7 @@ class PlaylistPatch(BaseModel):
     track_data: list[OrderDomain] | None = None
     now_playing: str | None = None
     tags: list[str] | None = None
-    allow_sources: list[str] | None = None
+    allow_sources: list[AllowedSource] | None = None
     is_public: bool | None = None
     is_favorite: bool | None = None
     is_allow_external_requests: bool | None = None
@@ -53,7 +59,7 @@ class PlaylistCreate(BaseModel):
     description: str | None = Field(None, max_length=500)
     tags: list[str] = Field(default_factory=list)
     is_allow_external_requests: bool = False
-    allow_sources: list[str] = Field(default_factory=list)
+    allow_sources: list[AllowedSource] = Field(default_factory=list)
     is_public: bool = False
     is_favorite: bool = False
 

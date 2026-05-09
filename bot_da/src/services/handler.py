@@ -65,6 +65,7 @@ async def _request_processing(donation: DonationData):
         OrderNew(
             request_id=uuid7(),
             owner_id=UUID(user.id),
+            owner_platform_id=user.da_id,
             requester_id=donation.recipient.user_id,
             requester_nickname=donation.username,
             donation_currency_amount=donation.amount_in_user_currency,

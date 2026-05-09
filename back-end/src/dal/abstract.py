@@ -35,7 +35,7 @@ class IPlaylistRepository(IAsyncCrud[Playlist, PlaylistSchema, PlaylistCreate, P
 
     @abstractmethod
     async def get_user_playlists_by_sourse(
-        self, session: AsyncSession, owner_id: UUID, source: Platform
+        self, session: AsyncSession, owner_id: UUID, platform_user_id: str, source: Platform
     ) -> list[PlaylistSchema]: ...
 
     @abstractmethod

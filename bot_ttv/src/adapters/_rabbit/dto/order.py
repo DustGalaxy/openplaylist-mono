@@ -26,6 +26,7 @@ class NewOrderPayload(BaseModel):
 
 class OrderNew(BaseModel):
     request_id: UUID
+    owner_platform_id: str
     owner_id: UUID
     requester_id: int
     requester_nickname: str

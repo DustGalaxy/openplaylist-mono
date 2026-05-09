@@ -43,7 +43,7 @@ from exceptions import NotActivePlaylist
 
 from models.order import OrderCreate, OrderDomain
 
-from _types import DonationPlatform, Platform, DeleteStatus, _All_Platforms
+from _types import DB_DonationPlatform, Platform, DeleteStatus, _All_Platforms
 
 
 class PlaylistRepository(
@@ -65,11 +65,7 @@ class PlaylistRepository(
         return PlaylistSchema.model_validate(result)
 
     async def get_active_streamer_playlist(self, session: AsyncSession, owner_id: UUID) -> PlaylistSchema:
-        stmt = (
-            select(Playlist)
-            .where(Playlist.owner_id == owner_id)
-            .where(Playlist.is_allow_external_requests)
-        )
+        stmt = select(Playlist).where(Playlist.owner_id == owner_id).where(Playlist.is_allow_external_requests)
         result = await session.execute(stmt)
         result = result.scalar_one_or_none()
         if not result:
@@ -97,12 +93,20 @@ class PlaylistRepository(
         return [PlaylistSchema.model_validate(item) for item in result]
 
     async def get_user_playlists_by_sourse(
-        self, session: AsyncSession, owner_id: UUID, source: Platform
+        self, session: AsyncSession, owner_id: UUID, platform_user_id: str, source: Platform
     ) -> list[PlaylistSchema]:
-        stmt = select(Playlist).where(Playlist.owner_id == owner_id).where(Playlist.allow_sources.contains(source))
+
+        target_source = {"platform": source.value, "platform_user_id": platform_user_id}
+        stmt = (
+            select(Playlist)
+            .where(Playlist.owner_id == owner_id)
+            .where(Playlist.allow_sources.contains([target_source]))
+        )
+
         result = await session.execute(stmt)
-        result = result.unique().scalars().all()
-        return [PlaylistSchema.model_validate(item) for item in result]
+        items = result.unique().scalars().all()
+
+        return [PlaylistSchema.model_validate(item) for item in items]
 
     async def create_with_settings(self, session: AsyncSession, data: PlaylistCreate) -> PlaylistSchema:
         try:
@@ -125,7 +129,7 @@ class PlaylistRepository(
             )
             general_donation_rule = DonationRulesCreate(
                 settings_id=new_settings.id,
-                platform=_All_Platforms.GENERAL,
+                platform=DB_DonationPlatform.GENERAL,
                 name="General",
                 slug="general",
                 currency="USD",
