@@ -43,7 +43,7 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
     is_favorite: Mapped[bool] = mapped_column(default=False, nullable=False)
     tags: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True, default=list)
 
-    allow_sources: Mapped[list[Platform]] = mapped_column(ARRAY(Enum(Platform, native_enum=False)), nullable=True, default=list)
+    allow_sources: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list, server_default='[]')
     is_allow_external_requests: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     now_playing: Mapped[str] = mapped_column(String, nullable=True)

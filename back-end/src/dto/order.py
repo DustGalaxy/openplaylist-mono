@@ -7,6 +7,7 @@ from _types import Status, Platform
 
 class DANewOrder(BaseModel):
     request_id: UUID
+    owner_platform_id: str
     owner_id: UUID
     requester_id: int
     requester_nickname: str
@@ -18,6 +19,7 @@ class DANewOrder(BaseModel):
 
 class TTVNewOrder(BaseModel):
     request_id: UUID
+    owner_platform_id: str
     owner_id: UUID
     requester_id: int
     requester_nickname: str
@@ -38,13 +40,12 @@ class WebNewOrder(BaseModel):
 
 class YTNewOrder(BaseModel):
     request_id: UUID
+    owner_platform_id: str
     owner_id: UUID
     requester_nickname: str
     yt_video_url: str
     priority: str
     source: Platform = Platform.YOUTUBE
-
-
 
 
 class OrderNew(BaseModel):

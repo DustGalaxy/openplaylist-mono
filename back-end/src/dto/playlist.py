@@ -20,7 +20,7 @@ class ReadPlaylist(BaseModel):
     is_public: bool
     is_favorite: bool
     is_allow_external_requests: bool
-    allow_sources: list[Platform]
+    allow_sources: list[dict]
 
     now_playing: str | None = Field(None)
 

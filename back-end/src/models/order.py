@@ -91,6 +91,7 @@ class OrderPatch(BaseModel):
 class OrderCreate(BaseModel):
     request_id: UUID
     owner_id: UUID
+    owner_platform_id: str
     from_owner: bool
 
     requester_nickname: str

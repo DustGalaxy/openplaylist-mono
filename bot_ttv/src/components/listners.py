@@ -18,6 +18,7 @@ class Listner(commands.Component):
         uid = await get_user_id(str(payload.broadcaster_id))
         event = OrderNew(
             request_id=uuid.uuid4(),
+            owner_platform_id=str(payload.broadcaster_id),
             owner_id=uuid.UUID(uid),
             requester_id=payload.chatter_id,
             requester_nickname=payload.chatter_nickname,

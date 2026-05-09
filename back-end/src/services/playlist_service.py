@@ -20,7 +20,9 @@ async def add_to_playlist(
             await playlist_repository.get_one(session, event.extra_data.playlist_id),
         ]
     else:
-        playlists = await playlist_repository.get_user_playlists_by_sourse(session, event.owner_id, event.source)
+        playlists = await playlist_repository.get_user_playlists_by_sourse(
+            session, event.owner_id, event.owner_platform_id, event.source
+        )
 
     tracks: list[tuple[OrderDomain, UUID]] = []
     errors: list[tuple[list[str], str]] = []
