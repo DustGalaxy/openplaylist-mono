@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from dto.settings import ReadPlaylistSettings
 from models.order import OrderDomain
+from models.playlist import AllowedSource
 
 from _types import Platform
 
@@ -20,7 +21,7 @@ class ReadPlaylist(BaseModel):
     is_public: bool
     is_favorite: bool
     is_allow_external_requests: bool
-    allow_sources: list[dict]
+    allow_sources: list[AllowedSource]
 
     now_playing: str | None = Field(None)
 
