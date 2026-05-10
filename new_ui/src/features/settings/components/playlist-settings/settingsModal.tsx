@@ -155,7 +155,7 @@ export default function SettingsModal({
           {/* <div className="h-[1px] bg-level-3" /> */}
           <TabsContent key="generaltab" value="general" className="h-full">
             <TabBasic
-              playlist={playlist}
+              playlist={plst}
               setPlst={setPlst}
               canPatchPlaylist={canPatchPlaylist}
               settings={settings}
@@ -165,27 +165,27 @@ export default function SettingsModal({
           </TabsContent>
           <TabsContent key="validationtab" value="validation">
             <TabValidation
-              playlist={playlist}
+              playlist={plst}
               settings={settings}
               setSettings={setSettings}
             />
           </TabsContent>
           <TabsContent key="donationtab" value="donation">
             <TabDonation
-              playlist={playlist}
+              playlist={plst}
               settings={settings}
               setSettings={setSettings}
             />
           </TabsContent>
           <TabsContent key="chatroles" value="chat-roles">
             <TabChatPlatformRoles
-              playlist={playlist}
+              playlist={plst}
               settings={settings}
               setSettings={setSettings}
             />
           </TabsContent>
           <TabsContent key="blocktab" value="block">
-            <TabBlock playlist={playlist} />
+            <TabBlock playlist={plst} />
           </TabsContent>
           <TabsContent key="deletetab" value="delete">
             <div className="gap-1 flex justify-between mb-4">

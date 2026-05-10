@@ -98,6 +98,11 @@ export type SortSettings = {
   shuffle: 'desc' | 'asc' | 'none'
 }
 
+export interface AllowSources {
+  platform: Platform
+  platform_user_id: string
+}
+
 export type PlaylistSettings = {
   id: string
   playlist_id: string
@@ -129,7 +134,7 @@ export type InputPlaylist = {
   is_favorite: boolean
   is_allow_external_requests: boolean
   tags: Array<string>
-  allow_sources: Array<string>
+  allow_sources: Array<AllowSources>
   track_data: Array<Track>
   now_playing: string | undefined
   created_at: string
@@ -141,7 +146,7 @@ export type PlaylistPatch = {
   name?: string
   description?: string
   tags?: Array<string>
-  allow_sources?: Array<string>
+  allow_sources?: Array<AllowSources>
   is_public?: boolean
   is_favorite?: boolean
   is_allow_external_requests?: boolean
@@ -155,7 +160,7 @@ export type ClientPlaylist = {
   is_favorite: boolean
   is_allow_external_requests: boolean
   tags: Array<string>
-  allow_sources: Array<string>
+  allow_sources: Array<AllowSources>
   track_data: Array<Track>
 
   isSub: boolean

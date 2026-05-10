@@ -1,9 +1,23 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import {
+  Discord,
+  Github,
+  Spotify,
+  Twitch,
+  XFormerlyTwitter,
+  Youtube,
+} from '@thesvg/react'
+import type {
+  ClientPlaylist,
+  Platform,
+  PlaylistSettings,
+} from '@/types/playlist'
+import type { Integration } from '@/types/user'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { DialogDescription } from '@/components/ui/dialog'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import type { ClientPlaylist, PlaylistSettings } from '@/types/playlist'
+import { Checkbox } from '@/components/ui/checkbox'
+import { getUserIntegrations } from '@/api/api-user'
 
 const TabBasic = ({
   playlist,
@@ -22,6 +36,94 @@ const TabBasic = ({
 }) => {
   const [plstMode, setPlstMode] = React.useState(playlist.settings.mode)
   const [isPublic, setIsPublic] = React.useState(playlist.is_public)
+  const [integrations, setIntegrations] = useState<Array<Integration>>([])
+  const [isLoadingIntegrations, setIsLoadingIntegrations] = useState(false)
+
+  useEffect(() => {
+    const fetchIntegrations = async () => {
+      try {
+        setIsLoadingIntegrations(true)
+        const data = await getUserIntegrations()
+        setIntegrations(Array.isArray(data) ? data : [])
+      } catch (error) {
+        console.error('Failed to fetch integrations:', error)
+        setIntegrations([])
+      } finally {
+        setIsLoadingIntegrations(false)
+      }
+    }
+    fetchIntegrations()
+  }, [])
+
+  const getPlatformIcon = (platform: string) => {
+    const iconStyles = ' size-6'
+    const platformIcons: Record<string, React.ReactNode> = {
+      twitch: <Twitch className={iconStyles} />,
+      discord: <Discord className={iconStyles} />,
+      youtube: <Youtube className={iconStyles} />,
+      X: <XFormerlyTwitter className={iconStyles} />,
+      twitter: <XFormerlyTwitter className={iconStyles} />,
+      github: <Github className={iconStyles} />,
+      spotify: <Spotify className={iconStyles} />,
+      donationalerts: <Spotify className={iconStyles} />,
+      da: <Spotify className={iconStyles} />,
+    }
+    return platformIcons[platform.toLowerCase()] || null
+  }
+
+  const getPlatformDisplayName = (platform: string) => {
+    const platformMap: Record<string, string> = {
+      twitch: 'Twitch',
+      donationalerts: 'Donation Alerts',
+      da: 'Donation Alerts',
+      youtube: 'YouTube',
+    }
+    return platformMap[platform.toLowerCase()] || platform
+  }
+
+  const isSourceSelected = (platform: string, platformUserId: string) => {
+    console.log(
+      'playlist sources:',
+      playlist.allow_sources,
+      '  checking for:',
+      platform,
+      platformUserId,
+    )
+
+    return playlist.allow_sources.some(
+      (source) =>
+        source.platform === platform &&
+        source.platform_user_id === platformUserId,
+    )
+  }
+
+  const handleSourceToggle = (platform: string, platformUserId: string) => {
+    const isCurrentlySelected = isSourceSelected(platform, platformUserId)
+
+    if (isCurrentlySelected) {
+      // Remove the source
+      setPlst({
+        ...playlist,
+        allow_sources: playlist.allow_sources.filter(
+          (source) =>
+            !(
+              source.platform === platform &&
+              source.platform_user_id === platformUserId
+            ),
+        ),
+      })
+    } else {
+      // Add the source
+      setPlst({
+        ...playlist,
+        allow_sources: [
+          ...playlist.allow_sources,
+          { platform: platform as Platform, platform_user_id: platformUserId },
+        ],
+      })
+    }
+    canPatchPlaylist.current = true
+  }
   return (
     <div>
       <div className="grid gap-4">
@@ -147,7 +249,7 @@ const TabBasic = ({
         </RadioGroup>
       </div>
       <div>
-        <Label className=" text-lg">Externat content sources</Label>
+        <Label className=" text-lg">External content sources</Label>
         <DialogDescription>
           <div className="py-1">
             This setting allows users to add tracks from different sources. If
@@ -160,47 +262,62 @@ const TabBasic = ({
             it.
           </div>
         </DialogDescription>
-        <ToggleGroup
-          type="multiple"
-          defaultValue={playlist.allow_sources}
-          onValueChange={(value) => {
-            console.log('ToggleGroup value:', value)
 
-            setPlst({
-              ...playlist,
-              allow_sources: value,
-            })
-            canPatchPlaylist.current = true
-          }}
-          className="border-2 border-level-3 rounded-(--rounded-std) p-[1px] w-full bg-level-2"
-        >
-          <ToggleGroupItem
-            value="twitch"
-            className="data-[state=on]:bg-accent-3 hover:bg-level-3 px-2"
-          >
-            <div className="">Twitch</div>
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="da"
-            className="data-[state=on]:bg-accent-3 hover:bg-level-3"
-          >
-            <div className="px-2">Donation Alerts</div>
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            disabled
-            value="youtube"
-            className="data-[state=on]:bg-accent-3 hover:bg-level-3"
-          >
-            Youtube
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            disabled
-            value="youtube"
-            className="data-[state=on]:bg-accent-3 hover:bg-level-3"
-          >
-            Discord
-          </ToggleGroupItem>
-        </ToggleGroup>
+        <div className=" rounded-(--rounded-std) w-full bg-level-2 mt-3">
+          {isLoadingIntegrations ? (
+            <div className="text-center py-4 text-sm text-gray-500">
+              Loading integrations...
+            </div>
+          ) : integrations.length === 0 ? (
+            <div className="text-center py-4 text-sm text-gray-500">
+              No integrations found. Connect your platforms in settings to
+              enable external sources.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {integrations.map((integration) => (
+                <div
+                  key={`${integration.platform}-${integration.platform_user_id}`}
+                  className="flex items-center gap-3 p-3 rounded bg-level-2 transition-colors cursor-pointer"
+                  onClick={() =>
+                    handleSourceToggle(
+                      integration.platform,
+                      integration.platform_user_id,
+                    )
+                  }
+                >
+                  <Checkbox
+                    checked={isSourceSelected(
+                      integration.platform,
+                      integration.platform_user_id,
+                    )}
+                    onCheckedChange={() =>
+                      handleSourceToggle(
+                        integration.platform,
+                        integration.platform_user_id,
+                      )
+                    }
+                    className="mt-0.5 flex-shrink-0 rounded-[4px] border-level-3 cursor-pointer"
+                  />
+
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-6 h-6 flex items-center justify-center rounded flex-shrink-0">
+                      {getPlatformIcon(integration.platform)}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-medium text-sm">
+                        {getPlatformDisplayName(integration.platform)}
+                      </span>
+                      <span className="text-xs text-gray-400 truncate">
+                        @{integration.platform_username}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
