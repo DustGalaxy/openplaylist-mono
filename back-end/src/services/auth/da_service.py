@@ -7,7 +7,8 @@ from fastapi import HTTPException
 from faststream.rabbit import RabbitQueue
 
 from settings import settings
-from dto.da import DAToken, DAUser
+from dto.internal.da import DAToken, DAUser
+from dto.internal.token import Tokens
 from dto.internal.auth import AuthStrategy, PlatformUser
 from adapters._rabbit.event_broker import bot_da_connect_request
 
@@ -82,7 +83,7 @@ class AuthDAService(AuthStrategy):
             socket_connection_token=data["socket_connection_token"],
         )
 
-    async def refresh_token(self, refresh_token: str):
+    async def refresh_token(self, refresh_token: str) -> DAToken:
         data = {
             "grant_type": "refresh_token",
             "client_id": settings.DA_APP_ID,
@@ -95,9 +96,10 @@ class AuthDAService(AuthStrategy):
                 logger.info("Attempting to refresh access token...")
                 response = await client.post(settings.DA_TOKEN_URL, data=data)
                 response.raise_for_status()
-                new_token_data = DAToken.model_validate(response.json())
-                if not new_token_data.refresh_token:
-                    new_token_data.refresh_token = refresh_token
+                data = response.json()
+                if not data.get("refresh_token", None):
+                    data["refresh_token"] = refresh_token
+                new_token_data = DAToken.model_validate(data)
 
                 logger.info("Access token refreshed and saved successfully.")
                 return new_token_data
@@ -115,6 +117,11 @@ class AuthDAService(AuthStrategy):
             except json.JSONDecodeError as e:
                 logger.error(f"Failed to decode JSON refresh token response: {e}")
                 raise HTTPException(status_code=400)
+
+    def validate_token(self, tokens: Tokens) -> bool:
+        
+        return True
+
 
     async def fetch_identity(self, code: str) -> PlatformUser:
         token = await self.get_token(code)

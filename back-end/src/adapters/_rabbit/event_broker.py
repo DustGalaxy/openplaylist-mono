@@ -5,6 +5,8 @@ from settings import settings
 broker = RabbitBroker(settings.RABBITMQ_URL)
 
 main_exchange = RabbitExchange("main_exchange", type=ExchangeType.DIRECT, durable=True)
+topic_exchange = RabbitExchange("topic_exchange", type=ExchangeType.TOPIC, durable=True)
+
 
 auth_user_da_all_request = RabbitQueue("auth.user.da.all.request", durable=True)
 auth_user_da_all_response = RabbitQueue("auth.user.da.all.response", durable=True)
@@ -40,6 +42,7 @@ playlist_settings_request = RabbitQueue("playlist.settings.request", durable=Tru
 
 async def declare():
     await broker.declare_exchange(main_exchange)
+    await broker.declare_exchange(topic_exchange)
     await broker.declare_queue(auth_user_da_all_request)
     await broker.declare_queue(auth_user_da_all_response)
     await broker.declare_queue(auth_user_da_tokens_refreshed)

@@ -25,3 +25,11 @@ class LinkedAccountWithTokensRead(BaseModel):
     expires_at: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class Tokens(BaseModel):
+    user_id: str
+    platform: str
+    platform_user_id: str
+    access_token: str
+    refresh_token: str

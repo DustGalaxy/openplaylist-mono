@@ -1,4 +1,5 @@
-from taskiq import TaskiqMiddleware
+from taskiq import TaskiqMiddleware, TaskiqScheduler
+from taskiq.schedule_sources import LabelScheduleSource
 from taskiq_redis import RedisAsyncResultBackend, ListQueueBroker
 
 from settings import settings
@@ -18,9 +19,15 @@ class MyMiddleware(TaskiqMiddleware):
         await rabbit_broker.start()
         redis_adapter.connect()
         sio.manager.initialize()
-        
+
     async def shutdown(self) -> None:
         redis_adapter.close()
-        await rabbit_broker.stop()  
+        await rabbit_broker.stop()
+
 
 broker.add_middlewares(MyMiddleware())
+
+scheduler = TaskiqScheduler(
+    broker=broker,
+    sources=[LabelScheduleSource(broker)],
+)

@@ -22,6 +22,7 @@ class Order(Base, UUIDMixin, TimestampMixin):
 
     request_id: Mapped[UUID] = mapped_column(unique=True)
     owner_id: Mapped[UUID]
+    owner_platform_id: Mapped[str]
     from_owner: Mapped[bool]
 
     source: Mapped[Platform] = mapped_column(Enum(Platform), nullable=False)

@@ -15,4 +15,6 @@ bot_twitch_connect_request = RabbitQueue("bot.twitch.connect.request", durable=T
 bot_twitch_disconnect_request = RabbitQueue("bot.twitch.disconnect.request", durable=True)
 
 main_exchange = RabbitExchange("main_exchange", ExchangeType.DIRECT, durable=True)
+topic_exchange = RabbitExchange("topic_exchange", ExchangeType.TOPIC, durable=True)
+
 broker = RabbitBroker(settings.RABBITMQ_URL)

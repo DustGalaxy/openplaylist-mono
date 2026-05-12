@@ -20,10 +20,6 @@ class LinkedAccountsDomain(BaseModel):
 
     bot_connection: bool
 
-    access_token: str
-    refresh_token: str
-    expires_at: int
-
     created_at: datetime
     updated_at: datetime
     model_config = ConfigDict(from_attributes=True)
@@ -38,16 +34,8 @@ class LinkedAccountsCreate(BaseModel):
     platform_avatar_url: str
     platform_user_email: str
 
-    access_token: str
-    refresh_token: str
-    expires_at: int
-
 
 class LinkedAccountsUpdate(BaseModel):
     platform_username: str | None = None
     platform_avatar_url: str | None = None
     bot_connection: bool | None = None
-
-    access_token: str | None = None
-    refresh_token: str | None = None
-    expires_at: int | None = None
