@@ -7,6 +7,7 @@ from faststream.rabbit import RabbitQueue
 
 from dto.internal.twitch import TwitchUserResponse, TwitchAuthResponse
 from dto.internal.auth import PlatformUser, AuthStrategy
+from dto.internal.token import Tokens
 from models.auth_user import AuthUserSchema
 from adapters._rabbit.event_broker import bot_twitch_connect_request
 
@@ -15,6 +16,7 @@ from _types import Platform
 from utils import find
 
 logger = logging.getLogger(__name__)
+
 
 class AuthTwitchService(AuthStrategy):
     def __init__(self, queue: RabbitQueue):
@@ -40,7 +42,7 @@ class AuthTwitchService(AuthStrategy):
 
         return TwitchAuthResponse.model_validate(response.json())
 
-    def refresh_token(self, refresh_token: str) -> TwitchAuthResponse:
+    async def refresh_token(self, refresh_token: str) -> TwitchAuthResponse:
         response = httpx.post(
             f"{settings.TWITCH_URL}/oauth2/token",
             data={
@@ -55,6 +57,17 @@ class AuthTwitchService(AuthStrategy):
             raise HTTPException(400, f"Failed to get user data from Twitch: {response.text}")
 
         return TwitchAuthResponse.model_validate(response.json())
+
+    def validate_token(self, tokens: Tokens) -> bool:
+        response = httpx.post(
+            f"{settings.TWITCH_URL}/oauth2/validate",
+            headers={"Authorization": f"Bearer {tokens.access_token}"},
+        )
+        if response.status_code != 200:
+            logger.error(f"Failed to validate token from Twitch: {response.text}")
+            return False
+
+        return True
 
     def get_data(self, access_token: str, user: AuthUserSchema | None = None) -> TwitchUserResponse:
         twitch_acc = find(user.linked_accounts, lambda x: x.platform == Platform.TWITCH) if user else None

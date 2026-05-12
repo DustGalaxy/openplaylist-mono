@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from simple_repository import crud_factory
@@ -38,10 +39,14 @@ from orm.auth_user import User
 from models.linked_accounts import LinkedAccountsDomain, LinkedAccountsCreate, LinkedAccountsUpdate
 from orm.linked_accounts import LinkedAccounts
 
+from models.order import OrderCreate, OrderDomain
+
+from orm.token_vault import TokenVault
+from models.token_vault import TokenVaultCreate, TokenVaultUpdate, TokenVaultDomain
+
 from dal.abstract import IPlaylistRepository, IPlaylistSettingsRepository
 from exceptions import NotActivePlaylist
 
-from models.order import OrderCreate, OrderDomain
 
 from _types import DB_DonationPlatform, Platform, DeleteStatus, _All_Platforms
 
@@ -454,5 +459,22 @@ class LinkedAccountsRepository(
         return self.domain_model.model_validate(object)
 
 
+class TokenVaultRepository(crud_factory(TokenVault, TokenVaultDomain, TokenVaultCreate, TokenVaultUpdate)):
+    def to_inner(self, data: TokenVaultCreate | TokenVaultDomain | TokenVaultUpdate) -> dict:
+        return data.model_dump(exclude_unset=True)
+
+    def to_repr(self, object: TokenVault) -> TokenVaultDomain:
+        return self.domain_model.model_validate(object)
+
+    async def fetch_tokens_to_refresh(self, session: AsyncSession) -> list[TokenVaultDomain]:
+        stmt = select(TokenVault).where(TokenVault.expires_at < int(datetime.now().timestamp()) - 60 * 60 * 2)
+
+        result = await session.execute(stmt)
+        result = result.unique().scalars().all()
+
+        return [self.to_repr(item) for item in result]
+
+
 user_repository = UserRepository()
 linked_accounts_repository = LinkedAccountsRepository()
+token_vault_repository = TokenVaultRepository()

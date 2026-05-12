@@ -13,15 +13,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from simple_repository.exceptions import NotFoundException, IntegrityConflictException
 
 from tasks.email import send_email
-from dto.user import LinkedAccountWithTokensRead
+
 from adapters._redis.broker import redis_adapter
 from adapters._rabbit.event_broker import (
     broker,
     main_exchange,
 )
+from dal.postgres_impl import TokenVaultRepository
+from models.token_vault import TokenVaultCreate
 from models.auth_user import AuthUserSchema, AuthUserCreate
 from models.linked_accounts import LinkedAccountsCreate, LinkedAccountsDomain
 from services.auth.strategy_manager import manager
+from services.tokens.token_service import token_service
+from dto.internal.token import Tokens
 
 from repo import LinkedAccountsRepository, UserRepository
 from _types import Platform
@@ -29,15 +33,19 @@ from database import get_async_session
 from settings import settings
 from exceptions import NeedConfirmationException
 from repo import user_repository
+
 from utils import find
 
 security_scheme = APIKeyCookie(name=settings.COOKIE_NAME)
 
 
 class AuthService:
-    def __init__(self, user_repo: UserRepository, link_repo: LinkedAccountsRepository):
+    def __init__(
+        self, user_repo: UserRepository, link_repo: LinkedAccountsRepository, token_vault_repo: TokenVaultRepository
+    ):
         self.user_repo: UserRepository = user_repo
         self.link_repo: LinkedAccountsRepository = link_repo
+        self.token_vault_repo: TokenVaultRepository = token_vault_repo
         self.hasher = PasswordHasher()
 
     def intergations(self, user: AuthUserSchema) -> list[dict]:
@@ -149,10 +157,24 @@ class AuthService:
 
     async def confirm_account_merge(self, db_session: AsyncSession, data: dict) -> str:
 
-        await self.link_repo.create(
+        link = await self.link_repo.create(
             db_session,
             LinkedAccountsCreate.model_validate(data),
         )
+        await self.token_vault_repo.create(
+            db_session,
+            TokenVaultCreate(
+                user_id=data["user_id"],
+                linked_account_id=link.id,
+                platform=data["platform"],
+                platform_user_id=data["platform_user_id"],
+                access_token=data["access_token"],
+                refresh_token=data["refresh_token"],
+                token_type=data["token_type"],
+                expires_at=data["expires_at"],
+            ),
+        )
+
         user = await self.user_repo.get_one(db_session, data["user_id"], column="id")
         if not user:
             raise HTTPException(status_code=400, detail="User not found")
@@ -170,33 +192,36 @@ class AuthService:
             raise HTTPException(status_code=400, detail="Platform not supported")
 
         platform_user = await strtg.fetch_identity(code)
+        # level 1 - link with id already exists
         try:
             link_by_id = await self.link_repo.get_one(db_session, platform_user.get("id"), column="platform_user_id")
-            link_by_id.access_token = platform_user.get("access_token")
-            link_by_id.refresh_token = platform_user.get("refresh_token")
-            link_by_id.expires_at = platform_user.get("expires_at")
-            link_by_id = await self.link_repo.update(db_session, link_by_id)
-        except NotFoundException:
-            link_by_id = None
 
-        # level 1 - link with id already exists
-        if link_by_id:
+            await token_service.update_tokens(
+                db_session,
+                link_by_id.id,
+                platform_user.get("access_token"),
+                platform_user.get("refresh_token"),
+                platform_user.get("expires_at"),
+            )
+
+            link_by_id = await self.link_repo.update(db_session, link_by_id)
+
             user = await self.user_repo.get_one(db_session, link_by_id.user_id, column="id")
 
             return self.encode_jwt(user.id, user.username)
+        except NotFoundException:
+            ...
 
         # if link dont exist - email must be verified
         if not platform_user.get("email_verified"):
             raise HTTPException(status_code=400, detail="Email on platform not verified")
+
+        # level 2 - another link with email already exists
         try:
             link_by_email = await self.link_repo.get_by_email_platform(
                 db_session, platform_user.get("email"), Platform(type)
             )
-        except NotFoundException:
-            link_by_email = None
 
-        # level 2 - another link with email already exists
-        if link_by_email:
             if not strtg.allow_email_collision():
                 raise HTTPException(status_code=400, detail="Email collision")
 
@@ -213,34 +238,15 @@ class AuthService:
                     "expires_at": platform_user.get("expires_at"),
                 }
             )
-        try:
-            user_by_email = await self.user_repo.get_one(db_session, platform_user.get("email"), column="email")
         except NotFoundException:
-            user_by_email = None
+            ...
 
-        # level 3 - user with email already exists
-        if user_by_email:
-            await self.link_repo.create(
-                db_session,
-                LinkedAccountsCreate(
-                    user_id=user_by_email.id,
-                    platform=Platform(type),
-                    platform_user_id=platform_user.get("id"),
-                    platform_username=platform_user.get("username"),
-                    platform_avatar_url=platform_user.get("avatar_url"),
-                    platform_user_email=platform_user.get("email"),
-                    access_token=platform_user.get("access_token"),
-                    refresh_token=platform_user.get("refresh_token"),
-                    expires_at=platform_user.get("expires_at"),
-                ),
-            )
-
-            token = self.encode_jwt(user_by_email.id, platform_user.get("username"))
-            return token
-
-        # level 4 - new user
-        else:
-            new_user = await self.user_repo.create(
+        try:
+            # level 3 - user with email already exists
+            user = await self.user_repo.get_one(db_session, platform_user.get("email"), column="email")
+        except NotFoundException:
+            # level 4 - completly new user
+            user = await self.create_user(
                 db_session,
                 AuthUserCreate(
                     username=platform_user.get("username"),
@@ -250,23 +256,34 @@ class AuthService:
                 ),
             )
 
-            await self.link_repo.create(
-                db_session,
-                LinkedAccountsCreate(
-                    user_id=new_user.id,
-                    platform=Platform(type),
-                    platform_user_id=platform_user.get("id"),
-                    platform_username=platform_user.get("username"),
-                    platform_avatar_url=platform_user.get("avatar_url"),
-                    platform_user_email=platform_user.get("email"),
-                    access_token=platform_user.get("access_token"),
-                    refresh_token=platform_user.get("refresh_token"),
-                    expires_at=platform_user.get("expires_at"),
-                ),
-            )
+        new_link = await self.create_link(
+            db_session,
+            LinkedAccountsCreate(
+                user_id=user.id,
+                platform=Platform(type),
+                platform_user_id=platform_user.get("id"),
+                platform_username=platform_user.get("username"),
+                platform_avatar_url=platform_user.get("avatar_url"),
+                platform_user_email=platform_user.get("email"),
+            ),
+        )
 
-            token = self.encode_jwt(new_user.id, platform_user.get("username"))
-            return token
+        await self.token_vault_repo.create(
+            db_session,
+            TokenVaultCreate(
+                user_id=user.id,
+                linked_account_id=new_link.id,
+                platform=Platform(type),
+                token_type="Bearer",
+                platform_user_id=platform_user.get("id"),
+                access_token=platform_user.get("access_token"),
+                refresh_token=platform_user.get("refresh_token"),
+                expires_at=platform_user.get("expires_at"),
+            ),
+        )
+
+        token = self.encode_jwt(user.id, platform_user.get("username"))
+        return token
 
     async def get_current_user(
         self,
@@ -363,8 +380,16 @@ class AuthService:
         if not link:
             raise HTTPException(status_code=403, detail="User does not have a needed integration")
 
+        tokens = await token_service.get(db_session, link.id)
         responce = await broker.request(
-            LinkedAccountWithTokensRead.model_validate(link),
+            {
+                "access_token": tokens.access_token,
+                "refresh_token": tokens.refresh_token,
+                "expires_at": tokens.expires_at,
+                "platform": tokens.platform,
+                "platform_user_id": tokens.platform_user_id,
+                "user_id": str(tokens.user_id),
+            },
             strtg.bot_connect_request_queue,
             main_exchange,
         )
@@ -388,4 +413,4 @@ class AuthService:
         await self.link_repo.update(db_session, link)
 
 
-auth_service = AuthService(UserRepository(), LinkedAccountsRepository())
+auth_service = AuthService(UserRepository(), LinkedAccountsRepository(), TokenVaultRepository())

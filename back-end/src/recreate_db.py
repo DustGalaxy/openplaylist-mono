@@ -5,6 +5,7 @@ from orm.auth_user import User
 from orm.linked_accounts import LinkedAccounts
 from orm.playlist import Playlist, OrderPlaylistStatus, Order
 from orm.settings import Settings
+from orm.token_vault import TokenVault
 
 
 async def recreate_db():

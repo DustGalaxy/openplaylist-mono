@@ -30,7 +30,7 @@ from src.utils import setup_database
 context = {"bot": None}
 
 
-class Bot(commands.AutoBot):
+class Bot(commands.Bot):
     def __init__(self, *, subs: list[eventsub.SubscriptionPayload]) -> None:
 
         super().__init__(
@@ -39,11 +39,11 @@ class Bot(commands.AutoBot):
             bot_id=settings.BOT_ID,
             owner_id=settings.OWNER_ID,
             prefix=self.custom_prefix,  # type: ignore
-            subscriptions=subs,
         )
 
     async def custom_prefix(self, bot: Self, message: twitchio.ChatMessage) -> str:
-        return "::"
+
+        return "::" if message.broadcaster.id else "!!"
 
     async def setup_hook(self) -> None:
         # Add our component which contains our commands...
@@ -65,13 +65,12 @@ class Bot(commands.AutoBot):
             return
 
         # A list of subscriptions we would like to make to the newly authorized channel...
-        subs: list[eventsub.SubscriptionPayload] = [
-            eventsub.ChatMessageSubscription(broadcaster_user_id=payload.user_id, user_id=self.bot_id),
-        ]
+        sub = eventsub.ChatMessageSubscription(broadcaster_user_id=payload.user_id, user_id=self.bot_id)
+        
 
-        resp: twitchio.MultiSubscribePayload = await self.multi_subscribe(subs)
-        if resp.errors:
-            LOGGER.warning("Failed to subscribe to: %r, for user: %s", resp.errors, payload.user_id)
+        resp = await self.subscribe_websocket(sub)
+
+        LOGGER.info("Subscribed to channel: %s", payload.user_id)
 
     async def add_token(
         self, token: str, refresh: str, user_id: str | None = None

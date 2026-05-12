@@ -19,7 +19,3 @@ class LinkedAccounts(Base, UUIDMixin, TimestampMixin):
     platform_avatar_url: Mapped[str] = mapped_column("platform_avatar_url", nullable=False)
 
     bot_connection: Mapped[bool] = mapped_column("bot_connection", nullable=False, default=False)
-
-    access_token: Mapped[str] = mapped_column("access_token", nullable=False)
-    refresh_token: Mapped[str] = mapped_column("refresh_token", nullable=False)
-    expires_at: Mapped[int] = mapped_column("expires_at", nullable=False)

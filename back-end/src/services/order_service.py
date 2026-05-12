@@ -60,6 +60,7 @@ class OrderService:
         return OrderCreate(
             owner_id=order.owner_id,
             from_owner=from_owner,
+            owner_platform_id=order.owner_platform_id if not isinstance(order, WebNewOrder) else 'web',
             requester_nickname=order.requester_nickname,
             yt_video_id=yt_video_id,
             title=data["title"],

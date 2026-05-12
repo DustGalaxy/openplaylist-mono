@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+from .token import Tokens
 
 class TwitchAuthResponse(BaseModel):
     access_token: str

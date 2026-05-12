@@ -48,14 +48,14 @@ class IntegrationRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class LinkedAccountWithTokensRead(BaseModel):
-    id: UUID
-    user_id: UUID
-    platform: Platform
-    platform_user_id: str
+# class LinkedAccountWithTokensRead(BaseModel):
+#     id: UUID
+#     user_id: UUID
+#     platform: Platform
+#     platform_user_id: str
 
-    access_token: str
-    refresh_token: str
-    expires_at: int
+#     access_token: str
+#     refresh_token: str
+#     expires_at: int
 
-    model_config = ConfigDict(from_attributes=True)
+#     model_config = ConfigDict(from_attributes=True)

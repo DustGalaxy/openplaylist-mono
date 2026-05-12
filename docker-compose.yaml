@@ -132,6 +132,24 @@ services:
     networks:
       - default
 
+  task-schuduler:
+    build:
+      context: ./back-end
+      dockerfile: ./Dockerfile.scheduler
+    depends_on:
+          database:
+            condition: service_healthy
+          redis:
+            condition: service_healthy
+          rabbitmq:
+            condition: service_healthy
+    env_file:
+      - ./back-end/.docker.env
+    volumes:
+      - ./back-end/src:/app/src
+    networks:
+      - default
+
   bot-ttv:
     build:
       context: ./bot_ttv

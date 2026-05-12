@@ -68,7 +68,7 @@ class PlstUpdsNamespace(socketio.AsyncNamespace):
         cookie_string = environ.get("HTTP_COOKIE")
         if not cookie_string:
             print("Куки не переданы.")
-            await sio.disconnect(sid)
+            await sio.disconnect(sid, namespace="/plst_upds")
             return
 
         if auth := self.get_auth(cookie_string):
@@ -79,7 +79,7 @@ class PlstUpdsNamespace(socketio.AsyncNamespace):
             redis_adapter.hset(f"playlist:users:{user['sub']}", "sid", sid)
         else:
             print("Кука 'auth' не найдена.")
-            await sio.disconnect(sid)
+            await sio.disconnect(sid, namespace="/plst_upds")
 
     async def on_subscribe(self, sid, data):
         user = await self.get_session(sid)
