@@ -14,7 +14,7 @@ from simple_repository.exceptions import NotFoundException, IntegrityConflictExc
 
 from tasks.email import send_email
 
-from adapters._redis.broker import redis_adapter
+from adapters._redis.broker import get_broker
 from adapters._rabbit.event_broker import (
     broker,
     main_exchange,
@@ -108,7 +108,7 @@ class AuthService:
         if not session_id:
             session_id = str(uuid.uuid4())
 
-        redis_adapter.set(
+        get_broker().set(
             f"email_comfirmation:{email}:{session_id}",
             "True",
             ex=600,
@@ -133,7 +133,7 @@ class AuthService:
                 password=self.hasher.hash(password),
             )
 
-            redis_adapter.set(
+            get_broker().set(
                 f"email_new_user_data:{email}:{session_id}",
                 str(new_user.model_dump_json()),
                 ex=600,
@@ -143,7 +143,7 @@ class AuthService:
         return None
 
     async def confirm_email(self, db_session: AsyncSession, email: str, session_id: UUID) -> str:
-        is_exists = bool(redis_adapter.getdel(f"email_comfirmation:{email}:{session_id}"))
+        is_exists = bool(get_broker().getdel(f"email_comfirmation:{email}:{session_id}"))
         if not is_exists:
             raise HTTPException(status_code=403, detail="Session expired")
 

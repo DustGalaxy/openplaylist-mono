@@ -4,11 +4,11 @@ from fastapi.logger import logger
 
 from database import async_session_maker
 from taskiq_broker import broker as taskiq_broker
-from utils import kick
+
 
 from adapters._rabbit.event_broker import broker as rabbit_broker
 from adapters._rabbit.event_broker import main_exchange
-from adapters._redis.broker import redis_adapter
+from adapters._redis.broker import get_broker
 from dto.events import Deleted, Moved, OrderCreated, PlaylistTrackAdded, PlayNow, Private
 from dto.order import OrderUpdate
 from dto.settings import ReadPlaylistSettings
@@ -18,12 +18,13 @@ from services.sio_service import sio_service
 from models.order import OrderCreate, OrderDomain
 from dal.postgres_impl import user_repository, playlist_settings_repository
 
+from utils import kick, conditional_trace
 
 @taskiq_broker.task(task_name="playlist.track.playnow")
 async def playlist_track_playnow_handler(event: PlayNow):
     await sio_service.set_playnow(event)
 
-
+@conditional_trace("order-flow:step-3")
 @taskiq_broker.task(task_name="playlist.track.added")
 async def playlist_track_added_handler(payload: OrderDomain, playlist_id: UUID):
     await sio_service.add_track(payload, playlist_id)
@@ -61,10 +62,10 @@ async def handle_settings_request(
     async with async_session_maker() as db_session:
         plst = await playlist_service.get_by_name(db_session, user_id, plst_name)
         settings = await playlist_settings_repository.get_one(db_session, plst.id, column="playlist_id")
-        redis_adapter.set(f"{user_id}:{plst.name}:settings", settings.model_dump_json())
+        get_broker().set(f"{user_id}:{plst.name}:settings", settings.model_dump_json())
         return plst
 
-
+@conditional_trace("order-flow:step-2")
 @taskiq_broker.task(task_name="order.created")
 async def handle_order_created(
     typed_payload: OrderCreate,

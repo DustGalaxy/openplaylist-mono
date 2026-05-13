@@ -1,10 +1,8 @@
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    IS_TESTING: bool = False
-
     SESSION_LIVE_TIME: int = Field(alias="SESSION_LIVE_TIME")
     COOKIE_NAME: str = Field(alias="COOKIE_NAME")
 
@@ -33,7 +31,7 @@ class Settings(BaseSettings):
     SELF_LOG_LEVEL: str = Field(alias="SELF_LOG_LEVEL")
     SELF_RELOAD: bool = Field(alias="SELF_RELOAD")
 
-    DB_URL: str = Field(alias="DB_URL")
+    DB_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5430/postgres"
     RABBITMQ_URL: str = Field(alias="RABBITMQ_URL")
     REDIS_URL: str = Field(alias="REDIS_URL")
 
@@ -43,9 +41,8 @@ class Settings(BaseSettings):
     SMTP_PORT: int = Field(alias="SMTP_PORT", default=587)
     SMTP_SERVER: str = Field(alias="SMTP_SERVER", default="smtp.gmail.com")
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
 
 
 settings = Settings()  # pyright: ignore[reportCallIssue]

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, HTTPException, Response
 
 from dto.token import CodeDTO
 from dto.user import HttpClassicLogin, HttpClassicRegister
-from adapters._redis.broker import redis_adapter
+from adapters._redis.broker import get_broker
 from models.auth_user import AuthUserCreate
 from models.linked_accounts import LinkedAccountsCreate
 
@@ -47,7 +47,7 @@ async def confirm_email(
     session_id: uuid.UUID = Body(),
     email: str = Body(),
 ):
-    user_data = redis_adapter.getdel(f"email_new_user_data:{email}:{session_id}")
+    user_data = get_broker().getdel(f"email_new_user_data:{email}:{session_id}")
     if user_data != "None" and user_data is not None:
         await auth_service.create_user(db_session, AuthUserCreate.model_validate_json(str(user_data)))
 
@@ -71,7 +71,7 @@ async def login_by_social(
 
     except NeedConfirmationException as e:
         link_session_id = str(uuid.uuid4())
-        redis_adapter.set(
+        get_broker().set(
             f"link_sessions:{link_session_id}",
             json.dumps(e.data),
             ex=600,
@@ -92,7 +92,7 @@ async def confirm_account_merge(
     link_session_id: str = Body(),
     is_confirmed: bool = Body(),
 ):
-    raw_data: str = str(redis_adapter.getdel(f"link_sessions:{link_session_id}"))
+    raw_data: str = str(get_broker().getdel(f"link_sessions:{link_session_id}"))
 
     if not raw_data:
         raise HTTPException(status_code=400, detail="Link session expired")

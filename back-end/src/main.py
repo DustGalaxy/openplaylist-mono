@@ -12,7 +12,7 @@ from adapters._fastapi.playlist_routes import router as playlist_router
 from adapters._fastapi.settings_routes import router as settings_router
 from adapters._sio.init import sio
 from adapters._rabbit.event_broker import broker, declare
-from adapters._redis.broker import redis_adapter
+from adapters._redis.broker import get_broker
 from adapters._sio.routes import PlstUpdsNamespace, BasicNamespace
 from settings import settings
 
@@ -21,9 +21,9 @@ from settings import settings
 async def lifespan(app: FastAPI):
     await broker.start()
     await declare()
-    redis_adapter.connect()
+    get_broker().connect()
     yield
-    redis_adapter.close()
+    get_broker().close()
     await broker.stop()
 
 
