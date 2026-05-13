@@ -4,7 +4,7 @@ from typing import Union
 
 from pytubefix import YouTube, extract
 
-from adapters._redis.broker import redis_adapter
+from adapters._redis.broker import get_broker
 from dto.order import WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder
 from models.order import OrderCreate, STRATEGIES
 
@@ -14,7 +14,7 @@ class OrderService:
         self, order: Union[WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder], from_owner: bool = False
     ) -> OrderCreate:
         yt_video_id = extract.video_id(order.yt_video_url)
-        cached_info: str = redis_adapter.get(yt_video_id)  # pyright: ignore[reportAssignmentType]
+        cached_info: str = get_broker().get(yt_video_id)  # pyright: ignore[reportAssignmentType]
 
         if not cached_info:
             yt = YouTube(order.yt_video_url)
@@ -48,7 +48,7 @@ class OrderService:
                 "views": yt.views,
             }
 
-            redis_adapter.set(yt_video_id, json.dumps(data))
+            get_broker().set(yt_video_id, json.dumps(data))
 
         else:
             data = json.loads((cached_info))

@@ -4,7 +4,7 @@ from taskiq_redis import RedisAsyncResultBackend, ListQueueBroker
 
 from settings import settings
 from adapters._rabbit.event_broker import broker as rabbit_broker
-from adapters._redis.broker import redis_adapter
+from adapters._redis.broker import get_broker
 from adapters._sio.init import sio
 
 result_backend = RedisAsyncResultBackend(redis_url=settings.REDIS_URL + "/2")
@@ -17,11 +17,11 @@ broker = ListQueueBroker(
 class MyMiddleware(TaskiqMiddleware):
     async def startup(self) -> None:
         await rabbit_broker.start()
-        redis_adapter.connect()
+        get_broker().connect()
         sio.manager.initialize()
 
     async def shutdown(self) -> None:
-        redis_adapter.close()
+        get_broker().close()
         await rabbit_broker.stop()
 
 

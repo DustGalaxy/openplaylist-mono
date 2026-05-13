@@ -11,7 +11,7 @@ from dto.events import (
 )
 from dto.settings import ReadPlaylistSettings
 from adapters._sio.init import sio
-from adapters._redis.broker import redis_adapter, RedisAdapter
+from adapters._redis.broker import get_broker, RedisAdapter
 from dal.postgres_impl import playlist_settings_repository, playlist_repository
 from models.order import OrderDomain
 from database import async_session_maker
@@ -67,7 +67,7 @@ class RoomManager:
             pipe.execute()
 
 
-room_manager = RoomManager(redis_adapter)
+room_manager = RoomManager(get_broker())
 
 
 class SioPlaylistUpdateService:
@@ -79,7 +79,7 @@ class SioPlaylistUpdateService:
         return await self.sio.get_session(sid)
 
     def sid_from_uid(self, user_id):
-        return str(redis_adapter.hget(f"playlist:users:{user_id}", "sid"))
+        return str(get_broker().hget(f"playlist:users:{user_id}", "sid"))
 
     async def set_playnow(self, data: PlayNow):
         sids = room_manager.get_sids(data.playlist_id, self.namespace)
@@ -112,7 +112,7 @@ class SioPlaylistUpdateService:
         )
 
     async def ack_bot_connection(self, type: str, user_id: str):
-        sid = redis_adapter.hget(f"basic:users:{user_id}", "sid")
+        sid = get_broker().hget(f"basic:users:{user_id}", "sid")
         await self.sio.emit(f"ack_bot_connected:{type}", to=sid, namespace="/")
 
     async def set_private(self, data: Private):

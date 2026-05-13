@@ -3,7 +3,7 @@ import socketio
 
 from settings import settings
 from services.sio_service import sio_service, room_manager
-from adapters._redis.broker import redis_adapter
+from adapters._redis.broker import get_broker
 
 from .init import sio
 
@@ -31,7 +31,7 @@ class BasicNamespace(socketio.AsyncNamespace):
                 user = jwt.decode(auth, settings.JWT_PUBLIC_KEY, algorithms=[settings.JWT_ALGORITHM])
 
                 await self.save_session(sid, {"user_id": user["sub"]})
-                redis_adapter.hset(f"basic:users:{user['sub']}", "sid", sid)
+                get_broker().hset(f"basic:users:{user['sub']}", "sid", sid)
             else:
                 print("Кука 'auth' не найдена.")
                 # Опционально, можно отключить клиента, если аутентификация не прошла
@@ -43,7 +43,7 @@ class BasicNamespace(socketio.AsyncNamespace):
     async def on_disconnect(self, sid, namespace=None):
         print("disconnect ", sid)
         user_id = await self.get_session(sid)
-        redis_adapter.hdel(f"basic:users:{user_id}", "sid")
+        get_broker().hdel(f"basic:users:{user_id}", "sid")
         await self.disconnect(sid)
 
 
@@ -76,7 +76,7 @@ class PlstUpdsNamespace(socketio.AsyncNamespace):
             user = jwt.decode(auth, settings.JWT_PUBLIC_KEY, algorithms=[settings.JWT_ALGORITHM])
 
             await self.save_session(sid, {"user_id": user["sub"]})
-            redis_adapter.hset(f"playlist:users:{user['sub']}", "sid", sid)
+            get_broker().hset(f"playlist:users:{user['sub']}", "sid", sid)
         else:
             print("Кука 'auth' не найдена.")
             await sio.disconnect(sid, namespace="/plst_upds")

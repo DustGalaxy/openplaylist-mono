@@ -41,4 +41,11 @@ else:
             return getattr(self.broker, name)
 
 
-redis_adapter = RedisAdapter(settings.REDIS_URL + "/0", decode_responses=True)
+_broker = None
+
+
+def get_broker() -> RedisAdapter:
+    global _broker
+    if _broker is None:
+        _broker = RedisAdapter(settings.REDIS_URL + "/0", decode_responses=True)
+    return _broker

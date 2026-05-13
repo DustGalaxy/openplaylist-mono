@@ -22,4 +22,6 @@ def send_email(recipient: str, subject: str, body: str):
     with smtplib.SMTP(smtp_server, smtp_port) as server:
         server.starttls()
         server.login(sender, password)
-        server.sendmail(sender, recipient, msg.as_string())
+        err = server.sendmail(sender, recipient, msg.as_string())
+
+    return err if err else True
