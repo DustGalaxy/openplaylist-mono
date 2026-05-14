@@ -158,6 +158,19 @@ export const useMusicStore = create<StoreState>((set, get) => {
     s.on('playnow:' + playlistId, playNowHandler)
     s.on('delete_track:' + playlistId, removedHandler)
     s.on('settings_changed:' + playlistId, settingsChangedHandler)
+    s.on('connect', () => {
+      console.debug('socket connect - re-subscribing to playlist', playlistId)
+      if (s !== undefined && s.emit)
+        s.emit('subscribe', { playlist_id: playlistId })
+    })
+    s.on('disconnect', () => {
+      console.debug(
+        'socket disconnect - unsubscribing from playlist',
+        playlistId,
+      )
+      if (s !== undefined && s.emit)
+        s.emit('unsubscribe', { playlist_id: playlistId })
+    })
 
     set((st) => ({
       socketHandlers: {
@@ -183,6 +196,7 @@ export const useMusicStore = create<StoreState>((set, get) => {
     if (h.removedHandler) s.off('delete_track:' + playlistId, h.removedHandler)
     if (h.settingsChangedHandler)
       s.off('settings_changed:' + playlistId, h.settingsChangedHandler)
+
     const newHandlers = { ...handlers }
     delete newHandlers[playlistId]
     set(() => ({ socketHandlers: newHandlers }))
@@ -520,10 +534,10 @@ export const useMusicStore = create<StoreState>((set, get) => {
           p.id === playlistId ? { ...p, isSub: true } : p,
         ),
       }))
-      // emit subscribe event
-      const socket = get().socket
-      if (socket !== undefined && socket.emit)
-        socket.emit('subscribe', { playlist_id: playlistId })
+
+      const s = get().socket
+      if (s !== undefined && s.emit)
+        s.emit('subscribe', { playlist_id: playlistId })
     },
 
     unsubscribePlaylist(playlistId) {
@@ -533,10 +547,9 @@ export const useMusicStore = create<StoreState>((set, get) => {
           p.id === playlistId ? { ...p, isSub: false } : p,
         ),
       }))
-      const socket = get().socket
-      if (socket !== undefined && socket.emit) {
-        socket.emit('unsubscribe', { playlist_id: playlistId })
-      }
+      const s = get().socket
+      if (s !== undefined && s.emit)
+        s.emit('unsubscribe', { playlist_id: playlistId })
     },
   }
 })

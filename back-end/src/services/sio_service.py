@@ -66,6 +66,12 @@ class RoomManager:
             pipe.delete(sid_rooms_key)
             pipe.execute()
 
+    def start_up(self):
+        with self.redis_adapter.broker.pipeline(transaction=True) as pipe:
+            pipe.delete("*:rooms-to-sids:*")
+            pipe.delete("*:sids-to-rooms:*")
+            pipe.execute()
+
 
 room_manager = RoomManager(get_broker())
 

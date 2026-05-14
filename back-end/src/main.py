@@ -14,6 +14,7 @@ from adapters._sio.init import sio
 from adapters._rabbit.event_broker import broker, declare
 from adapters._redis.broker import get_broker
 from adapters._sio.routes import PlstUpdsNamespace, BasicNamespace
+from services.sio_service import room_manager
 from settings import settings
 
 
@@ -22,6 +23,9 @@ async def lifespan(app: FastAPI):
     await broker.start()
     await declare()
     get_broker().connect()
+
+    room_manager.start_up()
+    
     yield
     get_broker().close()
     await broker.stop()

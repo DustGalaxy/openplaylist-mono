@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Callable
 from urllib import parse
 import functools
@@ -53,6 +54,8 @@ def prepare_obj(obj):
         return obj.model_dump()
     if isinstance(obj, (list, tuple, set)):
         return [prepare_obj(i) for i in obj]
+    if isinstance(obj, (UUID, datetime)):
+        return str(obj)
     if isinstance(obj, dict):
         return {k: prepare_obj(v) for k, v in obj.items()}
     return obj
@@ -77,8 +80,10 @@ def trace_to_redis(redis_client: RedisAdapter, key_prefix: str):
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             result = await func(*args, **kwargs)
+            trace_id = uuid4().hex[:8]
+            key = f"trace:{key_prefix}:{func.__name__}:{trace_id}"
             try:
-                await redis_client.set(f"{key_prefix}:{func.__name__}:{uuid4()}", obj_to_json(result))
+                await redis_client.set(key, obj_to_json(result), ex=180)
             except Exception as e:
                 print(f"Tracing failed for {func.__name__}: {e}")
 
@@ -94,4 +99,5 @@ def conditional_trace(key_prefix: str):
         if settings.IS_TESTING == "true":
             return trace_to_redis(get_broker(), key_prefix)(func)
         return func
+
     return decorator

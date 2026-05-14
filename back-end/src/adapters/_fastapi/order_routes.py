@@ -19,3 +19,4 @@ async def new_order(
 ):
     is_owner = order.owner_id == current_user.id
     await kick("order.new", taskiq_broker, order, is_owner, labels={"user_id": str(current_user.id)})
+    

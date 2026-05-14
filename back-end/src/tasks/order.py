@@ -20,3 +20,4 @@ async def order_new(
         taskiq_broker,
         new_order,
     )
+    return new_order
