@@ -28,6 +28,7 @@ async def playlist_track_playnow_handler(event: PlayNow):
 @taskiq_broker.task(task_name="playlist.track.added")
 async def playlist_track_added_handler(payload: OrderDomain, playlist_id: UUID):
     await sio_service.add_track(payload, playlist_id)
+    return True
 
 
 @taskiq_broker.task(task_name="playlist.track.deleted")
@@ -85,3 +86,4 @@ async def handle_order_created(
 
     for error_list, playlist_name in errors:
         ...  # TODO process errors and notify user about them
+    return tracks, errors
