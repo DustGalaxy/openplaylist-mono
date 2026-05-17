@@ -41,7 +41,7 @@ async def connect_to_twitch(message: RabbitMessage = Context()):
     if bot is None:
         return False
 
-    event: LinkedAccountWithTokensRead = LinkedAccountWithTokensRead.model_validate_json(message.body)
+    event: Tokens = Tokens.model_validate_json(message.body)
     try:
         await bot.add_token(event.access_token, event.refresh_token, event.platform_user_id)
         await bot.subscribe_websocket(
@@ -65,15 +65,9 @@ async def disconnect_from_twitch(message: RabbitMessage = Context()) -> None:
     LOGGER.info(f"ttvbot inst - {bot}")
     if bot is None:
         return
-    event: LinkedAccountWithTokensRead = LinkedAccountWithTokensRead.model_validate_json(message.body)
+    event: Tokens = Tokens.model_validate_json(message.body)
 
-    subs = bot.websocket_subscriptions()
-    for key, sub in subs.items():
-        broadcaster_user_id = sub.condition.get("broadcaster_user_id", None)
 
-        if broadcaster_user_id == event.platform_user_id:
-            await bot.delete_eventsub_subscription(key)
-            break
 
     await bot.remove_token(event.platform_user_id)
 

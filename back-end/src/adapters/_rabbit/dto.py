@@ -1,6 +1,13 @@
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 
+class Tokens(BaseModel):
+    user_id: str
+    platform: str
+    platform_user_id: str
+    access_token: str
+    refresh_token: str
+    expires_at: int
 
 class DATokenRefreshed(BaseModel):
     user_id: UUID

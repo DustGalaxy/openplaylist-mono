@@ -1,27 +1,27 @@
+from datetime import datetime
 import json
-import time
 
-from simple_repository.exceptions import NotFoundException
 from faststream import Context
 from faststream.rabbit.message import RabbitMessage
+from simple_repository.exceptions import NotFoundException
 
-from adapters._rabbit.dto import TwitchUser, TwitchTokenRefreshed
 from adapters._rabbit.event_broker import (
     broker,
     main_exchange,
     auth_user_twitch_all_request,
-    auth_user_twitch_tokens_refreshed,
     bot_twitch_order_new,
     bot_twitch_ack_connection,
+    auth_user_twitch_tokens_refreshed,
 )
-from dto.order import OrderNew, TTVNewOrder
+from dto.order import TTVNewOrder
+from adapters._rabbit.dto import Tokens, TwitchTokenRefreshed
 from services.sio_service import sio_service
 from services.auth.auth_service import auth_service
-from services.auth.twitch_service import auth_twitch_service
+from services.tokens.token_service import token_service
+from dal.postgres_impl import token_vault_repository
 from _types import Platform
 from database import async_session_maker
-from repo import user_repository, linked_accounts_repository
-from utils import find, kick
+from utils import kick
 from taskiq_broker import broker as taskiq_broker
 
 
@@ -48,22 +48,18 @@ async def get_all_twitch_users(
     message: RabbitMessage = Context(),
 ):
     await message.ack()
-    print("get_all_twitch_users event")
     async with async_session_maker() as session:
-        users, count = await user_repository.get_all(session)
-
-        users = [user for user in users if any([x.platform == Platform.TWITCH for x in user.linked_accounts])]
-        links = [find(user.linked_accounts, lambda x: x.platform == Platform.TWITCH) for user in users]
+        tokens = await auth_service.get_all_tokens(session, Platform.TWITCH)
         return [
-            TwitchUser(
-                user_id=link.user_id,
-                twitch_id=link.platform_user_id,
-                access_token=link.access_token,
-                refresh_token=link.refresh_token,
-                expires_at=link.expires_at,
+            Tokens(
+                user_id=str(token.user_id),
+                access_token=token.access_token,
+                refresh_token=token.refresh_token,
+                expires_at=token.expires_at,
+                platform=token.platform,
+                platform_user_id=token.platform_user_id,
             )
-            for link in links
-            if link
+            for token in tokens
         ]
 
 
@@ -75,14 +71,15 @@ async def twitch_refresh_tokens(
     event: TwitchTokenRefreshed = TwitchTokenRefreshed.model_validate_json(message.body)
     async with async_session_maker() as session:
         try:
-            link = await linked_accounts_repository.get_one(session, str(event.twitch_id), column="platform_user_id")
+            tokens = await token_vault_repository.get_by_id_platform(session, str(event.twitch_id), Platform.TWITCH)
         except NotFoundException:
             # TODO: log
             return
-        link.access_token = event.access_token
-        link.refresh_token = event.refresh_token
-        link.expires_at = event.expires_in + int(time.time())
-        await linked_accounts_repository.update(session, link)
+
+        tokens.access_token = event.access_token
+        tokens.refresh_token = event.refresh_token
+        tokens.expires_at = event.expires_in + int(datetime.now().timestamp())
+        await token_vault_repository.update(session, tokens)
 
 
 @broker.subscriber("user.token.died", exchange=main_exchange)
