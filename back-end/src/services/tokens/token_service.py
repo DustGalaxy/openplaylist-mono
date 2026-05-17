@@ -54,8 +54,6 @@ class TokenService:
         tokens.last_update = datetime.now()
         return await self.token_repository.update(db_session, tokens)
 
-    
-
     async def refresh_token(self, token_vault: TokenVaultDomain) -> TokenVaultDomain:
         strategy = self.strategy_manager.get_strategy(token_vault.platform)
 
