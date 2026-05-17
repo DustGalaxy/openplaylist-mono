@@ -25,15 +25,11 @@ async def refresh_tokens():
                 "access_token": fresh_token.access_token,
                 "refresh_token": fresh_token.refresh_token,
             },
-            exchange=topic_exchange, 
+            exchange=topic_exchange,
             routing_key=f"auth.token.refreshed.{token.platform}",
             persist=True,
-            # Выставляем TTL, например, 1 час (3600000 мс)
-            # Если бот не заберет сообщение за это время, оно удалится
-            expiration=3600, 
+            expiration=3600,
         )
 
-        delay = (random.random() + 0.5) 
+        delay = random.random() + 0.5
         await asyncio.sleep(delay)
-    
-    

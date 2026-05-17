@@ -12,6 +12,7 @@ class Platform(Enum):
 class TTVUser(BaseModel):
     user_id: str
     twitch_id: str
+    
 
 
 class LinkedAccountWithTokensRead(BaseModel):
@@ -33,3 +34,4 @@ class Tokens(BaseModel):
     platform_user_id: str
     access_token: str
     refresh_token: str
+    expires_at: int

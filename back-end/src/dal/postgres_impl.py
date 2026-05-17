@@ -413,6 +413,23 @@ class UserRepository(crud_factory(User, AuthUserSchema, AuthUserCreate, AuthUser
 
         return AuthUserSchema.model_validate(user)
 
+    async def get_by_tokens(self, session: AsyncSession, access_token: str, refresh_token: str, platform: Platform):
+        stmt = (
+            select(User)
+            .join(TokenVault, User.id == TokenVault.user_id)
+            .where(
+                TokenVault.access_token == access_token,
+                TokenVault.refresh_token == refresh_token,
+                TokenVault.platform == platform,
+            )
+        )
+        res = await session.execute(stmt)
+        user = res.unique().scalars().one_or_none()
+        if not user:
+            raise NotFoundException()
+
+        return AuthUserSchema.model_validate(user)
+
     async def patch(
         self,
         session: AsyncSession,
@@ -458,6 +475,38 @@ class LinkedAccountsRepository(
     def to_repr(self, object: LinkedAccounts) -> LinkedAccountsDomain:
         return self.domain_model.model_validate(object)
 
+    async def get_by_id_platform(
+        self, session: AsyncSession, user_id: UUID, platform: Platform
+    ) -> LinkedAccountsDomain:
+        stmt = select(LinkedAccounts).where(
+            LinkedAccounts.platform_user_id == user_id, LinkedAccounts.platform == platform
+        )
+
+        res = await session.execute(stmt)
+        user = res.unique().scalars().one_or_none()
+
+        if not user:
+            raise NotFoundException(
+                f"{self.sqla_model.__tablename__} with user_id={user_id} and platform={platform} not found"
+            )
+
+        return LinkedAccountsDomain.model_validate(user)
+
+    async def get_by_email_platform(self, session: AsyncSession, email: str, platform: Platform):
+        stmt = select(LinkedAccounts).where(
+            LinkedAccounts.platform_user_email == email, LinkedAccounts.platform == platform
+        )
+
+        res = await session.execute(stmt)
+        user = res.unique().scalars().one_or_none()
+
+        if not user:
+            raise NotFoundException(
+                f"{self.sqla_model.__tablename__} with email={email} and platform={platform} not found"
+            )
+
+        return LinkedAccountsDomain.model_validate(user)
+
 
 class TokenVaultRepository(crud_factory(TokenVault, TokenVaultDomain, TokenVaultCreate, TokenVaultUpdate)):
     def to_inner(self, data: TokenVaultCreate | TokenVaultDomain | TokenVaultUpdate) -> dict:
@@ -466,8 +515,29 @@ class TokenVaultRepository(crud_factory(TokenVault, TokenVaultDomain, TokenVault
     def to_repr(self, object: TokenVault) -> TokenVaultDomain:
         return self.domain_model.model_validate(object)
 
+    async def get_by_id_platform(self, session: AsyncSession, platform_user_id: str, platform: Platform):
+        stmt = select(TokenVault).where(TokenVault.platform_user_id == platform_user_id, TokenVault.platform == platform)
+
+        res = await session.execute(stmt)
+        tokens = res.unique().scalars().one_or_none()
+
+        if not tokens:
+            raise NotFoundException(
+                f"{self.sqla_model.__tablename__} with platform_user_id={platform_user_id} and platform={platform} not found"
+            )
+
+        return TokenVaultDomain.model_validate(tokens)
+
     async def fetch_tokens_to_refresh(self, session: AsyncSession) -> list[TokenVaultDomain]:
         stmt = select(TokenVault).where(TokenVault.expires_at < int(datetime.now().timestamp()) - 60 * 60 * 2)
+
+        result = await session.execute(stmt)
+        result = result.unique().scalars().all()
+
+        return [self.to_repr(item) for item in result]
+
+    async def get_all_by_platform(self, session: AsyncSession, platform: Platform) -> list[TokenVaultDomain]:
+        stmt = select(TokenVault).where(TokenVault.platform == platform)
 
         result = await session.execute(stmt)
         result = result.unique().scalars().all()

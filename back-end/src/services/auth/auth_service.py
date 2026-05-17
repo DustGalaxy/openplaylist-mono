@@ -1,16 +1,15 @@
 from datetime import datetime
-import json
 from typing import Annotated
 from uuid import UUID
 import uuid
 
 import jwt
 from argon2 import PasswordHasher
-from argon2.exceptions import VerifyMismatchError, VerificationError, InvalidHashError
+from argon2.exceptions import VerifyMismatchError
 from fastapi.security import APIKeyCookie
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from simple_repository.exceptions import NotFoundException, IntegrityConflictException
+from simple_repository.exceptions import NotFoundException
 
 from tasks.email import send_email
 
@@ -19,20 +18,18 @@ from adapters._rabbit.event_broker import (
     broker,
     main_exchange,
 )
-from dal.postgres_impl import TokenVaultRepository
-from models.token_vault import TokenVaultCreate
+from dal.postgres_impl import TokenVaultRepository, LinkedAccountsRepository, UserRepository, user_repository
+from models.token_vault import TokenVaultCreate, TokenVaultDomain
 from models.auth_user import AuthUserSchema, AuthUserCreate
 from models.linked_accounts import LinkedAccountsCreate, LinkedAccountsDomain
 from services.auth.strategy_manager import manager
 from services.tokens.token_service import token_service
-from dto.internal.token import Tokens
 
-from repo import LinkedAccountsRepository, UserRepository
 from _types import Platform
 from database import get_async_session
 from settings import settings
 from exceptions import NeedConfirmationException
-from repo import user_repository
+
 
 from utils import find
 
@@ -285,6 +282,9 @@ class AuthService:
         token = self.encode_jwt(user.id, platform_user.get("username"))
         return token
 
+    async def get_all_tokens(self, db_session: AsyncSession, type: Platform) -> list[TokenVaultDomain]:
+        return await self.token_vault_repo.get_all_by_platform(db_session, type)
+
     async def get_current_user(
         self,
         db_session: Annotated[AsyncSession, Depends(get_async_session)],
@@ -334,12 +334,22 @@ class AuthService:
                     platform_user_email=social_user["email"],
                     platform_username=social_user["username"],
                     platform_avatar_url=social_user["avatar_url"],
-                    access_token=social_user["access_token"],
-                    refresh_token=social_user["refresh_token"],
-                    expires_at=social_user["expires_at"],
                 )
-                await self.link_repo.create(db_session, link)
 
+                new_link = await self.link_repo.create(db_session, link)
+                await self.token_vault_repo.create(
+                    db_session,
+                    TokenVaultCreate(
+                        user_id=user_id,
+                        linked_account_id=new_link.id,
+                        platform=type,
+                        token_type="Bearer",
+                        platform_user_id=social_user["id"],
+                        access_token=social_user["access_token"],
+                        refresh_token=social_user["refresh_token"],
+                        expires_at=social_user["expires_at"],
+                    ),
+                )
                 return await self.user_repo.get_one(db_session, user_id)
 
             else:
