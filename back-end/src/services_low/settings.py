@@ -276,8 +276,7 @@ class SettingsLowService:
         id: UUID,
         settings_id: UUID,
     ):
-        sub_item_access = await self.sub_item_access(session, settings_id, id, data)
-        if not sub_item_access:
+        if not await self.sub_item_access(session, settings_id, id, data):
             raise NotAuthorizedException()
 
         return await self.get_repository(data).patch(session, data, id)
@@ -296,8 +295,7 @@ class SettingsLowService:
         settings_id: UUID,
         mark: str,
     ):
-        sub_item_access = await self.sub_item_access(session, settings_id, id, mark)
-        if not sub_item_access:
+        if not await self.sub_item_access(session, settings_id, id, mark):
             raise NotAuthorizedException()
 
         return await self.get_repository(mark).remove(session, id)
