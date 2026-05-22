@@ -8,16 +8,15 @@ import Play from '@/components/icons/icon-play'
 import Add from '@/components/icons/icon-add'
 import Copy from '@/components/icons/icon-copy'
 import Trash from '@/components/icons/icon-trash'
-import Warning from '@/components/icons/icon-warning'
 import Person from '@/components/icons/icon-person'
 import DurationChip from '@/components/ui/duration-chip'
 import Save from '@/components/icons/icon-save'
 
-import WarningModal from './warningModal'
 import type { ClientPlaylist, Track } from '@/types/playlist'
 import type { SavedTrack } from '@/stores/savedStore'
 import { useMusicStore } from '@/stores/musicStore'
 import { useSavedStore } from '@/stores/savedStore'
+import { toast } from 'sonner'
 
 export default function OrderMiniCard({
   track,
@@ -44,10 +43,12 @@ export default function OrderMiniCard({
     },
     {
       icon: <Copy />,
-      on_click: async () =>
-        await navigator.clipboard.writeText(
-          'https://www.youtube.com/watch?v=' + track.yt_video_id,
-        ),
+        on_click: async () =>{
+          await navigator.clipboard.writeText(
+            'https://www.youtube.com/watch?v=' + track.yt_video_id,
+          )
+          toast.success('Copied to clipboard!')
+        },
       className: 'px-1 bg-level-2',
       glow: 'white',
     },
