@@ -1,4 +1,3 @@
-import React from 'react'
 import DateChip from '@/components/ui/date-chip'
 import Btn from '@/components/ui/my-btn'
 
@@ -8,15 +7,14 @@ import Play from '@/components/icons/icon-play'
 import Add from '@/components/icons/icon-add'
 import Copy from '@/components/icons/icon-copy'
 import Trash from '@/components/icons/icon-trash'
-import Warning from '@/components/icons/icon-warning'
 
 import Person from '@/components/icons/icon-person'
 import Save from '@/components/icons/icon-save'
-import WarningModal from './warningModal'
 import type { ClientPlaylist, Track } from '@/types/playlist'
 import { useMusicStore } from '@/stores/musicStore'
 import { formatTime } from '@/lib/utils'
 import { useSavedStore } from '@/stores/savedStore'
+import { toast } from 'sonner'
 
 export default function OrderCard({
   track,
@@ -38,10 +36,12 @@ export default function OrderCard({
     },
     {
       icon: <Copy />,
-      on_click: async () =>
+      on_click: async () =>{
         await navigator.clipboard.writeText(
           'https://www.youtube.com/watch?v=' + track.yt_video_id,
-        ),
+        )
+        toast.success('Copied to clipboard!')
+      },
       className: 'px-1 bg-level-2',
       glow: 'white',
     },

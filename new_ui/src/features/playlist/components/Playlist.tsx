@@ -292,9 +292,9 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
         </div>
 
         <div className=" w-full  @container">
-          <div className="w-full  text-3xl flex items-center justify-center pb-2">
+          {/* <div className="w-full  text-3xl flex items-center justify-center pb-2">
             Track list
-          </div>
+          </div> */}
 
           <div
             className="w-full  items-center flex-col gap-y-8 
