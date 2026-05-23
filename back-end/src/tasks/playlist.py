@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi.logger import logger
 
 from database import async_session_maker
-from taskiq_broker import broker as taskiq_broker
+from taskiq_broker import task_broker as taskiq_broker
 
 
 from adapters._rabbit.event_broker import broker as rabbit_broker

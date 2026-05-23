@@ -7,6 +7,7 @@ This bot can be restarted as many times without needing to subscribe or worry ab
 Consider reading through the documentation for AutoBot for more in depth explanations.
 """
 
+import asyncio
 from typing import Self
 
 import asqlite
@@ -17,7 +18,7 @@ from twitchio.ext import commands
 from twitchio.exceptions import InvalidTokenException
 
 
-from adapters._rabbit.dto.user import Tokens
+from src.adapters._rabbit.dto.user import Tokens
 from src.adapters._rabbit.broker import broker, main_exchange, auth_user_twitch_tokens_refreshed, user_token_died
 from src.acl.user import get_users
 from src.components.listners import Listner
@@ -29,15 +30,19 @@ from src.config import settings
 context = {"bot": None}
 
 
-class Bot(commands.Bot):
+class Bot(commands.AutoBot):
     def __init__(self, users: list[Tokens]) -> None:
-
+        self.users = users
         super().__init__(
             client_id=settings.TWITCH_CLIENT_ID,
             client_secret=settings.TWICTH_CLIENT_SECRET,
             bot_id=settings.BOT_ID,
             owner_id=settings.OWNER_ID,
             prefix=self.custom_prefix,  # type: ignore
+            # subscriptions=[
+            #     eventsub.ChatMessageSubscription(broadcaster_user_id=user.platform_user_id, user_id=self.bot_id)
+            #     for user in users
+            # ],
         )
 
     async def custom_prefix(self, bot: Self, message: twitchio.ChatMessage) -> str:
@@ -66,7 +71,11 @@ class Bot(commands.Bot):
         # A list of subscriptions we would like to make to the newly authorized channel...
         sub = eventsub.ChatMessageSubscription(broadcaster_user_id=payload.user_id, user_id=self.bot_id)
 
-        await self.subscribe_websocket(sub)
+        await self.multi_subscribe(
+            [
+                sub,
+            ]
+        )
 
         LOGGER.info("Subscribed to channel: %s", payload.user_id)
 
@@ -83,6 +92,8 @@ class Bot(commands.Bot):
             "refresh_token": refresh,
             "expires_in": resp.expires_in,
         }
+        # TODO - add request to RabbitMQ maybe??
+
         LOGGER.info(f"{user_data=}, {resp.client_id=}, {resp.user_id=}")
 
         return resp
@@ -99,17 +110,8 @@ class Bot(commands.Bot):
 
     async def remove_token(self, user_id: str) -> None:
         await super().remove_token(user_id)
-        
-        subs = self.websocket_subscriptions()
 
-        for key, sub in subs.items():
-            broadcaster_user_id = sub.condition.get("broadcaster_user_id", None)
-
-            if broadcaster_user_id == user_id:
-                await self.delete_eventsub_subscription(key)
-                break
-
-        LOGGER.info("Removed token and subscriptions for user: %s", user_id)
+        LOGGER.info("Removed token for user: %s", user_id)
 
     async def event_ready(self) -> None:
         LOGGER.info("Successfully logged in as: %s", self.bot_id)

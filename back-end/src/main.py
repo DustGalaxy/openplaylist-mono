@@ -11,7 +11,7 @@ from adapters._fastapi.order_routes import router as order_router
 from adapters._fastapi.playlist_routes import router as playlist_router
 from adapters._fastapi.settings_routes import router as settings_router
 from adapters._sio.init import sio
-from adapters._rabbit.event_broker import broker, declare
+from adapters._rabbit import broker, declare
 from adapters._redis.broker import get_broker
 from adapters._sio.routes import PlstUpdsNamespace, BasicNamespace
 from services.sio_service import room_manager

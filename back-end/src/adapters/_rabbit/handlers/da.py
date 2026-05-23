@@ -14,9 +14,9 @@ from adapters._rabbit.event_broker import (
 from dto.order import DANewOrder
 from _types import Platform
 from database import async_session_maker
-from repo import user_repository, linked_accounts_repository
+from dal.postgres_impl import user_repository, linked_accounts_repository
 from services.sio_service import sio_service
-from taskiq_broker import broker as taskiq_broker
+
 from utils import find, kick
 
 
@@ -26,6 +26,8 @@ async def order_new_from_da(
 ):
     await message.ack()
     event: DANewOrder = DANewOrder.model_validate_json(message.body)
+
+    from taskiq_broker import task_broker as taskiq_broker
     await kick("order.new", taskiq_broker, event, False, labels={"user_id": str(event.owner_id)})
 
 @broker.subscriber(bot_da_ack_connection, exchange=main_exchange)

@@ -1,5 +1,5 @@
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 from urllib import parse
 from uuid import UUID
 
@@ -13,6 +13,8 @@ from src.config import settings
 if TYPE_CHECKING:
     import sqlite3
 
+def find[T](list_to_search: list[T], condition_func: Callable[[T], bool]) -> T | None:
+    return next((item for item in list_to_search if condition_func(item)), None)
 
 async def get_user_id(twitch_id: str) -> str:
     async with asqlite.create_pool("users.db") as udb:

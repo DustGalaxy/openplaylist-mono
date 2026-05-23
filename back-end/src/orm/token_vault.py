@@ -12,7 +12,7 @@ class TokenVault(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "token_vault"
 
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
-    linked_account_id: Mapped[UUID] = mapped_column(ForeignKey("linked_accounts.id"), nullable=False)
+    linked_account_id: Mapped[UUID] = mapped_column(ForeignKey("linked_accounts.id", ondelete="CASCADE"), nullable=False)
 
     platform: Mapped[Platform] = mapped_column("platform", nullable=False)
     platform_user_id: Mapped[str] = mapped_column("platform_user_id", nullable=False)

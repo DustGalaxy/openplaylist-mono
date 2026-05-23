@@ -3,7 +3,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 from settings import settings
-from taskiq_broker import broker as taskiq_broker
+from taskiq_broker import task_broker as taskiq_broker
 
 
 @taskiq_broker.task(task_name="send.email")

@@ -2,7 +2,7 @@ from typing import Union
 
 from dto.order import WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder
 from services.order_service import order_service
-from taskiq_broker import broker as taskiq_broker
+from taskiq_broker import task_broker as taskiq_broker
 from utils import kick, conditional_trace
 
 
