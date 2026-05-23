@@ -5,7 +5,7 @@ import type { IAuthLoginStrategy } from '../authStrategyManager'
  * Implements both integration and login flows
  */
 export class DaAuthStrategy implements IAuthLoginStrategy {
-  private readonly platformName = 'da'
+  private readonly platformName = 'donationalerts'
 
   getIntegrationEndpoint(): string {
     return '/user/integration'

@@ -1,4 +1,12 @@
-import { Twitch, Discord, Youtube, XFormerlyTwitter, Github, Spotify } from '@thesvg/react'
+import {
+  Twitch,
+  Discord,
+  Youtube,
+  XFormerlyTwitter,
+  Github,
+  Spotify,
+} from '@thesvg/react'
+import DonationAlerts from '@/components/icons/icon-da'
 
 const socials = {
   twitch: {
@@ -12,6 +20,10 @@ const socials = {
   youtube: {
     name: 'YouTube',
     icon: <Youtube />,
+  },
+  donationalerts: {
+    name: 'Donation Alerts',
+    icon: <DonationAlerts />,
   },
   X: {
     name: 'X',

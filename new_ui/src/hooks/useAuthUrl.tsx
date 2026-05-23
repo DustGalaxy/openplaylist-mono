@@ -131,7 +131,7 @@ export const useDaLoginUrl = () => {
   const handleOAuthRedirect = useOAuthUrl()
 
   const handleDaLogin = (isIntegration: boolean = false) => {
-    handleOAuthRedirect('da', isIntegration)
+    handleOAuthRedirect('donationalerts', isIntegration)
   }
 
   return handleDaLogin

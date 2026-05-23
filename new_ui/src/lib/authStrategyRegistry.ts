@@ -25,8 +25,8 @@ export function registerAuthStrategies(): void {
   authStrategyManager.registerLoginStrategy('twitch', twitchStrategy)
 
   // Register DA strategy
-  authStrategyManager.registerIntegrationStrategy('da', daStrategy)
-  authStrategyManager.registerLoginStrategy('da', daStrategy)
+  authStrategyManager.registerIntegrationStrategy('donationalerts', daStrategy)
+  authStrategyManager.registerLoginStrategy('donationalerts', daStrategy)
 
   console.log(
     'Auth strategies registered:',

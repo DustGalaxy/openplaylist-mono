@@ -32,7 +32,7 @@ export function getOAuthPlatformConfig(
         redirectUri,
       }
 
-    case 'da':
+    case 'donationalerts':
       return {
         platformName: 'Donation Alerts',
         authorizationUrl: 'https://www.donationalerts.com/oauth/authorize',
@@ -87,7 +87,7 @@ export function buildOAuthUrl(
  * Get all supported OAuth platforms
  */
 export function getSupportedOAuthPlatforms(): string[] {
-  return ['twitch', 'da']
+  return ['twitch', 'donationalerts']
   // Update this list when adding new platforms
 }
 
