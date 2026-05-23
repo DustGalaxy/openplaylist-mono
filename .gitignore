@@ -21,3 +21,4 @@ __pycache__*
 *.__pycache__
 .history/
 letsencrypt/acme.json
+back-end/src/src.zip

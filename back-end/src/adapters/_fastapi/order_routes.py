@@ -3,7 +3,7 @@ from fastapi import APIRouter, status
 from dto.order import WebNewOrder
 
 from utils import kick
-from taskiq_broker import broker as taskiq_broker
+from taskiq_broker import task_broker as taskiq_broker
 from .dependencies import CURR_USER
 
 router = APIRouter(prefix="/order")

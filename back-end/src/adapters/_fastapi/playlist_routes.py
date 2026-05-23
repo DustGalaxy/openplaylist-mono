@@ -15,7 +15,7 @@ from models.settings import SettingsSchema
 
 from utils import kick, find
 from _types import DeleteStatus
-from taskiq_broker import broker as task_broker
+from taskiq_broker import task_broker as task_broker
 from .dependencies import CURR_USER, DB_SESSION, PLST_SERVICE, SETTINGS_SERVICE as SE
 
 router = APIRouter(prefix="/playlist")

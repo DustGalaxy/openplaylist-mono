@@ -16,13 +16,13 @@ from adapters._rabbit.event_broker import (
 from dto.order import TTVNewOrder
 from adapters._rabbit.dto import Tokens, TwitchTokenRefreshed
 from services.sio_service import sio_service
-from services.auth.auth_service import auth_service
+
 from services.tokens.token_service import token_service
 from dal.postgres_impl import token_vault_repository
 from _types import Platform
 from database import async_session_maker
 from utils import kick
-from taskiq_broker import broker as taskiq_broker
+
 
 
 @broker.subscriber(bot_twitch_order_new, exchange=main_exchange)
@@ -31,6 +31,9 @@ async def order_new_from_twitch(
 ):
     await message.ack()
     event: TTVNewOrder = TTVNewOrder.model_validate_json(message.body)
+
+    from taskiq_broker import task_broker as taskiq_broker
+
     await kick("order.new", taskiq_broker, event, False, labels={"user_id": str(event.owner_id)})
 
 
@@ -48,7 +51,10 @@ async def get_all_twitch_users(
     message: RabbitMessage = Context(),
 ):
     await message.ack()
+    print("get_all_twitch_users")
     async with async_session_maker() as session:
+        from services.auth.auth_service import auth_service
+
         tokens = await auth_service.get_all_tokens(session, Platform.TWITCH)
         return [
             Tokens(
@@ -89,4 +95,6 @@ async def user_token_died(
     await message.ack()
     event: dict = json.loads(message.body)
     async with async_session_maker() as session:
+        from services.auth.auth_service import auth_service
+        
         await auth_service.bot_was_disconnected(session, event, Platform.TWITCH)

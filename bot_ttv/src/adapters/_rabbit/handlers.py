@@ -44,11 +44,13 @@ async def connect_to_twitch(message: RabbitMessage = Context()):
     event: Tokens = Tokens.model_validate_json(message.body)
     try:
         await bot.add_token(event.access_token, event.refresh_token, event.platform_user_id)
-        await bot.subscribe_websocket(
-            eventsub.ChatMessageSubscription(
-                broadcaster_user_id=event.platform_user_id,
-                user_id=bot.bot_id,
-            )
+        await bot.multi_subscribe(
+            [
+                eventsub.ChatMessageSubscription(
+                    broadcaster_user_id=event.platform_user_id,
+                    user_id=bot.bot_id,
+                ),
+            ]
         )
 
         LOGGER.info("Complete 1 step. Now adding tokens...")
@@ -66,8 +68,6 @@ async def disconnect_from_twitch(message: RabbitMessage = Context()) -> None:
     if bot is None:
         return
     event: Tokens = Tokens.model_validate_json(message.body)
-
-
 
     await bot.remove_token(event.platform_user_id)
 

@@ -41,6 +41,7 @@ playlist_settings_request = RabbitQueue("playlist.settings.request", durable=Tru
 
 
 async def declare():
+    print("Declaring exchanges and queues...")
     await broker.declare_exchange(main_exchange)
     await broker.declare_exchange(topic_exchange)
     await broker.declare_queue(auth_user_da_all_request)
