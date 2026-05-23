@@ -7,6 +7,7 @@ import {
   XFormerlyTwitter,
   Youtube,
 } from '@thesvg/react'
+import DonationAlerts from '@/components/icons/icon-da'
 import type {
   ClientPlaylist,
   Platform,
@@ -65,8 +66,8 @@ const TabBasic = ({
       twitter: <XFormerlyTwitter className={iconStyles} />,
       github: <Github className={iconStyles} />,
       spotify: <Spotify className={iconStyles} />,
-      donationalerts: <Spotify className={iconStyles} />,
-      da: <Spotify className={iconStyles} />,
+      donationalerts: <DonationAlerts className={iconStyles} />,
+      da: <DonationAlerts className={iconStyles} />,
     }
     return platformIcons[platform.toLowerCase()] || null
   }
@@ -263,7 +264,7 @@ const TabBasic = ({
           </div>
         </DialogDescription>
 
-        <div className=" rounded-(--rounded-std) w-full bg-level-2 mt-3">
+        <div className=" rounded-(--rounded-std) w-full mt-3">
           {isLoadingIntegrations ? (
             <div className="text-center py-4 text-sm text-gray-500">
               Loading integrations...
@@ -278,7 +279,7 @@ const TabBasic = ({
               {integrations.map((integration) => (
                 <div
                   key={`${integration.platform}-${integration.platform_user_id}`}
-                  className="flex items-center gap-3 p-3 rounded bg-level-2 transition-colors cursor-pointer"
+                  className="flex items-center gap-3 px-3 py-2 rounded bg-level-2 transition-colors cursor-pointer"
                   onClick={() =>
                     handleSourceToggle(
                       integration.platform,

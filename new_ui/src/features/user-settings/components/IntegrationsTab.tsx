@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Integration } from '@/types/user'
-import {
-  connectBot,
-  deleteIntegration,
-} from '@/api/api-user'
+import { connectBot, deleteIntegration } from '@/api/api-user'
 import { getGlobalSocket } from '@/api/io-sockets'
 import DonationAlerts from '@/components/icons/icon-da'
 import Twitch from '@/components/icons/icon-twtich'
@@ -29,9 +26,8 @@ export function IntegrationsTab({
   initialIntegrations,
   platformConfigs,
 }: IntegrationsTabProps) {
-  const [integrations, setIntegrations] = useState<Array<Integration>>(
-    initialIntegrations,
-  )
+  const [integrations, setIntegrations] =
+    useState<Array<Integration>>(initialIntegrations)
   const [loading, setLoading] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
@@ -174,7 +170,7 @@ export function IntegrationsTab({
               key={platform}
               className="flex flex-col items-center gap-4 p-6 rounded-xl border-level-3 border border-level-4 hover:border-accent-3 transition-all hover:shadow-md"
             >
-              <div className="w-[56px] h-[56px] flex items-center justify-center bg-level-1 rounded-lg">
+              <div className="w-[56px] h-[56px] flex items-center justify-center rounded-lg">
                 {config.icon}
               </div>
               <div className="text-center">

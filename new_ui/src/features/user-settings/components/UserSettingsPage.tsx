@@ -55,7 +55,7 @@ export function UserSettingsPage({
       ),
       loginHandler: handleTwitchLogin,
     },
-    da: {
+    donationalerts: {
       name: 'Donation Alerts',
       icon: <DonationAlerts width={45} height={45} />,
       loginHandler: handleDaLogin,

@@ -36,7 +36,7 @@ export default function OrderCard({
     },
     {
       icon: <Copy />,
-      on_click: async () =>{
+      on_click: async () => {
         await navigator.clipboard.writeText(
           'https://www.youtube.com/watch?v=' + track.yt_video_id,
         )

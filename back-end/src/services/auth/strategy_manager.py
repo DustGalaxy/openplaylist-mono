@@ -42,4 +42,4 @@ class AuthStrategyManager:
 
 manager = AuthStrategyManager()
 manager.add_strategy("twitch", AuthTwitchService(bot_twitch_connect_request))
-manager.add_strategy("da", AuthDAService(bot_da_connect_request))
+manager.add_strategy("donationalerts", AuthDAService(bot_da_connect_request))
