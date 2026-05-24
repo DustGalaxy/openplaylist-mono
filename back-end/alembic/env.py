@@ -2,12 +2,13 @@ from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+
 from src.database import Base
 from src.orm.auth_user import User  # noqa: F401
 from src.orm.linked_accounts import LinkedAccounts  # noqa: F401
-from src.orm.order import Order  # noqa: F401
-from src.orm.playlist import Playlist  # noqa: F401
-from src.orm.settings import Settings  # noqa: F401
+from src.orm.token_vault import TokenVault  # noqa: F401
+from src.orm.playlist import Playlist, Order, OrderPlaylistStatus  # noqa: F401
+from src.orm.settings import Settings, BlockList, ContentSettings, DonationRules, ChatRules # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

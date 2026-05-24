@@ -9,7 +9,7 @@ class DANewOrder(BaseModel):
     request_id: UUID
     owner_platform_id: str
     owner_id: UUID
-    requester_id: int
+    requester_id: str
     requester_nickname: str
     donation_currency_amount: float = 0.0
     yt_video_url: str
@@ -21,7 +21,7 @@ class TTVNewOrder(BaseModel):
     request_id: UUID
     owner_platform_id: str
     owner_id: UUID
-    requester_id: int
+    requester_id: str
     requester_nickname: str
     yt_video_url: str
     priority: str
@@ -31,6 +31,8 @@ class TTVNewOrder(BaseModel):
 class WebNewOrder(BaseModel):
     request_id: UUID
     owner_id: UUID
+    owner_platform_id: str
+    requester_id: str
     requester_nickname: str
     playlist_id: str
     yt_video_url: str
@@ -42,6 +44,7 @@ class YTNewOrder(BaseModel):
     request_id: UUID
     owner_platform_id: str
     owner_id: UUID
+    requester_id: str
     requester_nickname: str
     yt_video_url: str
     priority: str
@@ -51,6 +54,8 @@ class YTNewOrder(BaseModel):
 class OrderNew(BaseModel):
     request_id: UUID
     owner_id: UUID
+    owner_platform_id: str
+    requester_id: str
     requester_nickname: str
     donation_currency_amount: float = 0.0
     yt_video_id: str

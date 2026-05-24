@@ -81,8 +81,8 @@ class ContentSettings(Base, UUIDMixin, TimestampMixin):
 
 
 class BlockTrigger(enum.Enum):
-    USER_ID = "user_id"
-    USER_NAME = "user_name"
+    USER_ID = "USER_ID"
+    USER_NAME = "USER_NAME"
 
 
 class BlockList(Base, UUIDMixin, TimestampMixin):

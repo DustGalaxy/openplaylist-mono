@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import ForeignKey, func
+from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 
 from _types import Platform
@@ -14,7 +15,7 @@ class TokenVault(Base, UUIDMixin, TimestampMixin):
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
     linked_account_id: Mapped[UUID] = mapped_column(ForeignKey("linked_accounts.id", ondelete="CASCADE"), nullable=False)
 
-    platform: Mapped[Platform] = mapped_column("platform", nullable=False)
+    platform: Mapped[Platform] = mapped_column(ENUM(Platform), nullable=False)
     platform_user_id: Mapped[str] = mapped_column("platform_user_id", nullable=False)
 
     access_token: Mapped[str] = mapped_column("access_token", nullable=False)

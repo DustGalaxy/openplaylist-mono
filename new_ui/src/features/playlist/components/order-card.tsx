@@ -1,3 +1,6 @@
+import { toast } from 'sonner'
+import WarningModal from './warningModal'
+import type { ClientPlaylist, Track } from '@/types/playlist'
 import DateChip from '@/components/ui/date-chip'
 import Btn from '@/components/ui/my-btn'
 
@@ -10,11 +13,9 @@ import Trash from '@/components/icons/icon-trash'
 
 import Person from '@/components/icons/icon-person'
 import Save from '@/components/icons/icon-save'
-import type { ClientPlaylist, Track } from '@/types/playlist'
 import { useMusicStore } from '@/stores/musicStore'
 import { formatTime } from '@/lib/utils'
 import { useSavedStore } from '@/stores/savedStore'
-import { toast } from 'sonner'
 
 export default function OrderCard({
   track,
@@ -162,11 +163,11 @@ export default function OrderCard({
                     onClick={btn.on_click}
                   />
                 ))}
-                {/* <WarningModal
+                <WarningModal
                   playlist={playlist}
                   yt_video_id={track.yt_video_id}
                   requester_nickname={track.requester_nickname}
-                /> */}
+                />
               </div>
               <div className="flex gap-2">
                 <DateChip date={track.created_at} />

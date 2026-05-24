@@ -174,6 +174,12 @@ class ValidationEngine:
                         for block in settings.block_list
                         if block.trigger_type == "user_name" and new_track.source == block.platform
                     ]
+                    or new_track.requester_id
+                    in [
+                        block.trigger_value
+                        for block in settings.block_list
+                        if block.trigger_type == "user_id" and new_track.source == block.platform
+                    ]
                 ),
                 "Blacklisted user",
             ),

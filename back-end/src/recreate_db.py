@@ -4,7 +4,7 @@ import asyncio
 from orm.auth_user import User
 from orm.linked_accounts import LinkedAccounts
 from orm.playlist import Playlist, OrderPlaylistStatus, Order
-from orm.settings import Settings
+from orm.settings import Settings, BlockList, ContentSettings, DonationRules, ChatRules
 from orm.token_vault import TokenVault
 
 
