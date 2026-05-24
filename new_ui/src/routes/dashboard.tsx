@@ -27,7 +27,7 @@ export const Route = createFileRoute('/dashboard')({
   loader: ({ context }) => {
     const user = useAuthStore.getState().user
     if (!user) {
-      return redirect({ to: '/' })
+      return redirect({ to: '/login' })
     }
 
     //   const queryClient = context.queryClient
@@ -53,6 +53,11 @@ export const Route = createFileRoute('/dashboard')({
 })
 
 function RouteComponent() {
+  const user = useAuthStore.getState().user
+  if (!user) {
+    return redirect({ to: '/login' })
+  }
+
   usePlstUpdates('connect', () => {
     console.log('connect')
   })
