@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from _types import Platform
@@ -12,7 +12,7 @@ class LinkedAccounts(Base, UUIDMixin, TimestampMixin):
 
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
 
-    platform: Mapped[Platform] = mapped_column("platform", nullable=False)
+    platform: Mapped[Platform] = mapped_column(Enum(Platform), nullable=False)
     platform_user_email: Mapped[str] = mapped_column("platform_user_email", nullable=False)
     platform_user_id: Mapped[str] = mapped_column("platform_user_id", nullable=False)
     platform_username: Mapped[str] = mapped_column("platform_username", nullable=False)

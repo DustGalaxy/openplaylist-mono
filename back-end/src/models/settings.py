@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Literal, Optional
 from uuid import UUID
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
 from _types import Platform, DonationPlatform, ChatPlatform, _All_Platforms, DB_DonationPlatform
 
@@ -17,8 +17,8 @@ class SortSettings(BaseModel):
 
 
 class BlockTrigger(str, Enum):
-    USER_ID = "user_id"
-    USER_NAME = "user_name"
+    USER_ID = "USER_ID"
+    USER_NAME = "USER_NAME"
 
 
 # --- Shared Base ---

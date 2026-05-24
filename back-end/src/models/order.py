@@ -94,6 +94,7 @@ class OrderCreate(BaseModel):
     owner_platform_id: str
     from_owner: bool
 
+    requester_id: str | None = None
     requester_nickname: str
     priority: str
 

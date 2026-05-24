@@ -18,6 +18,13 @@ export enum ChatPlatform {
   YouTube = 'youtube',
 }
 
+export enum RequestPlatform {
+  Web = 'web',
+  Twitch = 'twitch',
+  YouTube = 'youtube',
+  DonationAlerts = 'donationalerts',
+}
+
 export type Role = {
   key: string
   name: string

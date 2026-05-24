@@ -186,3 +186,27 @@ export const getPublicPlaylists = async (query: string) => {
   if (!response) return null
   return response.data
 }
+
+export const blockUser = async (
+  playlist_id: string,
+  settings_id: string,
+  trigger_type: string,
+  trigger_value: string,
+  platform: string,
+) => {
+  const config = getConfig()
+  const response = await apiClient(
+    config.AUTH_API_URL + `/settings/${playlist_id}/blocklist`,
+    {
+      method: 'POST',
+      withCredentials: true,
+      data: {
+        trigger_type: trigger_type,
+        trigger_value: trigger_value,
+        settings_id,
+        platform,
+      },
+    },
+  )
+  return response.data
+}
