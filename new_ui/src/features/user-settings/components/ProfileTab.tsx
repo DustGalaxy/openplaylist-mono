@@ -5,6 +5,12 @@ import { SocialLinkHint } from '@/lib/constants/social_names'
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  feedbackErrorClass,
+  feedbackSuccessClass,
+  panelClass,
+  sectionTitleClass,
+} from '@/features/landing/styles'
 
 interface ProfileTabProps {
   user: UserProfile | null
@@ -247,13 +253,12 @@ export function ProfileTab({ user }: ProfileTabProps) {
   return (
     <div className="flex flex-col gap-6">
       {/* Profile Overview Card */}
-      <div className="bg-level-2 rounded-2xl p-8 shadow-md border border-level-3">
-        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-          <div className="w-1 h-6 bg-accent-1 rounded"></div>
+      <div className={`p-4 sm:p-6 ${panelClass}`}>
+        <h3 className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}>
           Profile Overview
         </h3>
 
-        <div className="flex items-start gap-6">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           {/* Avatar */}
           <div className="rounded-full w-[100px] h-[100px] bg-gradient-to-br from-accent-1 to-accent-2 p-1 flex-shrink-0 shadow-lg">
             <div className="w-full h-full rounded-full bg-level-2 overflow-hidden">
@@ -268,7 +273,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
           {/* Profile Info */}
           <div className="flex-1">
             <h2 className="text-2xl font-bold mb-2">{user?.username || ''}</h2>
-            <p className="text-level-4 mb-4">
+            <p className="text-text-secondary mb-4">
               {user?.email
                 ? user.email.length > 40
                   ? `${user.email.substring(0, 37)}...`
@@ -300,7 +305,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
                       disabled={
                         uiState.socialLoading[`delete-${platform}`] || false
                       }
-                      className="ml-1 text-level-4 hover:text-red-400 transition-colors disabled:opacity-50"
+                      className="ml-1 text-text-placeholder hover:text-danger transition-colors disabled:opacity-50"
                       title={`Remove ${platform}`}
                       aria-label={`Delete ${platform} social link`}
                     >
@@ -309,7 +314,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-level-4 italic">
+                <p className="text-sm text-text-placeholder italic">
                   No social links added yet
                 </p>
               )}
@@ -319,9 +324,8 @@ export function ProfileTab({ user }: ProfileTabProps) {
       </div>
 
       {/* Social Links Management Card */}
-      <div className="bg-level-2 rounded-2xl p-8 shadow-md border border-level-3">
-        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-          <div className="w-1 h-6 bg-accent-2 rounded"></div>
+      <div className={`p-4 sm:p-6 ${panelClass}`}>
+        <h3 className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}>
           Add Social Links
         </h3>
 
@@ -391,8 +395,8 @@ export function ProfileTab({ user }: ProfileTabProps) {
             <div
               className={`rounded-lg border px-4 py-3 text-sm ${
                 uiState.socialFeedback.add.type === 'success'
-                  ? 'border-green-600/50 bg-green-600/10 text-green-400'
-                  : 'border-red-500/50 bg-red-500/10 text-red-300'
+                  ? feedbackSuccessClass
+                  : feedbackErrorClass
               }`}
               role="alert"
             >
@@ -405,7 +409,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
       {/* Delete Confirmation Dialog */}
       {uiState.deleteConfirmation && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-level-2 rounded-2xl p-6 shadow-lg border border-level-3 max-w-sm w-full">
+          <div className={`p-4 sm:p-6 max-w-sm w-full ${panelClass}`}>
             <h3 className="text-lg font-bold mb-2">Confirm Deletion</h3>
             <p className="text-text-secondary mb-6">
               Are you sure you want to delete{' '}

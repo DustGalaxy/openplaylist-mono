@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react'
 import type { Integration } from '@/types/user'
 import { connectBot, deleteIntegration } from '@/api/api-user'
 import { getGlobalSocket } from '@/api/io-sockets'
-import DonationAlerts from '@/components/icons/icon-da'
-import Twitch from '@/components/icons/icon-twtich'
 import Btn from '@/components/ui/my-btn'
+import {
+  innerPanelClass,
+  panelClass,
+  sectionTitleClass,
+  statusOpenClass,
+} from '@/features/landing/styles'
 
 interface IntegrationsTabProps {
   initialIntegrations: Array<Integration>
@@ -114,9 +118,8 @@ export function IntegrationsTab({
   return (
     <div className="flex flex-col gap-6">
       {/* Connected Accounts Card */}
-      <div className="bg-level-2 rounded-2xl p-8 shadow-md border border-level-3">
-        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-          <div className="w-1 h-6 bg-accent-1 rounded"></div>
+      <div className={`p-4 sm:p-6 ${panelClass}`}>
+        <h3 className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}>
           Connected Accounts
         </h3>
 
@@ -147,7 +150,7 @@ export function IntegrationsTab({
               />
             ))
           ) : (
-            <div className="text-center py-12 text-level-4">
+            <div className="text-center py-12 text-text-secondary">
               <p className="mb-4">No connected accounts yet</p>
               <p className="text-sm">
                 Connect your streaming and donation platforms to manage your
@@ -159,23 +162,22 @@ export function IntegrationsTab({
       </div>
 
       {/* Available Platforms Card */}
-      <div className="bg-level-2 rounded-2xl p-8 shadow-md border border-level-3">
-        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-          <div className="w-1 h-6 bg-accent-2 rounded"></div>
+      <div className={`p-4 sm:p-6 ${panelClass}`}>
+        <h3 className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}>
           Add Accounts
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Object.entries(platformConfigs).map(([platform, config]) => (
             <div
               key={platform}
-              className="flex flex-col items-center gap-4 p-6 rounded-xl border-level-3 border border-level-4 hover:border-accent-3 transition-all hover:shadow-md"
+              className={`flex flex-col items-center gap-4 p-4 sm:p-6 ${innerPanelClass} hover:border-level-3/30 transition-all`}
             >
               <div className="w-[56px] h-[56px] flex items-center justify-center rounded-lg">
                 {config.icon}
               </div>
               <div className="text-center">
                 <p className="font-semibold">{config.name}</p>
-                <p className="text-xs text-level-4 mt-1">
+                <p className="text-xs text-text-placeholder mt-1">
                   Connect your account to get started
                 </p>
               </div>
@@ -211,23 +213,23 @@ function IntegrationCard({
   loading,
 }: IntegrationCardProps) {
   return (
-    <div className="flex items-center justify-between gap-4 p-5 rounded-xl border-level-3 border border-level-4 hover:border-accent-1 hover:shadow-md transition-all">
-      <div className="flex items-center gap-4 flex-1">
+    <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 ${innerPanelClass} hover:border-level-3/30 transition-all`}>
+      <div className="flex items-center gap-4 flex-1 min-w-0">
         <div className="w-[56px] h-[56px] flex items-center justify-center bg-level-2 rounded-lg flex-shrink-0">
           {config.icon}
         </div>
 
         <div className="flex flex-col gap-1">
           <div className="text-lg font-semibold">{config.name}</div>
-          <div className="text-sm text-level-4">
+          <div className="text-sm text-text-secondary">
             @{integration.platform_username}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 flex-shrink-0">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
         {integration.bot_connection ? (
-          <div className="px-4 py-2 rounded-lg bg-green-600/20 text-green-400 text-sm font-semibold border border-green-600/50">
+          <div className={`px-4 py-2 rounded-(--rounded-std) text-sm font-semibold border ${statusOpenClass}`}>
             ✓ Bot Connected
           </div>
         ) : (
@@ -245,7 +247,7 @@ function IntegrationCard({
                 `${integration.platform}-${integration.platform_user_id}-bot`
               ]
             }
-            className="px-4 py-2 text-sm"
+            className="px-4 py-2 text-sm w-full sm:w-auto"
           />
         )}
 
@@ -263,7 +265,7 @@ function IntegrationCard({
               `${integration.platform}-${integration.platform_user_id}-delete`
             ]
           }
-          className="px-4 py-2 text-sm"
+          className="px-4 py-2 text-sm w-full sm:w-auto"
         />
       </div>
     </div>

@@ -34,21 +34,25 @@ export default function SettingsModal({
 }: {
   playlist: ClientPlaylist
 }) {
-  const [settings, setSettings] = React.useState<PlaylistSettings>(
-    playlist.settings,
-  )
-  const [plst, setPlst] = React.useState<ClientPlaylist>(playlist)
+  const [settings, setSettings] = React.useState<PlaylistSettings>()
+  const [plst, setPlst] = React.useState<ClientPlaylist>()
 
   const [countToDelete, setCountToDelete] = React.useState(3)
   const [deleteTimeout, setDeleteTimeout] = React.useState(false)
 
   const { requestPlSettings, requestPlaylistPatch } = useMusicStore()
 
+  React.useEffect(() => {
+    setSettings(playlist.settings)
+    setPlst(playlist)
+  }, [playlist])
+
+
   const canPatchSettings = React.useRef(false)
   useDebouncedEffect(
     settings,
     async () => {
-      if (!canPatchSettings.current) return
+      if (!canPatchSettings.current || !settings) return
       canPatchSettings.current = false
       try {
         await requestPlSettings(playlist.id, settings)
@@ -64,7 +68,7 @@ export default function SettingsModal({
   useDebouncedEffect(
     plst,
     async () => {
-      if (!canPatchPlaylist.current) return
+      if (!canPatchPlaylist.current || !plst) return
       canPatchPlaylist.current = false
       try {
         const obj: PlaylistPatch = {

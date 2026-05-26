@@ -19,6 +19,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { DialogDescription } from '@/components/ui/dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { getUserIntegrations } from '@/api/api-user'
+import PlaylistDetailsForm from './playlist-details-form'
 
 const TabBasic = ({
   playlist,
@@ -29,7 +30,9 @@ const TabBasic = ({
   canPatchSettings,
 }: {
   playlist: ClientPlaylist
-  setPlst: React.Dispatch<React.SetStateAction<ClientPlaylist>>
+  setPlst: React.Dispatch<
+    React.SetStateAction<ClientPlaylist | undefined>
+  >
   canPatchPlaylist: React.RefObject<boolean>
   setSettings: React.Dispatch<React.SetStateAction<PlaylistSettings>>
   canPatchSettings: React.RefObject<boolean>
@@ -83,14 +86,6 @@ const TabBasic = ({
   }
 
   const isSourceSelected = (platform: string, platformUserId: string) => {
-    console.log(
-      'playlist sources:',
-      playlist.allow_sources,
-      '  checking for:',
-      platform,
-      platformUserId,
-    )
-
     return playlist.allow_sources.some(
       (source) =>
         source.platform === platform &&
@@ -127,6 +122,12 @@ const TabBasic = ({
   }
   return (
     <div>
+      <PlaylistDetailsForm
+        playlist={playlist}
+        setPlst={setPlst}
+        canPatchPlaylist={canPatchPlaylist}
+      />
+
       <div className="grid gap-4">
         <div className="grid grid-cols-[auto_1fr] gap-2">
           <Label className=" text-lg">Playlist mode</Label>
@@ -249,7 +250,7 @@ const TabBasic = ({
           </div>
         </RadioGroup>
       </div>
-      <div>
+      <div className="mb-4">
         <Label className=" text-lg">External content sources</Label>
         <DialogDescription>
           <div className="py-1">

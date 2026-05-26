@@ -1,10 +1,17 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { getUserIntegrations } from '@/api/api-user'
 import { useAuthStore } from '@/stores/authStore'
 import { useDaLoginUrl, useTwitchLoginUrl } from '@/hooks/useAuthUrl'
 import { UserSettingsPage } from '@/features/user-settings'
+import { settingsCopy } from '@/features/user-settings/copy'
 import Btn from '@/components/ui/my-btn'
-import type { Integration } from '@/types/user'
+import {
+  gradientTextClass,
+  pageInnerClass,
+  pageWrapClass,
+  panelClass,
+} from '@/features/landing/styles'
+import type { Integration, UserProfile } from '@/types/user'
 
 export const Route = createFileRoute('/settings')({
   component: RouteComponent,
@@ -19,22 +26,24 @@ export const Route = createFileRoute('/settings')({
 })
 
 function RouteComponent() {
+  const navigate = useNavigate()
   const { isAuthenticated, user, expired_at, setUser } = useAuthStore()
   const { integrations } = Route.useLoaderData()
 
   const handleTwitchLogin = useTwitchLoginUrl()
   const handleDaLogin = useDaLoginUrl()
 
-  const handleUserUpdate = (patch: any) => {
+  const handleUserUpdate = (patch: Partial<UserProfile>) => {
     if (user) {
+      const emailChanged =
+        patch.email !== undefined && patch.email !== user.email
       setUser(
         {
           ...user,
           ...patch,
-          email_confirmed:
-            patch.email && patch.email !== user.email
-              ? false
-              : (patch.email_confirmed ?? user.email_confirmed),
+          email_confirmed: emailChanged
+            ? false
+            : (patch.email_confirmed ?? user.email_confirmed),
         },
         expired_at,
       )
@@ -43,32 +52,41 @@ function RouteComponent() {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex w-full items-center justify-center min-h-screen bg-level-1 p-4">
-        <div className="flex flex-col max-w-[800px] w-full gap-6 text-text-main bg-level-2 rounded-2xl p-8 shadow-md border border-level-3">
-          <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-lg text-level-4">
-            You need to login first to manage your accounts
-          </p>
-          <Btn
-            text="Go to Login"
-            onClick={() => (window.location.href = '/login')}
-            className="px-6 py-3 text-lg"
-          />
+      <div className={pageWrapClass}>
+        <div className={pageInnerClass}>
+          <div
+            className={`flex flex-col gap-6 text-text-main p-6 sm:p-8 ${panelClass}`}
+          >
+            <header>
+              <p
+                className={`text-sm font-medium mb-2 ${gradientTextClass}`}
+              >
+                {settingsCopy.eyebrow}
+              </p>
+              <h1 className="text-2xl sm:text-3xl font-bold">
+                {settingsCopy.unauthTitle}
+              </h1>
+            </header>
+            <p className="text-text-secondary">{settingsCopy.unauthMessage}</p>
+            <Btn
+              text={settingsCopy.unauthCta}
+              onClick={() => navigate({ to: '/login' })}
+              className="px-6 h-12 text-base font-bold bg-level-2 text-text-main w-full sm:w-auto"
+            />
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <>
-      <UserSettingsPage
-        user={user}
-        expired_at={expired_at}
-        integrations={integrations}
-        onUserUpdate={handleUserUpdate}
-        useTwitchLoginUrl={() => handleTwitchLogin}
-        useDaLoginUrl={() => handleDaLogin}
-      />
-    </>
+    <UserSettingsPage
+      user={user}
+      expired_at={expired_at}
+      integrations={integrations}
+      onUserUpdate={handleUserUpdate}
+      useTwitchLoginUrl={() => handleTwitchLogin}
+      useDaLoginUrl={() => handleDaLogin}
+    />
   )
 }

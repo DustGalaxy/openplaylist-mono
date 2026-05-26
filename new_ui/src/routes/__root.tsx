@@ -1,6 +1,7 @@
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import Footer from '@/components/layout/Footer'
 import Header from '@/components/layout/Header'
 
 import { useCurrentUserQuery } from '@/hooks/useAuth.tsx'
@@ -41,24 +42,13 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
     <QueryClientProvider client={queryClient}>
       <AppProviders>
-        <div className="bg-level-1 min-w-[360px] min-h-screen">
+        <div className="bg-level-1 min-w-[360px] min-h-screen flex flex-col">
           <Toaster richColors />
-          <div className=" min-h-screen">
-            <Header />
-
+          <Header />
+          <main className="flex-1 w-full">
             <Outlet />
-          </div>
-
-          {/* <TanStackRouterDevtools />
-
-          <TanStackQueryLayout /> */}
-          {/* <div className="bg-level-1 min-w-[360px] flex flex-col items-center w-full mt-10 ">
-            <footer className="bg-level-2  w-[90vw] min-h-10 border-2 border-level-3 border-b-0 rounded-t-(--rounded-std)">
-              <p className="text-center text-text-main p-2">
-                Openplaylist Beta ver. 2026.1
-              </p>
-            </footer>
-          </div> */}
+          </main>
+          <Footer />
         </div>
       </AppProviders>
     </QueryClientProvider>

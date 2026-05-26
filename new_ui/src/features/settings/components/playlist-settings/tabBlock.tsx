@@ -1,4 +1,3 @@
-import React from 'react'
 import BlockList from './block-list'
 import type { ClientPlaylist } from '@/types/playlist'
 import { RequestPlatform } from '@/types/playlist'
@@ -15,8 +14,12 @@ import {
 } from '@/components/ui/select'
 import Btn from '@/components/ui/my-btn'
 import { toast } from 'sonner'
+import { useMusicStore } from '@/stores/musicStore'
+
+const YT_VIDEO_ID_REGEX = /^[a-zA-Z0-9_-]{11}$/
 
 const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
+  const { requestPlSettings, syncPlSettings } = useMusicStore()
   return (
     <div>
       <div>
@@ -36,12 +39,14 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
             className="flex items-center gap-2 mt-2 w-full"
             onSubmit={async (e) => {
               e.preventDefault()
-              const formData = new FormData(e.currentTarget)
+              const form = e.currentTarget
+              const formData = new FormData(form)
+
               const platform = formData.get('platform') as string
               const trigger_type = formData.get('trigger_type') as string
               const trigger_value = formData.get('trigger_value') as string
               if (trigger_value && platform) {
-                await blockUser(
+                const res = await blockUser(
                   playlist.id,
                   playlist.settings.id,
                   trigger_type,
@@ -49,7 +54,17 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
                   platform,
                 )
 
-                e.currentTarget.reset()
+                if (res) {
+                  toast.success('User blocked successfully!')
+                  const settings = playlist.settings
+                  settings.block_list.push(res)
+                  syncPlSettings(playlist.id, settings)
+
+                  // Reset the form
+                } else {
+                  toast.error('Failed to block user.')
+                }
+                form.reset()
               } else {
                 // Handle validation error (e.g., show a message to the user)
                 toast.error('Nickname/ID and platform are required.')
@@ -82,7 +97,7 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
                 <SelectValue placeholder="Select platform" />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(RequestPlatform).map(([key, val], i) => (
+                {Object.entries(RequestPlatform).map(([key, val]) => (
                   <SelectItem key={key} value={val}>
                     {key}
                   </SelectItem>
@@ -106,6 +121,51 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
         </div>
 
         <div className="flex flex-col gap-2 mt-2 w-full">
+          <Label className=" text-lg">Block track (YouTube ID)</Label>
+          <form
+            className="flex items-center gap-2 mt-2 w-full"
+            onSubmit={async (e) => {
+              e.preventDefault()
+              const form = e.currentTarget
+              const formData = new FormData(form)
+              const ytVideoId = (formData.get('yt_video_id') as string)?.trim()
+
+              if (!ytVideoId) {
+                toast.error('YouTube video ID is required.')
+                return
+              }
+
+              if (!YT_VIDEO_ID_REGEX.test(ytVideoId)) {
+                toast.error('YouTube video ID must be 11 characters.')
+                return
+              }
+
+              if (playlist.settings.track_black_list.includes(ytVideoId)) {
+                toast.error('Track is already blocked.')
+                return
+              }
+
+              await requestPlSettings(playlist.id, {
+                track_black_list: [...playlist.settings.track_black_list, ytVideoId],
+              })
+              toast.success('Track blocked successfully!')
+              form.reset()
+            }}
+          >
+            <Btn
+              text={<Add className="text-text-main" width={20} height={20} />}
+              className="cursor-pointer px-2 bg-level-2"
+              type="submit"
+            ></Btn>
+       
+            <input
+              type="text"
+              name="yt_video_id"
+              placeholder="Enter YouTube video ID (11 chars)"
+              className="w-full rounded-md border border-input bg-level-2 px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </form>
+
           {playlist.settings.track_black_list.length > 0 ? (
             <BlockList
               list={playlist.settings.track_black_list}

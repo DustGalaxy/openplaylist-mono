@@ -36,6 +36,8 @@ export type Role = {
 export type Order = {
   request_id: string
   owner_id: string
+  owner_platform_id: string
+  requester_id: string
   requester_nickname: string
   playlist_id: string
   yt_video_url: string

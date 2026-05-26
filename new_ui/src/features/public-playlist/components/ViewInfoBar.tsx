@@ -1,20 +1,33 @@
-import React, { use } from 'react'
+import React from 'react'
 import {
+  Calendar,
   Clock,
   Eye,
   List,
+  Music2,
   RefreshCcw,
   Settings,
   ThumbsUp,
   User,
 } from 'lucide-react'
+
 import ViewPlayNowCard from './view-track-card'
 import Priority from '@/components/icons/icon-priority'
 import AddBar from '@/features/playlist/components/addbar'
+import {
+  filterTabActiveClass,
+  filterTabBaseClass,
+  filterTabInactiveClass,
+  gradientTextClass,
+  innerPanelClass,
+  sectionTitleClass,
+  statusClosedClass,
+  statusOpenClass,
+} from '@/features/landing/styles'
 import type { ClientPlaylist } from '@/types/playlist'
 import { useAuthStore } from '@/stores/authStore'
 
-const InfoCard = ({
+function InfoCard({
   icon,
   label,
   value,
@@ -22,16 +35,43 @@ const InfoCard = ({
   icon: React.ReactNode
   label: string
   value: string | number
-}) => {
+}) {
   return (
-    <div className="bg-level-2 rounded-(--rounded-std) p-2 md:p-3 flex flex-col items-center gap-1 text-center">
-      <div className="text-gray-400 flex items-center gap-1">
-        {icon}
-        <div className="text-xs text-gray-400">{label}</div>
+    <div
+      className={`
+        ${innerPanelClass} p-3 sm:p-4 flex flex-col gap-2
+        transition-colors hover:border-level-3/30
+      `}
+    >
+      <div className="flex items-center gap-2 text-text-placeholder">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-level-2/80 text-level-3">
+          {icon}
+        </span>
+        <span className="text-[11px] uppercase tracking-wide leading-tight">
+          {label}
+        </span>
       </div>
-
-      <div className="text-sm font-semibold">{value}</div>
+      <p className="text-base font-semibold text-text-main pl-9 sm:pl-0 sm:text-center sm:-mt-1">
+        {value}
+      </p>
     </div>
+  )
+}
+
+function SectionBlock({
+  title,
+  children,
+  className = '',
+}: {
+  title: string
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <section className={className}>
+      <h3 className={sectionTitleClass}>{title}</h3>
+      {children}
+    </section>
   )
 }
 
@@ -39,58 +79,70 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
   const { isAuthenticated } = useAuthStore()
   const [selectedContentSettingIndex, setSelectedContentSettingIndex] =
     React.useState(0)
-  React.useEffect(() => {
-    console.log(playlist)
-  }, [])
+
+  const contentSettings =
+    playlist.settings.content_settings[selectedContentSettingIndex]
+
+  const updatedLabel = new Date(playlist.updated_at).toLocaleDateString(
+    'ru-RU',
+    { day: 'numeric', month: 'long', year: 'numeric' },
+  )
+
+  const requestsOpen = playlist.is_allow_external_requests
 
   return (
-    <div className="bg-level-1 rounded-(--rounded-std) shadow-lg flex flex-col gap-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div
-            className={`px-3 py-1 text-sm font-medium rounded-full ${
-              playlist.is_allow_external_requests
-                ? 'bg-green-600'
-                : 'bg-red-600'
-            }`}
+    <div className="flex flex-col gap-6 sm:gap-8">
+      {/* Meta row */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`
+              inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium
+              border transition-colors
+              ${requestsOpen ? statusOpenClass : statusClosedClass}
+            `}
           >
-            {playlist.is_allow_external_requests
-              ? 'Accept external requests'
-              : 'No external requests'}
-          </div>
-          <h2 className="text-xl font-semibold">{playlist.name}</h2>
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${requestsOpen ? 'bg-emerald-400' : 'bg-text-placeholder'}`}
+              aria-hidden
+            />
+            {requestsOpen
+              ? 'Заявки от зрителей открыты'
+              : 'Внешние заявки закрыты'}
+          </span>
+          <span
+            className={`inline-flex rounded-full px-3 py-1 text-xs font-medium border border-level-3/20 bg-level-1/50 text-text-secondary`}
+          >
+            {playlist.settings.mode === 'flow' ? 'Режим flow' : 'Режим static'}
+          </span>
         </div>
-        <span className="text-sm text-gray-400">
-          {new Date(playlist.updated_at).toLocaleDateString('en-UK', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-          })}
-        </span>
+        <time
+          dateTime={playlist.updated_at}
+          className="inline-flex items-center gap-1.5 text-sm text-text-placeholder shrink-0"
+        >
+          <Calendar className="h-3.5 w-3.5" />
+          {updatedLabel}
+        </time>
       </div>
 
       {/* Description */}
-      <p className="text-sm text-gray-300 line-clamp-1">
-        {playlist.description || 'No description provided.'}
+      <p className="text-sm sm:text-base text-text-secondary leading-relaxed border-l-2 border-level-3/40 pl-4">
+        {playlist.description || 'Описание не указано.'}
       </p>
 
       {/* Preferences */}
-      <div>
-        <h3 className="text-sm uppercase tracking-wide text-gray-400 mb-3">
-          Preferences
-        </h3>
-
+      <SectionBlock title="Настройки плейлиста">
         {playlist.settings.content_settings.length > 1 && (
-          <div className="flex gap-2 flex-wrap mb-3">
+          <div className="flex gap-2 flex-wrap mb-4">
             {playlist.settings.content_settings.map((setting, index) => (
               <button
-                key={index}
+                key={setting.platform}
+                type="button"
                 onClick={() => setSelectedContentSettingIndex(index)}
-                className={`px-3 py-1 text-sm rounded-(--rounded-std) transition-colors ${
+                className={`${filterTabBaseClass} ${
                   selectedContentSettingIndex === index
-                    ? 'bg-blue-600 text-text-main'
-                    : 'bg-level-2 text-gray-400 hover:bg-level-3'
+                    ? filterTabActiveClass
+                    : filterTabInactiveClass
                 }`}
               >
                 {setting.platform}
@@ -99,84 +151,83 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
           </div>
         )}
 
-        <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-4 mb-3">
-          {(() => {
-            const contentSettings =
-              playlist.settings.content_settings[selectedContentSettingIndex]
-            return (
-              <>
-                <InfoCard
-                  icon={<Settings size={16} />}
-                  label="Mode"
-                  value={playlist.settings.mode}
-                />
-                <InfoCard
-                  icon={<Eye size={16} />}
-                  label="Min views"
-                  value={contentSettings.min_views}
-                />
-                <InfoCard
-                  icon={<ThumbsUp size={16} />}
-                  label="Min likes"
-                  value={contentSettings.min_likes}
-                />
-                <InfoCard
-                  icon={<Clock size={16} />}
-                  label="Max duration"
-                  value={`${contentSettings.max_duration} sec`}
-                />
-                <InfoCard
-                  icon={<RefreshCcw size={16} />}
-                  label="Track CD"
-                  value={`${contentSettings.track_cooldown}m`}
-                />
-                <InfoCard
-                  icon={<User size={16} />}
-                  label="User CD"
-                  value={`${contentSettings.user_cooldown}m`}
-                />
-                <InfoCard
-                  icon={<List size={16} />}
-                  label="Max size"
-                  value={playlist.settings.max_playlist_size || '∞'}
-                />
-                <InfoCard
-                  icon={<Priority width={16} height={16} />}
-                  label="Priority mode"
-                  value={playlist.settings.cost_mode}
-                />
-              </>
-            )
-          })()}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+          <InfoCard
+            icon={<Settings size={14} />}
+            label="Режим"
+            value={playlist.settings.mode}
+          />
+          <InfoCard
+            icon={<Eye size={14} />}
+            label="Мин. просмотры"
+            value={contentSettings.min_views}
+          />
+          <InfoCard
+            icon={<ThumbsUp size={14} />}
+            label="Мин. лайки"
+            value={contentSettings.min_likes}
+          />
+          <InfoCard
+            icon={<Clock size={14} />}
+            label="Макс. длительность"
+            value={`${contentSettings.max_duration} с`}
+          />
+          <InfoCard
+            icon={<RefreshCcw size={14} />}
+            label="Кулдаун трека"
+            value={`${contentSettings.track_cooldown} мин`}
+          />
+          <InfoCard
+            icon={<User size={14} />}
+            label="Кулдаун пользователя"
+            value={`${contentSettings.user_cooldown} мин`}
+          />
+          <InfoCard
+            icon={<List size={14} />}
+            label="Макс. размер"
+            value={playlist.settings.max_playlist_size || '∞'}
+          />
+          <InfoCard
+            icon={<Priority width={14} height={14} />}
+            label="Приоритет"
+            value={playlist.settings.cost_mode}
+          />
         </div>
+      </SectionBlock>
 
-        {isAuthenticated && (
-          <div className="mb-3">
-            <h3 className="text-sm uppercase tracking-wide text-gray-400 mb-3">
-              Add a track
-            </h3>
+      {isAuthenticated && (
+        <SectionBlock title="Добавить трек">
+          <div className={`p-4 ${innerPanelClass}`}>
             <AddBar playlistId={playlist.id} />
           </div>
-        )}
+        </SectionBlock>
+      )}
 
-        <div className="mb-3">
-          <h3 className="text-sm uppercase tracking-wide text-gray-400 mb-3">
-            Now playing
-          </h3>
-          {playlist.now_playing ? (
-            <ViewPlayNowCard
-              track={playlist.now_playing}
-              playlist={playlist}
-              now_playing={true}
-            />
-          ) : (
-            <div className="text-gray-400 text-sm uppercase tracking-wide">
-              No track is currently playing.
+      <SectionBlock title="Сейчас играет">
+        {playlist.now_playing ? (
+          <ViewPlayNowCard
+            track={playlist.now_playing}
+            playlist={playlist}
+            now_playing={true}
+          />
+        ) : (
+          <div
+            className={`flex flex-col  items-center justify-center gap-3 py-10 px-4 text-center ${innerPanelClass} border-dashed`}
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-level-2/80 text-text-placeholder">
+              <Music2 className="h-6 w-6" strokeWidth={1.5} />
             </div>
-          )}
-        </div>
-      </div>
+            <p className="text-sm text-text-secondary">
+              Сейчас ничего не воспроизводится
+            </p>
+            <p className={`text-xs font-medium ${gradientTextClass}`}>
+              Трек появится здесь, когда стример запустит воспроизведение
+            </p>
+          </div>
+        )}
+      </SectionBlock>
     </div>
   )
 }
+
 export default ViewInfoBar

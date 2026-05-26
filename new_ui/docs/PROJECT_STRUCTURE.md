@@ -18,6 +18,10 @@ The source tree now separates shared infrastructure from feature-owned UI:
 
 The route files stay in `src/routes` and import feature components through the `@/features/...` alias. Shared UI and icon imports use `@/components/...`, which avoids fragile relative paths when feature folders move again.
 
+## UI consistency
+
+See **[UI_GUIDE.md](./UI_GUIDE.md)** for colors, panels, typography, buttons, and page layout patterns used on the landing page, footer, and public `/view` route.
+
 ## Suggested Next Steps
 
 - Keep new route files inside `src/routes` so TanStack Router can generate route metadata.

@@ -18,6 +18,8 @@ class Order(Base, UUIDMixin, TimestampMixin):
     likes: Mapped[int]
 
     priority: Mapped[str]
+
+    requester_id: Mapped[str]
     requester_nickname: Mapped[str]
 
     request_id: Mapped[UUID] = mapped_column(unique=True)
