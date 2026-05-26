@@ -104,7 +104,7 @@ export default function ViewTrackCard({
         {/* main grid */}
 
         <div
-          className={`grid ${track.id === playlist.now_playing?.id && !now_playing && 'transition-all duration-300 ring-3 ring-level-3'} bg-level-2 rounded-(--rounded-std) grid-cols-[150px_1fr] gap-2 h-[100px]  `}
+          className={` grid ${track.id === playlist.now_playing?.id && !now_playing && 'transition-all duration-300 ring-3 ring-level-3'} bg-level-1/40 rounded-(--rounded-std) grid-cols-[150px_1fr] gap-2 h-[100px]  `}
         >
           <div className="h-[100px] w-full flex items-center justify-center">
             {/* img container */}

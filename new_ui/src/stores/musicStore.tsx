@@ -283,6 +283,8 @@ export const useMusicStore = create<StoreState>((set, get) => {
       const order: Order = {
         request_id: uuidv4(),
         owner_id: user.id,
+        owner_platform_id: user.id,
+        requester_id: user.id,
         requester_nickname: user.username,
         playlist_id: playlistId,
         yt_video_url: yt_video_url,
@@ -397,7 +399,13 @@ export const useMusicStore = create<StoreState>((set, get) => {
           p.id === plst.id
             ? {
                 ...p,
-                plst,
+                name: plst.name,
+                description: plst.description,
+                is_public: plst.is_public,
+                is_favorite: plst.is_favorite,
+                is_allow_external_requests: plst.is_allow_external_requests,
+                allow_sources: plst.allow_sources,
+                tags: plst.tags,
               }
             : p,
         ),

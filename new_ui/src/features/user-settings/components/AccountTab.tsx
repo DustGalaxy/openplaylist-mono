@@ -5,6 +5,12 @@ import { updateUserProfile, updateUserPassword } from '@/api/api-user'
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  feedbackErrorClass,
+  feedbackSuccessClass,
+  panelClass,
+  sectionTitleClass,
+} from '@/features/landing/styles'
 
 interface AccountTabProps {
   user: UserProfile | null
@@ -329,12 +335,11 @@ function SettingsSection({
   return (
     <form
       onSubmit={(event) => onSubmit(event, section)}
-      className="bg-level-2 rounded-2xl p-8 shadow-md border border-level-3"
+      className={`p-4 sm:p-6 ${panelClass}`}
     >
-      <div className="flex items-center gap-2 mb-6">
-        <div className={`w-1 h-8 rounded ${section.accentClassName}`}></div>
-        <h2 className="text-2xl font-bold">{section.title}</h2>
-      </div>
+      <h2 className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}>
+        {section.title}
+      </h2>
 
       <div className="flex flex-col gap-4">
         {section.fields.map((field) => (
@@ -363,8 +368,8 @@ function SettingsSection({
         <div
           className={`mt-5 rounded-lg border px-4 py-3 text-sm ${
             feedback.type === 'success'
-              ? 'border-green-600/50 bg-green-600/10 text-green-400'
-              : 'border-red-500/50 bg-red-500/10 text-red-300'
+              ? feedbackSuccessClass
+              : feedbackErrorClass
           }`}
         >
           {feedback.message}

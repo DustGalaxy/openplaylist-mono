@@ -32,7 +32,7 @@ async def get_playlist_settings(
 
 
 # --- PATCH ENDPOINTS ---
-
+    
 
 @router.patch("/{playlist_id}")
 async def patch_playlist_settings(

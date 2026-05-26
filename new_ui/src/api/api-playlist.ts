@@ -69,6 +69,17 @@ export const patchPlaylist = async (
   return response.data as ClientPlaylist
 }
 
+export const updatePlaylistDetails = async (
+  playlist_id: string,
+  name: string,
+  description?: string,
+) => {
+  return patchPlaylist(playlist_id, {
+    name,
+    description: description ?? '',
+  })
+}
+
 export const changePlaylistPriority = async (
   id: string,
   prioriry_mode: boolean,
@@ -209,4 +220,16 @@ export const blockUser = async (
     },
   )
   return response.data
+}
+
+export const unBlockUser = async (playlist_id: string, id: string) => {
+  const config = getConfig()
+  const response = await apiClient(
+    config.AUTH_API_URL + `/settings/${playlist_id}/blocklist/${id}`,
+    {
+      method: 'DELETE',
+      withCredentials: true,
+    },
+  )
+  return response.status === 204
 }

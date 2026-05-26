@@ -18,7 +18,7 @@ class SortSettings(BaseModel):
 
 class BlockTrigger(str, Enum):
     USER_ID = "USER_ID"
-    USER_NAME = "USER_NAME"
+    USER_NAME = "USER_NAME" 
 
 
 # --- Shared Base ---

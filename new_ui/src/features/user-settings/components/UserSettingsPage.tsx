@@ -2,6 +2,16 @@ import { useState } from 'react'
 import type { Integration, UserProfile } from '@/types/user'
 import DonationAlerts from '@/components/icons/icon-da'
 import Twitch from '@/components/icons/icon-twtich'
+import {
+  filterTabActiveClass,
+  filterTabBaseClass,
+  filterTabInactiveClass,
+  gradientTextClass,
+  pageInnerClass,
+  pageWrapClass,
+  panelClass,
+} from '@/features/landing/styles'
+import { settingsCopy } from '@/features/user-settings/copy'
 import { ProfileTab } from './ProfileTab'
 import { AccountTab } from './AccountTab'
 import { IntegrationsTab } from './IntegrationsTab'
@@ -24,9 +34,13 @@ interface Tab {
 }
 
 const TABS: Array<Tab> = [
-  { id: 'profile', label: 'Profile', icon: '👤' },
-  { id: 'account', label: 'Account', icon: '⚙️' },
-  { id: 'integrations', label: 'Integrations', icon: '🔗' },
+  { id: 'profile', label: settingsCopy.tabs.profile, icon: '👤' },
+  { id: 'account', label: settingsCopy.tabs.account, icon: '⚙️' },
+  {
+    id: 'integrations',
+    label: settingsCopy.tabs.integrations,
+    icon: '🔗',
+  },
 ]
 
 export function UserSettingsPage({
@@ -55,7 +69,7 @@ export function UserSettingsPage({
       ),
       loginHandler: handleTwitchLogin,
     },
-    donationalerts: {
+    da: {
       name: 'Donation Alerts',
       icon: <DonationAlerts width={45} height={45} />,
       loginHandler: handleDaLogin,
@@ -63,22 +77,40 @@ export function UserSettingsPage({
   } as const
 
   return (
-    <div className="flex w-full items-center justify-center min-h-screen bg-level-1 p-4">
-      <div className="flex flex-col max-w-[1200px] w-full gap-8 text-text-main">
-        {/* Header */}
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-4">
-            <div className="rounded-full w-[80px] h-[80px] bg-gradient-to-br from-accent-1 to-accent-2 p-1 flex-shrink-0 shadow-lg">
+    <div className={pageWrapClass}>
+      <div className={`${pageInnerClass} flex flex-col gap-6 sm:gap-8`}>
+        <header className="text-center sm:text-left">
+          <p
+            className={`text-sm font-medium mb-2 ${gradientTextClass}`}
+          >
+            {settingsCopy.eyebrow}
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-main">
+            {settingsCopy.title}
+          </h1>
+          <p className="text-sm sm:text-base text-text-secondary mt-1">
+            {settingsCopy.subtitle}
+          </p>
+        </header>
+
+        <div className={`flex flex-col gap-4 p-4 sm:p-6 ${panelClass}`}>
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
+            <div className="rounded-full w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-accent-1 to-accent-2 p-1 shrink-0 shadow-lg">
               <div className="w-full h-full rounded-full bg-level-2 overflow-hidden">
                 <img
                   src={user?.avatar_url || ''}
+                  alt=""
                   className="w-full h-full object-cover"
                 />
               </div>
             </div>
             <div>
-              <h1 className="text-3xl font-bold">{user?.username || 'Settings'}</h1>
-              <p className="text-level-4">Manage your account and integrations</p>
+              <p className="text-lg font-semibold text-text-main">
+                {user?.username || settingsCopy.title}
+              </p>
+              <p className="text-sm text-text-secondary">
+                {user?.email ?? 'No email set'}
+              </p>
             </div>
           </div>
 
@@ -87,26 +119,25 @@ export function UserSettingsPage({
           ) : null}
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex flex-col sm:flex-row gap-2 bg-level-2 rounded-2xl p-1 shadow-md border border-level-3">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2">
           {TABS.map((tab) => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold transition-all ${
+              className={`flex flex-1 sm:flex-initial items-center justify-center gap-2 ${filterTabBaseClass} ${
                 activeTab === tab.id
-                  ? 'bg-accent-1 text-white shadow-md'
-                  : 'text-level-4 hover:text-text-main'
+                  ? filterTabActiveClass
+                  : filterTabInactiveClass
               }`}
             >
-              <span>{tab.icon}</span>
-              <span className="hidden sm:inline">{tab.label}</span>
+              <span aria-hidden>{tab.icon}</span>
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>
 
-        {/* Tab Content */}
-        <div className="min-h-[500px]">
+        <div className="min-h-[320px]">
           {activeTab === 'profile' && <ProfileTab user={user} />}
           {activeTab === 'account' && (
             <AccountTab
@@ -129,12 +160,13 @@ export function UserSettingsPage({
 
 function EmailNotConfirmedAlert({ email }: { email?: string }) {
   return (
-    <div className="rounded-2xl border border-yellow-500/50 bg-yellow-500/10 px-5 py-4 text-yellow-100 shadow-md">
+    <div className="rounded-(--rounded-std) border border-yellow-500/50 bg-yellow-500/10 px-4 py-3 text-yellow-100">
       <div className="flex flex-col gap-1">
-        <div className="text-base font-semibold">Email is not confirmed</div>
+        <div className="text-sm font-semibold">
+          {settingsCopy.emailNotConfirmedTitle}
+        </div>
         <p className="text-sm text-yellow-100/80">
-          Confirm {email ? email : 'your email'} to keep classic login and
-          account recovery fully available.
+          {settingsCopy.emailNotConfirmedBody(email)}
         </p>
       </div>
     </div>

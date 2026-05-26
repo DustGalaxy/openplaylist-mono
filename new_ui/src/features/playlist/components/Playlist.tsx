@@ -3,6 +3,7 @@ import {
   Clock,
   Eye,
   List,
+  Music2,
   RefreshCcw,
   Settings,
   Share2 as ShareIcon,
@@ -31,8 +32,18 @@ import SortPanel from './sortPanel'
 import type { ClientPlaylist } from '@/types/playlist'
 import { changePlaylistActive } from '@/api/api-playlist'
 import { useMusicStore } from '@/stores/musicStore'
+import {
+  filterTabActiveClass,
+  filterTabBaseClass,
+  filterTabInactiveClass,
+  innerPanelClass,
+  panelClass,
+  statusClosedClass,
+  statusOpenClass,
+} from '@/features/landing/styles'
+import { cn } from '@/lib/utils'
 
-const InfoCard = ({
+function InfoCard({
   icon,
   label,
   value,
@@ -40,20 +51,22 @@ const InfoCard = ({
   icon: React.ReactNode
   label: string
   value: string | number
-}) => {
-  const windowWidth = window.innerWidth
+}) {
   return (
     <div
-      className={`bg-level-2 rounded-(--rounded-std) p-2 md:p3 flex ${windowWidth > 600 ? 'flex-col' : 'flex-row'} items-center gap-1 text-center`}
+      className={`${innerPanelClass} p-3 sm:p-4 flex flex-col gap-2 transition-colors hover:border-level-3/30`}
     >
-      <div className="text-gray-400 flex items-center gap-1">
-        {icon}
-        {windowWidth > 600 && (
-          <div className="text-xs text-gray-400">{label}</div>
-        )}
+      <div className="flex items-center gap-2 text-text-placeholder">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-level-2/80 text-level-3">
+          {icon}
+        </span>
+        <span className="text-[11px] uppercase tracking-wide leading-tight">
+          {label}
+        </span>
       </div>
-
-      <div className="text-sm font-semibold">{value}</div>
+      <p className="text-base font-semibold text-text-main pl-9 sm:pl-0 sm:text-center sm:-mt-1">
+        {value}
+      </p>
     </div>
   )
 }
@@ -84,84 +97,87 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
     setNowPlaying(playlist.now_playing?.yt_video_id)
   }, [playlist])
 
+  useEffect(() => {
+    setActivePlst(playlist.is_allow_external_requests)
+  }, [playlist.is_allow_external_requests])
+
   return (
-    <div className="w-full ">
+    <div className="w-full flex flex-col gap-4 sm:gap-6">
       <div
-        className="w-full grid gap-2 grid-cols-1 [@media_(min-width:1150px)]:grid-cols-[640px_1fr] 
-      grid-rows-[auto_auto_auto] [@media_(min-width:640px)]:grid-rows-2 
-         "
+        className="w-full grid gap-4 grid-cols-1 lg:grid-cols-[minmax(0,640px)_1fr] grid-rows-[auto_auto_auto] sm:grid-rows-2"
       >
         <YoutubePlayer
           playlist={playlist}
           playOnReady={true}
           nowPlay={nowPlaying}
-          className="[@media_(min-width:640px)]:row-span-2 flex items-center justify-center "
+          className="sm:row-span-2 flex items-center justify-center"
         />
 
-        <div className="w-full gap-4 grid ">
+        <div className={`w-full gap-4 grid p-4 sm:p-6 ${panelClass}`}>
           {playlist.settings.content_settings.length > 1 && (
             <div className="flex gap-2 flex-wrap">
               {playlist.settings.content_settings.map((setting, index) => (
-                <Btn
-                  key={index}
-                  text={setting.platform}
-                  className={`px-3 py-1 text-sm ${
-                    selectedContentSettingIndex === index
-                      ? 'bg-blue-600'
-                      : 'bg-level-2'
-                  }`}
+                <button
+                  key={setting.platform}
+                  type="button"
                   onClick={() => setSelectedContentSettingIndex(index)}
-                />
+                  className={`${filterTabBaseClass} ${
+                    selectedContentSettingIndex === index
+                      ? filterTabActiveClass
+                      : filterTabInactiveClass
+                  }`}
+                >
+                  {setting.platform}
+                </button>
               ))}
             </div>
           )}
 
-          <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-4 ">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
             <InfoCard
-              icon={<Settings size={16} />}
+              icon={<Settings size={14} />}
               label="Mode"
               value={playlist.settings.mode}
             />
             <InfoCard
-              icon={<Eye size={16} />}
+              icon={<Eye size={14} />}
               label="Min views"
               value={contentSettings.min_views}
             />
             <InfoCard
-              icon={<ThumbsUp size={16} />}
+              icon={<ThumbsUp size={14} />}
               label="Min likes"
               value={contentSettings.min_likes}
             />
             <InfoCard
-              icon={<Clock size={16} />}
+              icon={<Clock size={14} />}
               label="Max duration"
               value={`${contentSettings.max_duration} sec`}
             />
             <InfoCard
-              icon={<RefreshCcw size={16} />}
+              icon={<RefreshCcw size={14} />}
               label="Track CD"
               value={`${contentSettings.track_cooldown}m`}
             />
             <InfoCard
-              icon={<User size={16} />}
+              icon={<User size={14} />}
               label="User CD"
               value={`${contentSettings.user_cooldown}m`}
             />
             <InfoCard
-              icon={<List size={16} />}
+              icon={<List size={14} />}
               label="Max size"
               value={playlist.settings.max_playlist_size || '∞'}
             />
             <InfoCard
-              icon={<Priority width={16} height={16} />}
+              icon={<Priority width={14} height={14} />}
               label="Priority mode"
               value={playlist.settings.cost_mode}
             />
           </div>
 
-          <div className="flex gap-2 justify-between items-end">
-            {/* <ModesBar playlist={playlist} /> */}
-            <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 justify-between items-center">
+            <div className="flex flex-wrap gap-2">
               <Btn
                 text={<ShareIcon />}
                 className="px-2 bg-level-2"
@@ -171,25 +187,26 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
                   )
                   toast.success('Playlist link copied to clipboard!')
                 }}
-              ></Btn>
-              <Btn
-                text={
-                  <div className="flex gap-2 justify-center  items-center">
-                    <div
-                      className={`${activePlst ? 'bg-green-600 shadow-green-600' : 'bg-red-600 shadow-red-600'} 
-                    shadow-[0px_0px_10px] w-2 h-3 rounded-full `}
-                    />
-                    <div>{activePlst ? 'Online' : 'Offline'}</div>
-                  </div>
-                }
-                className={`px-4 py-1  bg-level-2`}
+              />
+              <button
+                type="button"
                 onClick={() => {
                   setActivePlst(!activePlst)
                   changePlaylistActive(playlist.id, activePlst)
                 }}
-              />
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors min-h-11',
+                  activePlst ? statusOpenClass : statusClosedClass,
+                )}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${activePlst ? 'bg-emerald-400' : 'bg-text-placeholder'}`}
+                  aria-hidden
+                />
+                {activePlst ? 'Online' : 'Offline'}
+              </button>
             </div>
-            <div className="flex gap-2  [@media_(min-width:600px)]:justify-end">
+            <div className="flex flex-wrap gap-2 justify-end">
               <Btn
                 text={
                   repeatMode === 'all' ? (
@@ -228,32 +245,35 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
                 text={<Next width={33} height={33} />}
                 className="px-2 bg-level-2"
                 onClick={() => {
-                  console.log('Button clicked, Next clicked')
                   playNext(playlist, 'skipped')
                 }}
               />
-
               <SettingsModal playlist={playlist} />
             </div>
           </div>
         </div>
 
         <div className="flex items-center justify-center py-2">
-          {playlist.now_playing && playlist.now_playing.yt_video_id ? (
+          {playlist.now_playing?.yt_video_id ? (
             <PlayNowCard track={playlist.now_playing} />
           ) : (
-            <div>
-              <p className="text-gray-500">No track is currently playing.</p>
+            <div
+              className={`flex flex-col items-center justify-center gap-2 py-8 px-4 text-center w-full border-dashed ${innerPanelClass}`}
+            >
+              <Music2 className="h-8 w-8 text-text-placeholder" strokeWidth={1.5} />
+              <p className="text-sm text-text-secondary">
+                No track is currently playing.
+              </p>
             </div>
           )}
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-2 py-2">
-        <div className="flex w-full gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 py-2">
+        <div className="flex w-full gap-2 min-w-0">
           <ExpandingInputButtons playlist={playlist} />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <Counter number={playlist.track_data.length} />
           <SortPanel playlist={playlist} />
           <Btn
@@ -261,29 +281,28 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
             className="px-2 bg-level-2"
             onClick={() => {
               setToggled(!toggled)
-              console.log('Button clicked, toggled:', !toggled)
             }}
           />
         </div>
       </div>
 
-      <div className="flex w-full">
-        <div className={` w-full  ${toggled ? 'block' : 'hidden'}`}>
-          <div className="w-full  text-3xl flex items-center justify-center pb-2">
+      <div className="flex w-full gap-2 sm:gap-4">
+        <div className={`w-full ${toggled ? 'block' : 'hidden'}`}>
+          <div className="w-full text-lg font-semibold text-text-main flex items-center justify-center pb-2">
             Saved
           </div>
           <div className="w-full @container">
             <div
-              className="w-full  items-center flex-col gap-y-8 
-              [@container_(width_<_600px)]:hidden 
+              className="w-full items-center flex-col gap-y-4 sm:gap-y-8
+              [@container_(width_<_600px)]:hidden
               [@container_(width_>=_600px)]:flex"
             >
               <SavedList playlist={playlist} />
             </div>
 
             <div
-              className="w-full  items-center flex-col gap-y-8 
-              [@container_(width_<_600px)]:flex 
+              className="w-full items-center flex-col gap-y-4 sm:gap-y-8
+              [@container_(width_<_600px)]:flex
               [@container_(width_>=_600px)]:hidden"
             >
               <SavedList playlist={playlist} />
@@ -291,20 +310,16 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
           </div>
         </div>
 
-        <div className=" w-full  @container">
-          {/* <div className="w-full  text-3xl flex items-center justify-center pb-2">
-            Track list
-          </div> */}
-
+        <div className="w-full @container">
           <div
-            className="w-full  items-center flex-col gap-y-8 
-            [@container_(width_<_600px)]:hidden 
+            className="w-full items-center flex-col gap-y-4 sm:gap-y-8
+            [@container_(width_<_600px)]:hidden
             [@container_(width_>=_600px)]:flex"
           >
             {playlist.track_data.length > 0 ? (
-              playlist.track_data.map((track, index) => (
+              playlist.track_data.map((track) => (
                 <OrderCard
-                  key={index}
+                  key={track.id}
                   track={
                     playlist.track_data.filter((t) => t.id === track.id)[0]
                   }
@@ -313,18 +328,20 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
                 />
               ))
             ) : (
-              <p className="text-gray-500">No tracks available.</p>
+              <p className="text-sm text-text-secondary py-8 text-center w-full">
+                No tracks available.
+              </p>
             )}
           </div>
           <div
-            className="w-full  items-center flex-col gap-y-8 
-            [@container_(width_<_600px)]:flex 
+            className="w-full items-center flex-col gap-y-4 sm:gap-y-8
+            [@container_(width_<_600px)]:flex
             [@container_(width_>=_600px)]:hidden"
           >
             {playlist.track_data.length > 0 ? (
-              playlist.track_data.map((track, index) => (
+              playlist.track_data.map((track) => (
                 <OrderMiniCard
-                  key={index}
+                  key={track.id}
                   track={
                     playlist.track_data.filter((t) => t.id === track.id)[0]
                   }
@@ -333,7 +350,9 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
                 />
               ))
             ) : (
-              <p className="text-gray-500">No tracks available.</p>
+              <p className="text-sm text-text-secondary py-8 text-center w-full">
+                No tracks available.
+              </p>
             )}
           </div>
         </div>
