@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import Disc from '@/components/icons/icon-disc'
 import { useAuthStore } from '@/stores/authStore'
+import React from 'react'
 
 const APP_VERSION = '2026.1 beta'
 
@@ -21,8 +22,14 @@ export default function Footer() {
   const { isAuthenticated } = useAuthStore()
   const year = new Date().getFullYear()
 
+  const [inFocus, setInFocus] = React.useState(false)
+  const windowWidth = window.innerWidth
+
   return (
-    <footer className="w-full flex justify-center px-4 pb-6 pt-10 mt-auto">
+    <footer
+      className="w-full flex justify-center px-4 pb-6 pt-10 mt-auto"
+      onClick={() => setInFocus(!inFocus)}
+    >
       <div
         className="
           w-full max-w-5xl rounded-(--rounded-std) border-2 border-level-3 bg-level-2
@@ -36,13 +43,14 @@ export default function Footer() {
           aria-hidden
         />
 
-        <div className="px-6 py-8 sm:px-10 sm:py-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
+        <div
+          className="px-6 py-8 sm:px-10 sm:py-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]"
+          hidden={!inFocus && windowWidth < 600}
+        >
           <div className="flex flex-col gap-4 text-left">
             <Link to="/" className="inline-flex items-center gap-2 w-fit group">
               <Disc />
-              <span
-                className="text-lg font-bold text-transparent bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)] bg-clip-text bg-[length:200%_auto] animate-bg-move"
-              >
+              <span className="text-lg font-bold text-transparent bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)] bg-clip-text bg-[length:200%_auto] animate-bg-move">
                 OpenPlaylist
               </span>
             </Link>

@@ -28,7 +28,7 @@ export const filterTabInactiveClass =
   'border-white/5 bg-level-1/30 text-text-secondary hover:border-level-3/30 hover:text-text-main'
 
 export const statusOpenClass =
-  'border-emerald-400/25 bg-emerald-500/10 text-emerald-200/90'
+  ' text-emerald-200/90'
 
 export const statusClosedClass =
   'border-white/10 bg-level-1/60 text-text-secondary'
@@ -37,3 +37,7 @@ export const feedbackSuccessClass =
   'border-emerald-400/25 bg-emerald-500/10 text-emerald-200/90'
 
 export const feedbackErrorClass = 'border-danger/40 bg-danger/10 text-danger'
+
+/** Compact metadata chip — mode badges, track count, etc. */
+export const infoChipClass =
+  'inline-flex items-center gap-2 rounded-full border border-level-3/20 bg-level-1/50 text-text-secondary text-xs font-medium'

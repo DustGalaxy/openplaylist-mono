@@ -4,25 +4,23 @@ import DateOutline from '@/components/icons/icon-date'
 import Arrow from '@/components/icons/icon-arrow'
 import Shuffle from '@/components/icons/icon-shuffle'
 import type { ClientPlaylist, SortSettings } from '@/types/playlist'
-import Btn from '@/components/ui/my-btn'
 import useMusicStore from '@/stores/musicStore'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import { cn } from '@/lib/utils'
 
-const activeStateClass = ` 
-
-translate-y-[3px] sm:translate-y-[5px] shadow-[0_0px_0_0_theme(colors.level-3),0_0px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)]`
+const activeStateClass = `
+        translate-y-[3px] 
+        sm:translate-y-[5px] 
+        shadow-[0_0px_0_0_theme(colors.level-3),0_0px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)]
+        `
 const notActiveStateClass = `
-
-
         box-border
-                shadow-[0_3px_0_0_theme(colors.level-3),_0_0px_10px_rgba(0,0,0,0.4),_0_2px_4px_rgba(0,0,0,0.3)] 
+        shadow-[0_3px_0_0_theme(colors.level-3),_0_0px_10px_rgba(0,0,0,0.4),_0_2px_4px_rgba(0,0,0,0.3)] 
         sm:shadow-[0_5px_0_0_theme(colors.level-3),_0_0px_15px_rgba(0,0,0,0.55),_0_4px_8px_rgba(0,0,0,0.45)] 
-        
-        
-        hover:shadow-[0_6px_0_0_theme(colors.level-3),0_0px_15px_rgba(255,255,255,0.25),0_4px_8px_rgba(255,255,255,0.15)]
+
         hover:text-shadow-[0_0_4px_rgba(255,255,255,0.8),_0_0_25px_rgba(255,255,255,0.4)]
         hover:[&_svg]:drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]
+
         disabled:cursor-not-allowed
         disabled:opacity-50
         disabled:shadow-none
@@ -31,10 +29,10 @@ const notActiveStateClass = `
         disabled:[&_svg]:drop-shadow-none
         disabled:active:shadow-none
         disabled:active:translate-y-0
+
         transform translate-y-0
-
-
         `
+
 const SortButton = ({
   icon: Icon,
   isActive,

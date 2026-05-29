@@ -24,7 +24,7 @@ import Priority from '@/components/icons/icon-priority'
 import Repeat from '@/components/icons/icon-repeat'
 import PlayNowCard from './playnow-card'
 import Counter from './order-counter'
-import { ExpandingInputButtons } from './bar'
+import { PlaylistQueueInput } from './bar'
 
 import SettingsModal from '@/features/settings/components/playlist-settings/settingsModal'
 import SavedList from './saved-list'
@@ -42,7 +42,7 @@ import {
   statusOpenClass,
 } from '@/features/landing/styles'
 import { cn } from '@/lib/utils'
-
+import { Platform } from '@/types/playlist'
 function InfoCard({
   icon,
   label,
@@ -88,10 +88,22 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
   const [selectedContentSettingIndex, setSelectedContentSettingIndex] =
     React.useState(0)
 
+  const [queueSearch, setQueueSearch] = React.useState('')
+
   const { playNext, requestPlSettings, playPrev } = useMusicStore()
 
   const contentSettings =
     playlist.settings.content_settings[selectedContentSettingIndex]
+
+  const visibleTracks = React.useMemo(() => {
+    const q = queueSearch.trim().toLowerCase()
+    if (!q) return playlist.track_data
+    return playlist.track_data.filter(
+      (track) =>
+        track.title.toLowerCase().includes(q) ||
+        track.requester_nickname.toLowerCase().includes(q),
+    )
+  }, [playlist.track_data, queueSearch])
 
   useEffect(() => {
     setNowPlaying(playlist.now_playing?.yt_video_id)
@@ -102,10 +114,8 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
   }, [playlist.is_allow_external_requests])
 
   return (
-    <div className="w-full flex flex-col gap-4 sm:gap-6">
-      <div
-        className="w-full grid gap-4 grid-cols-1 lg:grid-cols-[minmax(0,640px)_1fr] grid-rows-[auto_auto_auto] sm:grid-rows-2"
-      >
+    <div className="w-full flex flex-col gap-3">
+      <div className="w-full grid gap-4 grid-cols-1  grid-rows-[auto_auto_auto] ">
         <YoutubePlayer
           playlist={playlist}
           playOnReady={true}
@@ -121,13 +131,12 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
                   key={setting.platform}
                   type="button"
                   onClick={() => setSelectedContentSettingIndex(index)}
-                  className={`${filterTabBaseClass} ${
-                    selectedContentSettingIndex === index
-                      ? filterTabActiveClass
-                      : filterTabInactiveClass
-                  }`}
+                  className={`${filterTabBaseClass} ${selectedContentSettingIndex === index
+                    ? filterTabActiveClass
+                    : filterTabInactiveClass
+                    }`}
                 >
-                  {setting.platform}
+                  {setting.platform === Platform.General ? "general" : setting.platform}
                 </button>
               ))}
             </div>
@@ -176,8 +185,8 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
             />
           </div>
 
-          <div className="flex flex-wrap gap-2 justify-between items-center">
-            <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-4 justify-between items-center">
+            <div className="flex flex-wrap w-full sm:w-fit gap-2 justify-between sm:justify-start">
               <Btn
                 text={<ShareIcon />}
                 className="px-2 bg-level-2"
@@ -188,25 +197,27 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
                   toast.success('Playlist link copied to clipboard!')
                 }}
               />
-              <button
-                type="button"
+              <Btn
+                text={
+                  <>
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${activePlst ? 'bg-emerald-400' : 'bg-text-placeholder'}`}
+                      aria-hidden
+                    />
+                    {activePlst ? 'Online' : 'Offline'}
+                  </>
+                }
                 onClick={() => {
                   setActivePlst(!activePlst)
                   changePlaylistActive(playlist.id, activePlst)
                 }}
                 className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors min-h-11',
+                  'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium min-h-11',
                   activePlst ? statusOpenClass : statusClosedClass,
                 )}
-              >
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${activePlst ? 'bg-emerald-400' : 'bg-text-placeholder'}`}
-                  aria-hidden
-                />
-                {activePlst ? 'Online' : 'Offline'}
-              </button>
+              />
             </div>
-            <div className="flex flex-wrap gap-2 justify-end">
+            <div className="flex flex-wrap w-full sm:w-fit gap-2 justify-between sm:justify-end">
               <Btn
                 text={
                   repeatMode === 'all' ? (
@@ -260,7 +271,10 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
             <div
               className={`flex flex-col items-center justify-center gap-2 py-8 px-4 text-center w-full border-dashed ${innerPanelClass}`}
             >
-              <Music2 className="h-8 w-8 text-text-placeholder" strokeWidth={1.5} />
+              <Music2
+                className="h-8 w-8 text-text-placeholder"
+                strokeWidth={1.5}
+              />
               <p className="text-sm text-text-secondary">
                 No track is currently playing.
               </p>
@@ -269,21 +283,28 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 py-2">
-        <div className="flex w-full gap-2 min-w-0">
-          <ExpandingInputButtons playlist={playlist} />
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
+        <div className="flex w-full min-w-0 gap-2">
+          <PlaylistQueueInput
+            playlist={playlist}
+            onSearchQueryChange={setQueueSearch}
+          />
         </div>
         <div className="flex gap-2 shrink-0">
-          <Counter number={playlist.track_data.length} />
+
           <SortPanel playlist={playlist} />
           <Btn
             text={toggled ? <RightPanel /> : <LeftPanel />}
-            className="px-2 bg-level-2"
+
+            className="px-2 bg-level-2 hidden sm:block"
             onClick={() => {
               setToggled(!toggled)
             }}
           />
         </div>
+      </div>
+      <div className="flex justify-end">
+        <Counter number={playlist.track_data.length} />
       </div>
 
       <div className="flex w-full gap-2 sm:gap-4">
@@ -317,16 +338,20 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
             [@container_(width_>=_600px)]:flex"
           >
             {playlist.track_data.length > 0 ? (
-              playlist.track_data.map((track) => (
-                <OrderCard
-                  key={track.id}
-                  track={
-                    playlist.track_data.filter((t) => t.id === track.id)[0]
-                  }
-                  playlist={playlist}
-                  btns_type="playlist"
-                />
-              ))
+              visibleTracks.length > 0 ? (
+                visibleTracks.map((track) => (
+                  <OrderCard
+                    key={track.id}
+                    track={track}
+                    playlist={playlist}
+                    btns_type="playlist"
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-text-secondary py-8 text-center w-full">
+                  No tracks match your search.
+                </p>
+              )
             ) : (
               <p className="text-sm text-text-secondary py-8 text-center w-full">
                 No tracks available.
@@ -339,16 +364,20 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
             [@container_(width_>=_600px)]:hidden"
           >
             {playlist.track_data.length > 0 ? (
-              playlist.track_data.map((track) => (
-                <OrderMiniCard
-                  key={track.id}
-                  track={
-                    playlist.track_data.filter((t) => t.id === track.id)[0]
-                  }
-                  playlist={playlist}
-                  btns_type="playlist"
-                />
-              ))
+              visibleTracks.length > 0 ? (
+                visibleTracks.map((track) => (
+                  <OrderMiniCard
+                    key={track.id}
+                    track={track}
+                    playlist={playlist}
+                    btns_type="playlist"
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-text-secondary py-8 text-center w-full">
+                  No tracks match your search.
+                </p>
+              )
             ) : (
               <p className="text-sm text-text-secondary py-8 text-center w-full">
                 No tracks available.
