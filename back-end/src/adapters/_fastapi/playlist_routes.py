@@ -113,7 +113,7 @@ async def get_my_playlists(
         ]
     else:
         ids = [p.id for p in playlists]
-        settings = await settings_service.repository.get_many(db_session, ids, "playlist_id")
+        settings = await settings_service.repository.get_many(db_session, ids, "playlist_id") # type: ignore
         my_zip: list[tuple[PlaylistSchema, SettingsSchema]] = []
         for id in ids:
             s = find(settings, lambda x: x.playlist_id == id)
