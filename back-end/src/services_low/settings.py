@@ -323,8 +323,8 @@ class SettingsLowService:
         result = None
 
         if len(setting) > 1:
-            result = find(setting, lambda x: x.platform == (platform if is_vip else Platform.GENERAL)) or find(
-                setting, lambda x: x.platform is Platform.GENERAL
+            result = find(setting, lambda x: x.platform == (platform if is_vip else _All_Platforms.GENERAL)) or find(
+                setting, lambda x: x.platform is _All_Platforms.GENERAL
             )
         else:
             result = setting[0]

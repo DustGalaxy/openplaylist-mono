@@ -4,6 +4,19 @@ from typing import Literal
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
+class PlaylistLogsEventTypes(StrEnum):
+    ADD_TRACK = "add_track"
+
+    PLAY_TRACK = "play_track"
+
+    REMOVE_TRACK = "remove_track"
+    LISTEN_TRACK = "listen_track"
+    SKIP_TRACK = "skip_track"
+    REPORT_TRACK = "report_track"
+
+    ERROR = "error"
+
+
 class _All_Platforms(StrEnum):
     TWITCH = "twitch"
     YOUTUBE = "youtube"

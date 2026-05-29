@@ -12,7 +12,7 @@ from _types import AsyncSession
 
 async def add_to_playlist(
     session: AsyncSession, event: OrderCreate, user: User
-) -> tuple[list[tuple[OrderDomain, UUID]], list[tuple[list[str], str]]]:
+) -> tuple[list[tuple[OrderDomain, UUID]], list[tuple[list[str], str, UUID]]]:
     settings_service = get_settings_service()
 
     if isinstance(event.extra_data, WebExtraData):
@@ -25,17 +25,17 @@ async def add_to_playlist(
         )
 
     tracks: list[tuple[OrderDomain, UUID]] = []
-    errors: list[tuple[list[str], str]] = []
+    errors: list[tuple[list[str], str, UUID]] = []
 
     for playlist in playlists:
         if not playlist.is_allow_external_requests and playlist.owner_id != user.id:
-            errors.append((["playlist is not active"], playlist.name))
+            errors.append((["Playlist is not active"], playlist.name, playlist.id))
             continue
 
         track = await settings_service.validate_track(session, playlist, event, user) or event
 
         if isinstance(track, list):
-            errors.append((track, playlist.name))
+            errors.append((track, playlist.name, playlist.id))
         else:
             track = await playlist_repository.add_order_to_playlist(session, playlist.id, event)
             tracks.append((track, playlist.id))
