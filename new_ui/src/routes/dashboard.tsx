@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ListMusic } from 'lucide-react'
 import type { ClientPlaylist } from '@/types/playlist'
 
+import { HorizontalScrollStrip } from '@/components/ui/horizontal-scroll-strip'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Playlist from '@/features/playlist/components/Playlist'
 import { useAuthStore } from '@/stores/authStore'
@@ -104,11 +105,11 @@ function RouteComponent() {
         </header>
 
         <Tabs className="w-full">
-          <TabsList className="w-full flex items-center justify-start gap-2 bg-transparent p-0 h-auto flex-wrap sm:flex-nowrap">
+          <TabsList className="w-full flex flex-nowrap items-center justify-start gap-2 overflow-hidden bg-transparent p-0 h-auto">
             <div className="shrink-0">
               <AddPlaylistModal />
             </div>
-            <div className="flex overflow-x-auto gap-1 min-w-0 flex-1 pb-1">
+            <HorizontalScrollStrip>
               {sortedPlsts.length > 0 ? (
                 sortedPlsts.map((plst) => (
                   <TabsTrigger
@@ -117,7 +118,7 @@ function RouteComponent() {
                     className={cn(
                       filterTabBaseClass,
                       filterTabInactiveClass,
-                      'shrink-0 max-w-[12rem] truncate font-medium',
+                      'shrink-0 flex-none min-w-[4rem] font-medium',
                       'data-[state=active]:!border-level-3/60 data-[state=active]:!bg-level-1 data-[state=active]:!text-text-main data-[state=active]:!shadow-[0_0_12px_rgba(245,106,25,0.15)]',
                     )}
                   >
@@ -139,7 +140,7 @@ function RouteComponent() {
                   </div>
                 </div>
               )}
-            </div>
+            </HorizontalScrollStrip>
           </TabsList>
 
           {sortedPlsts.map((plst) => (

@@ -157,13 +157,13 @@ code {
       width: 0;
     }
     100% {
-      width: 50vw;
+      width: 100%;
     }
   }
 
   @keyframes collapse_ {
     0% {
-      width: 50vw;
+      width: 100%;
     }
     100% {
       width: 0;
