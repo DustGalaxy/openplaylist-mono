@@ -9,6 +9,7 @@ from dal.postgres_impl import playlist_repository
 
 from dto.playlist import NewPlaylist, PlaylistBaseinfo
 from models.auth_user import AuthUserSchema as User
+from models.order import OrderDomain
 from exceptions import NotAuthorizedException
 from models.playlist import PlaylistCreate, PlaylistSchema, PlaylistPatch
 
@@ -96,17 +97,18 @@ class PlaylistLowService:
         res = await self._playlist_repository.remove(session, playlist_id, raise_not_found=True)
         return res
 
-    async def set_play_now(self, session: AsyncSession, playlist_id: UUID, track_id: str | None, user: User) -> None:
+    async def set_play_now(self, session: AsyncSession, playlist_id: UUID, track_id: str | None, user: User) -> OrderDomain:
         plst = await self._playlist_repository.get_one(session, playlist_id)
         if user.id != plst.owner_id:
             raise NotAuthorizedException()
         if plst.now_playing == track_id:
-            return
+            return await self._playlist_repository.get_play_now(session, playlist_id)
 
         if track_id not in [str(track.id) for track in plst.track_data] and track_id is not None:
             raise HTTPException(detail="Track is not in playlist", status_code=status.HTTP_400_BAD_REQUEST)
 
         await self._playlist_repository.patch(session, PlaylistPatch(now_playing=track_id), playlist_id)
+        return await self._playlist_repository.get_play_now(session, playlist_id)
 
     async def delete_track_from_playlist(
         self, session: AsyncSession, playlist_id: UUID, track_id: UUID, user: User, reason: DeleteStatus

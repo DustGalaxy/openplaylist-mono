@@ -204,7 +204,7 @@ async def set_play_now_for_playlist(
     playnow: PlayNow,
 ) -> None:
     try:
-        await service.set_play_now(db_session, playlist_id, playnow.track_id, current_user)
+        order = await service.set_play_now(db_session, playlist_id, playnow.track_id, current_user)
 
         await kick("playlist.track.playnow", task_broker, playnow)
         await playlist_log_service.log_and_emit(
@@ -212,7 +212,7 @@ async def set_play_now_for_playlist(
             current_user.id,
             playlist_id,
             PlaylistLogsEventTypes.PLAY_TRACK,
-            {"details": f"Update current playing track to {playnow.track_id}"},
+            {"details": f"Update current playing track to {order.title}", "platform": order.source, "by_owner": order.from_owner},
         )
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")
