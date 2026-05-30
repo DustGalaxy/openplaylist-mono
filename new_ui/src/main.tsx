@@ -51,7 +51,7 @@ const PROJECT_DOMAIN = window.location.origin
 // DA_REDIRECT_URI="http://openplaylist.localhost/oauth-callback"
 // DA_SCOPES="oauth-user-show oauth-donation-subscribe"
 
-window.appConfig ??= {
+window.appConfig = {
   PROJECT_DOMAIN: PROJECT_DOMAIN,
   WS_API_URL: `${PROJECT_DOMAIN}`,
   SOCKET_PATH: '/api/socket.io',

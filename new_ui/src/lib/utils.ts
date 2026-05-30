@@ -123,5 +123,5 @@ export function removeNullAndUndefined<T extends Record<string, any>>(
 }
 
 export function getConfig() {
-  return window.appConfig || {}
+  return window.appConfig
 }
