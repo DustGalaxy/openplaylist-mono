@@ -1,15 +1,21 @@
 import { useState } from 'react'
 import { useNavigate, Link } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import {
+  fetchCurrentUserProfile,
+  type BackendUserProfileResponse,
+} from '@/hooks/useAuth'
 import { useOAuthUrl } from '@/hooks/useAuthUrl'
-import { getConfig } from '@/lib/utils'
+import { getConfig, REDIRECT_AFTER_LOGIN_KEY } from '@/lib/utils'
 import apiClient from '@/lib/axios'
 import { SocialAuthButtons } from './SocialAuthButtons'
+import { useAuthStore } from '@/stores/authStore'
 
 export interface LoginFormProps {
   onSuccess?: () => void
@@ -17,6 +23,7 @@ export interface LoginFormProps {
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const handleOAuthRedirect = useOAuthUrl()
 
   const [email, setEmail] = useState('')
@@ -24,6 +31,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('social')
+  const { setUser } = useAuthStore()
+
 
   const handleSocialLogin = async (platform: string) => {
     try {
@@ -62,8 +71,28 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       )
 
       if (response.status === 200) {
-        onSuccess?.()
-        navigate({ to: '/dashboard' })
+        const userProfileResponse = await queryClient.fetchQuery<
+          BackendUserProfileResponse | null
+        >({
+          queryKey: ['currentUserProfile'],
+          queryFn: fetchCurrentUserProfile,
+          staleTime: 0,
+          gcTime: 0,
+        })
+
+        if (userProfileResponse?.user) {
+          setUser(userProfileResponse.user, userProfileResponse.expired_at)
+          onSuccess?.()
+
+          const redirectToPath =
+            localStorage.getItem(REDIRECT_AFTER_LOGIN_KEY) || '/dashboard'
+          localStorage.removeItem(REDIRECT_AFTER_LOGIN_KEY)
+          navigate({ to: redirectToPath })
+        } else {
+          setError(
+            'Login succeeded but your profile could not be loaded. Please try again.',
+          )
+        }
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
