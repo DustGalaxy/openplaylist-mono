@@ -62,12 +62,12 @@ class PlaylistRepository(
     def to_inner(self, data: PlaylistCreate | PlaylistSchema | PlaylistPatch) -> dict:
         return data.model_dump(exclude_unset=True)
 
-    async def get_play_now(self, session: AsyncSession, playlist_id: UUID) -> OrderDomain:
+    async def get_play_now(self, session: AsyncSession, playlist_id: UUID) -> OrderDomain | None:
         stmt = select(Order).where(Playlist.id == playlist_id, cast(Playlist.now_playing, PostgresUUID) == Order.id)
         result = await session.execute(stmt)
         result = result.unique().scalar_one_or_none()
         if not result:
-            raise NotFoundException(f"Playlist with id: {playlist_id}, not found")
+            return None
         
         return OrderDomain.model_validate(result)
 
