@@ -98,7 +98,7 @@ services:
           rabbitmq:
             condition: service_healthy
     env_file:
-      - ./back-end/.docker.env
+      - ./back-end/.env
     volumes:
       - ./back-end/src:/app/src
     labels:
@@ -126,7 +126,7 @@ services:
           rabbitmq:
             condition: service_healthy
     env_file:
-      - ./back-end/.docker.env
+      - ./back-end/.env
     volumes:
       - ./back-end/src:/app/src
     networks:
@@ -144,7 +144,7 @@ services:
           rabbitmq:
             condition: service_healthy
     env_file:
-      - ./back-end/.docker.env
+      - ./back-end/.env
     volumes:
       - ./back-end/src:/app/src
     networks:
@@ -157,7 +157,7 @@ services:
     depends_on:
       - backend
     env_file:
-      - ./bot_ttv/.docker.env
+      - ./bot_ttv/.env
     volumes:
       - ./bot_ttv/src:/app/src
       - ./bot_ttv/main.py:/app/main.py
@@ -171,7 +171,7 @@ services:
     depends_on:
       - backend
     env_file:
-      - ./bot_da/.docker.env
+      - ./bot_da/.env
     volumes:
       - ./bot_da/src:/app/src
     networks:
