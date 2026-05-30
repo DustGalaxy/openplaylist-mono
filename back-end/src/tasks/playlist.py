@@ -1,27 +1,22 @@
 from uuid import UUID
 
-from fastapi.logger import logger
-
 from database import async_session_maker
 from taskiq_broker import task_broker as taskiq_broker
 
-
-from adapters._rabbit.event_broker import broker as rabbit_broker
-from adapters._rabbit.event_broker import main_exchange
 from adapters._redis.broker import get_broker
-from dto.events import Deleted, Moved, OrderCreated, PlaylistTrackAdded, PlayNow, Private
-from dto.order import OrderUpdate
+from dto.events import Deleted, Moved, PlayNow, Private
 from dto.settings import ReadPlaylistSettings
 from services.playlist_service import add_to_playlist
 from services_low.playlist import playlist_service
 from services.sio_service import sio_service
 from models.order import OrderCreate, OrderDomain
-from models.playlist_logs import PlaylistLogCreate
 
-from dal.postgres.playlist_logs import get_playlist_logs_repository as pl_logs
+# from models.playlist_logs import PlaylistLogCreate
+# from dal.postgres.playlist_logs import get_playlist_logs_repository as pl_logs
+
 from dal.postgres_impl import user_repository, playlist_settings_repository
 
-from _types import PlaylistLogsEventTypes
+# from _types import PlaylistLogsEventTypes
 from utils import kick, conditional_trace
 
 
@@ -90,39 +85,40 @@ async def handle_order_created(
                 playlist_id,
             )
 
-            await kick(
-                "playlist.log",
-                taskiq_broker,
-                await pl_logs().create(
-                    db_session,
-                    PlaylistLogCreate(
-                        user_id=typed_payload.owner_id,
-                        playlist_id=playlist_id,
-                        event_type=PlaylistLogsEventTypes.ADD_TRACK,
-                        event_data={
-                            "details": f"Track '{typed_payload.title}' added to playlist",
-                            "by_owner": typed_payload.from_owner,
-                        },
-                    ),
-                ),
-            )
+            # await kick(
+            #     "playlist.log",
+            #     taskiq_broker,
+            #     await pl_logs().create(
+            #         db_session,
+            #         PlaylistLogCreate(
+            #             user_id=typed_payload.owner_id,
+            #             playlist_id=playlist_id,
+            #             event_type=PlaylistLogsEventTypes.ADD_TRACK,
+            #             event_data={
+            #                 "details": f"Track '{typed_payload.title}' added to playlist",
+            #                 "by_owner": typed_payload.from_owner,
+            #             },
+            #         ),
+            #     ),
+            # )
 
         for error_list, playlist_name, playlist_id in errors:
-            await kick(
-                "playlist.log",
-                taskiq_broker,
-                await pl_logs().create(
-                    db_session,
-                    PlaylistLogCreate(
-                        user_id=typed_payload.owner_id,
-                        playlist_id=playlist_id,
-                        event_type=PlaylistLogsEventTypes.ERROR,
-                        event_data={
-                            "details": f"Failed to add track '{typed_payload.title}' to playlist '{playlist_name}': {'; '.join(error_list)}.",
-                            "by_owner": typed_payload.from_owner,
-                        },
-                    ),
-                ),
-            )
+            # await kick(
+            #     "playlist.log",
+            #     taskiq_broker,
+            #     await pl_logs().create(
+            #         db_session,
+            #         PlaylistLogCreate(
+            #             user_id=typed_payload.owner_id,
+            #             playlist_id=playlist_id,
+            #             event_type=PlaylistLogsEventTypes.ERROR,
+            #             event_data={
+            #                 "details": f"Failed to add track '{typed_payload.title}' to playlist '{playlist_name}': {'; '.join(error_list)}.",
+            #                 "by_owner": typed_payload.from_owner,
+            #             },
+            #         ),
+            #     ),
+            # )
+            ...
 
     return tracks, errors

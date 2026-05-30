@@ -12,7 +12,7 @@ from dto.playlist import (
 )
 from models.playlist import PlaylistPatch, PlaylistSchema
 from models.settings import SettingsSchema
-from services.playlist_log import playlist_log_service
+# from services.playlist_log import playlist_log_service
 
 
 from utils import kick, find
@@ -207,13 +207,13 @@ async def set_play_now_for_playlist(
         order = await service.set_play_now(db_session, playlist_id, playnow.track_id, current_user)
 
         await kick("playlist.track.playnow", task_broker, playnow)
-        await playlist_log_service.log_and_emit(
-            db_session,
-            current_user.id,
-            playlist_id,
-            PlaylistLogsEventTypes.PLAY_TRACK,
-            {"details": f"Update current playing track to {order.title}", "platform": order.source, "by_owner": order.from_owner},
-        )
+        # await playlist_log_service.log_and_emit(
+        #     db_session,
+        #     current_user.id,
+        #     playlist_id,
+        #     PlaylistLogsEventTypes.PLAY_TRACK,
+        #     {"details": f"Update current playing track to {order.title}", "platform": order.source, "by_owner": order.from_owner},
+        # )
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")
 
