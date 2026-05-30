@@ -6,3 +6,4 @@ src
 *.md
 .env
 .env.*
+*.env

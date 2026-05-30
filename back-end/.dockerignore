@@ -4,6 +4,7 @@ dist
 .git
 .vscode
 .venv
+*.env
 test
 __pycache__
 Dockerfile*

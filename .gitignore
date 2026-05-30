@@ -15,6 +15,7 @@ __pycache__*
 *.pem
 *.log
 *.db
+*.env
 *.sqlite3
 *.__pycache__
 .history/
