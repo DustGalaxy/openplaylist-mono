@@ -15,6 +15,7 @@ import reportWebVitals from './reportWebVitals.ts'
 declare global {
   interface Window {
     appConfig: {
+      PROJECT_DOMAIN: string
       WS_API_URL: string
       SOCKET_PATH: string
       PLST_API_URL: string
@@ -29,18 +30,40 @@ declare global {
     }
   }
 }
+
+const PROJECT_DOMAIN = 'openplaylist.midnull.space'
+
+// # API URLы (Если бэкенд в том же докере, можно слать через прокси)
+// WS_URL='https://openplaylist.localhost'
+// SOCKET_PATH='/api/socket.io'
+// PLST_URL='https://openplaylist.localhost/api/playlist'
+// SETTINGS_URL='https://openplaylist.localhost/api/settings'
+// AUTH_URL='https://openplaylist.localhost/api'
+// ORDER_URL='https://openplaylist.localhost/api/order'
+
+// # Twitch Settings
+// TWITCH_ID='vsil95c2am4rgvbgdax1o4a1u003mx'
+// TWITCH_REDIRECT='https://openplaylist.localhost/oauth-callback'
+// TWITCH_SCOPES='user:read:email'
+
+// # DonationAlerts Settings
+// DA_CLIENT_ID="18779"
+// DA_REDIRECT_URI="http://openplaylist.localhost/oauth-callback"
+// DA_SCOPES="oauth-user-show oauth-donation-subscribe"
+
 window.appConfig ??= {
-  WS_API_URL: import.meta.env.VITE_WS_API_URL,
-  SOCKET_PATH: import.meta.env.VITE_SOCKET_PATH,
-  PLST_API_URL: import.meta.env.VITE_PLST_API_URL,
-  AUTH_API_URL: import.meta.env.VITE_AUTH_API_URL,
-  ORDER_API_URL: import.meta.env.VITE_ORDER_API_URL,
-  TWITCH_CLIENT_ID: import.meta.env.VITE_TWITCH_CLIENT_ID,
-  TWITCH_REDIRECT_URI: import.meta.env.VITE_TWITCH_REDIRECT_URI,
-  TWITCH_SCOPES: import.meta.env.VITE_TWITCH_SCOPES,
-  DA_CLIENT_ID: import.meta.env.VITE_DA_CLIENT_ID,
-  DA_REDIRECT_URI: import.meta.env.VITE_DA_REDIRECT_URI,
-  DA_SCOPES: import.meta.env.VITE_DA_SCOPES,
+  PROJECT_DOMAIN: PROJECT_DOMAIN,
+  WS_API_URL: `https://${PROJECT_DOMAIN}`,
+  SOCKET_PATH: '/api/socket.io',
+  PLST_API_URL: `https://${PROJECT_DOMAIN}/api/playlist`,
+  AUTH_API_URL: `https://${PROJECT_DOMAIN}/api`,
+  ORDER_API_URL: `https://${PROJECT_DOMAIN}/api/order`,
+  TWITCH_CLIENT_ID: 'vsil95c2am4rgvbgdax1o4a1u003mx',
+  TWITCH_REDIRECT_URI: `https://${PROJECT_DOMAIN}/oauth-callback`,
+  TWITCH_SCOPES: 'user:read:email',
+  DA_CLIENT_ID: '18779',
+  DA_REDIRECT_URI: `http://${PROJECT_DOMAIN}/oauth-callback`,
+  DA_SCOPES: 'oauth-user-show oauth-donation-subscribe',
 }
 registerAuthStrategies()
 // Create a new router instance

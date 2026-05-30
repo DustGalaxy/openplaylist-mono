@@ -181,18 +181,6 @@ services:
     build:
       context: ./new_ui
       dockerfile: Dockerfile
-      args:
-        - VITE_WS_API_URL=${WS_URL}
-        - VITE_SOCKET_PATH=${SOCKET_PATH}
-        - VITE_PLST_API_URL=${PLST_URL}
-        - VITE_AUTH_API_URL=${AUTH_URL}
-        - VITE_ORDER_API_URL=${ORDER_URL}
-        - VITE_TWITCH_CLIENT_ID=${TWITCH_ID}
-        - VITE_TWITCH_REDIRECT_URI=${TWITCH_REDIRECT}
-        - VITE_TWITCH_SCOPES=${TWITCH_SCOPES}
-        - VITE_DA_CLIENT_ID=${DA_CLIENT_ID}
-        - VITE_DA_REDIRECT_URI=${DA_REDIRECT_URI}
-        - VITE_DA_SCOPES=${DA_SCOPES}
     depends_on:
       - traefik
     labels:
