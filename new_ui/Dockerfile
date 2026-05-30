@@ -1,44 +1,15 @@
-# Этап 1: Сборка
-FROM node:20-alpine AS build
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm install
-
-# Переменные окружения для Vite (должны начинаться с VITE_)
-ARG VITE_WS_API_URL
-ARG VITE_SOCKET_PATH
-ARG VITE_PLST_API_URL
-ARG VITE_AUTH_API_URL
-ARG VITE_ORDER_API_URL
-ARG VITE_TWITCH_CLIENT_ID
-ARG VITE_TWITCH_REDIRECT_URI
-ARG VITE_TWITCH_SCOPES
-ARG VITE_DA_CLIENT_ID
-ARG VITE_DA_REDIRECT_URI
-ARG VITE_DA_SCOPES
-
-# Переводим ARG в ENV, чтобы Vite подхватил их при выполнении npm run build
-ENV VITE_WS_API_URL=$VITE_WS_API_URL
-ENV VITE_SOCKET_PATH=$VITE_SOCKET_PATH
-ENV VITE_PLST_API_URL=$VITE_PLST_API_URL
-ENV VITE_AUTH_API_URL=$VITE_AUTH_API_URL
-ENV VITE_ORDER_API_URL=$VITE_ORDER_API_URL
-ENV VITE_TWITCH_CLIENT_ID=$VITE_TWITCH_CLIENT_ID
-ENV VITE_TWITCH_REDIRECT_URI=$VITE_TWITCH_REDIRECT_URI
-ENV VITE_TWITCH_SCOPES=$VITE_TWITCH_SCOPES
-ENV VITE_DA_CLIENT_ID=$VITE_DA_CLIENT_ID
-ENV VITE_DA_REDIRECT_URI=$VITE_DA_REDIRECT_URI
-ENV VITE_DA_SCOPES=$VITE_DA_SCOPES
-
-COPY . .
-RUN npm run build
-
-# Этап 2: Раздача статики
+# Serves pre-built static assets from ./dist (build locally or in CI before image build).
+#   cd new_ui && npm ci && npm run build
+#   docker compose build frontend
 FROM nginx:stable-alpine
-# Копируем билд из первого этапа
-COPY --from=build /app/dist /usr/share/nginx/html
-# Копируем конфиг Nginx (чтобы работал React Router)
+
+RUN apk add --no-cache gettext
+
+COPY dist /usr/share/nginx/html
+COPY public/config.js.template /usr/share/nginx/html/config.js.template
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/entrypoint.sh"]

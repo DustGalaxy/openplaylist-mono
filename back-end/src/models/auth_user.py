@@ -18,7 +18,7 @@ class AuthUserSchema(BaseModel):
     vip_expires_at: datetime | None = None
     is_active: bool
 
-    linked_accounts: list[LinkedAccountsDomain]
+    linked_accounts: list[LinkedAccountsDomain] = Field(default_factory=list)
     social_links: dict[str, str] | None = None
 
 

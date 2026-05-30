@@ -15,18 +15,9 @@ import {
   REDIRECT_AFTER_LOGIN_KEY,
   getConfig,
 } from '@/lib/utils'
+import type { UserProfile } from '@/types/user'
 
-interface UserProfile {
-  id: string
-  username: string
-  email?: string
-  email_confirmed: boolean
-  curr_platform: string
-  profile_image_url: string
-  // ... другие данные
-}
-
-interface BackendUserProfileResponse {
+export interface BackendUserProfileResponse {
   user: UserProfile | null
   expired_at: number | null
 }
