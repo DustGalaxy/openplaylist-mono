@@ -5,10 +5,11 @@ from simple_repository import crud_factory
 from simple_repository.abctract import IdValue
 from simple_repository.exceptions import IntegrityConflictException, RepositoryException, NotFoundException
 
-from sqlalchemy import func, literal, or_, select, update
+from sqlalchemy import func, literal, or_, select, update, cast
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 
 from models.playlist import PlaylistSchema, PlaylistCreate, PlaylistPatch
 from orm.playlist import OrderPlaylistStatus, Playlist, Order
@@ -62,7 +63,7 @@ class PlaylistRepository(
         return data.model_dump(exclude_unset=True)
 
     async def get_play_now(self, session: AsyncSession, playlist_id: UUID) -> OrderDomain:
-        stmt = select(Order).where(Playlist.id == playlist_id, Playlist.now_playing == Order.id)
+        stmt = select(Order).where(Playlist.id == playlist_id, cast(Playlist.now_playing, PostgresUUID) == Order.id)
         result = await session.execute(stmt)
         result = result.unique().scalar_one_or_none()
         if not result:
