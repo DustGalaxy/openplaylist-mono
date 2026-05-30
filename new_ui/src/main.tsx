@@ -31,7 +31,7 @@ declare global {
   }
 }
 
-const PROJECT_DOMAIN = 'openplaylist.midnull.space'
+const PROJECT_DOMAIN = window.location.origin
 
 // # API URLы (Если бэкенд в том же докере, можно слать через прокси)
 // WS_URL='https://openplaylist.localhost'
@@ -53,16 +53,16 @@ const PROJECT_DOMAIN = 'openplaylist.midnull.space'
 
 window.appConfig ??= {
   PROJECT_DOMAIN: PROJECT_DOMAIN,
-  WS_API_URL: `https://${PROJECT_DOMAIN}`,
+  WS_API_URL: `${PROJECT_DOMAIN}`,
   SOCKET_PATH: '/api/socket.io',
-  PLST_API_URL: `https://${PROJECT_DOMAIN}/api/playlist`,
-  AUTH_API_URL: `https://${PROJECT_DOMAIN}/api`,
-  ORDER_API_URL: `https://${PROJECT_DOMAIN}/api/order`,
+  PLST_API_URL: `${PROJECT_DOMAIN}/api/playlist`,
+  AUTH_API_URL: `${PROJECT_DOMAIN}/api`,
+  ORDER_API_URL: `${PROJECT_DOMAIN}/api/order`,
   TWITCH_CLIENT_ID: 'vsil95c2am4rgvbgdax1o4a1u003mx',
-  TWITCH_REDIRECT_URI: `https://${PROJECT_DOMAIN}/oauth-callback`,
+  TWITCH_REDIRECT_URI: `${PROJECT_DOMAIN}/oauth-callback`,
   TWITCH_SCOPES: 'user:read:email',
   DA_CLIENT_ID: '18779',
-  DA_REDIRECT_URI: `http://${PROJECT_DOMAIN}/oauth-callback`,
+  DA_REDIRECT_URI: `${PROJECT_DOMAIN}/oauth-callback`,
   DA_SCOPES: 'oauth-user-show oauth-donation-subscribe',
 }
 registerAuthStrategies()
