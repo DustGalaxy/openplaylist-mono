@@ -1,5 +1,8 @@
 node_modules
-build
+src
 .git
 .vscode
 .tanstack
+*.md
+.env
+.env.*

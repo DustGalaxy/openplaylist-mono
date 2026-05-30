@@ -29,7 +29,7 @@ declare global {
     }
   }
 }
-window.appConfig = {
+window.appConfig ??= {
   WS_API_URL: import.meta.env.VITE_WS_API_URL,
   SOCKET_PATH: import.meta.env.VITE_SOCKET_PATH,
   PLST_API_URL: import.meta.env.VITE_PLST_API_URL,
