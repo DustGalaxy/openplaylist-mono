@@ -107,7 +107,7 @@ class AuthService:
 
         get_broker().set(
             f"email_comfirmation:{email}:{session_id}",
-            "True",
+            True,
             ex=600,
         )
         await send_email.kiq(

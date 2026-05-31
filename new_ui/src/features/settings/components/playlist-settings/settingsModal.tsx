@@ -12,11 +12,8 @@ import TabChatPlatformRoles from './tabChatPlatformRoles.tsx'
 import TabBlock from './tabBlock'
 
 import TabDonation from './tabDonation.tsx'
-import type {
-  ClientPlaylist,
-  PlaylistPatch,
-  PlaylistSettings,
-} from '@/types/playlist'
+import type { ClientPlaylist, PlaylistPatch, PlaylistSettings } from '@/types/playlist'
+import { usePlaylist } from '@/features/playlist/context/playlist-context'
 import {
   Dialog,
   DialogContent,
@@ -29,11 +26,8 @@ import useMusicStore from '@/stores/musicStore'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import { deletePlaylist } from '@/api/api-playlist'
 
-export default function SettingsModal({
-  playlist,
-}: {
-  playlist: ClientPlaylist
-}) {
+export default function SettingsModal() {
+  const playlist = usePlaylist()
   const [settings, setSettings] = React.useState<PlaylistSettings>()
   const [plst, setPlst] = React.useState<ClientPlaylist>()
 

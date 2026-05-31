@@ -4,27 +4,43 @@ import PriorityChip from '@/components/ui/priority-chip'
 
 import Add from '@/components/icons/icon-add'
 import Copy from '@/components/icons/icon-copy'
-import Warning from '@/components/icons/icon-warning'
 import Person from '@/components/icons/icon-person'
 import DurationChip from '@/components/ui/duration-chip'
 import Save from '@/components/icons/icon-save'
 
 import type { Track } from '@/types/playlist'
 import { formatTime } from '@/lib/utils'
+import { useSavedStore } from '@/stores/savedStore'
+import WarningModal from './warningModal'
+
 
 export default function PlayNowCard({ track }: { track: Track }) {
   const bgUrl = `https://img.youtube.com/vi/${track.yt_video_id}/mqdefault.jpg`
+  const { isSaved, addTrack, removeTrack } = useSavedStore()
+
 
   const nonPlaylistButtons = [
     {
       icon: <Copy />,
-      on_click: () => console.log('Copy clicked'),
+      on_click: async () => await navigator.clipboard.writeText(
+        'https://www.youtube.com/watch?v=' + track.yt_video_id,
+      ),
       glow: 'white',
       className: 'px-1 bg-level-2',
     },
     {
-      icon: <Save />,
-      on_click: () => console.log('Save clicked'),
+      icon: <Save fill={isSaved(track.yt_video_id) ? '#FFFFFF' : 'none'} />,
+      on_click: () => {
+        if (isSaved(track.yt_video_id)) {
+          removeTrack(track.yt_video_id)
+        } else {
+          addTrack({
+            yt_video_id: track.yt_video_id,
+            title: track.title,
+            duration: track.duration,
+          })
+        }
+      },
       glow: 'white',
       className: 'px-1 bg-level-2',
     },
@@ -32,12 +48,6 @@ export default function PlayNowCard({ track }: { track: Track }) {
       icon: <Add />,
       on_click: () => console.log('Add clicked'),
       glow: 'white',
-      className: 'px-1 bg-level-2',
-    },
-    {
-      icon: <Warning />,
-      on_click: () => console.log('Warning clicked'),
-      glow: 'red',
       className: 'px-1 bg-level-2',
     },
   ]
@@ -146,6 +156,12 @@ export default function PlayNowCard({ track }: { track: Track }) {
                       onClick={btn.on_click}
                     />
                   ))}
+                  <WarningModal
+                    yt_video_id={track.yt_video_id}
+                    requester_nickname={track.requester_nickname}
+                    requester_platform={track.source}
+                    track_id={track.id}
+                  />
                 </div>
                 <div className="flex gap-2">
                   <DateChip date={track.created_at || ''} />

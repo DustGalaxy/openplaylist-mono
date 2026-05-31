@@ -5,7 +5,7 @@ WORKDIR /app
 # Устанавливаем uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-COPY pyproject.toml uv.lock .env ./
+COPY pyproject.toml uv.lock ./
 
 RUN uv sync --frozen --no-cache --no-dev
 

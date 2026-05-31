@@ -43,6 +43,10 @@ import {
 } from '@/features/landing/styles'
 import { cn } from '@/lib/utils'
 import { Platform } from '@/types/playlist'
+import {
+  PlaylistProvider,
+  usePlaylist,
+} from '@/features/playlist/context/playlist-context'
 function InfoCard({
   icon,
   label,
@@ -72,6 +76,15 @@ function InfoCard({
 }
 
 export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
+  return (
+    <PlaylistProvider playlist={playlist}>
+      <PlaylistView />
+    </PlaylistProvider>
+  )
+}
+
+function PlaylistView() {
+  const playlist = usePlaylist()
   const [toggled, setToggled] = React.useState(false)
   const [activePlst, setActivePlst] = React.useState(
     playlist.is_allow_external_requests,
@@ -117,7 +130,6 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
     <div className="w-full flex flex-col gap-3">
       <div className="w-full grid gap-4 grid-cols-1  grid-rows-[auto_auto_auto] ">
         <YoutubePlayer
-          playlist={playlist}
           playOnReady={true}
           nowPlay={nowPlaying}
           className="sm:row-span-2 flex items-center justify-center"
@@ -259,7 +271,7 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
                   playNext(playlist, 'skipped')
                 }}
               />
-              <SettingsModal playlist={playlist} />
+              <SettingsModal />
             </div>
           </div>
         </div>
@@ -285,14 +297,11 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
 
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
         <div className="flex w-full min-w-0 gap-2">
-          <PlaylistQueueInput
-            playlist={playlist}
-            onSearchQueryChange={setQueueSearch}
-          />
+          <PlaylistQueueInput onSearchQueryChange={setQueueSearch} />
         </div>
         <div className="flex gap-2 shrink-0">
 
-          <SortPanel playlist={playlist} />
+          <SortPanel />
           <Btn
             text={toggled ? <RightPanel /> : <LeftPanel />}
 
@@ -318,7 +327,7 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
               [@container_(width_<_600px)]:hidden
               [@container_(width_>=_600px)]:flex"
             >
-              <SavedList playlist={playlist} />
+              <SavedList />
             </div>
 
             <div
@@ -326,7 +335,7 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
               [@container_(width_<_600px)]:flex
               [@container_(width_>=_600px)]:hidden"
             >
-              <SavedList playlist={playlist} />
+              <SavedList />
             </div>
           </div>
         </div>
@@ -340,12 +349,7 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
             {playlist.track_data.length > 0 ? (
               visibleTracks.length > 0 ? (
                 visibleTracks.map((track) => (
-                  <OrderCard
-                    key={track.id}
-                    track={track}
-                    playlist={playlist}
-                    btns_type="playlist"
-                  />
+                  <OrderCard key={track.id} track={track} btns_type="playlist" />
                 ))
               ) : (
                 <p className="text-sm text-text-secondary py-8 text-center w-full">
@@ -369,7 +373,6 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
                   <OrderMiniCard
                     key={track.id}
                     track={track}
-                    playlist={playlist}
                     btns_type="playlist"
                   />
                 ))

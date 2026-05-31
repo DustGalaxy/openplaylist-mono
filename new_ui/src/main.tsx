@@ -16,6 +16,7 @@ declare global {
   interface Window {
     appConfig: {
       PROJECT_DOMAIN: string
+      BACKEND_DOMAIN: string
       WS_API_URL: string
       SOCKET_PATH: string
       PLST_API_URL: string
@@ -32,6 +33,7 @@ declare global {
 }
 
 const PROJECT_DOMAIN = window.location.origin
+const BACKEND_DOMAIN = import.meta.env.DEV ? "http://localhost:8000" : PROJECT_DOMAIN
 
 // # API URLы (Если бэкенд в том же докере, можно слать через прокси)
 // WS_URL='https://openplaylist.localhost'
@@ -53,11 +55,12 @@ const PROJECT_DOMAIN = window.location.origin
 
 window.appConfig = {
   PROJECT_DOMAIN: PROJECT_DOMAIN,
-  WS_API_URL: `${PROJECT_DOMAIN}`,
+  BACKEND_DOMAIN,
+  WS_API_URL: `${BACKEND_DOMAIN}`,
   SOCKET_PATH: '/api/socket.io',
-  PLST_API_URL: `${PROJECT_DOMAIN}/api/playlist`,
-  AUTH_API_URL: `${PROJECT_DOMAIN}/api`,
-  ORDER_API_URL: `${PROJECT_DOMAIN}/api/order`,
+  PLST_API_URL: `${BACKEND_DOMAIN}/api/playlist`,
+  AUTH_API_URL: `${BACKEND_DOMAIN}/api`,
+  ORDER_API_URL: `${BACKEND_DOMAIN}/api/order`,
   TWITCH_CLIENT_ID: 'vsil95c2am4rgvbgdax1o4a1u003mx',
   TWITCH_REDIRECT_URI: `${PROJECT_DOMAIN}/oauth-callback`,
   TWITCH_SCOPES: 'user:read:email',

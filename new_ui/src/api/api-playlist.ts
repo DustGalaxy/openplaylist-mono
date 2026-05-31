@@ -233,3 +233,40 @@ export const unBlockUser = async (playlist_id: string, id: string) => {
   )
   return response.status === 204
 }
+
+/** Payload for playlist track/user reports (server endpoint TBD). */
+export type PlaylistReportPayload = {
+  playlist_id: string
+  settings_id: string
+  yt_video_id: string
+  track_id?: string
+  requester_nickname: string
+  requester_id?: string
+  platform: string
+  reason: string
+  block_user: boolean
+  block_track: boolean
+}
+
+/**
+ * Submits a moderation report. Endpoint is prepared for backend wiring;
+ * failures are non-fatal for local block/remove actions.
+ */
+export const submitPlaylistReport = async (
+  payload: PlaylistReportPayload,
+): Promise<boolean> => {
+  const config = getConfig()
+  try {
+    await apiClient(
+      config.AUTH_API_URL + `/settings/${payload.playlist_id}/reports`,
+      {
+        method: 'POST',
+        withCredentials: true,
+        data: removeNullAndUndefined(payload),
+      },
+    )
+    return true
+  } catch {
+    return false
+  }
+}

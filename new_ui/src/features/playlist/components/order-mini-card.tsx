@@ -12,7 +12,8 @@ import Person from '@/components/icons/icon-person'
 import DurationChip from '@/components/ui/duration-chip'
 import Save from '@/components/icons/icon-save'
 
-import type { ClientPlaylist, Track } from '@/types/playlist'
+import type { Track } from '@/types/playlist'
+import { usePlaylist } from '@/features/playlist/context/playlist-context'
 import type { SavedTrack } from '@/stores/savedStore'
 import { useMusicStore } from '@/stores/musicStore'
 import { useSavedStore } from '@/stores/savedStore'
@@ -20,16 +21,15 @@ import { toast } from 'sonner'
 
 export default function OrderMiniCard({
   track,
-  playlist,
   btns_type = 'playlist',
 }: {
   track: Track | SavedTrack
-  playlist: ClientPlaylist
   btns_type?: 'playlist' | 'non-playlist'
 }) {
+  const playlist = usePlaylist()
   const bgUrl = `https://img.youtube.com/vi/${track.yt_video_id}/mqdefault.jpg`
   const [hovered, setHovered] = React.useState(false)
-  const { requestPlayNow, requestAddTrack } = useMusicStore()
+  const { requestPlayNow, requestAddTrack, requestRemoveTrack } = useMusicStore()
   const { isSaved, addTrack, removeTrack } = useSavedStore()
 
   const playlistButtons = [
@@ -70,7 +70,7 @@ export default function OrderMiniCard({
     },
     {
       icon: <Trash />,
-      on_click: () => console.log('Trash clicked'),
+      on_click: () => requestRemoveTrack(playlist.id, track.id, 'removed'),
       className: 'px-1 bg-level-2',
       glow: 'red',
     },

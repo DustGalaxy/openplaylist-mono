@@ -1,6 +1,7 @@
 import { toast } from 'sonner'
 import WarningModal from './warningModal'
-import type { ClientPlaylist, Track } from '@/types/playlist'
+import type { Track } from '@/types/playlist'
+import { usePlaylist } from '@/features/playlist/context/playlist-context'
 import DateChip from '@/components/ui/date-chip'
 import Btn from '@/components/ui/my-btn'
 
@@ -19,13 +20,12 @@ import { useSavedStore } from '@/stores/savedStore'
 
 export default function OrderCard({
   track,
-  playlist,
   btns_type = 'playlist',
 }: {
   track: Track
-  playlist: ClientPlaylist
   btns_type?: 'playlist' | 'non-playlist'
 }) {
+  const playlist = usePlaylist()
   const { playNext, requestRemoveTrack, requestAddTrack } = useMusicStore()
   const { isSaved, addTrack, removeTrack } = useSavedStore()
   const playlistButtons = [
@@ -164,9 +164,10 @@ export default function OrderCard({
                   />
                 ))}
                 <WarningModal
-                  playlist={playlist}
                   yt_video_id={track.yt_video_id}
                   requester_nickname={track.requester_nickname}
+                  requester_platform={track.source}
+                  track_id={track.id}
                 />
               </div>
               <div className="flex gap-2">

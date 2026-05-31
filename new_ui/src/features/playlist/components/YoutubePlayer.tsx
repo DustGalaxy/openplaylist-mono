@@ -1,24 +1,23 @@
 /* eslint-disable import/no-duplicates */
-import React, { useContext, useEffect } from 'react'
+import React from 'react'
 import YouTube from 'react-youtube'
 import type { YouTubeEvent, YouTubeProps } from 'react-youtube'
-import type { ClientPlaylist } from '@/types/playlist'
 import useWindowDimensions from '@/hooks/useWindowDimensions'
 import useMusicStore from '@/stores/musicStore'
+import { usePlaylist } from '@/features/playlist/context/playlist-context'
 
 type YoutubePlayerProps = {
-  playlist: ClientPlaylist
   nowPlay: string | undefined
   playOnReady?: boolean
   className?: string
 }
 
 const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
-  playlist,
   nowPlay,
   playOnReady = true,
   className = '',
 }) => {
+  const playlist = usePlaylist()
   const { height, width } = useWindowDimensions()
   const { playNext } = useMusicStore()
 

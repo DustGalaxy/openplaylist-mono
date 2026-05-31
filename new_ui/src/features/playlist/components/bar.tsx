@@ -2,8 +2,8 @@ import { useState, type ChangeEvent, type FormEvent, type ReactNode } from 'reac
 import { Plus, Search } from 'lucide-react'
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
-import type { ClientPlaylist } from '@/types/playlist'
 import useMusicStore from '@/stores/musicStore'
+import { usePlaylist } from '@/features/playlist/context/playlist-context'
 import {
   filterTabActiveClass,
   filterTabBaseClass,
@@ -42,12 +42,11 @@ function ModeButton({
 }
 
 export function PlaylistQueueInput({
-  playlist,
   onSearchQueryChange,
 }: {
-  playlist: ClientPlaylist
   onSearchQueryChange: (query: string) => void
 }) {
+  const playlist = usePlaylist()
   const [mode, setMode] = useState<InputMode>('add')
   const [value, setValue] = useState('')
   const { requestAddTrack } = useMusicStore()

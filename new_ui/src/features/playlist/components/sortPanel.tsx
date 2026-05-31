@@ -3,8 +3,9 @@ import Priority from '@/components/icons/icon-priority'
 import DateOutline from '@/components/icons/icon-date'
 import Arrow from '@/components/icons/icon-arrow'
 import Shuffle from '@/components/icons/icon-shuffle'
-import type { ClientPlaylist, SortSettings } from '@/types/playlist'
+import type { SortSettings } from '@/types/playlist'
 import useMusicStore from '@/stores/musicStore'
+import { usePlaylist } from '@/features/playlist/context/playlist-context'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import { cn } from '@/lib/utils'
 
@@ -97,7 +98,8 @@ const DirectionButton = ({
   )
 }
 
-export default function SortPanel({ playlist }: { playlist: ClientPlaylist }) {
+export default function SortPanel() {
+  const playlist = usePlaylist()
   const { requestPlSettings } = useMusicStore()
   const setPlaylist = useMusicStore((s) => s.setPlaylist)
   const [sortSettings, setSortSettings] = React.useState<SortSettings>(
