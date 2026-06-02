@@ -27,6 +27,9 @@ async def kick(task_name: str, broker, *args, labels=None, **kwargs):
     return await kicker.kiq(*args, **kwargs)
 
 
+def parse_ISO_8601(s: str) -> int:
+    return int(datetime.fromisoformat(s).timestamp())
+
 def extract_youtube_video_id(url: str) -> str | None:
     """
     Examples:
@@ -34,11 +37,12 @@ def extract_youtube_video_id(url: str) -> str | None:
     - http://www.youtube.com/watch?v=_oPAwA_Udwc&feature=feedu
     - http://www.youtube.com/embed/SA2iWivDJiE
     - http://www.youtube.com/v/SA2iWivDJiE?version=3&amp;hl=en_US
+    - https://music.youtube.com/watch?v=SA2iWivDJiE
     """
     query = parse.urlparse(url)
     if query.hostname == "youtu.be":
         return query.path[1:]
-    if query.hostname in ("www.youtube.com", "youtube.com", "m.youtube.com"):
+    if query.hostname in ("www.youtube.com", "youtube.com", "m.youtube.com", "music.youtube.com"):
         if query.path == "/watch":
             p = parse.parse_qs(query.query)
             return p["v"][0]

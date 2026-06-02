@@ -2,65 +2,119 @@ import re
 import json
 from typing import Union
 
-from pytubefix import YouTube, extract
+from pytubefix import YouTube
+import requests
 
 from adapters._redis.broker import get_broker
 from dto.order import WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder
 from models.order import OrderCreate, STRATEGIES
 
+from utils import extract_youtube_video_id, parse_ISO_8601
+from settings import settings
+
 
 class OrderService:
+    def get_data_from_pytube(self, url):
+        yt = YouTube(url)
+        try:
+            first_part = yt.initial_data["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][0]
+            second_part = first_part.get("videoPrimaryInfoRenderer") or first_part.get("videoSecondaryInfoRenderer")
+
+            likes = second_part["videoActions"]["menuRenderer"]["topLevelButtons"][0][
+                "segmentedLikeDislikeButtonViewModel"
+            ]["likeButtonViewModel"]["likeButtonViewModel"]["toggleButtonViewModel"]["toggleButtonViewModel"][
+                "defaultButtonViewModel"
+            ]["buttonViewModel"]["accessibilityText"]
+
+            likes_text = likes
+            like_template = r"like this video along with (.*?) other people"
+            text = str(likes_text)
+            matches = re.findall(like_template, text, re.MULTILINE)
+            likes = None
+            if len(matches) >= 1:
+                like_str = matches[0]
+                likes = int(like_str.replace(",", ""))
+        except Exception:
+            likes = None
+
+        return {
+            "title": yt.title,
+            "length": yt.length,
+            "likes": likes if likes else 0,
+            "views": yt.views,
+        }
+
+    def get_data_from_youtube_api(self, video_id, api_key) -> dict:
+        # URL официального эндпоинта для работы с видео
+        url = "https://www.googleapis.com/youtube/v3/videos"
+
+        # Формируем параметры запроса
+        params = {
+            # Перечисляем через запятую все категории данных, которые хотим забрать
+            "part": "snippet,statistics,status,contentDetails",
+            "id": video_id,
+            "key": api_key,
+        }
+
+        # Выполняем GET-запрос
+        response = requests.get(url, params=params)
+
+        # Если Google вернул ошибку (например, 403 Forbidden из-за квот),
+        # этот метод вызовет исключение, которое перехватит ваша гибридная функция
+        response.raise_for_status()
+
+        json_data = response.json()
+
+        # Проверяем, нашлось ли видео (если ID неверный, список items будет пустым)
+        if not json_data.get("items"):
+            raise ValueError("Invalid YouTube video URL")
+
+        video_item = json_data["items"][0]
+
+        # Собираем чистый словарь с данными
+        return {
+            "title": video_item["snippet"]["title"],
+            "author": video_item["snippet"]["channelTitle"],
+            "embeddable": video_item["status"]["embeddable"],
+            "views": int(video_item["statistics"].get("viewCount", 0)),
+            "likes": int(video_item["statistics"].get("likeCount", 0)),
+            "length": parse_ISO_8601(video_item["contentDetails"]["duration"]),  # формат ISO 8601 (например, PT4M13S)
+        }
+
+    def get_from_cache(self, video_id) -> dict:
+        return json.loads(str(get_broker().get(video_id)))
+
+    def save_to_cache(self, video_id, data):
+        return get_broker().set(video_id, json.dumps(data))
+
     async def init_order(
         self, order: Union[WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder], from_owner: bool = False
     ) -> OrderCreate:
-        yt_video_id = extract.video_id(order.yt_video_url)
-        cached_info: str = get_broker().get(yt_video_id)  # pyright: ignore[reportAssignmentType]
+        yt_video_id = extract_youtube_video_id(order.yt_video_url)
+        if not yt_video_id:
+            raise ValueError("Invalid YouTube video URL")
 
-        if not cached_info:
-            yt = YouTube(order.yt_video_url)
+        data: dict = self.get_from_cache(yt_video_id)  # pyright: ignore[reportAssignmentType]
+
+        if not data:
             try:
-                first_part = yt.initial_data["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][
-                    0
-                ]
-                second_part = first_part.get("videoPrimaryInfoRenderer") or first_part.get("videoSecondaryInfoRenderer")
-
-                likes = second_part["videoActions"]["menuRenderer"]["topLevelButtons"][0][
-                    "segmentedLikeDislikeButtonViewModel"
-                ]["likeButtonViewModel"]["likeButtonViewModel"]["toggleButtonViewModel"]["toggleButtonViewModel"][
-                    "defaultButtonViewModel"
-                ]["buttonViewModel"]["accessibilityText"]
-
-                likes_text = likes
-                like_template = r"like this video along with (.*?) other people"
-                text = str(likes_text)
-                matches = re.findall(like_template, text, re.MULTILINE)
-                likes = None
-                if len(matches) >= 1:
-                    like_str = matches[0]
-                    likes = int(like_str.replace(",", ""))
+                if not settings.YOUTUBE_API_KEY:
+                    raise ValueError("YOUTUBE_API_KEY not found")
+                data = self.get_data_from_youtube_api(yt_video_id, settings.YOUTUBE_API_KEY)
+            except requests.HTTPError:
+                data = self.get_data_from_pytube(order.yt_video_url)
             except Exception:
-                likes = None
+                data = self.get_data_from_pytube(order.yt_video_url)
 
-            data = {
-                "title": yt.title,
-                "length": yt.length,
-                "likes": likes if likes else 0,
-                "views": yt.views,
-            }
-
-            get_broker().set(yt_video_id, json.dumps(data))
-
-        else:
-            data = json.loads((cached_info))
+            self.save_to_cache(yt_video_id, data)
 
         print(f"Получен заказ: {order}")
         extra_data = STRATEGIES[order.source].model_validate(order, from_attributes=True)
 
-
         return OrderCreate(
             owner_id=order.owner_id,
             from_owner=from_owner,
-            owner_platform_id=order.owner_platform_id if not isinstance(order, WebNewOrder) else 'web',
+            owner_platform_id=order.owner_platform_id if not isinstance(order, WebNewOrder) else "web",
             requester_id=order.requester_id,
             requester_nickname=order.requester_nickname,
             yt_video_id=yt_video_id,

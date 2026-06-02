@@ -42,6 +42,8 @@ class Settings(BaseSettings):
     RABBITMQ_URL: str = Field(alias="RABBITMQ_URL")
     REDIS_URL: str = Field(alias="REDIS_URL")
 
+    YOUTUBE_API_KEY: str = Field(alias="YOUTUBE_API_KEY")
+
     EMAIL_COMFIRM_ADRESS: str = ""  # Вычисляется динамически
     SMTP_EMAIL_ADDRESS: str = Field(alias="SMTP_EMAIL_ADDRESS", default="midnulltest@gmail.com")
     SMTP_EMAIL_PASSWORD: str = Field(alias="SMTP_EMAIL_PASSWORD")
