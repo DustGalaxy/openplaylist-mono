@@ -1,6 +1,6 @@
 from faststream.rabbit import RabbitMessage
 
-from adapters._rabbit.broker import rabbit_broker, main_exchange, bot_da_connect_request
+from adapters._rabbit.broker import rabbit_broker, main_exchange, bot_da_connect_request, auth_user_da_all_request
 from adapters._rabbit.dto import ConnectionData
 from context import context
 
