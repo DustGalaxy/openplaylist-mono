@@ -26,6 +26,8 @@ bot_da_connect_response = RabbitQueue("bot.da.connect.response", durable=True)
 bot_da_order_new = RabbitQueue("bot.da.order.new", durable=True)
 bot_da_ack_connection = RabbitQueue("bot.da.ack.connection", durable=True)
 
+bot_google_connect_request = RabbitQueue("bot.google.connect.request", durable=True)
+
 playlist_order_created = RabbitQueue("playlist.order.created", durable=True)
 
 playlist_track_playnow = RabbitQueue("playlist.track.playnow", durable=True)

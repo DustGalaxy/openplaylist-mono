@@ -44,6 +44,7 @@ class Settings(BaseSettings):
 
     YOUTUBE_API_KEY: str = Field(alias="YOUTUBE_API_KEY")
 
+    GOOGLE_URL: str = Field(alias="GOOGLE_URL", default="https://oauth2.googleapis.com")
     GOOGLE_CLIENT_ID: str = Field(alias="GOOGLE_CLIENT_ID", default="684341768922-sd9fgqd8l3vhr7e4iep5c3ddqsgboaic.apps.googleusercontent.com")
     GOOGLE_CLIENT_SECRET: str = Field(alias="GOOGLE_CLIENT_SECRET")
     GOOGLE_REDIRECT_URI: str = ""
