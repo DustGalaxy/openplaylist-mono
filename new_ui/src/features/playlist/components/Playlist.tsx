@@ -47,6 +47,7 @@ import {
   PlaylistProvider,
   usePlaylist,
 } from '@/features/playlist/context/playlist-context'
+
 function InfoCard({
   icon,
   label,
@@ -143,12 +144,15 @@ function PlaylistView() {
                   key={setting.platform}
                   type="button"
                   onClick={() => setSelectedContentSettingIndex(index)}
-                  className={`${filterTabBaseClass} ${selectedContentSettingIndex === index
-                    ? filterTabActiveClass
-                    : filterTabInactiveClass
-                    }`}
+                  className={`${filterTabBaseClass} ${
+                    selectedContentSettingIndex === index
+                      ? filterTabActiveClass
+                      : filterTabInactiveClass
+                  }`}
                 >
-                  {setting.platform === Platform.General ? "general" : setting.platform}
+                  {setting.platform === Platform.General
+                    ? 'general'
+                    : setting.platform}
                 </button>
               ))}
             </div>
@@ -300,11 +304,9 @@ function PlaylistView() {
           <PlaylistQueueInput onSearchQueryChange={setQueueSearch} />
         </div>
         <div className="flex gap-2 shrink-0">
-
           <SortPanel />
           <Btn
             text={toggled ? <RightPanel /> : <LeftPanel />}
-
             className="px-2 bg-level-2 hidden sm:block"
             onClick={() => {
               setToggled(!toggled)
@@ -349,7 +351,11 @@ function PlaylistView() {
             {playlist.track_data.length > 0 ? (
               visibleTracks.length > 0 ? (
                 visibleTracks.map((track) => (
-                  <OrderCard key={track.id} track={track} btns_type="playlist" />
+                  <OrderCard
+                    key={track.id}
+                    track={track}
+                    btns_type="playlist"
+                  />
                 ))
               ) : (
                 <p className="text-sm text-text-secondary py-8 text-center w-full">
