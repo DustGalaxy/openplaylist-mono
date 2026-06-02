@@ -40,8 +40,12 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
 
   useEffect(() => {
     if (!playerRef.current) return
-    if (pause) return
-    playerRef.current.pauseVideo()
+    if (pause) {
+      playerRef.current.pauseVideo()
+    } else {
+      playerRef.current.playVideo()
+    }
+    
   }, [pause])
 
   const _onReady = async (event: YouTubeEvent<any>) => {
