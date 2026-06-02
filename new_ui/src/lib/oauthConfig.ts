@@ -1,5 +1,5 @@
 import { getConfig } from '@/lib/utils'
-
+import { authStrategyManager } from './authStrategyManager'
 /**
  * OAuth Platform Configuration
  * Defines how to build OAuth authorization URLs for each platform
@@ -7,7 +7,7 @@ import { getConfig } from '@/lib/utils'
 export interface OAuthPlatformConfig {
   platformName: string
   authorizationUrl: string
-  scopes: string
+  scopes: Array<string>
   clientId: string
   redirectUri: string
 }
@@ -38,6 +38,14 @@ export function getOAuthPlatformConfig(
         authorizationUrl: 'https://www.donationalerts.com/oauth/authorize',
         scopes: config.DA_SCOPES,
         clientId: config.DA_CLIENT_ID,
+        redirectUri,
+      }
+    case 'google':
+      return {
+        platformName: 'Google',
+        authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+        scopes: config.GOOGLE_SCOPES,
+        clientId: config.GOOGLE_CLIENT_ID,
         redirectUri,
       }
 
@@ -76,7 +84,9 @@ export function buildOAuthUrl(
     response_type: 'code',
     client_id: platformConfig.clientId,
     redirect_uri: redirectUri,
-    scope: platformConfig.scopes,
+    scope: authStrategyManager.getLoginStrategy(platform).getScopeString(
+      platformConfig.scopes,
+    ),
     state,
   })
 
@@ -87,7 +97,7 @@ export function buildOAuthUrl(
  * Get all supported OAuth platforms
  */
 export function getSupportedOAuthPlatforms(): string[] {
-  return ['twitch', 'donationalerts']
+  return ['twitch', 'donationalerts', 'google']
   // Update this list when adding new platforms
 }
 

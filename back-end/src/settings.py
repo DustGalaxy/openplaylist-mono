@@ -44,6 +44,10 @@ class Settings(BaseSettings):
 
     YOUTUBE_API_KEY: str = Field(alias="YOUTUBE_API_KEY")
 
+    GOOGLE_CLIENT_ID: str = Field(alias="GOOGLE_CLIENT_ID", default="684341768922-sd9fgqd8l3vhr7e4iep5c3ddqsgboaic.apps.googleusercontent.com")
+    GOOGLE_CLIENT_SECRET: str = Field(alias="GOOGLE_CLIENT_SECRET")
+    GOOGLE_REDIRECT_URI: str = ""
+
     EMAIL_COMFIRM_ADRESS: str = ""  # Вычисляется динамически
     SMTP_EMAIL_ADDRESS: str = Field(alias="SMTP_EMAIL_ADDRESS", default="midnulltest@gmail.com")
     SMTP_EMAIL_PASSWORD: str = Field(alias="SMTP_EMAIL_PASSWORD")
@@ -56,11 +60,12 @@ class Settings(BaseSettings):
         # Если в .env написано MODE=prod, меняем домен (или подтягиваем из другой переменной PROD_PROJECT_DOMAIN)
         if self.MODE == "prod":
             self.PROJECT_DOMAIN = "https://openplaylist.midnull.space"
-        
+
         # Формируем зависимые ссылки
+        self.EMAIL_COMFIRM_ADRESS = f"{self.PROJECT_DOMAIN}/email-confirm"
         self.TWITCH_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
         self.DA_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
-        self.EMAIL_COMFIRM_ADRESS = f"{self.PROJECT_DOMAIN}/email-confirm"
+        self.GOOGLE_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
         return self
 
     class Config:

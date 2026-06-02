@@ -24,16 +24,21 @@ declare global {
       ORDER_API_URL: string
       TWITCH_CLIENT_ID: string
       TWITCH_REDIRECT_URI: string
-      TWITCH_SCOPES: string
+      TWITCH_SCOPES: Array<string>
+      GOOGLE_CLIENT_ID: string
+      GOOGLE_REDIRECT_URI: string
+      GOOGLE_SCOPES: Array<string>
       DA_CLIENT_ID: string
       DA_REDIRECT_URI: string
-      DA_SCOPES: string
+      DA_SCOPES: Array<string>
     }
   }
 }
 
 const PROJECT_DOMAIN = window.location.origin
-const BACKEND_DOMAIN = import.meta.env.DEV ? "http://localhost:8000" : PROJECT_DOMAIN
+const BACKEND_DOMAIN = import.meta.env.DEV
+  ? 'http://localhost:8000'
+  : PROJECT_DOMAIN
 
 // # API URLы (Если бэкенд в том же докере, можно слать через прокси)
 // WS_URL='https://openplaylist.localhost'
@@ -63,10 +68,19 @@ window.appConfig = {
   ORDER_API_URL: `${BACKEND_DOMAIN}/api/order`,
   TWITCH_CLIENT_ID: 'vsil95c2am4rgvbgdax1o4a1u003mx',
   TWITCH_REDIRECT_URI: `${PROJECT_DOMAIN}/oauth-callback`,
-  TWITCH_SCOPES: 'user:read:email',
+  TWITCH_SCOPES: ['user:read:email'],
+  GOOGLE_CLIENT_ID:
+    '684341768922-sd9fgqd8l3vhr7e4iep5c3ddqsgboaic.apps.googleusercontent.com',
+  GOOGLE_REDIRECT_URI: `${PROJECT_DOMAIN}/oauth-callback`,
+  GOOGLE_SCOPES: [
+    'https://www.googleapis.com/auth/userinfo.profile',
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/youtube.readonly',
+    'openid',
+  ],
   DA_CLIENT_ID: '18779',
   DA_REDIRECT_URI: `${PROJECT_DOMAIN}/oauth-callback`,
-  DA_SCOPES: 'oauth-user-show oauth-donation-subscribe',
+  DA_SCOPES: ['oauth-user-show', 'oauth-donation-subscribe'],
 }
 registerAuthStrategies()
 // Create a new router instance

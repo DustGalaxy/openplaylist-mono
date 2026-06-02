@@ -17,6 +17,10 @@ export class DaAuthStrategy implements IAuthLoginStrategy {
       type: { type: this.platformName },
     }
   }
+  
+  getScopeString(scopes: Array<string>): string {
+    return scopes.join(' ')
+  }
 
   getLoginEndpoint(): string {
     return `/login/social/${this.platformName}`

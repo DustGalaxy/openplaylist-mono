@@ -34,7 +34,7 @@ export interface IAuthIntegrationStrategy {
    * Get the endpoint for integration
    */
   getIntegrationEndpoint(): string
-
+  
   /**
    * Format the payload for integration request
    */
@@ -64,6 +64,8 @@ export interface IAuthLoginStrategy extends IAuthIntegrationStrategy {
    * Format the payload for login request
    */
   formatLoginPayload(code: string): Record<string, unknown>
+
+  getScopeString(scopes: Array<string>): string
 
   /**
    * Get confirmation message for email collision

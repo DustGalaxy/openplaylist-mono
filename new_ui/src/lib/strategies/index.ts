@@ -5,3 +5,4 @@
 
 export { TwitchAuthStrategy } from './TwitchAuthStrategy'
 export { DaAuthStrategy } from './DaAuthStrategy'
+export { GoogleAuthStrategy } from './GoogleAuthStrategy'

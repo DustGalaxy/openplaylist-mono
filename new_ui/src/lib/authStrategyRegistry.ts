@@ -11,6 +11,8 @@
 import { authStrategyManager } from './authStrategyManager'
 import { TwitchAuthStrategy } from './strategies/TwitchAuthStrategy'
 import { DaAuthStrategy } from './strategies/DaAuthStrategy'
+import { GoogleAuthStrategy } from './strategies/GoogleAuthStrategy'
+
 
 /**
  * Initialize and register all available auth strategies
@@ -19,14 +21,20 @@ import { DaAuthStrategy } from './strategies/DaAuthStrategy'
 export function registerAuthStrategies(): void {
   const twitchStrategy = new TwitchAuthStrategy()
   const daStrategy = new DaAuthStrategy()
+  const googleStrategy = new GoogleAuthStrategy()
+
 
   // Register Twitch strategy
   authStrategyManager.registerIntegrationStrategy('twitch', twitchStrategy)
   authStrategyManager.registerLoginStrategy('twitch', twitchStrategy)
 
-  // Register DA strategy
+  // Register donationalerts strategy
   authStrategyManager.registerIntegrationStrategy('donationalerts', daStrategy)
   authStrategyManager.registerLoginStrategy('donationalerts', daStrategy)
+
+  // Register google strategy
+  authStrategyManager.registerIntegrationStrategy('google', googleStrategy)
+  authStrategyManager.registerLoginStrategy('google', googleStrategy)
 
   console.log(
     'Auth strategies registered:',
