@@ -90,6 +90,11 @@ export function buildOAuthUrl(
     state,
   })
 
+  if (platform === "google") {
+    params.set('access_type', 'offline')
+    params.set('prompt', 'consent')
+  }
+
   return `${platformConfig.authorizationUrl}?${params.toString()}`
 }
 
