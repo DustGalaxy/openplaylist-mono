@@ -11,6 +11,7 @@ import {
   panelClass,
   sectionTitleClass,
 } from '@/features/landing/styles'
+import { cn } from '@/lib/utils'
 
 interface AccountTabProps {
   user: UserProfile | null
@@ -46,6 +47,7 @@ type SettingsField = {
   autoComplete: string
   placeholder: string
   helpText?: string
+  className?: string
 }
 
 const getApiErrorMessage = (error: unknown, fallback: string) => {
@@ -107,6 +109,7 @@ const createSettingsSections = (
         autoComplete: 'email',
         placeholder: 'you@example.com',
         helpText: 'Used for classic login and account notices.',
+        className: 'text-black bg-black hover:bg-level-2 hover:text-text-main',
       },
     ],
     validate: ({ username, email }) => {
@@ -355,7 +358,7 @@ function SettingsSection({
               value={values[field.name]}
               disabled={isSaving}
               onChange={(event) => onChange(field.name, event.target.value)}
-              className="h-11 border-level-4 text-text-main bg-level-1"
+              className={cn("h-11 border-level-4 text-text-main bg-level-1", field.className)}
             />
             {field.helpText ? (
               <p className="text-xs text-text-secondary">{field.helpText}</p>

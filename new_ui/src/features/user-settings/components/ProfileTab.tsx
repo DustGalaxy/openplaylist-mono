@@ -254,7 +254,9 @@ export function ProfileTab({ user }: ProfileTabProps) {
     <div className="flex flex-col gap-6">
       {/* Profile Overview Card */}
       <div className={`p-4 sm:p-6 ${panelClass}`}>
-        <h3 className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}>
+        <h3
+          className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}
+        >
           Profile Overview
         </h3>
 
@@ -273,12 +275,8 @@ export function ProfileTab({ user }: ProfileTabProps) {
           {/* Profile Info */}
           <div className="flex-1">
             <h2 className="text-2xl font-bold mb-2">{user?.username || ''}</h2>
-            <p className="text-text-secondary mb-4">
-              {user?.email
-                ? user.email.length > 40
-                  ? `${user.email.substring(0, 37)}...`
-                  : user.email
-                : 'No email set'}
+            <p className="mb-4 text-black bg-black hover:text-text-secondary hover:bg-level-2 px-2 py-1 rounded-full">
+              {user?.email ? user.email : 'No email set'}
             </p>
 
             {/* Social Links */}
@@ -325,7 +323,9 @@ export function ProfileTab({ user }: ProfileTabProps) {
 
       {/* Social Links Management Card */}
       <div className={`p-4 sm:p-6 ${panelClass}`}>
-        <h3 className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}>
+        <h3
+          className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}
+        >
           Add Social Links
         </h3>
 

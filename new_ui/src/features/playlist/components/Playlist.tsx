@@ -4,6 +4,8 @@ import {
   Eye,
   List,
   Music2,
+  Pause,
+  Play,
   RefreshCcw,
   Settings,
   Share2 as ShareIcon,
@@ -104,6 +106,8 @@ function PlaylistView() {
 
   const [queueSearch, setQueueSearch] = React.useState('')
 
+  const [isPaused, setIsPaused] = React.useState(false)
+
   const { playNext, requestPlSettings, playPrev } = useMusicStore()
 
   const contentSettings =
@@ -132,6 +136,7 @@ function PlaylistView() {
       <div className="w-full grid gap-4 grid-cols-1  grid-rows-[auto_auto_auto] ">
         <YoutubePlayer
           playOnReady={true}
+          pause={isPaused}
           nowPlay={nowPlaying}
           className="sm:row-span-2 flex items-center justify-center"
         />
@@ -268,6 +273,13 @@ function PlaylistView() {
                   }}
                 />
               )}
+              <Btn
+                text={isPaused ? <Play width={33} height={33} /> : <Pause width={33} height={33} />}
+                className="px-2 bg-level-2"
+                onClick={() => {
+                  isPaused ? setIsPaused(false) : setIsPaused(true)
+                }}
+              />
               <Btn
                 text={<Next width={33} height={33} />}
                 className="px-2 bg-level-2"

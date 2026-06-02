@@ -101,7 +101,7 @@ export function UserSettingsPage({
           </p>
         </header>
 
-        <div className={`flex flex-col gap-4 p-4 sm:p-6 ${panelClass}`}>
+        {/* <div className={`flex flex-col gap-4 p-4 sm:p-6 ${panelClass}`}>
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
             <div className="rounded-full w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-accent-1 to-accent-2 p-1 shrink-0 shadow-lg">
               <div className="w-full h-full rounded-full bg-level-2 overflow-hidden">
@@ -125,7 +125,7 @@ export function UserSettingsPage({
           {!user?.email_confirmed ? (
             <EmailNotConfirmedAlert email={user?.email} />
           ) : null}
-        </div>
+        </div> */}
 
         <div className="flex flex-col sm:flex-row flex-wrap gap-2">
           {TABS.map((tab) => (
