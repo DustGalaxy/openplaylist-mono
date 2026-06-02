@@ -71,6 +71,9 @@ app.include_router(api_route)
 async def logout(response: Response):
     response.delete_cookie(settings.COOKIE_NAME)
 
+@app.get("/health")
+async def root():
+    return {"status": "ok"}
 
 if __name__ == "__main__":
     import uvicorn

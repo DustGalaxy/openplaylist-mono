@@ -112,6 +112,8 @@ services:
       - "traefik.http.routers.backend.tls.certresolver=myresolver"
     networks:
       - default
+    healthcheck:
+      test: curl --fail http://localhost:8000/health || exit 1
     stop_grace_period: 30s
 
   task-worker:
@@ -155,7 +157,8 @@ services:
       context: ./bot_ttv
       dockerfile: ./Dockerfile
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     env_file:
       - ./bot_ttv/.env
     volumes:
@@ -169,7 +172,8 @@ services:
       context: ./bot_da
       dockerfile: ./Dockerfile
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     env_file:
       - ./bot_da/.env
     volumes:
