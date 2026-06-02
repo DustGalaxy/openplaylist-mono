@@ -25,7 +25,7 @@ class AuthGoogleService(AuthStrategy):
 
     def get_token(self, code) -> GoogleTokenResponseDTO:
         response = httpx.post(
-            f"{settings.TWITCH_URL}/oauth2/token",
+            "https://oauth2.googleapis.com/token",
             data={
                 "code": code,
                 "client_id": settings.GOOGLE_CLIENT_ID,
