@@ -4,6 +4,7 @@ import {
   Youtube,
   XFormerlyTwitter,
   Github,
+  Google,
   Spotify,
 } from '@thesvg/react'
 import DonationAlerts from '@/components/icons/icon-da'
@@ -28,6 +29,10 @@ const socials = {
   X: {
     name: 'X',
     icon: <XFormerlyTwitter />,
+  },
+  google: {
+    name: 'Google',
+    icon: <Google />,
   },
   github: {
     name: 'GitHub',

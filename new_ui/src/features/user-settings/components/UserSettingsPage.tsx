@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Integration, UserProfile } from '@/types/user'
 import DonationAlerts from '@/components/icons/icon-da'
 import Twitch from '@/components/icons/icon-twtich'
+import { Google } from '@thesvg/react'
 import {
   filterTabActiveClass,
   filterTabBaseClass,
@@ -15,6 +16,7 @@ import { settingsCopy } from '@/features/user-settings/copy'
 import { ProfileTab } from './ProfileTab'
 import { AccountTab } from './AccountTab'
 import { IntegrationsTab } from './IntegrationsTab'
+import { useOAuthUrl } from '@/hooks/useAuthUrl'
 
 interface UserSettingsPageProps {
   user: UserProfile | null
@@ -55,6 +57,7 @@ export function UserSettingsPage({
 
   const handleTwitchLogin = useTwitchLoginUrl()
   const handleDaLogin = useDaLoginUrl()
+  const handleOAuthRedirect = useOAuthUrl()
 
   const platformConfigs = {
     twitch: {
@@ -74,15 +77,20 @@ export function UserSettingsPage({
       icon: <DonationAlerts width={45} height={45} />,
       loginHandler: handleDaLogin,
     },
+    google: {
+      name: 'Google',
+      icon: <Google width={45} height={45} />,
+      loginHandler: () => {
+        handleOAuthRedirect('google')
+      },
+    },
   } as const
 
   return (
     <div className={pageWrapClass}>
       <div className={`${pageInnerClass} flex flex-col gap-6 sm:gap-8`}>
         <header className="text-center sm:text-left">
-          <p
-            className={`text-sm font-medium mb-2 ${gradientTextClass}`}
-          >
+          <p className={`text-sm font-medium mb-2 ${gradientTextClass}`}>
             {settingsCopy.eyebrow}
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold text-text-main">
