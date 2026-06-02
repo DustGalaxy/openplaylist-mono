@@ -5,12 +5,24 @@ import Dashboard from '@/components/icons/icon-dashboard'
 import MenuDropdown from './menu-dropdown'
 import Search from '@/components/icons/icon-search'
 import { useAuthStore } from '@/stores/authStore'
+import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function Header() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { isAuthenticated } = useAuthStore()
   const navigate = useNavigate()
   const windowWidth = window.innerWidth
+
+  const languages = [
+    { code: 'ru', label: 'Русский' },
+    { code: 'en', label: 'English' },
+  ]
+
+  const currentLanguage = languages.find(language => language.code === i18n.language)
+
+  const handleLanguageChange = (language: (typeof languages)[number]['code']) => {
+    i18n.changeLanguage(language)
+  }
 
   return (
     <div className="w-full flex sticky top-0 z-50 justify-center">
@@ -62,6 +74,25 @@ export default function Header() {
             </div>
           ) : (
             <div className="flex gap-2 h-[33px] items-center">
+              <div>
+                <Select
+                  value={currentLanguage?.code}
+                  onValueChange={handleLanguageChange}
+                >
+                  <SelectTrigger className="w-fit bg-level-2 text-text-main" >
+                    <SelectValue placeholder={currentLanguage?.label}>
+                      <span>{currentLanguage?.label}</span>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-level-2 border-0 text-text-main">
+                    {languages.map(language => (
+                      <SelectItem key={language.code} value={language.code} className="text-text-main">
+                        {language.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="px-2   flex items-center">
                 <MenuDropdown />
               </div>
