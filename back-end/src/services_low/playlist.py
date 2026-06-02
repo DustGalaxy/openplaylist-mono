@@ -97,7 +97,7 @@ class PlaylistLowService:
         res = await self._playlist_repository.remove(session, playlist_id, raise_not_found=True)
         return res
 
-    async def set_play_now(self, session: AsyncSession, playlist_id: UUID, track_id: str | None, user: User) -> OrderDomain:
+    async def set_play_now(self, session: AsyncSession, playlist_id: UUID, track_id: str | None, user: User) -> OrderDomain | None:
         plst = await self._playlist_repository.get_one(session, playlist_id)
         if user.id != plst.owner_id:
             raise NotAuthorizedException()

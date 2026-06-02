@@ -22,6 +22,7 @@ import { DialogDescription } from '@/components/ui/dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { getUserIntegrations } from '@/api/api-user'
 import PlaylistDetailsForm from './playlist-details-form'
+import ContentSwitch from '@/components/ui/content-switch'
 
 const TabBasic = ({
   playlist,
@@ -232,6 +233,34 @@ const TabBasic = ({
             className={`flex items-center  cursor-pointer  bg-level-2
           py-1 pl-4 pr-[2px] rounded-l-(--rounded-std)  justify-end`}
           >
+            <ContentSwitch
+              leftLabel={
+                <Label
+                  htmlFor="public-id"
+                  className={`${isPublic ? 'text-shadow-accent-1 text-shadow-md font-bold ' : ''} 
+                    flex cursor-pointer transition-all duration-100 text-lg`}
+                >
+                  {t('playlistSettings.basic.public')}
+                </Label>
+              }
+              rightLabel={
+                <Label
+                  htmlFor="private-id"
+                  className={`${!isPublic ? 'text-shadow-accent-3 text-shadow-md font-bold' : ''} 
+                    cursor-pointer transition-all duration-100 text-lg`}
+                >
+                  {t('playlistSettings.basic.private')}
+                </Label>
+              }
+              onChange={(value) => {
+                if (value === 'right') {
+                  setIsPublic(false)
+                } else {
+                  setIsPublic(true)
+                }
+              }}
+              defaultValue={isPublic ? 'left' : 'right'}
+            />
             <RadioGroupItem
               value="public"
               id="public-id"

@@ -1,11 +1,8 @@
 from _types import IManager, IDonationAlertsListener
 from acl.user import UserACL
-from adapters._rabbit.dto import LinkedAccountWithTokensRead
-from adapters._repository.user import user_repo
+from adapters._rabbit.dto import ConnectionData
 from services.handler import handler
 from services.da_client import DonationAlertsListener
-
-from database import async_session_maker
 
 
 class Manager(IManager):
@@ -14,25 +11,22 @@ class Manager(IManager):
     def __init__(self) -> None:
         pass
 
-    async def add_connection(self, link: LinkedAccountWithTokensRead):
-        client = DonationAlertsListener(link.user_id, link.access_token, link.refresh_token, link.expires_at, handler)
+    async def add_connection(self, data: ConnectionData):
+        client = DonationAlertsListener(
+            data.user_id, data.platform_user_id, data.access_token, data.refresh_token, data.expires_at, handler
+        )
 
         await self.run_connection(client)
-        async with async_session_maker() as session:
-            await user_repo.get_one_or_create(session, link.platform_user_id, str(link.user_id))
 
     async def start(self):
         users = await UserACL.get_users()
 
         for user in users:
             client = DonationAlertsListener(
-                user.user_id, user.access_token, user.refresh_token, user.expires_at, handler
+                user.user_id, user.da_id, user.access_token, user.refresh_token, user.expires_at, handler
             )
 
             await self.run_connection(client)
-
-            async with async_session_maker() as session:
-                await user_repo.get_one_or_create(session, user.da_id, str(user.user_id))
 
     async def stop(self):
         for connection in self.connections:

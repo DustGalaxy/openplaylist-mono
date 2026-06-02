@@ -1,8 +1,7 @@
-from faststream import Context
 from faststream.rabbit import RabbitMessage
 
-from adapters._rabbit.broker import rabbit_broker, main_exchange, bot_da_connect_request, auth_user_da_all_request
-from adapters._rabbit.dto import LinkedAccountWithTokensRead
+from adapters._rabbit.broker import rabbit_broker, main_exchange, bot_da_connect_request
+from adapters._rabbit.dto import ConnectionData
 from context import context
 
 
@@ -12,7 +11,7 @@ async def add_connection(
 ):
     await message.ack()
 
-    link: LinkedAccountWithTokensRead = LinkedAccountWithTokensRead.model_validate_json(message.body)
+    link: ConnectionData = ConnectionData.model_validate_json(message.body)
     if context.manager is not None:
         await context.manager.add_connection(link)
         return True

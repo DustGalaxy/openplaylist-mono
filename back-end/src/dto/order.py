@@ -11,9 +11,10 @@ class DANewOrder(BaseModel):
     owner_id: UUID
     requester_id: str
     requester_nickname: str
-    donation_currency_amount: float = 0.0
+    donation_amount: float = 0.0
+    donation_currency: str
     yt_video_url: str
-    priority: str = "d"
+    priority: str = "donation"
     source: Platform = Platform.DA
 
 

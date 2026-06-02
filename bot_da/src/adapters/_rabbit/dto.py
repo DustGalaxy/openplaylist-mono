@@ -12,8 +12,7 @@ class Platform(Enum):
     GOOGLE = "google"
 
 
-class LinkedAccountWithTokensRead(BaseModel):
-    id: UUID
+class ConnectionData(BaseModel):
     user_id: UUID
     platform: Platform
     platform_user_id: str
@@ -27,6 +26,7 @@ class LinkedAccountWithTokensRead(BaseModel):
 
 class DATokenRefreshed(BaseModel):
     user_id: UUID
+    platform_user_id: str
     access_token: str
     refresh_token: str | None
     expires_at: int

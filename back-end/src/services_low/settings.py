@@ -97,7 +97,7 @@ class ValidationEngine:
         self.owner_is_vip = owner_is_vip
 
     def get_content_settigs(
-        self, settings: SettingsSchema, platform: Platform, user_roles: list[str] | None = None
+        self, settings: SettingsSchema, platform: Platform
     ) -> dict:
         base_obj = next(
             (c for c in settings.content_settings if c.platform == platform),
@@ -111,26 +111,26 @@ class ValidationEngine:
         if not self.owner_is_vip:
             return effective
 
-        match platform:
-            case p if p in ChatPlatform:
-                if user_roles is None:
-                    return effective
+        # match platform:
+        #     case p if p in ChatPlatform:
+        #         if user_roles is None:
+        #             return effective
 
-                chat_rules = sorted(
-                    [r for r in settings.chat_rules if r.key in user_roles and r.platform == platform],
-                    key=lambda x: x.priority,
-                )
-                for rule in chat_rules:
-                    if rule.content_settings:
-                        effective.update(rule.content_settings)
+        #         chat_rules = sorted(
+        #             [r for r in settings.chat_rules if r.platform == platform],
+        #             key=lambda x: x.priority,
+        #         )
+        #         for rule in chat_rules:
+        #             if rule.content_settings:
+        #                 effective.update(rule.content_settings)
 
-            case p if p in DonationPlatform:
-                donation_rules = find(settings.donation_rules, lambda x: x.platform == platform)
-                if donation_rules and donation_rules.content_settings:
-                    effective.update(donation_rules.content_settings)
+        #     case p if p in DonationPlatform:
+        #         donation_rules = find(settings.donation_rules, lambda x: x.platform == platform)
+        #         if donation_rules and donation_rules.content_settings:
+        #             effective.update(donation_rules.content_settings)
 
-            case _:
-                raise ValueError(f"Unknown platform: {platform}")
+        #     case _:
+        #         raise ValueError(f"Unknown platform: {platform}")
 
         return effective
 
@@ -151,9 +151,9 @@ class ValidationEngine:
         if new_track.from_owner:
             return []
 
-        requester_roles = self.identify_roles(new_track.priority)
+        # requester_roles = self.identify_roles(new_track.priority)
 
-        effective_content_settings = self.get_content_settigs(settings, new_track.source, requester_roles)
+        effective_content_settings = self.get_content_settigs(settings, new_track.source)
 
         effective_donation_settings = self.get_donations_settings(settings, new_track.source)
 
@@ -161,10 +161,16 @@ class ValidationEngine:
             (
                 lambda: (
                     new_track.source in DonationPlatform
-                    and effective_donation_settings.get("donation_currency_amount", 0)
-                    != new_track.extra_data.donation_currency_amount  # type: ignore
+                    and effective_donation_settings.get("amount", 0) != new_track.extra_data.donation_currency_amount  # type: ignore
                 ),
-                "Wrong currency amount",
+                "Wrong donation amount",
+            ),
+            (
+                lambda: (
+                    new_track.source in DonationPlatform
+                    and effective_donation_settings.get("currency", "") != new_track.extra_data.currency_code  # type: ignore
+                ),
+                "Wrong donation currency",
             ),
             (
                 lambda: (

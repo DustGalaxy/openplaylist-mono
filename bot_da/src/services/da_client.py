@@ -3,14 +3,13 @@ import json
 import logging
 import secrets
 import time
-from typing import Callable
 from uuid import UUID
 
 import httpx
 import websockets
 from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError, InvalidStatus
 
-from _types import IDonationAlertsListener
+from _types import Handler, IDonationAlertsListener
 import config as app_config
 from token_storage import is_token_valid, needs_refresh, clear_token
 
@@ -104,7 +103,7 @@ def get_authorization_url():
 #             return None
 
 
-async def refresh_access_token(refresh_token: str, user_id: UUID):
+async def refresh_access_token(refresh_token: str, user_id: UUID, platform_user_id: str):
     """Refreshes the access token using the stored refresh token."""
     data = {
         "grant_type": "refresh_token",
@@ -125,6 +124,7 @@ async def refresh_access_token(refresh_token: str, user_id: UUID):
             await rabbit_broker.publish(
                 DATokenRefreshed(
                     user_id=user_id,
+                    platform_user_id=platform_user_id,
                     access_token=new_token_data.access_token,
                     refresh_token=new_token_data.refresh_token,
                     expires_at=new_token_data.expires_in + int(time.time()),
@@ -156,8 +156,17 @@ async def refresh_access_token(refresh_token: str, user_id: UUID):
 
 
 class DonationAlertsListener(IDonationAlertsListener):
-    def __init__(self, user_id: UUID, access_token: str, refresh_token: str, expires_at: int, handler: Callable):
+    def __init__(
+        self,
+        user_id: UUID,
+        platform_user_id: str,
+        access_token: str,
+        refresh_token: str,
+        expires_at: int,
+        handler: Handler,
+    ):
         self.user_id = user_id
+        self._platform_user_id = platform_user_id
         self._access_token = access_token
         self._refresh_token = refresh_token
         self.expires_at = expires_at
@@ -220,7 +229,7 @@ class DonationAlertsListener(IDonationAlertsListener):
 
             if needs_refresh(token_data):
                 logger.info("Token needs refresh before connecting.")
-                token_data = await refresh_access_token(self._refresh_token, self.user_id)
+                token_data = await refresh_access_token(self._refresh_token, self.user_id, self._platform_user_id)
 
             if not token_data:
                 logger.error("Failed to refresh token. Stopping listener.")
@@ -330,6 +339,7 @@ class DonationAlertsListener(IDonationAlertsListener):
                 logger.debug(f"RAW MESSAGE RECEIVED: {message_str}")
                 await self._handler(
                     message_str,
+                    self.user_id,
                     channel_name,
                 )
 

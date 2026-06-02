@@ -1,4 +1,9 @@
-import { useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
+import {
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+} from 'react'
 import { Plus, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -75,9 +80,9 @@ export function PlaylistQueueInput({
     const loadingToast = toast.loading(t('common.toast.loading'))
     try {
       const result = await requestAddTrack(playlist.id, value.trim())
-      
+
       toast.dismiss(loadingToast)
-      
+
       if (result?.success || result === undefined) {
         toast.success(t('playlist.toast.requestAdded'))
       } else {

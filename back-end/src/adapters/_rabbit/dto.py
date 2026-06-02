@@ -11,6 +11,7 @@ class Tokens(BaseModel):
 
 class DATokenRefreshed(BaseModel):
     user_id: UUID
+    platform_user_id: str
     access_token: str
     refresh_token: str
     expires_at: int
