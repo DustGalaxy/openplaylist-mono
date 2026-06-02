@@ -1,6 +1,10 @@
 from fastapi import HTTPException
 
 
+class NotEmbeddable(Exception):
+    def __init__(self):
+        super().__init__("Video is not embeddable")
+
 class NotAuthorizedException(HTTPException):
     def __init__(self):
         super().__init__(status_code=401, detail="Not authorized")

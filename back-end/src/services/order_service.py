@@ -11,6 +11,7 @@ from models.order import OrderCreate, STRATEGIES
 
 from utils import extract_youtube_video_id, parse_ISO_8601
 from settings import settings
+from exceptions import NotEmbeddable
 
 
 class OrderService:
@@ -45,33 +46,23 @@ class OrderService:
         }
 
     def get_data_from_youtube_api(self, video_id, api_key) -> dict:
-        # URL официального эндпоинта для работы с видео
-        url = "https://www.googleapis.com/youtube/v3/videos"
+        BASE_YOUTUBE_API_VIDEOS_URL = "https://www.googleapis.com/youtube/v3/videos"
 
-        # Формируем параметры запроса
         params = {
-            # Перечисляем через запятую все категории данных, которые хотим забрать
             "part": "snippet,statistics,status,contentDetails",
             "id": video_id,
             "key": api_key,
         }
 
-        # Выполняем GET-запрос
-        response = requests.get(url, params=params)
-
-        # Если Google вернул ошибку (например, 403 Forbidden из-за квот),
-        # этот метод вызовет исключение, которое перехватит ваша гибридная функция
+        response = requests.get(BASE_YOUTUBE_API_VIDEOS_URL, params=params)
         response.raise_for_status()
-
         json_data = response.json()
 
-        # Проверяем, нашлось ли видео (если ID неверный, список items будет пустым)
         if not json_data.get("items"):
             raise ValueError("Invalid YouTube video URL")
 
         video_item = json_data["items"][0]
 
-        # Собираем чистый словарь с данными
         return {
             "title": video_item["snippet"]["title"],
             "author": video_item["snippet"]["channelTitle"],
@@ -101,9 +92,9 @@ class OrderService:
                 if not settings.YOUTUBE_API_KEY:
                     raise ValueError("YOUTUBE_API_KEY not found")
                 data = self.get_data_from_youtube_api(yt_video_id, settings.YOUTUBE_API_KEY)
-            except requests.HTTPError:
-                data = self.get_data_from_pytube(order.yt_video_url)
-            except Exception:
+                if not data["embeddable"]:
+                    raise NotEmbeddable
+            except (requests.HTTPError, ValueError):
                 data = self.get_data_from_pytube(order.yt_video_url)
 
             self.save_to_cache(yt_video_id, data)
