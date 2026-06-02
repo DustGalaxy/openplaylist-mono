@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { TabsContent } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import MyBtn from '@/components/ui/my-btn'
@@ -38,6 +39,7 @@ const PlatformDonationEditor = React.memo(
     createNewRule,
     handleDeleteRule,
   }: PlatformDonationProps) => {
+    const { t } = useTranslation()
     const [newRuleData, setNewRuleData] = React.useState({
       name: '',
       slug: '',
@@ -60,7 +62,7 @@ const PlatformDonationEditor = React.memo(
 
         <div className="flex gap-1 sm:gap-2">
           <MyBtn
-            text="Add"
+            text={t('playlistSettings.donation.add')}
             onClick={() =>
               createNewRule(
                 platform,
@@ -75,10 +77,12 @@ const PlatformDonationEditor = React.memo(
           />
           {/* Name */}
           <div className=" flex flex-col gap-1">
-            <Label className="text-xs text-text-secondary">Name</Label>
+            <Label className="text-xs text-text-secondary">
+              {t('playlistSettings.donation.name')}
+            </Label>
             <Input
               value={newRuleData.name || ''}
-              placeholder="Rule name"
+              placeholder={t('playlistSettings.donation.ruleName')}
               className="text-sm sm:text-base bg-level-2 border-0"
               onChange={(e) =>
                 setNewRuleData((prev) => ({
@@ -91,10 +95,12 @@ const PlatformDonationEditor = React.memo(
 
           {/* Slug */}
           <div className=" flex flex-col gap-1">
-            <Label className="text-xs text-text-secondary">Slug</Label>
+            <Label className="text-xs text-text-secondary">
+              {t('playlistSettings.donation.slug')}
+            </Label>
             <Input
               value={newRuleData.slug || ''}
-              placeholder="rule-slug"
+              placeholder={t('playlistSettings.donation.ruleSlug')}
               className="text-sm sm:text-base bg-level-2 border-0"
               onChange={(e) =>
                 setNewRuleData((prev) => ({
@@ -107,7 +113,9 @@ const PlatformDonationEditor = React.memo(
 
           {/* Amount */}
           <div className=" flex flex-col gap-1">
-            <Label className="text-xs text-text-secondary">Amount</Label>
+            <Label className="text-xs text-text-secondary">
+              {t('playlistSettings.donation.amount')}
+            </Label>
             <div className="flex rounded-[--rounded-std] items-center gap-0 overflow-hidden">
               <Input
                 type="number"
@@ -136,7 +144,9 @@ const PlatformDonationEditor = React.memo(
 
           {/* Currency */}
           <div className="col-span-1 flex flex-col gap-1">
-            <Label className="text-xs text-text-secondary">Currency</Label>
+            <Label className="text-xs text-text-secondary">
+              {t('playlistSettings.donation.currency')}
+            </Label>
             <CurrencySelect
               name="currency"
               value={newRuleData.currency}
@@ -159,7 +169,9 @@ const PlatformDonationEditor = React.memo(
 
           {/* Priority */}
           <div className="col-span-1 flex flex-col gap-1">
-            <Label className="text-xs text-text-secondary">Priority</Label>
+            <Label className="text-xs text-text-secondary">
+              {t('playlistSettings.donation.priority')}
+            </Label>
             <div className="flex rounded-[--rounded-std] items-center gap-0 overflow-hidden">
               <Input
                 type="number"
@@ -202,10 +214,7 @@ const PlatformDonationEditor = React.memo(
             </div>
           ) : (
             <div>
-              <Label>No rules configured</Label>
-              <DialogDescription>
-                Create a new rule to get started
-              </DialogDescription>
+              <Label>{t('playlistSettings.donation.noRules')}</Label>
             </div>
           )}
         </div>

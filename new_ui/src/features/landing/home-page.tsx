@@ -1,4 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router'
+import { Trans, useTranslation } from 'react-i18next'
 import {
   ListMusic,
   Radio,
@@ -14,50 +15,20 @@ import SearchPlaylist from '@/features/public-playlist/components/search-playlis
 import { gradientTextClass, panelClass } from '@/features/landing/styles'
 import { useAuthStore } from '@/stores/authStore'
 
-const features = [
-  {
-    icon: Radio,
-    title: 'Живая очередь',
-    description:
-      'Заявки от зрителей сразу попадают в плейлист. Все подключённые клиенты видят изменения через WebSocket.',
-  },
-  {
-    icon: Shield,
-    title: 'Умные правила',
-    description:
-      'Лимиты по длительности, просмотрам, кулдаунам и блок-листам — вы сами решаете, что допустить в эфир.',
-  },
-  {
-    icon: Zap,
-    title: 'Донаты и приоритет',
-    description:
-      'Настройте бусты от DonationAlerts и роли из чата Twitch — очередь учитывает вклад аудитории.',
-  },
-  {
-    icon: Users,
-    title: 'Публичный доступ',
-    description:
-      'Открытые плейлисты можно найти по имени или автору. Зрители отправляют треки без лишних шагов.',
-  },
-]
+const featureKeys = [
+  { icon: Radio, key: 'liveQueue' },
+  { icon: Shield, key: 'smartRules' },
+  { icon: Zap, key: 'donations' },
+  { icon: Users, key: 'publicAccess' },
+] as const
 
-const steps = [
-  {
-    step: '01',
-    title: 'Создайте плейлист',
-    text: 'Войдите через Twitch или email, настройте режим flow/static и правила контента.',
-  },
-  {
-    step: '02',
-    title: 'Поделитесь ссылкой',
-    text: 'Дайте зрителям публичную страницу — они ищут трек и отправляют заявку в очередь.',
-  },
-  {
-    step: '03',
-    title: 'Ведите эфир',
-    text: 'Управляйте воспроизведением с дашборда: play now, пропуск, сортировка и история.',
-  },
-]
+const stepKeys = ['create', 'share', 'stream'] as const
+const audienceBulletKeys = [
+  'sharedQueue',
+  'validation',
+  'publicPrivate',
+  'sync',
+] as const
 
 function FeatureCard({
   icon: Icon,
@@ -92,12 +63,12 @@ function FeatureCard({
 }
 
 export default function HomePage() {
+  const { t } = useTranslation()
   const { isAuthenticated } = useAuthStore()
   const navigate = useNavigate()
 
   return (
     <div className="w-full text-text-main">
-      {/* Hero */}
       <section className="relative px-4 pt-8 pb-16 sm:pt-12 sm:pb-24 overflow-hidden">
         <div
           className="pointer-events-none absolute inset-0 opacity-30"
@@ -114,7 +85,7 @@ export default function HomePage() {
                 className={`inline-flex items-center gap-2 text-sm font-medium mb-4 ${gradientTextClass}`}
               >
                 <Sparkles className="h-4 w-4 text-[var(--color-accent-2)]" />
-                Плейлисты для стримов и сообществ
+                {t('landing.eyebrow')}
               </p>
 
               <h1
@@ -124,28 +95,31 @@ export default function HomePage() {
                   bg-clip-text bg-[length:200%_auto] animate-bg-move-w-shadow
                 "
               >
-                OPEN PLAYLIST
+                {t('landing.title')}
               </h1>
 
               <p className="text-lg sm:text-xl text-text-secondary leading-relaxed max-w-xl mb-8">
-                <span className={`font-semibold ${gradientTextClass}`}>
-                  OpenPlaylist
-                </span>{' '}
-                — место, где плейлист общий, а не личный список треков.
-                Зрители предлагают музыку, правила фильтруют заявки, а вы
-                управляете эфиром в один клик.
+                <Trans
+                  i18nKey="landing.heroBody"
+                  components={[
+                    <span
+                      key="0"
+                      className={`font-semibold ${gradientTextClass}`}
+                    />,
+                  ]}
+                />
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 {isAuthenticated ? (
                   <Btn
-                    text="Перейти к плейлистам"
+                    text={t('landing.goToPlaylists')}
                     className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-[220px]"
                     onClick={() => navigate({ to: '/dashboard' })}
                   />
                 ) : (
                   <Btn
-                    text="Войти и начать"
+                    text={t('landing.loginAndStart')}
                     className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-[200px]"
                     onClick={() => navigate({ to: '/login' })}
                   />
@@ -159,7 +133,7 @@ export default function HomePage() {
                   "
                 >
                   <Search className="h-5 w-5" />
-                  Найти плейлист
+                  {t('landing.findPlaylist')}
                 </Link>
               </div>
             </div>
@@ -173,26 +147,26 @@ export default function HomePage() {
               <div className="flex items-center gap-3 mb-6">
                 <ListMusic className="h-8 w-8 text-level-3" />
                 <div>
-                  <p className="font-semibold text-text-main">Для кого</p>
+                  <p className="font-semibold text-text-main">
+                    {t('landing.audienceTitle')}
+                  </p>
                   <p className="text-sm text-text-secondary">
-                    Стримеры · модераторы · зрители
+                    {t('landing.audienceSubtitle')}
                   </p>
                 </div>
               </div>
               <ul className="space-y-4 text-sm sm:text-base">
-                {[
-                  'Совместная очередь с приоритетами и донатами',
-                  'Валидация YouTube-треков по вашим лимитам',
-                  'Публичные и приватные плейлисты',
-                  'Синхронизация дашборда и зрительской страницы',
-                ].map((line) => (
-                  <li key={line} className="flex gap-3 text-text-secondary">
+                {audienceBulletKeys.map((key) => (
+                  <li
+                    key={key}
+                    className="flex gap-3 text-text-secondary"
+                  >
                     <span
                       className={`shrink-0 font-bold ${gradientTextClass}`}
                     >
                       →
                     </span>
-                    <span>{line}</span>
+                    <span>{t(`landing.audienceBullets.${key}`)}</span>
                   </li>
                 ))}
               </ul>
@@ -201,46 +175,50 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features */}
       <section className="px-4 py-16 sm:py-20 bg-level-2/40 border-y border-level-3/30">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-text-main mb-3">
-              Что умеет платформа
+              {t('landing.featuresTitle')}
             </h2>
             <p className="text-text-secondary max-w-2xl mx-auto">
-              От заявки зрителя до воспроизведения в эфире — всё связано
-              настройками, realtime-обновлениями и понятным дашбордом.
+              {t('landing.featuresSubtitle')}
             </p>
           </div>
           <div className="grid gap-5 sm:grid-cols-2">
-            {features.map((f) => (
-              <FeatureCard key={f.title} {...f} />
+            {featureKeys.map(({ icon, key }) => (
+              <FeatureCard
+                key={key}
+                icon={icon}
+                title={t(`landing.features.${key}.title`)}
+                description={t(`landing.features.${key}.description`)}
+              />
             ))}
           </div>
         </div>
       </section>
 
-      {/* How it works */}
       <section className="px-4 py-16 sm:py-20">
         <div className="mx-auto max-w-5xl">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">
-            Как это работает
+            {t('landing.howItWorksTitle')}
           </h2>
           <ol className="grid gap-6 md:grid-cols-3">
-            {steps.map(({ step, title, text }) => (
+            {stepKeys.map((key, index) => (
               <li
-                key={step}
+                key={key}
                 className="relative rounded-(--rounded-std) border border-level-3/40 bg-level-2 p-6 text-left"
               >
                 <span
                   className={`text-4xl font-black opacity-40 ${gradientTextClass}`}
                 >
-                  {step}
+                  {String(index + 1).padStart(2, '0')}
                 </span>
-                <h3 className="text-xl font-semibold mt-2 mb-2">{title}</h3>
+                <h3 className="text-xl font-semibold mt-2 mb-2">
+                  {t(`landing.steps.${key}.title`)}
+                </h3>
                 <p className="text-sm text-text-secondary leading-relaxed">
-                  {text}
+                  {t(`landing.steps.${key}.text`)}
                 </p>
               </li>
             ))}
@@ -248,7 +226,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Discover */}
       <section className="px-4 pb-20 sm:pb-28">
         <div className="mx-auto max-w-5xl">
           <div className={`p-6 sm:p-10 ${panelClass}`}>

@@ -17,6 +17,7 @@ import Save from '@/components/icons/icon-save'
 import { useMusicStore } from '@/stores/musicStore'
 import { formatTime } from '@/lib/utils'
 import { useSavedStore } from '@/stores/savedStore'
+import { useTranslation } from 'react-i18next'
 
 export default function OrderCard({
   track,
@@ -25,6 +26,7 @@ export default function OrderCard({
   track: Track
   btns_type?: 'playlist' | 'non-playlist'
 }) {
+  const { t } = useTranslation()
   const playlist = usePlaylist()
   const { playNext, requestRemoveTrack, requestAddTrack } = useMusicStore()
   const { isSaved, addTrack, removeTrack } = useSavedStore()
@@ -41,7 +43,7 @@ export default function OrderCard({
         await navigator.clipboard.writeText(
           'https://www.youtube.com/watch?v=' + track.yt_video_id,
         )
-        toast.success('Copied to clipboard!')
+        toast.success(t('common.toast.copied'))
       },
       className: 'px-1 bg-level-2',
       glow: 'white',

@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { Label } from '@/components/ui/label'
 import UpDownBtn from '@/components/ui/funny-btn'
@@ -24,6 +25,7 @@ const DonationItem = ({
   playlist_id,
   handleDeleteRule,
 }: DonationItemProps) => {
+  const { t } = useTranslation()
   const [localRule, setLocalRule] = React.useState(rule)
   const [isDirty, setIsDirty] = React.useState(false)
   const [isSaving, setIsSaving] = React.useState(false)
@@ -79,7 +81,7 @@ const DonationItem = ({
   }
 
   const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this donation rule?')) {
+    if (confirm(t('playlistSettings.donation.deleteRuleConfirm'))) {
       handleDeleteRule(localRule.platform, playlist_id, localRule.id)
     }
   }
@@ -95,10 +97,12 @@ const DonationItem = ({
       <div className="grid grid-cols-2 gap-1 sm:gap-2">
         {/* Name */}
         <div className="col-span-1 flex flex-col gap-1">
-          <Label className="text-xs text-text-secondary">Name</Label>
+          <Label className="text-xs text-text-secondary">
+            {t('playlistSettings.donation.name')}
+          </Label>
           <Input
             value={localRule.name || ''}
-            placeholder="Rule name"
+            placeholder={t('playlistSettings.donation.ruleName')}
             className="text-sm sm:text-base bg-level-2 border-0"
             onChange={(e) => handleInputChange('name', e.target.value)}
           />
@@ -106,10 +110,12 @@ const DonationItem = ({
 
         {/* Slug */}
         <div className="col-span-1 flex flex-col gap-1">
-          <Label className="text-xs text-text-secondary">Slug</Label>
+          <Label className="text-xs text-text-secondary">
+            {t('playlistSettings.donation.slug')}
+          </Label>
           <Input
             value={localRule.slug || ''}
-            placeholder="rule-slug"
+            placeholder={t('playlistSettings.donation.ruleSlug')}
             className="text-sm text-text-main sm:text-base bg-level-2 border-0"
             onChange={(e) => handleInputChange('slug', e.target.value)}
           />
@@ -120,7 +126,9 @@ const DonationItem = ({
       <div className="grid grid-cols-3 gap-2 sm:gap-3">
         {/* Amount */}
         <div className="col-span-1 flex flex-col gap-1">
-          <Label className="text-xs text-text-secondary">Amount</Label>
+          <Label className="text-xs text-text-secondary">
+            {t('playlistSettings.donation.amount')}
+          </Label>
           <div className="flex rounded-[--rounded-std] items-center gap-0 overflow-hidden">
             <Input
               type="number"
@@ -144,7 +152,9 @@ const DonationItem = ({
 
         {/* Currency */}
         <div className="col-span-1 flex flex-col gap-1">
-          <Label className="text-xs text-text-secondary">Currency</Label>
+          <Label className="text-xs text-text-secondary">
+            {t('playlistSettings.donation.currency')}
+          </Label>
           <CurrencySelect
             name="currency"
             value={localRule.currency}
@@ -163,7 +173,9 @@ const DonationItem = ({
 
         {/* Priority */}
         <div className="col-span-1 flex flex-col gap-1">
-          <Label className="text-xs text-text-secondary">Priority</Label>
+          <Label className="text-xs text-text-secondary">
+            {t('playlistSettings.donation.priority')}
+          </Label>
           <div className="flex rounded-[--rounded-std] items-center gap-0 overflow-hidden">
             <Input
               type="number"

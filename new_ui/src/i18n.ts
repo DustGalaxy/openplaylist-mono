@@ -6,13 +6,14 @@ i18n
   .use(Backend) // Загрузка файлов из папки public/locales
   .use(initReactI18next)
   .init({
-    fallbackLng: 'ru', // Язык по умолчанию
-    lng: 'ru', // Текущий язык
+    fallbackLng: 'ru',
+    lng: 'ru',
+    supportedLngs: ['ru', 'en'],
     interpolation: {
-      escapeValue: false, // React сам защищает от XSS
+      escapeValue: false,
     },
     backend: {
-      loadPath: '/locales/{{lng}}.json', // Путь к файлам перевода
+      loadPath: '/locales/{{lng}}.json',
     },
   })
 

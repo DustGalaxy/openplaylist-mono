@@ -1,11 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
+import i18n from '@/i18n'
 import { RegisterForm } from '@/features/auth'
 
 export const Route = createFileRoute('/register')({
   component: RegisterPage,
   meta: () => [
-    { title: 'Sign Up - OpenPlaylist' },
-    { name: 'description', content: 'Create a new OpenPlaylist account' },
+    { title: i18n.t('meta.register.title') },
+    { name: 'description', content: i18n.t('meta.register.description') },
   ],
 })
 

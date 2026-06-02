@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import axios, { AxiosError } from 'axios'
+import { useTranslation } from 'react-i18next'
 
 import { useAuthStore } from '@/stores/authStore'
 import { getConfig } from '@/lib/utils'
@@ -9,14 +10,13 @@ import apiClient from '@/lib/axios'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 
-
-
 interface SearchParams {
   email?: string
   session_id?: string
 }
 
 const EmailConfirmPage = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const search = useSearch({ from: '/email-confirm' }) as SearchParams
   const queryClient = useQueryClient()
@@ -29,7 +29,7 @@ const EmailConfirmPage = () => {
   const confirmEmailMutation = useMutation({
     mutationFn: async () => {
       if (!email || !sessionId) {
-        throw new Error('Missing email or session_id parameters')
+        throw new Error(t('auth.emailConfirm.missingParams'))
       }
 
       try {
@@ -49,15 +49,15 @@ const EmailConfirmPage = () => {
         if (axios.isAxiosError(error)) {
           const axiosError = error as AxiosError<{ detail?: string }>
           if (axiosError.code === 'ERR_NETWORK' || !axiosError.response) {
-            throw new Error('Network error. Please check your connection.')
+            throw new Error(t('auth.emailConfirm.networkError'))
           }
           if (axiosError.response?.status === 400) {
             throw new Error(
-              axiosError.response.data?.detail || 'Invalid confirmation link',
+              axiosError.response.data?.detail || t('auth.emailConfirm.invalid'),
             )
           }
           if (axiosError.response?.status === 401) {
-            throw new Error('Confirmation link expired. Please register again.')
+            throw new Error(t('auth.emailConfirm.expired'))
           }
         }
         throw error
@@ -65,7 +65,6 @@ const EmailConfirmPage = () => {
     },
     onSuccess: () => {
       setLoadingAuth(true)
-      // Fetch updated user profile after successful confirmation
       queryClient
         .fetchQuery({
           queryKey: ['currentUserProfile'],
@@ -99,12 +98,11 @@ const EmailConfirmPage = () => {
       setError(
         error instanceof Error
           ? error.message
-          : 'Confirmation failed. Please try again.',
+          : t('auth.emailConfirm.confirmationFailedFallback'),
       )
     },
   })
 
-  // Auto-confirm on mount if parameters are present
   useEffect(() => {
     if (user) {
       navigate({ to: '/dashboard' })
@@ -114,21 +112,21 @@ const EmailConfirmPage = () => {
     }
   }, [email, sessionId])
 
-  // Validate parameters
   if (!email || !sessionId) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
         <div className="w-full max-w-md rounded-lg border border-red-500/20 bg-red-500/5 p-8">
           <div className="flex items-center gap-3 mb-4">
             <AlertCircle className="h-6 w-6 text-red-500" />
-            <h1 className="text-2xl font-bold text-white">Invalid Link</h1>
+            <h1 className="text-2xl font-bold text-white">
+              {t('auth.emailConfirm.invalidLink')}
+            </h1>
           </div>
           <p className="text-slate-300 mb-6">
-            This confirmation link is missing required parameters. Please check
-            your email and try again.
+            {t('auth.emailConfirm.missingParamsDetail')}
           </p>
           <Button onClick={() => navigate({ to: '/login' })} className="w-full">
-            Back to Login
+            {t('auth.emailConfirm.backToLogin')}
           </Button>
         </div>
       </div>
@@ -148,14 +146,13 @@ const EmailConfirmPage = () => {
               </div>
             </div>
             <h1 className="text-2xl font-bold text-white text-center mb-2">
-              Confirming Email
+              {t('auth.emailConfirm.confirming')}
             </h1>
             <p className="text-slate-400 text-center">
-              We're verifying your email address:{' '}
-              <span className="text-slate-200 font-medium">{email}</span>
+              {t('auth.emailConfirm.verifyingEmail', { email })}
             </p>
             <p className="text-slate-500 text-sm text-center mt-4">
-              Please don't close this page...
+              {t('auth.emailConfirm.pleaseWait')}
             </p>
           </>
         )}
@@ -166,13 +163,13 @@ const EmailConfirmPage = () => {
               <CheckCircle2 className="h-16 w-16 text-green-500 animate-pulse" />
             </div>
             <h1 className="text-2xl font-bold text-white text-center mb-2">
-              Email Confirmed!
+              {t('auth.emailConfirm.confirmed')}
             </h1>
             <p className="text-slate-300 text-center mb-6">
-              Your email has been successfully verified. You're now logged in.
+              {t('auth.emailConfirm.confirmedLoggedIn')}
             </p>
             <p className="text-slate-400 text-sm text-center">
-              Redirecting to dashboard...
+              {t('auth.emailConfirm.redirecting')}
             </p>
           </>
         )}
@@ -182,7 +179,7 @@ const EmailConfirmPage = () => {
             <div className="flex items-center gap-3 mb-4">
               <AlertCircle className="h-6 w-6 text-red-500 flex-shrink-0" />
               <h1 className="text-2xl font-bold text-white">
-                Confirmation Failed
+                {t('auth.emailConfirm.failed')}
               </h1>
             </div>
             <p className="text-slate-300 mb-6">{error}</p>
@@ -192,14 +189,14 @@ const EmailConfirmPage = () => {
                 variant="default"
                 className="w-full"
               >
-                Try Again
+                {t('auth.emailConfirm.tryAgain')}
               </Button>
               <Button
                 onClick={() => navigate({ to: '/login' })}
                 variant="outline"
                 className="w-full"
               >
-                Back to Login
+                {t('auth.emailConfirm.backToLogin')}
               </Button>
             </div>
           </>

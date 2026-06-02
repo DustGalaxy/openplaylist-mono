@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { UserProfile } from '@/types/user'
 import { patchSocialLink } from '@/api/api-user'
 import { SocialLinkHint } from '@/lib/constants/social_names'
@@ -59,39 +60,46 @@ const getApiErrorMessage = (error: unknown, fallback: string): string => {
   return error instanceof Error ? error.message : fallback
 }
 
-const validatePlatform = (platform: string): string | null => {
+const validatePlatform = (
+  platform: string,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+): string | null => {
   const trimmed = platform.trim()
-  if (!trimmed) return 'Platform name is required'
+  if (!trimmed) return t('settings.profile.validation.platformRequired')
   if (trimmed.length < MIN_PLATFORM_LENGTH) {
-    return `Platform name must be at least ${MIN_PLATFORM_LENGTH} characters`
+    return t('settings.profile.validation.platformMin', { min: MIN_PLATFORM_LENGTH })
   }
   if (trimmed.length > MAX_PLATFORM_LENGTH) {
-    return `Platform name must not exceed ${MAX_PLATFORM_LENGTH} characters`
+    return t('settings.profile.validation.platformMax', { max: MAX_PLATFORM_LENGTH })
   }
   if (!/^[a-zA-Z0-9\s\-_]+$/.test(trimmed)) {
-    return 'Platform name can only contain letters, numbers, spaces, hyphens, and underscores'
+    return t('settings.profile.validation.platformChars')
   }
   return null
 }
 
-const validateUrl = (url: string): string | null => {
+const validateUrl = (
+  url: string,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+): string | null => {
   const trimmed = url.trim()
-  if (!trimmed) return 'URL is required'
+  if (!trimmed) return t('settings.profile.validation.urlRequired')
   if (trimmed.length < MIN_URL_LENGTH) {
-    return `URL must be at least ${MIN_URL_LENGTH} characters`
+    return t('settings.profile.validation.urlMin', { min: MIN_URL_LENGTH })
   }
   if (!URL_REGEX.test(trimmed)) {
-    return 'URL must start with http:// or https://'
+    return t('settings.profile.validation.urlProtocol')
   }
   try {
     new URL(trimmed)
     return null
   } catch {
-    return 'Enter a valid URL'
+    return t('settings.profile.validation.urlInvalid')
   }
 }
 
 export function ProfileTab({ user }: ProfileTabProps) {
+  const { t } = useTranslation()
   const [socialLinks, setSocialLinks] = useState<Record<string, string>>(
     user?.social_links ?? {},
   )
@@ -136,7 +144,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
   }, [])
 
   const handleAddSocialLink = useCallback(async () => {
-    const platformError = validatePlatform(newSocialLink.platform)
+    const platformError = validatePlatform(newSocialLink.platform, t)
     if (platformError) {
       setUIState((prev) => ({
         ...prev,
@@ -145,7 +153,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
       return
     }
 
-    const urlError = validateUrl(newSocialLink.url)
+    const urlError = validateUrl(newSocialLink.url, t)
     if (urlError) {
       setUIState((prev) => ({
         ...prev,
@@ -163,7 +171,9 @@ export function ProfileTab({ user }: ProfileTabProps) {
         socialFeedback: {
           add: {
             type: 'error',
-            message: `${newSocialLink.platform} is already added`,
+            message: t('settings.profile.duplicatePlatform', {
+              platform: newSocialLink.platform,
+            }),
           },
         },
       }))
@@ -188,7 +198,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
       setUIState((prev) => ({
         ...prev,
         socialFeedback: {
-          add: { type: 'success', message: 'Social link added successfully' },
+          add: { type: 'success', message: t('settings.profile.linkAddedSuccess') },
         },
       }))
     } catch (error) {
@@ -197,7 +207,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
         socialFeedback: {
           add: {
             type: 'error',
-            message: getApiErrorMessage(error, 'Failed to add social link'),
+            message: getApiErrorMessage(error, t('settings.profile.linkFailed')),
           },
         },
       }))
@@ -228,7 +238,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
         socialFeedback: {
           [`delete-${platform}`]: {
             type: 'success',
-            message: 'Social link deleted',
+            message: t('settings.profile.linkDeleted'),
           },
         },
       }))
@@ -238,7 +248,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
         socialFeedback: {
           [`delete-${platform}`]: {
             type: 'error',
-            message: getApiErrorMessage(error, 'Failed to delete social link'),
+            message: getApiErrorMessage(error, t('settings.profile.linkDeleteFailed')),
           },
         },
       }))
@@ -257,7 +267,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
         <h3
           className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}
         >
-          Profile Overview
+          {t('settings.profile.overview')}
         </h3>
 
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
@@ -276,7 +286,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
           <div className="flex-1">
             <h2 className="text-2xl font-bold mb-2">{user?.username || ''}</h2>
             <p className="mb-4 text-black bg-black hover:text-text-secondary hover:bg-level-2 px-2 py-1 rounded-full">
-              {user?.email ? user.email : 'No email set'}
+              {user?.email ? user.email : t('settings.profile.noEmail')}
             </p>
 
             {/* Social Links */}
@@ -304,8 +314,10 @@ export function ProfileTab({ user }: ProfileTabProps) {
                         uiState.socialLoading[`delete-${platform}`] || false
                       }
                       className="ml-1 text-text-placeholder hover:text-danger transition-colors disabled:opacity-50"
-                      title={`Remove ${platform}`}
-                      aria-label={`Delete ${platform} social link`}
+                      title={t('settings.profile.removePlatform', { platform })}
+                      aria-label={t('settings.profile.deletePlatformAria', {
+                        platform,
+                      })}
                     >
                       ✕
                     </button>
@@ -313,7 +325,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
                 ))
               ) : (
                 <p className="text-sm text-text-placeholder italic">
-                  No social links added yet
+                  {t('settings.profile.noSocialLinksYet')}
                 </p>
               )}
             </div>
@@ -326,20 +338,20 @@ export function ProfileTab({ user }: ProfileTabProps) {
         <h3
           className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}
         >
-          Add Social Links
+          {t('settings.profile.addSocialLinks')}
         </h3>
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <Label htmlFor="social-platform" className="text-text-main">
-                Platform
+                {t('settings.profile.platform')}
               </Label>
               <div className="relative">
                 <Input
                   id="social-platform"
                   type="text"
-                  placeholder="e.g., Twitch, GitHub, LinkedIn"
+                  placeholder={t('settings.profile.platformPlaceholder')}
                   value={newSocialLink.platform}
                   onChange={(e) => handlePlatformChange(e.target.value)}
                   className="h-11 border-level-4 text-text-main bg-level-1 mt-2"
@@ -369,12 +381,12 @@ export function ProfileTab({ user }: ProfileTabProps) {
             </div>
             <div className="flex-1">
               <Label htmlFor="social-url" className="text-text-main">
-                URL
+                {t('settings.profile.url')}
               </Label>
               <Input
                 id="social-url"
                 type="url"
-                placeholder="https://..."
+                placeholder={t('settings.profile.urlPlaceholder')}
                 value={newSocialLink.url}
                 onChange={(e) => handleUrlChange(e.target.value)}
                 className="h-11 border-level-4 text-text-main bg-level-1 mt-2"
@@ -383,7 +395,11 @@ export function ProfileTab({ user }: ProfileTabProps) {
             </div>
             <div className="flex items-end">
               <Btn
-                text={uiState.socialLoading.add ? '⟳ Adding...' : '+ Add Link'}
+                text={
+                  uiState.socialLoading.add
+                    ? t('settings.profile.adding')
+                    : t('settings.profile.addLink')
+                }
                 onClick={handleAddSocialLink}
                 disabled={uiState.socialLoading.add || false}
                 className="px-4 py-3 text-base font-semibold w-full sm:w-auto"
@@ -410,11 +426,13 @@ export function ProfileTab({ user }: ProfileTabProps) {
       {uiState.deleteConfirmation && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className={`p-4 sm:p-6 max-w-sm w-full ${panelClass}`}>
-            <h3 className="text-lg font-bold mb-2">Confirm Deletion</h3>
+            <h3 className="text-lg font-bold mb-2">
+              {t('settings.profile.confirmDeletion')}
+            </h3>
             <p className="text-text-secondary mb-6">
-              Are you sure you want to delete{' '}
-              <strong>{uiState.deleteConfirmation}</strong>? This action cannot
-              be undone.
+              {t('settings.profile.confirmDeleteBody', {
+                platform: uiState.deleteConfirmation,
+              })}
             </p>
             <div className="flex gap-3">
               <button
@@ -426,7 +444,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
                 }
                 className="flex-1 px-4 py-2 rounded-lg border border-level-4 hover:bg-level-1 transition-colors font-medium"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={() =>
@@ -441,8 +459,8 @@ export function ProfileTab({ user }: ProfileTabProps) {
                 className="flex-1 px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/50 hover:bg-red-500/30 transition-colors font-medium text-red-300 disabled:opacity-50"
               >
                 {uiState.socialLoading[`delete-${uiState.deleteConfirmation}`]
-                  ? 'Deleting...'
-                  : 'Delete'}
+                  ? t('settings.profile.deleting')
+                  : t('settings.profile.delete')}
               </button>
             </div>
           </div>

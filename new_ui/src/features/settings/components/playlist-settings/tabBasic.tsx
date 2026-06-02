@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Discord,
   Github,
@@ -38,6 +39,7 @@ const TabBasic = ({
   canPatchSettings: React.RefObject<boolean>
   settings: PlaylistSettings
 }) => {
+  const { t } = useTranslation()
   const [plstMode, setPlstMode] = React.useState(playlist.settings.mode)
   const [isPublic, setIsPublic] = React.useState(playlist.is_public)
   const [integrations, setIntegrations] = useState<Array<Integration>>([])
@@ -76,13 +78,20 @@ const TabBasic = ({
   }
 
   const getPlatformDisplayName = (platform: string) => {
-    const platformMap: Record<string, string> = {
-      twitch: 'Twitch',
-      donationalerts: 'Donation Alerts',
-      da: 'Donation Alerts',
-      youtube: 'YouTube',
+    const normalized = platform.toLowerCase()
+    const keyMap: Record<string, string> = {
+      twitch: 'platform.twitch',
+      donationalerts: 'platform.donationalerts',
+      da: 'platform.da',
+      youtube: 'platform.youtube',
+      discord: 'platform.discord',
+      github: 'platform.github',
+      spotify: 'platform.spotify',
+      x: 'platform.x',
+      google: 'platform.google',
     }
-    return platformMap[platform.toLowerCase()] || platform
+    const key = keyMap[normalized]
+    return key ? t(key) : platform
   }
 
   const isSourceSelected = (platform: string, platformUserId: string) => {
@@ -130,7 +139,7 @@ const TabBasic = ({
 
       <div className="grid gap-4">
         <div className="grid grid-cols-[auto_1fr] gap-2">
-          <Label className=" text-lg">Playlist mode</Label>
+          <Label className=" text-lg">{t('playlistSettings.basic.modeTitle')}</Label>
           <RadioGroup
             defaultValue={plstMode}
             className="flex gap-0 justify-end"
@@ -160,7 +169,7 @@ const TabBasic = ({
                 className={`${plstMode === 'flow' ? 'text-shadow-accent-1 text-shadow-md font-bold ' : ''} 
             flex cursor-pointer transition-all duration-100 text-lg`}
               >
-                FLOW
+                {t('playlistSettings.basic.flow')}
               </Label>
             </div>
 
@@ -178,20 +187,18 @@ const TabBasic = ({
                 className={`${plstMode === 'static' ? 'text-shadow-accent-3 text-shadow-md font-bold' : ''} 
             cursor-pointer transition-all duration-100 text-lg`}
               >
-                STATIC
+                {t('playlistSettings.basic.static')}
               </Label>
             </div>
           </RadioGroup>
         </div>
       </div>
       <DialogDescription>
-        <div className="py-1">
-          Flow - remove track after playing or skip to next track.
-        </div>
-        <div className="py-1">Static - normal playlist.</div>
+        <div className="py-1">{t('playlistSettings.basic.flowHelp')}</div>
+        <div className="py-1">{t('playlistSettings.basic.staticHelp')}</div>
       </DialogDescription>
       <div className="grid grid-cols-[auto_1fr] gap-2">
-        <Label className=" text-lg">Privacy</Label>
+        <Label className=" text-lg">{t('playlistSettings.basic.privacy')}</Label>
 
         <RadioGroup
           defaultValue={isPublic ? 'public' : 'private'}
@@ -228,7 +235,7 @@ const TabBasic = ({
               className={`${isPublic ? 'text-shadow-accent-1 text-shadow-md font-bold ' : ''} 
             flex cursor-pointer transition-all duration-100 text-lg`}
             >
-              PUBLIC
+              {t('playlistSettings.basic.public')}
             </Label>
           </div>
           <div
@@ -245,35 +252,24 @@ const TabBasic = ({
               className={`${!isPublic ? 'text-shadow-accent-3 text-shadow-md font-bold' : ''} 
             cursor-pointer transition-all duration-100 text-lg`}
             >
-              PRIVATE
+              {t('playlistSettings.basic.private')}
             </Label>
           </div>
         </RadioGroup>
       </div>
       <div className="mb-4">
-        <Label className=" text-lg">External content sources</Label>
-        <DialogDescription>
-          <div className="py-1">
-            This setting allows users to add tracks from different sources. If
-            no sources are selected, users can add tracks only by web view if
-            they are logged in and playlist are public.
-          </div>
-          <div className="py-1">
-            If you enable any external source in a few playlists in same time,
-            requests will be set in all selected playlists, so be careful with
-            it.
-          </div>
-        </DialogDescription>
+        <Label className=" text-lg">
+          {t('playlistSettings.basic.externalSources')}
+        </Label>
 
         <div className=" rounded-(--rounded-std) w-full mt-3">
           {isLoadingIntegrations ? (
             <div className="text-center py-4 text-sm text-gray-500">
-              Loading integrations...
+              {t('playlistSettings.basic.integrationsLoading')}
             </div>
           ) : integrations.length === 0 ? (
             <div className="text-center py-4 text-sm text-gray-500">
-              No integrations found. Connect your platforms in settings to
-              enable external sources.
+              {t('playlistSettings.basic.integrationsEmpty')}
             </div>
           ) : (
             <div className="space-y-3">

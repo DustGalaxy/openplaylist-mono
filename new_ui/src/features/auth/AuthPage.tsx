@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { LoginForm } from './LoginForm'
 import { RegisterForm } from './RegisterForm'
 import Btn from '@/components/ui/my-btn'
@@ -9,6 +10,7 @@ export interface AuthPageProps {
 }
 
 export function AuthPage({ defaultMode = 'login', onSuccess }: AuthPageProps) {
+  const { t } = useTranslation()
   const [mode, setMode] = useState<'login' | 'register'>(defaultMode)
 
   return (
@@ -18,9 +20,11 @@ export function AuthPage({ defaultMode = 'login', onSuccess }: AuthPageProps) {
           <>
             <LoginForm onSuccess={onSuccess} />
             <div className="mt-6 text-center">
-              <p className="text-text-secondary mb-3">Don't have an account?</p>
+              <p className="text-text-secondary mb-3">
+                {t('auth.page.noAccount')}
+              </p>
               <Btn
-                text="Create Account"
+                text={t('auth.page.createAccount')}
                 onClick={() => setMode('register')}
                 className="w-full"
               />
@@ -30,9 +34,11 @@ export function AuthPage({ defaultMode = 'login', onSuccess }: AuthPageProps) {
           <>
             <RegisterForm onSuccess={onSuccess} />
             <div className="mt-6 text-center">
-              <p className="text-text-secondary mb-3">Already have an account?</p>
+              <p className="text-text-secondary mb-3">
+                {t('auth.page.hasAccount')}
+              </p>
               <Btn
-                text="Login Instead"
+                text={t('auth.page.loginInstead')}
                 onClick={() => setMode('login')}
                 className="w-full"
               />

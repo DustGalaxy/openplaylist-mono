@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import {
@@ -20,6 +21,7 @@ const TwitchPriority = ({
   settings: PlaylistSettings
   canRequest: React.RefObject<boolean>
 }) => {
+  const { t } = useTranslation()
   const [costBroacaster, setCostBroacaster] = React.useState(
     playlist.settings.cost_broacaster,
   )
@@ -46,7 +48,7 @@ const TwitchPriority = ({
             alt=""
             className="w-[18px] h-[18px]"
           />
-          <Label className=" text-lg">Broadcaster</Label>
+          <Label className=" text-lg">{t('twitch.role.broadcaster')}</Label>
         </div>
 
         <Input
@@ -71,7 +73,7 @@ const TwitchPriority = ({
             alt=""
             className="w-[18px] h-[18px]"
           />
-          <Label className=" text-lg">Moderator</Label>
+          <Label className=" text-lg">{t('twitch.role.moderator')}</Label>
         </div>
 
         <Input
@@ -96,7 +98,7 @@ const TwitchPriority = ({
             alt=""
             className="w-[18px] h-[18px]"
           />
-          <Label className=" text-lg">Vip</Label>
+          <Label className=" text-lg">{t('twitch.role.vip')}</Label>
         </div>
 
         <Input
@@ -125,7 +127,7 @@ const TwitchPriority = ({
           >
             <path d="M8.944 2.654c.406-.872 1.706-.872 2.112 0l1.754 3.77 4.2.583c.932.13 1.318 1.209.664 1.853l-3.128 3.083.755 4.272c.163.92-.876 1.603-1.722 1.132L10 15.354l-3.579 1.993c-.846.47-1.885-.212-1.722-1.132l.755-4.272L2.326 8.86c-.654-.644-.268-1.723.664-1.853l4.2-.583 1.754-3.77z"></path>
           </svg>
-          <Label className=" text-lg">Subscriber</Label>
+          <Label className=" text-lg">{t('twitch.role.subscriber')}</Label>
         </div>
 
         <Input
@@ -151,7 +153,7 @@ const TwitchPriority = ({
             alt=""
             className="w-[18px] h-[18px]"
           />
-          <Label className=" text-lg">Turbo</Label>
+          <Label className=" text-lg">{t('twitch.role.Turbo')}</Label>
         </div>
 
         <Input
@@ -176,7 +178,7 @@ const TwitchPriority = ({
             alt=""
             className="w-[18px] h-[18px]"
           />
-          <Label className=" text-lg">Artist</Label>
+          <Label className=" text-lg">{t('twitch.role.artist')}</Label>
         </div>
 
         <Input
@@ -210,7 +212,7 @@ const TwitchPriority = ({
               fillRule="evenodd"
             ></path>
           </svg>
-          <Label className=" text-lg">Follower</Label>
+          <Label className=" text-lg">{t('twitch.role.follower')}</Label>
         </div>
         <Input
           type="number"

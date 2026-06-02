@@ -12,7 +12,7 @@ import {
   pageWrapClass,
   panelClass,
 } from '@/features/landing/styles'
-import { settingsCopy } from '@/features/user-settings/copy'
+import { useTranslation } from 'react-i18next'
 import { ProfileTab } from './ProfileTab'
 import { AccountTab } from './AccountTab'
 import { IntegrationsTab } from './IntegrationsTab'
@@ -35,16 +35,6 @@ interface Tab {
   icon: string
 }
 
-const TABS: Array<Tab> = [
-  { id: 'profile', label: settingsCopy.tabs.profile, icon: '👤' },
-  { id: 'account', label: settingsCopy.tabs.account, icon: '⚙️' },
-  {
-    id: 'integrations',
-    label: settingsCopy.tabs.integrations,
-    icon: '🔗',
-  },
-]
-
 export function UserSettingsPage({
   user,
   expired_at,
@@ -53,7 +43,14 @@ export function UserSettingsPage({
   useTwitchLoginUrl,
   useDaLoginUrl,
 }: UserSettingsPageProps) {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState<TabId>('profile')
+
+  const TABS: Array<Tab> = [
+    { id: 'profile', label: t('settings.tabs.profile'), icon: '👤' },
+    { id: 'account', label: t('settings.tabs.account'), icon: '⚙️' },
+    { id: 'integrations', label: t('settings.tabs.integrations'), icon: '🔗' },
+  ]
 
   const handleTwitchLogin = useTwitchLoginUrl()
   const handleDaLogin = useDaLoginUrl()
@@ -61,7 +58,7 @@ export function UserSettingsPage({
 
   const platformConfigs = {
     twitch: {
-      name: 'Twitch',
+      name: t('platform.twitch'),
       icon: (
         <Twitch
           className="w-full h-full bg-accent-1 rounded-lg"
@@ -73,12 +70,12 @@ export function UserSettingsPage({
       loginHandler: handleTwitchLogin,
     },
     da: {
-      name: 'Donation Alerts',
+      name: t('platform.donationAlerts'),
       icon: <DonationAlerts width={45} height={45} />,
       loginHandler: handleDaLogin,
     },
     google: {
-      name: 'Google',
+      name: t('platform.google'),
       icon: <Google width={45} height={45} />,
       loginHandler: () => {
         handleOAuthRedirect('google')
@@ -91,13 +88,13 @@ export function UserSettingsPage({
       <div className={`${pageInnerClass} flex flex-col gap-6 sm:gap-8`}>
         <header className="text-center sm:text-left">
           <p className={`text-sm font-medium mb-2 ${gradientTextClass}`}>
-            {settingsCopy.eyebrow}
+            {t('settings.eyebrow')}
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold text-text-main">
-            {settingsCopy.title}
+            {t('settings.title')}
           </h1>
           <p className="text-sm sm:text-base text-text-secondary mt-1">
-            {settingsCopy.subtitle}
+            {t('settings.subtitle')}
           </p>
         </header>
 
@@ -117,7 +114,7 @@ export function UserSettingsPage({
                 {user?.username || settingsCopy.title}
               </p>
               <p className="text-sm text-text-secondary">
-                {user?.email ?? 'No email set'}
+                {user?.email ?? t('settings.profile.noEmail')}
               </p>
             </div>
           </div>
@@ -167,14 +164,17 @@ export function UserSettingsPage({
 }
 
 function EmailNotConfirmedAlert({ email }: { email?: string }) {
+  const { t } = useTranslation()
   return (
     <div className="rounded-(--rounded-std) border border-yellow-500/50 bg-yellow-500/10 px-4 py-3 text-yellow-100">
       <div className="flex flex-col gap-1">
         <div className="text-sm font-semibold">
-          {settingsCopy.emailNotConfirmedTitle}
+          {t('settings.emailNotConfirmed.title')}
         </div>
         <p className="text-sm text-yellow-100/80">
-          {settingsCopy.emailNotConfirmedBody(email)}
+          {t('settings.emailNotConfirmed.body', {
+            email: email ?? t('settings.emailNotConfirmed.defaultEmail'),
+          })}
         </p>
       </div>
     </div>

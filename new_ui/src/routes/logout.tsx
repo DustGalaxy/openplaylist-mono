@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useLogoutMutation } from '@/hooks/useAuth'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -8,6 +9,7 @@ export const Route = createFileRoute('/logout')({
 })
 
 function RouteComponent() {
+  const { t } = useTranslation()
   const {
     mutate: logout,
     isSuccess,
@@ -20,27 +22,20 @@ function RouteComponent() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Инициируем мутацию выхода из системы сразу при монтировании компонента
-    // Убедимся, что это происходит только один раз
     if (!isPending && !isSuccess && !isError) {
       logout()
     }
-  }, [logout, isPending, isSuccess, isError]) // Зависимости для useEffect
+  }, [logout, isPending, isSuccess, isError])
 
-  // Дополнительный useEffect для обработки результата мутации
-  // (хотя useLogoutMutation уже содержит логику редиректа)
   useEffect(() => {
     if (isSuccess) {
       console.log('Successfully logged out!')
-      // Redirection is handled by useLogoutMutation's internal useEffect
       navigate({ to: '/' })
     } else if (isError) {
       console.error('Logout failed:', error)
-      // Если произошла ошибка выхода, но мы все равно хотим очистить состояние клиента
-      // (например, если бэкенд недоступен, но пользователь хочет выйти из сессии на клиенте)
       clearAuth()
     }
-  }, [isSuccess, isError, error, clearAuth])
+  }, [isSuccess, isError, error, clearAuth, navigate])
 
   return (
     <div
@@ -52,16 +47,18 @@ function RouteComponent() {
         flexDirection: 'column',
       }}
     >
-      <h1>Выход из системы...</h1>
-      {isPending && <p>Пожалуйста, подождите, идет выход...</p>}
+      <h1>{t('auth.logout.title')}</h1>
+      {isPending && <p>{t('auth.logout.pleaseWait')}</p>}
       {isError && (
         <p style={{ color: 'red' }}>
-          Произошла ошибка при выходе: {error.message || 'Неизвестная ошибка.'}
+          {t('auth.logout.errorDetail', {
+            message: error?.message || t('auth.oauthCallback.unknownError'),
+          })}
           <br />
-          (Возможно, сервер недоступен. Ваша локальная сессия будет очищена.)
+          {t('auth.logout.errorLocalClear')}
         </p>
       )}
-      {isSuccess && <p>Вы успешно вышли. Перенаправление...</p>}
+      {isSuccess && <p>{t('auth.logout.redirecting')}</p>}
     </div>
   )
 }

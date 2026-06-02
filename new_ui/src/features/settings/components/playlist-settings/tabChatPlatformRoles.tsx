@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Label } from '@/components/ui/label'
 import { DialogDescription } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -19,6 +20,7 @@ const TabChatRoles = ({
   settings: PlaylistSettings
   setSettings: React.Dispatch<React.SetStateAction<PlaylistSettings>>
 }) => {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = React.useState<string>(ChatPlatform.Twitch)
   const [rules, setRules] = React.useState<
     Record<ChatPlatform, Array<ReadChatRules>>
@@ -81,7 +83,7 @@ const TabChatRoles = ({
   return (
     <div>
       <div className="gap-1 flex flex-col">
-        <Label className="text-xl">Chat Roles</Label>
+        <Label className="text-xl">{t('playlistSettings.chatRoles.title')}</Label>
         <DialogDescription>
           Configure role priorities for different chat platforms.
         </DialogDescription>

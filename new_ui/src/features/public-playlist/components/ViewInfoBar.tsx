@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Calendar,
   Clock,
@@ -76,6 +77,7 @@ function SectionBlock({
 }
 
 const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
+  const { t, i18n } = useTranslation()
   const { isAuthenticated } = useAuthStore()
   const [selectedContentSettingIndex, setSelectedContentSettingIndex] =
     React.useState(0)
@@ -84,7 +86,7 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
     playlist.settings.content_settings[selectedContentSettingIndex]
 
   const updatedLabel = new Date(playlist.updated_at).toLocaleDateString(
-    'ru-RU',
+    i18n.language === 'ru' ? 'ru-RU' : 'en-US',
     { day: 'numeric', month: 'long', year: 'numeric' },
   )
 
@@ -92,7 +94,6 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
-      {/* Meta row */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <span
@@ -107,13 +108,15 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
               aria-hidden
             />
             {requestsOpen
-              ? 'Заявки от зрителей открыты'
-              : 'Внешние заявки закрыты'}
+              ? t('publicView.requestsOpen')
+              : t('publicView.requestsClosed')}
           </span>
           <span
             className={`inline-flex rounded-full px-3 py-1 text-xs font-medium border border-level-3/20 bg-level-1/50 text-text-secondary`}
           >
-            {playlist.settings.mode === 'flow' ? 'Режим flow' : 'Режим static'}
+            {playlist.settings.mode === 'flow'
+              ? t('publicView.modeFlow')
+              : t('publicView.modeStatic')}
           </span>
         </div>
         <time
@@ -125,13 +128,11 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
         </time>
       </div>
 
-      {/* Description */}
       <p className="text-sm sm:text-base text-text-secondary leading-relaxed border-l-2 border-level-3/40 pl-4">
-        {playlist.description || 'Описание не указано.'}
+        {playlist.description || t('publicView.noDescription')}
       </p>
 
-      {/* Preferences */}
-      <SectionBlock title="Настройки плейлиста">
+      <SectionBlock title={t('publicView.playlistSettings')}>
         {playlist.settings.content_settings.length > 1 && (
           <div className="flex gap-2 flex-wrap mb-4">
             {playlist.settings.content_settings.map((setting, index) => (
@@ -154,56 +155,65 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
           <InfoCard
             icon={<Settings size={14} />}
-            label="Режим"
+            label={t('playlist.stats.mode')}
             value={playlist.settings.mode}
           />
           <InfoCard
             icon={<Eye size={14} />}
-            label="Мин. просмотры"
+            label={t('playlist.stats.minViews')}
             value={contentSettings.min_views}
           />
           <InfoCard
             icon={<ThumbsUp size={14} />}
-            label="Мин. лайки"
+            label={t('playlist.stats.minLikes')}
             value={contentSettings.min_likes}
           />
           <InfoCard
             icon={<Clock size={14} />}
-            label="Макс. длительность"
-            value={`${contentSettings.max_duration} с`}
+            label={t('playlist.stats.maxDuration')}
+            value={t('playlist.stats.durationSec', {
+              count: contentSettings.max_duration,
+            })}
           />
           <InfoCard
             icon={<RefreshCcw size={14} />}
-            label="Кулдаун трека"
-            value={`${contentSettings.track_cooldown} мин`}
+            label={t('playlist.stats.trackCd')}
+            value={t('playlist.stats.cooldownMin', {
+              count: contentSettings.track_cooldown,
+            })}
           />
           <InfoCard
             icon={<User size={14} />}
-            label="Кулдаун пользователя"
-            value={`${contentSettings.user_cooldown} мин`}
+            label={t('playlist.stats.userCd')}
+            value={t('playlist.stats.cooldownMin', {
+              count: contentSettings.user_cooldown,
+            })}
           />
           <InfoCard
             icon={<List size={14} />}
-            label="Макс. размер"
-            value={playlist.settings.max_playlist_size || '∞'}
+            label={t('playlist.stats.maxSize')}
+            value={
+              playlist.settings.max_playlist_size ||
+              t('playlist.stats.maxSizeUnlimited')
+            }
           />
           <InfoCard
             icon={<Priority width={14} height={14} />}
-            label="Приоритет"
+            label={t('playlist.stats.priorityMode')}
             value={playlist.settings.cost_mode}
           />
         </div>
       </SectionBlock>
 
       {isAuthenticated && (
-        <SectionBlock title="Добавить трек">
+        <SectionBlock title={t('publicView.addTrack')}>
           <div className={`p-4 ${innerPanelClass}`}>
             <AddBar playlistId={playlist.id} />
           </div>
         </SectionBlock>
       )}
 
-      <SectionBlock title="Сейчас играет">
+      <SectionBlock title={t('publicView.nowPlaying')}>
         {playlist.now_playing ? (
           <ViewPlayNowCard
             track={playlist.now_playing}
@@ -218,10 +228,10 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
               <Music2 className="h-6 w-6" strokeWidth={1.5} />
             </div>
             <p className="text-sm text-text-secondary">
-              Сейчас ничего не воспроизводится
+              {t('publicView.nowPlayingEmpty')}
             </p>
             <p className={`text-xs font-medium ${gradientTextClass}`}>
-              Трек появится здесь, когда стример запустит воспроизведение
+              {t('publicView.nowPlayingHint')}
             </p>
           </div>
         )}

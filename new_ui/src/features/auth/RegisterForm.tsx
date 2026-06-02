@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from '@tanstack/react-router'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
@@ -16,6 +17,7 @@ export interface RegisterFormProps {
 }
 
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const handleOAuthRedirect = useOAuthUrl()
 
@@ -34,7 +36,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       handleOAuthRedirect(platform, false)
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Social registration failed'
+        err instanceof Error ? err.message : t('auth.register.error.socialFailed')
       setError(message)
       setIsLoading(false)
     }
@@ -44,17 +46,17 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     e.preventDefault()
 
     if (!username || !email || !password || !confirmPassword) {
-      setError('Please fill in all fields')
+      setError(t('auth.register.error.fillAll'))
       return
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
+      setError(t('auth.register.error.passwordMismatch'))
       return
     }
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters')
+      setError(t('auth.register.error.passwordShort'))
       return
     }
 
@@ -82,10 +84,10 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const message =
-          err.response?.data?.detail || 'Registration failed. Please try again.'
+          err.response?.data?.detail || t('auth.register.error.failed')
         setError(message)
       } else {
-        setError('An unexpected error occurred')
+        setError(t('auth.register.error.unexpected'))
       }
     } finally {
       setIsLoading(false)
@@ -95,8 +97,10 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   return (
     <div className="w-full max-w-md mx-auto p-6 space-y-6">
       <div className="text-center space-y-2">
-        <h1 className="text-2xl text-text-main  font-bold">Create Account</h1>
-        <p className="text-text-secondary">Join us to get started</p>
+        <h1 className="text-2xl text-text-main  font-bold">
+          {t('auth.register.title')}
+        </h1>
+        <p className="text-text-secondary">{t('auth.register.subtitle')}</p>
       </div>
 
       {error && (
@@ -107,14 +111,13 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="social">Social Sign Up</TabsTrigger>
-          <TabsTrigger value="classic">Email & Password</TabsTrigger>
+          <TabsTrigger value="social">{t('auth.register.tab.social')}</TabsTrigger>
+          <TabsTrigger value="classic">{t('auth.register.tab.classic')}</TabsTrigger>
         </TabsList>
 
-        {/* Social Registration Tab */}
         <TabsContent value="social" className="space-y-4 ">
           <p className="text-sm text-text-secondary text-center">
-            Sign up with your favorite platform
+            {t('auth.register.socialHint')}
           </p>
 
           <SocialAuthButtons
@@ -128,26 +131,27 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
               <div className="w-full border-t border-level-3"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-level-1 text-text-secondary">or</span>
+              <span className="px-2 bg-level-1 text-text-secondary">
+                {t('common.or')}
+              </span>
             </div>
           </div>
 
           <p className="text-sm text-text-secondary text-center">
-            Prefer email? Use the form on the right →
+            {t('auth.register.emailHint')}
           </p>
         </TabsContent>
 
-        {/* Classic Registration Tab */}
         <TabsContent value="classic" className="space-y-4">
           <form onSubmit={handleClassicRegister} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username" className="text-text-main ">
-                Username
+                {t('auth.register.field.username')}
               </Label>
               <Input
                 id="username"
                 type="text"
-                placeholder="your_username"
+                placeholder={t('auth.register.placeholder.username')}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={isLoading}
@@ -157,12 +161,12 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="email" className="text-text-main ">
-                Email
+                {t('auth.register.field.email')}
               </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={t('auth.register.placeholder.email')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
@@ -172,30 +176,30 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="password" className="text-text-main ">
-                Password
+                {t('auth.register.field.password')}
               </Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder={t('auth.register.placeholder.password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 className="text-text-main "
               />
               <p className="text-xs text-text-secondary">
-                At least 8 characters
+                {t('auth.register.passwordHint')}
               </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword" className="text-text-main ">
-                Confirm Password
+                {t('auth.register.field.confirmPassword')}
               </Label>
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="••••••••"
+                placeholder={t('auth.register.placeholder.password')}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
@@ -204,7 +208,11 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             </div>
 
             <Btn
-              text={isLoading ? 'Creating account...' : 'Sign Up'}
+              text={
+                isLoading
+                  ? t('auth.register.submitLoading')
+                  : t('auth.register.submit')
+              }
               onClick={() => {}}
               disabled={isLoading}
               className="w-full text-text-main bg-level-2"
@@ -216,19 +224,17 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             className="w-full text-center text-sm text-text-main  hover:underline"
             onClick={() => setActiveTab('social')}
           >
-            Back to social sign up
+            {t('auth.register.backToSocial')}
           </button>
         </TabsContent>
       </Tabs>
 
       <div className="space-y-3 text-center">
-        <p className="text-xs text-text-secondary">
-          By signing up, you agree to our Terms of Service and Privacy Policy
-        </p>
+        <p className="text-xs text-text-secondary">{t('auth.register.legal')}</p>
         <p className="text-sm text-text-main ">
-          Already have an account?{' '}
+          {t('auth.register.loginPrompt')}{' '}
           <Link to="/login" className="text-text-main  hover:underline">
-            Log in here
+            {t('auth.register.loginLink')}
           </Link>
         </p>
       </div>

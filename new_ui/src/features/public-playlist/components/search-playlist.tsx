@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from '@tanstack/react-router'
 import { ListMusic, Loader2, SearchX, User } from 'lucide-react'
 
@@ -26,6 +27,7 @@ const SearchPlaylist = ({
   showHeader = false,
   className = '',
 }: SearchPlaylistProps) => {
+  const { t } = useTranslation()
   const [search, setSearch] = React.useState('')
   const [playlists, setPlaylists] = React.useState<PublicPlaylistResult[]>([])
   const [notFound, setNotFound] = React.useState(false)
@@ -59,10 +61,10 @@ const SearchPlaylist = ({
       {showHeader && (
         <div className="text-center mb-6">
           <h2 className="text-2xl sm:text-3xl font-bold text-text-main mb-2">
-            Найти публичный плейлист
+            {t('publicSearch.title')}
           </h2>
           <p className="text-text-secondary text-sm sm:text-base">
-            По имени плейлиста, нику автора или фрагменту описания
+            {t('publicSearch.subtitle')}
           </p>
         </div>
       )}
@@ -72,13 +74,13 @@ const SearchPlaylist = ({
         setValue={setSearch}
         action={handleSearch}
         isLoading={isLoading}
-        placeholder="Имя плейлиста, ник автора или текст в описании…"
+        placeholder={t('publicSearch.placeholder')}
       />
 
       {isLoading && (
         <div className="mt-8 flex items-center justify-center gap-2 text-text-secondary">
           <Loader2 className="h-5 w-5 animate-spin text-level-3" />
-          <span className="text-sm">Ищем плейлисты…</span>
+          <span className="text-sm">{t('publicSearch.searching')}</span>
         </div>
       )}
 
@@ -87,10 +89,9 @@ const SearchPlaylist = ({
           className={`mt-8 flex flex-col items-center gap-3 text-center py-10 ${panelClass} border-dashed`}
         >
           <SearchX className="h-10 w-10 text-text-placeholder" strokeWidth={1.5} />
-          <p className="text-text-main font-medium">Плейлисты не найдены</p>
+          <p className="text-text-main font-medium">{t('publicSearch.notFound')}</p>
           <p className="text-sm text-text-secondary max-w-sm">
-            Попробуйте другое слово или проверьте, что плейлист открыт для
-            публичного просмотра.
+            {t('publicSearch.notFoundHintFull')}
           </p>
         </div>
       )}
@@ -133,10 +134,10 @@ const SearchPlaylist = ({
                 </div>
               </div>
               <p className="text-sm text-text-secondary line-clamp-2 leading-relaxed">
-                {playlist.discription || 'Нет описания'}
+                {playlist.discription || t('publicSearch.noDescription')}
               </p>
               <span className="text-xs font-medium text-level-3 group-hover:text-text-main transition-colors">
-                Открыть плейлист →
+                {t('publicSearch.openPlaylist')} →
               </span>
             </Link>
           ))}
@@ -145,7 +146,7 @@ const SearchPlaylist = ({
 
       {!isLoading && !hasSearched && playlists.length === 0 && !notFound && (
         <p className="mt-6 text-center text-sm text-text-placeholder">
-          Введите запрос и нажмите «Найти», чтобы увидеть публичные плейлисты.
+          {t('publicSearch.initialHintFull')}
         </p>
       )}
     </div>

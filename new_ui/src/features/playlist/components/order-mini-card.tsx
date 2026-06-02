@@ -18,6 +18,7 @@ import type { SavedTrack } from '@/stores/savedStore'
 import { useMusicStore } from '@/stores/musicStore'
 import { useSavedStore } from '@/stores/savedStore'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 export default function OrderMiniCard({
   track,
@@ -26,6 +27,7 @@ export default function OrderMiniCard({
   track: Track | SavedTrack
   btns_type?: 'playlist' | 'non-playlist'
 }) {
+  const { t } = useTranslation()
   const playlist = usePlaylist()
   const bgUrl = `https://img.youtube.com/vi/${track.yt_video_id}/mqdefault.jpg`
   const [hovered, setHovered] = React.useState(false)
@@ -47,7 +49,7 @@ export default function OrderMiniCard({
           await navigator.clipboard.writeText(
             'https://www.youtube.com/watch?v=' + track.yt_video_id,
           )
-          toast.success('Copied to clipboard!')
+          toast.success(t('common.toast.copied'))
         },
       className: 'px-1 bg-level-2',
       glow: 'white',

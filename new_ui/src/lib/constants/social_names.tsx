@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import {
   Twitch,
   Discord,
@@ -9,53 +10,30 @@ import {
 } from '@thesvg/react'
 import DonationAlerts from '@/components/icons/icon-da'
 
-const socials = {
-  twitch: {
-    name: 'Twitch',
-    icon: <Twitch />,
-  },
-  discord: {
-    name: 'Discord',
-    icon: <Discord />,
-  },
-  youtube: {
-    name: 'YouTube',
-    icon: <Youtube />,
-  },
-  donationalerts: {
-    name: 'Donation Alerts',
-    icon: <DonationAlerts />,
-  },
-  X: {
-    name: 'X',
-    icon: <XFormerlyTwitter />,
-  },
-  google: {
-    name: 'Google',
-    icon: <Google />,
-  },
-  github: {
-    name: 'GitHub',
-    icon: <Github />,
-  },
-  spotify: {
-    name: 'Spotify',
-    icon: <Spotify />,
-  },
-}
+const socialIcons = {
+  twitch: { icon: <Twitch />, key: 'platform.twitch' },
+  discord: { icon: <Discord />, key: 'platform.discord' },
+  youtube: { icon: <Youtube />, key: 'platform.youtube' },
+  donationalerts: { icon: <DonationAlerts />, key: 'platform.donationalerts' },
+  X: { icon: <XFormerlyTwitter />, key: 'platform.x' },
+  google: { icon: <Google />, key: 'platform.google' },
+  github: { icon: <Github />, key: 'platform.github' },
+  spotify: { icon: <Spotify />, key: 'platform.spotify' },
+} as const
 
 interface SocialLinkHintProps {
   socialKey: string
 }
 
 export function SocialLinkHint({ socialKey }: SocialLinkHintProps) {
-  const social = socials[socialKey as keyof typeof socials]
+  const { t } = useTranslation()
+  const social = socialIcons[socialKey as keyof typeof socialIcons]
 
   if (social) {
     return (
       <div className="flex items-center gap-2">
         <div className="w-4 h-4">{social.icon}</div>
-        <span>{social.name}</span>
+        <span>{t(social.key)}</span>
       </div>
     )
   }
@@ -63,4 +41,4 @@ export function SocialLinkHint({ socialKey }: SocialLinkHintProps) {
   return <span>{socialKey}</span>
 }
 
-export default socials
+export default socialIcons

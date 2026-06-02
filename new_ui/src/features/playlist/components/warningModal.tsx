@@ -1,5 +1,6 @@
 import React from 'react'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 import { Label } from '@/components/ui/label'
 import Btn from '@/components/ui/my-btn'
 import { Textarea } from '@/components/ui/textarea'
@@ -51,6 +52,7 @@ export default function WarningModal({
   track_id?: string
   requester_id?: string
 }) {
+  const { t } = useTranslation()
   const playlist = usePlaylist()
   const [open, setOpen] = React.useState(false)
   const [blockUserToggle, setBlockUserToggle] = React.useState(false)
@@ -96,7 +98,7 @@ export default function WarningModal({
 
   const handleBlockTrack = async (): Promise<boolean> => {
     if (!YT_VIDEO_ID_REGEX.test(yt_video_id)) {
-      toast.error('Invalid YouTube video ID.')
+      toast.error(t('playlist.report.error.invalidYoutubeId'))
       return false
     }
     if (playlist.settings.track_black_list.includes(yt_video_id)) {
@@ -132,7 +134,7 @@ export default function WarningModal({
     )
 
     if (!entry) {
-      toast.error('Failed to block user.')
+      toast.error(t('playlist.report.error.blockFailed'))
       return false
     }
 
@@ -146,7 +148,7 @@ export default function WarningModal({
   const handleSubmit = async () => {
     const trimmedReason = reason.trim()
     if (!trimmedReason && !blockUserToggle && !blockTrackToggle) {
-      toast.error('Add a reason or choose to block the user and/or track.')
+      toast.error(t('playlist.report.error.validation'))
       return
     }
 
@@ -194,23 +196,29 @@ export default function WarningModal({
       }
 
       const parts: string[] = []
-      if (blockedUser) parts.push('user blocked')
-      if (blockedTrack) parts.push('track blocked')
+      if (blockedUser) parts.push(t('playlist.report.success.userBlocked'))
+      if (blockedTrack) parts.push(t('playlist.report.success.trackBlocked'))
       if (trackIdsToRemove.length > 0) {
         parts.push(
-          `${trackIdsToRemove.length} track${trackIdsToRemove.length === 1 ? '' : 's'} removed`,
+          t('playlist.report.success.tracksRemoved', {
+            count: trackIdsToRemove.length,
+          }),
         )
       }
-      if (trimmedReason && reportSent) parts.push('report submitted')
+      if (trimmedReason && reportSent) {
+        parts.push(t('playlist.report.success.reportSubmitted'))
+      }
 
       toast.success(
-        parts.length > 0 ? parts.join(', ') + '.' : 'Report recorded.',
+        parts.length > 0
+          ? `${parts.join(', ')}.`
+          : t('playlist.report.success.recorded'),
       )
 
       setOpen(false)
       resetForm()
     } catch {
-      toast.error('Something went wrong while processing the report.')
+      toast.error(t('playlist.report.error.processFailed'))
     } finally {
       setSubmitting(false)
     }
@@ -223,18 +231,15 @@ export default function WarningModal({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] bg-level-1 border-level-3 text-text-main overflow-scroll">
         <DialogHeader>
-          <DialogTitle className="text-xl">Report</DialogTitle>
-          <DialogDescription>
-            Report a track or requester and optionally add them to your block
-            lists.
-          </DialogDescription>
+          <DialogTitle className="text-xl">{t('playlist.report.title')}</DialogTitle>
+          <DialogDescription>{t('playlist.report.description')}</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="report-reason">Reason</Label>
+          <Label htmlFor="report-reason">{t('playlist.report.reason')}</Label>
           <Textarea
             id="report-reason"
-            placeholder="Why are you reporting this track or user?"
+            placeholder={t('playlist.report.reasonPlaceholder')}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             disabled={submitting}
@@ -249,7 +254,10 @@ export default function WarningModal({
             disabled={submitting}
           />
           <Label htmlFor="block-user" className="cursor-pointer">
-            Block user: {requester_nickname} ({requester_platform})
+            {t('playlist.report.blockUserLabel', {
+              nickname: requester_nickname,
+              platform: requester_platform,
+            })}
           </Label>
         </div>
 
@@ -261,27 +269,29 @@ export default function WarningModal({
             disabled={submitting}
           />
           <Label htmlFor="block-track" className="cursor-pointer">
-            Block track: {yt_video_id}
+            {t('playlist.report.blockTrackLabel', { id: yt_video_id })}
           </Label>
         </div>
 
-        <DialogFooter >
+        <DialogFooter>
           <div className="flex justify-between w-full">
-
             <Btn
-              text={submitting ? 'Submitting…' : 'Submit report'}
+              text={
+                submitting
+                  ? t('playlist.report.submitting')
+                  : t('playlist.report.submit')
+              }
               className="w-full bg-level-2 sm:w-auto px-2"
               disabled={submitting}
               onClick={() => void handleSubmit()}
             />
             <Btn
-              text="Cancel"
+              text={t('playlist.report.cancel')}
               className="bg-level-2 px-2"
               disabled={submitting}
               onClick={() => handleOpenChange(false)}
             />
           </div>
-
         </DialogFooter>
       </DialogContent>
     </Dialog>

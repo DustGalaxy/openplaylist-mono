@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Label } from '@/components/ui/label'
 import { DialogDescription } from '@/components/ui/dialog'
@@ -22,6 +23,7 @@ const TabValidation = ({
   setSettings: React.Dispatch<React.SetStateAction<PlaylistSettings>>
   settings: PlaylistSettings
 }) => {
+  const { t } = useTranslation()
   const [rules, setRules] = React.useState<
     Record<Platform, ContentSettings | null>
   >(() => {
@@ -64,14 +66,14 @@ const TabValidation = ({
           [platform]: res,
         }))
       } else {
-        toast.error('Failed to initialize section. Please try again later.')
+        toast.error(t('playlistSettings.validation.initFailed'))
       }
     })
   }
   return (
     <div>
       <div className="gap-1 flex flex-col">
-        <Label className=" text-xl">Video validation</Label>
+        <Label className=" text-xl">{t('playlistSettings.validation.title')}</Label>
         <DialogDescription>
           Video validation settings. Can`t be negtive.
         </DialogDescription>

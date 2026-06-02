@@ -1,27 +1,26 @@
 import { Link } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import Disc from '@/components/icons/icon-disc'
 import { useAuthStore } from '@/stores/authStore'
 import React from 'react'
 
-const APP_VERSION = '2026.1 beta'
+const productLinkKeys = [
+  { to: '/view' as const, labelKey: 'footer.searchPlaylists' },
+  { to: '/login' as const, labelKey: 'footer.login' },
+  { to: '/register' as const, labelKey: 'footer.register' },
+] as const
 
-const productLinks = [
-  { to: '/view' as const, label: 'Поиск плейлистов' },
-  { to: '/login' as const, label: 'Вход' },
-  { to: '/register' as const, label: 'Регистрация' },
-]
-
-const featureHighlights = [
-  'Очередь треков в реальном времени',
-  'Правила и блок-листы',
-  'Приоритет от донатов',
-  'Интеграция Twitch и DonationAlerts',
-]
+const featureHighlightKeys = [
+  'footer.highlights.realtimeQueue',
+  'footer.highlights.rulesAndBlocks',
+  'footer.highlights.donationPriority',
+  'footer.highlights.integrations',
+] as const
 
 export default function Footer() {
+  const { t } = useTranslation()
   const { isAuthenticated } = useAuthStore()
   const year = new Date().getFullYear()
-
   const [inFocus, setInFocus] = React.useState(false)
   const windowWidth = window.innerWidth
 
@@ -51,22 +50,20 @@ export default function Footer() {
             <Link to="/" className="inline-flex items-center gap-2 w-fit group">
               <Disc />
               <span className="text-lg font-bold text-transparent bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)] bg-clip-text bg-[length:200%_auto] animate-bg-move">
-                OpenPlaylist
+                {t('brand.name')}
               </span>
             </Link>
             <p className="text-text-secondary text-sm leading-relaxed max-w-sm">
-              Платформа для стримеров и зрителей: общие плейлисты, заявки на
-              треки, гибкие правила и синхронизация очереди без перезагрузки
-              страницы.
+              {t('footer.description')}
             </p>
             <span className="inline-flex w-fit items-center rounded-full border border-level-3/60 bg-level-1 px-3 py-1 text-xs text-text-placeholder">
-              {APP_VERSION}
+              {t('brand.version')}
             </span>
           </div>
 
           <div className="text-left">
             <h3 className="text-sm font-semibold text-text-main uppercase tracking-wide mb-4">
-              Навигация
+              {t('footer.navigation')}
             </h3>
             <ul className="flex flex-col gap-2.5">
               {isAuthenticated && (
@@ -75,17 +72,17 @@ export default function Footer() {
                     to="/dashboard"
                     className="text-sm text-text-secondary hover:text-text-main transition-colors"
                   >
-                    Мои плейлисты
+                    {t('nav.myPlaylists')}
                   </Link>
                 </li>
               )}
-              {productLinks.map(({ to, label }) => (
+              {productLinkKeys.map(({ to, labelKey }) => (
                 <li key={to}>
                   <Link
                     to={to}
                     className="text-sm text-text-secondary hover:text-text-main transition-colors"
                   >
-                    {label}
+                    {t(labelKey)}
                   </Link>
                 </li>
               ))}
@@ -94,19 +91,19 @@ export default function Footer() {
 
           <div className="text-left">
             <h3 className="text-sm font-semibold text-text-main uppercase tracking-wide mb-4">
-              Возможности
+              {t('footer.features')}
             </h3>
             <ul className="flex flex-col gap-2.5">
-              {featureHighlights.map((item) => (
+              {featureHighlightKeys.map((key) => (
                 <li
-                  key={item}
+                  key={key}
                   className="text-sm text-text-secondary flex items-start gap-2"
                 >
                   <span
                     className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-r from-[var(--color-accent-2)] to-[var(--color-accent-3)]"
                     aria-hidden
                   />
-                  {item}
+                  {t(key)}
                 </li>
               ))}
             </ul>
@@ -114,10 +111,8 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-level-3/40 px-6 py-4 sm:px-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-text-placeholder">
-          <p>© {year} OpenPlaylist. Сделано для живых эфиров.</p>
-          <p className="text-text-secondary">
-            REST + WebSocket · React · FastAPI
-          </p>
+          <p>{t('footer.copyright', { year })}</p>
+          <p className="text-text-secondary">{t('footer.techStack')}</p>
         </div>
       </div>
     </footer>

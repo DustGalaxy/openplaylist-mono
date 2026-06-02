@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ListMusic, Radio } from 'lucide-react'
 
 import type { ClientPlaylist, InputPlaylist, Track } from '@/types/playlist'
@@ -58,6 +59,7 @@ function ViewPageShell({
   subtitle: string
   children: React.ReactNode
 }) {
+  const { t } = useTranslation()
   return (
     <div className={pageWrapClass}>
       <div className={pageInnerClass}>
@@ -66,7 +68,7 @@ function ViewPageShell({
             className={`inline-flex items-center gap-2 text-sm font-medium mb-3 ${gradientTextClass}`}
           >
             <Radio className="h-4 w-4 text-[var(--color-accent-2)]" />
-            Публичные плейлисты
+            {t('publicView.eyebrow')}
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold text-text-main mb-2">
             {title}
@@ -82,6 +84,7 @@ function ViewPageShell({
 }
 
 function RouteComponent() {
+  const { t } = useTranslation()
   const { playlist } = Route.useLoaderData()
   const { p: playlistIdFromUrl } = Route.useSearch()
   const [playlistState, setPlaylistState] = useState<ClientPlaylist | null>(
@@ -189,18 +192,18 @@ function RouteComponent() {
   if (!playlist || playlistState === null) {
     return (
       <ViewPageShell
-        title="Поиск и просмотр"
-        subtitle="Найдите открытый плейлист стримера и следите за очередью в реальном времени"
+        title={t('publicView.searchTitle')}
+        subtitle={t('publicView.browseSubtitle')}
       >
         {playlistIdFromUrl && (
           <div
             className={`mb-6 p-4 text-center text-sm ${panelClass} border-dashed border-level-3/60`}
           >
             <p className="text-text-main font-medium mb-1">
-              Плейлист не найден или недоступен
+              {t('publicView.notFoundUnavailable')}
             </p>
             <p className="text-text-secondary">
-              Проверьте ссылку или найдите другой плейлист ниже.
+              {t('publicView.notFoundCheckLink')}
             </p>
           </div>
         )}
@@ -221,10 +224,10 @@ function RouteComponent() {
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
             <div>
               <p className="text-xs uppercase tracking-wide text-text-placeholder mb-1">
-                Другой плейлист
+                {t('publicView.anotherPlaylist')}
               </p>
               <h2 className="text-lg font-semibold text-text-main">
-                Поиск публичных плейлистов
+                {t('publicView.searchPublic')}
               </h2>
             </div>
             <Link
@@ -232,7 +235,7 @@ function RouteComponent() {
               search={{ p: undefined }}
               className="text-sm text-level-3 hover:text-text-main transition-colors shrink-0"
             >
-              Сбросить и искать заново
+              {t('publicView.resetSearchAgain')}
             </Link>
           </div>
           <SearchPlaylist />
@@ -256,7 +259,7 @@ function RouteComponent() {
             </div>
             <div className="min-w-0 flex-1">
               <p className={`text-xs font-medium uppercase tracking-wider mb-1 ${gradientTextClass}`}>
-                Плейлист
+                {t('publicView.playlist')}
               </p>
               <h1 className="text-2xl sm:text-3xl font-bold text-text-main leading-tight break-words">
                 {playlistState.name}
@@ -270,15 +273,10 @@ function RouteComponent() {
         <section className={`p-5 sm:p-8 ${panelClass}`}>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-text-main">
-              Очередь треков
+              {t('publicView.queue')}
             </h2>
             <span className="text-sm text-text-secondary tabular-nums">
-              {trackCount}{' '}
-              {trackCount === 1
-                ? 'трек'
-                : trackCount >= 2 && trackCount <= 4
-                  ? 'трека'
-                  : 'треков'}
+              {t('publicView.trackCount', { count: trackCount })}
             </span>
           </div>
 
@@ -287,10 +285,10 @@ function RouteComponent() {
               className={`text-center py-12 border border-dashed border-level-3/50 rounded-(--rounded-std) bg-level-1/50`}
             >
               <p className="text-text-main font-medium mb-1">
-                В плейлисте пока нет треков
+                {t('publicView.queueEmptyPlaylist')}
               </p>
               <p className="text-sm text-text-secondary">
-                Заявки появятся здесь, когда зрители отправят музыку.
+                {t('publicView.queueEmptyWaiting')}
               </p>
             </div>
           ) : (

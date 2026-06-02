@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Label } from '@/components/ui/label'
 import { DialogDescription } from '@/components/ui/dialog'
@@ -25,6 +26,7 @@ const TabDonation = ({
   settings: PlaylistSettings
   setSettings: React.Dispatch<React.SetStateAction<PlaylistSettings>>
 }) => {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = React.useState<DonationPlatform>(
     DonationPlatform.General,
   )
@@ -50,7 +52,7 @@ const TabDonation = ({
       currency: string,
     ) => {
       if (!name || !slug || !currency) {
-        toast.error('Please fill in all fields')
+        toast.error(t('playlistSettings.donation.fillAll'))
         return
       }
       const newRuleData = {
@@ -77,14 +79,14 @@ const TabDonation = ({
               ...prev,
               donation_rules: [...prev.donation_rules, res],
             }))
-            toast.success('New rule created successfully')
+            toast.success(t('playlistSettings.donation.createSuccess'))
           } else {
-            toast.error('Failed to create rule. Please try again later.')
+            toast.error(t('playlistSettings.donation.createFailed'))
           }
         })
         .catch((error) => {
           console.error('Error creating rule:', error)
-          toast.error('Error creating rule')
+          toast.error(t('playlistSettings.donation.createFailed'))
         })
     },
     [settings.id, playlist.id, setSettings],
@@ -109,11 +111,11 @@ const TabDonation = ({
             ...prev,
             donation_rules: prev.donation_rules.filter((r) => r.id !== rule_id),
           }))
-          toast.success('Rule deleted successfully')
+          toast.success(t('playlistSettings.donation.deleteSuccess'))
         })
       } catch (error) {
         console.error('Error deleting rule:', error)
-        toast.error('Error deleting rule')
+        toast.error(t('playlistSettings.donation.deleteFailed'))
       }
     },
     [setSettings],
@@ -122,7 +124,7 @@ const TabDonation = ({
   return (
     <div>
       <div className="gap-1 flex flex-col">
-        <Label className="text-xl">Donation Receiving</Label>
+        <Label className="text-xl">{t('playlistSettings.donation.title')}</Label>
         <DialogDescription>
           Configure how you receive donations on different platforms.
         </DialogDescription>

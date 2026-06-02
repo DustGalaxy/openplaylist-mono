@@ -1,20 +1,15 @@
 import { Link, useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import Disc from '@/components/icons/icon-disc'
 import Dashboard from '@/components/icons/icon-dashboard'
-// import News from '@/components/icons/icon-news'
-// import Notifications from '@/components/icons/icon-notifications'
-// import Menu from '@/components/icons/icon-menu'
 import MenuDropdown from './menu-dropdown'
 import Search from '@/components/icons/icon-search'
 import { useAuthStore } from '@/stores/authStore'
 
-import { useTwitchLoginUrl } from '@/hooks/useAuthUrl'
-
 export default function Header() {
-  const { isAuthenticated, user } = useAuthStore()
+  const { t } = useTranslation()
+  const { isAuthenticated } = useAuthStore()
   const navigate = useNavigate()
-
-  const handleTwitchLogin = useTwitchLoginUrl()
   const windowWidth = window.innerWidth
 
   return (
@@ -36,16 +31,12 @@ export default function Header() {
                   bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)]  
                   bg-clip-text bg-[length:200%_auto]  leading-normal animate-bg-move transition-all"
                 >
-                  OpenPlaylist {windowWidth > 600 && 'v2026.1beta'}
+                  {t('brand.name')}
+                  {windowWidth > 600 && ` ${t('brand.version')}`}
                 </h1>
               </Link>
             </div>
 
-            {/* <div className="px-2">
-              <Link to="/news" disabled >
-                <News />
-              </Link>
-            </div> */}
             {isAuthenticated && (
               <div className="px-2 ">
                 <Link to="/dashboard">
@@ -62,22 +53,17 @@ export default function Header() {
           </div>
           {!isAuthenticated ? (
             <div className="pr-4 ">
-              <button className='cursor-pointer' onClick={() =>  navigate({ to: '/login' })}>
-                Login
+              <button
+                className="cursor-pointer"
+                onClick={() => navigate({ to: '/login' })}
+              >
+                {t('nav.login')}
               </button>
             </div>
           ) : (
             <div className="flex gap-2 h-[33px] items-center">
-              {/* <div className="px-2 ">
-            <Link to="/" className="relative">
-              <div className="relative">
-                <div className="absolute  top-[3px] right-[3px] w-3 h-3 bg-red-500 rounded-full border-2 border-level-2" />
-                <Notifications />
-              </div>
-            </Link>
-          </div> */}
               <div className="px-2   flex items-center">
-                {user && <MenuDropdown {...user} />}
+                <MenuDropdown />
               </div>
             </div>
           )}

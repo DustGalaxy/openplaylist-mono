@@ -20,7 +20,7 @@ import {
 } from '@/api/api-playlist'
 import { useMusicStore } from '@/stores/musicStore'
 import AddPlaylistModal from '@/features/playlist/components/newPlaylistModal'
-import { dashboardCopy } from '@/features/playlist/copy'
+import { useTranslation } from 'react-i18next'
 import {
   filterTabBaseClass,
   filterTabInactiveClass,
@@ -42,6 +42,7 @@ export const Route = createFileRoute('/dashboard')({
 })
 
 function RouteComponent() {
+  const { t } = useTranslation()
   const user = useAuthStore.getState().user
   if (!user) {
     return redirect({ to: '/login' })
@@ -94,13 +95,13 @@ function RouteComponent() {
       <div className={pageInnerClass}>
         <header className="mb-6 sm:mb-8">
           <p className={`text-sm font-medium mb-2 ${gradientTextClass}`}>
-            {dashboardCopy.eyebrow}
+            {t('dashboard.eyebrow')}
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold text-text-main">
-            {dashboardCopy.title}
+            {t('dashboard.title')}
           </h1>
           <p className="text-sm sm:text-base text-text-secondary mt-1">
-            {dashboardCopy.subtitle}
+            {t('dashboard.subtitle')}
           </p>
         </header>
 
@@ -132,10 +133,10 @@ function RouteComponent() {
                   <ListMusic className="h-8 w-8 text-text-placeholder shrink-0" />
                   <div className="text-center sm:text-left">
                     <p className="text-text-main font-medium">
-                      {dashboardCopy.emptyTitle}
+                      {t('dashboard.empty.title')}
                     </p>
                     <p className="text-sm text-text-secondary mt-1">
-                      {dashboardCopy.emptyHint}
+                      {t('dashboard.empty.hint')}
                     </p>
                   </div>
                 </div>

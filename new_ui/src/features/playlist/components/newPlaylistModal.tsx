@@ -1,4 +1,5 @@
-import React, { use } from 'react'
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 import Add from '@/components/icons/icon-add'
 import { Input } from '@/components/ui/input'
 import Btn from '@/components/ui/my-btn'
@@ -18,6 +19,7 @@ import { createNewPlaylist } from '@/api/api-playlist'
 import useMusicStore from '@/stores/musicStore'
 
 export default function AddPlaylistModal() {
+  const { t } = useTranslation()
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
 
@@ -33,23 +35,25 @@ export default function AddPlaylistModal() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] bg-level-1 border-level-3 text-text-main ">
         <DialogHeader>
-          <DialogTitle className="text-xl">New playlist</DialogTitle>
-          <DialogDescription>Form to create new playlist</DialogDescription>
+          <DialogTitle className="text-xl">
+            {t('playlist.create.title')}
+          </DialogTitle>
+          <DialogDescription>{t('playlist.create.description')}</DialogDescription>
         </DialogHeader>
-        <Label className="text-lg">Playlist name</Label>
-        <DialogDescription>Playlist name must be unique</DialogDescription>
+        <Label className="text-lg">{t('playlist.create.nameLabel')}</Label>
+        <DialogDescription>{t('playlist.create.nameHint')}</DialogDescription>
         <Input
           type="text"
-          placeholder="Type name here..."
+          placeholder={t('playlist.create.namePlaceholder')}
           className="border-level-3 border-1 w-full mb-4"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <Label className="text-lg">Playlist description</Label>
+        <Label className="text-lg">{t('playlist.create.descriptionLabel')}</Label>
 
         <Input
           type="text"
-          placeholder="Type description here..."
+          placeholder={t('playlist.create.descriptionPlaceholder')}
           className="border-level-3 border-1 w-full mb-4"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -57,7 +61,7 @@ export default function AddPlaylistModal() {
         <DialogFooter>
           <DialogClose asChild>
             <Btn
-              text="Create"
+              text={t('playlist.create.submit')}
               className="w-full"
               onClick={async () => {
                 const newPlst = await createNewPlaylist(name, description)

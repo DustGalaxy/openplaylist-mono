@@ -3,7 +3,7 @@ import { getUserIntegrations } from '@/api/api-user'
 import { useAuthStore } from '@/stores/authStore'
 import { useDaLoginUrl, useTwitchLoginUrl } from '@/hooks/useAuthUrl'
 import { UserSettingsPage } from '@/features/user-settings'
-import { settingsCopy } from '@/features/user-settings/copy'
+import { useTranslation } from 'react-i18next'
 import Btn from '@/components/ui/my-btn'
 import {
   gradientTextClass,
@@ -26,6 +26,7 @@ export const Route = createFileRoute('/settings')({
 })
 
 function RouteComponent() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { isAuthenticated, user, expired_at, setUser } = useAuthStore()
   const { integrations } = Route.useLoaderData()
@@ -61,15 +62,15 @@ function RouteComponent() {
               <p
                 className={`text-sm font-medium mb-2 ${gradientTextClass}`}
               >
-                {settingsCopy.eyebrow}
+                {t('settings.eyebrow')}
               </p>
               <h1 className="text-2xl sm:text-3xl font-bold">
-                {settingsCopy.unauthTitle}
+                {t('settings.unauth.title')}
               </h1>
             </header>
-            <p className="text-text-secondary">{settingsCopy.unauthMessage}</p>
+            <p className="text-text-secondary">{t('settings.unauth.message')}</p>
             <Btn
-              text={settingsCopy.unauthCta}
+              text={t('settings.unauth.cta')}
               onClick={() => navigate({ to: '/login' })}
               className="px-6 h-12 text-base font-bold bg-level-2 text-text-main w-full sm:w-auto"
             />

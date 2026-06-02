@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { Plus, Search } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
 import useMusicStore from '@/stores/musicStore'
@@ -46,6 +47,7 @@ export function PlaylistQueueInput({
 }: {
   onSearchQueryChange: (query: string) => void
 }) {
+  const { t } = useTranslation()
   const playlist = usePlaylist()
   const [mode, setMode] = useState<InputMode>('add')
   const [value, setValue] = useState('')
@@ -80,7 +82,9 @@ export function PlaylistQueueInput({
 
   const InputIcon = mode === 'add' ? Plus : Search
   const placeholder =
-    mode === 'add' ? 'Paste YouTube URL…' : 'Search queue by title or requester…'
+    mode === 'add'
+      ? t('playlist.queue.placeholder.add')
+      : t('playlist.queue.placeholder.searchRequester')
 
   return (
     <form
@@ -91,14 +95,14 @@ export function PlaylistQueueInput({
         <ModeButton
           active={mode === 'add'}
           onClick={() => switchMode('add')}
-          label="Add track"
+          label={t('playlist.queue.mode.add')}
         >
           <Plus className="h-4 w-4" aria-hidden />
         </ModeButton>
         <ModeButton
           active={mode === 'search'}
           onClick={() => switchMode('search')}
-          label="Search queue"
+          label={t('playlist.queue.mode.search')}
         >
           <Search className="h-4 w-4" aria-hidden />
         </ModeButton>
@@ -124,10 +128,9 @@ export function PlaylistQueueInput({
 
       {mode === 'add' && (
         <Btn
-          text="Add"
+          text={t('playlist.queue.submit')}
           disabled={!value.trim()}
           type="submit"
-
           className="h-11 shrink-0 px-4 bg-level-2 text-sm font-semibold text-text-main"
         />
       )}

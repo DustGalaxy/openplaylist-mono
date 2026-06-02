@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -20,16 +21,15 @@ export default function PlaylistDetailsForm({
   >
   canPatchPlaylist: React.RefObject<boolean>
 }) {
+  const { t } = useTranslation()
   const [name, setName] = React.useState(playlist.name)
   const [description, setDescription] = React.useState(playlist.description ?? '')
 
   return (
     <div className="grid gap-3 mb-6">
       <div>
-        <Label className="text-lg">Playlist name</Label>
-        <DialogDescription>
-          Shown in your dashboard and public listings.
-        </DialogDescription>
+        <Label className="text-lg">{t('playlistSettings.details.name')}</Label>
+        <DialogDescription>{t('playlistSettings.details.nameHelp')}</DialogDescription>
         <Input
           type="text"
           name="name"
@@ -37,13 +37,11 @@ export default function PlaylistDetailsForm({
           onChange={(e) => {
             const value = e.target.value
             if (value.length > MAX_NAME_LENGTH) {
-              toast.error(
-                `Playlist name must be at most ${MAX_NAME_LENGTH} characters.`,
-              )
+              toast.error(t('playlistSettings.details.nameTooLong'))
               return
             }
             if (!value.trim()) {
-              toast.error('Playlist name is required.')
+              toast.error(t('playlistSettings.details.nameRequired'))
               setName(value)
               setPlst({ ...playlist, name: value })
               canPatchPlaylist.current = true
@@ -53,16 +51,16 @@ export default function PlaylistDetailsForm({
             setPlst({ ...playlist, name: value })
             canPatchPlaylist.current = true
           }}
-          placeholder="Enter playlist name"
+          placeholder={t('playlistSettings.details.namePlaceholder')}
           maxLength={MAX_NAME_LENGTH}
           className="mt-2 border-level-3 border-1 w-full bg-level-2"
         />
       </div>
 
       <div>
-        <Label className="text-lg">Description</Label>
+        <Label className="text-lg">{t('playlistSettings.details.description')}</Label>
         <DialogDescription>
-          Optional short summary for viewers.
+          {t('playlistSettings.details.descriptionHelp')}
         </DialogDescription>
         <Textarea
           name="description"
@@ -70,16 +68,14 @@ export default function PlaylistDetailsForm({
           onChange={(e) => {
             const value = e.target.value
             if (value.length > MAX_DESCRIPTION_LENGTH) {
-              toast.error(
-                `Description must be at most ${MAX_DESCRIPTION_LENGTH} characters.`,
-              )
+              toast.error(t('playlistSettings.details.descriptionTooLong'))
               return
             }
             setDescription(value)
             setPlst({ ...playlist, description: value })
             canPatchPlaylist.current = true
           }}
-          placeholder="Enter playlist description"
+          placeholder={t('playlistSettings.details.descriptionPlaceholder')}
           maxLength={MAX_DESCRIPTION_LENGTH}
           rows={3}
           className="mt-2 border-level-3 border-1 w-full bg-level-2 resize-none"

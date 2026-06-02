@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import BlockList from './block-list'
 import type { ClientPlaylist } from '@/types/playlist'
 import { RequestPlatform } from '@/types/playlist'
@@ -19,22 +20,19 @@ import { useMusicStore } from '@/stores/musicStore'
 const YT_VIDEO_ID_REGEX = /^[a-zA-Z0-9_-]{11}$/
 
 const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
+  const { t } = useTranslation()
   const { requestPlSettings, syncPlSettings } = useMusicStore()
   return (
     <div>
       <div>
         <div className="">
-          <Label className=" text-xl">Block Lists</Label>
+          <Label className=" text-xl">{t('playlistSettings.block.title')}</Label>
           <DialogDescription>
-            <p>An block users or tracks.</p>
+            <p>{t('playlistSettings.block.description')}</p>
           </DialogDescription>
-          {/* <Btn
-                text={<Add width={25} height={25} />}
-                className="ml-auto px-1 mb-1"
-              /> */}
         </div>
         <div>
-          <Label className=" text-lg">Block user</Label>
+          <Label className=" text-lg">{t('playlistSettings.block.blockUser')}</Label>
           <form
             className="flex items-center gap-2 mt-2 w-full"
             onSubmit={async (e) => {
@@ -55,19 +53,16 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
                 )
 
                 if (res) {
-                  toast.success('User blocked successfully!')
+                  toast.success(t('playlistSettings.block.userBlockedSuccess'))
                   const settings = playlist.settings
                   settings.block_list.push(res)
                   syncPlSettings(playlist.id, settings)
-
-                  // Reset the form
                 } else {
-                  toast.error('Failed to block user.')
+                  toast.error(t('playlistSettings.block.userBlockFailed'))
                 }
                 form.reset()
               } else {
-                // Handle validation error (e.g., show a message to the user)
-                toast.error('Nickname/ID and platform are required.')
+                toast.error(t('playlistSettings.block.validationRequired'))
               }
             }}
           >
@@ -78,23 +73,31 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
             ></Btn>
             <Select name="trigger_type">
               <SelectTrigger className="w-fit bg-level-2 ">
-                <SelectValue placeholder="Select trigger type" />
+                <SelectValue
+                  placeholder={t('playlistSettings.block.selectTriggerType')}
+                />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="USER_NAME">User Name</SelectItem>
-                <SelectItem value="USER_ID">User ID</SelectItem>
+                <SelectItem value="USER_NAME">
+                  {t('playlistSettings.block.triggerUserName')}
+                </SelectItem>
+                <SelectItem value="USER_ID">
+                  {t('playlistSettings.block.triggerUserId')}
+                </SelectItem>
               </SelectContent>
             </Select>
 
             <input
               type="text"
               name="trigger_value"
-              placeholder="Enter user nickname or ID"
+              placeholder={t('playlistSettings.block.enterNicknameOrId')}
               className="w-full rounded-md border border-input bg-level-2 px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
             />
             <Select name="platform">
               <SelectTrigger className="w-full bg-level-2">
-                <SelectValue placeholder="Select platform" />
+                <SelectValue
+                  placeholder={t('playlistSettings.block.selectPlatform')}
+                />
               </SelectTrigger>
               <SelectContent>
                 {Object.entries(RequestPlatform).map(([key, val]) => (
@@ -115,13 +118,15 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
             />
           ) : (
             <div className="flex text-text-secondary text-sm justify-center w-full">
-              <p>No users block.</p>
+              <p>{t('playlistSettings.block.emptyUsers')}</p>
             </div>
           )}
         </div>
 
         <div className="flex flex-col gap-2 mt-2 w-full">
-          <Label className=" text-lg">Block track (YouTube ID)</Label>
+          <Label className=" text-lg">
+            {t('playlistSettings.block.blockTrackYoutubeLabel')}
+          </Label>
           <form
             className="flex items-center gap-2 mt-2 w-full"
             onSubmit={async (e) => {
@@ -131,24 +136,27 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
               const ytVideoId = (formData.get('yt_video_id') as string)?.trim()
 
               if (!ytVideoId) {
-                toast.error('YouTube video ID is required.')
+                toast.error(t('playlistSettings.block.trackYoutubeRequired'))
                 return
               }
 
               if (!YT_VIDEO_ID_REGEX.test(ytVideoId)) {
-                toast.error('YouTube video ID must be 11 characters.')
+                toast.error(t('playlistSettings.block.trackYoutubeLength'))
                 return
               }
 
               if (playlist.settings.track_black_list.includes(ytVideoId)) {
-                toast.error('Track is already blocked.')
+                toast.error(t('playlistSettings.block.trackAlreadyBlocked'))
                 return
               }
 
               await requestPlSettings(playlist.id, {
-                track_black_list: [...playlist.settings.track_black_list, ytVideoId],
+                track_black_list: [
+                  ...playlist.settings.track_black_list,
+                  ytVideoId,
+                ],
               })
-              toast.success('Track blocked successfully!')
+              toast.success(t('playlistSettings.block.trackBlockedSuccess'))
               form.reset()
             }}
           >
@@ -157,11 +165,11 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
               className="cursor-pointer px-2 bg-level-2"
               type="submit"
             ></Btn>
-       
+
             <input
               type="text"
               name="yt_video_id"
-              placeholder="Enter YouTube video ID (11 chars)"
+              placeholder={t('playlistSettings.block.blockedVideoId')}
               className="w-full rounded-md border border-input bg-level-2 px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
             />
           </form>
@@ -174,7 +182,7 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
             />
           ) : (
             <div className="flex text-text-secondary text-sm justify-center w-full">
-              <p>No tracks block.</p>
+              <p>{t('playlistSettings.block.emptyTracks')}</p>
             </div>
           )}
         </div>

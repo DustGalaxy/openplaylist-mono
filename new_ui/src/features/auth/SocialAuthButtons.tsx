@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import Btn from '@/components/ui/my-btn'
 import {
   getSupportedOAuthPlatforms,
@@ -20,6 +21,7 @@ export function SocialAuthButtons({
   onPlatformClick,
   mode,
 }: SocialAuthButtonsProps) {
+  const { t } = useTranslation()
   const platforms = getSupportedOAuthPlatforms()
 
   return (
@@ -32,8 +34,10 @@ export function SocialAuthButtons({
           bg: 'bg-primary',
           hover: 'hover:bg-primary/80',
         }
-        const actionText = mode === 'login' ? 'Login with' : 'Sign up with'
-        const buttonText = `${actionText} ${config.platformName}`
+        const buttonText =
+          mode === 'login'
+            ? t('auth.social.loginWith', { platform: config.platformName })
+            : t('auth.social.signUpWith', { platform: config.platformName })
 
         return (
           <Btn

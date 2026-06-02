@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
@@ -22,6 +23,7 @@ export interface LoginFormProps {
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const handleOAuthRedirect = useOAuthUrl()
@@ -33,14 +35,14 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const [activeTab, setActiveTab] = useState('social')
   const { setUser } = useAuthStore()
 
-
   const handleSocialLogin = async (platform: string) => {
     try {
       setIsLoading(true)
       setError(null)
       handleOAuthRedirect(platform, false)
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Social login failed'
+      const message =
+        err instanceof Error ? err.message : t('auth.login.error.socialFailed')
       setError(message)
       setIsLoading(false)
     }
@@ -50,7 +52,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
     e.preventDefault()
 
     if (!email || !password) {
-      setError('Please fill in all fields')
+      setError(t('auth.login.error.fillAll'))
       return
     }
 
@@ -89,18 +91,16 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           localStorage.removeItem(REDIRECT_AFTER_LOGIN_KEY)
           navigate({ to: redirectToPath })
         } else {
-          setError(
-            'Login succeeded but your profile could not be loaded. Please try again.',
-          )
+          setError(t('auth.login.error.profileLoad'))
         }
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const message =
-          err.response?.data?.detail || 'Login failed. Please try again.'
+          err.response?.data?.detail || t('auth.login.error.failed')
         setError(message)
       } else {
-        setError('An unexpected error occurred')
+        setError(t('auth.login.error.unexpected'))
       }
     } finally {
       setIsLoading(false)
@@ -110,8 +110,10 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   return (
     <div className="w-full max-w-md mx-auto p-6 space-y-6">
       <div className="text-center space-y-2">
-        <h1 className="text-2xl text-text-main font-bold">Login</h1>
-        <p className="text-text-secondary">Connect with your account</p>
+        <h1 className="text-2xl text-text-main font-bold">
+          {t('auth.login.title')}
+        </h1>
+        <p className="text-text-secondary">{t('auth.login.subtitle')}</p>
       </div>
 
       {error && (
@@ -122,14 +124,13 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="social">Social Login</TabsTrigger>
-          <TabsTrigger value="classic">Email & Password</TabsTrigger>
+          <TabsTrigger value="social">{t('auth.login.tab.social')}</TabsTrigger>
+          <TabsTrigger value="classic">{t('auth.login.tab.classic')}</TabsTrigger>
         </TabsList>
 
-        {/* Social Login Tab */}
         <TabsContent value="social" className="space-y-4">
           <p className="text-sm text-text-secondary text-center">
-            Sign in with your favorite platform
+            {t('auth.login.socialHint')}
           </p>
 
           <SocialAuthButtons
@@ -143,25 +144,26 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
               <div className="w-full border-t border-level-3"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-level-1 text-text-main">or</span>
+              <span className="px-2 bg-level-1 text-text-main">
+                {t('common.or')}
+              </span>
             </div>
           </div>
           <div className="text-text-secondary text-xs text-center">
-            Don't have an social account link to yours? Login via email →
+            {t('auth.login.socialFallbackHint')}
           </div>
         </TabsContent>
 
-        {/* Classic Login Tab */}
         <TabsContent value="classic" className="space-y-4">
           <form onSubmit={handleClassicLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-text-main ">
-                Email
+                {t('auth.login.field.email')}
               </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={t('auth.login.placeholder.email')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
@@ -171,12 +173,12 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="password" className="text-text-main ">
-                Password
+                {t('auth.login.field.password')}
               </Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder={t('auth.login.placeholder.password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
@@ -185,7 +187,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             </div>
 
             <Btn
-              text={isLoading ? 'Logging in...' : 'Login'}
+              text={
+                isLoading ? t('auth.login.submitLoading') : t('auth.login.submit')
+              }
               onClick={() => {}}
               disabled={isLoading}
               className="w-full text-text-main bg-level-2"
@@ -197,19 +201,17 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             className="w-full text-text-main  text-center text-sm hover:underline"
             onClick={() => setActiveTab('social')}
           >
-            Back to social login
+            {t('auth.login.backToSocial')}
           </button>
         </TabsContent>
       </Tabs>
 
       <div className="space-y-3 text-center">
-        <p className="text-xs text-text-secondary">
-          By logging in, you agree to our Terms of Service and Privacy Policy
-        </p>
+        <p className="text-xs text-text-secondary">{t('auth.login.legal')}</p>
         <p className="text-sm text-text-main ">
-          Don't have an account?{' '}
+          {t('auth.login.registerPrompt')}{' '}
           <Link to="/register" className="text-text-main  hover:underline">
-            Sign up here
+            {t('auth.login.registerLink')}
           </Link>
         </p>
       </div>

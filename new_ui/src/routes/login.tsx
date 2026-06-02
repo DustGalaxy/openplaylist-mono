@@ -1,11 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
+import i18n from '@/i18n'
 import { LoginForm } from '@/features/auth'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
   meta: () => [
-    { title: 'Login - OpenPlaylist' },
-    { name: 'description', content: 'Log in to your OpenPlaylist account' },
+    { title: i18n.t('meta.login.title') },
+    { name: 'description', content: i18n.t('meta.login.description') },
   ],
 })
 

@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import type { UserProfile } from '@/types/user'
 import { updateUserProfile, updateUserPassword } from '@/api/api-user'
 import Btn from '@/components/ui/my-btn'
@@ -80,6 +82,7 @@ const getInitialFormState = (
 })
 
 const createSettingsSections = (
+  t: TFunction,
   onUserUpdate: (patch: {
     username?: string
     email?: string
@@ -89,37 +92,37 @@ const createSettingsSections = (
 ): Array<SettingsSection> => [
   {
     id: 'profile',
-    title: 'Profile Data',
+    title: t('settings.account.profileData'),
     accentClassName: 'bg-accent-2',
-    submitText: 'Save Profile',
-    successText: 'Profile updated',
+    submitText: t('settings.account.saveProfile'),
+    successText: t('settings.account.profileUpdated'),
     fields: [
       {
         name: 'username',
-        label: 'Nickname',
+        label: t('settings.account.nickname'),
         type: 'text',
         autoComplete: 'nickname',
-        placeholder: 'Your nickname',
-        helpText: 'Shown on playlists and public activity.',
+        placeholder: t('settings.account.nicknamePlaceholder'),
+        helpText: t('settings.account.nicknameHelp'),
       },
       {
         name: 'email',
-        label: 'Email',
+        label: t('settings.account.email'),
         type: 'email',
         autoComplete: 'email',
         placeholder: 'you@example.com',
-        helpText: 'Used for classic login and account notices.',
+        helpText: t('settings.account.emailHelp'),
         className: 'text-black bg-black hover:bg-level-2 hover:text-text-main',
       },
     ],
     validate: ({ username, email }) => {
-      if (!username.trim()) return 'Nickname is required'
+      if (!username.trim()) return t('settings.account.validation.nicknameRequired')
       if (username.trim().length < 3) {
-        return 'Nickname must be at least 3 characters'
+        return t('settings.account.validation.nicknameShort')
       }
-      if (!email.trim()) return 'Email is required'
+      if (!email.trim()) return t('settings.account.validation.emailRequired')
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-        return 'Enter a valid email address'
+        return t('settings.account.validation.emailInvalid')
       }
       return null
     },
@@ -137,26 +140,26 @@ const createSettingsSections = (
   },
   {
     id: 'avatar',
-    title: 'Avatar',
+    title: t('settings.account.avatar'),
     accentClassName: 'bg-accent-1',
-    submitText: 'Save Avatar',
-    successText: 'Avatar updated',
+    submitText: t('settings.account.saveAvatar'),
+    successText: t('settings.account.avatarUpdated'),
     fields: [
       {
         name: 'profile_image_url',
-        label: 'Avatar URL',
+        label: t('settings.account.avatarUrl'),
         type: 'text',
         autoComplete: 'off',
         placeholder: 'https://example.com/avatar.jpg',
-        helpText: 'URL to your profile image.',
+        helpText: t('settings.account.avatarHelp'),
       },
     ],
     validate: ({ profile_image_url }) => {
-      if (!profile_image_url.trim()) return 'Avatar URL is required'
+      if (!profile_image_url.trim()) return t('settings.account.validation.avatarRequired')
       try {
         new URL(profile_image_url.trim())
       } catch {
-        return 'Enter a valid URL'
+        return t('settings.account.validation.urlInvalid')
       }
       return null
     },
@@ -170,44 +173,46 @@ const createSettingsSections = (
   },
   {
     id: 'password',
-    title: 'Password',
+    title: t('settings.account.password'),
     accentClassName: 'bg-accent-3',
-    submitText: 'Change Password',
-    successText: 'Password changed',
+    submitText: t('settings.account.changePassword'),
+    successText: t('settings.account.passwordChanged'),
     fields: [
       {
         name: 'currentPassword',
-        label: 'Current Password',
+        label: t('settings.account.currentPassword'),
         type: 'password',
         autoComplete: 'current-password',
-        placeholder: 'Current password',
+        placeholder: t('settings.account.currentPasswordPlaceholder'),
       },
       {
         name: 'newPassword',
-        label: 'New Password',
+        label: t('settings.account.newPassword'),
         type: 'password',
         autoComplete: 'new-password',
-        placeholder: 'New password',
-        helpText: 'Use at least 8 characters.',
+        placeholder: t('settings.account.newPasswordPlaceholder'),
+        helpText: t('settings.account.passwordHelp'),
       },
       {
         name: 'confirmPassword',
-        label: 'Confirm New Password',
+        label: t('settings.account.confirmPassword'),
         type: 'password',
         autoComplete: 'new-password',
-        placeholder: 'Repeat new password',
+        placeholder: t('settings.account.confirmPasswordPlaceholder'),
       },
     ],
     validate: ({ currentPassword, newPassword, confirmPassword }) => {
       if (!currentPassword || !newPassword || !confirmPassword) {
-        return 'Fill all password fields'
+        return t('settings.account.validation.passwordFillAll')
       }
       if (newPassword.length < 8) {
-        return 'New password must be at least 8 characters'
+        return t('settings.account.validation.passwordShort')
       }
-      if (newPassword !== confirmPassword) return 'Passwords do not match'
+      if (newPassword !== confirmPassword) {
+        return t('settings.account.validation.passwordMismatch')
+      }
       if (currentPassword === newPassword) {
-        return 'New password must be different from current password'
+        return t('settings.account.validation.passwordSame')
       }
       return null
     },
@@ -223,6 +228,7 @@ const createSettingsSections = (
 ]
 
 export function AccountTab({ user, onUserUpdate }: AccountTabProps) {
+  const { t } = useTranslation()
   const [formState, setFormState] = useState<AccountFormState>(() =>
     getInitialFormState(user),
   )
@@ -231,7 +237,10 @@ export function AccountTab({ user, onUserUpdate }: AccountTabProps) {
     Record<string, { type: 'success' | 'error'; message: string }>
   >({})
 
-  const sections = createSettingsSections(onUserUpdate)
+  const sections = useMemo(
+    () => createSettingsSections(t, onUserUpdate),
+    [t, onUserUpdate],
+  )
 
   useEffect(() => {
     setFormState(getInitialFormState(user))
@@ -290,7 +299,7 @@ export function AccountTab({ user, onUserUpdate }: AccountTabProps) {
         ...prev,
         [section.id]: {
           type: 'error',
-          message: getApiErrorMessage(error, 'Settings update failed'),
+          message: getApiErrorMessage(error, t('settings.account.updateFailed')),
         },
       }))
     } finally {
@@ -335,6 +344,7 @@ function SettingsSection({
   onChange,
   onSubmit,
 }: SettingsSectionProps) {
+  const { t } = useTranslation()
   return (
     <form
       onSubmit={(event) => onSubmit(event, section)}
@@ -380,7 +390,7 @@ function SettingsSection({
       ) : null}
 
       <Btn
-        text={isSaving ? 'Saving...' : section.submitText}
+        text={isSaving ? t('settings.account.saving') : section.submitText}
         disabled={isSaving}
         className="mt-6 w-full px-4 py-3 text-base font-semibold bg-level-1 text-text-main"
       />

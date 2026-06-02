@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -24,6 +25,7 @@ const ChatRoleItem = ({
   onUpdate,
   onDelete,
 }: ChatRoleItemProps) => {
+  const { t } = useTranslation()
   const [localRole, setLocalRole] = React.useState(role)
   const [isDirty, setIsDirty] = React.useState(false)
   const [isSaving, setIsSaving] = React.useState(false)
@@ -87,10 +89,10 @@ const ChatRoleItem = ({
       role_id: role.id,
     })
     if (success) {
-      toast.success('Role removed')
+      toast.success(t('playlistSettings.chatRoles.removeSuccess'))
       onDelete?.(role.id)
     } else {
-      toast.error('Failed to remove role')
+      toast.error(t('playlistSettings.chatRoles.removeFailed'))
     }
   }
 

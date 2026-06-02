@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import MyBtn from '@/components/ui/my-btn'
@@ -31,6 +32,7 @@ const PlatformSettingsEditor = React.memo(
     updateRule,
     initSection,
   }: PlatformSettingsProps) => {
+    const { t } = useTranslation()
     // Локальные рефы для кнопок UpDown внутри одной платформы
     const controlsRef = React.useRef<Record<string, HTMLInputElement | null>>(
       {},
@@ -54,10 +56,10 @@ const PlatformSettingsEditor = React.memo(
       return (
         <TabsContent value={platform}>
           <Label className="text-lg">{platformKey} validation</Label>
-          <Label>Section not initialized</Label>
+          <Label>{t('playlistSettings.validation.notInitialized')}</Label>
           <div className="h-3" />
           <MyBtn
-            text="Init section"
+            text={t('playlistSettings.validation.notInitialized')}
             onClick={() => initSection(platform)}
             className="px-2"
           />
@@ -78,7 +80,7 @@ const PlatformSettingsEditor = React.memo(
         <Label className=" text-lg">{platformKey} validation</Label>
         <p className="h-3"></p>
         <div className="flex justify-between gap-2 items-center">
-          <Label className=" text-lg">Min views</Label>
+          <Label className=" text-lg">{t('playlistSettings.validation.minViews')}</Label>
           <div className="flex rounded-(--rounded-std) items-center gap-0 overflow-hidden">
             <Input
               type="number"
@@ -100,7 +102,7 @@ const PlatformSettingsEditor = React.memo(
           </div>
         </div>
         <div className="flex justify-between gap-2 items-center">
-          <Label className=" text-lg">Min likes</Label>
+          <Label className=" text-lg">{t('playlistSettings.validation.minLikes')}</Label>
           <div className="flex rounded-(--rounded-std) items-center gap-0 overflow-hidden">
             <Input
               type="number"
@@ -126,7 +128,7 @@ const PlatformSettingsEditor = React.memo(
           validation.
         </DialogDescription>
         <div className="flex justify-between gap-2 items-center">
-          <Label className=" text-lg">Max duration (sec)</Label>
+          <Label className=" text-lg">{t('playlistSettings.validation.maxDuration')}</Label>
           <div className="flex rounded-(--rounded-std) items-center gap-0 overflow-hidden">
             <Input
               type="number"
@@ -153,7 +155,7 @@ const PlatformSettingsEditor = React.memo(
         </div>
 
         <div className="flex justify-between gap-2 items-center">
-          <Label className=" text-lg">Track cooldown (min)</Label>
+          <Label className=" text-lg">{t('playlistSettings.validation.trackCooldown')}</Label>
           <div className="flex rounded-(--rounded-std) items-center gap-0 overflow-hidden">
             <Input
               type="number"
@@ -184,7 +186,7 @@ const PlatformSettingsEditor = React.memo(
         </DialogDescription>
 
         <div className="flex justify-between gap-2 items-center">
-          <Label className=" text-lg">User cooldown (min)</Label>
+          <Label className=" text-lg">{t('playlistSettings.validation.userCooldown')}</Label>
           <div className="flex rounded-(--rounded-std) items-center gap-0 overflow-hidden">
             <Input
               type="number"

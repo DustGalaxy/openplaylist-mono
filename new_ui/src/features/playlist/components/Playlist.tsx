@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Clock,
   Eye,
@@ -87,6 +88,7 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
 }
 
 function PlaylistView() {
+  const { t } = useTranslation()
   const playlist = usePlaylist()
   const [toggled, setToggled] = React.useState(false)
   const [activePlst, setActivePlst] = React.useState(
@@ -156,7 +158,7 @@ function PlaylistView() {
                   }`}
                 >
                   {setting.platform === Platform.General
-                    ? 'general'
+                    ? t('common.general')
                     : setting.platform}
                 </button>
               ))}
@@ -166,42 +168,51 @@ function PlaylistView() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
             <InfoCard
               icon={<Settings size={14} />}
-              label="Mode"
+              label={t('playlist.stats.mode')}
               value={playlist.settings.mode}
             />
             <InfoCard
               icon={<Eye size={14} />}
-              label="Min views"
+              label={t('playlist.stats.minViews')}
               value={contentSettings.min_views}
             />
             <InfoCard
               icon={<ThumbsUp size={14} />}
-              label="Min likes"
+              label={t('playlist.stats.minLikes')}
               value={contentSettings.min_likes}
             />
             <InfoCard
               icon={<Clock size={14} />}
-              label="Max duration"
-              value={`${contentSettings.max_duration} sec`}
+              label={t('playlist.stats.maxDuration')}
+              value={t('playlist.stats.durationSec', {
+                count: contentSettings.max_duration,
+              })}
             />
             <InfoCard
               icon={<RefreshCcw size={14} />}
-              label="Track CD"
-              value={`${contentSettings.track_cooldown}m`}
+              label={t('playlist.stats.trackCd')}
+              value={t('playlist.stats.cooldownMin', {
+                count: contentSettings.track_cooldown,
+              })}
             />
             <InfoCard
               icon={<User size={14} />}
-              label="User CD"
-              value={`${contentSettings.user_cooldown}m`}
+              label={t('playlist.stats.userCd')}
+              value={t('playlist.stats.cooldownMin', {
+                count: contentSettings.user_cooldown,
+              })}
             />
             <InfoCard
               icon={<List size={14} />}
-              label="Max size"
-              value={playlist.settings.max_playlist_size || '∞'}
+              label={t('playlist.stats.maxSize')}
+              value={
+                playlist.settings.max_playlist_size ||
+                t('playlist.stats.maxSizeUnlimited')
+              }
             />
             <InfoCard
               icon={<Priority width={14} height={14} />}
-              label="Priority mode"
+              label={t('playlist.stats.priorityMode')}
               value={playlist.settings.cost_mode}
             />
           </div>
@@ -215,7 +226,7 @@ function PlaylistView() {
                   navigator.clipboard.writeText(
                     window.location.origin + '/view?p=' + playlist.id,
                   )
-                  toast.success('Playlist link copied to clipboard!')
+                  toast.success(t('playlist.toast.linkCopied'))
                 }}
               />
               <Btn
@@ -225,7 +236,9 @@ function PlaylistView() {
                       className={`h-1.5 w-1.5 rounded-full ${activePlst ? 'bg-emerald-400' : 'bg-text-placeholder'}`}
                       aria-hidden
                     />
-                    {activePlst ? 'Online' : 'Offline'}
+                    {activePlst
+                      ? t('playlist.status.online')
+                      : t('playlist.status.offline')}
                   </>
                 }
                 onClick={() => {
@@ -304,7 +317,7 @@ function PlaylistView() {
                 strokeWidth={1.5}
               />
               <p className="text-sm text-text-secondary">
-                No track is currently playing.
+                {t('playlist.nowPlaying.empty')}
               </p>
             </div>
           )}
@@ -333,7 +346,7 @@ function PlaylistView() {
       <div className="flex w-full gap-2 sm:gap-4">
         <div className={`w-full ${toggled ? 'block' : 'hidden'}`}>
           <div className="w-full text-lg font-semibold text-text-main flex items-center justify-center pb-2">
-            Saved
+            {t('playlist.saved.title')}
           </div>
           <div className="w-full @container">
             <div
@@ -371,12 +384,12 @@ function PlaylistView() {
                 ))
               ) : (
                 <p className="text-sm text-text-secondary py-8 text-center w-full">
-                  No tracks match your search.
+                  {t('playlist.queue.noMatch')}
                 </p>
               )
             ) : (
               <p className="text-sm text-text-secondary py-8 text-center w-full">
-                No tracks available.
+                {t('playlist.queue.empty')}
               </p>
             )}
           </div>
@@ -396,12 +409,12 @@ function PlaylistView() {
                 ))
               ) : (
                 <p className="text-sm text-text-secondary py-8 text-center w-full">
-                  No tracks match your search.
+                  {t('playlist.queue.noMatch')}
                 </p>
               )
             ) : (
               <p className="text-sm text-text-secondary py-8 text-center w-full">
-                No tracks available.
+                {t('playlist.queue.empty')}
               </p>
             )}
           </div>

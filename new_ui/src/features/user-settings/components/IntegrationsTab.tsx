@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Integration } from '@/types/user'
 import { connectBot, deleteIntegration } from '@/api/api-user'
 import { getGlobalSocket } from '@/api/io-sockets'
@@ -30,6 +31,7 @@ export function IntegrationsTab({
   initialIntegrations,
   platformConfigs,
 }: IntegrationsTabProps) {
+  const { t } = useTranslation()
   const [integrations, setIntegrations] =
     useState<Array<Integration>>(initialIntegrations)
   const [loading, setLoading] = useState<Record<string, boolean>>({})
@@ -120,7 +122,7 @@ export function IntegrationsTab({
       {/* Connected Accounts Card */}
       <div className={`p-4 sm:p-6 ${panelClass}`}>
         <h3 className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}>
-          Connected Accounts
+          {t('settings.integrations.connected')}
         </h3>
 
         <div className="flex flex-col gap-4">
@@ -151,11 +153,8 @@ export function IntegrationsTab({
             ))
           ) : (
             <div className="text-center py-12 text-text-secondary">
-              <p className="mb-4">No connected accounts yet</p>
-              <p className="text-sm">
-                Connect your streaming and donation platforms to manage your
-                playlists
-              </p>
+              <p className="mb-4">{t('settings.integrations.empty')}</p>
+              <p className="text-sm">{t('settings.integrations.emptyHintLong')}</p>
             </div>
           )}
         </div>
@@ -164,7 +163,7 @@ export function IntegrationsTab({
       {/* Available Platforms Card */}
       <div className={`p-4 sm:p-6 ${panelClass}`}>
         <h3 className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}>
-          Add Accounts
+          {t('settings.integrations.addAccounts')}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Object.entries(platformConfigs).map(([platform, config]) => (
@@ -178,11 +177,11 @@ export function IntegrationsTab({
               <div className="text-center">
                 <p className="font-semibold">{config.name}</p>
                 <p className="text-xs text-text-placeholder mt-1">
-                  Connect your account to get started
+                  {t('settings.integrations.connectHint')}
                 </p>
               </div>
               <Btn
-                text="+ Connect Account"
+                text={t('settings.integrations.connectAccount')}
                 onClick={() => handleConnectPlatform(platform)}
                 className="w-full px-4 py-3 text-base font-semibold"
               />
@@ -212,6 +211,7 @@ function IntegrationCard({
   onDisconnect,
   loading,
 }: IntegrationCardProps) {
+  const { t } = useTranslation()
   return (
     <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 ${innerPanelClass} hover:border-level-3/30 transition-all`}>
       <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -230,7 +230,7 @@ function IntegrationCard({
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
         {integration.bot_connection ? (
           <div className={`px-4 py-2 rounded-(--rounded-std) text-sm font-semibold border ${statusOpenClass}`}>
-            ✓ Bot Connected
+            {t('settings.integrations.botConnected')}
           </div>
         ) : (
           <Btn
@@ -238,8 +238,8 @@ function IntegrationCard({
               loading[
                 `${integration.platform}-${integration.platform_user_id}-bot`
               ]
-                ? '⟳ Connecting...'
-                : 'Connect Bot'
+                ? t('settings.integrations.connecting')
+                : t('settings.integrations.connectBot')
             }
             onClick={onConnectBot}
             disabled={
@@ -256,8 +256,8 @@ function IntegrationCard({
             loading[
               `${integration.platform}-${integration.platform_user_id}-delete`
             ]
-              ? '⟳ Removing...'
-              : '✕ Disconnect'
+              ? t('settings.integrations.removing')
+              : t('settings.integrations.disconnect')
           }
           onClick={onDisconnect}
           disabled={

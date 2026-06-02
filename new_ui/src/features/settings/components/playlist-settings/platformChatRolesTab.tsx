@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
   DndContext,
@@ -56,6 +57,7 @@ const PlatformChatRolesTab = React.memo(
     onRoleUpdated,
     onRoleDeleted,
   }: PlatformChatRolesTabProps) => {
+    const { t } = useTranslation()
     const [selectedRole, setSelectedRole] = React.useState<string>('')
     const [priority, setPriority] = React.useState<number>(0)
     const [isCreating, setIsCreating] = React.useState(false)
@@ -113,7 +115,7 @@ const PlatformChatRolesTab = React.memo(
 
     const handleAddRole = React.useCallback(async () => {
       if (!selectedRole) {
-        toast.error('Please select a role')
+        toast.error(t('playlistSettings.chatRoles.selectRole'))
         return
       }
 
@@ -133,13 +135,13 @@ const PlatformChatRolesTab = React.memo(
           onRoleCreated(response)
           setSelectedRole('')
           setPriority(0)
-          toast.success('Role added successfully')
+          toast.success(t('playlistSettings.chatRoles.addSuccess'))
         } else {
-          toast.error('Failed to add role. Please try again later.')
+          toast.error(t('playlistSettings.chatRoles.addFailed'))
         }
       } catch (error) {
         console.error('Error creating role:', error)
-        toast.error('Error adding role')
+        toast.error(t('playlistSettings.chatRoles.addFailed'))
       } finally {
         setIsCreating(false)
       }
@@ -160,7 +162,7 @@ const PlatformChatRolesTab = React.memo(
             <div className="flex-1">
               <Select value={selectedRole} onValueChange={setSelectedRole}>
                 <SelectTrigger className="bg-level-2 border-level-3 h-8 text-xs">
-                  <SelectValue placeholder="Add role..." />
+                  <SelectValue placeholder={t('playlistSettings.chatRoles.addRole')} />
                 </SelectTrigger>
                 <SelectContent className="bg-level-2 border-level-3">
                   {unusedRoles.map((role) => (
@@ -217,7 +219,7 @@ const PlatformChatRolesTab = React.memo(
             </div>
 
             <MyBtn
-              text="Add"
+              text={t('playlistSettings.chatRoles.add')}
               onClick={handleAddRole}
               disabled={!selectedRole || isCreating}
               className="px-3 h-8 text-xs bg-level-2 border border-level-3"
@@ -253,8 +255,10 @@ const PlatformChatRolesTab = React.memo(
             </DndContext>
           ) : (
             <div>
-              <Label>No roles configured</Label>
-              <DialogDescription>Add a role to get started</DialogDescription>
+              <Label>{t('playlistSettings.chatRoles.noRoles')}</Label>
+              <DialogDescription>
+                {t('playlistSettings.chatRoles.addRoleHint')}
+              </DialogDescription>
             </div>
           )}
         </div>

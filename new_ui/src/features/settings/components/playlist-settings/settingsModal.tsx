@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import Settings from '@/components/icons/icon-settings'
 import { Label } from '@/components/ui/label'
@@ -27,6 +28,7 @@ import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import { deletePlaylist } from '@/api/api-playlist'
 
 export default function SettingsModal() {
+  const { t } = useTranslation()
   const playlist = usePlaylist()
   const [settings, setSettings] = React.useState<PlaylistSettings>()
   const [plst, setPlst] = React.useState<ClientPlaylist>()
@@ -50,9 +52,9 @@ export default function SettingsModal() {
       canPatchSettings.current = false
       try {
         await requestPlSettings(playlist.id, settings)
-        toast.success('Settings saved')
+        toast.success(t('playlistSettings.toast.settingsSaved'))
       } catch (err) {
-        toast.error('Failed to save settings')
+        toast.error(t('playlistSettings.toast.settingsFailed'))
       }
     },
     2000,
@@ -75,9 +77,9 @@ export default function SettingsModal() {
           tags: plst.tags,
         }
         await requestPlaylistPatch(plst.id, obj)
-        toast.success('Playlist saved')
+        toast.success(t('playlistSettings.toast.playlistSaved'))
       } catch (err) {
-        toast.error('Failed to save playlist')
+        toast.error(t('playlistSettings.toast.playlistFailed'))
       }
     },
     2000,
@@ -120,10 +122,10 @@ export default function SettingsModal() {
       <DialogContent className="max-w-[425px] md:max-w-[1200px] bg-level-1 border-level-3 text-text-main h-[700px] overflow-scroll">
         <Tabs className="w-full flex justify-start min-h-full">
           <DialogHeader>
-            <DialogTitle className="text-xl">Playlist settings</DialogTitle>
-            <DialogDescription>
-              Here you can change your playlist settings. Saving automatically
-            </DialogDescription>
+            <DialogTitle className="text-xl">
+              {t('playlistSettings.title')}
+            </DialogTitle>
+            <DialogDescription>{t('playlistSettings.description')}</DialogDescription>
           </DialogHeader>
 
           <TabsList
@@ -131,22 +133,22 @@ export default function SettingsModal() {
             className="w-full flex items-center justify-start bg-transparent px-0 mx-0 gap-1"
           >
             <TabsTrigger className={retroTabStyles} value="general">
-              Basic
+              {t('playlistSettings.tabs.basic')}
             </TabsTrigger>
             <TabsTrigger className={retroTabStyles} value="validation">
-              Validation
+              {t('playlistSettings.tabs.validation')}
             </TabsTrigger>
             <TabsTrigger className={retroTabStyles} value="donation">
-              Donation
+              {t('playlistSettings.tabs.donation')}
             </TabsTrigger>
             <TabsTrigger className={retroTabStyles} value="chat-roles">
-              Chat Roles
+              {t('playlistSettings.tabs.chatRoles')}
             </TabsTrigger>
             <TabsTrigger className={retroTabStyles} value="block">
-              Block
+              {t('playlistSettings.tabs.block')}
             </TabsTrigger>
             <TabsTrigger className={retroTabStyles} value="delete">
-              Delete
+              {t('playlistSettings.tabs.delete')}
             </TabsTrigger>
           </TabsList>
 
@@ -187,11 +189,17 @@ export default function SettingsModal() {
           </TabsContent>
           <TabsContent key="deletetab" value="delete">
             <div className="gap-1 flex justify-between mb-4">
-              <Label className="text-red-500 text-xl">Delete playlist</Label>
+              <Label className="text-red-500 text-xl">
+                {t('playlistSettings.delete.title')}
+              </Label>
               <div className="flex gap-2">
                 <Label className="text-red-500 text-xl"> {countToDelete}</Label>
                 <Btn
-                  text={<div className="py-1 px-2">Delete</div>}
+                  text={
+                    <div className="py-1 px-2">
+                      {t('playlistSettings.delete.button')}
+                    </div>
+                  }
                   className="bg-level-2"
                   disabled={deleteTimeout || countToDelete === 0}
                   onClick={async () => {
@@ -204,8 +212,12 @@ export default function SettingsModal() {
                     } else if (countToDelete === 1) {
                       await deletePlaylist(playlist.id)
                       useMusicStore.getState().deletePlaylist(playlist.id)
-                      setCountToDelete('Deleted' as any)
-                      toast.success('Playlist ' + playlist.name + ' deleted')
+                      setCountToDelete(t('playlistSettings.delete.deleted') as any)
+                      toast.success(
+                        t('playlistSettings.toast.playlistDeleted', {
+                          name: playlist.name,
+                        }),
+                      )
                     } else {
                       setCountToDelete(3)
                     }
