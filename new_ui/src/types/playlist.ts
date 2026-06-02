@@ -55,6 +55,7 @@ export type Track = {
   requester_nickname: string
   created_at: string // ISO
   source: Platform // twitch | youtube | web
+  extra_data: Record<string, any>
   loading?: boolean // для оптимистичного состояния
 }
 

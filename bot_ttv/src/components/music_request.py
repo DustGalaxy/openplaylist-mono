@@ -65,21 +65,21 @@ class MusicRequest(commands.Component):
         priority_song = []
         author: Chatter = ctx.author  # type: ignore
         if author.broadcaster:
-            priority_song.append("twitch-broadcaster")
+            priority_song.append("broadcaster")
         if author.moderator:
-            priority_song.append("twitch-moderator")
+            priority_song.append("moderator")
         if author.vip:
-            priority_song.append("twitch-vip")
+            priority_song.append("vip")
         if author.subscriber:
-            priority_song.append("twitch-subscriber")
+            priority_song.append("subscriber")
         if author.turbo:
-            priority_song.append("twitch-turbo")
+            priority_song.append("turbo")
         if author.artist:
-            priority_song.append("twitch-artist")
+            priority_song.append("tartist")
         # if await author.follow_info():
         #     priority_song.append("o")
         if author.founder:
-            priority_song.append("twitch-founder")
+            priority_song.append("founder")
 
         LOGGER.info(f"mr {ctx.chatter.name} -> {ctx.author.name} url: {yt_url} priority: {':'.join(priority_song)} ")
 

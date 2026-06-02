@@ -257,11 +257,11 @@ export const useMusicStore = create<StoreState>((set, get) => {
             .filter((t) => t.id === p.now_playing)
             .map((t) => ({
               ...t,
-              priority: computePriority(t.priority, p.settings),
+              priority: computePriority(t, p.settings),
             }))[0],
           track_data: p.track_data.map((t) => ({
             ...t,
-            priority: computePriority(t.priority, p.settings),
+            priority: computePriority(t, p.settings),
           })),
           settings: {
             ...p.settings,
@@ -308,7 +308,7 @@ export const useMusicStore = create<StoreState>((set, get) => {
       // Создаем новый объект трека с обновленным приоритетом
       const newTrack = {
         ...track,
-        priority: computePriority(track.priority, pl.settings),
+        priority: computePriority(track, pl.settings),
       }
 
       set((state) => ({

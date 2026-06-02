@@ -46,7 +46,7 @@ const default_roles: Record<ChatPlatform, Array<Role>> = {
       ) as ReactElement,
     },
     {
-      key: 'Turbo',
+      key: 'turbo',
       name: 'Turbo',
       platform: ChatPlatform.Twitch,
       badge_type: 'img',

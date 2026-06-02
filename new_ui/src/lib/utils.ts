@@ -1,7 +1,7 @@
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import type { ClassValue } from 'clsx'
-import type { PlaylistSettings, Track } from '@/types/playlist'
+import { Platform, type PlaylistSettings, type Track } from '@/types/playlist'
 
 export function cn(...inputs: Array<ClassValue>) {
   return twMerge(clsx(inputs))
@@ -34,34 +34,35 @@ export const OAUTH_STATE_KEY = 'oauth_twitch_state'
 
 export const REDIRECT_AFTER_LOGIN_KEY = 'redirect_after_login_path'
 
-const ROLE_TO_COST_FIELD: Record<string, keyof PlaylistSettings> = {
-  b: 'cost_broacaster',
-  m: 'cost_mod',
-  s: 'cost_subscriber',
-  d: 'cost_donater',
-  v: 'cost_vip',
-  t: 'cost_turbo',
-  a: 'cost_artist',
-  f: 'cost_fonder',
-  o: 'cost_follower',
-}
-
 export function computePriority(
-  priority: string | number,
+  track: Track,
   settings: PlaylistSettings,
 ): number {
-  if (typeof priority === 'number') return priority
+  if (typeof track.priority === 'number') return track.priority
 
-  const letters = (priority || '').split('')
-  const vals = letters
-    .map((ch) => ROLE_TO_COST_FIELD[ch])
-    .filter(Boolean)
-    .map((field) =>
-      typeof settings[field] === 'number'
-        ? (settings[field] as unknown as number)
-        : 0,
+  const labels = (track.priority || '').split(':') 
+
+  if (labels.length === 0) return 0
+  var vals: number[] = []
+  var rules = []
+  if (labels.length === 1 && labels[0].includes('donation')) {
+    rules = settings.donation_rules.filter(
+      (r) =>
+        ((r.platform as string) === track.source ||
+          (r.platform as string) === Platform.General) &&
+        r.currency === track.extra_data.currency &&
+        r.amount === track.extra_data.amount,
     )
-  if (vals.length === 0) return 0
+  } else {
+    rules = settings.chat_rules.filter(
+      (r) => (r.platform as string) === track.source && labels.includes(r.key),
+    )
+  }
+
+  if (rules.length === 0) return 0
+
+  vals = rules.map((r) => r.priority)
+
   return settings.cost_mode === 'max'
     ? Math.max(...vals)
     : vals.reduce((a, b) => a + b, 0)
