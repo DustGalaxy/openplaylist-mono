@@ -63,41 +63,44 @@ export default function Header() {
               </Link>
             </div>
           </div>
-          {!isAuthenticated ? (
-            <div className="pr-4 ">
-              <button
-                className="cursor-pointer"
-                onClick={() => navigate({ to: '/login' })}
-              >
-                {t('nav.login')}
-              </button>
-            </div>
-          ) : (
-            <div className="flex gap-2 h-[33px] items-center">
-              <div>
-                <Select
-                  value={currentLanguage?.code}
-                  onValueChange={handleLanguageChange}
+          <div className="flex gap-2 items-center">
+            <Select
+              value={currentLanguage?.code}
+              onValueChange={handleLanguageChange}
+            >
+              <SelectTrigger className="w-fit bg-level-2 text-text-main cursor-pointer
+               ring-0 border-0 focus:ring-0 focus:ring-offset-0 focus-within:border-0 focus-visible:border-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none focus:outline-none focus:border-0" >
+                <SelectValue placeholder={currentLanguage?.label}>
+                  <span>{currentLanguage?.code}</span>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="bg-level-2  border-0 text-text-main">
+                {languages.map(language => (
+                  <SelectItem key={language.code} value={language.code} className="text-text-main focus:bg-level-3">
+                    {language.code}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {!isAuthenticated ? (
+              <div className="pr-4 ">
+                <button
+                  className="cursor-pointer"
+                  onClick={() => navigate({ to: '/login' })}
                 >
-                  <SelectTrigger className="w-fit bg-level-2 text-text-main" >
-                    <SelectValue placeholder={currentLanguage?.label}>
-                      <span>{currentLanguage?.label}</span>
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="bg-level-2 border-0 text-text-main">
-                    {languages.map(language => (
-                      <SelectItem key={language.code} value={language.code} className="text-text-main">
-                        {language.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  {t('nav.login')}
+                </button>
               </div>
-              <div className="px-2   flex items-center">
-                <MenuDropdown />
+            ) : (
+              <div className="flex gap-2 h-[33px] items-center">
+
+                <div className="px-2   flex items-center">
+                  <MenuDropdown />
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+
         </nav>
       </header>
     </div>
