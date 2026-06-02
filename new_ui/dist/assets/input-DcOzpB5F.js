@@ -1,4 +1,4 @@
-import{j as t,a7 as o}from"./index-Cw9A_ahW.js";function d({text:e,onClick:a,className:r,disabled:s=!1,...i}){return t.jsx("button",{onClick:a,disabled:s,className:o(`
+import{j as t,d as o}from"./index-BSq0g_CP.js";function d({text:e,onClick:a,className:r,disabled:s=!1,...i}){return t.jsx("button",{onClick:a,disabled:s,className:o(`
         pt-0.5 pb-[3px]            
         sm:pt-1 sm:pb-[5px] 
         cursor-pointer 
