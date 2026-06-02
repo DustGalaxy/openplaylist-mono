@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import type { Integration } from '@/types/user'
 import { connectBot, deleteIntegration } from '@/api/api-user'
 import { getGlobalSocket } from '@/api/io-sockets'
@@ -46,6 +47,7 @@ export function IntegrationsTab({
         ),
       )
       setLoading((prev) => ({ ...prev, [`${platform}-bot`]: false }))
+      toast.success(t('settings.integrations.botConnected'))
     }
 
     Object.keys(platformConfigs).forEach((platform) => {
@@ -69,6 +71,8 @@ export function IntegrationsTab({
       ...prev,
       [`${platform}-${platform_user_id}-bot`]: true,
     }))
+    const loadingToast = toast.loading(t('settings.integrations.connecting'))
+
     try {
       if (await connectBot(platform, platform_user_id)) {
         setIntegrations((prev) =>
@@ -79,9 +83,13 @@ export function IntegrationsTab({
               : item,
           ),
         )
+        toast.dismiss(loadingToast)
+        toast.success(t('settings.integrations.botConnected'))
       }
     } catch (error) {
       console.error(`Failed to connect bot for ${platform}:`, error)
+      toast.dismiss(loadingToast)
+      toast.error(t('settings.integrations.connectFailed'))
       setLoading((prev) => ({
         ...prev,
         [`${platform}-${platform_user_id}-bot`]: false,
@@ -94,6 +102,8 @@ export function IntegrationsTab({
       ...prev,
       [`${platform}-${platformUserId}-delete`]: true,
     }))
+    const loadingToast = toast.loading(t('common.toast.confirming'))
+
     try {
       await deleteIntegration(platform, platformUserId)
       setIntegrations((prev) =>
@@ -102,8 +112,12 @@ export function IntegrationsTab({
             !(i.platform === platform && i.platform_user_id === platformUserId),
         ),
       )
+      toast.dismiss(loadingToast)
+      toast.success(t('settings.integrations.disconnected'))
     } catch (error) {
       console.error(`Failed to disconnect ${platform}:`, error)
+      toast.dismiss(loadingToast)
+      toast.error(t('settings.integrations.disconnectFailed'))
     } finally {
       setLoading((prev) => ({
         ...prev,
@@ -121,7 +135,9 @@ export function IntegrationsTab({
     <div className="flex flex-col gap-6">
       {/* Connected Accounts Card */}
       <div className={`p-4 sm:p-6 ${panelClass}`}>
-        <h3 className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}>
+        <h3
+          className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}
+        >
           {t('settings.integrations.connected')}
         </h3>
 
@@ -154,7 +170,9 @@ export function IntegrationsTab({
           ) : (
             <div className="text-center py-12 text-text-secondary">
               <p className="mb-4">{t('settings.integrations.empty')}</p>
-              <p className="text-sm">{t('settings.integrations.emptyHintLong')}</p>
+              <p className="text-sm">
+                {t('settings.integrations.emptyHintLong')}
+              </p>
             </div>
           )}
         </div>
@@ -162,7 +180,9 @@ export function IntegrationsTab({
 
       {/* Available Platforms Card */}
       <div className={`p-4 sm:p-6 ${panelClass}`}>
-        <h3 className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}>
+        <h3
+          className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}
+        >
           {t('settings.integrations.addAccounts')}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -213,7 +233,9 @@ function IntegrationCard({
 }: IntegrationCardProps) {
   const { t } = useTranslation()
   return (
-    <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 ${innerPanelClass} hover:border-level-3/30 transition-all`}>
+    <div
+      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 ${innerPanelClass} hover:border-level-3/30 transition-all`}
+    >
       <div className="flex items-center gap-4 flex-1 min-w-0">
         <div className="w-[56px] h-[56px] flex items-center justify-center bg-level-2 rounded-lg flex-shrink-0">
           {config.icon}
@@ -229,7 +251,9 @@ function IntegrationCard({
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
         {integration.bot_connection ? (
-          <div className={`px-4 py-2 rounded-(--rounded-std) text-sm font-semibold border ${statusOpenClass}`}>
+          <div
+            className={`px-4 py-2 rounded-(--rounded-std) text-sm font-semibold border ${statusOpenClass}`}
+          >
             {t('settings.integrations.botConnected')}
           </div>
         ) : (

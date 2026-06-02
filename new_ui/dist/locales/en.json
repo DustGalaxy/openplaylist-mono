@@ -3,7 +3,14 @@
     "or": "or",
     "cancel": "Cancel",
     "toast": {
-      "copied": "Copied to clipboard!"
+      "copied": "Copied to clipboard!",
+      "saving": "Saving...",
+      "saved": "Saved successfully",
+      "saveFailed": "Failed to save",
+      "loading": "Loading...",
+      "success": "Done!",
+      "error": "Something went wrong",
+      "confirming": "Processing..."
     },
     "web": "Web",
     "general": "General"
@@ -118,8 +125,17 @@
       "tab": { "social": "Social Sign Up", "classic": "Email & Password" },
       "socialHint": "Sign up with your favorite platform",
       "emailHint": "Prefer email? Use the form on the right →",
-      "field": { "username": "Username", "email": "Email", "password": "Password", "confirmPassword": "Confirm Password" },
-      "placeholder": { "username": "your_username", "email": "you@example.com", "password": "••••••••" },
+      "field": {
+        "username": "Username",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm Password"
+      },
+      "placeholder": {
+        "username": "your_username",
+        "email": "you@example.com",
+        "password": "••••••••"
+      },
       "passwordHint": "At least 8 characters",
       "submit": "Sign Up",
       "submitLoading": "Creating account...",
@@ -181,6 +197,7 @@
       "pleaseWait": "Please wait, signing out...",
       "redirecting": "You have been logged out. Redirecting...",
       "success": "You have been logged out successfully",
+      "successToast": "Logged out successfully",
       "error": "Logout failed",
       "errorDetail": "An error occurred while signing out: {{message}}",
       "errorLocalClear": "(The server may be unavailable. Your local session will be cleared.)"
@@ -219,7 +236,23 @@
       "cooldownMin": "{{count}}m",
       "maxSizeUnlimited": "∞"
     },
-    "toast": { "linkCopied": "Playlist link copied to clipboard!" },
+    "toast": {
+      "linkCopied": "Playlist link copied to clipboard!",
+      "created": "Playlist \"{{name}}\" created successfully",
+      "deleted": "Playlist deleted",
+      "deleteFailed": "Failed to delete playlist",
+      "updated": "Playlist updated",
+      "updateFailed": "Failed to update playlist",
+      "requestAdded": "Track added to queue",
+      "requestAddedFailed": "Failed to add track",
+      "requestRemoved": "Track removed from queue",
+      "requestRemoveFailed": "Failed to remove track",
+      "playNowSet": "Track set to play next",
+      "playNowFailed": "Failed to set track",
+      "visibilityUpdated": "Playlist visibility updated",
+      "modeUpdated": "Playlist mode updated",
+      "activeUpdated": "Playlist requests updated"
+    },
     "status": { "online": "Online", "offline": "Offline" },
     "nowPlaying": { "empty": "No track is currently playing." },
     "saved": { "title": "Saved", "empty": "No saved tracks" },
@@ -243,7 +276,10 @@
       "namePlaceholder": "Type name...",
       "descriptionLabel": "Playlist description",
       "descriptionPlaceholder": "Type description...",
-      "submit": "Create"
+      "submit": "Create",
+      "submitting": "Creating...",
+      "success": "Playlist created successfully! You can start adding tracks or configure rules.",
+      "failed": "Failed to create playlist"
     },
     "trackCount_one": "{{count}} track",
     "trackCount_other": "{{count}} tracks",
@@ -289,11 +325,21 @@
       "delete": "Delete"
     },
     "toast": {
-      "settingsSaved": "Settings saved",
+      "settingsSaved": "Settings saved successfully",
       "settingsFailed": "Failed to save settings",
-      "playlistSaved": "Playlist saved",
+      "playlistSaved": "Playlist saved successfully",
       "playlistFailed": "Failed to save playlist",
-      "playlistDeleted": "Playlist {{name}} deleted"
+      "playlistDeleted": "Playlist \"{{name}}\" deleted",
+      "detailsUpdated": "Playlist details updated",
+      "detailsUpdateFailed": "Failed to update details",
+      "modeChanged": "Playlist mode updated",
+      "modeChangeFailed": "Failed to change mode",
+      "privacyUpdated": "Playlist privacy updated",
+      "privacyUpdateFailed": "Failed to update privacy",
+      "validationRulesSaved": "Validation rules saved",
+      "validationRulesFailed": "Failed to save validation rules",
+      "validationRulesLoaded": "Loading validation settings...",
+      "validationRulesLoadFailed": "Failed to load validation settings"
     },
     "delete": {
       "title": "Delete playlist",
@@ -346,12 +392,16 @@
       "ruleSlug": "rule-slug",
       "noRules": "No rules yet",
       "fillAll": "Please fill in all fields",
-      "createSuccess": "Rule created",
-      "createFailed": "Failed to create rule",
+      "createSuccess": "Donation rule created successfully",
+      "createFailed": "Failed to create donation rule",
       "deleteConfirm": "Delete this rule?",
       "deleteRuleConfirm": "Are you sure you want to delete this donation rule?",
-      "deleteSuccess": "Rule deleted",
-      "deleteFailed": "Failed to delete rule"
+      "deleteSuccess": "Donation rule deleted successfully",
+      "deleteFailed": "Failed to delete donation rule",
+      "updateSuccess": "Donation rule updated",
+      "updateFailed": "Failed to update rule",
+      "saving": "Saving rule...",
+      "deleting": "Deleting rule..."
     },
     "block": {
       "title": "Block Lists",
@@ -359,13 +409,13 @@
       "selectTriggerType": "Select trigger type",
       "selectPlatform": "Select platform",
       "enterNicknameOrId": "Enter user nickname or ID",
-      "userBlockedSuccess": "User blocked successfully!",
+      "userBlockedSuccess": "User blocked successfully! They won't be able to submit tracks.",
       "userBlockFailed": "Failed to block user.",
       "validationRequired": "Nickname/ID and platform are required.",
       "trackYoutubeRequired": "YouTube video ID is required.",
       "trackYoutubeLength": "YouTube video ID must be 11 characters.",
-      "trackAlreadyBlocked": "Track is already blocked.",
-      "trackBlockedSuccess": "Track blocked successfully!",
+      "trackAlreadyBlocked": "This track is already blocked.",
+      "trackBlockedSuccess": "Track blocked successfully! It won't appear in requests.",
       "blockTrackYoutubeLabel": "Block track (YouTube ID)",
       "triggerUserName": "User Name",
       "triggerUserId": "User ID",
@@ -379,11 +429,14 @@
       "unblockTrack": "Unblock track",
       "unblockUserAria": "Unblock {{type}}: {{value}}",
       "unblockTrackAria": "Unblock track {{id}}",
-      "userUnblocked": "User unblocked successfully!",
+      "userUnblocked": "User unblocked successfully! They can submit tracks again.",
       "userUnblockFailed": "Failed to unblock user.",
-      "trackUnblocked": "Track unblocked successfully!",
+      "trackUnblocked": "Track unblocked successfully! It can be requested again.",
+      "trackUnblockFailed": "Failed to unblock track.",
       "emptyUsers": "No blocked users",
-      "emptyTracks": "No blocked tracks"
+      "emptyTracks": "No blocked tracks",
+      "blocking": "Blocking...",
+      "unblocking": "Unblocking..."
     },
     "chatRoles": {
       "title": "Chat Roles",
@@ -392,10 +445,14 @@
       "addRole": "Add role...",
       "add": "Add",
       "noRoles": "No roles yet",
-      "addSuccess": "Role added",
-      "addFailed": "Failed to add role",
-      "removeSuccess": "Role removed",
-      "removeFailed": "Failed to remove role"
+      "addSuccess": "Chat role added successfully",
+      "addFailed": "Failed to add chat role",
+      "removeSuccess": "Chat role removed successfully",
+      "removeFailed": "Failed to remove chat role",
+      "updateSuccess": "Chat role updated",
+      "updateFailed": "Failed to update role",
+      "saving": "Saving role...",
+      "removing": "Removing role..."
     },
     "priority": {
       "title": "Priority",
@@ -438,9 +495,12 @@
       "saveProfile": "Save Profile",
       "saveAvatar": "Save Avatar",
       "changePassword": "Change Password",
-      "profileUpdated": "Profile updated",
-      "avatarUpdated": "Avatar updated",
-      "passwordChanged": "Password changed",
+      "profileUpdated": "Profile updated successfully",
+      "avatarUpdated": "Avatar updated successfully",
+      "passwordChanged": "Password changed successfully",
+      "profileUpdateFailed": "Failed to update profile",
+      "avatarUpdateFailed": "Failed to update avatar",
+      "passwordChangeFailed": "Failed to change password",
       "nickname": "Nickname",
       "email": "Email",
       "avatarUrl": "Avatar URL",
@@ -456,6 +516,7 @@
       "newPasswordPlaceholder": "New password",
       "confirmPasswordPlaceholder": "Repeat new password",
       "updateFailed": "Settings update failed",
+      "saving": "Saving...",
       "validation": {
         "nicknameRequired": "Nickname is required",
         "nicknameShort": "Nickname must be at least 3 characters",
@@ -467,8 +528,7 @@
         "passwordShort": "New password must be at least 8 characters",
         "passwordMismatch": "Passwords do not match",
         "passwordSame": "New password must be different from current password"
-      },
-      "saving": "Saving..."
+      }
     },
     "profile": {
       "overview": "Profile Overview",
@@ -481,9 +541,10 @@
       "confirmDeleteBody": "Are you sure you want to delete {{platform}}? This action cannot be undone.",
       "deleting": "Deleting...",
       "delete": "Delete",
-      "linkDeleted": "Social link deleted",
+      "linkDeleted": "Social link removed successfully",
       "linkDeleteFailed": "Failed to delete social link",
       "linkAddedSuccess": "Social link added successfully",
+      "linkAddFailed": "Failed to add social link",
       "duplicatePlatform": "{{platform}} is already added",
       "validation": {
         "platformRequired": "Platform name is required",
@@ -516,8 +577,17 @@
       "botConnected": "✓ Bot Connected",
       "connectBot": "Connect Bot",
       "connecting": "⟳ Connecting...",
+      "connected": "Account connected successfully",
+      "connectFailed": "Failed to connect account",
       "disconnect": "✕ Disconnect",
-      "removing": "⟳ Removing..."
+      "removing": "⟳ Removing...",
+      "disconnected": "Account disconnected successfully",
+      "disconnectFailed": "Failed to disconnect account",
+      "botConnecting": "Connecting bot...",
+      "botConnected": "Bot connected successfully",
+      "botConnectFailed": "Failed to connect bot",
+      "botDisconnecting": "Disconnecting bot...",
+      "botDisconnected": "Bot disconnected successfully"
     }
   },
   "publicSearch": {
@@ -525,6 +595,7 @@
     "subtitle": "By playlist name, author nickname, or description",
     "placeholder": "Playlist name, author, or description text...",
     "searching": "Searching playlists...",
+    "searchFailed": "Search failed. Please try again.",
     "notFound": "No playlists found",
     "notFoundHint": "Try a different query",
     "notFoundHintFull": "Try another term or check that the playlist is open for public viewing.",
@@ -564,7 +635,14 @@
     "playlistSettings": "Playlist settings",
     "addTrack": "Add track",
     "nowPlaying": "Now playing",
-    "nowPlayingEmpty": "Nothing playing right now"
+    "nowPlayingEmpty": "Nothing playing right now",
+    "toast": {
+      "trackAdded": "Your track has been added to the queue!",
+      "trackAddFailed": "Failed to add track. Try again or check the playlist rules.",
+      "trackRateLimited": "You're submitting too many tracks. Please wait a moment.",
+      "searching": "Searching for track...",
+      "playlistLoadFailed": "Failed to load playlist. The link may be invalid or the playlist is no longer public."
+    }
   },
   "platform": {
     "twitch": "Twitch",

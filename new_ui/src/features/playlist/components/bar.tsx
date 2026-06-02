@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
 import useMusicStore from '@/stores/musicStore'
@@ -71,7 +72,21 @@ export function PlaylistQueueInput({
 
   const submitAdd = async () => {
     if (mode !== 'add' || !value.trim()) return
-    await requestAddTrack(playlist.id, value.trim())
+    const loadingToast = toast.loading(t('common.toast.loading'))
+    try {
+      const result = await requestAddTrack(playlist.id, value.trim())
+      
+      toast.dismiss(loadingToast)
+      
+      if (result?.success || result === undefined) {
+        toast.success(t('playlist.toast.requestAdded'))
+      } else {
+        toast.error(result?.message || t('playlist.toast.requestAddedFailed'))
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      toast.error(t('playlist.toast.requestAddedFailed'))
+    }
     setValue('')
   }
 

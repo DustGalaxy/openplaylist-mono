@@ -3,7 +3,14 @@
     "or": "или",
     "cancel": "Отмена",
     "toast": {
-      "copied": "Скопировано в буфер обмена!"
+      "copied": "Скопировано в буфер обмена!",
+      "saving": "Сохраняется...",
+      "saved": "Сохранено успешно",
+      "saveFailed": "Ошибка сохранения",
+      "loading": "Загрузка...",
+      "success": "Готово!",
+      "error": "Что-то пошло не так",
+      "confirming": "Обработка..."
     },
     "web": "Веб",
     "general": "Общие"
@@ -118,8 +125,17 @@
       "tab": { "social": "Соцсети", "classic": "Email и пароль" },
       "socialHint": "Зарегистрируйтесь через любимую платформу",
       "emailHint": "Предпочитаете email? Используйте форму справа →",
-      "field": { "username": "Имя пользователя", "email": "Email", "password": "Пароль", "confirmPassword": "Подтвердите пароль" },
-      "placeholder": { "username": "your_username", "email": "you@example.com", "password": "••••••••" },
+      "field": {
+        "username": "Имя пользователя",
+        "email": "Email",
+        "password": "Пароль",
+        "confirmPassword": "Подтвердите пароль"
+      },
+      "placeholder": {
+        "username": "your_username",
+        "email": "you@example.com",
+        "password": "••••••••"
+      },
       "passwordHint": "Не менее 8 символов",
       "submit": "Регистрация",
       "submitLoading": "Создание аккаунта…",
@@ -219,7 +235,23 @@
       "cooldownMin": "{{count}} мин",
       "maxSizeUnlimited": "∞"
     },
-    "toast": { "linkCopied": "Ссылка на плейлист скопирована!" },
+    "toast": {
+      "linkCopied": "Ссылка на плейлист скопирована!",
+      "created": "Плейлист \"{{name}}\" создан",
+      "deleted": "Плейлист удалён",
+      "deleteFailed": "Не удалось удалить плейлист",
+      "updated": "Плейлист обновлён",
+      "updateFailed": "Не удалось обновить плейлист",
+      "requestAdded": "Трек добавлен в очередь",
+      "requestAddedFailed": "Не удалось добавить трек",
+      "requestRemoved": "Трек удалён из очереди",
+      "requestRemoveFailed": "Не удалось удалить трек",
+      "playNowSet": "Трек будет воспроизведён следующим",
+      "playNowFailed": "Не удалось установить трек",
+      "visibilityUpdated": "Доступность плейлиста обновлена",
+      "modeUpdated": "Режим плейлиста обновлён",
+      "activeUpdated": "Заявки обновлены"
+    },
     "status": { "online": "Онлайн", "offline": "Офлайн" },
     "nowPlaying": { "empty": "Сейчас ничего не играет." },
     "saved": { "title": "Сохранённые", "empty": "Нет сохранённых треков" },
@@ -243,7 +275,10 @@
       "namePlaceholder": "Введите название…",
       "descriptionLabel": "Описание плейлиста",
       "descriptionPlaceholder": "Введите описание…",
-      "submit": "Создать"
+      "submit": "Создать",
+      "submitting": "Создание…",
+      "success": "Плейлист создан! Вы можете добавлять треки или настраивать правила.",
+      "failed": "Не удалось создать плейлист"
     },
     "trackCount_one": "{{count}} трек",
     "trackCount_few": "{{count}} трека",
@@ -291,11 +326,21 @@
       "delete": "Удалить"
     },
     "toast": {
-      "settingsSaved": "Настройки сохранены",
+      "settingsSaved": "Настройки сохранены успешно",
       "settingsFailed": "Не удалось сохранить настройки",
-      "playlistSaved": "Плейлист сохранён",
+      "playlistSaved": "Плейлист сохранён успешно",
       "playlistFailed": "Не удалось сохранить плейлист",
-      "playlistDeleted": "Плейлист «{{name}}» удалён"
+      "playlistDeleted": "Плейлист \"{{name}}\" удалён",
+      "detailsUpdated": "Данные плейлиста обновлены",
+      "detailsUpdateFailed": "Не удалось обновить данные",
+      "modeChanged": "Режим плейлиста изменён",
+      "modeChangeFailed": "Не удалось изменить режим",
+      "privacyUpdated": "Приватность обновлена",
+      "privacyUpdateFailed": "Не удалось обновить приватность",
+      "validationRulesSaved": "Правила валидации сохранены",
+      "validationRulesFailed": "Не удалось сохранить правила",
+      "validationRulesLoaded": "Загрузка настроек…",
+      "validationRulesLoadFailed": "Не удалось загрузить настройки"
     },
     "delete": {
       "title": "Удалить плейлист",
@@ -353,7 +398,11 @@
       "deleteConfirm": "Удалить это правило?",
       "deleteRuleConfirm": "Удалить это правило доната?",
       "deleteSuccess": "Правило удалено",
-      "deleteFailed": "Не удалось удалить правило"
+      "deleteFailed": "Не удалось удалить правило",
+      "updateSuccess": "Правило обновлено",
+      "updateFailed": "Не удалось обновить правило",
+      "saving": "Сохранение правила…",
+      "deleting": "Удаление правила…"
     },
     "block": {
       "title": "Блок-листы",
@@ -518,8 +567,16 @@
       "botConnected": "✓ Бот подключён",
       "connectBot": "Подключить бота",
       "connecting": "⟳ Подключение…",
+      "connected": "Аккаунт подключен успешно",
+      "connectFailed": "Не удалось подключить аккаунт",
       "disconnect": "✕ Отключить",
-      "removing": "⟳ Удаление…"
+      "removing": "⟳ Удаление…",
+      "disconnected": "Аккаунт отключен успешно",
+      "disconnectFailed": "Не удалось отключить аккаунт",
+      "botConnecting": "Подключение бота…",
+      "botConnectFailed": "Не удалось подключить бота",
+      "botDisconnecting": "Отключение бота…",
+      "botDisconnected": "Бот отключен успешно"
     }
   },
   "publicSearch": {

@@ -1,5 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import Add from '@/components/icons/icon-add'
 import { Input } from '@/components/ui/input'
 import Btn from '@/components/ui/my-btn'
@@ -22,11 +23,49 @@ export default function AddPlaylistModal() {
   const { t } = useTranslation()
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [open, setOpen] = React.useState(false)
 
   const { addPlaylist } = useMusicStore()
 
+  const handleCreatePlaylist = async () => {
+    if (!name.trim()) {
+      toast.error(t('playlistSettings.details.nameRequired'))
+      return
+    }
+
+    setIsLoading(true)
+    const loadingToast = toast.loading(t('playlist.create.submitting'))
+
+    try {
+      const newPlst = await createNewPlaylist(name, description)
+
+      if (newPlst) {
+        addPlaylist(newPlst)
+        toast.dismiss(loadingToast)
+        toast.success(
+          t('playlist.create.success', {
+            defaultValue: t('playlist.toast.created', { name }),
+          }),
+        )
+        setName('')
+        setDescription('')
+        setOpen(false)
+      } else {
+        toast.dismiss(loadingToast)
+        toast.error(t('playlist.create.failed'))
+      }
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      toast.error(t('playlist.create.failed'))
+      console.error('Failed to create playlist:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Btn
           text={<Add width={33} height={33} />}
@@ -38,7 +77,9 @@ export default function AddPlaylistModal() {
           <DialogTitle className="text-xl">
             {t('playlist.create.title')}
           </DialogTitle>
-          <DialogDescription>{t('playlist.create.description')}</DialogDescription>
+          <DialogDescription>
+            {t('playlist.create.description')}
+          </DialogDescription>
         </DialogHeader>
         <Label className="text-lg">{t('playlist.create.nameLabel')}</Label>
         <DialogDescription>{t('playlist.create.nameHint')}</DialogDescription>
@@ -48,8 +89,11 @@ export default function AddPlaylistModal() {
           className="border-level-3 border-1 w-full mb-4"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          disabled={isLoading}
         />
-        <Label className="text-lg">{t('playlist.create.descriptionLabel')}</Label>
+        <Label className="text-lg">
+          {t('playlist.create.descriptionLabel')}
+        </Label>
 
         <Input
           type="text"
@@ -57,16 +101,19 @@ export default function AddPlaylistModal() {
           className="border-level-3 border-1 w-full mb-4"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          disabled={isLoading}
         />
         <DialogFooter>
           <DialogClose asChild>
             <Btn
-              text={t('playlist.create.submit')}
+              text={
+                isLoading
+                  ? t('common.toast.saving')
+                  : t('playlist.create.submit')
+              }
               className="w-full"
-              onClick={async () => {
-                const newPlst = await createNewPlaylist(name, description)
-                addPlaylist(newPlst)
-              }}
+              disabled={isLoading}
+              onClick={handleCreatePlaylist}
             />
           </DialogClose>
         </DialogFooter>

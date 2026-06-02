@@ -82,9 +82,9 @@ export default function OrderCard({
     {
       icon: <Copy />,
       on_click: async () =>
-        await navigator.clipboard.writeText(
-          'https://www.youtube.com/watch?v=' + track.yt_video_id,
-        ),
+        await navigator.clipboard
+          .writeText('https://www.youtube.com/watch?v=' + track.yt_video_id)
+          .then(() => toast.success(t('common.toast.copied'))),
       glow: 'white',
       className: 'px-1 bg-level-2',
     },
@@ -108,10 +108,26 @@ export default function OrderCard({
     {
       icon: <Add />,
       on_click: async () => {
-        await requestAddTrack(
-          playlist.id,
-          'https://www.youtube.com/watch?v=' + track.yt_video_id,
-        )
+        const loadingToast = toast.loading(t('common.toast.loading'))
+        try {
+          const result = await requestAddTrack(
+            playlist.id,
+            'https://www.youtube.com/watch?v=' + track.yt_video_id,
+          )
+
+          toast.dismiss(loadingToast)
+
+          if (result?.success || result === undefined) {
+            toast.success(t('playlist.toast.requestAdded'))
+          } else {
+            toast.error(
+              result?.message || t('playlist.toast.requestAddedFailed'),
+            )
+          }
+        } catch (error) {
+          toast.dismiss(loadingToast)
+          toast.error(t('playlist.toast.requestAddedFailed'))
+        }
       },
       glow: 'white',
       className: 'px-1 bg-level-2',

@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import type { UserProfile } from '@/types/user'
 import { patchSocialLink } from '@/api/api-user'
 import { SocialLinkHint } from '@/lib/constants/social_names'
@@ -67,10 +68,14 @@ const validatePlatform = (
   const trimmed = platform.trim()
   if (!trimmed) return t('settings.profile.validation.platformRequired')
   if (trimmed.length < MIN_PLATFORM_LENGTH) {
-    return t('settings.profile.validation.platformMin', { min: MIN_PLATFORM_LENGTH })
+    return t('settings.profile.validation.platformMin', {
+      min: MIN_PLATFORM_LENGTH,
+    })
   }
   if (trimmed.length > MAX_PLATFORM_LENGTH) {
-    return t('settings.profile.validation.platformMax', { max: MAX_PLATFORM_LENGTH })
+    return t('settings.profile.validation.platformMax', {
+      max: MAX_PLATFORM_LENGTH,
+    })
   }
   if (!/^[a-zA-Z0-9\s\-_]+$/.test(trimmed)) {
     return t('settings.profile.validation.platformChars')
@@ -150,6 +155,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
         ...prev,
         socialFeedback: { add: { type: 'error', message: platformError } },
       }))
+      toast.error(platformError)
       return
     }
 
@@ -159,6 +165,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
         ...prev,
         socialFeedback: { add: { type: 'error', message: urlError } },
       }))
+      toast.error(urlError)
       return
     }
 
@@ -166,17 +173,19 @@ export function ProfileTab({ user }: ProfileTabProps) {
       (key) => key.toLowerCase() === newSocialLink.platform.toLowerCase(),
     )
     if (isDuplicate) {
+      const message = t('settings.profile.duplicatePlatform', {
+        platform: newSocialLink.platform,
+      })
       setUIState((prev) => ({
         ...prev,
         socialFeedback: {
           add: {
             type: 'error',
-            message: t('settings.profile.duplicatePlatform', {
-              platform: newSocialLink.platform,
-            }),
+            message: message,
           },
         },
       }))
+      toast.error(message)
       return
     }
 
@@ -187,6 +196,8 @@ export function ProfileTab({ user }: ProfileTabProps) {
       return next
     })
 
+    const loadingToast = toast.loading(t('settings.profile.adding'))
+
     try {
       const updatedSocials = {
         ...user?.social_links,
@@ -195,19 +206,32 @@ export function ProfileTab({ user }: ProfileTabProps) {
       await patchSocialLink(updatedSocials)
       setSocialLinks(updatedSocials)
       setNewSocialLink({ platform: '', url: '' })
+
+      toast.dismiss(loadingToast)
+      toast.success(t('settings.profile.linkAddedSuccess'))
+
       setUIState((prev) => ({
         ...prev,
         socialFeedback: {
-          add: { type: 'success', message: t('settings.profile.linkAddedSuccess') },
+          add: {
+            type: 'success',
+            message: t('settings.profile.linkAddedSuccess'),
+          },
         },
       }))
     } catch (error) {
+      const errorMsg = getApiErrorMessage(
+        error,
+        t('settings.profile.linkAddFailed'),
+      )
+      toast.dismiss(loadingToast)
+      toast.error(errorMsg)
       setUIState((prev) => ({
         ...prev,
         socialFeedback: {
           add: {
             type: 'error',
-            message: getApiErrorMessage(error, t('settings.profile.linkFailed')),
+            message: errorMsg,
           },
         },
       }))
@@ -229,10 +253,16 @@ export function ProfileTab({ user }: ProfileTabProps) {
       socialLoading: { [`delete-${platform}`]: true },
     }))
 
+    const loadingToast = toast.loading(t('settings.profile.deleting'))
+
     try {
       const { [platform]: deleted, ...otherSocials } = user?.social_links ?? {}
       await patchSocialLink(otherSocials)
       setSocialLinks(otherSocials)
+
+      toast.dismiss(loadingToast)
+      toast.success(t('settings.profile.linkDeleted'))
+
       setUIState((prev) => ({
         ...prev,
         socialFeedback: {
@@ -243,12 +273,18 @@ export function ProfileTab({ user }: ProfileTabProps) {
         },
       }))
     } catch (error) {
+      const errorMsg = getApiErrorMessage(
+        error,
+        t('settings.profile.linkDeleteFailed'),
+      )
+      toast.dismiss(loadingToast)
+      toast.error(errorMsg)
       setUIState((prev) => ({
         ...prev,
         socialFeedback: {
           [`delete-${platform}`]: {
             type: 'error',
-            message: getApiErrorMessage(error, t('settings.profile.linkDeleteFailed')),
+            message: errorMsg,
           },
         },
       }))

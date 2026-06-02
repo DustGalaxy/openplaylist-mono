@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import type { TFunction } from 'i18next'
 import type { UserProfile } from '@/types/user'
 import { updateUserProfile, updateUserPassword } from '@/api/api-user'
@@ -18,7 +19,12 @@ import { cn } from '@/lib/utils'
 interface AccountTabProps {
   user: UserProfile | null
   expired_at: number | null
-  onUserUpdate: (patch: { username?: string; email?: string; email_confirmed?: boolean; profile_image_url?: string }) => void
+  onUserUpdate: (patch: {
+    username?: string
+    email?: string
+    email_confirmed?: boolean
+    profile_image_url?: string
+  }) => void
 }
 
 type AccountFormState = {
@@ -70,9 +76,7 @@ const getApiErrorMessage = (error: unknown, fallback: string) => {
   return error instanceof Error ? error.message : fallback
 }
 
-const getInitialFormState = (
-  user: UserProfile | null,
-): AccountFormState => ({
+const getInitialFormState = (user: UserProfile | null): AccountFormState => ({
   username: user?.username ?? '',
   email: user?.email ?? '',
   profile_image_url: user?.avatar_url ?? '',
@@ -116,7 +120,8 @@ const createSettingsSections = (
       },
     ],
     validate: ({ username, email }) => {
-      if (!username.trim()) return t('settings.account.validation.nicknameRequired')
+      if (!username.trim())
+        return t('settings.account.validation.nicknameRequired')
       if (username.trim().length < 3) {
         return t('settings.account.validation.nicknameShort')
       }
@@ -155,7 +160,8 @@ const createSettingsSections = (
       },
     ],
     validate: ({ profile_image_url }) => {
-      if (!profile_image_url.trim()) return t('settings.account.validation.avatarRequired')
+      if (!profile_image_url.trim())
+        return t('settings.account.validation.avatarRequired')
       try {
         new URL(profile_image_url.trim())
       } catch {
@@ -263,6 +269,7 @@ export function AccountTab({ user, onUserUpdate }: AccountTabProps) {
         ...prev,
         [section.id]: { type: 'error', message: validationError },
       }))
+      toast.error(validationError)
       return
     }
 
@@ -273,33 +280,47 @@ export function AccountTab({ user, onUserUpdate }: AccountTabProps) {
       return next
     })
 
+    const loadingToast = toast.loading(t('common.toast.saving'))
+
     try {
       await section.submit(formState)
       section.afterSubmit?.(formState)
 
-      if (section.id !== 'password') {
-        setFeedback((prev) => ({
-          ...prev,
-          [section.id]: { type: 'success', message: section.successText },
-        }))
-      } else {
+      toast.dismiss(loadingToast)
+
+      if (section.id === 'profile') {
+        toast.success(t('settings.account.profileUpdated'))
+      } else if (section.id === 'avatar') {
+        toast.success(t('settings.account.avatarUpdated'))
+      } else if (section.id === 'password') {
+        toast.success(t('settings.account.passwordChanged'))
+      }
+
+      setFeedback((prev) => ({
+        ...prev,
+        [section.id]: { type: 'success', message: section.successText },
+      }))
+
+      if (section.id === 'password') {
         setFormState((prev) => ({
           ...prev,
           currentPassword: '',
           newPassword: '',
           confirmPassword: '',
         }))
-        setFeedback((prev) => ({
-          ...prev,
-          [section.id]: { type: 'success', message: section.successText },
-        }))
       }
     } catch (error) {
+      toast.dismiss(loadingToast)
+      const errorMessage = getApiErrorMessage(
+        error,
+        t('settings.account.updateFailed'),
+      )
+      toast.error(errorMessage)
       setFeedback((prev) => ({
         ...prev,
         [section.id]: {
           type: 'error',
-          message: getApiErrorMessage(error, t('settings.account.updateFailed')),
+          message: errorMessage,
         },
       }))
     } finally {
@@ -350,7 +371,9 @@ function SettingsSection({
       onSubmit={(event) => onSubmit(event, section)}
       className={`p-4 sm:p-6 ${panelClass}`}
     >
-      <h2 className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}>
+      <h2
+        className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}
+      >
         {section.title}
       </h2>
 
@@ -368,7 +391,10 @@ function SettingsSection({
               value={values[field.name]}
               disabled={isSaving}
               onChange={(event) => onChange(field.name, event.target.value)}
-              className={cn("h-11 border-level-4 text-text-main bg-level-1", field.className)}
+              className={cn(
+                'h-11 border-level-4 text-text-main bg-level-1',
+                field.className,
+              )}
             />
             {field.helpText ? (
               <p className="text-xs text-text-secondary">{field.helpText}</p>

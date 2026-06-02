@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import {
   Discord,
   Github,
@@ -31,9 +32,7 @@ const TabBasic = ({
   canPatchSettings,
 }: {
   playlist: ClientPlaylist
-  setPlst: React.Dispatch<
-    React.SetStateAction<ClientPlaylist | undefined>
-  >
+  setPlst: React.Dispatch<React.SetStateAction<ClientPlaylist | undefined>>
   canPatchPlaylist: React.RefObject<boolean>
   setSettings: React.Dispatch<React.SetStateAction<PlaylistSettings>>
   canPatchSettings: React.RefObject<boolean>
@@ -117,6 +116,7 @@ const TabBasic = ({
             ),
         ),
       })
+      toast.success(t('playlistSettings.toast.visibilityUpdated'))
     } else {
       // Add the source
       setPlst({
@@ -126,6 +126,7 @@ const TabBasic = ({
           { platform: platform as Platform, platform_user_id: platformUserId },
         ],
       })
+      toast.success(t('playlistSettings.toast.visibilityUpdated'))
     }
     canPatchPlaylist.current = true
   }
@@ -139,7 +140,9 @@ const TabBasic = ({
 
       <div className="grid gap-4">
         <div className="grid grid-cols-[auto_1fr] gap-2">
-          <Label className=" text-lg">{t('playlistSettings.basic.modeTitle')}</Label>
+          <Label className=" text-lg">
+            {t('playlistSettings.basic.modeTitle')}
+          </Label>
           <RadioGroup
             defaultValue={plstMode}
             className="flex gap-0 justify-end"
@@ -148,10 +151,12 @@ const TabBasic = ({
                 setPlstMode('flow')
                 setSettings({ ...settings, mode: 'flow' })
                 canPatchSettings.current = true
+                toast.success(t('playlistSettings.toast.modeUpdated'))
               } else if (e === 'static') {
                 setPlstMode('static')
                 setSettings({ ...settings, mode: 'static' })
                 canPatchSettings.current = true
+                toast.success(t('playlistSettings.toast.modeUpdated'))
               }
             }}
           >
@@ -198,7 +203,9 @@ const TabBasic = ({
         <div className="py-1">{t('playlistSettings.basic.staticHelp')}</div>
       </DialogDescription>
       <div className="grid grid-cols-[auto_1fr] gap-2">
-        <Label className=" text-lg">{t('playlistSettings.basic.privacy')}</Label>
+        <Label className=" text-lg">
+          {t('playlistSettings.basic.privacy')}
+        </Label>
 
         <RadioGroup
           defaultValue={isPublic ? 'public' : 'private'}

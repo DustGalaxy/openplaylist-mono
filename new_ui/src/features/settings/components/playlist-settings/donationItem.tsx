@@ -1,5 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 import { Label } from '@/components/ui/label'
 import UpDownBtn from '@/components/ui/funny-btn'
@@ -44,14 +45,22 @@ const DonationItem = ({
     () => {
       if (!isSaving && isDirty && localRule.id === rule.id) {
         setIsSaving(true)
+        const loadingToast = toast.loading(
+          t('playlistSettings.donation.saving'),
+        )
+
         updateDonation({
           playlist_id,
           data: localRule,
         })
           .then(() => {
+            toast.dismiss(loadingToast)
+            toast.success(t('playlistSettings.donation.updateSuccess'))
             setIsDirty(false)
           })
           .catch((error) => {
+            toast.dismiss(loadingToast)
+            toast.error(t('playlistSettings.donation.updateFailed'))
             console.error(`Error saving donation rule ${localRule.id}:`, error)
             // Откатываем к исходному состоянию при ошибке
             setLocalRule(rule)
