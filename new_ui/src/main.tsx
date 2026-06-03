@@ -76,7 +76,7 @@ window.appConfig = {
   GOOGLE_SCOPES: [
     'https://www.googleapis.com/auth/userinfo.profile',
     'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/youtube.readonly',
+    // 'https://www.googleapis.com/auth/youtube.readonly',
     'openid',
   ],
   DA_CLIENT_ID: '18779',
