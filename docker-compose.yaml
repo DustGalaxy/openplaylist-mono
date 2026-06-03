@@ -88,8 +88,6 @@ services:
 
   backend:
     build: ./back-end
-    ports:
-      - "8000:8000"
     depends_on:
           database:
             condition: service_healthy
@@ -113,11 +111,11 @@ services:
     networks:
       - default
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 5s
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').getcode()"]
+      interval: 30s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 15s
 
     stop_grace_period: 30s
 
@@ -191,7 +189,9 @@ services:
       context: ./new_ui
       dockerfile: Dockerfile
     depends_on:
-      - traefik
+      traefik:
+      backend:
+        condition: service_healthy
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`${PROJECT_DOMAIN:-openplaylist.localhost}`)"
