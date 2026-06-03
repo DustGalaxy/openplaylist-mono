@@ -17,7 +17,7 @@ from src.models.settings import SettingsSchema
 
 from src.utils import kick, find
 from src._types import DeleteStatus, PlaylistLogsEventTypes
-from src.taskiq_broker import task_broker as task_broker
+from taskiq_broker import task_broker as task_broker
 from src.adapters._fastapi.dependencies import CURR_USER, DB_SESSION, PLST_SERVICE, SETTINGS_SERVICE as SE
 
 router = APIRouter(prefix="/playlist")

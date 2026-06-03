@@ -11,6 +11,6 @@ RUN uv sync --frozen --no-cache --no-dev
 
 COPY . .
 
-WORKDIR /app/src
+WORKDIR /app
 
-CMD ["uv", "run", "taskiq", "scheduler","taskiq_broker:scheduler", "tasks.tokens"]
+CMD ["uv", "run", "--no-dev", "taskiq", "scheduler","taskiq_broker:scheduler", "src.tasks.tokens"]

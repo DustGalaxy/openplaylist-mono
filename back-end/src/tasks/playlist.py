@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from src.database import async_session_maker
-from src.taskiq_broker import task_broker as taskiq_broker
+from taskiq_broker import task_broker as taskiq_broker
 
 from src.adapters._redis.broker import get_broker
 from src.dto.events import Deleted, Moved, PlayNow, Private

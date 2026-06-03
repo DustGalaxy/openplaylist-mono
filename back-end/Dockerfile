@@ -11,4 +11,4 @@ RUN uv sync --frozen --no-cache --no-dev
 
 COPY . .
 
-CMD ["uv", "run", "main.py"]
+CMD ["uv", "run", "--no-dev", "main.py"]

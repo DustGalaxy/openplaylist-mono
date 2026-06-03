@@ -6,7 +6,7 @@ from src.adapters._rabbit.event_broker import broker as rabbit_broker, topic_exc
 
 from src.database import async_session_maker
 from src.settings import settings
-from src.taskiq_broker import task_broker as taskiq_broker
+from taskiq_broker import task_broker as taskiq_broker
 
 
 @taskiq_broker.task(schedule=[{"cron": "*/10 * * * *"}])
