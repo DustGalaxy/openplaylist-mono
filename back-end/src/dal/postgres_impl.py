@@ -11,10 +11,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 
-from models.playlist import PlaylistSchema, PlaylistCreate, PlaylistPatch
-from orm.playlist import OrderPlaylistStatus, Playlist, Order
+from src.models.playlist import PlaylistSchema, PlaylistCreate, PlaylistPatch
+from src.orm.playlist import OrderPlaylistStatus, Playlist, Order
 
-from models.settings import (
+from src.models.settings import (
     SettingsSchema,
     SettingsPatch,
     SettingsCreate,
@@ -31,25 +31,25 @@ from models.settings import (
     BlockListCreate,
     BlockListPatch,
 )
-from orm.settings import Settings, ContentSettings, DonationRules, ChatRules, BlockList
+from src.orm.settings import Settings, ContentSettings, DonationRules, ChatRules, BlockList
 
 
-from models.auth_user import AuthUserSchema, AuthUserCreate, AuthUserUpdate
-from orm.auth_user import User
+from src.models.auth_user import AuthUserSchema, AuthUserCreate, AuthUserUpdate
+from src.orm.auth_user import User
 
-from models.linked_accounts import LinkedAccountsDomain, LinkedAccountsCreate, LinkedAccountsUpdate
-from orm.linked_accounts import LinkedAccounts
+from src.models.linked_accounts import LinkedAccountsDomain, LinkedAccountsCreate, LinkedAccountsUpdate
+from src.orm.linked_accounts import LinkedAccounts
 
-from models.order import OrderCreate, OrderDomain
+from src.models.order import OrderCreate, OrderDomain
 
-from orm.token_vault import TokenVault
-from models.token_vault import TokenVaultCreate, TokenVaultUpdate, TokenVaultDomain
+from src.orm.token_vault import TokenVault
+from src.models.token_vault import TokenVaultCreate, TokenVaultUpdate, TokenVaultDomain
 
-from dal.abstract import IPlaylistRepository, IPlaylistSettingsRepository
-from exceptions import NotActivePlaylist
+from src.dal.abstract import IPlaylistRepository, IPlaylistSettingsRepository
+from src.exceptions import NotActivePlaylist
 
 
-from _types import DB_DonationPlatform, Platform, DeleteStatus, _All_Platforms
+from src._types import DB_DonationPlatform, Platform, DeleteStatus, _All_Platforms
 
 
 class PlaylistRepository(

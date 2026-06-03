@@ -11,27 +11,27 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from simple_repository.exceptions import NotFoundException
 
-from tasks.email import send_email
+from src.tasks.email import send_email
 
-from adapters._redis.broker import get_broker
-from adapters._rabbit.event_broker import (
+from src.adapters._redis.broker import get_broker
+from src.adapters._rabbit.event_broker import (
     broker,
     main_exchange,
 )
-from dal.postgres_impl import TokenVaultRepository, LinkedAccountsRepository, UserRepository, user_repository
-from models.token_vault import TokenVaultCreate, TokenVaultDomain
-from models.auth_user import AuthUserSchema, AuthUserCreate
-from models.linked_accounts import LinkedAccountsCreate, LinkedAccountsDomain
-from services.auth.strategy_manager import manager
-from services.tokens.token_service import token_service
+from src.dal.postgres_impl import TokenVaultRepository, LinkedAccountsRepository, UserRepository, user_repository
+from src.models.token_vault import TokenVaultCreate, TokenVaultDomain
+from src.models.auth_user import AuthUserSchema, AuthUserCreate
+from src.models.linked_accounts import LinkedAccountsCreate, LinkedAccountsDomain
+from src.services.auth.strategy_manager import manager
+from src.services.tokens.token_service import token_service
 
-from _types import Platform
-from database import get_async_session
-from settings import settings
-from exceptions import NeedConfirmationException
+from src._types import Platform
+from src.database import get_async_session
+from src.settings import settings
+from src.exceptions import NeedConfirmationException
 
 
-from utils import find
+from src.utils import find
 
 security_scheme = APIKeyCookie(name=settings.COOKIE_NAME)
 

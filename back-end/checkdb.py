@@ -2,7 +2,8 @@ import asyncio
 import sys
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-from database import engine
+
+from src.database import engine
 
 
 async def check_db_connection():

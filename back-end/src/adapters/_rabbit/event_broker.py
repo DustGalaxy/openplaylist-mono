@@ -1,6 +1,6 @@
 from faststream.rabbit import RabbitBroker, RabbitExchange, RabbitQueue, ExchangeType
 
-from settings import settings
+from src.settings import settings
 
 broker = RabbitBroker(settings.RABBITMQ_URL)
 

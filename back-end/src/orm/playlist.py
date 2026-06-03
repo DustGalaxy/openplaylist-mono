@@ -4,8 +4,8 @@ from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ARRAY, UUID as PGUUID, JSONB
 
-from database import Base, UUIDMixin, TimestampMixin
-from _types import Status, Platform
+from src.database import Base, UUIDMixin, TimestampMixin
+from src._types import Status, Platform
 
 
 class Order(Base, UUIDMixin, TimestampMixin):

@@ -5,14 +5,14 @@ from simple_repository.abctract import IAsyncCrud
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.order import OrderCreate, OrderDomain
-from models.settings import SettingsSchema, SettingsPatch, SettingsCreate
-from models.playlist import PlaylistSchema, PlaylistCreate, PlaylistPatch
+from src.models.order import OrderCreate, OrderDomain
+from src.models.settings import SettingsSchema, SettingsPatch, SettingsCreate
+from src.models.playlist import PlaylistSchema, PlaylistCreate, PlaylistPatch
 
-from orm.playlist import Playlist
-from orm.settings import Settings
+from src.orm.playlist import Playlist
+from src.orm.settings import Settings
 
-from _types import DeleteStatus, Platform
+from src._types import DeleteStatus, Platform
 
 
 class IPlaylistSettingsRepository(IAsyncCrud[Settings, SettingsSchema, SettingsCreate, SettingsPatch]):

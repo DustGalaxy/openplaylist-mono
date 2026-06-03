@@ -5,7 +5,7 @@
 # from sqlalchemy.dialects.postgresql import JSONB
 # from sqlalchemy.orm import Mapped, mapped_column
 
-# from database import Base, UUIDMixin
+# from src.database import Base, UUIDMixin
 
 
 # class PlaylistLog(Base, UUIDMixin):

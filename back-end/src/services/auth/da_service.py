@@ -6,11 +6,11 @@ import httpx
 from fastapi import HTTPException
 from faststream.rabbit import RabbitQueue
 
-from settings import settings
-from dto.internal.da import DAToken, DAUser
-from dto.internal.token import Tokens
-from dto.internal.auth import AuthStrategy, PlatformUser
-from adapters._rabbit.event_broker import bot_da_connect_request
+from src.settings import settings
+from src.dto.internal.da import DAToken, DAUser
+from src.dto.internal.token import Tokens
+from src.dto.internal.auth import AuthStrategy, PlatformUser
+from src.adapters._rabbit.event_broker import bot_da_connect_request
 
 logger = logging.getLogger(__name__)
 

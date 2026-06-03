@@ -5,13 +5,13 @@ from typing import Union
 from pytubefix import YouTube
 import requests
 
-from adapters._redis.broker import get_broker
-from dto.order import WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder
-from models.order import OrderCreate, STRATEGIES
+from src.adapters._redis.broker import get_broker
+from src.dto.order import WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder
+from src.models.order import OrderCreate, STRATEGIES
 
-from utils import extract_youtube_video_id, parse_ISO_8601
-from settings import settings
-from exceptions import NotEmbeddable
+from src.utils import extract_youtube_video_id, parse_ISO_8601
+from src.settings import settings
+from src.exceptions import NotEmbeddable
 
 
 class OrderService:

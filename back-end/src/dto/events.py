@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from _types import Platform, Status
+from src._types import Platform, Status
 
 
 class OrderCreated(BaseModel):

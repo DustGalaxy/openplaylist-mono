@@ -99,6 +99,8 @@ services:
       - ./back-end/.env
     volumes:
       - ./back-end/src:/app/src
+      - ./back-end/alembic.ini:/app/alembic.ini
+      - ./back-end/alembic:/app/alembic
     labels:
       - "traefik.enable=true"
       # Направляем все запросы, начинающиеся с /api, на бэкенд

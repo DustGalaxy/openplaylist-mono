@@ -1,13 +1,13 @@
 from uuid import UUID
 
-from dal.postgres_impl import playlist_repository
-from services_low.settings import get_settings_service
+from src.dal.postgres_impl import playlist_repository
+from src.services_low.settings import get_settings_service
 
-from models.auth_user import AuthUserSchema as User
-from models.playlist import PlaylistSchema
-from models.order import OrderDomain, OrderCreate, WebExtraData
+from src.models.auth_user import AuthUserSchema as User
+from src.models.playlist import PlaylistSchema
+from src.models.order import OrderDomain, OrderCreate, WebExtraData
 
-from _types import AsyncSession
+from src._types import AsyncSession
 
 
 async def add_to_playlist(

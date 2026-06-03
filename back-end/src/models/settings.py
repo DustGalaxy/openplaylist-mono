@@ -4,7 +4,7 @@ from typing import List, Literal, Optional
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
-from _types import Platform, DonationPlatform, ChatPlatform, _All_Platforms, DB_DonationPlatform
+from src._types import Platform, DonationPlatform, ChatPlatform, _All_Platforms, DB_DonationPlatform
 
 
 class SortSettings(BaseModel):

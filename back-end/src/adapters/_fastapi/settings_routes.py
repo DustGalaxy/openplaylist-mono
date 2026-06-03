@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException
 from fastapi import Body
 
-from models.settings import (
+from src.models.settings import (
     SettingsPatch,
     ContentSettingsCreate,
     ContentSettingsPatch,
@@ -15,8 +15,8 @@ from models.settings import (
     ChatRulesPatch,
 )
 
-from .dependencies import SETTINGS, DB_SESSION, SETTINGS_SERVICE
-from exceptions import NotAuthorizedException
+from src.adapters._fastapi.dependencies import SETTINGS, DB_SESSION, SETTINGS_SERVICE
+from src.exceptions import NotAuthorizedException
 
 router = APIRouter(prefix="/settings")
 

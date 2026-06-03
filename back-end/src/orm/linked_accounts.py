@@ -3,8 +3,8 @@ from uuid import UUID
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from _types import Platform
-from database import Base, UUIDMixin, TimestampMixin
+from src._types import Platform
+from src.database import Base, UUIDMixin, TimestampMixin
 
 
 class LinkedAccounts(Base, UUIDMixin, TimestampMixin):

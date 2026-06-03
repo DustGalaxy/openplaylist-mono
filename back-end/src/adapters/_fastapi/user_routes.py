@@ -3,14 +3,14 @@ from typing import Any
 
 from fastapi import APIRouter, Body, Response
 
-from dto.token import CodeDTO
-from dto.user import IntegrationRead, UserRead
+from src.dto.token import CodeDTO
+from src.dto.user import IntegrationRead, UserRead
 
-from services.auth.auth_service import auth_service
-from models.auth_user import AuthUserUpdate
-from .dependencies import DB_SESSION, CURR_USER
-from _types import Platform
-from settings import settings
+from src.services.auth.auth_service import auth_service
+from src.models.auth_user import AuthUserUpdate
+from src.adapters._fastapi.dependencies import DB_SESSION, CURR_USER
+from src._types import Platform
+from src.settings import settings
 
 router = APIRouter(prefix="/user")
 

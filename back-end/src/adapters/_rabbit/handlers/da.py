@@ -2,8 +2,8 @@ from faststream import Context
 from faststream.rabbit.message import RabbitMessage
 
 
-from adapters._rabbit.dto import DATokenRefreshed, DAUser as DAUser_Rabbit
-from adapters._rabbit.event_broker import (
+from src.adapters._rabbit.dto import DATokenRefreshed, DAUser as DAUser_Rabbit
+from src.adapters._rabbit.event_broker import (
     broker,
     main_exchange,
     auth_user_da_all_request,
@@ -11,13 +11,13 @@ from adapters._rabbit.event_broker import (
     bot_da_order_new,
     bot_da_ack_connection,
 )
-from dto.order import DANewOrder
-from _types import Platform
-from database import async_session_maker
-from dal.postgres_impl import user_repository, linked_accounts_repository, token_vault_repository
-from services.sio_service import sio_service
+from src.dto.order import DANewOrder
+from src._types import Platform
+from src.database import async_session_maker
+from src.dal.postgres_impl import user_repository, linked_accounts_repository, token_vault_repository
+from src.services.sio_service import sio_service
 
-from utils import find, kick
+from src.utils import find, kick
 
 
 @broker.subscriber(bot_da_order_new, exchange=main_exchange)

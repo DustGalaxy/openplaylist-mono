@@ -8,8 +8,8 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel
 from taskiq.kicker import AsyncKicker
 
-from adapters._redis.broker import get_broker, RedisAdapter
-from settings import settings
+from src.adapters._redis.broker import get_broker, RedisAdapter
+from src.settings import settings
 
 
 def find[T](list_to_search: list[T], condition_func: Callable[[T], bool]) -> T | None:

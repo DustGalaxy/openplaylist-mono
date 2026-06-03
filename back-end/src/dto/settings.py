@@ -3,8 +3,8 @@ from typing import Literal, Optional
 from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict
 
-from models.settings import SortSettings
-from _types import Platform, DonationPlatform, ChatPlatform, _All_Platforms, DB_DonationPlatform
+from src.models.settings import SortSettings
+from src._types import Platform, DonationPlatform, ChatPlatform, _All_Platforms, DB_DonationPlatform
 
 
 class ReadContentSettings(BaseModel):

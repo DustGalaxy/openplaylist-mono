@@ -5,8 +5,8 @@ from sqlalchemy import ForeignKey, func
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 
-from _types import Platform
-from database import Base, UUIDMixin, TimestampMixin
+from src._types import Platform
+from src.database import Base, UUIDMixin, TimestampMixin
 
 
 class TokenVault(Base, UUIDMixin, TimestampMixin):

@@ -5,17 +5,17 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import socketio
 
-from adapters._fastapi.login_routes import router as login_router
-from adapters._fastapi.user_routes import router as user_router
-from adapters._fastapi.order_routes import router as order_router
-from adapters._fastapi.playlist_routes import router as playlist_router
-from adapters._fastapi.settings_routes import router as settings_router
-from adapters._sio.init import sio
-from adapters._rabbit import broker, declare
-from adapters._redis.broker import get_broker
-from adapters._sio.routes import PlstUpdsNamespace, BasicNamespace
-from services.sio_service import room_manager
-from settings import settings
+from src.adapters._fastapi.login_routes import router as login_router
+from src.adapters._fastapi.user_routes import router as user_router
+from src.adapters._fastapi.order_routes import router as order_router
+from src.adapters._fastapi.playlist_routes import router as playlist_router
+from src.adapters._fastapi.settings_routes import router as settings_router
+from src.adapters._sio.init import sio
+from src.adapters._rabbit import broker, declare
+from src.adapters._redis.broker import get_broker
+from src.adapters._sio.routes import PlstUpdsNamespace, BasicNamespace
+from src.services.sio_service import room_manager
+from src.settings import settings
 
 
 @asynccontextmanager

@@ -2,15 +2,15 @@ from datetime import datetime
 from typing import Protocol, Any
 from uuid import UUID
 
-from dal.abstract import IAsyncCrud, IPlaylistSettingsRepository
-from dal.postgres_impl import (
+from src.dal.abstract import IAsyncCrud, IPlaylistSettingsRepository
+from src.dal.postgres_impl import (
     playlist_settings_repository,
     content_settings_repository,
     donation_rules_repository,
     chat_rules_repository,
     user_black_list_repository,
 )
-from models.settings import (
+from src.models.settings import (
     SubSchema,
     SettingsPatch,
     SettingsSchema,
@@ -27,12 +27,12 @@ from models.settings import (
     BlockListCreate,
     BlockListPatch,
 )
-from models.order import OrderCreate, DAExtraData, OrderDomain
-from models.playlist import PlaylistSchema
-from models.auth_user import AuthUserSchema
-from exceptions import NotAuthorizedException
-from _types import _All_Platforms, AsyncSession, ChatPlatform, DonationPlatform, Platform
-from utils import find
+from src.models.order import OrderCreate, DAExtraData, OrderDomain
+from src.models.playlist import PlaylistSchema
+from src.models.auth_user import AuthUserSchema
+from src.exceptions import NotAuthorizedException
+from src._types import _All_Platforms, AsyncSession, ChatPlatform, DonationPlatform, Platform
+from src.utils import find
 
 
 class Strategy(Protocol):

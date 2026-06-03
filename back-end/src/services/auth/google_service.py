@@ -6,12 +6,12 @@ import httpx
 from faststream.rabbit import RabbitQueue
 import jwt
 
-from dto.internal.google import GoogleTokenResponseDTO, GoogleIdTokenPayloadDTO
-from dto.internal.auth import PlatformUser, AuthStrategy
-from dto.internal.token import Tokens
-from adapters._rabbit.event_broker import bot_google_connect_request
+from src.dto.internal.google import GoogleTokenResponseDTO, GoogleIdTokenPayloadDTO
+from src.dto.internal.auth import PlatformUser, AuthStrategy
+from src.dto.internal.token import Tokens
+from src.adapters._rabbit.event_broker import bot_google_connect_request
 
-from settings import settings
+from src.settings import settings
 
 logger = logging.getLogger(__name__)
 

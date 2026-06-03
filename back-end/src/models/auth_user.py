@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from models.linked_accounts import LinkedAccountsDomain
+from src.models.linked_accounts import LinkedAccountsDomain
 
 
 class AuthUserSchema(BaseModel):

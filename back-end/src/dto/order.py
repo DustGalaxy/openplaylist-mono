@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from _types import Status, Platform
+from src._types import Status, Platform
 
 
 class DANewOrder(BaseModel):

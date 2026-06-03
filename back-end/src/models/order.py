@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
-from _types import Status, Platform
+from src._types import Status, Platform
 
 
 class WebExtraData(BaseModel):

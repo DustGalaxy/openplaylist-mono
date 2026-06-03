@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Any
 
 from redis import Redis
 
-from settings import settings
+from src.settings import settings
 
 
 if TYPE_CHECKING:

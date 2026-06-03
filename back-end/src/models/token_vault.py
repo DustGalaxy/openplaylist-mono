@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
-from _types import Platform
+from src._types import Platform
 
 
 class TokenVaultDomain(BaseModel):

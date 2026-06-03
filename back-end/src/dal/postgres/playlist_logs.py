@@ -6,8 +6,8 @@
 # from sqlalchemy import select
 # from sqlalchemy.ext.asyncio import AsyncSession
 
-# from models.playlist_logs import PlaylistLogSchema, PlaylistLogCreate
-# from orm.playlist_logs import PlaylistLog
+# from src.models.playlist_logs import PlaylistLogSchema, PlaylistLogCreate
+# from src.orm.playlist_logs import PlaylistLog
 
 
 # class PlaylistLogsRepository(crud_factory(PlaylistLog, PlaylistLogSchema, PlaylistLogCreate, dict)):

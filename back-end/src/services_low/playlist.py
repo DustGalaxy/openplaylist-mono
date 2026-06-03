@@ -4,14 +4,14 @@ from fastapi import HTTPException, status
 from _types import AsyncSession, DeleteStatus
 from simple_repository.exceptions import NotFoundException
 
-from dal.abstract import IPlaylistRepository
-from dal.postgres_impl import playlist_repository
+from src.dal.abstract import IPlaylistRepository
+from src.dal.postgres_impl import playlist_repository
 
-from dto.playlist import NewPlaylist, PlaylistBaseinfo
-from models.auth_user import AuthUserSchema as User
-from models.order import OrderDomain
-from exceptions import NotAuthorizedException
-from models.playlist import PlaylistCreate, PlaylistSchema, PlaylistPatch
+from src.dto.playlist import NewPlaylist, PlaylistBaseinfo
+from src.models.auth_user import AuthUserSchema as User
+from src.models.order import OrderDomain
+from src.exceptions import NotAuthorizedException
+from src.models.playlist import PlaylistCreate, PlaylistSchema, PlaylistPatch
 
 
 class PlaylistLowService:

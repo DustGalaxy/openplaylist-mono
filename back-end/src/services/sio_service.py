@@ -3,19 +3,19 @@ from uuid import UUID
 
 import socketio
 
-from dto.events import (
+from src.dto.events import (
     PlayNow,
     Deleted,
     Moved,
     Private,
 )
-from dto.settings import ReadPlaylistSettings
-from adapters._sio.init import sio
-from adapters._redis.broker import get_broker, RedisAdapter
-from dal.postgres_impl import playlist_repository
-# from models.playlist_logs import PlaylistLogSchema
-from models.order import OrderDomain
-from database import async_session_maker
+from src.dto.settings import ReadPlaylistSettings
+from src.adapters._sio.init import sio
+from src.adapters._redis.broker import get_broker, RedisAdapter
+from src.dal.postgres_impl import playlist_repository
+# from src.models.playlist_logs import PlaylistLogSchema
+from src.models.order import OrderDomain
+from src.database import async_session_maker
 
 
 class RoomManager:

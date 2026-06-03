@@ -1,7 +1,7 @@
-from dto.internal.token import TokenStrategy
+from src.dto.internal.token import TokenStrategy
 
-from services.auth.twitch_service import auth_twitch_service
-from services.auth.da_service import auth_da_service
+from src.services.auth.twitch_service import auth_twitch_service
+from src.services.auth.da_service import auth_da_service
 
 
 class TokenStrategyManager:

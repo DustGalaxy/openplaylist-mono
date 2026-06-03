@@ -4,17 +4,17 @@ from uuid import UUID
 from fastapi import Depends
 from sqlalchemy import select
 
-from models.auth_user import AuthUserSchema as User
-from models.settings import SettingsSchema
+from src.models.auth_user import AuthUserSchema as User
+from src.models.settings import SettingsSchema
 
-from services_low.settings import get_settings_service, SettingsLowService
-from services_low.playlist import get_playlist_service, PlaylistLowService
-from services.auth.auth_service import auth_service
-from orm.playlist import Playlist
-from orm.settings import Settings
+from src.services_low.settings import get_settings_service, SettingsLowService
+from src.services_low.playlist import get_playlist_service, PlaylistLowService
+from src.services.auth.auth_service import auth_service
+from src.orm.playlist import Playlist
+from src.orm.settings import Settings
 
-from database import AsyncSession, get_async_session
-from exceptions import NotAuthorizedException
+from src.database import AsyncSession, get_async_session
+from src.exceptions import NotAuthorizedException
 
 
 DB_SESSION = Annotated[AsyncSession, Depends(get_async_session)]

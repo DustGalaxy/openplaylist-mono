@@ -2,11 +2,11 @@ from datetime import datetime
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
-from dto.settings import ReadPlaylistSettings
-from models.order import OrderDomain
-from models.playlist import AllowedSource
+from src.dto.settings import ReadPlaylistSettings
+from src.models.order import OrderDomain
+from src.models.playlist import AllowedSource
 
-from _types import Platform
+from src._types import Platform
 
 
 class ReadPlaylist(BaseModel):

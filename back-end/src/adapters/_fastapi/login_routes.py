@@ -3,15 +3,15 @@ import uuid
 
 from fastapi import APIRouter, Body, HTTPException, Response
 
-from dto.token import CodeDTO
-from dto.user import HttpClassicLogin, HttpClassicRegister
-from adapters._redis.broker import get_broker
-from models.auth_user import AuthUserCreate
-from models.linked_accounts import LinkedAccountsCreate
+from src.dto.token import CodeDTO
+from src.dto.user import HttpClassicLogin, HttpClassicRegister
+from src.adapters._redis.broker import get_broker
+from src.models.auth_user import AuthUserCreate
+from src.models.linked_accounts import LinkedAccountsCreate
 
-from settings import settings
-from .dependencies import DB_SESSION, auth_service
-from exceptions import NeedConfirmationException
+from src.settings import settings
+from src.adapters._fastapi.dependencies import DB_SESSION, auth_service
+from src.exceptions import NeedConfirmationException
 
 
 router = APIRouter(prefix="/login")

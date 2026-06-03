@@ -5,15 +5,15 @@ from fastapi import HTTPException
 import httpx
 from faststream.rabbit import RabbitQueue
 
-from dto.internal.twitch import TwitchUserResponse, TwitchAuthResponse
-from dto.internal.auth import PlatformUser, AuthStrategy
-from dto.internal.token import Tokens
-from models.auth_user import AuthUserSchema
-from adapters._rabbit.event_broker import bot_twitch_connect_request
+from src.dto.internal.twitch import TwitchUserResponse, TwitchAuthResponse
+from src.dto.internal.auth import PlatformUser, AuthStrategy
+from src.dto.internal.token import Tokens
+from src.models.auth_user import AuthUserSchema
+from src.adapters._rabbit.event_broker import bot_twitch_connect_request
 
-from settings import settings
-from _types import Platform
-from utils import find
+from src.settings import settings
+from src._types import Platform
+from src.utils import find
 
 logger = logging.getLogger(__name__)
 

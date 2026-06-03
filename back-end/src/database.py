@@ -10,7 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 from sqlalchemy.dialects.postgresql import UUID as UUIDCOLUMN
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker, AsyncEngine
 
-from settings import settings
+from src.settings import settings
 
 def custom_serializer(obj):
     if isinstance(obj, BaseModel):

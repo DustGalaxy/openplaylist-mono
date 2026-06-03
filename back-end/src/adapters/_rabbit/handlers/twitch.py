@@ -5,7 +5,7 @@ from faststream import Context
 from faststream.rabbit.message import RabbitMessage
 from simple_repository.exceptions import NotFoundException
 
-from adapters._rabbit.event_broker import (
+from src.adapters._rabbit.event_broker import (
     broker,
     main_exchange,
     auth_user_twitch_all_request,
@@ -13,15 +13,15 @@ from adapters._rabbit.event_broker import (
     bot_twitch_ack_connection,
     auth_user_twitch_tokens_refreshed,
 )
-from dto.order import TTVNewOrder
-from adapters._rabbit.dto import Tokens, TwitchTokenRefreshed
-from services.sio_service import sio_service
+from src.dto.order import TTVNewOrder
+from src.adapters._rabbit.dto import Tokens, TwitchTokenRefreshed
+from src.services.sio_service import sio_service
 
-from services.tokens.token_service import token_service
-from dal.postgres_impl import token_vault_repository
-from _types import Platform
-from database import async_session_maker
-from utils import kick
+from src.services.tokens.token_service import token_service
+from src.dal.postgres_impl import token_vault_repository
+from src._types import Platform
+from src.database import async_session_maker
+from src.utils import kick
 
 
 

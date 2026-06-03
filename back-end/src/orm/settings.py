@@ -6,8 +6,8 @@ from sqlalchemy import CheckConstraint, Enum, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ARRAY, UUID as PGUUID, JSONB
 
-from database import Base, UUIDMixin, TimestampMixin
-from _types import _All_Platforms, DB_DonationPlatform, ChatPlatform, Platform
+from src.database import Base, UUIDMixin, TimestampMixin
+from src._types import _All_Platforms, DB_DonationPlatform, ChatPlatform, Platform
 
 
 class Settings(Base, UUIDMixin, TimestampMixin):

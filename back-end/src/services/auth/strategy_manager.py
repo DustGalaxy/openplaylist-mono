@@ -1,9 +1,9 @@
 from dto.internal.auth import AuthStrategy
 
-from adapters._rabbit.event_broker import bot_twitch_connect_request, bot_da_connect_request, bot_google_connect_request
-from services.auth.twitch_service import AuthTwitchService
-from services.auth.da_service import AuthDAService
-from services.auth.google_service import AuthGoogleService
+from src.adapters._rabbit.event_broker import bot_twitch_connect_request, bot_da_connect_request, bot_google_connect_request
+from src.services.auth.twitch_service import AuthTwitchService
+from src.services.auth.da_service import AuthDAService
+from src.services.auth.google_service import AuthGoogleService
 
 
 class AuthStrategyManager:

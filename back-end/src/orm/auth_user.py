@@ -5,11 +5,11 @@ from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from _types import Platform
-from database import Base, UUIDMixin, TimestampMixin
+from src._types import Platform
+from src.database import Base, UUIDMixin, TimestampMixin
 
 if TYPE_CHECKING:
-    from orm.linked_accounts import LinkedAccounts
+    from src.orm.linked_accounts import LinkedAccounts
 
 
 class User(Base, UUIDMixin, TimestampMixin):

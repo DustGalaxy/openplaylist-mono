@@ -3,22 +3,22 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, status
 from simple_repository.exceptions import NotFoundException
 
-from dto.playlist import (
+from src.dto.playlist import (
     NewPlaylist,
     PlaylistBaseinfo,
     PlayNow,
     ReadPlaylist,
     ReadPlaylistPreview,
 )
-from models.playlist import PlaylistPatch, PlaylistSchema
-from models.settings import SettingsSchema
-# from services.playlist_log import playlist_log_service
+from src.models.playlist import PlaylistPatch, PlaylistSchema
+from src.models.settings import SettingsSchema
+# from src.services.playlist_log import playlist_log_service
 
 
-from utils import kick, find
-from _types import DeleteStatus, PlaylistLogsEventTypes
-from taskiq_broker import task_broker as task_broker
-from .dependencies import CURR_USER, DB_SESSION, PLST_SERVICE, SETTINGS_SERVICE as SE
+from src.utils import kick, find
+from src._types import DeleteStatus, PlaylistLogsEventTypes
+from src.taskiq_broker import task_broker as task_broker
+from src.adapters._fastapi.dependencies import CURR_USER, DB_SESSION, PLST_SERVICE, SETTINGS_SERVICE as SE
 
 router = APIRouter(prefix="/playlist")
 

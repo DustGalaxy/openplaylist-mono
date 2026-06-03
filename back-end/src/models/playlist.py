@@ -2,8 +2,8 @@ from datetime import datetime
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
-from .order import OrderDomain
-from _types import Platform
+from src.models.order import OrderDomain
+from src._types import Platform
 
 
 class AllowedSource(BaseModel):
