@@ -13,7 +13,7 @@ export class TwitchAuthStrategy implements IAuthLoginStrategy {
 
   formatIntegrationPayload(code: string): Record<string, unknown> {
     return {
-      code: { code },
+      code,
     }
   }
   getScopeString(scopes: Array<string>): string {

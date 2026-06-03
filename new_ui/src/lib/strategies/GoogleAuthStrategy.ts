@@ -14,7 +14,7 @@ export class GoogleAuthStrategy implements IAuthLoginStrategy {
 
   formatIntegrationPayload(code: string): Record<string, unknown> {
     return {
-      code: { code },
+      code,
     }
   }
 

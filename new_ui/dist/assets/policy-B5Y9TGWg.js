@@ -1,4 +1,4 @@
-import{j as s}from"./index-BVyOR_wu.js";const t=`
+import{j as s}from"./index-C3MiIiLM.js";const t=`
 <style>
   [data-custom-class='body'], [data-custom-class='body'] * {
           background: transparent !important;
