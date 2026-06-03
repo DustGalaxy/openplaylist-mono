@@ -16,11 +16,11 @@ export const getUserIntegrations = async () => {
 export const linkIntegration = async (platform: string, code: string) => {
   const config = getConfig()
   const response = await apiClient(
-    config.AUTH_API_URL + `/user/integrations/`,
+    config.AUTH_API_URL + `/user/integrations/${platform}`,
     {
       method: 'POST',
       withCredentials: true,
-      data: { code: { code: code }, type: { type: platform } },
+      data: { code: { code: code } },
     },
   )
   return response.data
