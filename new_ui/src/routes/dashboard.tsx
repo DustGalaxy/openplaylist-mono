@@ -48,12 +48,8 @@ function RouteComponent() {
     return redirect({ to: '/login' })
   }
 
-  usePlstUpdates('connect', () => {
-    console.log('connect')
-  })
-  usePlstUpdates('disconnect', () => {
-    console.log('disconnect')
-  })
+  usePlstUpdates('connect', () => {})
+  usePlstUpdates('disconnect', () => {})
 
   const { data: playlistsData, isLoading } = useQuery({
     queryKey: ['playlistsData'],
