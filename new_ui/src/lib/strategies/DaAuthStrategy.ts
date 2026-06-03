@@ -8,16 +8,15 @@ export class DaAuthStrategy implements IAuthLoginStrategy {
   private readonly platformName = 'donationalerts'
 
   getIntegrationEndpoint(): string {
-    return '/user/integration'
+    return `/user/integration/${this.platformName}`
   }
 
   formatIntegrationPayload(code: string): Record<string, unknown> {
     return {
       code: { code },
-      type: { type: this.platformName },
     }
   }
-  
+
   getScopeString(scopes: Array<string>): string {
     return scopes.join(' ')
   }

@@ -9,13 +9,12 @@ export class GoogleAuthStrategy implements IAuthLoginStrategy {
   private readonly platformDisplayName = 'Google'
 
   getIntegrationEndpoint(): string {
-    return '/user/integration'
+    return `/user/integration/${this.platformName}`
   }
 
   formatIntegrationPayload(code: string): Record<string, unknown> {
     return {
       code: { code },
-      type: { type: this.platformName },
     }
   }
 
