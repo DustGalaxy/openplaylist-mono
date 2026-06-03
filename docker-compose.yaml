@@ -190,6 +190,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       traefik:
+        condition: service_started
       backend:
         condition: service_healthy
     labels:
