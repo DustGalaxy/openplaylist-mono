@@ -1,23 +1,23 @@
 from uuid import UUID
 
-from database import async_session_maker
-from taskiq_broker import task_broker as taskiq_broker
+from src.database import async_session_maker
+from src.taskiq_broker import task_broker as taskiq_broker
 
-from adapters._redis.broker import get_broker
-from dto.events import Deleted, Moved, PlayNow, Private
-from dto.settings import ReadPlaylistSettings
-from services.playlist_service import add_to_playlist
-from services_low.playlist import playlist_service
-from services.sio_service import sio_service
-from models.order import OrderCreate, OrderDomain
+from src.adapters._redis.broker import get_broker
+from src.dto.events import Deleted, Moved, PlayNow, Private
+from src.dto.settings import ReadPlaylistSettings
+from src.services.playlist_service import add_to_playlist
+from src.services_low.playlist import playlist_service
+from src.services.sio_service import sio_service
+from src.models.order import OrderCreate, OrderDomain
 
 # from models.playlist_logs import PlaylistLogCreate
 # from dal.postgres.playlist_logs import get_playlist_logs_repository as pl_logs
 
-from dal.postgres_impl import user_repository, playlist_settings_repository
+from src.dal.postgres_impl import user_repository, playlist_settings_repository
 
 # from _types import PlaylistLogsEventTypes
-from utils import kick, conditional_trace
+from src.utils import kick, conditional_trace
 
 
 @taskiq_broker.task(task_name="playlist.track.playnow")

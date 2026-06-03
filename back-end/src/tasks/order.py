@@ -1,9 +1,9 @@
 from typing import Union
 
-from dto.order import WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder
-from services.order_service import order_service
-from taskiq_broker import task_broker as taskiq_broker
-from utils import kick, conditional_trace
+from src.dto.order import WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder
+from src.services.order_service import order_service
+from src.taskiq_broker import task_broker as taskiq_broker
+from src.utils import kick, conditional_trace
 
 
 @conditional_trace("order-flow:step-1")

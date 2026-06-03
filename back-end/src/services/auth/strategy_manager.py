@@ -1,4 +1,4 @@
-from dto.internal.auth import AuthStrategy
+from src.dto.internal.auth import AuthStrategy
 
 from src.adapters._rabbit.event_broker import bot_twitch_connect_request, bot_da_connect_request, bot_google_connect_request
 from src.services.auth.twitch_service import AuthTwitchService

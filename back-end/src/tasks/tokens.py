@@ -1,12 +1,12 @@
 import asyncio
 import random
 
-from services.tokens.token_service import token_service
-from adapters._rabbit.event_broker import broker as rabbit_broker, topic_exchange
+from src.services.tokens.token_service import token_service
+from src.adapters._rabbit.event_broker import broker as rabbit_broker, topic_exchange
 
-from database import async_session_maker
-from settings import settings
-from taskiq_broker import task_broker as taskiq_broker
+from src.database import async_session_maker
+from src.settings import settings
+from src.taskiq_broker import task_broker as taskiq_broker
 
 
 @taskiq_broker.task(schedule=[{"cron": "*/10 * * * *"}])

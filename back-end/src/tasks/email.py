@@ -2,8 +2,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from settings import settings
-from taskiq_broker import task_broker as taskiq_broker
+from src.settings import settings
+from src.taskiq_broker import task_broker as taskiq_broker
 
 
 @taskiq_broker.task(task_name="send.email")

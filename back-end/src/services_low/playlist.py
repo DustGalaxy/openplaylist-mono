@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from _types import AsyncSession, DeleteStatus
+
 from simple_repository.exceptions import NotFoundException
 
 from src.dal.abstract import IPlaylistRepository
@@ -12,7 +12,7 @@ from src.models.auth_user import AuthUserSchema as User
 from src.models.order import OrderDomain
 from src.exceptions import NotAuthorizedException
 from src.models.playlist import PlaylistCreate, PlaylistSchema, PlaylistPatch
-
+from src._types import AsyncSession, DeleteStatus
 
 class PlaylistLowService:
     def __init__(
