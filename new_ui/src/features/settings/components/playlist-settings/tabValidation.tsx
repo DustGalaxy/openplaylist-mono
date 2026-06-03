@@ -75,7 +75,7 @@ const TabValidation = ({
       <div className="gap-1 flex flex-col">
         <Label className=" text-xl">{t('playlistSettings.validation.title')}</Label>
         <DialogDescription>
-          Video validation settings. Can`t be negtive.
+          {t('playlistSettings.validation.description')}
         </DialogDescription>
         <Tabs
           orientation="vertical"
@@ -85,7 +85,7 @@ const TabValidation = ({
           <TabsList className="flex flex-col h-full items-start">
             {Object.entries(Platform).map(([key, val], i) => (
               <TabsTrigger key={key} value={val} className="  w-full">
-                <Label className="w-full text-lg text-left">{key}</Label>
+                <Label className="w-full text-lg text-left">{key === 'General' ? t(`common.general`) : key} </Label>
               </TabsTrigger>
             ))}
           </TabsList>

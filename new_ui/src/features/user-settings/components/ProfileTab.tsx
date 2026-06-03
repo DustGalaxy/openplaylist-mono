@@ -13,6 +13,8 @@ import {
   panelClass,
   sectionTitleClass,
 } from '@/features/landing/styles'
+import { deleteUser } from '@/api/api-user'
+import { useNavigate } from '@tanstack/react-router'
 
 interface ProfileTabProps {
   user: UserProfile | null
@@ -105,6 +107,7 @@ const validateUrl = (
 
 export function ProfileTab({ user }: ProfileTabProps) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [socialLinks, setSocialLinks] = useState<Record<string, string>>(
     user?.social_links ?? {},
   )
@@ -295,6 +298,18 @@ export function ProfileTab({ user }: ProfileTabProps) {
       }))
     }
   }, [])
+
+  const handleKillProfile = async () => {
+    toast.loading(t('settings.profile.killUserProfile.deleting'))
+    const res = await deleteUser()
+
+    if (res) {
+      toast.success(t('settings.profile.killUserProfile.deleted'))
+      navigate({ to: '/logout' })
+    } else {
+      toast.error(t('settings.profile.killUserProfile.deleteFailed'))
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -502,6 +517,22 @@ export function ProfileTab({ user }: ProfileTabProps) {
           </div>
         </div>
       )}
+      <div className="flex flex-row gap-4 justify-between">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-lg font-semibold">
+            {t('settings.profile.killUserProfile.title')}
+          </h2>
+          <p className="text-text-secondary text-sm">
+            {t('settings.profile.killUserProfile.body')}
+          </p>
+        </div>
+
+        <Btn
+          text={t('settings.profile.killUserProfile.btnText')}
+          className="px-4 py-3 text-base font-semibold w-full sm:w-auto bg-red-500/20 border border-red-500/50 hover:bg-red-500/30 transition-colors"
+          onClick={handleKillProfile}
+        />
+      </div>
     </div>
   )
 }

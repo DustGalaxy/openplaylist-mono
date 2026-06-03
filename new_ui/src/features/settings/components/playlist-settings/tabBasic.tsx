@@ -144,59 +144,44 @@ const TabBasic = ({
           <Label className=" text-lg">
             {t('playlistSettings.basic.modeTitle')}
           </Label>
-          <RadioGroup
-            defaultValue={plstMode}
-            className="flex gap-0 justify-end"
-            onValueChange={(e) => {
-              if (e === 'flow') {
-                setPlstMode('flow')
-                setSettings({ ...settings, mode: 'flow' })
-                canPatchSettings.current = true
-                toast.success(t('playlistSettings.toast.modeUpdated'))
-              } else if (e === 'static') {
-                setPlstMode('static')
-                setSettings({ ...settings, mode: 'static' })
-                canPatchSettings.current = true
-                toast.success(t('playlistSettings.toast.modeUpdated'))
-              }
-            }}
-          >
-            <div
-              className={`flex items-center  cursor-pointer  bg-level-2
-            py-1 pl-4 pr-[2px] rounded-l-(--rounded-std)  justify-end`}
-            >
-              <RadioGroupItem
-                value="flow"
-                id="flow-id"
-                className={`sr-only `}
-              />
-              <Label
-                htmlFor="flow-id"
-                className={`${plstMode === 'flow' ? 'text-shadow-accent-1 text-shadow-md font-bold ' : ''} 
-            flex cursor-pointer transition-all duration-100 text-lg`}
-              >
-                {t('playlistSettings.basic.flow')}
-              </Label>
-            </div>
 
-            <div
-              className={`flex items-center  cursor-pointer bg-level-2
-            py-1 pr-4 pl-[2px] rounded-r-(--rounded-std) justify-start`}
-            >
-              <RadioGroupItem
-                value="static"
-                id="static-id"
-                className="sr-only"
-              />
-              <Label
-                htmlFor="static-id"
-                className={`${plstMode === 'static' ? 'text-shadow-accent-3 text-shadow-md font-bold' : ''} 
-            cursor-pointer transition-all duration-100 text-lg`}
-              >
-                {t('playlistSettings.basic.static')}
-              </Label>
-            </div>
-          </RadioGroup>
+          <div
+            className={`flex items-center  cursor-pointer  
+          py-1 pl-4 pr-[2px] rounded-l-(--rounded-std)  justify-end`}
+          >
+            <ContentSwitch
+              leftLabel={
+                <Label
+                  htmlFor="flow-id"
+                  className={`${plstMode === 'flow' ? 'text-shadow-accent-1 text-shadow-md font-bold ' : ''} 
+                    flex cursor-pointer transition-all duration-100 text-lg`}
+                >
+                  {t('playlistSettings.basic.flow')}
+                </Label>
+              }
+              rightLabel={
+                <Label
+                  htmlFor="static-id"
+                  className={`${plstMode === 'static' ? 'text-shadow-accent-3 text-shadow-md font-bold' : ''} 
+                    cursor-pointer transition-all duration-100 text-lg`}
+                >
+                  {t('playlistSettings.basic.static')}
+                </Label>
+              }
+              onChange={(value) => {
+                if (value === 'left') {
+                  setPlstMode('flow')
+                  setSettings({ ...settings, mode: 'flow' })
+                  canPatchSettings.current = true
+                } else {
+                  setPlstMode('static')
+                  setSettings({ ...settings, mode: 'static' })
+                  canPatchSettings.current = true
+                }
+              }}
+              defaultValue={plstMode === 'flow' ? 'left' : 'right'}
+            />
+          </div>
         </div>
       </div>
       <DialogDescription>
@@ -208,90 +193,49 @@ const TabBasic = ({
           {t('playlistSettings.basic.privacy')}
         </Label>
 
-        <RadioGroup
-          defaultValue={isPublic ? 'public' : 'private'}
-          className="flex gap-0 justify-end"
-          onValueChange={(e) => {
-            if (e === 'public') {
-              setIsPublic(true)
-              setPlst({
-                ...playlist,
-                is_public: true,
-              })
-              canPatchPlaylist.current = true
-            } else if (e === 'private') {
-              setIsPublic(false)
-              setPlst({
-                ...playlist,
-                is_public: false,
-              })
-              canPatchPlaylist.current = true
-            }
-          }}
-        >
-          <div
-            className={`flex items-center  cursor-pointer  bg-level-2
+        <div
+          className={`flex items-center  cursor-pointer  
           py-1 pl-4 pr-[2px] rounded-l-(--rounded-std)  justify-end`}
-          >
-            <ContentSwitch
-              leftLabel={
-                <Label
-                  htmlFor="public-id"
-                  className={`${isPublic ? 'text-shadow-accent-1 text-shadow-md font-bold ' : ''} 
+        >
+          <ContentSwitch
+            leftLabel={
+              <Label
+                htmlFor="public-id"
+                className={`${isPublic ? 'text-shadow-accent-1 text-shadow-md font-bold ' : ''} 
                     flex cursor-pointer transition-all duration-100 text-lg`}
-                >
-                  {t('playlistSettings.basic.public')}
-                </Label>
-              }
-              rightLabel={
-                <Label
-                  htmlFor="private-id"
-                  className={`${!isPublic ? 'text-shadow-accent-3 text-shadow-md font-bold' : ''} 
+              >
+                {t('playlistSettings.basic.public')}
+              </Label>
+            }
+            rightLabel={
+              <Label
+                htmlFor="private-id"
+                className={`${!isPublic ? 'text-shadow-accent-3 text-shadow-md font-bold' : ''} 
                     cursor-pointer transition-all duration-100 text-lg`}
-                >
-                  {t('playlistSettings.basic.private')}
-                </Label>
+              >
+                {t('playlistSettings.basic.private')}
+              </Label>
+            }
+            onChange={(value) => {
+              if (value === 'right') {
+                setIsPublic(false)
+                setPlst({
+                  ...playlist,
+                  is_public: false,
+                })
+                canPatchPlaylist.current = true
+              } else {
+                setIsPublic(true)
+                setPlst({
+                  ...playlist,
+                  is_public: true,
+                })
+                canPatchPlaylist.current = true
               }
-              onChange={(value) => {
-                if (value === 'right') {
-                  setIsPublic(false)
-                } else {
-                  setIsPublic(true)
-                }
-              }}
-              defaultValue={isPublic ? 'left' : 'right'}
-            />
-            <RadioGroupItem
-              value="public"
-              id="public-id"
-              className={`sr-only `}
-            />
-            <Label
-              htmlFor="public-id"
-              className={`${isPublic ? 'text-shadow-accent-1 text-shadow-md font-bold ' : ''} 
-            flex cursor-pointer transition-all duration-100 text-lg`}
-            >
-              {t('playlistSettings.basic.public')}
-            </Label>
-          </div>
-          <div
-            className={`flex items-center  cursor-pointer bg-level-2
-          py-1 pr-4 pl-[2px] rounded-r-(--rounded-std) justify-start`}
-          >
-            <RadioGroupItem
-              value="private"
-              id="private-id"
-              className="sr-only"
-            />
-            <Label
-              htmlFor="private-id"
-              className={`${!isPublic ? 'text-shadow-accent-3 text-shadow-md font-bold' : ''} 
-            cursor-pointer transition-all duration-100 text-lg`}
-            >
-              {t('playlistSettings.basic.private')}
-            </Label>
-          </div>
-        </RadioGroup>
+            }}
+            defaultValue={isPublic ? 'left' : 'right'}
+          />
+        </div>
       </div>
       <div className="mb-4">
         <Label className=" text-lg">

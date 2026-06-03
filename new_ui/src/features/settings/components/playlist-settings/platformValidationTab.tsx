@@ -55,7 +55,7 @@ const PlatformSettingsEditor = React.memo(
     if (!rules) {
       return (
         <TabsContent value={platform}>
-          <Label className="text-lg">{platformKey} validation</Label>
+          <Label className="text-lg">{platformKey} {t('playlistSettings.validation.tabtitle')}</Label>
           <Label>{t('playlistSettings.validation.notInitialized')}</Label>
           <div className="h-3" />
           <MyBtn
@@ -77,7 +77,7 @@ const PlatformSettingsEditor = React.memo(
 
     return (
       <TabsContent key={platformKey} value={platform}>
-        <Label className=" text-lg">{platformKey} validation</Label>
+        <Label className=" text-lg">{platformKey === "General" ? t(`common.general2`) : platformKey} {t('playlistSettings.validation.tabtitle')}</Label>
         <p className="h-3"></p>
         <div className="flex justify-between gap-2 items-center">
           <Label className=" text-lg">{t('playlistSettings.validation.minViews')}</Label>
@@ -124,8 +124,7 @@ const PlatformSettingsEditor = React.memo(
           </div>
         </div>
         <DialogDescription>
-          Not every video can have likes. 0 means all videos will pass likes
-          validation.
+          {t('playlistSettings.validation.minViewsDesc')}
         </DialogDescription>
         <div className="flex justify-between gap-2 items-center">
           <Label className=" text-lg">{t('playlistSettings.validation.maxDuration')}</Label>
@@ -182,7 +181,8 @@ const PlatformSettingsEditor = React.memo(
         </div>
 
         <DialogDescription>
-          The time after which a track can be added again.
+          {t('playlistSettings.validation.trackCooldownDesc')}
+          
         </DialogDescription>
 
         <div className="flex justify-between gap-2 items-center">

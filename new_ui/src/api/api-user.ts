@@ -36,7 +36,10 @@ export const unlinkIntegration = async (platform: string) => {
   return response.data
 }
 
-export const deleteIntegration = async (platform: string, platformUserId: string) => {
+export const deleteIntegration = async (
+  platform: string,
+  platformUserId: string,
+) => {
   const config = getConfig()
   const response = await apiClient(
     config.AUTH_API_URL + `/user/integration/${platform}/${platformUserId}`,
@@ -48,10 +51,13 @@ export const deleteIntegration = async (platform: string, platformUserId: string
   return response.status === 204
 }
 
-export const connectBot = async (platform: string, platform_user_id: string) => {
+export const connectBot = async (
+  platform: string,
+  platform_user_id: string,
+) => {
   const config = getConfig()
   const response = await apiClient(
-    config.AUTH_API_URL + `/user/bots/${platform}/connect`, 
+    config.AUTH_API_URL + `/user/bots/${platform}/connect`,
     {
       method: 'POST',
       withCredentials: true,
@@ -91,4 +97,13 @@ export const patchSocialLink = async (social_links: object) => {
     data: { social_links },
   })
   return response.data
+}
+
+export const deleteUser = async () => {
+  const config = getConfig()
+  const response = await apiClient(config.AUTH_API_URL + '/user/me', {
+    method: 'DELETE',
+    withCredentials: true,
+  })
+  return response.status === 204
 }

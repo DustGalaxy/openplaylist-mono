@@ -11,4 +11,6 @@ RUN uv sync --frozen --no-cache --no-dev
 
 COPY . .
 
+EXPOSE 8000
+
 CMD ["uv", "run", "--no-dev", "main.py"]

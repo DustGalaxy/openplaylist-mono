@@ -6,15 +6,19 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip' // Импорты из Shadcn UI
+import { useTranslation } from 'react-i18next'
 
 export default function DateChip({ date }: { date: string }) {
-  const formattedDate = new Date(date).toLocaleDateString('en-UK', {
+
+  const {i18n} = useTranslation()
+
+  const formattedDate = new Date(date).toLocaleDateString(i18n.language, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   })
 
-  const fullDate = new Date(date).toLocaleDateString('en-UK', {
+  const fullDate = new Date(date).toLocaleDateString(i18n.language, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',

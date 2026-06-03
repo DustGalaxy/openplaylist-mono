@@ -29,7 +29,7 @@ from src._types import Platform
 from src.database import get_async_session
 from src.settings import settings
 from src.exceptions import NeedConfirmationException
-
+from src.dal.postgres_impl import playlist_repository, playlist_settings_repository
 
 from src.utils import find
 
@@ -421,6 +421,12 @@ class AuthService:
         link.bot_connection = False
 
         await self.link_repo.update(db_session, link)
+
+    async def delete_user(self, db_session: AsyncSession, user_id: UUID) -> None:
+        await playlist_repository.remove_many(db_session, [user_id], column="user_id")
+        await self.token_vault_repo.remove_many(db_session, [user_id], column="user_id")
+        await self.link_repo.remove_many(db_session, [user_id], column="user_id")
+        await self.user_repo.remove(db_session, user_id)
 
 
 auth_service = AuthService(UserRepository(), LinkedAccountsRepository(), TokenVaultRepository())

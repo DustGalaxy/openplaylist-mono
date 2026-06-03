@@ -31,6 +31,7 @@ class Order(Base, UUIDMixin, TimestampMixin):
 
     extra_data: Mapped[dict] = mapped_column(JSONB, nullable=True)
 
+    
     playlist_associations: Mapped[list["OrderPlaylistStatus"]] = relationship(back_populates="order")
 
 
@@ -51,7 +52,7 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
 
     now_playing: Mapped[str] = mapped_column(String, nullable=True)
 
-    order_associations: Mapped[list["OrderPlaylistStatus"]] = relationship(back_populates="playlist", lazy="selectin")
+    order_associations: Mapped[list["OrderPlaylistStatus"]] = relationship(back_populates="playlist", lazy="selectin", cascade="all, delete-orphan")
 
     active_order_associations: Mapped[list["OrderPlaylistStatus"]] = relationship(
         primaryjoin="and_(Playlist.id == OrderPlaylistStatus.playlist_id, OrderPlaylistStatus.status == 'in playlist')",
@@ -73,9 +74,9 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
 class OrderPlaylistStatus(Base, TimestampMixin):
     __tablename__ = "order_playlist_status"
 
-    order_id: Mapped[UUID] = mapped_column(PGUUID, ForeignKey("orders.id"), primary_key=True)
-    playlist_id: Mapped[UUID] = mapped_column(PGUUID, ForeignKey("playlists.id"), primary_key=True)
+    order_id: Mapped[UUID] = mapped_column(PGUUID, ForeignKey("orders.id", ondelete="CASCADE"), primary_key=True)
+    playlist_id: Mapped[UUID] = mapped_column(PGUUID, ForeignKey("playlists.id", ondelete="CASCADE"), primary_key=True)
     status: Mapped[Status] = mapped_column(default="in playlist")
 
-    order: Mapped["Order"] = relationship(back_populates="playlist_associations", lazy="selectin")
+    order: Mapped["Order"] = relationship(back_populates="playlist_associations", lazy="selectin", cascade="all, delete")
     playlist: Mapped["Playlist"] = relationship(back_populates="order_associations")

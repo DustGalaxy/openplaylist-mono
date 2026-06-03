@@ -13,7 +13,8 @@
       "confirming": "Processing..."
     },
     "web": "Web",
-    "general": "General"
+    "general": "General",
+    "general2": "General"
   },
   "brand": {
     "name": "OpenPlaylist",
@@ -100,11 +101,20 @@
     "login": {
       "title": "Login",
       "subtitle": "Connect with your account",
-      "tab": { "social": "Social Login", "classic": "Email & Password" },
+      "tab": {
+        "social": "Social Login",
+        "classic": "Email & Password"
+      },
       "socialHint": "Sign in with your favorite platform",
       "socialFallbackHint": "Don't have a social account linked? Log in via email →",
-      "field": { "email": "Email", "password": "Password" },
-      "placeholder": { "email": "you@example.com", "password": "••••••••" },
+      "field": {
+        "email": "Email",
+        "password": "Password"
+      },
+      "placeholder": {
+        "email": "you@example.com",
+        "password": "••••••••"
+      },
       "submit": "Login",
       "submitLoading": "Logging in...",
       "backToSocial": "Back to social login",
@@ -122,7 +132,10 @@
     "register": {
       "title": "Create Account",
       "subtitle": "Join us to get started",
-      "tab": { "social": "Social Sign Up", "classic": "Email & Password" },
+      "tab": {
+        "social": "Social Sign Up",
+        "classic": "Email & Password"
+      },
       "socialHint": "Sign up with your favorite platform",
       "emailHint": "Prefer email? Use the form on the right →",
       "field": {
@@ -253,13 +266,24 @@
       "modeUpdated": "Playlist mode updated",
       "activeUpdated": "Playlist requests updated"
     },
-    "status": { "online": "Online", "offline": "Offline" },
-    "nowPlaying": { "empty": "No track is currently playing." },
-    "saved": { "title": "Saved", "empty": "No saved tracks" },
+    "status": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "nowPlaying": {
+      "empty": "No track is currently playing."
+    },
+    "saved": {
+      "title": "Saved",
+      "empty": "No saved tracks"
+    },
     "queue": {
       "noMatch": "No tracks match your search.",
       "empty": "No tracks available.",
-      "mode": { "add": "Add track", "search": "Search queue" },
+      "mode": {
+        "add": "Add track",
+        "search": "Search queue"
+      },
       "placeholder": {
         "add": "Paste YouTube URL...",
         "search": "Search queue by title...",
@@ -267,7 +291,9 @@
       },
       "submit": "Add"
     },
-    "addbar": { "placeholder": "Place url here" },
+    "addbar": {
+      "placeholder": "Place url here"
+    },
     "create": {
       "title": "New playlist",
       "description": "Form to create a new playlist",
@@ -372,13 +398,17 @@
     },
     "validation": {
       "title": "Video validation",
+      "description": "Video validation settings. Can`t be negtive.",
       "notInitialized": "Section not initialized",
       "minViews": "Min views",
+      "minViewsDesc": "Not every video can have likes. 0 means all videos will pass likes validation.",
       "minLikes": "Min likes",
       "maxDuration": "Max duration",
       "trackCooldown": "Track cooldown",
+      "trackCooldownDesc": "The time after which a track can be added again.",
       "userCooldown": "User cooldown",
-      "initFailed": "Failed to initialize settings"
+      "initFailed": "Failed to initialize settings",
+      "tabtitle": "validation"
     },
     "donation": {
       "title": "Donation Receiving",
@@ -565,7 +595,15 @@
       "linkAdded": "Link added",
       "linkFailed": "Failed to add link",
       "confirmDeletion": "Confirm Deletion",
-      "deleteLink": "Delete link"
+      "deleteLink": "Delete link",
+      "killUserProfile": {
+        "title": "Profile Deletion",
+        "btnText": "Delete Profile",
+        "body": "Are you sure you want to delete your profile? This action cannot be undone.",
+        "deleting": "Deleting...",
+        "deleted": "Profile deleted successfully",
+        "deleteFailed": "Failed to delete profile"
+      }
     },
     "integrations": {
       "connected": "Connected Accounts",

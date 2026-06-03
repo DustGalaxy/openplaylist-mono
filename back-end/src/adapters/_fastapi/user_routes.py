@@ -96,3 +96,11 @@ async def delete_integration(
 
     await auth_service.delete_integration(db_session, curr_user.id, type, platform_user_id)
     return {"message": "Integration deleted"}
+
+@router.delete("/me", status_code=204)
+async def delete_me(
+    db_session: DB_SESSION,
+    curr_user: CURR_USER,
+):
+    await auth_service.delete_user(db_session, curr_user.id)
+    return {"message": "User deleted"}

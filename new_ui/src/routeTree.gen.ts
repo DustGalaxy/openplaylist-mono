@@ -13,6 +13,7 @@ import { Route as ViewRouteImport } from './routes/view'
 import { Route as StatisticRouteImport } from './routes/statistic'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as PolicyRouteImport } from './routes/policy'
 import { Route as OauthCallbackRouteImport } from './routes/oauth-callback'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
@@ -39,6 +40,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PolicyRoute = PolicyRouteImport.update({
+  id: '/policy',
+  path: '/policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OauthCallbackRoute = OauthCallbackRouteImport.update({
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/oauth-callback': typeof OauthCallbackRoute
+  '/policy': typeof PolicyRoute
   '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/oauth-callback': typeof OauthCallbackRoute
+  '/policy': typeof PolicyRoute
   '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
   '/oauth-callback': typeof OauthCallbackRoute
+  '/policy': typeof PolicyRoute
   '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/logout'
     | '/oauth-callback'
+    | '/policy'
     | '/register'
     | '/settings'
     | '/statistic'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/logout'
     | '/oauth-callback'
+    | '/policy'
     | '/register'
     | '/settings'
     | '/statistic'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/logout'
     | '/oauth-callback'
+    | '/policy'
     | '/register'
     | '/settings'
     | '/statistic'
@@ -167,6 +179,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   LogoutRoute: typeof LogoutRoute
   OauthCallbackRoute: typeof OauthCallbackRoute
+  PolicyRoute: typeof PolicyRoute
   RegisterRoute: typeof RegisterRoute
   SettingsRoute: typeof SettingsRoute
   StatisticRoute: typeof StatisticRoute
@@ -201,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/policy': {
+      id: '/policy'
+      path: '/policy'
+      fullPath: '/policy'
+      preLoaderRoute: typeof PolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/oauth-callback': {
@@ -263,6 +283,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   LogoutRoute: LogoutRoute,
   OauthCallbackRoute: OauthCallbackRoute,
+  PolicyRoute: PolicyRoute,
   RegisterRoute: RegisterRoute,
   SettingsRoute: SettingsRoute,
   StatisticRoute: StatisticRoute,
