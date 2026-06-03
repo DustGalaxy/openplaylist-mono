@@ -72,8 +72,11 @@ class OrderService:
             "length": parse_ISO_8601(video_item["contentDetails"]["duration"]),  # формат ISO 8601 (например, PT4M13S)
         }
 
-    def get_from_cache(self, video_id) -> dict:
-        return json.loads(str(get_broker().get(video_id)))
+    def get_from_cache(self, video_id: str) -> dict | None:
+        raw_data = get_broker().get(video_id)
+        if not raw_data or str(raw_data) == "None":
+            return None
+        return json.loads(str(raw_data))
 
     def save_to_cache(self, video_id, data):
         return get_broker().set(video_id, json.dumps(data))
