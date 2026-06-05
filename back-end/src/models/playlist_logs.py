@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
-from _types import PlaylistLogsEventTypes
+from src._types import PlaylistLogsEventTypes
 
 
 class PlaylistLogSchema(BaseModel):

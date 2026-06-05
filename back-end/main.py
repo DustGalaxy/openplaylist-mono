@@ -12,7 +12,7 @@ from src.adapters._fastapi.playlist_routes import router as playlist_router
 from src.adapters._fastapi.settings_routes import router as settings_router
 from src.adapters._sio.init import sio
 from src.adapters._rabbit import broker, declare
-from src.adapters._redis.broker import get_broker
+from src.dal._redis.broker import get_broker
 from src.adapters._sio.routes import PlstUpdsNamespace, BasicNamespace
 from src.services.sio_service import room_manager
 from src.settings import settings
