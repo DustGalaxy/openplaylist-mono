@@ -13,7 +13,7 @@ from src.dto.settings import ReadPlaylistSettings
 from src.adapters._sio.init import sio
 from src.dal._redis.broker import get_broker, RedisAdapter
 from src.dal.postgres.playlist import playlist_repository
-# from src.models.playlist_logs import PlaylistLogSchema
+from src.models.playlist_logs import PlaylistLogSchema
 from src.models.order import OrderDomain
 from src.database import async_session_maker
 
@@ -88,9 +88,9 @@ class SioPlaylistUpdateService:
     def sid_from_uid(self, user_id):
         return str(get_broker().hget(f"playlist:users:{user_id}", "sid"))
 
-    # async def log(self, log: PlaylistLogSchema):
-    #     owner_sid = self.sid_from_uid(log.user_id)
-    #     await self.sio.emit(f"log:{log.playlist_id}", log.model_dump_json(), to=owner_sid, namespace=self.namespace)
+    async def log(self, log: PlaylistLogSchema):
+        owner_sid = self.sid_from_uid(log.user_id)
+        await self.sio.emit(f"log:{log.playlist_id}", log.model_dump_json(), to=owner_sid, namespace=self.namespace)
 
     async def set_playnow(self, data: PlayNow):
         sids = room_manager.get_sids(data.playlist_id, self.namespace)

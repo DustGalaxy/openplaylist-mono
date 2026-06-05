@@ -12,7 +12,7 @@ from src.dto.playlist import (
 )
 from src.models.playlist import PlaylistPatch, PlaylistSchema
 from src.models.settings import SettingsSchema
-# from src.services.playlist_log import playlist_log_service
+from src.services.playlist_log import playlist_log_service
 
 
 from src.utils import kick, find
@@ -113,7 +113,7 @@ async def get_my_playlists(
         ]
     else:
         ids = [p.id for p in playlists]
-        settings = await settings_service.repository.get_many(db_session, ids, "playlist_id") # type: ignore
+        settings = await settings_service.repository.get_many(db_session, ids, "playlist_id")  # type: ignore
         my_zip: list[tuple[PlaylistSchema, SettingsSchema]] = []
         for id in ids:
             s = find(settings, lambda x: x.playlist_id == id)
@@ -207,13 +207,28 @@ async def set_play_now_for_playlist(
         order = await service.set_play_now(db_session, playlist_id, playnow.track_id, current_user)
 
         await kick("playlist.track.playnow", task_broker, playnow)
-        # await playlist_log_service.log_and_emit(
-        #     db_session,
-        #     current_user.id,
-        #     playlist_id,
-        #     PlaylistLogsEventTypes.PLAY_TRACK,
-        #     {"details": f"Update current playing track to {order.title}", "platform": order.source, "by_owner": order.from_owner},
-        # )
+
+        if order is None:
+            data = {
+                "details": "Clear current playing track",
+                "platform": None,
+                "by_owner": None,
+            }
+
+        else:
+            data = {
+                "details": f"Update current playing track to {order.title}",
+                "platform": order.source,
+                "by_owner": order.from_owner,
+            }
+
+        await playlist_log_service.log_and_emit(
+            db_session,
+            current_user.id,
+            playlist_id,
+            PlaylistLogsEventTypes.PLAY_TRACK,
+            data,
+        )
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")
 

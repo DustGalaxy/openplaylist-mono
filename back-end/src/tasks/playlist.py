@@ -10,14 +10,14 @@ from src.services_low.playlist import playlist_service
 from src.services.sio_service import sio_service
 from src.models.order import OrderCreate, OrderDomain
 
-# from models.playlist_logs import PlaylistLogCreate
-# from dal.postgres.playlist_logs import get_playlist_logs_repository as pl_logs
-
+from models.playlist_logs import PlaylistLogCreate
+from dal.postgres.playlist_logs import get_playlist_logs_repository as pl_logs
+from src.services.playlist_log import playlist_log_service
 from src.dal._redis.broker import get_broker
 from src.dal.postgres.user import user_repository
 from src.dal.postgres.playlist_settings import playlist_settings_repository
 
-# from _types import PlaylistLogsEventTypes
+from _types import PlaylistLogsEventTypes
 from src.utils import kick, conditional_trace
 
 
@@ -85,41 +85,28 @@ async def handle_order_created(
                 track,
                 playlist_id,
             )
-
-            # await kick(
-            #     "playlist.log",
-            #     taskiq_broker,
-            #     await pl_logs().create(
-            #         db_session,
-            #         PlaylistLogCreate(
-            #             user_id=typed_payload.owner_id,
-            #             playlist_id=playlist_id,
-            #             event_type=PlaylistLogsEventTypes.ADD_TRACK,
-            #             event_data={
-            #                 "details": f"Track '{typed_payload.title}' added to playlist",
-            #                 "by_owner": typed_payload.from_owner,
-            #             },
-            #         ),
-            #     ),
-            # )
+            await playlist_log_service.log_and_emit(
+                db_session,
+                typed_payload.owner_id,
+                playlist_id,
+                PlaylistLogsEventTypes.ADD_TRACK,
+                {
+                    "details": f"Track '{typed_payload.title}' added to playlist",
+                    "by_owner": typed_payload.from_owner,
+                },
+            )
 
         for error_list, playlist_name, playlist_id in errors:
-            # await kick(
-            #     "playlist.log",
-            #     taskiq_broker,
-            #     await pl_logs().create(
-            #         db_session,
-            #         PlaylistLogCreate(
-            #             user_id=typed_payload.owner_id,
-            #             playlist_id=playlist_id,
-            #             event_type=PlaylistLogsEventTypes.ERROR,
-            #             event_data={
-            #                 "details": f"Failed to add track '{typed_payload.title}' to playlist '{playlist_name}': {'; '.join(error_list)}.",
-            #                 "by_owner": typed_payload.from_owner,
-            #             },
-            #         ),
-            #     ),
-            # )
+            await playlist_log_service.log_and_emit(
+                db_session,
+                typed_payload.owner_id,
+                playlist_id,
+                PlaylistLogsEventTypes.ERROR,
+                {
+                    "details": f"Failed to add track '{typed_payload.title}' to playlist '{playlist_name}': {'; '.join(error_list)}.",
+                    "by_owner": typed_payload.from_owner,
+                },
+            )
             ...
 
     return tracks, errors
