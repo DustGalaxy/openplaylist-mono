@@ -1,6 +1,6 @@
 from services.sio_service import sio_service
 
-from models.playlist_logs import PlaylistLogSchema
+from src.models.playlist_logs import PlaylistLogSchema
 
 from taskiq_broker import task_broker as taskiq_broker
 

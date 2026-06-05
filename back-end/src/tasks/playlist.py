@@ -9,15 +9,12 @@ from src.services.playlist_service import add_to_playlist
 from src.services_low.playlist import playlist_service
 from src.services.sio_service import sio_service
 from src.models.order import OrderCreate, OrderDomain
-
-from models.playlist_logs import PlaylistLogCreate
-from dal.postgres.playlist_logs import get_playlist_logs_repository as pl_logs
 from src.services.playlist_log import playlist_log_service
 from src.dal._redis.broker import get_broker
 from src.dal.postgres.user import user_repository
 from src.dal.postgres.playlist_settings import playlist_settings_repository
 
-from _types import PlaylistLogsEventTypes
+from src._types import PlaylistLogsEventTypes
 from src.utils import kick, conditional_trace
 
 
