@@ -10,6 +10,7 @@ from src.dto.playlist import (
     ReadPlaylist,
     ReadPlaylistPreview,
 )
+from src.dto.playlist_log import ReadPlaylistLog
 from src.models.playlist import PlaylistPatch, PlaylistSchema
 from src.models.settings import SettingsSchema
 from src.services.playlist_log import playlist_log_service
@@ -18,7 +19,8 @@ from src.services.playlist_log import playlist_log_service
 from src.utils import kick, find
 from src._types import DeleteStatus, PlaylistLogsEventTypes
 from taskiq_broker import task_broker as task_broker
-from src.adapters._fastapi.dependencies import CURR_USER, DB_SESSION, PLST_SERVICE, SETTINGS_SERVICE as SE
+
+from src.adapters._fastapi.dependencies import CURR_USER, DB_SESSION, PLST_SERVICE, PLST_LOG_SERVICE, SETTINGS_SERVICE as SE
 
 router = APIRouter(prefix="/playlist")
 
@@ -165,6 +167,17 @@ async def get_public_playlist(
 
     return ReadPlaylist.model_validate(res)
 
+@router.get("/{playlist_id}/logs")
+async def get_logs(
+    db_session: DB_SESSION,
+    service: PLST_LOG_SERVICE,
+    playlist_id: UUID,
+    current_user: CURR_USER,
+) -> list[ReadPlaylistLog]:
+    logs = await service.get_logs(db_session, playlist_id, current_user.id)
+
+
+    return [ReadPlaylistLog.model_validate(log) for log in logs]
 
 @router.get("/{playlist_id}/baseinfo")
 async def get_playlist_baseinfo(
@@ -210,14 +223,16 @@ async def set_play_now_for_playlist(
 
         if order is None:
             data = {
-                "details": "Clear current playing track",
+                "title": None,
+                "id": None,
                 "platform": None,
                 "by_owner": None,
             }
 
         else:
             data = {
-                "details": f"Update current playing track to {order.title}",
+                "title": f"{order.title}",
+                "id": f"{order.yt_video_id}",
                 "platform": order.source,
                 "by_owner": order.from_owner,
             }

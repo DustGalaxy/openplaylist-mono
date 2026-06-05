@@ -139,6 +139,7 @@ export type PlaylistSettings = {
 export type InputPlaylist = {
   id: string
   name: string
+  owner_id: string
   description?: string
   is_public: boolean
   is_favorite: boolean
@@ -164,6 +165,7 @@ export type PlaylistPatch = {
 
 export type ClientPlaylist = {
   id: string
+  owner_id: string
   name: string
   description?: string
   is_public: boolean

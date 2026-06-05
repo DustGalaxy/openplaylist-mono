@@ -11,7 +11,7 @@ from src._types import AsyncSession
 
 
 async def add_to_playlist(
-    session: AsyncSession, event: OrderCreate, user: User
+    session: AsyncSession, event: OrderCreate, user: User, from_owner: bool
 ) -> tuple[list[tuple[OrderDomain, UUID]], list[tuple[list[str], str, UUID]]]:
     settings_service = get_settings_service()
 
@@ -21,14 +21,14 @@ async def add_to_playlist(
         ]
     else:
         playlists = await playlist_repository.get_user_playlists_by_sourse(
-            session, event.owner_id, event.owner_platform_id, event.source
+            session, user.id, event.owner_platform_id, event.source
         )
 
     tracks: list[tuple[OrderDomain, UUID]] = []
     errors: list[tuple[list[str], str, UUID]] = []
 
     for playlist in playlists:
-        if not playlist.is_allow_external_requests and playlist.owner_id != user.id:
+        if not playlist.is_allow_external_requests and not from_owner:
             errors.append((["Playlist is not active"], playlist.name, playlist.id))
             continue
 

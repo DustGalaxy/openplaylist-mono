@@ -66,15 +66,14 @@ async def handle_settings_request(
         return plst
 
 
-@conditional_trace("order-flow:step-2")
+# @conditional_trace("order-flow:step-2")
 @taskiq_broker.task(task_name="order.created")
 async def handle_order_created(
     typed_payload: OrderCreate,
 ):
     async with async_session_maker() as db_session:
         owner = await user_repository.get_one(db_session, typed_payload.owner_id)
-        tracks, errors = await add_to_playlist(db_session, typed_payload, owner)
-
+        tracks, errors = await add_to_playlist(db_session, typed_payload, owner, from_owner=typed_payload.from_owner)
         for track, playlist_id in tracks:
             await kick(
                 "playlist.track.added",
@@ -88,8 +87,10 @@ async def handle_order_created(
                 playlist_id,
                 PlaylistLogsEventTypes.ADD_TRACK,
                 {
-                    "details": f"Track '{typed_payload.title}' added to playlist",
+                    "title": f"{typed_payload.title}",
+                    "id": f"{typed_payload.yt_video_id}",
                     "by_owner": typed_payload.from_owner,
+                    "platform": typed_payload.source,
                 },
             )
 
@@ -98,12 +99,16 @@ async def handle_order_created(
                 db_session,
                 typed_payload.owner_id,
                 playlist_id,
-                PlaylistLogsEventTypes.ERROR,
+                PlaylistLogsEventTypes.ADD_TRACK_ERROR,
                 {
-                    "details": f"Failed to add track '{typed_payload.title}' to playlist '{playlist_name}': {'; '.join(error_list)}.",
+                    "title": f"{typed_payload.title}",
+                    "id": f"{typed_payload.yt_video_id}",
+                    "playlist_name": playlist_name,
                     "by_owner": typed_payload.from_owner,
+                    "platform": typed_payload.source,
+                    "errors": error_list,
                 },
             )
-            ...
+            
 
     return tracks, errors

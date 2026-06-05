@@ -236,6 +236,53 @@
     }
   },
   "playlist": {
+    "log": {
+      "title": "Log",
+      "add_track": "Added track '{{title}}'",
+      "add_track_error": "Failed to add track '{{title}}' by reason: {{error}}",
+      "remove_track": "Removed track '{{title}}'",
+      "play_track": "Played track '{{title}}'",
+      "listen_track": "Listened to track '{{title}}'",
+      "skip_track": "Skipped track '{{title}}'",
+      "report_track": "Reported track '{{title}}'",
+      "no_track": "No track played",
+      "modal": {
+        "title": "Log for {{name}}",
+        "close": "Close",
+        "id": "Log ID",
+        "created_at": "Timestamp",
+        "event_type": "Event Type",
+        "platform": "Platform",
+        "initiated_by": "Initiated By",
+        "owner": "Owner",
+        "guest": "Guest",
+        "payload": "Event Data (JSON)"
+      },
+      "errors": {
+        "Playlist is not active": "Playlist is not active",
+        "Wrong donation amount": "Wrong donation amount",
+        "Wrong donation currency": "Wrong donation currency",
+        "Blacklisted user": "Blacklisted user",
+        "Blacklisted track": "Blacklisted track",
+        "Not enough views": "Not enough views",
+        "Not enough likes": "Not enough likes",
+        "Too long": "Track is too long",
+        "Playlist is full": "Playlist is full",
+        "Track cooldown": "Track cooldown",
+        "User cooldown": "User cooldown",
+        "unknown": "Неизвестная ошибка"
+      },
+      "types": {
+        "add_track": "Add Track",
+        "add_track_error": "Add Track Error",
+        "play_track": "Play Track",
+        "remove_track": "Remove Track",
+        "listen_track": "Listen Track",
+        "skip_track": "Skip Track",
+        "report_track": "Report Track",
+        "error": "System Error"
+      }
+    },
     "stats": {
       "mode": "Mode",
       "minViews": "Min views",

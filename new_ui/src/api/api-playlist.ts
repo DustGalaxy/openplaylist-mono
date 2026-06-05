@@ -9,6 +9,7 @@ import type {
 import apiClient from '@/lib/axios'
 import { useAuthStore } from '@/stores/authStore'
 import { getConfig, removeNullAndUndefined } from '@/lib/utils'
+import type { PlaylistLog } from '@/types/playlistLog'
 
 export const fetchPlaylistPublic = async (
   playlist_id: string,
@@ -269,4 +270,20 @@ export const submitPlaylistReport = async (
   } catch {
     return false
   }
+}
+
+export async function fetchPlaylistLogs(
+  playlistId: string,
+): Promise<PlaylistLog[]> {
+  const config = getConfig()
+  const response = await apiClient(
+    config.PLST_API_URL + `/${playlistId}/logs`,
+    {
+      method: 'GET',
+      withCredentials: true,
+    },
+  )
+  if (!response.status || response.status !== 200)
+    throw new Error('Failed to fetch logs')
+  return response.data
 }

@@ -208,7 +208,7 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
       {isAuthenticated && (
         <SectionBlock title={t('publicView.addTrack')}>
           <div className={`p-4 ${innerPanelClass}`}>
-            <AddBar playlistId={playlist.id} />
+            <AddBar playlistId={playlist.id} ownerId={playlist.owner_id} />
           </div>
         </SectionBlock>
       )}

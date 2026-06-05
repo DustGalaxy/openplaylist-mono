@@ -3,6 +3,13 @@ import { twMerge } from 'tailwind-merge'
 import type { ClassValue } from 'clsx'
 import { Platform, type PlaylistSettings, type Track } from '@/types/playlist'
 
+export class NotImplementedError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'NotImplementedError'
+  }
+}
+
 export function cn(...inputs: Array<ClassValue>) {
   return twMerge(clsx(inputs))
 }
@@ -40,7 +47,7 @@ export function computePriority(
 ): number {
   if (typeof track.priority === 'number') return track.priority
 
-  const labels = (track.priority || '').split(':') 
+  const labels = (track.priority || '').split(':')
 
   if (labels.length === 0) return 0
   var vals: number[] = []

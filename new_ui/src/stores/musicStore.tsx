@@ -59,7 +59,7 @@ type StoreState = {
 
   // add track flow
   // optimistic + server request
-  requestAddTrack: (playlistId: string, yt_video_id: string) => Promise<void>
+  requestAddTrack: (playlistId: string, yt_video_id: string, ownerId?: string) => Promise<void>
   syncAddTrack: (playlistId: string, track: Track) => void // вызывается из socket handler
 
   requestPlayNow: (
@@ -272,17 +272,18 @@ export const useMusicStore = create<StoreState>((set, get) => {
     },
 
     /* ---- ADD flow ---- */
-    async requestAddTrack(playlistId, yt_video_url) {
+    async requestAddTrack(playlistId, yt_video_url, ownerId=null) {
       // optimistic: add to playlist
       const { user } = useAuthStore.getState()
-
-      if (!user) {
+      var owner_id = get().playlists.find((p) => p.id === playlistId)?.owner_id 
+      owner_id = owner_id ? owner_id : ownerId
+      if (!user || !owner_id) {
         console.debug('no user in requestAddTrack')
         return
       }
       const order: Order = {
         request_id: uuidv4(),
-        owner_id: user.id,
+        owner_id: owner_id,
         owner_platform_id: user.id,
         requester_id: user.id,
         requester_nickname: user.username,

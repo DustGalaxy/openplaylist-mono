@@ -101,11 +101,20 @@
     "login": {
       "title": "Вход",
       "subtitle": "Подключите свой аккаунт",
-      "tab": { "social": "Соцсети", "classic": "Email и пароль" },
+      "tab": {
+        "social": "Соцсети",
+        "classic": "Email и пароль"
+      },
       "socialHint": "Войдите через любимую платформу",
       "socialFallbackHint": "Нет привязки к соцсети? Войдите по email →",
-      "field": { "email": "Email", "password": "Пароль" },
-      "placeholder": { "email": "you@example.com", "password": "••••••••" },
+      "field": {
+        "email": "Email",
+        "password": "Пароль"
+      },
+      "placeholder": {
+        "email": "you@example.com",
+        "password": "••••••••"
+      },
       "submit": "Войти",
       "submitLoading": "Вход…",
       "backToSocial": "Назад к входу через соцсети",
@@ -123,7 +132,10 @@
     "register": {
       "title": "Создать аккаунт",
       "subtitle": "Присоединяйтесь, чтобы начать",
-      "tab": { "social": "Соцсети", "classic": "Email и пароль" },
+      "tab": {
+        "social": "Соцсети",
+        "classic": "Email и пароль"
+      },
       "socialHint": "Зарегистрируйтесь через любимую платформу",
       "emailHint": "Предпочитаете email? Используйте форму справа →",
       "field": {
@@ -223,6 +235,53 @@
     }
   },
   "playlist": {
+    "log": {
+      "title": "Лог",
+      "add_track": "Добавлен трек '{{title}}'",
+      "add_track_error": "Не удалось добавить трек '{{title}}' по причине: {{error}}",
+      "remove_track": "Удален трек '{{title}}'",
+      "play_track": "Воспроизведен трек '{{title}}'",
+      "listen_track": "Прослушан трек '{{title}}'",
+      "skip_track": "Пропущен трек '{{title}}'",
+      "report_track": "Жалоба на трек '{{title}}'",
+      "no_track": "Трек не воспроизводится",
+      "modal": {
+        "title": "Лог для {{name}}",
+        "close": "Закрыть",
+        "id": "ID лога",
+        "created_at": "Время",
+        "event_type": "Тип события",
+        "platform": "Платформа",
+        "initiated_by": "Инициатор",
+        "owner": "Владелец",
+        "guest": "Гость",
+        "payload": "Данные события (JSON)"
+      },
+      "errors": {
+        "Playlist is not active": "Плейлист не активен",
+        "Wrong donation amount": "Неверная сумма доната",
+        "Wrong donation currency": "Неверная валюта доната",
+        "Blacklisted user": "Пользователь в черном списке",
+        "Blacklisted track": "Трек в черном списке",
+        "Not enough views": "Недостаточно просмотров",
+        "Not enough likes": "Недостаточно лайков",
+        "Too long": "Трек слишком длинный",
+        "Playlist is full": "Плейлист заполнен",
+        "Track cooldown": "Трек на перезарядке (cooldown)",
+        "User cooldown": "Пользователь на перезарядке (cooldown)",
+        "unknown": "Неизвестная ошибка"
+      },
+      "types": {
+        "add_track": "Добавление трека",
+        "add_track_error": "Ошибка добавления трека",
+        "play_track": "Воспроизведение трека",
+        "remove_track": "Удаление трека",
+        "listen_track": "Прослушивание трека",
+        "skip_track": "Пропуск трека",
+        "report_track": "Жалоба на трек",
+        "error": "Системная ошибка"
+      }
+    },
     "stats": {
       "mode": "Режим",
       "minViews": "Мин. просмотры",
@@ -253,13 +312,24 @@
       "modeUpdated": "Режим плейлиста обновлён",
       "activeUpdated": "Заявки обновлены"
     },
-    "status": { "online": "Онлайн", "offline": "Офлайн" },
-    "nowPlaying": { "empty": "Сейчас ничего не играет." },
-    "saved": { "title": "Сохранённые", "empty": "Нет сохранённых треков" },
+    "status": {
+      "online": "Онлайн",
+      "offline": "Офлайн"
+    },
+    "nowPlaying": {
+      "empty": "Сейчас ничего не играет."
+    },
+    "saved": {
+      "title": "Сохранённые",
+      "empty": "Нет сохранённых треков"
+    },
     "queue": {
       "noMatch": "Нет треков по вашему запросу.",
       "empty": "Треков пока нет.",
-      "mode": { "add": "Добавить трек", "search": "Поиск в очереди" },
+      "mode": {
+        "add": "Добавить трек",
+        "search": "Поиск в очереди"
+      },
       "placeholder": {
         "add": "Вставьте ссылку YouTube…",
         "search": "Поиск по названию в очереди…",
@@ -267,7 +337,9 @@
       },
       "submit": "Добавить"
     },
-    "addbar": { "placeholder": "Вставьте URL сюда" },
+    "addbar": {
+      "placeholder": "Вставьте URL сюда"
+    },
     "create": {
       "title": "Новый плейлист",
       "description": "Форма создания плейлиста",

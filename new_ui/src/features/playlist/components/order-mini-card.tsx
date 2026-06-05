@@ -31,7 +31,8 @@ export default function OrderMiniCard({
   const playlist = usePlaylist()
   const bgUrl = `https://img.youtube.com/vi/${track.yt_video_id}/mqdefault.jpg`
   const [hovered, setHovered] = React.useState(false)
-  const { requestPlayNow, requestAddTrack, requestRemoveTrack } = useMusicStore()
+  const { requestPlayNow, requestAddTrack, requestRemoveTrack } =
+    useMusicStore()
   const { isSaved, addTrack, removeTrack } = useSavedStore()
 
   const playlistButtons = [
@@ -45,12 +46,12 @@ export default function OrderMiniCard({
     },
     {
       icon: <Copy />,
-        on_click: async () =>{
-          await navigator.clipboard.writeText(
-            'https://www.youtube.com/watch?v=' + track.yt_video_id,
-          )
-          toast.success(t('common.toast.copied'))
-        },
+      on_click: async () => {
+        await navigator.clipboard.writeText(
+          'https://www.youtube.com/watch?v=' + track.yt_video_id,
+        )
+        toast.success(t('common.toast.copied'))
+      },
       className: 'px-1 bg-level-2',
       glow: 'white',
     },
@@ -145,28 +146,29 @@ export default function OrderMiniCard({
           <div className="absolute inset-0 h-20 rounded-(--rounded-std) bg-black/55" />
 
           {/* title + requester */}
-          <div className="px-2 pt-2 justify-between relative z-10 ">
-            <div className="text-[18px] font-semibold text-left truncate">
+          <div className="px-2 h-22 pt-2 justify-between relative z-10 ">
+            <div className="text-[14px] font-semibold text-left truncate">
               {track.title}
             </div>
             {btns_type === 'playlist' ? (
-              <div className="text-[16px] text-[#888888] text-left flex items-center gap-1">
-                <Person width={20} height={20} /> {track.requester_nickname}
+              <div className="text-[14px] text-[#888888] text-left flex items-center gap-1">
+                <Person width={18} height={18} /> {track.requester_nickname}
               </div>
             ) : (
               <div className="h-5"></div>
             )}
 
             {/* date + priority + btn grid */}
-
-            <div className="justify-between flex">
-              <DurationChip time={+track.duration} />
-              {btns_type === 'playlist' ? (
-                <div className="flex gap-2">
-                  <DateChip date={track.created_at} />
-                  <PriorityChip number={+track.priority} />
-                </div>
-              ) : null}
+            <div className="absolute bottom-0 w-full ">
+              <div className="flex justify-between mr-4">
+                <DurationChip time={+track.duration} />
+                {btns_type === 'playlist' ? (
+                  <div className="flex gap-2">
+                    <DateChip date={track.created_at} />
+                    <PriorityChip number={+track.priority} />
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
         </div>

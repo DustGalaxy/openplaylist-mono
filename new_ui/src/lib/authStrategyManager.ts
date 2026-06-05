@@ -1,4 +1,5 @@
 import type { AxiosError, AxiosResponse } from 'axios'
+import { NotImplementedError } from './utils'
 
 /**
  * Response type when there's an email collision during login
@@ -138,16 +139,6 @@ export class AuthStrategyManager {
       integration: Array.from(this._integrationStrategies.keys()),
       login: Array.from(this._loginStrategies.keys()),
     }
-  }
-}
-
-/**
- * Custom error for not implemented strategies
- */
-export class NotImplementedError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = 'NotImplementedError'
   }
 }
 

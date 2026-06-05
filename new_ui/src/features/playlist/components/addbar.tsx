@@ -6,7 +6,7 @@ import Btn from '@/components/ui/my-btn'
 import Add from '@/components/icons/icon-add'
 import { useMusicStore } from '@/stores/musicStore'
 
-export default function AddBar({ playlistId }: { playlistId: string }) {
+export default function AddBar({ playlistId, ownerId }: { playlistId: string, ownerId: string }) {
   const { t } = useTranslation()
   const [visibility, setVisibility] = useState(false)
   const [youtubeurl, setYoutubeurl] = useState('')
@@ -23,7 +23,7 @@ export default function AddBar({ playlistId }: { playlistId: string }) {
     const loadingToast = toast.loading(t('common.toast.loading'))
 
     try {
-      const result = await requestAddTrack(playlistId, youtubeurl)
+      const result = await requestAddTrack(playlistId, youtubeurl, ownerId)
 
       toast.dismiss(loadingToast)
 

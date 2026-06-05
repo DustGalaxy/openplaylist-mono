@@ -28,5 +28,12 @@ class PlaylistLogService:
             )
         )
 
+    async def get_logs(self, session: AsyncSession, playlist_id: UUID, user_id):
+        return await get_playlist_logs_repository().get_logs(session, playlist_id, user_id)
+
 
 playlist_log_service = PlaylistLogService()
+
+
+def get_playlist_log_service():
+    return playlist_log_service

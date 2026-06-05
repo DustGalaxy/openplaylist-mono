@@ -30,7 +30,7 @@ export default function DateChip({ date }: { date: string }) {
       className="
         bg-level-2
         rounded-[var(--rounded-std)]              
-         border-t-[5px] border-level-3
+        border-t-[3px] sm:border-t-[5px] border-level-3
         h-[28px] sm:h-[32px] md:h-[40px]         
         px-1.5 sm:px-2 md:px-3           
         shadow-[-1px_1px_6px_rgba(0,0,0,0.4),-1px_1px_4px_rgba(0,0,0,0.3)]         

@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 class PlaylistLogsEventTypes(StrEnum):
     ADD_TRACK = "add_track"
+    ADD_TRACK_ERROR = "add_track_error"
 
     PLAY_TRACK = "play_track"
 

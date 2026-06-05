@@ -42,17 +42,17 @@ export default function Header() {
       border-2 border-level-3 shadow-[-1px_1px_6px_rgba(0,0,0,0.4),-1px_1px_4px_rgba(0,0,0,0.3)]
       sm:shadow-[-2px_2px_10px_rgba(0,0,0,0.45),-2px_2px_4px_rgba(0,0,0,0.35)]"
       >
-        <nav className="flex flex-row justify-between w-full  gap-2  items-center">
+        <nav className="flex flex-row justify-between w-full @container  gap-2  items-center">
           <div className="flex gap-2">
             <div className="px-2 ">
-              <Link to="/" className="flex gap-2 ">
+              <Link to="/" className="flex gap-2 items-center">
                 <Disc />
                 <h1
-                  className="text-xl font-bold  text-transparent  relative drop-shadow-2xl
+                  className="hidden @[400px]:block text-lg sm:text-xl font-bold text-center h-full text-transparent  relative drop-shadow-2xl
                   bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)]  
                   bg-clip-text bg-[length:200%_auto]  leading-normal animate-bg-move transition-all"
                 >
-                  {t('brand.name')}
+                  {windowWidth > 400 && t('brand.name')}
                   {windowWidth > 600 && ` ${t('brand.version')}`}
                 </h1>
               </Link>
@@ -61,14 +61,14 @@ export default function Header() {
             {isAuthenticated && (
               <div className="px-2 ">
                 <Link to="/dashboard">
-                  <Dashboard />
+                  <Dashboard className='w-8 sm:w-8'/>
                 </Link>
               </div>
             )}
 
-            <div className="px-2 ">
+            <div className="px-2">
               <Link to="/view">
-                <Search />
+                <Search className='w-8 sm:w-8'/>
               </Link>
             </div>
           </div>

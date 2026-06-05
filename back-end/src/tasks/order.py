@@ -13,6 +13,7 @@ async def order_new(
     is_owner: bool,
 ):
     from_owner = True if is_owner else False
+    print("from_owner", from_owner)
     new_order = await order_service.init_order(order, from_owner)
 
     await kick(

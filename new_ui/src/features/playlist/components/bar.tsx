@@ -79,7 +79,7 @@ export function PlaylistQueueInput({
     if (mode !== 'add' || !value.trim()) return
     const loadingToast = toast.loading(t('common.toast.loading'))
     try {
-      const result = await requestAddTrack(playlist.id, value.trim())
+      const result = await requestAddTrack(playlist.id, value.trim(), playlist.owner_id)
 
       toast.dismiss(loadingToast)
 

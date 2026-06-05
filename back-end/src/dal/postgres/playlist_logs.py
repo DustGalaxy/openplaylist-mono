@@ -19,8 +19,12 @@ class PlaylistLogsRepository(crud_factory(PlaylistLog, PlaylistLogSchema, Playli
     def to_repr(self, object: PlaylistLog) -> PlaylistLogSchema:
         return PlaylistLogSchema.model_validate(object)
 
-    async def get_user_logs(self, user_id: UUID, session: AsyncSession) -> list[PlaylistLogSchema]:
-        stmt = select(PlaylistLog).where(PlaylistLog.user_id == user_id).order_by(PlaylistLog.created_at.desc())
+    async def get_logs(self, session: AsyncSession, playlist_id: UUID, user_id: UUID) -> list[PlaylistLogSchema]:
+        stmt = (
+            select(PlaylistLog)
+            .where(PlaylistLog.user_id == user_id, PlaylistLog.playlist_id == playlist_id)
+            .order_by(PlaylistLog.created_at.asc())
+        )
         result = await session.execute(stmt)
 
         return [self.to_repr(item) for item in result.unique().scalars().all()]
