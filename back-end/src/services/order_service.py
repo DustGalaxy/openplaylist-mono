@@ -5,7 +5,7 @@ from typing import Union
 from pytubefix import YouTube
 import requests
 
-from src.adapters._redis.broker import get_broker
+from src.dal._redis.broker import get_broker
 from src.dto.order import WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder
 from src.models.order import OrderCreate, STRATEGIES
 

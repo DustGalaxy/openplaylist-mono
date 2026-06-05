@@ -18,11 +18,10 @@ from src.adapters._rabbit.dto import Tokens, TwitchTokenRefreshed
 from src.services.sio_service import sio_service
 
 from src.services.tokens.token_service import token_service
-from src.dal.postgres_impl import token_vault_repository
+from src.dal.postgres.token import token_vault_repository
 from src._types import Platform
 from src.database import async_session_maker
 from src.utils import kick
-
 
 
 @broker.subscriber(bot_twitch_order_new, exchange=main_exchange)
@@ -96,5 +95,5 @@ async def user_token_died(
     event: dict = json.loads(message.body)
     async with async_session_maker() as session:
         from services.auth.auth_service import auth_service
-        
+
         await auth_service.bot_was_disconnected(session, event, Platform.TWITCH)

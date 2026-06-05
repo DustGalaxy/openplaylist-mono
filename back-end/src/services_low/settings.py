@@ -3,7 +3,7 @@ from typing import Protocol, Any
 from uuid import UUID
 
 from src.dal.abstract import IAsyncCrud, IPlaylistSettingsRepository
-from src.dal.postgres_impl import (
+from src.dal.postgres.playlist_settings import (
     playlist_settings_repository,
     content_settings_repository,
     donation_rules_repository,

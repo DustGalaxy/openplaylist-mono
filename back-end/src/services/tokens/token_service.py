@@ -4,8 +4,7 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.token_vault import TokenVaultCreate, TokenVaultDomain
-from src.dal.postgres_impl import token_vault_repository, TokenVaultRepository
-
+from src.dal.postgres.token import token_vault_repository, TokenVaultRepository
 
 from src.services.tokens.manager import manager
 from src.database import async_session_maker

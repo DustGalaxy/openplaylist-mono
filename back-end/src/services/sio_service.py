@@ -11,8 +11,8 @@ from src.dto.events import (
 )
 from src.dto.settings import ReadPlaylistSettings
 from src.adapters._sio.init import sio
-from src.adapters._redis.broker import get_broker, RedisAdapter
-from src.dal.postgres_impl import playlist_repository
+from src.dal._redis.broker import get_broker, RedisAdapter
+from src.dal.postgres.playlist import playlist_repository
 # from src.models.playlist_logs import PlaylistLogSchema
 from src.models.order import OrderDomain
 from src.database import async_session_maker

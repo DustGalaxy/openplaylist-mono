@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, HTTPException, Response
 
 from src.dto.token import CodeDTO
 from src.dto.user import HttpClassicLogin, HttpClassicRegister
-from src.adapters._redis.broker import get_broker
+from src.dal._redis.broker import get_broker
 from src.models.auth_user import AuthUserCreate
 from src.models.linked_accounts import LinkedAccountsCreate
 

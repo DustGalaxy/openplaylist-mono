@@ -14,10 +14,11 @@ from src.adapters._rabbit.event_broker import (
 from src.dto.order import DANewOrder
 from src._types import Platform
 from src.database import async_session_maker
-from src.dal.postgres_impl import user_repository, linked_accounts_repository, token_vault_repository
+
+from src.dal.postgres.token import token_vault_repository
 from src.services.sio_service import sio_service
 
-from src.utils import find, kick
+from src.utils import kick
 
 
 @broker.subscriber(bot_da_order_new, exchange=main_exchange)
@@ -77,4 +78,3 @@ async def da_refresh_tokens(
         token.refresh_token = event.refresh_token
         token.expires_at = event.expires_at
         await token_vault_repository.update(session, token)
-       

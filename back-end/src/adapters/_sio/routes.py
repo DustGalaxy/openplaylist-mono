@@ -3,7 +3,7 @@ import socketio
 
 from src.settings import settings
 from src.services.sio_service import sio_service, room_manager
-from src.adapters._redis.broker import get_broker
+from src.dal._redis.broker import get_broker
 
 from src.adapters._sio.init import sio
 

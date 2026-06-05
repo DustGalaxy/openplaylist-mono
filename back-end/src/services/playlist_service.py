@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from src.dal.postgres_impl import playlist_repository
+from src.dal.postgres.playlist import playlist_repository
 from src.services_low.settings import get_settings_service
 
 from src.models.auth_user import AuthUserSchema as User

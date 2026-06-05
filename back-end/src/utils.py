@@ -8,7 +8,7 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel
 from taskiq.kicker import AsyncKicker
 
-from src.adapters._redis.broker import get_broker, RedisAdapter
+from src.dal._redis.broker import get_broker, RedisAdapter
 from src.settings import settings
 
 

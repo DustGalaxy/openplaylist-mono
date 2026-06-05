@@ -5,7 +5,7 @@ from fastapi import HTTPException, status
 from simple_repository.exceptions import NotFoundException
 
 from src.dal.abstract import IPlaylistRepository
-from src.dal.postgres_impl import playlist_repository
+from src.dal.postgres.playlist import playlist_repository
 
 from src.dto.playlist import NewPlaylist, PlaylistBaseinfo
 from src.models.auth_user import AuthUserSchema as User

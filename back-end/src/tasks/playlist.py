@@ -3,7 +3,6 @@ from uuid import UUID
 from src.database import async_session_maker
 from taskiq_broker import task_broker as taskiq_broker
 
-from src.adapters._redis.broker import get_broker
 from src.dto.events import Deleted, Moved, PlayNow, Private
 from src.dto.settings import ReadPlaylistSettings
 from src.services.playlist_service import add_to_playlist
@@ -14,7 +13,9 @@ from src.models.order import OrderCreate, OrderDomain
 # from models.playlist_logs import PlaylistLogCreate
 # from dal.postgres.playlist_logs import get_playlist_logs_repository as pl_logs
 
-from src.dal.postgres_impl import user_repository, playlist_settings_repository
+from src.dal._redis.broker import get_broker
+from src.dal.postgres.user import user_repository
+from src.dal.postgres.playlist_settings import playlist_settings_repository
 
 # from _types import PlaylistLogsEventTypes
 from src.utils import kick, conditional_trace
