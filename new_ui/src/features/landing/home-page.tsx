@@ -9,7 +9,7 @@ import {
   Users,
   Zap,
 } from 'lucide-react'
-
+import Dashboard from '@/components/icons/icon-dashboard'
 import Btn from '@/components/ui/my-btn'
 import SearchPlaylist from '@/features/public-playlist/components/search-playlist'
 import { gradientTextClass, panelClass } from '@/features/landing/styles'
@@ -57,7 +57,9 @@ function FeatureCard({
         <Icon className="h-5 w-5 group-hover:text-level-1" strokeWidth={2} />
       </div>
       <h3 className="text-lg font-semibold text-text-main mb-2">{title}</h3>
-      <p className="text-sm text-text-secondary leading-relaxed">{description}</p>
+      <p className="text-sm text-text-secondary leading-relaxed">
+        {description}
+      </p>
     </article>
   )
 }
@@ -113,7 +115,11 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 {isAuthenticated ? (
                   <Btn
-                    text={t('landing.goToPlaylists')}
+                    text={
+                      <div className="flex items-center gap-2">
+                        <Dashboard /> {t('landing.goToPlaylists')}
+                      </div>
+                    }
                     className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-[220px]"
                     onClick={() => navigate({ to: '/dashboard' })}
                   />
@@ -124,17 +130,17 @@ export default function HomePage() {
                     onClick={() => navigate({ to: '/login' })}
                   />
                 )}
-                <Link
-                  to="/view"
-                  className="
-                    inline-flex items-center justify-center gap-2 h-14 px-6 rounded-(--rounded-std)
-                    border-2 border-level-3/70 bg-level-2/80 text-text-main text-lg font-medium
-                    hover:border-level-3 hover:bg-level-2 transition-colors
-                  "
-                >
-                  <Search className="h-5 w-5" />
-                  {t('landing.findPlaylist')}
-                </Link>
+                <Btn
+                  text={
+                    <div className="flex items-center gap-2">
+                      <Search className="size-8" />
+                      {t('landing.findPlaylist')}
+                    </div>
+                  }
+                  className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-[200px]"
+                  onClick={() => navigate({ to: '/view' })}
+                />
+                
               </div>
             </div>
 
@@ -157,13 +163,8 @@ export default function HomePage() {
               </div>
               <ul className="space-y-4 text-sm sm:text-base">
                 {audienceBulletKeys.map((key) => (
-                  <li
-                    key={key}
-                    className="flex gap-3 text-text-secondary"
-                  >
-                    <span
-                      className={`shrink-0 font-bold ${gradientTextClass}`}
-                    >
+                  <li key={key} className="flex gap-3 text-text-secondary">
+                    <span className={`shrink-0 font-bold ${gradientTextClass}`}>
                       →
                     </span>
                     <span>{t(`landing.audienceBullets.${key}`)}</span>

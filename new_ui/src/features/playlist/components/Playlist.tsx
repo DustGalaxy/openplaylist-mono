@@ -9,6 +9,7 @@ import {
   Play,
   RefreshCcw,
   Settings,
+  Shield,
   Share2 as ShareIcon,
   ThumbsUp,
   User,
@@ -167,7 +168,6 @@ function PlaylistView() {
                     </button>
                   ))}
                 </div>
-              
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
@@ -228,7 +228,7 @@ function PlaylistView() {
               <div className="flex gap-2">
                 <Btn
                   text={<ShareIcon />}
-                  className="px-2 bg-level-2"
+                  className="px-3 bg-level-2"
                   onClick={() => {
                     navigator.clipboard.writeText(
                       window.location.origin + '/view?p=' + playlist.id,
@@ -238,14 +238,14 @@ function PlaylistView() {
                 />
                 <Btn
                   text={'>_'}
-                  className="px-3 bg-level-2 font-bold font-mono"
+                  className="px-3.25 bg-level-2 font-bold font-mono"
                   onClick={() => {
                     setShowConsole(!showConsole)
                   }}
                 />
                 <Btn
-                  text={'i'}
-                  className="px-5 bg-level-2"
+                  text={<Shield  />}
+                  className="px-3 bg-level-2"
                   onClick={() => {
                     setShowContentSettings(!showContentSettings)
                   }}

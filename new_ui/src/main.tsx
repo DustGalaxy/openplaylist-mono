@@ -12,6 +12,7 @@ import { routeTree } from './routeTree.gen'
 import './i18n'
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
+import ErrorComponent from './components/layout/RootError.tsx'
 
 declare global {
   interface Window {
@@ -94,6 +95,10 @@ export const router = createRouter({
   scrollRestoration: true,
   defaultStructuralSharing: true,
   defaultPreloadStaleTime: 0,
+  defaultErrorComponent: ({ error }) => <ErrorComponent error={error} />,
+  defaultNotFoundComponent: () => (
+    <ErrorComponent error={new Error('Страница не найдена (404)')} />
+  ),
 })
 
 // Register the router instance for type safety
