@@ -11,16 +11,38 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuGroup,
+  DropdownMenuPortal,
+  DropdownMenuRadioItem,
+  DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Languages,
+} from "lucide-react"
 import { useAuthStore } from '@/stores/authStore'
 
 export default function MenuDropdown() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { user } = useAuthStore()
 
   if (!user) return null
 
+  const languages = [
+    { code: 'ru', label: 'Русский' },
+    { code: 'en', label: 'English' },
+  ]
 
+  const currentLanguage = languages.find(
+    (language) => language.code === i18n.language,
+  )
+  const handleLanguageChange = (
+    language: (typeof languages)[number]['code'],
+  ) => {
+    i18n.changeLanguage(language)
+  }
 
   return (
     <DropdownMenu>
@@ -33,9 +55,42 @@ export default function MenuDropdown() {
           </div>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-level-2 border-level-3 text-text-main scale-125">
+      <DropdownMenuContent
+        side="bottom"
+        sideOffset={5}
+        className="bg-level-2 border-level-3 text-text-main "
+      >
         <DropdownMenuLabel>{user.username}</DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-level-3" />
+        <DropdownMenuSub>
+          <DropdownMenuGroup>
+            <DropdownMenuSubTrigger
+              className="flex gap-2 items-center 
+            bg-level-2 text-text-main  
+            data-[state=open]:bg-level-1  
+            data-[state=open]:text-text-main  
+            focus:text-text-main
+            focus:bg-level-1"
+            >
+              <Languages  size={16}/><span>{currentLanguage?.label}</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent className="bg-level-2 text-text-main border-0">
+                <DropdownMenuRadioGroup value={currentLanguage?.code} onValueChange={(value) => handleLanguageChange(value)}>
+                  {languages.map((language) => (
+                    <DropdownMenuRadioItem
+                      key={language.code}
+                      value={language.code}
+                      className="text-text-main focus:bg-level-3 bg-level-2"
+                    >
+                      {language.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuGroup>
+        </DropdownMenuSub>
         <DropdownMenuItem disabled>
           <Link to="/statistic" className="flex gap-2 items-center">
             <Statistic strokeWidth={3.5} /> {t('nav.statistic')}

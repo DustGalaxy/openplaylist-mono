@@ -5,33 +5,12 @@ import Dashboard from '@/components/icons/icon-dashboard'
 import MenuDropdown from './menu-dropdown'
 import Search from '@/components/icons/icon-search'
 import { useAuthStore } from '@/stores/authStore'
-import {
-  Select,
-  SelectItem,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 
 export default function Header() {
   const { t, i18n } = useTranslation()
   const { isAuthenticated } = useAuthStore()
   const navigate = useNavigate()
   const windowWidth = window.innerWidth
-
-  const languages = [
-    { code: 'ru', label: 'Русский' },
-    { code: 'en', label: 'English' },
-  ]
-
-  const currentLanguage = languages.find(
-    (language) => language.code === i18n.language,
-  )
-  const handleLanguageChange = (
-    language: (typeof languages)[number]['code'],
-  ) => {
-    i18n.changeLanguage(language)
-  }
 
   return (
     <div className="w-full flex sticky top-0 z-50 justify-center">
@@ -61,43 +40,19 @@ export default function Header() {
             {isAuthenticated && (
               <div className="px-2 ">
                 <Link to="/dashboard">
-                  <Dashboard className='w-8 sm:w-8'/>
+                  <Dashboard className="w-8 sm:w-8" />
                 </Link>
               </div>
             )}
 
             <div className="px-2">
               <Link to="/view">
-                <Search className='w-8 sm:w-8'/>
+                <Search className="w-8 sm:w-8" />
               </Link>
             </div>
           </div>
 
           <div className="flex gap-2 items-center">
-            <Select
-              value={currentLanguage?.code}
-              onValueChange={handleLanguageChange}
-            >
-              <SelectTrigger
-                className="w-fit bg-level-2 text-text-main cursor-pointer
-               ring-0 border-0 focus:ring-0 focus:ring-offset-0 focus-within:border-0 focus-visible:border-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none focus:outline-none focus:border-0"
-              >
-                <SelectValue placeholder={currentLanguage?.label}>
-                  <span>{currentLanguage?.code}</span>
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="bg-level-2  border-0 text-text-main">
-                {languages.map((language) => (
-                  <SelectItem
-                    key={language.code}
-                    value={language.code}
-                    className="text-text-main focus:bg-level-3"
-                  >
-                    {language.code}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             {!isAuthenticated ? (
               <div className="pr-4 ">
                 <button
