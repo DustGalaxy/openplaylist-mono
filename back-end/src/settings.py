@@ -51,6 +51,12 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: str = Field(alias="GOOGLE_CLIENT_SECRET")
     GOOGLE_REDIRECT_URI: str = ""
 
+    DONATEX_URL: str = Field(alias="DONATEX_URL", default="https://donatex.com/api")
+    DONATEX_CLIENT_ID: str = Field(alias="DONATEX_CLIENT_ID")
+    DONATEX_CLIENT_SECRET: str = Field(alias="DONATEX_CLIENT_SECRET")
+    DONATEX_REDIRECT_URI: str = ""
+
+
     EMAIL_COMFIRM_ADRESS: str = ""  # Вычисляется динамически
     SMTP_EMAIL_ADDRESS: str = Field(alias="SMTP_EMAIL_ADDRESS", default="midnulltest@gmail.com")
     SMTP_EMAIL_PASSWORD: str = Field(alias="SMTP_EMAIL_PASSWORD")
@@ -69,6 +75,7 @@ class Settings(BaseSettings):
         self.TWITCH_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
         self.DA_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
         self.GOOGLE_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
+        self.DONATEX_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
         return self
 
     class Config:

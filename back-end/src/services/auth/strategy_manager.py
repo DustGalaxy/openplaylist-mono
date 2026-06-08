@@ -1,6 +1,10 @@
-from src.dto.internal.auth import AuthStrategy
+from src.dto.internal.auth import AuthStrategy, AuthStrategyPKCE
 
-from src.adapters._rabbit.event_broker import bot_twitch_connect_request, bot_da_connect_request, bot_google_connect_request
+from src.adapters._rabbit.event_broker import (
+    bot_twitch_connect_request,
+    bot_da_connect_request,
+    bot_google_connect_request,
+)
 from src.services.auth.twitch_service import AuthTwitchService
 from src.services.auth.da_service import AuthDAService
 from src.services.auth.google_service import AuthGoogleService
@@ -31,10 +35,13 @@ class AuthStrategyManager:
 
         return wrapper
 
-    def add_strategy(self, mark: str, strategy: AuthStrategy):
+    def _is_pkce_strategy(self, strategy: AuthStrategy | AuthStrategyPKCE) -> bool:
+        return "PKCE" in strategy.__class__.__name__
+
+    def add_strategy(self, mark: str, strategy: AuthStrategy | AuthStrategyPKCE):
         self._registry[mark] = strategy
 
-    def get_strategy(self, obj: str) -> AuthStrategy:
+    def get_strategy(self, obj: str) -> AuthStrategy | AuthStrategyPKCE:
         strategy = self._registry.get(obj)
         if strategy is None:
             raise NotImplementedError(f"Strategy for {obj} is not implemented")

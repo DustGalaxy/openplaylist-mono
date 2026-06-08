@@ -32,7 +32,7 @@ class LinkedAccountsCreate(BaseModel):
     platform_user_id: str
     platform_username: str
     platform_avatar_url: str
-    platform_user_email: str
+    platform_user_email: str | None
 
 
 class LinkedAccountsUpdate(BaseModel):

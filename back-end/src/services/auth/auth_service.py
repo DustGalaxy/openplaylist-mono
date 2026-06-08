@@ -31,6 +31,8 @@ from src.models.linked_accounts import LinkedAccountsCreate, LinkedAccountsDomai
 from src.services.auth.strategy_manager import manager
 from src.services.tokens.token_service import token_service
 
+from src.dto.internal.auth import AuthStrategyPKCE, AuthStrategyPKCE
+
 from src._types import Platform
 from src.database import get_async_session
 from src.settings import settings
@@ -188,22 +190,26 @@ class AuthService:
         db_session: AsyncSession,
         code: str,
         type: str,
+        code_verifier: str | None = None,
     ):
         strtg = manager.get_strategy(type)
         if strtg is None:
             raise HTTPException(status_code=400, detail="Platform not supported")
+        if code_verifier is None:
+            platform_user = await strtg.fetch_identity(code)  # type: ignore
+        else:
+            platform_user = await strtg.fetch_identity(code, code_verifier)  # type: ignore
 
-        platform_user = await strtg.fetch_identity(code)
         # level 1 - link with id already exists
         try:
-            link_by_id = await self.link_repo.get_one(db_session, platform_user.get("id"), column="platform_user_id")
+            link_by_id = await self.link_repo.get_one(db_session, platform_user.id, column="platform_user_id")
 
             await token_service.update_tokens(
                 db_session,
                 link_by_id.id,
-                platform_user.get("access_token"),
-                platform_user.get("refresh_token"),
-                platform_user.get("expires_at"),
+                platform_user.access_token,
+                platform_user.refresh_token,
+                platform_user.expires_at,
             )
 
             link_by_id = await self.link_repo.update(db_session, link_by_id)
@@ -215,14 +221,15 @@ class AuthService:
             ...
 
         # if link dont exist - email must be verified
-        if not platform_user.get("email_verified"):
-            raise HTTPException(status_code=400, detail="Email on platform not verified")
+        if not platform_user.email_verified or not platform_user.email:
+            raise HTTPException(
+                status_code=400,
+                detail="Email on platform not verified or not provided. Please verify or register with another platform.",
+            )
 
         # level 2 - another link with email already exists
         try:
-            link_by_email = await self.link_repo.get_by_email_platform(
-                db_session, platform_user.get("email"), Platform(type)
-            )
+            link_by_email = await self.link_repo.get_by_email_platform(db_session, platform_user.email, Platform(type))
 
             if not strtg.allow_email_collision():
                 raise HTTPException(status_code=400, detail="Email collision")
@@ -231,13 +238,13 @@ class AuthService:
                 data={
                     "user_id": str(link_by_email.user_id),
                     "platform": type,
-                    "platform_user_id": platform_user.get("id"),
-                    "platform_user_email": platform_user.get("email"),
-                    "platform_username": platform_user.get("username"),
-                    "platform_avatar_url": platform_user.get("avatar_url"),
-                    "access_token": platform_user.get("access_token"),
-                    "refresh_token": platform_user.get("refresh_token"),
-                    "expires_at": platform_user.get("expires_at"),
+                    "platform_user_id": platform_user.id,
+                    "platform_user_email": platform_user.email,
+                    "platform_username": platform_user.username,
+                    "platform_avatar_url": platform_user.avatar_url,
+                    "access_token": platform_user.access_token,
+                    "refresh_token": platform_user.refresh_token,
+                    "expires_at": platform_user.expires_at,
                 }
             )
         except NotFoundException:
@@ -245,16 +252,16 @@ class AuthService:
 
         try:
             # level 3 - user with email already exists
-            user = await self.user_repo.get_one(db_session, platform_user.get("email"), column="email")
+            user = await self.user_repo.get_one(db_session, platform_user.email, column="email")
         except NotFoundException:
             # level 4 - completly new user
             user = await self.create_user(
                 db_session,
                 AuthUserCreate(
-                    username=platform_user.get("username"),
-                    email=platform_user.get("email"),
-                    email_confirmed=True,
-                    avatar_url=platform_user.get("avatar_url"),
+                    username=platform_user.username,
+                    email=platform_user.email,
+                    email_confirmed=platform_user.email_verified,
+                    avatar_url=platform_user.avatar_url,
                 ),
             )
 
@@ -263,10 +270,10 @@ class AuthService:
             LinkedAccountsCreate(
                 user_id=user.id,
                 platform=Platform(type),
-                platform_user_id=platform_user.get("id"),
-                platform_username=platform_user.get("username"),
-                platform_avatar_url=platform_user.get("avatar_url"),
-                platform_user_email=platform_user.get("email"),
+                platform_user_id=platform_user.id,
+                platform_username=platform_user.username,
+                platform_avatar_url=platform_user.avatar_url,
+                platform_user_email=platform_user.email,
             ),
         )
 
@@ -277,14 +284,14 @@ class AuthService:
                 linked_account_id=new_link.id,
                 platform=Platform(type),
                 token_type="Bearer",
-                platform_user_id=platform_user.get("id"),
-                access_token=platform_user.get("access_token"),
-                refresh_token=platform_user.get("refresh_token"),
-                expires_at=platform_user.get("expires_at"),
+                platform_user_id=platform_user.id,
+                access_token=platform_user.access_token,
+                refresh_token=platform_user.refresh_token,
+                expires_at=platform_user.expires_at,
             ),
         )
 
-        token = self.encode_jwt(user.id, platform_user.get("username"))
+        token = self.encode_jwt(user.id, platform_user.username)
         return token
 
     async def get_all_tokens(self, db_session: AsyncSession, type: Platform) -> list[TokenVaultDomain]:
@@ -319,26 +326,36 @@ class AuthService:
         return await self.link_repo.create(db_session, link)
 
     async def add_integration(
-        self, db_session: AsyncSession, user_id: UUID, code: str, type: Platform
+        self,
+        db_session: AsyncSession,
+        user_id: UUID,
+        code: str,
+        type: Platform,
+        code_verifier: str | None = None,
     ) -> AuthUserSchema:
+        
         strtg = manager.get_strategy(type)
         if strtg is None:
             raise HTTPException(status_code=400, detail="Platform not supported")
 
         try:
             db_user = await self.user_repo.get_one(db_session, user_id)
-            social_user = await strtg.fetch_identity(code)
+            if manager._is_pkce_strategy(strtg) and code_verifier is not None:
+                social_user = await strtg.fetch_identity(code, code_verifier)  # pyright: ignore[reportCallIssue]
+            else:
+                social_user = await strtg.fetch_identity(code)  # pyright: ignore[reportCallIssue]
+
             integration = find(
-                db_user.linked_accounts, lambda x: x.platform == type and x.platform_user_id == social_user["id"]
+                db_user.linked_accounts, lambda x: x.platform == type and x.platform_user_id == social_user.id
             )
             if not integration:
                 link = LinkedAccountsCreate(
                     user_id=user_id,
                     platform=type,
-                    platform_user_id=social_user["id"],
-                    platform_user_email=social_user["email"],
-                    platform_username=social_user["username"],
-                    platform_avatar_url=social_user["avatar_url"],
+                    platform_user_id=social_user.id,
+                    platform_user_email=social_user.email,
+                    platform_username=social_user.username,
+                    platform_avatar_url=social_user.avatar_url,
                 )
 
                 new_link = await self.link_repo.create(db_session, link)
@@ -349,16 +366,16 @@ class AuthService:
                         linked_account_id=new_link.id,
                         platform=type,
                         token_type="Bearer",
-                        platform_user_id=social_user["id"],
-                        access_token=social_user["access_token"],
-                        refresh_token=social_user["refresh_token"],
-                        expires_at=social_user["expires_at"],
+                        platform_user_id=social_user.id,
+                        access_token=social_user.access_token,
+                        refresh_token=social_user.refresh_token,
+                        expires_at=social_user.expires_at,
                     ),
                 )
                 return await self.user_repo.get_one(db_session, user_id)
 
             else:
-                raise HTTPException(status_code=400, detail="User already has a da integration")
+                raise HTTPException(status_code=400, detail=f"User already has a {integration.platform} integration")
         except NotFoundException:
             raise HTTPException(status_code=404, detail="User not found")
 
