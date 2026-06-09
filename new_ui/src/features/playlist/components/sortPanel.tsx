@@ -2,12 +2,13 @@ import React from 'react'
 import Priority from '@/components/icons/icon-priority'
 import DateOutline from '@/components/icons/icon-date'
 import Arrow from '@/components/icons/icon-arrow'
-import Shuffle from '@/components/icons/icon-shuffle'
-import type { SortSettings } from '@/types/playlist'
+
+
 import useMusicStore from '@/stores/musicStore'
 import { usePlaylist } from '@/features/playlist/context/playlist-context'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import { cn } from '@/lib/utils'
+import type { SortSettings } from '@/types/playlist'
 
 const activeStateClass = `
         translate-y-[3px] 
@@ -129,16 +130,7 @@ export default function SortPanel() {
   return (
     <div className="flex gap-2 sm:gap-3 justify-center items-end ">
       {/* Shuffle */}
-      <SortButton
-        icon={Shuffle}
-        isActive={sortSettings.shuffle !== 'none'}
-        onClick={() =>
-          updateSettings({
-            ...sortSettings,
-            shuffle: sortSettings.shuffle === 'none' ? 'desc' : 'none',
-          })
-        }
-      />
+
 
       {/* Priority */}
       <SortButton

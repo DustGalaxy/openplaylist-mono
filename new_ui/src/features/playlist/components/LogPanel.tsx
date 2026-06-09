@@ -292,14 +292,14 @@ export default function LogPanel() {
 
   if (logs.length === 0)
     return (
-      <div className="w-full h-[200px] bg-level-1 mt-1 rounded-[var(--rounded-std)] px-2 py-1.5" />
+      <div className="w-full h-[350px] bg-level-1 mt-1 rounded-[var(--rounded-std)] px-2 py-1.5" />
     )
 
   return (
-    <div className="w-full bg-level-1 mt-1 rounded-[var(--rounded-std)] px-2 py-1.5 font-mono text-xs overflow-x-hidden">
+    <div className="w-full bg-level-1 mt-1 h-[350px] rounded-[var(--rounded-std)] px-2 py-1.5 font-mono text-xs overflow-x-hidden">
       <div
         ref={scrollContainerRef}
-        className="flex flex-col w-full gap-1 h-[200px] overflow-y-auto scroll-auto"
+        className="flex flex-col w-full gap-1 scroll-auto"
       >
         {logs.map((log, i) => (
           <LogModal key={log.id || i} data={log}>

@@ -59,7 +59,11 @@ type StoreState = {
 
   // add track flow
   // optimistic + server request
-  requestAddTrack: (playlistId: string, yt_video_id: string, ownerId?: string) => Promise<void>
+  requestAddTrack: (
+    playlistId: string,
+    yt_video_id: string,
+    ownerId?: string,
+  ) => Promise<void>
   syncAddTrack: (playlistId: string, track: Track) => void // вызывается из socket handler
 
   requestPlayNow: (
@@ -272,10 +276,10 @@ export const useMusicStore = create<StoreState>((set, get) => {
     },
 
     /* ---- ADD flow ---- */
-    async requestAddTrack(playlistId, yt_video_url, ownerId=null) {
+    async requestAddTrack(playlistId, yt_video_url, ownerId = null) {
       // optimistic: add to playlist
       const { user } = useAuthStore.getState()
-      var owner_id = get().playlists.find((p) => p.id === playlistId)?.owner_id 
+      var owner_id = get().playlists.find((p) => p.id === playlistId)?.owner_id
       owner_id = owner_id ? owner_id : ownerId
       if (!user || !owner_id) {
         console.debug('no user in requestAddTrack')
@@ -432,6 +436,9 @@ export const useMusicStore = create<StoreState>((set, get) => {
     /* ---- Playback navigation ---- */
     playNext(pl, reason?: string, forceNextTrack?: Track) {
       const repeatHandler = () => {
+        if (pl.settings.sort_settings.shuffle !== 'none') {
+          return pl.track_data[Math.floor(Math.random() * pl.track_data.length)]
+        }
         if (pl.settings.repeat_mode === 'all') {
           if (
             pl.track_data[pl.track_data.length - 1].id === pl.now_playing?.id
@@ -503,13 +510,13 @@ export const useMusicStore = create<StoreState>((set, get) => {
       let tracks = [...playlist.track_data]
 
       // Если shuffle включен — делаем случайную перестановку
-      if (sort_settings.shuffle !== 'none') {
-        tracks = tracks
-          .map((t) => ({ t, sort: Math.random() }))
-          .sort((a, b) => a.sort - b.sort)
-          .map(({ t }) => t)
-        return { ...playlist, track_data: tracks }
-      }
+      // if (sort_settings.shuffle !== 'none') {
+      //   tracks = tracks
+      //     .map((t) => ({ t, sort: Math.random() }))
+      //     .sort((a, b) => a.sort - b.sort)
+      //     .map(({ t }) => t)
+      //   return { ...playlist, track_data: tracks }
+      // }
 
       // Сортировка по priority и date
       const sortedTracks = [...tracks].sort((a, b) => {

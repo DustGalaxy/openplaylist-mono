@@ -29,7 +29,8 @@ import Repeat from '@/components/icons/icon-repeat'
 import PlayNowCard from './playnow-card'
 import Counter from './order-counter'
 import { PlaylistQueueInput } from './bar'
-
+import Shuffle from '@/components/icons/icon-shuffle'
+import type { SortSettings } from '@/types/playlist'
 import SettingsModal from '@/features/settings/components/playlist-settings/settingsModal'
 import SavedList from './saved-list'
 import SortPanel from './sortPanel'
@@ -52,6 +53,62 @@ import {
   usePlaylist,
 } from '@/features/playlist/context/playlist-context'
 import LogPanel from './LogPanel'
+import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
+
+const activeStateClass = `
+        translate-y-[3px] 
+        sm:translate-y-[5px] 
+        shadow-[0_0px_0_0_theme(colors.level-3),0_0px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)]
+        `
+const notActiveStateClass = `
+        box-border
+        shadow-[0_3px_0_0_theme(colors.level-3),_0_0px_10px_rgba(0,0,0,0.4),_0_2px_4px_rgba(0,0,0,0.3)] 
+        sm:shadow-[0_5px_0_0_theme(colors.level-3),_0_0px_15px_rgba(0,0,0,0.55),_0_4px_8px_rgba(0,0,0,0.45)] 
+
+        hover:text-shadow-[0_0_4px_rgba(255,255,255,0.8),_0_0_25px_rgba(255,255,255,0.4)]
+        hover:[&_svg]:drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]
+
+        disabled:cursor-not-allowed
+        disabled:opacity-50
+        disabled:shadow-none
+        disabled:hover:shadow-none
+        disabled:hover:text-shadow-none
+        disabled:[&_svg]:drop-shadow-none
+        disabled:active:shadow-none
+        disabled:active:translate-y-0
+
+        transform translate-y-0
+        `
+
+const SortButton = ({
+  icon: Icon,
+  isActive,
+  onClick,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  isActive: boolean
+  onClick: () => void
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        `px-5 pt-0.5 pb-[3px]            
+        sm:pt-1 sm:pb-[5px] 
+        cursor-pointer 
+        transition-all 
+        duration-100 
+        ease-out border-level-2 bg-level-2          
+        rounded-[var(--rounded-std)] 
+        flex items-center justify-center 
+`,
+        isActive ? activeStateClass : notActiveStateClass,
+      )}
+    >
+      <Icon className="size-6 sm:size-8" />
+    </button>
+  )
+}
 
 function InfoCard({
   icon,
@@ -106,7 +163,9 @@ function PlaylistView() {
   const [queueSearch, setQueueSearch] = React.useState('')
 
   const [isPaused, setIsPaused] = React.useState(false)
-
+  const [sortSettings, setSortSettings] = React.useState<SortSettings>(
+    playlist.settings.sort_settings,
+  )
   const { playNext, requestPlSettings, playPrev } = useMusicStore()
 
   const visibleTracks = React.useMemo(() => {
@@ -127,6 +186,24 @@ function PlaylistView() {
     setActivePlst(playlist.is_allow_external_requests)
   }, [playlist.is_allow_external_requests])
 
+  const canRequest = React.useRef(false)
+
+  useDebouncedEffect(
+    sortSettings,
+    async () => {
+      if (!canRequest.current) return
+      canRequest.current = false
+      await requestPlSettings(playlist.id, { sort_settings: sortSettings })
+    },
+    2000,
+  )
+
+  const updateSettings = (newSettings: SortSettings) => {
+    setSortSettings(newSettings)
+    playlist.settings.sort_settings = newSettings
+    canRequest.current = true
+  }
+
   const [showConsole, setShowConsole] = React.useState(false)
   const [showContentSettings, setShowContentSettings] = React.useState(false)
   const [selectedContentSettingIndex, setSelectedContentSettingIndex] =
@@ -136,15 +213,83 @@ function PlaylistView() {
 
   return (
     <div className="w-full flex flex-col gap-3">
-      <div className="w-full grid gap-4 grid-cols-1  grid-rows-[auto_auto_auto] ">
-        <YoutubePlayer
-          playOnReady={true}
-          pause={isPaused}
-          nowPlay={nowPlaying}
-          className="sm:row-span-2 flex items-center justify-center"
-        />
+      <div className="w-full grid gap-4 grid-cols-1 items-end sm:grid-cols-2 sm:grid-rows-[430px_auto_auto] grid-rows-[auto_auto_auto]">
+        <div className={`flex flex-col gap-4 w-full px-3 pt-3 pb-4 ${panelClass}`}>
+          <YoutubePlayer
+            playOnReady={true}
+            pause={isPaused}
+            nowPlay={nowPlaying}
+            className="sm:row-span-2 flex items-center justify-center"
+          />
+          <div className="w-full gap-2 grid grid-cols-5">
+            <Btn
+              text={
+                repeatMode === 'all' ? (
+                  <Repeat width={33} height={33} />
+                ) : repeatMode === 'once' ? (
+                  <RepeatSingle width={33} height={33} />
+                ) : (
+                  <RepeatLined width={33} height={33} />
+                )
+              }
+              className="px-2 bg-level-2"
+              onClick={() => {
+                if (repeatMode === 'all') {
+                  setRepeatMode('once')
+                  requestPlSettings(playlist.id, { repeat_mode: 'once' })
+                } else if (repeatMode === 'once') {
+                  setRepeatMode('none')
+                  requestPlSettings(playlist.id, { repeat_mode: 'none' })
+                  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                } else if (repeatMode === 'none') {
+                  setRepeatMode('all')
+                  requestPlSettings(playlist.id, { repeat_mode: 'all' })
+                }
+              }}
+            />
+            {playlist.settings.mode === 'static' && (
+              <Btn
+                text={<Next width={33} height={33} className=" rotate-180" />}
+                className="px-2 bg-level-2"
+                onClick={() => {
+                  playPrev(playlist.id)
+                }}
+              />
+            )}
+            <Btn
+              text={
+                isPaused ? (
+                  <Play width={33} height={33} />
+                ) : (
+                  <Pause width={33} height={33} />
+                )
+              }
+              className="px-2 bg-level-2"
+              onClick={() => {
+                isPaused ? setIsPaused(false) : setIsPaused(true)
+              }}
+            />
+            <Btn
+              text={<Next width={33} height={33} />}
+              className="px-2 bg-level-2"
+              onClick={() => {
+                playNext(playlist, 'skipped')
+              }}
+            />
+            <SortButton
+              icon={Shuffle}
+              isActive={sortSettings.shuffle !== 'none'}
+              onClick={() =>
+                updateSettings({
+                  ...sortSettings,
+                  shuffle: sortSettings.shuffle === 'none' ? 'desc' : 'none',
+                })
+              }
+            />
+          </div>
+        </div>
 
-        <div className={`w-full gap-4 grid p-4 sm:p-6 ${panelClass}`}>
+        <div className={`w-full gap-4 items-end grid px-3 pt-3 pb-4 ${panelClass}`}>
           {showConsole && <LogPanel />}
 
           {showContentSettings && (
@@ -170,7 +315,7 @@ function PlaylistView() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-0.25 sm:gap-0.5">
                 <InfoCard
                   icon={<Settings size={14} />}
                   label={t('playlist.stats.mode')}
@@ -223,7 +368,7 @@ function PlaylistView() {
               </div>
             </div>
           )}
-          <div className="flex flex-wrap gap-4 justify-between items-center">
+          <div className="flex flex-wrap gap-4  justify-between ">
             <div className="flex flex-wrap w-full sm:w-fit gap-2 justify-between sm:justify-start">
               <div className="flex gap-2">
                 <Btn
@@ -244,14 +389,14 @@ function PlaylistView() {
                   }}
                 />
                 <Btn
-                  text={<Shield  />}
+                  text={<Shield />}
                   className="px-3 bg-level-2"
                   onClick={() => {
                     setShowContentSettings(!showContentSettings)
                   }}
                 />
               </div>
-
+              <SettingsModal />
               <Btn
                 text={
                   <>
@@ -274,67 +419,10 @@ function PlaylistView() {
                 )}
               />
             </div>
-            <div className="flex flex-wrap w-full sm:w-fit gap-2 justify-between sm:justify-end">
-              <Btn
-                text={
-                  repeatMode === 'all' ? (
-                    <Repeat width={33} height={33} />
-                  ) : repeatMode === 'once' ? (
-                    <RepeatSingle width={33} height={33} />
-                  ) : (
-                    <RepeatLined width={33} height={33} />
-                  )
-                }
-                className="px-2 bg-level-2"
-                onClick={() => {
-                  if (repeatMode === 'all') {
-                    setRepeatMode('once')
-                    requestPlSettings(playlist.id, { repeat_mode: 'once' })
-                  } else if (repeatMode === 'once') {
-                    setRepeatMode('none')
-                    requestPlSettings(playlist.id, { repeat_mode: 'none' })
-                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                  } else if (repeatMode === 'none') {
-                    setRepeatMode('all')
-                    requestPlSettings(playlist.id, { repeat_mode: 'all' })
-                  }
-                }}
-              />
-              {playlist.settings.mode === 'static' && (
-                <Btn
-                  text={<Next width={33} height={33} className=" rotate-180" />}
-                  className="px-2 bg-level-2"
-                  onClick={() => {
-                    playPrev(playlist.id)
-                  }}
-                />
-              )}
-              <Btn
-                text={
-                  isPaused ? (
-                    <Play width={33} height={33} />
-                  ) : (
-                    <Pause width={33} height={33} />
-                  )
-                }
-                className="px-2 bg-level-2"
-                onClick={() => {
-                  isPaused ? setIsPaused(false) : setIsPaused(true)
-                }}
-              />
-              <Btn
-                text={<Next width={33} height={33} />}
-                className="px-2 bg-level-2"
-                onClick={() => {
-                  playNext(playlist, 'skipped')
-                }}
-              />
-              <SettingsModal />
-            </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-center py-2">
+        <div className="flex items-center justify-center py-2 sm:col-span-2">
           {playlist.now_playing?.yt_video_id ? (
             <PlayNowCard track={playlist.now_playing} />
           ) : (
