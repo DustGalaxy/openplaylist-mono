@@ -20,7 +20,7 @@ const EmailConfirmPage = () => {
   const navigate = useNavigate()
   const search = useSearch({ from: '/email-confirm' }) as SearchParams
   const queryClient = useQueryClient()
-  const { setUser, clearAuth, setLoadingAuth, user } = useAuthStore()
+  const { setUser, setLoadingAuth, user } = useAuthStore()
   const [error, setError] = useState<string | null>(null)
 
   const email = search.email

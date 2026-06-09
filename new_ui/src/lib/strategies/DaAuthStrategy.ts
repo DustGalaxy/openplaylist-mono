@@ -12,9 +12,11 @@ export class DaAuthStrategy implements IAuthLoginStrategy {
   }
 
   formatIntegrationPayload(code: string): Record<string, unknown> {
-    return { code }
+    return {
+      code,
+    }
   }
-  
+
   getScopeString(scopes: Array<string>): string {
     return scopes.join(' ')
   }

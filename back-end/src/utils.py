@@ -5,6 +5,7 @@ import functools
 import json
 from uuid import UUID, uuid4
 
+import isodate
 from pydantic import BaseModel
 from taskiq.kicker import AsyncKicker
 
@@ -28,7 +29,8 @@ async def kick(task_name: str, broker, *args, labels=None, **kwargs):
 
 
 def parse_ISO_8601(s: str) -> int:
-    return int(datetime.fromisoformat(s).timestamp())
+    return int(isodate.parse_duration("PT2M50S").total_seconds())
+
 
 def extract_youtube_video_id(url: str) -> str | None:
     """

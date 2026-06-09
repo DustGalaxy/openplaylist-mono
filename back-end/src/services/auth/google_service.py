@@ -81,7 +81,7 @@ class AuthGoogleService(AuthStrategy):
         token = self.get_token(code)
         google_user = self.get_data(token.id_token)
         user = PlatformUser(
-            id=google_user.iss,
+            id=google_user.sub,
             username=google_user.name,
             avatar_url=google_user.picture or "",
             email=google_user.email,

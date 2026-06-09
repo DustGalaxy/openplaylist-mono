@@ -47,7 +47,6 @@ export function UserSettingsPage({
     { id: 'account', label: t('settings.tabs.account'), icon: '⚙️' },
     { id: 'integrations', label: t('settings.tabs.integrations'), icon: '🔗' },
   ]
-
   const handleOAuthRedirect = useOAuthUrl()
 
   const platformConfigs = {

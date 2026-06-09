@@ -50,23 +50,6 @@ const BACKEND_DOMAIN = import.meta.env.DEV
   ? 'http://localhost:8000'
   : PROJECT_DOMAIN
 
-// # API URLы (Если бэкенд в том же докере, можно слать через прокси)
-// WS_URL='https://openplaylist.localhost'
-// SOCKET_PATH='/api/socket.io'
-// PLST_URL='https://openplaylist.localhost/api/playlist'
-// SETTINGS_URL='https://openplaylist.localhost/api/settings'
-// AUTH_URL='https://openplaylist.localhost/api'
-// ORDER_URL='https://openplaylist.localhost/api/order'
-
-// # Twitch Settings
-// TWITCH_ID='vsil95c2am4rgvbgdax1o4a1u003mx'
-// TWITCH_REDIRECT='https://openplaylist.localhost/oauth-callback'
-// TWITCH_SCOPES='user:read:email'
-
-// # DonationAlerts Settings
-// DA_CLIENT_ID="18779"
-// DA_REDIRECT_URI="http://openplaylist.localhost/oauth-callback"
-// DA_SCOPES="oauth-user-show oauth-donation-subscribe"
 
 window.appConfig = {
   PROJECT_DOMAIN: PROJECT_DOMAIN,
@@ -85,7 +68,7 @@ window.appConfig = {
   GOOGLE_SCOPES: [
     'https://www.googleapis.com/auth/userinfo.profile',
     'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/youtube.readonly',
+    // 'https://www.googleapis.com/auth/youtube.readonly',
     'openid',
   ],
 

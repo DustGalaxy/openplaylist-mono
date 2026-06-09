@@ -1,6 +1,7 @@
-from database import create_db, drop_db
+
 import asyncio
 
+from src.database import create_db, drop_db
 from src.orm.auth_user import User
 from src.orm.linked_accounts import LinkedAccounts
 from src.orm.playlist import Playlist, OrderPlaylistStatus, Order
