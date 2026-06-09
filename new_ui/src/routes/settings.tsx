@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { getUserIntegrations } from '@/api/api-user'
 import { useAuthStore } from '@/stores/authStore'
-import { useDaLoginUrl, useTwitchLoginUrl } from '@/hooks/useAuthUrl'
 import { UserSettingsPage } from '@/features/user-settings'
 import { useTranslation } from 'react-i18next'
 import Btn from '@/components/ui/my-btn'
@@ -30,9 +29,6 @@ function RouteComponent() {
   const navigate = useNavigate()
   const { isAuthenticated, user, expired_at, setUser } = useAuthStore()
   const { integrations } = Route.useLoaderData()
-
-  const handleTwitchLogin = useTwitchLoginUrl()
-  const handleDaLogin = useDaLoginUrl()
 
   const handleUserUpdate = (patch: Partial<UserProfile>) => {
     if (user) {
@@ -86,8 +82,6 @@ function RouteComponent() {
       expired_at={expired_at}
       integrations={integrations}
       onUserUpdate={handleUserUpdate}
-      useTwitchLoginUrl={() => handleTwitchLogin}
-      useDaLoginUrl={() => handleDaLogin}
     />
   )
 }

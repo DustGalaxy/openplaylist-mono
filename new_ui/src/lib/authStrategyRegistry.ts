@@ -12,29 +12,31 @@ import { authStrategyManager } from './authStrategyManager'
 import { TwitchAuthStrategy } from './strategies/TwitchAuthStrategy'
 import { DaAuthStrategy } from './strategies/DaAuthStrategy'
 import { GoogleAuthStrategy } from './strategies/GoogleAuthStrategy'
-
+import { DonateXIntegrayionStrategy } from './strategies/DonateXIntegrayionStrategy'
 
 /**
  * Initialize and register all available auth strategies
  * Call this function once during app initialization
  */
 export function registerAuthStrategies(): void {
-  const twitchStrategy = new TwitchAuthStrategy()
-  const daStrategy = new DaAuthStrategy()
-  const googleStrategy = new GoogleAuthStrategy()
-
-
   // Register Twitch strategy
+  const twitchStrategy = new TwitchAuthStrategy()
   authStrategyManager.registerIntegrationStrategy('twitch', twitchStrategy)
   authStrategyManager.registerLoginStrategy('twitch', twitchStrategy)
 
   // Register donationalerts strategy
+  const daStrategy = new DaAuthStrategy()
   authStrategyManager.registerIntegrationStrategy('donationalerts', daStrategy)
   authStrategyManager.registerLoginStrategy('donationalerts', daStrategy)
 
   // Register google strategy
+  const googleStrategy = new GoogleAuthStrategy()
   authStrategyManager.registerIntegrationStrategy('google', googleStrategy)
   authStrategyManager.registerLoginStrategy('google', googleStrategy)
+
+  // Register DonateX integration strategy
+  const donateXStrategy = new DonateXIntegrayionStrategy()
+  authStrategyManager.registerIntegrationStrategy('donateX', donateXStrategy)
 
   console.log(
     'Auth strategies registered:',
