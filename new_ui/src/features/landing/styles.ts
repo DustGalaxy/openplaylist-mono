@@ -8,7 +8,7 @@ export const panelClass =
 export const panelAccentClass =
   'rounded-(--rounded-std) border-2 border-level-3 bg-level-2 shadow-[-2px_2px_14px_rgba(0,0,0,0.3)]'
 
-export const pageWrapClass = 'w-full text-text-main px-4 py-8 sm:py-10'
+export const pageWrapClass = 'w-full text-text-main px-4 pt-4 pb-8 sm:pb-10'
 
 export const pageInnerClass = 'mx-auto max-w-5xl w-full'
 

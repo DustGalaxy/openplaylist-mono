@@ -19,7 +19,6 @@ import {
 } from '@/types/playlist'
 import type { Integration } from '@/types/user'
 import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { DialogDescription } from '@/components/ui/dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { getUserIntegrations } from '@/api/api-user'

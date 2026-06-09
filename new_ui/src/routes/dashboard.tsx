@@ -90,8 +90,8 @@ function RouteComponent() {
   return (
     <div className={pageWrapClass}>
       <div className={pageInnerClass}>
-        <header className="mb-6 sm:mb-8">
-          <p className={`text-sm font-medium mb-2 ${gradientTextClass}`}>
+        {/* <header className="">
+          <p className={`text-sm font-medium ${gradientTextClass}`}>
             {t('dashboard.eyebrow')}
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold text-text-main">
@@ -100,7 +100,7 @@ function RouteComponent() {
           <p className="text-sm sm:text-base text-text-secondary mt-1">
             {t('dashboard.subtitle')}
           </p>
-        </header>
+        </header> */}
 
         <Tabs className="w-full">
           <TabsList className="w-full flex flex-nowrap items-center justify-start gap-2 overflow-hidden bg-transparent p-0 h-auto">
