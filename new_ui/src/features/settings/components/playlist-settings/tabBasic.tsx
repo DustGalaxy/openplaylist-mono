@@ -8,12 +8,14 @@ import {
   Twitch,
   XFormerlyTwitter,
   Youtube,
+  Google,
 } from '@thesvg/react'
 import DonationAlerts from '@/components/icons/icon-da'
-import type {
-  ClientPlaylist,
-  Platform,
-  PlaylistSettings,
+import {
+  ExternalContentPlatform,
+  type ClientPlaylist,
+  type Platform,
+  type PlaylistSettings,
 } from '@/types/playlist'
 import type { Integration } from '@/types/user'
 import { Label } from '@/components/ui/label'
@@ -73,6 +75,7 @@ const TabBasic = ({
       spotify: <Spotify className={iconStyles} />,
       donationalerts: <DonationAlerts className={iconStyles} />,
       da: <DonationAlerts className={iconStyles} />,
+      google: <Google className={iconStyles} />,
     }
     return platformIcons[platform.toLowerCase()] || null
   }
@@ -89,6 +92,8 @@ const TabBasic = ({
       spotify: 'platform.spotify',
       x: 'platform.x',
       google: 'platform.google',
+      donatex: 'platform.donatex',
+      donatepay: 'platform.donatepay',
     }
     const key = keyMap[normalized]
     return key ? t(key) : platform
@@ -253,46 +258,55 @@ const TabBasic = ({
             </div>
           ) : (
             <div className="space-y-3">
-              {integrations.map((integration) => (
-                <div
-                  key={`${integration.platform}-${integration.platform_user_id}`}
-                  className="flex items-center gap-3 px-3 py-2 rounded bg-level-2 transition-colors cursor-pointer"
-                  onClick={() =>
-                    handleSourceToggle(
-                      integration.platform,
-                      integration.platform_user_id,
-                    )
-                  }
-                >
-                  <Checkbox
-                    checked={isSourceSelected(
-                      integration.platform,
-                      integration.platform_user_id,
-                    )}
-                    onCheckedChange={() =>
+              {integrations.map((integration) => {
+                if (
+                  !Object.values(ExternalContentPlatform).includes(
+                    integration.platform,
+                  )
+                )
+                  return null
+
+                return (
+                  <div
+                    key={`${integration.platform}-${integration.platform_user_id}`}
+                    className="flex items-center gap-3 px-3 py-2 rounded bg-level-2 transition-colors cursor-pointer"
+                    onClick={() =>
                       handleSourceToggle(
                         integration.platform,
                         integration.platform_user_id,
                       )
                     }
-                    className="mt-0.5 flex-shrink-0 rounded-[4px] border-level-3 cursor-pointer"
-                  />
+                  >
+                    <Checkbox
+                      checked={isSourceSelected(
+                        integration.platform,
+                        integration.platform_user_id,
+                      )}
+                      onCheckedChange={() =>
+                        handleSourceToggle(
+                          integration.platform,
+                          integration.platform_user_id,
+                        )
+                      }
+                      className="mt-0.5 flex-shrink-0 rounded-[4px] border-level-3 cursor-pointer"
+                    />
 
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-6 h-6 flex items-center justify-center rounded flex-shrink-0">
-                      {getPlatformIcon(integration.platform)}
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="font-medium text-sm">
-                        {getPlatformDisplayName(integration.platform)}
-                      </span>
-                      <span className="text-xs text-gray-400 truncate">
-                        @{integration.platform_username}
-                      </span>
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="w-6 h-6 flex items-center justify-center rounded flex-shrink-0">
+                        {getPlatformIcon(integration.platform)}
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-medium text-sm">
+                          {getPlatformDisplayName(integration.platform)}
+                        </span>
+                        <span className="text-xs text-gray-400 truncate">
+                          @{integration.platform_username}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>

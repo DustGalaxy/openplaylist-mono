@@ -1,5 +1,5 @@
 {
-"errorPage": {
+  "errorPage": {
     "eyebrow": "Упс! Что-то сломалось",
     "title": "Произошла ошибка",
     "logLabel": "Лог ошибки:",
@@ -729,7 +729,9 @@
     "google": "Google",
     "github": "GitHub",
     "spotify": "Spotify",
-    "da": "Donation Alerts"
+    "da": "Donation Alerts",
+    "donatex": "DonateX",
+    "donatepay": "DonatePay"
   },
   "twitch": {
     "role": {

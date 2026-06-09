@@ -53,7 +53,7 @@ export function getOAuthPlatformConfig(
     case 'donatex':
       return {
         platformName: 'DonateX',
-        authorizationUrl: 'https://donatex.com/oauth/authorize',
+        authorizationUrl: 'https://donatex.gg/api/connect/authorize',
         scopes: config.DONATEX_SCOPES,
         clientId: config.DONATEX_CLIENT_ID,
         code_challenge: '',
@@ -122,7 +122,9 @@ export async function buildOAuthUrl(
   if (!platformConfig) {
     throw new Error(`OAuth not configured for platform: ${platform}`)
   }
+
   var scope = ''
+
   if (state.includes('integration')) {
     scope = authStrategyManager
       .getIntegrationStrategy(platform)
@@ -132,6 +134,7 @@ export async function buildOAuthUrl(
       .getLoginStrategy(platform)
       .getScopeString(platformConfig.scopes)
   }
+
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: platformConfig.clientId,

@@ -11,6 +11,7 @@ export class DonateXIntegrayionStrategy implements IAuthIntegrationStrategy {
   formatIntegrationPayload(code: string): Record<string, unknown> {
     return {
       code: code,
+      
     }
   }
   getErrorMessage(context: 'network' | 'auth_failed'): string {

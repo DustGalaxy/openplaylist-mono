@@ -1,5 +1,5 @@
 {
-"errorPage": {
+  "errorPage": {
     "eyebrow": "Wow! Something went wrong",
     "title": "Something went wrong",
     "logLabel": "Error log:",
@@ -747,7 +747,9 @@
     "google": "Google",
     "github": "GitHub",
     "spotify": "Spotify",
-    "da": "Donation Alerts"
+    "da": "Donation Alerts",
+    "donatex": "DonateX",
+    "donatepay": "DonatePay"
   },
   "twitch": {
     "role": {

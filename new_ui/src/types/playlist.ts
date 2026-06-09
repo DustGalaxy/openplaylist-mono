@@ -28,6 +28,13 @@ export enum RequestPlatform {
   DonateX = 'donatex',
 }
 
+export enum ExternalContentPlatform {
+  Twitch = 'twitch',
+  YouTube = 'youtube',
+  DonationAlerts = 'donationalerts',
+  DonateX = 'donatex',
+}
+
 export type Role = {
   key: string
   name: string
