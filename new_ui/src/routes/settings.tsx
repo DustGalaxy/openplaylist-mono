@@ -31,9 +31,6 @@ function RouteComponent() {
   const { isAuthenticated, user, expired_at, setUser } = useAuthStore()
   const { integrations } = Route.useLoaderData()
 
-  const handleTwitchLogin = useTwitchLoginUrl()
-  const handleDaLogin = useDaLoginUrl()
-
   const handleUserUpdate = (patch: Partial<UserProfile>) => {
     if (user) {
       const emailChanged =
@@ -86,8 +83,6 @@ function RouteComponent() {
       expired_at={expired_at}
       integrations={integrations}
       onUserUpdate={handleUserUpdate}
-      useTwitchLoginUrl={() => handleTwitchLogin}
-      useDaLoginUrl={() => handleDaLogin}
     />
   )
 }

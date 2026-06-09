@@ -23,8 +23,6 @@ interface UserSettingsPageProps {
   expired_at: number | null
   integrations: Array<Integration>
   onUserUpdate: (patch: Partial<UserProfile>) => void
-  useTwitchLoginUrl: () => (value: boolean) => void
-  useDaLoginUrl: () => (value: boolean) => void
 }
 
 type TabId = 'profile' | 'account' | 'integrations'
@@ -40,8 +38,6 @@ export function UserSettingsPage({
   expired_at,
   integrations,
   onUserUpdate,
-  useTwitchLoginUrl,
-  useDaLoginUrl,
 }: UserSettingsPageProps) {
   const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState<TabId>('profile')
@@ -51,9 +47,6 @@ export function UserSettingsPage({
     { id: 'account', label: t('settings.tabs.account'), icon: '⚙️' },
     { id: 'integrations', label: t('settings.tabs.integrations'), icon: '🔗' },
   ]
-
-  const handleTwitchLogin = useTwitchLoginUrl()
-  const handleDaLogin = useDaLoginUrl()
   const handleOAuthRedirect = useOAuthUrl()
 
   const platformConfigs = {
@@ -67,18 +60,22 @@ export function UserSettingsPage({
           color="#fff"
         />
       ),
-      loginHandler: handleTwitchLogin,
+      loginHandler:() => {
+        handleOAuthRedirect('twitch', true)
+      },
     },
     da: {
       name: t('platform.donationAlerts'),
       icon: <DonationAlerts width={45} height={45} />,
-      loginHandler: handleDaLogin,
+      loginHandler: () => {
+        handleOAuthRedirect('donationalerts', true)
+      },
     },
     google: {
       name: t('platform.google'),
       icon: <Google width={45} height={45} />,
       loginHandler: () => {
-        handleOAuthRedirect('google')
+        handleOAuthRedirect('google', true)
       },
     },
   } as const
