@@ -29,7 +29,7 @@ async def kick(task_name: str, broker, *args, labels=None, **kwargs):
 
 
 def parse_ISO_8601(s: str) -> int:
-    return int(isodate.parse_duration("PT2M50S").total_seconds())
+    return int(isodate.parse_duration(s).total_seconds())
 
 
 def extract_youtube_video_id(url: str) -> str | None:
