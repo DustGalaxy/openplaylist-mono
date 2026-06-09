@@ -24,15 +24,23 @@ declare global {
       PLST_API_URL: string
       AUTH_API_URL: string
       ORDER_API_URL: string
+
       TWITCH_CLIENT_ID: string
       TWITCH_REDIRECT_URI: string
       TWITCH_SCOPES: Array<string>
+
       GOOGLE_CLIENT_ID: string
       GOOGLE_REDIRECT_URI: string
       GOOGLE_SCOPES: Array<string>
+
       DA_CLIENT_ID: string
       DA_REDIRECT_URI: string
       DA_SCOPES: Array<string>
+
+      DONATEX_CLIENT_ID: string
+      DONATEX_REDIRECT_URI: string
+      DONATEX_SCOPES: Array<string>
+      DONATEX_CODE_CHALLENGE_METHOD: string
     }
   }
 }
@@ -80,11 +88,19 @@ window.appConfig = {
     'https://www.googleapis.com/auth/youtube.readonly',
     'openid',
   ],
+
+  DONATEX_CLIENT_ID: '',
+  DONATEX_REDIRECT_URI: `${PROJECT_DOMAIN}/oauth-callback`,
+  DONATEX_SCOPES: ['user.read', 'offline_access', 'donations.subscribe'],
+  DONATEX_CODE_CHALLENGE_METHOD: 'S256',
+
   DA_CLIENT_ID: '18779',
   DA_REDIRECT_URI: `${PROJECT_DOMAIN}/oauth-callback`,
   DA_SCOPES: ['oauth-user-show', 'oauth-donation-subscribe'],
 }
+
 registerAuthStrategies()
+
 // Create a new router instance
 export const router = createRouter({
   routeTree,

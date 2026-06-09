@@ -52,7 +52,7 @@ async def get_all_twitch_users(
     await message.ack()
     print("get_all_twitch_users")
     async with async_session_maker() as session:
-        from services.auth.auth_service import auth_service
+        from src.services.auth.auth_service import auth_service
 
         tokens = await auth_service.get_all_tokens(session, Platform.TWITCH)
         return [
@@ -94,6 +94,6 @@ async def user_token_died(
     await message.ack()
     event: dict = json.loads(message.body)
     async with async_session_maker() as session:
-        from services.auth.auth_service import auth_service
+        from src.services.auth.auth_service import auth_service
 
         await auth_service.bot_was_disconnected(session, event, Platform.TWITCH)

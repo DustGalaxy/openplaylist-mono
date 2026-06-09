@@ -33,7 +33,9 @@ export function serializeOAuthState(data: OAuthStateData): string {
  * Deserialize OAuth state parameter back to structured data
  * Called in callback page to extract platform and operation type
  */
-export function deserializeOAuthState(stateParam: string): OAuthStateData | null {
+export function deserializeOAuthState(
+  stateParam: string,
+): OAuthStateData | null {
   try {
     const parts = stateParam.split('|')
     if (parts.length !== 3) {
@@ -66,12 +68,12 @@ export function deserializeOAuthState(stateParam: string): OAuthStateData | null
 export const useOAuthUrl = () => {
   const routerState = useRouterState()
 
-  const handleOAuthRedirect = (
+  const handleOAuthRedirect = async (
     platform: string,
     isIntegration: boolean = false,
   ) => {
     // 1. Validate platform is supported
-    if (!isOAuthPlatformSupported(platform)) {
+    if (!isOAuthPlatformSupported(platform) && !isIntegration) {
       console.error(`OAuth not configured for platform: ${platform}`)
       throw new Error(`Platform "${platform}" is not configured for OAuth`)
     }
@@ -97,7 +99,7 @@ export const useOAuthUrl = () => {
 
     // 5. Build complete OAuth authorization URL
     const redirectUri = `${window.location.origin}/oauth-callback`
-    const authUrl = buildOAuthUrl(platform, serializedState, redirectUri)
+    const authUrl = await buildOAuthUrl(platform, serializedState, redirectUri)
 
     // 6. Redirect to OAuth provider
     console.log(
@@ -107,32 +109,4 @@ export const useOAuthUrl = () => {
   }
 
   return handleOAuthRedirect
-}
-
-/**
- * @deprecated Use useOAuthUrl() instead
- * Backward compatibility wrapper for Twitch
- */
-export const useTwitchLoginUrl = () => {
-  const handleOAuthRedirect = useOAuthUrl()
-
-  const handleTwitchLogin = (isIntegration: boolean = false) => {
-    handleOAuthRedirect('twitch', isIntegration)
-  }
-
-  return handleTwitchLogin
-}
-
-/**
- * @deprecated Use useOAuthUrl() instead
- * Backward compatibility wrapper for DA
- */
-export const useDaLoginUrl = () => {
-  const handleOAuthRedirect = useOAuthUrl()
-
-  const handleDaLogin = (isIntegration: boolean = false) => {
-    handleOAuthRedirect('donationalerts', isIntegration)
-  }
-
-  return handleDaLogin
 }

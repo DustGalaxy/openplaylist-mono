@@ -8,14 +8,11 @@ export class TwitchAuthStrategy implements IAuthLoginStrategy {
   private readonly platformName = 'twitch'
 
   getIntegrationEndpoint(): string {
-    return '/user/integration'
+    return `/user/integration/${this.platformName}`
   }
 
   formatIntegrationPayload(code: string): Record<string, unknown> {
-    return {
-      code: { code },
-      type: { type: this.platformName },
-    }
+    return { code }
   }
   getScopeString(scopes: Array<string>): string {
     return scopes.join(' ')

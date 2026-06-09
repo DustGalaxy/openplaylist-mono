@@ -61,22 +61,29 @@ export function UserSettingsPage({
           color="#fff"
         />
       ),
-      loginHandler: () => {
-        handleOAuthRedirect('twitch', true)
+      loginHandler: async () => {
+        await handleOAuthRedirect('twitch', true)
       },
     },
     da: {
       name: t('platform.donationAlerts'),
       icon: <DonationAlerts width={45} height={45} />,
-      loginHandler: () => {
-        handleOAuthRedirect('donationalerts', true)
+      loginHandler: async () => {
+        await handleOAuthRedirect('donationalerts', true)
       },
     },
     google: {
       name: t('platform.google'),
       icon: <Google width={45} height={45} />,
-      loginHandler: () => {
-        handleOAuthRedirect('google', true)
+      loginHandler: async () => {
+        await handleOAuthRedirect('google', true)
+      },
+    },
+    donatex: {
+      name: t('platform.donatex'),
+      icon: <img src="/donatex-icon.png" width={45} height={45}></img>,
+      loginHandler: async () => {
+        await handleOAuthRedirect('donatex', true)
       },
     },
   } as const

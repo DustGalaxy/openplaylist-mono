@@ -25,7 +25,10 @@ export interface SuccessfulLoginResponse {
 /**
  * Union type for login response
  */
-export type LoginResponse = EmailCollisionResponse | SuccessfulLoginResponse | AxiosResponse
+export type LoginResponse =
+  | EmailCollisionResponse
+  | SuccessfulLoginResponse
+  | AxiosResponse
 
 /**
  * Interface for integration strategies (link existing accounts)
@@ -35,7 +38,7 @@ export interface IAuthIntegrationStrategy {
    * Get the endpoint for integration
    */
   getIntegrationEndpoint(): string
-  
+
   /**
    * Format the payload for integration request
    */
@@ -50,6 +53,8 @@ export interface IAuthIntegrationStrategy {
    * Allows email collision (account linking)
    */
   allowsEmailCollision(): boolean
+
+  getScopeString(scopes: Array<string>): string
 }
 
 /**
@@ -65,8 +70,6 @@ export interface IAuthLoginStrategy extends IAuthIntegrationStrategy {
    * Format the payload for login request
    */
   formatLoginPayload(code: string): Record<string, unknown>
-
-  getScopeString(scopes: Array<string>): string
 
   /**
    * Get confirmation message for email collision
@@ -84,7 +87,8 @@ export interface IAuthLoginStrategy extends IAuthIntegrationStrategy {
  * Similar to the Python AuthStrategyManager
  */
 export class AuthStrategyManager {
-  private _integrationStrategies: Map<string, IAuthIntegrationStrategy> = new Map()
+  private _integrationStrategies: Map<string, IAuthIntegrationStrategy> =
+    new Map()
   private _loginStrategies: Map<string, IAuthLoginStrategy> = new Map()
 
   /**
@@ -123,7 +127,9 @@ export class AuthStrategyManager {
   getLoginStrategy(platform: string): IAuthLoginStrategy {
     const strategy = this._loginStrategies.get(platform)
     if (!strategy) {
-      throw new NotImplementedError(`Login strategy for "${platform}" is not implemented`)
+      throw new NotImplementedError(
+        `Login strategy for "${platform}" is not implemented`,
+      )
     }
     return strategy
   }

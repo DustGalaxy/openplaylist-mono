@@ -10,6 +10,8 @@ export interface OAuthPlatformConfig {
   scopes: Array<string>
   clientId: string
   redirectUri: string
+  code_challenge_method?: string
+  code_challenge?: string
 }
 
 /**
@@ -48,6 +50,16 @@ export function getOAuthPlatformConfig(
         clientId: config.GOOGLE_CLIENT_ID,
         redirectUri,
       }
+    case 'donatex':
+      return {
+        platformName: 'DonateX',
+        authorizationUrl: 'https://donatex.com/oauth/authorize',
+        scopes: config.DONATEX_SCOPES,
+        clientId: config.DONATEX_CLIENT_ID,
+        code_challenge: '',
+        code_challenge_method: config.DONATEX_CODE_CHALLENGE_METHOD,
+        redirectUri,
+      }
 
     // Add more platforms here
     // case 'youtube':
@@ -64,33 +76,80 @@ export function getOAuthPlatformConfig(
       return null
   }
 }
+interface PKCEPair {
+  codeVerifier: string
+  codeChallenge: string
+}
+
+export async function generatePKCE(): Promise<PKCEPair> {
+  // 1. Генерация случайного code_verifier (используем криптографически стойкий метод)
+  const array = new Uint32Array(32)
+  window.crypto.getRandomValues(array)
+
+  const codeVerifier = Array.from(array)
+    .map((num) => String.fromCharCode((num % 63) + 48)) // Безопасный набор символов
+    .join('')
+    .replace(/[^a-zA-Z0-9\-._~]/g, '') // Оставляем только разрешенные спецификацией символы
+    .substring(0, 128)
+
+  // 2. Хеширование через SHA-256
+  const encoder = new TextEncoder()
+  const data = encoder.encode(codeVerifier)
+  const hashBuffer = await window.crypto.subtle.digest('SHA-256', data)
+
+  // 3. Кодирование в Base64URL (без символов '=', '+' и '/')
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const base64 = btoa(String.fromCharCode(...hashArray))
+  const codeChallenge = base64
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+
+  return { codeVerifier, codeChallenge }
+}
 
 /**
  * Build complete OAuth authorization URL
  * Standard OAuth 2.0 format
  */
-export function buildOAuthUrl(
+export async function buildOAuthUrl(
   platform: string,
   state: string,
   redirectUri: string,
-): string {
+): Promise<string> {
   const platformConfig = getOAuthPlatformConfig(platform, redirectUri)
 
   if (!platformConfig) {
     throw new Error(`OAuth not configured for platform: ${platform}`)
   }
-
+  var scope = ''
+  if (state.includes('integration')) {
+    scope = authStrategyManager
+      .getIntegrationStrategy(platform)
+      .getScopeString(platformConfig.scopes)
+  } else {
+    scope = authStrategyManager
+      .getLoginStrategy(platform)
+      .getScopeString(platformConfig.scopes)
+  }
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: platformConfig.clientId,
     redirect_uri: redirectUri,
-    scope: authStrategyManager.getLoginStrategy(platform).getScopeString(
-      platformConfig.scopes,
-    ),
-    state,
+    scope: scope,
+    state: state,
   })
 
-  if (platform === "google") {
+  if (platform === 'donatex') {
+    const { codeVerifier, codeChallenge } = await generatePKCE().then(
+      (result) => result,
+    )
+    params.set('code_challenge_method', platformConfig.code_challenge_method!)
+    params.set('code_challenge', codeChallenge)
+    window.sessionStorage.setItem('code_verifier', codeVerifier)
+  }
+
+  if (platform === 'google') {
     params.set('access_type', 'offline')
     params.set('prompt', 'consent')
   }
