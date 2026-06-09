@@ -104,7 +104,7 @@ function RouteComponent() {
 
         <Tabs className="w-full">
           <TabsList className="w-full flex flex-nowrap items-center justify-start gap-2 overflow-hidden bg-transparent p-0 h-auto">
-            <div className="shrink-0">
+            <div className="mb-0.75">
               <AddPlaylistModal />
             </div>
             <HorizontalScrollStrip>
