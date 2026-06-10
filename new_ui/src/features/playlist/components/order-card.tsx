@@ -37,6 +37,7 @@ export default function OrderCard({
       icon: <Play />,
       on_click: () => playNext(playlist, undefined, track),
       className: 'px-1 bg-level-2',
+      tooltip: t('playlist.track.play'),
     },
     {
       icon: <Copy />,
@@ -47,6 +48,7 @@ export default function OrderCard({
         toast.success(t('common.toast.copied'))
       },
       className: 'px-1 bg-level-2',
+      tooltip: t('playlist.track.copy'),
     },
     {
       icon: <Save fill={isSaved(track.yt_video_id) ? '#FFFFFF' : 'none'} />,
@@ -62,11 +64,13 @@ export default function OrderCard({
         }
       },
       className: 'px-1 bg-level-2',
+      tooltip: isSaved(track.yt_video_id) ? t('playlist.track.unsave') : t('playlist.track.save'),
     },
     {
       icon: <Trash />,
       on_click: () => requestRemoveTrack(playlist.id, track.id, 'removed'),
       className: 'px-1 bg-level-2',
+      tooltip: t('playlist.track.remove'),
     },
   ]
 
@@ -75,6 +79,7 @@ export default function OrderCard({
       icon: <Play />,
       on_click: () => console.log('Play clicked'),
       className: 'px-1 bg-level-2',
+      tooltip: t('playlist.track.play'),
     },
     {
       icon: <Copy />,
@@ -83,6 +88,7 @@ export default function OrderCard({
           .writeText('https://www.youtube.com/watch?v=' + track.yt_video_id)
           .then(() => toast.success(t('common.toast.copied'))),
       className: 'px-1 bg-level-2',
+      tooltip: t('playlist.track.copy'),
     },
     {
       icon: <Save fill={isSaved(track.yt_video_id) ? '#FFFFFF' : 'none'} />,
@@ -98,6 +104,7 @@ export default function OrderCard({
         }
       },
       className: 'px-1 bg-level-2',
+      tooltip: isSaved(track.yt_video_id) ? t('playlist.track.unsave') : t('playlist.track.save'),
     },
     {
       icon: <Add />,
@@ -122,6 +129,7 @@ export default function OrderCard({
         }
       },
       className: 'px-1 bg-level-2',
+      tooltip: t('playlist.track.add'),
     },
   ]
 
@@ -137,7 +145,7 @@ export default function OrderCard({
     : 'Н/Д'
     
   return (
-    /* ВНЕШНИЙ КОНТЕЙНЕР: Теперь жестко фиксирован, список не дергается */
+    /* ВНЕШНИЙ КОНТЕЙНЕР */
     <div className="relative w-full h-[100px] min-w-[600px] [perspective:1200px]">
       {/* ФИЗИЧЕСКИЙ КОРПУС КАРТОЧКИ */}
       <div
@@ -154,19 +162,21 @@ export default function OrderCard({
             : 'none',
         }}
       >
-        {/* 📟 ВЕРХНИЙ ТОРЕЦ (Появляется и ложится горизонтально при наклоне) */}
+        {/* 📟 ВЕРХНИЙ ТОРЕЦ */}
         <div
           className="absolute top-0 left-0 right-0 h-[32px] bg-level-2/90 border-b border-level-3/30 rounded-t-(--rounded-std) flex items-center px-4 gap-4 transition-all duration-300 ease-out"
           style={{
-            // Сдвигаем наверх и разворачиваем на 90 градусов, чтобы сформировать грань коробки
             transform: 'translateY(-100%) rotateX(90deg)',
             transformOrigin: 'bottom',
             opacity: isOpen ? 1 : 0,
             pointerEvents: isOpen ? 'auto' : 'none',
           }}
         >
-          {/* Данные внутри торца: используем моноширинный ретро-шрифт */}
-          <div className="flex items-center gap-1.5 text-[11px] font-mono text-text-secondary select-all">
+          {/* Источник */}
+          <div 
+            title={t('playlist.track.source')} 
+            className="flex items-center gap-1.5 text-[11px] font-mono text-text-secondary select-all cursor-help"
+          >
             <span className="text-[9px] text-text-placeholder uppercase tracking-wider">
               SRC:
             </span>
@@ -177,7 +187,11 @@ export default function OrderCard({
 
           <div className="w-[1px] h-3 bg-white/10" />
 
-          <div className="flex items-center gap-1.5 text-[11px] font-mono text-text-secondary select-all">
+          {/* Видео ID */}
+          <div 
+            title={t('playlist.track.video_id')} 
+            className="flex items-center gap-1.5 text-[11px] font-mono text-text-secondary select-all cursor-help"
+          >
             <span className="text-[9px] text-text-placeholder uppercase tracking-wider">
               VIDEO_ID:
             </span>
@@ -191,8 +205,11 @@ export default function OrderCard({
             </a>
           </div>
 
-          {/* Светодиодный индикатор статуса в правом углу торца */}
-          <div className="flex items-center gap-1.5 text-[10px] font-mono ml-auto bg-black/40 px-2 py-0.5 rounded border border-white/5">
+          {/* Статус */}
+          <div 
+            title={t('playlist.track.status')} 
+            className="flex items-center gap-1.5 text-[10px] font-mono ml-auto bg-black/40 px-2 py-0.5 rounded border border-white/5 cursor-help"
+          >
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981] animate-pulse" />
             <span className="text-emerald-400 font-bold uppercase tracking-widest text-[9px]">
               READY
@@ -209,7 +226,10 @@ export default function OrderCard({
                 className="h-[72px] aspect-video rounded-(--rounded-std) block object-cover"
                 src={`https://img.youtube.com/vi/${track.yt_video_id}/mqdefault.jpg`}
               />
-              <div className="absolute text-[12px] bottom-[3px] right-[3px] px-1.5 py-0.5 rounded-md font-mono bg-[#000000a7] text-text-main">
+              <div 
+                title={t('playlist.track.duration')} 
+                className="absolute text-[12px] bottom-[3px] right-[3px] px-1.5 py-0.5 rounded-md font-mono bg-[#000000a7] text-text-main cursor-help"
+              >
                 {formatTime(track.duration ? +track.duration : 0)}
               </div>
             </div>
@@ -217,20 +237,27 @@ export default function OrderCard({
 
           {/* Контентная зона */}
           <div className="grid grid-rows-[auto_1fr] pt-2 w-full overflow-hidden">
-            {/* Верхняя строка: Название и Утопленные Ретро-чипы */}
             <div className="flex justify-between items-start w-full pr-2">
               <div className="text-[18px] font-semibold text-left truncate max-w-[55%]">
                 {track.title}
               </div>
 
-              {/* Ретро индикаторы (Вдавленные окошки) */}
+              {/* Ретро индикаторы */}
               <div className="flex gap-2 text-xs font-mono">
-                <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-level-1/40 border border-white/5 text-text-placeholder shadow-inner">
+                {/* Дата */}
+                <div 
+                  title={t('playlist.track.date')} 
+                  className="flex items-center gap-1 px-2 py-1 rounded-md bg-level-1/40 border border-white/5 text-text-placeholder shadow-inner cursor-help"
+                >
                   <Calendar className="w-3.5 h-3.5 text-level-3/70" />
                   <span>{formattedDate}</span>
                 </div>
 
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-level-1/60 border border-white/5 shadow-inner min-w-[45px] justify-center">
+                {/* Приоритет */}
+                <div 
+                  title={t('playlist.track.priority')} 
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-level-1/60 border border-white/5 shadow-inner min-w-[45px] justify-center cursor-help"
+                >
                   <ArrowUpRight
                     className={`w-3.5 h-3.5 ${+track.priority > 0 ? 'text-level-3 animate-pulse' : 'text-text-placeholder'}`}
                   />
@@ -243,9 +270,13 @@ export default function OrderCard({
               </div>
             </div>
 
-            {/* Нижная строка: Автор и Кнопки управления */}
+            {/* Нижная строка */}
             <div className="flex justify-between items-end pb-2.5 pr-2 w-full self-end">
-              <div className="text-[14px] text-text-secondary text-left flex gap-1 items-center font-medium">
+              {/* Заказчик трека */}
+              <div 
+                title={t('playlist.track.requester')} 
+                className="text-[14px] text-text-secondary text-left flex gap-1 items-center font-medium cursor-help"
+              >
                 <Person
                   width={18}
                   height={18}
@@ -263,6 +294,7 @@ export default function OrderCard({
                     text={btn.icon}
                     className={`${btn.className} px-1 flex items-center justify-center`}
                     onClick={btn.on_click}
+                    title={btn.tooltip}
                   />
                 ))}
                 <WarningModal
@@ -277,16 +309,17 @@ export default function OrderCard({
                 {/* Кнопка EJECT */}
                 <button
                   onClick={() => setIsOpen(!isOpen)}
+                  title={t('playlist.track.eject')}
                   className={`
-                  flex items-center justify-center gap-1 h-8 px-2.5 rounded-(--rounded-std)
-                  font-mono text-[11px] font-bold uppercase tracking-wider transition-all duration-150
-                  border border-level-3/40
-                  ${
-                    isOpen
-                      ? 'bg-level-1 text-level-3 shadow-inner translate-y-[2px]'
-                      : 'bg-level-2 text-text-main hover:text-text-main shadow-[0_2px_0_0_rgb(245,106,25)] active:translate-y-[2px] active:shadow-none'
-                  }
-                `}
+                    flex items-center justify-center gap-1 h-8 px-2.5 rounded-(--rounded-std)
+                    font-mono text-[11px] font-bold uppercase tracking-wider transition-all duration-150
+                    border border-level-3/40
+                    ${
+                      isOpen
+                        ? 'bg-level-1 text-level-3 shadow-inner translate-y-[2px]'
+                        : 'bg-level-2 text-text-main hover:text-text-main shadow-[0_2px_0_0_rgb(245,106,25)] active:translate-y-[2px] active:shadow-none'
+                    }
+                  `}
                 >
                   <span>Eject</span>
                   <ChevronDown

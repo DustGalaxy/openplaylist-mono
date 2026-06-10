@@ -437,7 +437,8 @@ export const useMusicStore = create<StoreState>((set, get) => {
     playNext(pl, reason?: string, forceNextTrack?: Track) {
       const repeatHandler = () => {
         if (pl.settings.sort_settings.shuffle !== 'none') {
-          return pl.track_data[Math.floor(Math.random() * pl.track_data.length)]
+          const list = pl.track_data.filter((t) => t.id !== pl.now_playing?.id)
+          return list[Math.floor(Math.random() * list.length)]
         }
         if (pl.settings.repeat_mode === 'all') {
           if (

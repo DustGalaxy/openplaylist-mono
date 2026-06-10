@@ -392,6 +392,22 @@
         "reportSubmitted": "report submitted",
         "recorded": "Report recorded."
       }
+    },
+    "track": {
+      "play": "Play next",
+      "copy": "Copy YouTube link",
+      "save": "Save track",
+      "unsave": "Remove from saved",
+      "remove": "Remove from queue",
+      "add": "Add to playlist",
+      "source": "Request source",
+      "video_id": "YouTube Video ID (Open original)",
+      "status": "Track status",
+      "duration": "Duration",
+      "date": "Date added",
+      "priority": "Track priority",
+      "requester": "Requested by",
+      "eject": "Show/hide technical details"
     }
   },
   "playlistSettings": {
