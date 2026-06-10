@@ -241,6 +241,10 @@
     "empty": {
       "title": "No playlists yet",
       "hint": "Press + to create your first playlist."
+    },
+    "tooltip": {
+      "addPlaylist": "Create playlist",
+      "playlist": "Playlist - {{playlistName}}"
     }
   },
   "playlist": {
@@ -394,6 +398,7 @@
       }
     },
     "track": {
+      "ejectBtn": "Eject",
       "play": "Play next",
       "copy": "Copy YouTube link",
       "save": "Save track",
@@ -404,10 +409,26 @@
       "video_id": "YouTube Video ID (Open original)",
       "status": "Track status",
       "duration": "Duration",
-      "date": "Date added",
+      "date": "Date added - {{date}}",
       "priority": "Track priority",
       "requester": "Requested by",
       "eject": "Show/hide technical details"
+    },
+    "tooltip": {
+      "validation": "Validation preview",
+      "logs": "Playlist action logs",
+      "share": "Share playlist link",
+      "status": "Playlist status",
+      "repeatMode": {
+        "all": "Repeat all",
+        "once": "Repeat one",
+        "none": "Repeat off"
+      },
+      "prev": "Previous track",
+      "next": "Next track",
+      "pause": "Pause",
+      "play": "Play",
+      "shuffle": "Shuffle"
     }
   },
   "playlistSettings": {
@@ -788,5 +809,17 @@
   "placeholder": {
     "history": "Hello \"/history\"!",
     "statistic": "Hello \"/statistic\"!"
+  },
+  "sort": {
+    "date": {
+      "title": "Date sorting",
+      "olderFirst": "Older first",
+      "newerFirst": "Newer first"
+    },
+    "priority": {
+      "title": "Priority sorting",
+      "highFirst": "High priority first",
+      "lowFirst": "Low priority first"
+    }
   }
 }

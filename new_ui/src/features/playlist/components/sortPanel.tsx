@@ -1,14 +1,14 @@
 import React from 'react'
-import Priority from '@/components/icons/icon-priority'
-import DateOutline from '@/components/icons/icon-date'
 import Arrow from '@/components/icons/icon-arrow'
-
 
 import useMusicStore from '@/stores/musicStore'
 import { usePlaylist } from '@/features/playlist/context/playlist-context'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import { cn } from '@/lib/utils'
 import type { SortSettings } from '@/types/playlist'
+import { toast } from 'sonner'
+import { ArrowUpRight, Calendar } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const activeStateClass = `
         translate-y-[3px] 
@@ -18,7 +18,7 @@ const activeStateClass = `
 const notActiveStateClass = `
         box-border
         shadow-[0_3px_0_0_theme(colors.level-3),_0_0px_10px_rgba(0,0,0,0.4),_0_2px_4px_rgba(0,0,0,0.3)] 
-        sm:shadow-[0_5px_0_0_theme(colors.level-3),_0_0px_15px_rgba(0,0,0,0.55),_0_4px_8px_rgba(0,0,0,0.45)] 
+        sm:shadow-[0_3px_0_0_theme(colors.level-3),_0_0px_15px_rgba(0,0,0,0.55),_0_4px_8px_rgba(0,0,0,0.45)] 
 
         hover:text-shadow-[0_0_4px_rgba(255,255,255,0.8),_0_0_25px_rgba(255,255,255,0.4)]
         hover:[&_svg]:drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]
@@ -39,13 +39,16 @@ const SortButton = ({
   icon: Icon,
   isActive,
   onClick,
+  ...props
 }: {
   icon: React.ComponentType<{ className?: string }>
   isActive: boolean
   onClick: () => void
+  [key: string]: any
 }) => {
   return (
     <button
+      {...props}
       onClick={onClick}
       className={cn(
         `px-5 pt-0.5 pb-[3px]            
@@ -60,7 +63,7 @@ const SortButton = ({
         isActive ? activeStateClass : notActiveStateClass,
       )}
     >
-      <Icon className="size-6 sm:size-8" />
+      <Icon className="size-6 sm:size-8 p-1" />
     </button>
   )
 }
@@ -70,14 +73,17 @@ const DirectionButton = ({
   isActive,
   onClick,
   disabled = false,
+  ...props
 }: {
   direction: 'up' | 'down'
   isActive: boolean
   onClick: () => void
   disabled?: boolean
+  [key: string]: any
 }) => {
   return (
     <button
+      {...props}
       onClick={onClick}
       disabled={disabled}
       className={cn(
@@ -102,6 +108,7 @@ const DirectionButton = ({
 export default function SortPanel() {
   const playlist = usePlaylist()
   const { requestPlSettings } = useMusicStore()
+  const { t } = useTranslation()
   const setPlaylist = useMusicStore((s) => s.setPlaylist)
   const [sortSettings, setSortSettings] = React.useState<SortSettings>(
     playlist.settings.sort_settings,
@@ -114,6 +121,7 @@ export default function SortPanel() {
       if (!canRequest.current) return
       canRequest.current = false
       await requestPlSettings(playlist.id, { sort_settings: sortSettings })
+      toast.success('Playlist settings updated')
     },
     2000,
   )
@@ -131,10 +139,10 @@ export default function SortPanel() {
     <div className="flex gap-2 sm:gap-3 justify-center items-end ">
       {/* Shuffle */}
 
-
       {/* Priority */}
       <SortButton
-        icon={Priority}
+        title={t('sort.priority.title')}
+        icon={ArrowUpRight}
         isActive={sortSettings.priority !== 'none'}
         onClick={() =>
           updateSettings({
@@ -147,12 +155,14 @@ export default function SortPanel() {
       {/* Priority Direction */}
       <div className="flex flex-col gap-1">
         <DirectionButton
+          title={t('sort.priority.highFirst')}
           direction="up"
           isActive={sortSettings.priority === 'asc'}
           disabled={sortSettings.priority === 'none'}
           onClick={() => updateSettings({ ...sortSettings, priority: 'asc' })}
         />
         <DirectionButton
+          title={t('sort.priority.lowFirst')}
           direction="down"
           isActive={sortSettings.priority === 'desc'}
           disabled={sortSettings.priority === 'none'}
@@ -162,7 +172,8 @@ export default function SortPanel() {
 
       {/* Date */}
       <SortButton
-        icon={DateOutline}
+        title={t('sort.date.title')}
+        icon={Calendar}
         isActive={sortSettings.date !== 'none'}
         onClick={() =>
           updateSettings({
@@ -175,12 +186,14 @@ export default function SortPanel() {
       {/* Date Direction */}
       <div className="flex flex-col gap-1">
         <DirectionButton
+          title={t('sort.date.olderFirst')}
           direction="up"
           isActive={sortSettings.date === 'asc'}
           disabled={sortSettings.date === 'none'}
           onClick={() => updateSettings({ ...sortSettings, date: 'asc' })}
         />
         <DirectionButton
+          title={t('sort.date.newerFirst')}
           direction="down"
           isActive={sortSettings.date === 'desc'}
           disabled={sortSettings.date === 'none'}

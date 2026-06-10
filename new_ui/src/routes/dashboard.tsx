@@ -57,7 +57,6 @@ function RouteComponent() {
   })
   const [plsts, setPlsts] = useState<Array<ClientPlaylist>>([])
 
-
   useEffect(() => {
     if (playlistsData && !isLoading) {
       useMusicStore.getState().setPlaylistsFromServer(playlistsData)
@@ -86,25 +85,13 @@ function RouteComponent() {
   const sortedPlsts = [...plsts].sort((a, b) =>
     a.created_at > b.created_at ? 1 : -1,
   )
-
+  const [plstOpen, setPlstOpen] = useState<boolean>(false)
   return (
     <div className={pageWrapClass}>
       <div className={pageInnerClass}>
-        {/* <header className="">
-          <p className={`text-sm font-medium ${gradientTextClass}`}>
-            {t('dashboard.eyebrow')}
-          </p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-main">
-            {t('dashboard.title')}
-          </h1>
-          <p className="text-sm sm:text-base text-text-secondary mt-1">
-            {t('dashboard.subtitle')}
-          </p>
-        </header> */}
-
-        <Tabs className="w-full">
+        <Tabs className="w-full" onValueChange={(value) => setPlstOpen(false)}>
           <TabsList className="w-full flex flex-nowrap items-center justify-start gap-2 overflow-hidden bg-transparent p-0 h-auto">
-            <div className="mb-0.75">
+            <div title={t('dashboard.tooltip.addPlaylist')} className="mb-0.75">
               <AddPlaylistModal />
             </div>
             <HorizontalScrollStrip>
@@ -113,6 +100,9 @@ function RouteComponent() {
                   <TabsTrigger
                     key={plst.id}
                     value={plst.id}
+                    title={t('dashboard.tooltip.playlist', {
+                      playlistName: plst.name,
+                    })}
                     className={cn(
                       filterTabBaseClass,
                       filterTabInactiveClass,
@@ -140,6 +130,19 @@ function RouteComponent() {
               )}
             </HorizontalScrollStrip>
           </TabsList>
+          <TabsContent value="">
+            <header className=" mt-4">
+              <p className={`text-sm font-medium ${gradientTextClass}`}>
+                {t('dashboard.eyebrow')}
+              </p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-text-main">
+                {t('dashboard.title')}
+              </h1>
+              <p className="text-sm sm:text-base text-text-secondary mt-1">
+                {t('dashboard.subtitle')}
+              </p>
+            </header>
+          </TabsContent>
 
           {sortedPlsts.map((plst) => (
             <TabsContent key={plst.id} value={plst.id} className="mt-4">

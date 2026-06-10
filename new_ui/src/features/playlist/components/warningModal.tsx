@@ -19,6 +19,7 @@ import {
 import useMusicStore from '@/stores/musicStore'
 import { blockUser, submitPlaylistReport } from '@/api/api-playlist'
 import type { Platform, ReadBlockList } from '@/types/playlist'
+import { TriangleAlert } from 'lucide-react'
 
 const YT_VIDEO_ID_REGEX = /^[a-zA-Z0-9_-]{11}$/
 
@@ -227,7 +228,7 @@ export default function WarningModal({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Btn text={<Warning />} className="px-1 bg-level-2" />
+        <Btn text={<TriangleAlert />} className="px-1 bg-level-2" />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] bg-level-1 border-level-3 text-text-main overflow-scroll">
         <DialogHeader>

@@ -78,13 +78,13 @@ export function UserSettingsPage({
         await handleOAuthRedirect('google', true)
       },
     },
-    donatex: {
-      name: t('platform.donatex'),
-      icon: <img src="/donatex-icon.png" width={45} height={45}></img>,
-      loginHandler: async () => {
-        await handleOAuthRedirect('donatex', true)
-      },
-    },
+    // donatex: {
+    //   name: t('platform.donatex'),
+    //   icon: <img src="/donatex-icon.png" width={45} height={45}></img>,
+    //   loginHandler: async () => {
+    //     await handleOAuthRedirect('donatex', true)
+    //   },
+    // },
   } as const
 
   return (

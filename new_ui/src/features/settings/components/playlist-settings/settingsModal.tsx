@@ -115,6 +115,7 @@ export default function SettingsModal() {
       <DialogTrigger asChild>
         <Btn
           text={<Settings />}
+          title={t('playlistSettings.title')}
           className="flex w-[50px] bg-level-2"
           onClick={() => setCountToDelete(3)}
         />

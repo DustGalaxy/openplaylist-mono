@@ -13,6 +13,12 @@ import {
   Share2 as ShareIcon,
   ThumbsUp,
   User,
+  Repeat,
+  RepeatOff,
+  Repeat1,
+  SkipForward,
+  SkipBack,
+  ArrowUpRight,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import OrderCard from './order-card'
@@ -21,11 +27,7 @@ import Btn from '@/components/ui/my-btn'
 import LeftPanel from '@/components/icons/icon-left-panel'
 import RightPanel from '@/components/icons/icon-right-panel'
 import YoutubePlayer from './YoutubePlayer'
-import Next from '@/components/icons/icon-next'
-import RepeatLined from '@/components/icons/icon-repeat-lined'
-import RepeatSingle from '@/components/icons/icon-repeat-single'
 import Priority from '@/components/icons/icon-priority'
-import Repeat from '@/components/icons/icon-repeat'
 import PlayNowCard from './playnow-card'
 import Counter from './order-counter'
 import { PlaylistQueueInput } from './bar'
@@ -63,7 +65,7 @@ const activeStateClass = `
 const notActiveStateClass = `
         box-border
         shadow-[0_3px_0_0_theme(colors.level-3),_0_0px_10px_rgba(0,0,0,0.4),_0_2px_4px_rgba(0,0,0,0.3)] 
-        sm:shadow-[0_5px_0_0_theme(colors.level-3),_0_0px_15px_rgba(0,0,0,0.55),_0_4px_8px_rgba(0,0,0,0.45)] 
+        sm:shadow-[0_3px_0_0_theme(colors.level-3),_0_0px_15px_rgba(0,0,0,0.55),_0_4px_8px_rgba(0,0,0,0.45)] 
 
         hover:text-shadow-[0_0_4px_rgba(255,255,255,0.8),_0_0_25px_rgba(255,255,255,0.4)]
         hover:[&_svg]:drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]
@@ -84,13 +86,16 @@ const SortButton = ({
   icon: Icon,
   isActive,
   onClick,
+  ...props
 }: {
   icon: React.ComponentType<{ className?: string }>
   isActive: boolean
   onClick: () => void
+  [key: string]: any
 }) => {
   return (
     <button
+      {...props}
       onClick={onClick}
       className={cn(
         `px-5 pt-0.5 pb-[3px]            
@@ -213,216 +218,238 @@ function PlaylistView() {
 
   return (
     <div className="w-full flex flex-col gap-3">
-      <div className="w-full grid gap-4 grid-cols-1 items-end sm:grid-cols-2 sm:grid-rows-[430px_auto_auto] grid-rows-[auto_auto_auto]">
-        <div className={`flex flex-col gap-4 w-full px-3 pt-3 pb-4 ${panelClass}`}>
-          <YoutubePlayer
-            playOnReady={true}
-            pause={isPaused}
-            nowPlay={nowPlaying}
-            className="sm:row-span-2 flex items-center justify-center"
-          />
-          <div className="w-full gap-2 grid grid-cols-5">
-            <Btn
-              text={
-                repeatMode === 'all' ? (
-                  <Repeat width={33} height={33} />
-                ) : repeatMode === 'once' ? (
-                  <RepeatSingle width={33} height={33} />
-                ) : (
-                  <RepeatLined width={33} height={33} />
-                )
-              }
-              className="px-2 bg-level-2"
-              onClick={() => {
-                if (repeatMode === 'all') {
-                  setRepeatMode('once')
-                  requestPlSettings(playlist.id, { repeat_mode: 'once' })
-                } else if (repeatMode === 'once') {
-                  setRepeatMode('none')
-                  requestPlSettings(playlist.id, { repeat_mode: 'none' })
-                  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                } else if (repeatMode === 'none') {
-                  setRepeatMode('all')
-                  requestPlSettings(playlist.id, { repeat_mode: 'all' })
-                }
-              }}
+      <div className="w-full flex flex-col gap-4  items-end ">
+        <div
+          className={`flex flex-col gap-4  px-3 pt-3 pb-4 ${panelClass} w-full`}
+        >
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <YoutubePlayer
+              playOnReady={true}
+              pause={isPaused}
+              nowPlay={nowPlaying}
+              className={`sm:row-span-2 ${showConsole || showContentSettings ? '' : 'col-span-2'} flex items-center justify-center`}
             />
-            {playlist.settings.mode === 'static' && (
-              <Btn
-                text={<Next width={33} height={33} className=" rotate-180" />}
-                className="px-2 bg-level-2"
-                onClick={() => {
-                  playPrev(playlist.id)
-                }}
-              />
-            )}
-            <Btn
-              text={
-                isPaused ? (
-                  <Play width={33} height={33} />
-                ) : (
-                  <Pause width={33} height={33} />
-                )
-              }
-              className="px-2 bg-level-2"
-              onClick={() => {
-                isPaused ? setIsPaused(false) : setIsPaused(true)
-              }}
-            />
-            <Btn
-              text={<Next width={33} height={33} />}
-              className="px-2 bg-level-2"
-              onClick={() => {
-                playNext(playlist, 'skipped')
-              }}
-            />
-            <SortButton
-              icon={Shuffle}
-              isActive={sortSettings.shuffle !== 'none'}
-              onClick={() =>
-                updateSettings({
-                  ...sortSettings,
-                  shuffle: sortSettings.shuffle === 'none' ? 'desc' : 'none',
-                })
-              }
-            />
-          </div>
-        </div>
+            {showConsole && <LogPanel />}
 
-        <div className={`w-full gap-4 items-end grid px-3 pt-3 pb-4 ${panelClass}`}>
-          {showConsole && <LogPanel />}
+            {showContentSettings && (
+              <div className="flex flex-col gap-2 sm:gap-3">
+                <div className={`flex items-center justify-between`}>
+                  <div className="flex gap-2 flex-wrap">
+                    {playlist.settings.content_settings.map(
+                      (setting, index) => (
+                        <button
+                          key={setting.platform}
+                          type="button"
+                          onClick={() => setSelectedContentSettingIndex(index)}
+                          className={`${filterTabBaseClass} ${
+                            selectedContentSettingIndex === index
+                              ? filterTabActiveClass
+                              : filterTabInactiveClass
+                          }`}
+                        >
+                          {setting.platform === Platform.General
+                            ? t('common.general')
+                            : setting.platform}
+                        </button>
+                      ),
+                    )}
+                  </div>
+                </div>
 
-          {showContentSettings && (
-            <div className="flex flex-col gap-2 sm:gap-3">
-              <div className={`flex items-center justify-between`}>
-                <div className="flex gap-2 flex-wrap">
-                  {playlist.settings.content_settings.map((setting, index) => (
-                    <button
-                      key={setting.platform}
-                      type="button"
-                      onClick={() => setSelectedContentSettingIndex(index)}
-                      className={`${filterTabBaseClass} ${
-                        selectedContentSettingIndex === index
-                          ? filterTabActiveClass
-                          : filterTabInactiveClass
-                      }`}
-                    >
-                      {setting.platform === Platform.General
-                        ? t('common.general')
-                        : setting.platform}
-                    </button>
-                  ))}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-0.25 sm:gap-0.5">
+                  <InfoCard
+                    icon={<Settings size={14} />}
+                    label={t('playlist.stats.mode')}
+                    value={playlist.settings.mode}
+                  />
+                  <InfoCard
+                    icon={<Eye size={14} />}
+                    label={t('playlist.stats.minViews')}
+                    value={contentSettings.min_views}
+                  />
+                  <InfoCard
+                    icon={<ThumbsUp size={14} />}
+                    label={t('playlist.stats.minLikes')}
+                    value={contentSettings.min_likes}
+                  />
+                  <InfoCard
+                    icon={<Clock size={14} />}
+                    label={t('playlist.stats.maxDuration')}
+                    value={t('playlist.stats.durationSec', {
+                      count: contentSettings.max_duration,
+                    })}
+                  />
+                  <InfoCard
+                    icon={<RefreshCcw size={14} />}
+                    label={t('playlist.stats.trackCd')}
+                    value={t('playlist.stats.cooldownMin', {
+                      count: contentSettings.track_cooldown,
+                    })}
+                  />
+                  <InfoCard
+                    icon={<User size={14} />}
+                    label={t('playlist.stats.userCd')}
+                    value={t('playlist.stats.cooldownMin', {
+                      count: contentSettings.user_cooldown,
+                    })}
+                  />
+                  <InfoCard
+                    icon={<List size={14} />}
+                    label={t('playlist.stats.maxSize')}
+                    value={
+                      playlist.settings.max_playlist_size ||
+                      t('playlist.stats.maxSizeUnlimited')
+                    }
+                  />
+                  <InfoCard
+                    icon={<ArrowUpRight width={14} height={14} />}
+                    label={t('playlist.stats.priorityMode')}
+                    value={playlist.settings.cost_mode}
+                  />
                 </div>
               </div>
+            )}
+          </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-0.25 sm:gap-0.5">
-                <InfoCard
-                  icon={<Settings size={14} />}
-                  label={t('playlist.stats.mode')}
-                  value={playlist.settings.mode}
-                />
-                <InfoCard
-                  icon={<Eye size={14} />}
-                  label={t('playlist.stats.minViews')}
-                  value={contentSettings.min_views}
-                />
-                <InfoCard
-                  icon={<ThumbsUp size={14} />}
-                  label={t('playlist.stats.minLikes')}
-                  value={contentSettings.min_likes}
-                />
-                <InfoCard
-                  icon={<Clock size={14} />}
-                  label={t('playlist.stats.maxDuration')}
-                  value={t('playlist.stats.durationSec', {
-                    count: contentSettings.max_duration,
-                  })}
-                />
-                <InfoCard
-                  icon={<RefreshCcw size={14} />}
-                  label={t('playlist.stats.trackCd')}
-                  value={t('playlist.stats.cooldownMin', {
-                    count: contentSettings.track_cooldown,
-                  })}
-                />
-                <InfoCard
-                  icon={<User size={14} />}
-                  label={t('playlist.stats.userCd')}
-                  value={t('playlist.stats.cooldownMin', {
-                    count: contentSettings.user_cooldown,
-                  })}
-                />
-                <InfoCard
-                  icon={<List size={14} />}
-                  label={t('playlist.stats.maxSize')}
-                  value={
-                    playlist.settings.max_playlist_size ||
-                    t('playlist.stats.maxSizeUnlimited')
-                  }
-                />
-                <InfoCard
-                  icon={<Priority width={14} height={14} />}
-                  label={t('playlist.stats.priorityMode')}
-                  value={playlist.settings.cost_mode}
-                />
-              </div>
-            </div>
-          )}
-          <div className="flex flex-wrap gap-4  justify-between ">
-            <div className="flex flex-wrap w-full sm:w-fit gap-2 justify-between sm:justify-start">
-              <div className="flex gap-2">
-                <Btn
-                  text={<ShareIcon />}
-                  className="px-3 bg-level-2"
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      window.location.origin + '/view?p=' + playlist.id,
-                    )
-                    toast.success(t('playlist.toast.linkCopied'))
-                  }}
-                />
-                <Btn
-                  text={'>_'}
-                  className="px-3.25 bg-level-2 font-bold font-mono"
-                  onClick={() => {
-                    setShowConsole(!showConsole)
-                  }}
-                />
-                <Btn
-                  text={<Shield />}
-                  className="px-3 bg-level-2"
-                  onClick={() => {
-                    setShowContentSettings(!showContentSettings)
-                  }}
-                />
-              </div>
-              <SettingsModal />
+          <div className="  grid  sm:grid-cols-2 w-full gap-2">
+            <div className="w-full gap-2 grid grid-cols-5  ">
               <Btn
                 text={
-                  <>
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${activePlst ? 'bg-emerald-400' : 'bg-text-placeholder'}`}
-                      aria-hidden
-                    />
-                    {activePlst
-                      ? t('playlist.status.online')
-                      : t('playlist.status.offline')}
-                  </>
+                  repeatMode === 'all' ? (
+                    <Repeat />
+                  ) : repeatMode === 'once' ? (
+                    <Repeat1 />
+                  ) : (
+                    <RepeatOff />
+                  )
                 }
+                title={t(`playlist.tooltip.repeatMode.${repeatMode}`)}
+                className="px-2 bg-level-2"
                 onClick={() => {
-                  setActivePlst(!activePlst)
-                  changePlaylistActive(playlist.id, activePlst)
+                  if (repeatMode === 'all') {
+                    setRepeatMode('once')
+                    requestPlSettings(playlist.id, { repeat_mode: 'once' })
+                  } else if (repeatMode === 'once') {
+                    setRepeatMode('none')
+                    requestPlSettings(playlist.id, { repeat_mode: 'none' })
+                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                  } else if (repeatMode === 'none') {
+                    setRepeatMode('all')
+                    requestPlSettings(playlist.id, { repeat_mode: 'all' })
+                  }
                 }}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium min-h-11',
-                  activePlst ? statusOpenClass : statusClosedClass,
-                )}
               />
+              {playlist.settings.mode === 'static' && (
+                <Btn
+                  title={t(`playlist.tooltip.prev`)}
+                  text={<SkipBack />}
+                  className="px-2 bg-level-2"
+                  onClick={() => {
+                    playPrev(playlist.id)
+                  }}
+                />
+              )}
+              <Btn
+                title={t(`playlist.tooltip.${isPaused ? 'play' : 'pause'}`)}
+                text={isPaused ? <Play /> : <Pause />}
+                className="px-2 bg-level-2"
+                onClick={() => {
+                  isPaused ? setIsPaused(false) : setIsPaused(true)
+                }}
+              />
+              <Btn
+                title={t(`playlist.tooltip.next`)}
+                text={<SkipForward />}
+                className="px-2 bg-level-2"
+                onClick={() => {
+                  playNext(playlist, 'skipped')
+                }}
+              />
+              <SortButton
+                title={t(`playlist.tooltip.shuffle`)}
+                icon={Shuffle}
+                isActive={sortSettings.shuffle !== 'none'}
+                onClick={() =>
+                  updateSettings({
+                    ...sortSettings,
+                    shuffle: sortSettings.shuffle === 'none' ? 'desc' : 'none',
+                  })
+                }
+              />
+            </div>
+
+            <div className="flex gap-2  justify-between ">
+              <div className="w-[1px] h-[70%] self-center bg-text-secondary" />
+              <div className="flex w-full  gap-2 justify-between ">
+                <div className="flex gap-2 justify-between w-full ">
+                  <Btn
+                    title={t('playlist.tooltip.status')}
+                    text={
+                      <>
+                        <span
+                          className={`  h-1.5 w-1.5 rounded-full ${activePlst ? 'bg-emerald-400' : 'bg-text-placeholder'}`}
+                          aria-hidden
+                        />
+                        {activePlst
+                          ? t('playlist.status.online')
+                          : t('playlist.status.offline')}
+                      </>
+                    }
+                    onClick={() => {
+                      setActivePlst(!activePlst)
+                      changePlaylistActive(playlist.id, activePlst)
+                    }}
+                    className={cn(
+                      'inline-flex items-center gap-1.5  px-3 py-1.5 text-xs font-mono min-h-11',
+                      activePlst ? statusOpenClass : statusClosedClass,
+                    )}
+                  />
+                  <div className="flex gap-2">
+                    <Btn
+                      text={<ShareIcon />}
+                      title={t('playlist.tooltip.share')}
+                      className="px-3 bg-level-2"
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          window.location.origin + '/view?p=' + playlist.id,
+                        )
+                        toast.success(t('playlist.toast.linkCopied'))
+                      }}
+                    />
+                    <Btn
+                      text={'>_'}
+                      title={t('playlist.tooltip.logs')}
+                      className="px-3.25 bg-level-2 font-bold font-mono"
+                      onClick={() => {
+                        if (showContentSettings) {
+                          setShowContentSettings(false)
+                        }
+                        setShowConsole(!showConsole)
+                      }}
+                    />
+                    <Btn
+                      text={<Shield />}
+                      title={t('playlist.tooltip.validation')}
+                      className="px-3 bg-level-2"
+                      onClick={() => {
+                        if (showConsole) {
+                          setShowConsole(false)
+                        }
+                        setShowContentSettings(!showContentSettings)
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <div className="w-[1px] h-[70%] self-center bg-text-secondary" />
+                  <SettingsModal />
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-center py-2 sm:col-span-2">
+        <div className="flex items-center  justify-center w-full">
           {playlist.now_playing?.yt_video_id ? (
             <PlayNowCard track={playlist.now_playing} />
           ) : (
@@ -486,7 +513,7 @@ function PlaylistView() {
 
         <div className="w-full @container">
           <div
-            className="w-full items-center flex-col gap-y-4 sm:gap-y-8
+            className="w-full items-center flex-col gap-y-2 sm:gap-y-4
             [@container_(width_<_600px)]:hidden
             [@container_(width_>=_600px)]:flex"
           >

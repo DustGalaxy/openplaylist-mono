@@ -197,6 +197,8 @@ export default function LogPanel() {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop =
         scrollContainerRef.current.scrollHeight
+      console.log("SCROLL!");
+      
     }
   }, [logs.length]) // Следим конкретно за длиной массива
 
@@ -296,10 +298,10 @@ export default function LogPanel() {
     )
 
   return (
-    <div className="w-full bg-level-1 mt-1 h-[350px] rounded-[var(--rounded-std)] px-2 py-1.5 font-mono text-xs overflow-x-hidden">
+    <div className="w-full bg-level-1 h-[345px] rounded-[var(--rounded-std)] px-2 py-1.5 font-mono text-xs overflow-x-hidden">
       <div
         ref={scrollContainerRef}
-        className="flex flex-col w-full gap-1 scroll-auto"
+        className="flex flex-col w-full gap-1 h-[330px] overflow-y-auto scroll-auto"
       >
         {logs.map((log, i) => (
           <LogModal key={log.id || i} data={log}>

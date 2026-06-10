@@ -23,6 +23,8 @@ export default function Btn({
         sm:pt-1 sm:pb-[5px] 
         cursor-pointer 
         transition-all 
+        text-text-main
+        [&_svg]:text-text-main
         duration-100 
         ease-out
         rounded-[var(--rounded-std)] 
@@ -30,7 +32,7 @@ export default function Btn({
         box-border
         
         shadow-[0_3px_0_0_theme(colors.level-3),_0_0px_10px_rgba(0,0,0,0.4),_0_2px_4px_rgba(0,0,0,0.3)]
-        sm:shadow-[0_5px_0_0_theme(colors.level-3),_0_0px_15px_rgba(0,0,0,0.55),_0_4px_8px_rgba(0,0,0,0.45)]
+        sm:shadow-[0_3px_0_0_theme(colors.level-3),_0_0px_15px_rgba(0,0,0,0.55),_0_4px_8px_rgba(0,0,0,0.45)]
         
         hover:text-shadow-[0_0_4px_rgba(255,255,255,0.8),_0_0_25px_rgba(255,255,255,0.4)]
         hover:[&_svg]:drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]
