@@ -1,13 +1,14 @@
 from pydantic import model_validator
 from pydantic_settings import BaseSettings  # Для загрузки конфига
 
-PROJECT_DOMAIN: str = "http://localhost:3000"
+
 # --- Загрузка конфигурации ---
 class Settings(BaseSettings):
+    PROJECT_DOMAIN: str = "http://localhost:3000"
     APP_ID: str = "18779"
-    API_KEY: str = "oauth-user-show oauth-donation-subscribe"
+    API_KEY: str = ""
     REDIRECT_URI: str = ""
-    SESSION_SECRET_KEY: str 
+    SESSION_SECRET_KEY: str
 
     RABBITMQ_URL: str
     DB_URL: str
@@ -28,5 +29,6 @@ class Settings(BaseSettings):
         # Формируем зависимые ссылки
         self.REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
         return self
+
 
 settings = Settings()  # type: ignore # Загружаем настройки при старте

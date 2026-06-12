@@ -178,9 +178,6 @@ services:
     build:
       context: ./bot_da
       dockerfile: ./Dockerfile
-    depends_on:
-      backend:
-        condition: service_healthy
     env_file:
       - ./bot_da/.env
     volumes:
