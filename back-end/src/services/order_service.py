@@ -80,7 +80,7 @@ class OrderService:
             return
 
     def save_to_cache(self, video_id, data):
-        return get_broker().set(video_id, json.dumps(data))
+        return get_broker().set(video_id, json.dumps(data), ex=60 * 60 * 24 * 3)
 
     async def init_order(
         self, order: Union[WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder], from_owner: bool = False
@@ -88,7 +88,7 @@ class OrderService:
         yt_video_id = extract_youtube_video_id(order.yt_video_url)
         if not yt_video_id:
             raise ValueError("Invalid YouTube video URL")
-
+        yt_video_id = yt_video_id.strip()
         data: dict = self.get_from_cache(yt_video_id)  # pyright: ignore[reportAssignmentType]
 
         if not data:

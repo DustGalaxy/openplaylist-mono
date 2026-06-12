@@ -20,9 +20,9 @@ class TTVExtraData(BaseModel):
 
 
 class DAExtraData(BaseModel):
-    requester_id: int
-    donation_currency_amount: float
-    currency_code: str
+    requester_id: str
+    donation_amount: float
+    donation_currency: str
 
 
 ExtraData = TTVExtraData | DAExtraData | YTExtraData | WebExtraData

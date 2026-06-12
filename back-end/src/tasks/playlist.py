@@ -73,7 +73,8 @@ async def handle_order_created(
 ):
     async with async_session_maker() as db_session:
         owner = await user_repository.get_one(db_session, typed_payload.owner_id)
-        tracks, errors = await add_to_playlist(db_session, typed_payload, owner, from_owner=typed_payload.from_owner)
+        tracks, errors = await add_to_playlist(db_session, typed_payload, owner, typed_payload.from_owner)
+        print(tracks, "\n", errors)
         for track, playlist_id in tracks:
             await kick(
                 "playlist.track.added",
