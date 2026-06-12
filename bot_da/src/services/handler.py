@@ -19,7 +19,7 @@ async def _request_processing(owner_id: UUID, donation: DonationData):
             request_id=uuid7(),
             owner_id=owner_id,
             owner_platform_id=str(donation.recipient.user_id),
-            requester_id="__none__",
+            requester_id="",
             requester_nickname=donation.username,
             donation_amount=donation.amount_in_user_currency,
             donation_currency=donation.currency,
