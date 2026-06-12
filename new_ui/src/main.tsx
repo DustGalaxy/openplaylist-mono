@@ -72,7 +72,7 @@ window.appConfig = {
     'openid',
   ],
 
-  DONATEX_CLIENT_ID: '',
+  DONATEX_CLIENT_ID: '2bca17b98ef34185',
   DONATEX_REDIRECT_URI: `${PROJECT_DOMAIN}/oauth-callback`,
   DONATEX_SCOPES: ['user.read', 'offline_access', 'donations.subscribe'],
   DONATEX_CODE_CHALLENGE_METHOD: 'S256',
