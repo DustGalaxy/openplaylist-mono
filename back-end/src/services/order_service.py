@@ -87,7 +87,7 @@ class OrderService:
         yt_video_id = extract_youtube_video_id(order.yt_video_url)
         if not yt_video_id:
             raise ValueError("Invalid YouTube video URL")
-
+        yt_video_id = yt_video_id.strip()
         data: dict = self.get_from_cache(yt_video_id)  # pyright: ignore[reportAssignmentType]
 
         if not data:
