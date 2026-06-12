@@ -22,10 +22,10 @@ class LinkedAccountsRepository(
         return self.domain_model.model_validate(object)
 
     async def get_by_id_platform(
-        self, session: AsyncSession, user_id: UUID, platform: IntegrationPlatform
+        self, session: AsyncSession, platform_user_id: str, platform: IntegrationPlatform
     ) -> LinkedAccountsDomain:
         stmt = select(LinkedAccounts).where(
-            LinkedAccounts.platform_user_id == user_id, LinkedAccounts.platform == platform
+            LinkedAccounts.platform_user_id == platform_user_id, LinkedAccounts.platform == platform
         )
 
         res = await session.execute(stmt)
@@ -33,7 +33,7 @@ class LinkedAccountsRepository(
 
         if not user:
             raise NotFoundException(
-                f"{self.sqla_model.__tablename__} with user_id={user_id} and platform={platform} not found"
+                f"{self.sqla_model.__tablename__} with platform_user_id={platform_user_id} and platform={platform} not found"
             )
 
         return LinkedAccountsDomain.model_validate(user)

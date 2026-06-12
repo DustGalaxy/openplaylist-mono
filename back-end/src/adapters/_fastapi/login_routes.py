@@ -3,7 +3,7 @@ import uuid
 
 from fastapi import APIRouter, Body, HTTPException, Response
 
-from src.dto.token import CodeDTO
+from src.dto.token import OAuthBody
 from src.dto.user import HttpClassicLogin, HttpClassicRegister
 from src.dal._redis.broker import get_broker
 from src.models.auth_user import AuthUserCreate
@@ -12,7 +12,7 @@ from src.models.linked_accounts import LinkedAccountsCreate
 from src.settings import settings
 from src.adapters._fastapi.dependencies import DB_SESSION, auth_service
 from src.exceptions import NeedConfirmationException
-
+from src._types import IntegrationPlatform
 
 router = APIRouter(prefix="/login")
 
@@ -57,15 +57,20 @@ async def confirm_email(
     return {"status": "ok"}
 
 
-@router.post("/social/{type}", status_code=200)
+@router.post("/social/{platform}", status_code=200)
 async def login_by_social(
     response: Response,
     db_session: DB_SESSION,
-    code: CodeDTO,
-    type: str,
+    body: OAuthBody,
+    platform: IntegrationPlatform,
 ) -> dict | None:
     try:
-        token = await auth_service.login_by_social(db_session, code.code, type)
+        token = await auth_service.login_by_social(
+            db_session,
+            code=body.code,
+            platform=platform,
+            code_verifier=body.code_verifier,
+        )
         response.set_cookie(settings.COOKIE_NAME, token, httponly=True, secure=True)
         return None
 
@@ -76,12 +81,14 @@ async def login_by_social(
             json.dumps(e.data),
             ex=600,
         )
-
         response.status_code = 202
         return {
             "action": "NEED_CONFIRMATION",
             "link_session_id": link_session_id,
-            "display_info": {"username": e.data["platform_username"], "platform": e.data["platform"]},
+            "display_info": {
+                "username": e.data["platform_username"],
+                "platform": e.data["platform"],
+            },
         }
 
 

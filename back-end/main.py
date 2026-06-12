@@ -15,6 +15,7 @@ from src.adapters._rabbit import broker, declare
 from src.dal._redis.broker import get_broker
 from src.adapters._sio.routes import PlstUpdsNamespace, BasicNamespace
 from src.services.sio_service import room_manager
+from src.models import model_rebuild
 from src.settings import settings
 
 
@@ -25,11 +26,13 @@ async def lifespan(app: FastAPI):
     get_broker().connect()
 
     room_manager.start_up()
-    
+
     yield
     get_broker().close()
     await broker.stop()
 
+
+model_rebuild()
 
 app = FastAPI(lifespan=lifespan)
 
@@ -71,9 +74,11 @@ app.include_router(api_route)
 async def logout(response: Response):
     response.delete_cookie(settings.COOKIE_NAME)
 
+
 @app.get("/health")
 async def root():
     return {"status": "ok"}
+
 
 if __name__ == "__main__":
     import uvicorn

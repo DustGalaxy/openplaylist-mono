@@ -6,6 +6,9 @@ from pydantic import BaseModel, ConfigDict
 
 from src._types import IntegrationPlatform
 
+if TYPE_CHECKING:
+    from src.models.token_vault import TokenVaultDomain
+
 
 class LinkedAccountsDomain(BaseModel):
     id: UUID
@@ -16,9 +19,11 @@ class LinkedAccountsDomain(BaseModel):
     platform_user_id: str
     platform_username: str
     platform_avatar_url: str
-    platform_user_email: str
+    platform_user_email: str | None
 
     bot_connection: bool
+
+    tokens: "TokenVaultDomain"
 
     created_at: datetime
     updated_at: datetime

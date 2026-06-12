@@ -9,18 +9,35 @@ from faststream.rabbit import RabbitQueue
 from src.settings import settings
 from src.dto.internal.da import DAToken, DAUser
 from src.dto.internal.token import Tokens
-from src.dto.internal.auth import AuthStrategy, PlatformUser
+from src.dto.internal.auth import (
+    IntegrationType,
+    IntegrationPlatform,
+    IntegrationStrategy,
+    PlatformUser,
+    PlatformTokens,
+    PlatformAuthResult,
+    PlatformMeta,
+    AuthFlow,
+)
 from src.adapters._rabbit.event_broker import bot_da_connect_request
+from src._types import PlatformCap
 
 logger = logging.getLogger(__name__)
 
 
-class AuthDAService(AuthStrategy):
-    def __init__(self, queue: RabbitQueue):
-        self.bot_connect_request_queue = queue
+class AuthDAService(IntegrationStrategy):
+    meta: PlatformMeta = PlatformMeta(
+        platform=IntegrationPlatform.DA,
+        integration_type=IntegrationType.IDENTITY_AND_BOT,
+        auth_flow=AuthFlow.AUTH_CODE,
+        allow_email_collision=True,
+        bot_capabilities={
+            PlatformCap.DONATIONS,
+        },
+    )
 
-    def allow_email_collision(self) -> bool:
-        return False
+    def get_bot_queue(self) -> RabbitQueue:
+        return bot_da_connect_request
 
     async def _make_api_request(self, method: str, endpoint: str, access_token: str, **kwargs):
         """Helper to make authenticated requests to the DA API."""
@@ -119,11 +136,14 @@ class AuthDAService(AuthStrategy):
                 raise HTTPException(status_code=400)
 
     def validate_token(self, tokens: Tokens) -> bool:
-        
+
         return True
 
-
-    async def fetch_identity(self, code: str) -> PlatformUser:
+    async def fetch_identity(
+        self, code: str | None = None, code_verifier: str | None = None, user_key: str | None = None
+    ) -> PlatformAuthResult:
+        if not code:
+            raise HTTPException(400, "code is required")
         token = await self.get_token(code)
         da_user = await self.get_data(token.access_token)
         user = PlatformUser(
@@ -132,12 +152,14 @@ class AuthDAService(AuthStrategy):
             avatar_url=da_user.avatar,
             email=da_user.email,
             email_verified=True,
-            access_token=token.access_token,
-            refresh_token=token.refresh_token,  # type: ignore
-            expires_at=token.expires_at,
         )
+        tokens = PlatformTokens(
+            access_token=token.access_token,
+            refresh_token=token.refresh_token,
+            expires_at=token.expires_at,
+            token_type=token.token_type,
+        )
+        return PlatformAuthResult(user=user, tokens=tokens)
 
-        return user
 
-
-auth_da_service = AuthDAService(bot_da_connect_request)
+auth_da_service = AuthDAService()

@@ -4,36 +4,49 @@ from typing import Protocol, TypedDict, overload
 from pydantic import BaseModel
 from faststream.rabbit import RabbitQueue
 
+from src._types import IntegrationPlatform, AuthFlow, PlatformCap, IntegrationType
+
+
+class PlatformTokens(BaseModel):
+    access_token: str
+    refresh_token: str | None = None
+    expires_at: int | None = None
+    token_type: str = "Bearer"
+
 
 class PlatformUser(BaseModel):
     id: str
-
     username: str
     avatar_url: str
-
-    email: str | None
-    email_verified: bool
-
-    access_token: str
-    refresh_token: str
-    expires_at: int
+    email: str | None = None
+    email_verified: bool = False
 
 
-class AuthStrategy(Protocol):
-    bot_connect_request_queue: RabbitQueue
-
-    @abstractmethod
-    async def fetch_identity(self, code: str) -> PlatformUser: ...
-
-    @abstractmethod
-    def allow_email_collision(self) -> bool: ...
+class PlatformAuthResult(BaseModel):
+    user: PlatformUser
+    tokens: PlatformTokens
 
 
-class AuthStrategyPKCE(Protocol):
-    bot_connect_request_queue: RabbitQueue
+class PlatformMeta(BaseModel):
+    platform: IntegrationPlatform
+    integration_type: IntegrationType
+    auth_flow: AuthFlow
+    allow_email_collision: bool = False
+    bot_capabilities: set[PlatformCap] = set()
 
-    @abstractmethod
-    async def fetch_identity(self, code: str, code_verifier: str) -> PlatformUser: ...
 
-    @abstractmethod
-    def allow_email_collision(self) -> bool: ...
+# --- Единый протокол стратегии ---
+
+
+class IntegrationStrategy(Protocol):
+    meta: PlatformMeta
+
+    async def fetch_identity(
+        self,
+        code: str | None = None,
+        code_verifier: str | None = None,
+        user_key: str | None = None,
+    ) -> PlatformAuthResult: ...
+
+    def get_bot_queue(self) -> RabbitQueue | None:
+        return None

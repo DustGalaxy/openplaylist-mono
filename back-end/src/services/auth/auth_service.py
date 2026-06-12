@@ -22,7 +22,6 @@ from src.dal.postgres.token import TokenVaultRepository
 from src.dal.postgres.linked_account import LinkedAccountsRepository
 from src.dal.postgres.user import UserRepository, user_repository
 from src.dal.postgres.playlist import playlist_repository
-from src.dal.postgres.playlist_settings import playlist_settings_repository
 
 from src.models.token_vault import TokenVaultCreate, TokenVaultDomain
 from src.models.auth_user import AuthUserSchema, AuthUserCreate
@@ -31,9 +30,7 @@ from src.models.linked_accounts import LinkedAccountsCreate, LinkedAccountsDomai
 from src.services.auth.strategy_manager import manager
 from src.services.tokens.token_service import token_service
 
-from src.dto.internal.auth import AuthStrategyPKCE, AuthStrategyPKCE
-
-from src._types import IntegrationPlatform
+from src._types import AuthFlow, IntegrationPlatform
 from src.database import get_async_session
 from src.settings import settings
 from src.exceptions import NeedConfirmationException
@@ -168,10 +165,7 @@ class AuthService:
         await self.token_vault_repo.create(
             db_session,
             TokenVaultCreate(
-                user_id=data["user_id"],
                 linked_account_id=link.id,
-                platform=data["platform"],
-                platform_user_id=data["platform_user_id"],
                 access_token=data["access_token"],
                 refresh_token=data["refresh_token"],
                 token_type=data["token_type"],
@@ -189,16 +183,17 @@ class AuthService:
         self,
         db_session: AsyncSession,
         code: str,
-        type: str,
+        platform: IntegrationPlatform,
         code_verifier: str | None = None,
-    ):
-        strtg = manager.get_strategy(type)
-        if strtg is None:
-            raise HTTPException(status_code=400, detail="Platform not supported")
-        if code_verifier is None:
-            platform_user = await strtg.fetch_identity(code)  # type: ignore
-        else:
-            platform_user = await strtg.fetch_identity(code, code_verifier)  # type: ignore
+    ) -> str:
+        strtg = manager.get(platform)
+
+        if not manager.supports_identity(platform):
+            raise HTTPException(400, f"{platform} does not support login")
+
+        result = await strtg.fetch_identity(code, code_verifier)
+        platform_user = result.user
+        platform_tokens = result.tokens
 
         # level 1 - link with id already exists
         try:
@@ -207,11 +202,14 @@ class AuthService:
             await token_service.update_tokens(
                 db_session,
                 link_by_id.id,
-                platform_user.access_token,
-                platform_user.refresh_token,
-                platform_user.expires_at,
+                access_token=platform_tokens.access_token,
+                refresh_token=platform_tokens.refresh_token,
+                expires_at=platform_tokens.expires_at,
             )
 
+            link_by_id.platform_username = platform_user.username
+            link_by_id.platform_avatar_url = platform_user.avatar_url
+            link_by_id.platform_user_email = platform_user.email
             link_by_id = await self.link_repo.update(db_session, link_by_id)
 
             user = await self.user_repo.get_one(db_session, link_by_id.user_id, column="id")
@@ -233,7 +231,7 @@ class AuthService:
                 db_session, platform_user.email, IntegrationPlatform(type)
             )
 
-            if not strtg.allow_email_collision():
+            if not strtg.meta.allow_email_collision:
                 raise HTTPException(status_code=400, detail="Email collision")
 
             raise NeedConfirmationException(
@@ -244,9 +242,9 @@ class AuthService:
                     "platform_user_email": platform_user.email,
                     "platform_username": platform_user.username,
                     "platform_avatar_url": platform_user.avatar_url,
-                    "access_token": platform_user.access_token,
-                    "refresh_token": platform_user.refresh_token,
-                    "expires_at": platform_user.expires_at,
+                    "access_token": platform_tokens.access_token,
+                    "refresh_token": platform_tokens.refresh_token,
+                    "expires_at": platform_tokens.expires_at,
                 }
             )
         except NotFoundException:
@@ -282,14 +280,11 @@ class AuthService:
         await self.token_vault_repo.create(
             db_session,
             TokenVaultCreate(
-                user_id=user.id,
                 linked_account_id=new_link.id,
-                platform=IntegrationPlatform(type),
                 token_type="Bearer",
-                platform_user_id=platform_user.id,
-                access_token=platform_user.access_token,
-                refresh_token=platform_user.refresh_token,
-                expires_at=platform_user.expires_at,
+                access_token=platform_tokens.access_token,
+                refresh_token=platform_tokens.refresh_token,
+                expires_at=platform_tokens.expires_at,
             ),
         )
 
@@ -331,55 +326,65 @@ class AuthService:
         self,
         db_session: AsyncSession,
         user_id: UUID,
-        code: str,
-        type: IntegrationPlatform,
+        platform: IntegrationPlatform,
+        code: str | None = None,
         code_verifier: str | None = None,
+        user_key: str | None = None,
     ) -> AuthUserSchema:
+        strtg = manager.get(platform)
+        if strtg.meta.auth_flow == AuthFlow.USER_KEY:
+            if not user_key:
+                raise HTTPException(400, "This platform requires a personal token")
+            result = await strtg.fetch_identity(user_key=user_key)
 
-        strtg = manager.get_strategy(type)
-        if strtg is None:
-            raise HTTPException(status_code=400, detail="Platform not supported")
+        elif strtg.meta.auth_flow == AuthFlow.PKCE:
+            if not code or not code_verifier:
+                raise HTTPException(400, "code and code_verifier are required for PKCE flow")
+            result = await strtg.fetch_identity(code=code, code_verifier=code_verifier)
+
+        else:  # AUTH_CODE
+            if not code:
+                raise HTTPException(400, "code is required")
+            result = await strtg.fetch_identity(code=code)
 
         try:
             db_user = await self.user_repo.get_one(db_session, user_id)
-            if manager._is_pkce_strategy(strtg) and code_verifier is not None:
-                social_user = await strtg.fetch_identity(code, code_verifier)  # pyright: ignore[reportCallIssue]
-            else:
-                social_user = await strtg.fetch_identity(code)  # pyright: ignore[reportCallIssue]
-
-            integration = find(
-                db_user.linked_accounts, lambda x: x.platform == type and x.platform_user_id == social_user.id
-            )
-            if not integration:
-                link = LinkedAccountsCreate(
-                    user_id=user_id,
-                    platform=type,
-                    platform_user_id=social_user.id,
-                    platform_user_email=social_user.email,
-                    platform_username=social_user.username,
-                    platform_avatar_url=social_user.avatar_url,
-                )
-
-                new_link = await self.link_repo.create(db_session, link)
-                await self.token_vault_repo.create(
-                    db_session,
-                    TokenVaultCreate(
-                        user_id=user_id,
-                        linked_account_id=new_link.id,
-                        platform=type,
-                        token_type="Bearer",
-                        platform_user_id=social_user.id,
-                        access_token=social_user.access_token,
-                        refresh_token=social_user.refresh_token,
-                        expires_at=social_user.expires_at,
-                    ),
-                )
-                return await self.user_repo.get_one(db_session, user_id)
-
-            else:
-                raise HTTPException(status_code=400, detail=f"User already has a {integration.platform} integration")
         except NotFoundException:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(404, "User not found")
+
+        # проверяем что такой интеграции ещё нет
+        existing = find(
+            db_user.linked_accounts,
+            lambda x: x.platform == platform and x.platform_user_id == result.user.id,
+        )
+        if existing:
+            raise HTTPException(400, f"User already has a {platform} integration")
+
+        # создаём линк и токен
+        new_link = await self.create_link(
+            db_session,
+            LinkedAccountsCreate(
+                user_id=user_id,
+                platform=platform,
+                platform_user_id=result.user.id,
+                platform_username=result.user.username,
+                platform_avatar_url=result.user.avatar_url,
+                platform_user_email=result.user.email,
+            ),
+        )
+
+        await self.token_vault_repo.create(
+            db_session,
+            TokenVaultCreate(
+                linked_account_id=new_link.id,
+                token_type=result.tokens.token_type,
+                access_token=result.tokens.access_token,
+                refresh_token=result.tokens.refresh_token,
+                expires_at=result.tokens.expires_at,
+            ),
+        )
+
+        return await self.user_repo.get_one(db_session, user_id)
 
     async def delete_integration(
         self, db_session: AsyncSession, user_id: UUID, type: IntegrationPlatform, platform_user_id: str
@@ -404,46 +409,65 @@ class AuthService:
             raise HTTPException(status_code=404, detail="User not found")
 
     async def connect_bot(
-        self, db_session: AsyncSession, user: AuthUserSchema, type: IntegrationPlatform, platform_user_id: str
+        self,
+        db_session: AsyncSession,
+        user: AuthUserSchema,
+        platform: IntegrationPlatform,
+        platform_user_id: str,
     ) -> None:
-        strtg = manager.get_strategy(type)
-        if strtg is None:
-            raise HTTPException(status_code=400, detail="Platform not supported")
+        strtg = manager.get(platform)
 
-        link = find(user.linked_accounts, lambda x: x.platform == type and x.platform_user_id == platform_user_id)
+        if not manager.supports_bot(platform):
+            raise HTTPException(400, f"{platform} does not support bot")
+
+        link = find(
+            user.linked_accounts,
+            lambda x: x.platform == platform and x.platform_user_id == platform_user_id,
+        )
         if not link:
-            raise HTTPException(status_code=403, detail="User does not have a needed integration")
+            raise HTTPException(403, "User does not have a needed integration")
 
-        tokens = await token_service.get(db_session, link.id)
-        responce = await broker.request(
+        queue = strtg.get_bot_queue()
+        if queue is None:
+            raise HTTPException(500, f"Bot queue not configured for {platform}")
+
+        tokens = await self.token_vault_repo.get_by_id_link(db_session, link.id)
+
+        response = await broker.request(
             {
                 "access_token": tokens.access_token,
                 "refresh_token": tokens.refresh_token,
                 "expires_at": tokens.expires_at,
-                "platform": tokens.platform,
-                "platform_user_id": tokens.platform_user_id,
-                "user_id": str(tokens.user_id),
+                "platform": platform.value,
+                "platform_user_id": platform_user_id,
+                "user_id": str(user.id),
             },
-            strtg.bot_connect_request_queue,
+            queue,
             main_exchange,
         )
 
-        is_connected = bool(await responce.decode())
-
+        is_connected = bool(await response.decode())
         if not is_connected:
-            raise HTTPException(status_code=500, detail="Failed to connect bot. Try again later.")
+            raise HTTPException(500, "Failed to connect bot. Try again later.")
 
-        link.bot_connection = is_connected
+        link.bot_connection = True
         await self.link_repo.update(db_session, link)
 
-    async def bot_was_disconnected(self, db_session: AsyncSession, tokens: dict, type: IntegrationPlatform) -> None:
-        user = await user_repository.get_by_tokens(db_session, tokens["access_token"], tokens["refresh_token"], type)
-
-        link = find(user.linked_accounts, lambda x: x.platform == type)
+    async def bot_was_disconnected(
+        self,
+        db_session: AsyncSession,
+        platform: IntegrationPlatform,
+        platform_user_id: str,
+    ) -> None:
+        link = await self.link_repo.get_by_id_platform(
+            db_session,
+            platform=platform,
+            platform_user_id=platform_user_id,
+        )
         if not link:
-            raise HTTPException(status_code=400, detail="User does not have a needed integration")
-        link.bot_connection = False
+            raise HTTPException(400, "Integration not found")
 
+        link.bot_connection = False
         await self.link_repo.update(db_session, link)
 
     async def delete_user(self, db_session: AsyncSession, user_id: UUID) -> None:

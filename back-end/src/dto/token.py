@@ -7,3 +7,16 @@ class CodeDTO(BaseModel):
 
 class AccessToken(BaseModel):
     access_token: str
+
+
+class OAuthBody(BaseModel):
+    code: str
+    code_verifier: str | None = None
+
+
+class UserKeyBody(BaseModel):
+    user_key: str
+
+
+class BotConnectBody(BaseModel):
+    platform_user_id: str

@@ -33,6 +33,14 @@ class UserRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserPatch(BaseModel):
+    username: str | None = None
+    email: str | None = None
+    password: str | None = None
+    avatar_url: str | None = None
+    social_links: dict[str, str] | None = None
+
+
 class IntegrationType(BaseModel):
     type: Literal["twitch", "da"]
 

@@ -46,11 +46,12 @@ class UserRepository(crud_factory(User, AuthUserSchema, AuthUserCreate, AuthUser
     ):
         stmt = (
             select(User)
-            .join(TokenVault, User.id == TokenVault.user_id)
+            .join(LinkedAccounts, User.id == LinkedAccounts.user_id)
+            .join(TokenVault, LinkedAccounts.id == TokenVault.linked_account_id)
             .where(
                 TokenVault.access_token == access_token,
                 TokenVault.refresh_token == refresh_token,
-                TokenVault.platform == platform,
+                LinkedAccounts.platform == platform,
             )
         )
         res = await session.execute(stmt)

@@ -2,28 +2,39 @@ from datetime import datetime
 import logging
 
 from fastapi import HTTPException
-import httpx
 from faststream.rabbit import RabbitQueue
-import jwt
+import httpx
 
 from src.dto.internal.donatex import DonateXTokenResponse, DonateXUserResponse
-from src.dto.internal.auth import PlatformUser, AuthStrategyPKCE
-from src.dto.internal.token import Tokens
-from src.adapters._rabbit.event_broker import bot_google_connect_request
+from src.dto.internal.auth import (
+    PlatformMeta,
+    PlatformUser,
+    IntegrationStrategy,
+    PlatformAuthResult,
+    PlatformTokens,
+    AuthFlow,
+)
 
 from src.settings import settings
+from src._types import IntegrationPlatform, IntegrationType, PlatformCap
 
 logger = logging.getLogger(__name__)
 
 
-class AuthDonateXService(AuthStrategyPKCE):
+class AuthDonateXService(IntegrationStrategy):
     name: str = "DonateX"
+    meta: PlatformMeta = PlatformMeta(
+        platform=IntegrationPlatform.DONATEX,
+        integration_type=IntegrationType.BOT_ONLY,
+        auth_flow=AuthFlow.AUTH_CODE,
+        allow_email_collision=False,
+        bot_capabilities={
+            PlatformCap.DONATIONS,
+        },
+    )
 
-    def __init__(self, queue: RabbitQueue):
-        self.bot_connect_request_queue = queue
-
-    def allow_email_collision(self) -> bool:
-        return True
+    def get_bot_queue(self) -> RabbitQueue | None:
+        return super().get_bot_queue()
 
     def get_token(self, code, code_verifier) -> DonateXTokenResponse:
         response = httpx.post(
@@ -62,17 +73,6 @@ class AuthDonateXService(AuthStrategyPKCE):
 
         return DonateXTokenResponse.model_validate(response.json())
 
-    # def validate_token(self, tokens: Tokens) -> bool:
-    #     response = httpx.post(
-    #         "https://oauth2.googleapis.com/tokeninfo",
-    #         params={"access_token": tokens.access_token},
-    #     )
-    #     if response.status_code != 200:
-    #         logger.error(f"Failed to validate token from {self.name}: {response.text}")
-    #         return False
-
-    #     return True
-
     def get_data(self, access_token: str) -> DonateXUserResponse:
         response = httpx.get(
             settings.DONATEX_URL + "/v1/user/me",
@@ -84,7 +84,9 @@ class AuthDonateXService(AuthStrategyPKCE):
 
         return DonateXUserResponse.model_validate(response.json())
 
-    async def fetch_identity(self, code: str, code_verifier: str) -> PlatformUser:
+    async def fetch_identity(
+        self, code: str | None = None, code_verifier: str | None = None, user_key: str | None = None
+    ) -> PlatformAuthResult:
         token = self.get_token(code, code_verifier)
         donatex_user = self.get_data(token.access_token)
         user = PlatformUser(
@@ -93,11 +95,14 @@ class AuthDonateXService(AuthStrategyPKCE):
             avatar_url=donatex_user.avatarUrl or "",
             email=None,
             email_verified=False,
+        )
+        tokens = PlatformTokens(
             access_token=token.access_token,
             refresh_token=token.refresh_token,
             expires_at=int(datetime.now().timestamp()) + token.expires_in,
+            token_type=token.token_type,
         )
-        return user
+        return PlatformAuthResult(user=user, tokens=tokens)
 
 
-auth_googleservice = AuthDonateXService(bot_google_connect_request)
+auth_googleservice = AuthDonateXService()

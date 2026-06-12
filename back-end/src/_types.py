@@ -25,6 +25,7 @@ class Platform(StrEnum):
     GOOGLE = "google"
     DA = "donationalerts"
     WEB = "web"
+    DONATEX = "donatex"
 
 
 # служебный sentinel — только для БД, не платформа
@@ -39,6 +40,7 @@ class ContentSettingScope(StrEnum):
     YOUTUBE = Platform.YOUTUBE
     WEB = Platform.WEB
     DA = Platform.DA
+    DONATEX = Platform.DONATEX
     GENERAL = GENERAL_SCOPE
 
 
@@ -47,10 +49,12 @@ class BlockListScope(StrEnum):
     YOUTUBE = Platform.YOUTUBE
     DA = Platform.DA
     WEB = Platform.WEB
+    DONATEX = Platform.DONATEX
 
 
 class DonationRuleScope(StrEnum):
     DA = Platform.DA
+    DONATEX = Platform.DONATEX
     GENERAL = GENERAL_SCOPE
 
 
@@ -67,6 +71,19 @@ class IntegrationPlatform(StrEnum):
     YOUTUBE = Platform.YOUTUBE
     GOOGLE = Platform.GOOGLE
     DA = Platform.DA
+    DONATEX = Platform.DONATEX
+
+
+class IntegrationType(StrEnum):
+    IDENTITY_ONLY = "identity_only"
+    BOT_ONLY = "bot_only"
+    IDENTITY_AND_BOT = "identity_and_bot"
+
+
+class AuthFlow(StrEnum):
+    AUTH_CODE = "oauth2_code"
+    PKCE = "oauth2_pkce"
+    USER_KEY = "user_key"
 
 
 # --- источник трека ---
@@ -77,6 +94,12 @@ class TrackSource(StrEnum):
     YOUTUBE = Platform.YOUTUBE
     WEB = Platform.WEB
     DA = Platform.DA
+    DONATEX = Platform.DONATEX
+
+
+class PlatformCap(StrEnum):
+    CHAT = "chat"  # чат
+    DONATIONS = "donations"  # пожертвования
 
 
 Status = Literal["in playlist", "removed", "listened", "skipped", "reported"]

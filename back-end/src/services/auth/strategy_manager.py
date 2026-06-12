@@ -1,54 +1,45 @@
-from src.dto.internal.auth import AuthStrategy, AuthStrategyPKCE
+from fastapi import HTTPException
 
-from src.adapters._rabbit.event_broker import (
-    bot_twitch_connect_request,
-    bot_da_connect_request,
-    bot_google_connect_request,
-)
 from src.services.auth.twitch_service import AuthTwitchService
 from src.services.auth.da_service import AuthDAService
 from src.services.auth.google_service import AuthGoogleService
+from src.dto.internal.auth import IntegrationStrategy, PlatformCap
+from src._types import IntegrationPlatform, IntegrationType
 
 
 class AuthStrategyManager:
     def __init__(self):
-        self._registry = {}
+        self._registry: dict[IntegrationPlatform, IntegrationStrategy] = {}
 
-    def register(self, mark: str, **kwargs):
-        """
-        Registers a strategy class with the given mark.
-        This method returns a decorator that instantiates the strategy class
-        with the provided keyword arguments and stores the instance in the
-        registry under the specified mark.
-        Args:
-            mark (str): The key to register the strategy instance under.
-            **kwargs: Keyword arguments to pass to the strategy class constructor.
-        Returns:
-            callable: A decorator function that takes a strategy class and returns it
-            after registering an instance of it.
-        """
-
-        def wrapper(strategy_class):
-            instance = strategy_class(**kwargs)
-            self._registry[mark] = instance
-            return strategy_class
-
-        return wrapper
-
-    def _is_pkce_strategy(self, strategy: AuthStrategy | AuthStrategyPKCE) -> bool:
-        return "PKCE" in strategy.__class__.__name__
-
-    def add_strategy(self, mark: str, strategy: AuthStrategy | AuthStrategyPKCE):
-        self._registry[mark] = strategy
-
-    def get_strategy(self, obj: str) -> AuthStrategy | AuthStrategyPKCE:
-        strategy = self._registry.get(obj)
-        if strategy is None:
-            raise NotImplementedError(f"Strategy for {obj} is not implemented")
+    def register(self, strategy: IntegrationStrategy) -> IntegrationStrategy:
+        self._registry[strategy.meta.platform] = strategy
         return strategy
+
+    def get(self, platform: IntegrationPlatform) -> IntegrationStrategy:
+        strategy = self._registry.get(platform)
+        if strategy is None:
+            raise HTTPException(status_code=400, detail=f"Platform '{platform}' not supported")
+        return strategy
+
+    def supports_identity(self, platform: IntegrationPlatform) -> bool:
+        strtg = self.get(platform)
+        return strtg.meta.integration_type in (
+            IntegrationType.IDENTITY_ONLY,
+            IntegrationType.IDENTITY_AND_BOT,
+        )
+
+    def supports_bot(self, platform: IntegrationPlatform) -> bool:
+        strtg = self.get(platform)
+        return strtg.meta.integration_type in (
+            IntegrationType.BOT_ONLY,
+            IntegrationType.IDENTITY_AND_BOT,
+        )
+
+    def has_capability(self, platform: IntegrationPlatform, cap: PlatformCap) -> bool:
+        return cap in self.get(platform).meta.bot_capabilities
 
 
 manager = AuthStrategyManager()
-manager.add_strategy("twitch", AuthTwitchService(bot_twitch_connect_request))
-manager.add_strategy("donationalerts", AuthDAService(bot_da_connect_request))
-manager.add_strategy("google", AuthGoogleService(bot_google_connect_request))
+manager.register(AuthTwitchService())
+manager.register(AuthDAService())
+manager.register(AuthGoogleService())
