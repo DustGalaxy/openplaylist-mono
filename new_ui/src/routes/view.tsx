@@ -14,6 +14,7 @@ import {
   pageInnerClass,
   pageWrapClass,
   panelClass,
+  sectionTitleClass,
 } from '@/features/landing/styles'
 
 export const Route = createFileRoute('/view')({
@@ -272,7 +273,7 @@ function RouteComponent() {
         {/* Track queue */}
         <section className={`p-5 sm:p-8 ${panelClass}`}>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-text-main">
+            <h2 className={`text-lg font-semibold text-text-main  ${sectionTitleClass}`}>
               {t('publicView.queue')}
             </h2>
             <span className="text-sm text-text-secondary tabular-nums">
@@ -284,7 +285,7 @@ function RouteComponent() {
             <div
               className={`text-center py-12 border border-dashed border-level-3/50 rounded-(--rounded-std) bg-level-1/50`}
             >
-              <p className="text-text-main font-medium mb-1">
+              <p className={`text-text-main font-medium mb-1`}>
                 {t('publicView.queueEmptyPlaylist')}
               </p>
               <p className="text-sm text-text-secondary">

@@ -49,7 +49,6 @@ export default function ViewTrackCard({
 
           max-h-30`}
       >
-        {/*  */}
         <div className="relative w-[300px] @md:w-[400px] h-20">
           <div
             className=" rounded-(--rounded-std) gap-2 absolute inset-0 bg-cover bg-center blur-none"

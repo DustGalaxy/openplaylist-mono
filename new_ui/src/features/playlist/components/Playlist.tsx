@@ -56,6 +56,7 @@ import {
 } from '@/features/playlist/context/playlist-context'
 import LogPanel from './LogPanel'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
+import { InfoCardGroup } from '@/components/ui/info-card-group'
 
 const activeStateClass = `
         translate-y-[3px] 
@@ -256,57 +257,17 @@ function PlaylistView() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-0.25 sm:gap-0.5">
-                  <InfoCard
-                    icon={<Settings size={14} />}
-                    label={t('playlist.stats.mode')}
-                    value={playlist.settings.mode}
-                  />
-                  <InfoCard
-                    icon={<Eye size={14} />}
-                    label={t('playlist.stats.minViews')}
-                    value={contentSettings.min_views}
-                  />
-                  <InfoCard
-                    icon={<ThumbsUp size={14} />}
-                    label={t('playlist.stats.minLikes')}
-                    value={contentSettings.min_likes}
-                  />
-                  <InfoCard
-                    icon={<Clock size={14} />}
-                    label={t('playlist.stats.maxDuration')}
-                    value={t('playlist.stats.durationSec', {
-                      count: contentSettings.max_duration,
-                    })}
-                  />
-                  <InfoCard
-                    icon={<RefreshCcw size={14} />}
-                    label={t('playlist.stats.trackCd')}
-                    value={t('playlist.stats.cooldownMin', {
-                      count: contentSettings.track_cooldown,
-                    })}
-                  />
-                  <InfoCard
-                    icon={<User size={14} />}
-                    label={t('playlist.stats.userCd')}
-                    value={t('playlist.stats.cooldownMin', {
-                      count: contentSettings.user_cooldown,
-                    })}
-                  />
-                  <InfoCard
-                    icon={<List size={14} />}
-                    label={t('playlist.stats.maxSize')}
-                    value={
-                      playlist.settings.max_playlist_size ||
-                      t('playlist.stats.maxSizeUnlimited')
-                    }
-                  />
-                  <InfoCard
-                    icon={<ArrowUpRight width={14} height={14} />}
-                    label={t('playlist.stats.priorityMode')}
-                    value={playlist.settings.cost_mode}
-                  />
-                </div>
+                <InfoCardGroup
+                  mode={playlist.settings.mode}
+                  min_views={contentSettings.min_views}
+                  min_likes={contentSettings.min_likes}
+                  max_duration={contentSettings.max_duration}
+                  track_cooldown={contentSettings.track_cooldown}
+                  user_cooldown={contentSettings.user_cooldown}
+                  max_playlist_size={playlist.settings.max_playlist_size}
+                  priorityMode={playlist.settings.cost_mode}
+                  className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-0.25 sm:gap-0.5"
+                />
               </div>
             )}
           </div>
@@ -339,16 +300,17 @@ function PlaylistView() {
                   }
                 }}
               />
-              {playlist.settings.mode === 'static' && (
+              {
                 <Btn
                   title={t(`playlist.tooltip.prev`)}
                   text={<SkipBack />}
-                  className="px-2 bg-level-2"
+                  disabled={playlist.settings.mode !== 'static'}
+                  className={`px-2 bg-level-2 `}
                   onClick={() => {
                     playPrev(playlist.id)
                   }}
                 />
-              )}
+              }
               <Btn
                 title={t(`playlist.tooltip.${isPaused ? 'play' : 'pause'}`)}
                 text={isPaused ? <Play /> : <Pause />}

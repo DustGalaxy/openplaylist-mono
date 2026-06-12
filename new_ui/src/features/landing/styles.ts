@@ -16,7 +16,7 @@ export const innerPanelClass =
   'rounded-(--rounded-std) border border-white/5 bg-level-1/40 backdrop-blur-sm'
 
 export const sectionTitleClass =
-  'text-xs font-semibold uppercase tracking-wider text-text-placeholder mb-3'
+  'text-xs font-semibold uppercase tracking-wider text-text-placeholder mb-1'
 
 export const filterTabBaseClass =
   'px-3 py-1.5 text-sm rounded-(--rounded-std) border transition-all min-h-11'
