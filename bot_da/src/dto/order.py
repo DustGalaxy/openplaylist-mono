@@ -2,7 +2,7 @@ from typing import Literal
 from uuid import UUID
 from pydantic import BaseModel
 
-Source = Literal["twitch", "youtube", "web", "da"]
+Source = Literal["twitch", "youtube", "web", "donationalerts"]
 
 
 class OrderNew(BaseModel):

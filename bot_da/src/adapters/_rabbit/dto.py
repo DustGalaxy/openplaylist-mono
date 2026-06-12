@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class Platform(Enum):
     TWITCH = "twitch"
-    DA = "da"
+    DA = "donationalerts"
     GOOGLE = "google"
 
 
