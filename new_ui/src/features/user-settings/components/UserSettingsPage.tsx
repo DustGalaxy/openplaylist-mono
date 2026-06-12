@@ -64,7 +64,7 @@ export function UserSettingsPage({
         handleOAuthRedirect('twitch', true)
       },
     },
-    da: {
+    donationalerts: {
       name: t('platform.donationAlerts'),
       icon: <DonationAlerts width={45} height={45} />,
       loginHandler: () => {
