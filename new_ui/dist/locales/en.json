@@ -1,4 +1,12 @@
 {
+  "errorPage": {
+    "eyebrow": "Wow! Something went wrong",
+    "title": "Something went wrong",
+    "logLabel": "Error log:",
+    "unknownError": "Unknown system error",
+    "retryBtn": "Try again",
+    "homeBtn": "Go home"
+  },
   "common": {
     "or": "or",
     "cancel": "Cancel",
@@ -49,51 +57,51 @@
   "landing": {
     "eyebrow": "Playlists for streams and communities",
     "title": "OPEN PLAYLIST",
-    "heroBody": "<0>OpenPlaylist</0> is where the playlist is shared, not a personal track list. Viewers suggest music, rules filter requests, and you control the stream in one click.",
-    "goToPlaylists": "Go to playlists",
-    "loginAndStart": "Log in and get started",
-    "findPlaylist": "Find a playlist",
-    "audienceTitle": "Who it's for",
-    "audienceSubtitle": "Streamers · moderators · viewers",
+    "heroBody": "<0>OpenPlaylist</0> is a shared queue, not a personal playlist. Viewers suggest music, filters validate requests, and you manage the stream in one click.",
+    "goToPlaylists": "To Playlists",
+    "loginAndStart": "Log In & Start",
+    "findPlaylist": "Find Playlist",
+    "audienceTitle": "Who is it for?",
+    "audienceSubtitle": "Streamers · Viewers · Music Lovers",
     "audienceBullets": {
       "sharedQueue": "Shared queue with priorities and donations",
-      "validation": "YouTube track validation with your limits",
+      "validation": "YouTube track validation based on your settings",
       "publicPrivate": "Public and private playlists",
-      "sync": "Dashboard and viewer page stay in sync"
+      "sync": "Real-time dashboard and viewer page sync"
     },
-    "featuresTitle": "What the platform does",
-    "featuresSubtitle": "From a viewer request to on-air playback — settings, real-time updates, and a clear dashboard.",
+    "featuresTitle": "Features",
+    "featuresSubtitle": "From viewer request to playback — everything is connected via settings, real-time updates, and an intuitive dashboard.",
     "howItWorksTitle": "How it works",
     "features": {
       "liveQueue": {
-        "title": "Live queue",
-        "description": "Viewer requests go straight into the playlist. All connected clients see changes via WebSocket."
+        "title": "Live Queue",
+        "description": "Viewer requests instantly hit the playlist. All connected users see updates in real time."
       },
       "smartRules": {
-        "title": "Smart rules",
-        "description": "Limits on duration, views, cooldowns, and block lists — you decide what goes on air."
+        "title": "Smart Rules",
+        "description": "Set limits for duration, views, cooldowns, and blocklists — you decide what goes on stream."
       },
       "donations": {
-        "title": "Donations and priority",
-        "description": "Set boosts from DonationAlerts and Twitch chat roles — the queue reflects audience support."
+        "title": "Donations & Priority",
+        "description": "Set priorities for donations and Twitch chat roles — the queue adapts to your audience's input."
       },
       "publicAccess": {
-        "title": "Public access",
-        "description": "Open playlists can be found by name or author. Viewers submit tracks without extra steps."
+        "title": "Public Access",
+        "description": "Public playlists can be found by name or creator. Viewers submit tracks instantly."
       }
     },
     "steps": {
       "create": {
-        "title": "Create a playlist",
-        "text": "Sign in with Twitch or email, set flow/static mode and content rules."
+        "title": "Create Playlist",
+        "text": "Log in via Twitch or email, configure flow/static mode, and set content rules."
       },
       "share": {
-        "title": "Share the link",
-        "text": "Give viewers a public page — they search for a track and submit a queue request."
+        "title": "Share Access",
+        "text": "Share the playlist link so viewers can search and submit tracks, or connect a profile bot."
       },
       "stream": {
-        "title": "Run your stream",
-        "text": "Control playback from the dashboard: play now, skip, sort, and history."
+        "title": "Go Live",
+        "text": "Manage playback directly from your dashboard: play, skip, reorder, and view logs."
       }
     }
   },
@@ -233,9 +241,60 @@
     "empty": {
       "title": "No playlists yet",
       "hint": "Press + to create your first playlist."
+    },
+    "tooltip": {
+      "addPlaylist": "Create playlist",
+      "playlist": "Playlist - {{playlistName}}"
     }
   },
   "playlist": {
+    "log": {
+      "title": "Log",
+      "add_track": "Added track '{{title}}'",
+      "add_track_error": "Failed to add track '{{title}}' by reason: {{error}}",
+      "remove_track": "Removed track '{{title}}'",
+      "play_track": "Played track '{{title}}'",
+      "listen_track": "Listened to track '{{title}}'",
+      "skip_track": "Skipped track '{{title}}'",
+      "report_track": "Reported track '{{title}}'",
+      "no_track": "No track played",
+      "modal": {
+        "title": "Log for {{name}}",
+        "close": "Close",
+        "id": "Log ID",
+        "created_at": "Timestamp",
+        "event_type": "Event Type",
+        "platform": "Platform",
+        "initiated_by": "Initiated By",
+        "owner": "Owner",
+        "guest": "Guest",
+        "payload": "Event Data (JSON)"
+      },
+      "errors": {
+        "Playlist is not active": "Playlist is not active",
+        "Wrong donation amount": "Wrong donation amount",
+        "Wrong donation currency": "Wrong donation currency",
+        "Blacklisted user": "Blacklisted user",
+        "Blacklisted track": "Blacklisted track",
+        "Not enough views": "Not enough views",
+        "Not enough likes": "Not enough likes",
+        "Too long": "Track is too long",
+        "Playlist is full": "Playlist is full",
+        "Track cooldown": "Track cooldown",
+        "User cooldown": "User cooldown",
+        "unknown": "Неизвестная ошибка"
+      },
+      "types": {
+        "add_track": "Add Track",
+        "add_track_error": "Add Track Error",
+        "play_track": "Play Track",
+        "remove_track": "Remove Track",
+        "listen_track": "Listen Track",
+        "skip_track": "Skip Track",
+        "report_track": "Report Track",
+        "error": "System Error"
+      }
+    },
     "stats": {
       "mode": "Mode",
       "minViews": "Min views",
@@ -337,6 +396,39 @@
         "reportSubmitted": "report submitted",
         "recorded": "Report recorded."
       }
+    },
+    "track": {
+      "ejectBtn": "Eject",
+      "play": "Play next",
+      "copy": "Copy YouTube link",
+      "save": "Save track",
+      "unsave": "Remove from saved",
+      "remove": "Remove from queue",
+      "add": "Add to playlist",
+      "source": "Request source",
+      "video_id": "YouTube Video ID (Open original)",
+      "status": "Track status",
+      "duration": "Duration",
+      "date": "Date added - {{date}}",
+      "priority": "Track priority",
+      "requester": "Requested by",
+      "eject": "Show/hide technical details"
+    },
+    "tooltip": {
+      "validation": "Validation preview",
+      "logs": "Playlist action logs",
+      "share": "Share playlist link",
+      "status": "Playlist status",
+      "repeatMode": {
+        "all": "Repeat all",
+        "once": "Repeat one",
+        "none": "Repeat off"
+      },
+      "prev": "Previous track",
+      "next": "Next track",
+      "pause": "Pause",
+      "play": "Play",
+      "shuffle": "Shuffle"
     }
   },
   "playlistSettings": {
@@ -692,7 +784,9 @@
     "google": "Google",
     "github": "GitHub",
     "spotify": "Spotify",
-    "da": "Donation Alerts"
+    "da": "Donation Alerts",
+    "donatex": "DonateX",
+    "donatepay": "DonatePay"
   },
   "twitch": {
     "role": {
@@ -715,5 +809,17 @@
   "placeholder": {
     "history": "Hello \"/history\"!",
     "statistic": "Hello \"/statistic\"!"
+  },
+  "sort": {
+    "date": {
+      "title": "Date sorting",
+      "olderFirst": "Older first",
+      "newerFirst": "Newer first"
+    },
+    "priority": {
+      "title": "Priority sorting",
+      "highFirst": "High priority first",
+      "lowFirst": "Low priority first"
+    }
   }
 }
