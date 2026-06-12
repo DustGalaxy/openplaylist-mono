@@ -89,12 +89,12 @@ services:
   backend:
     build: ./back-end
     depends_on:
-          database:
-            condition: service_healthy
-          redis:
-            condition: service_healthy
-          rabbitmq:
-            condition: service_healthy
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     env_file:
       - ./back-end/.env
     ports:
@@ -115,7 +115,7 @@ services:
     networks:
       - default
     healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').getcode()"]
+      test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').getcode()" ]
       interval: 30s
       timeout: 5s
       retries: 5
@@ -128,12 +128,12 @@ services:
       context: ./back-end
       dockerfile: ./Dockerfile.tasks
     depends_on:
-          database:
-            condition: service_healthy
-          redis:
-            condition: service_healthy
-          rabbitmq:
-            condition: service_healthy
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     env_file:
       - ./back-end/.env
     volumes:
@@ -146,12 +146,12 @@ services:
       context: ./back-end
       dockerfile: ./Dockerfile.scheduler
     depends_on:
-          database:
-            condition: service_healthy
-          redis:
-            condition: service_healthy
-          rabbitmq:
-            condition: service_healthy
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     env_file:
       - ./back-end/.env
     volumes:
@@ -195,8 +195,10 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`${PROJECT_DOMAIN:-openplaylist.localhost}`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure" # Добавлено
       - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.tls.certresolver=myresolver" # Добавлено для корректного SSL
+      - "traefik.http.routers.frontend.priority=1" # Добавлено: минимальный приоритет
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
-
     networks:
       - default
