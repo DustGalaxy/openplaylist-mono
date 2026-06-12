@@ -161,14 +161,14 @@ class ValidationEngine:
             (
                 lambda: (
                     new_track.source in DonationPlatform
-                    and effective_donation_settings.get("amount", 0) != new_track.extra_data.donation_currency_amount  # type: ignore
+                    and effective_donation_settings.get("amount", 0) != new_track.extra_data.donation_amount  # type: ignore
                 ),
                 "Wrong donation amount",
             ),
             (
                 lambda: (
                     new_track.source in DonationPlatform
-                    and effective_donation_settings.get("currency", "") != new_track.extra_data.currency_code  # type: ignore
+                    and effective_donation_settings.get("currency", "") != new_track.extra_data.donation_currency  # type: ignore
                 ),
                 "Wrong donation currency",
             ),
