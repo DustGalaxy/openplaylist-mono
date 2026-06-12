@@ -79,7 +79,7 @@ class OrderService:
         return json.loads(str(raw_data))
 
     def save_to_cache(self, video_id, data):
-        return get_broker().set(video_id, json.dumps(data))
+        return get_broker().set(video_id, json.dumps(data), ex=60 * 60 * 24 * 3)
 
     async def init_order(
         self, order: Union[WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder], from_owner: bool = False
