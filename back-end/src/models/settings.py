@@ -4,7 +4,7 @@ from typing import List, Literal, Optional
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
-from src._types import Platform, DonationPlatform, ChatPlatform, _All_Platforms, DB_DonationPlatform
+from src._types import ContentSettingScope, DonationRuleScope, ChatRuleScope, BlockListScope
 
 
 class SortSettings(BaseModel):
@@ -18,7 +18,7 @@ class SortSettings(BaseModel):
 
 class BlockTrigger(str, Enum):
     USER_ID = "USER_ID"
-    USER_NAME = "USER_NAME" 
+    USER_NAME = "USER_NAME"
 
 
 # --- Shared Base ---
@@ -39,7 +39,7 @@ class SubSchema(BaseSchema):
 
 
 class ContentSettingsSchema(SubSchema):
-    platform: _All_Platforms
+    platform: ContentSettingScope
     min_views: int
     min_likes: int
     max_duration: int
@@ -50,11 +50,11 @@ class ContentSettingsSchema(SubSchema):
 class BlockListSchema(SubSchema):
     trigger_type: BlockTrigger
     trigger_value: str
-    platform: Platform
+    platform: BlockListScope
 
 
 class DonationRulesSchema(SubSchema):
-    platform: _All_Platforms
+    platform: DonationRuleScope
     name: str
     slug: str
     currency: str
@@ -64,7 +64,7 @@ class DonationRulesSchema(SubSchema):
 
 
 class ChatRulesSchema(SubSchema):
-    platform: ChatPlatform
+    platform: ChatRuleScope
     key: str
     priority: int
     content_settings: Optional[dict] = None
@@ -97,7 +97,7 @@ class SettingsSchema(BaseSchema):
 class ContentSettingsPatch(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    platform: Optional[_All_Platforms] = None
+    platform: Optional[ContentSettingScope] = None
     min_views: Optional[int] = None
     min_likes: Optional[int] = None
     max_duration: Optional[int] = None
@@ -110,13 +110,13 @@ class BlockListPatch(BaseModel):
 
     trigger_type: Optional[BlockTrigger] = None
     trigger_value: Optional[str] = None
-    platform: Optional[Platform] = None
+    platform: Optional[BlockListScope] = None
 
 
 class DonationRulesPatch(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    platform: Optional[DB_DonationPlatform] = None
+    platform: Optional[DonationRuleScope] = None
     name: Optional[str] = None
     slug: Optional[str] = None
     currency: Optional[str] = None
@@ -128,7 +128,7 @@ class DonationRulesPatch(BaseModel):
 class ChatRulesPatch(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    platform: Optional[ChatPlatform] = None
+    platform: Optional[ChatRuleScope] = None
     key: Optional[str] = None
     priority: Optional[int] = None
     content_settings: Optional[dict] = None
@@ -153,7 +153,7 @@ class DonationRulesCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     settings_id: UUID
-    platform: DB_DonationPlatform
+    platform: DonationRuleScope
     name: str = "Donation"
     slug: str = "donation"
     currency: str = Field("USD", min_length=3, max_length=3)
@@ -166,7 +166,7 @@ class ChatRulesCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     settings_id: UUID
-    platform: ChatPlatform
+    platform: ChatRuleScope
     key: str = Field(..., max_length=255)
     priority: int
     content_settings: Optional[dict] = None
@@ -176,7 +176,7 @@ class ChatRulesCreate(BaseModel):
 class ContentSettingsCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    platform: _All_Platforms
+    platform: ContentSettingScope
     settings_id: UUID
     min_views: int = 10_000
     min_likes: int = 500
@@ -191,7 +191,7 @@ class BlockListCreate(BaseModel):
     settings_id: UUID
     trigger_type: BlockTrigger
     trigger_value: str = Field(..., max_length=255)
-    platform: Platform
+    platform: BlockListScope
 
 
 class SettingsCreate(BaseModel): ...

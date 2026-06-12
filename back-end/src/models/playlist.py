@@ -3,11 +3,11 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.models.order import OrderDomain
-from src._types import Platform
+from src._types import TrackSource
 
 
 class AllowedSource(BaseModel):
-    platform: Platform
+    platform: TrackSource
     platform_user_id: str
 
 

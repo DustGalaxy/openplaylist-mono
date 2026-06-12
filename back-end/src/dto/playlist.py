@@ -6,8 +6,6 @@ from src.dto.settings import ReadPlaylistSettings
 from src.models.order import OrderDomain
 from src.models.playlist import AllowedSource
 
-from src._types import Platform
-
 
 class ReadPlaylist(BaseModel):
     id: UUID

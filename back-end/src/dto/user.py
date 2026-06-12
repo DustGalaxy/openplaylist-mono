@@ -3,7 +3,7 @@ from typing import Literal
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
-from src._types import Platform
+from src._types import IntegrationPlatform
 
 
 class UserDTO(BaseModel):
@@ -39,7 +39,7 @@ class IntegrationType(BaseModel):
 
 class IntegrationRead(BaseModel):
     id: UUID
-    platform: Platform
+    platform: IntegrationPlatform
     platform_user_id: str
     platform_avatar_url: str
     platform_username: str

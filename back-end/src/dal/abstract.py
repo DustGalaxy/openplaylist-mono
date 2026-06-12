@@ -12,7 +12,7 @@ from src.models.playlist import PlaylistSchema, PlaylistCreate, PlaylistPatch
 from src.orm.playlist import Playlist
 from src.orm.settings import Settings
 
-from src._types import DeleteStatus, Platform
+from src._types import DeleteStatus, TrackSource
 
 
 class IPlaylistSettingsRepository(IAsyncCrud[Settings, SettingsSchema, SettingsCreate, SettingsPatch]):
@@ -35,7 +35,7 @@ class IPlaylistRepository(IAsyncCrud[Playlist, PlaylistSchema, PlaylistCreate, P
 
     @abstractmethod
     async def get_user_playlists_by_sourse(
-        self, session: AsyncSession, owner_id: UUID, platform_user_id: str, source: Platform
+        self, session: AsyncSession, owner_id: UUID, platform_user_id: str, source: TrackSource
     ) -> list[PlaylistSchema]: ...
 
     @abstractmethod

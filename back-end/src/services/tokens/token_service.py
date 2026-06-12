@@ -8,7 +8,7 @@ from src.dal.postgres.token import token_vault_repository, TokenVaultRepository
 
 from src.services.tokens.manager import manager
 from src.database import async_session_maker
-from src._types import Platform
+from src._types import IntegrationPlatform
 
 
 class TokenService:
@@ -21,7 +21,7 @@ class TokenService:
         db_session: AsyncSession,
         user_id: UUID,
         linked_account_id: UUID,
-        platform: Platform,
+        platform: IntegrationPlatform,
         platform_user_id: str,
         token_type: str,
         access_token: str,

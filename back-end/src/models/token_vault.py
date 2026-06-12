@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
-from src._types import Platform
+from src._types import IntegrationPlatform
 
 
 class TokenVaultDomain(BaseModel):
@@ -13,7 +13,7 @@ class TokenVaultDomain(BaseModel):
     user_id: UUID
     linked_account_id: UUID
 
-    platform: Platform
+    platform: IntegrationPlatform
     platform_user_id: str
 
     access_token: str
@@ -32,7 +32,7 @@ class TokenVaultCreate(BaseModel):
     user_id: UUID
     linked_account_id: UUID
 
-    platform: Platform
+    platform: IntegrationPlatform
     platform_user_id: str
 
     access_token: str

@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
-from src._types import Platform
+from src._types import IntegrationPlatform
 
 
 class LinkedAccountsDomain(BaseModel):
@@ -12,7 +12,7 @@ class LinkedAccountsDomain(BaseModel):
 
     user_id: UUID
 
-    platform: Platform
+    platform: IntegrationPlatform
     platform_user_id: str
     platform_username: str
     platform_avatar_url: str
@@ -28,7 +28,7 @@ class LinkedAccountsDomain(BaseModel):
 class LinkedAccountsCreate(BaseModel):
     user_id: UUID
 
-    platform: Platform
+    platform: IntegrationPlatform
     platform_user_id: str
     platform_username: str
     platform_avatar_url: str

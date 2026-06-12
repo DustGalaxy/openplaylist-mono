@@ -11,7 +11,7 @@ from src.orm.token_vault import TokenVault
 from src.models.token_vault import TokenVaultCreate, TokenVaultUpdate, TokenVaultDomain
 
 
-from src._types import Platform
+from src._types import IntegrationPlatform
 
 
 class TokenVaultRepository(crud_factory(TokenVault, TokenVaultDomain, TokenVaultCreate, TokenVaultUpdate)):
@@ -21,7 +21,7 @@ class TokenVaultRepository(crud_factory(TokenVault, TokenVaultDomain, TokenVault
     def to_repr(self, object: TokenVault) -> TokenVaultDomain:
         return self.domain_model.model_validate(object)
 
-    async def get_by_id_platform(self, session: AsyncSession, platform_user_id: str, platform: Platform):
+    async def get_by_id_platform(self, session: AsyncSession, platform_user_id: str, platform: IntegrationPlatform):
         stmt = select(TokenVault).where(
             TokenVault.platform_user_id == platform_user_id, TokenVault.platform == platform
         )
@@ -44,7 +44,7 @@ class TokenVaultRepository(crud_factory(TokenVault, TokenVaultDomain, TokenVault
 
         return [self.to_repr(item) for item in result]
 
-    async def get_all_by_platform(self, session: AsyncSession, platform: Platform) -> list[TokenVaultDomain]:
+    async def get_all_by_platform(self, session: AsyncSession, platform: IntegrationPlatform) -> list[TokenVaultDomain]:
         stmt = select(TokenVault).where(TokenVault.platform == platform)
 
         result = await session.execute(stmt)

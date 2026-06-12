@@ -13,7 +13,7 @@ from src.orm.linked_accounts import LinkedAccounts
 
 from src.orm.token_vault import TokenVault
 
-from src._types import Platform
+from src._types import IntegrationPlatform
 
 
 class UserRepository(crud_factory(User, AuthUserSchema, AuthUserCreate, AuthUserUpdate)):
@@ -24,7 +24,7 @@ class UserRepository(crud_factory(User, AuthUserSchema, AuthUserCreate, AuthUser
         return self.domain_model.model_validate(object)
 
     async def get_user_by_link(
-        self, session: AsyncSession, platform: Platform, platform_user_id: str
+        self, session: AsyncSession, platform: IntegrationPlatform, platform_user_id: str
     ) -> AuthUserSchema:
         stmt = (
             select(User)
@@ -41,7 +41,9 @@ class UserRepository(crud_factory(User, AuthUserSchema, AuthUserCreate, AuthUser
 
         return AuthUserSchema.model_validate(user)
 
-    async def get_by_tokens(self, session: AsyncSession, access_token: str, refresh_token: str, platform: Platform):
+    async def get_by_tokens(
+        self, session: AsyncSession, access_token: str, refresh_token: str, platform: IntegrationPlatform
+    ):
         stmt = (
             select(User)
             .join(TokenVault, User.id == TokenVault.user_id)

@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.linked_accounts import LinkedAccountsDomain, LinkedAccountsCreate, LinkedAccountsUpdate
 from src.orm.linked_accounts import LinkedAccounts
 
-from src._types import Platform
+from src._types import IntegrationPlatform
 
 
 class LinkedAccountsRepository(
@@ -22,7 +22,7 @@ class LinkedAccountsRepository(
         return self.domain_model.model_validate(object)
 
     async def get_by_id_platform(
-        self, session: AsyncSession, user_id: UUID, platform: Platform
+        self, session: AsyncSession, user_id: UUID, platform: IntegrationPlatform
     ) -> LinkedAccountsDomain:
         stmt = select(LinkedAccounts).where(
             LinkedAccounts.platform_user_id == user_id, LinkedAccounts.platform == platform
@@ -38,7 +38,7 @@ class LinkedAccountsRepository(
 
         return LinkedAccountsDomain.model_validate(user)
 
-    async def get_by_email_platform(self, session: AsyncSession, email: str, platform: Platform):
+    async def get_by_email_platform(self, session: AsyncSession, email: str, platform: IntegrationPlatform):
         stmt = select(LinkedAccounts).where(
             LinkedAccounts.platform_user_email == email, LinkedAccounts.platform == platform
         )

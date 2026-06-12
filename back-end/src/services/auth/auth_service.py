@@ -33,7 +33,7 @@ from src.services.tokens.token_service import token_service
 
 from src.dto.internal.auth import AuthStrategyPKCE, AuthStrategyPKCE
 
-from src._types import Platform
+from src._types import IntegrationPlatform
 from src.database import get_async_session
 from src.settings import settings
 from src.exceptions import NeedConfirmationException
@@ -229,7 +229,9 @@ class AuthService:
 
         # level 2 - another link with email already exists
         try:
-            link_by_email = await self.link_repo.get_by_email_platform(db_session, platform_user.email, Platform(type))
+            link_by_email = await self.link_repo.get_by_email_platform(
+                db_session, platform_user.email, IntegrationPlatform(type)
+            )
 
             if not strtg.allow_email_collision():
                 raise HTTPException(status_code=400, detail="Email collision")
@@ -269,7 +271,7 @@ class AuthService:
             db_session,
             LinkedAccountsCreate(
                 user_id=user.id,
-                platform=Platform(type),
+                platform=IntegrationPlatform(type),
                 platform_user_id=platform_user.id,
                 platform_username=platform_user.username,
                 platform_avatar_url=platform_user.avatar_url,
@@ -282,7 +284,7 @@ class AuthService:
             TokenVaultCreate(
                 user_id=user.id,
                 linked_account_id=new_link.id,
-                platform=Platform(type),
+                platform=IntegrationPlatform(type),
                 token_type="Bearer",
                 platform_user_id=platform_user.id,
                 access_token=platform_user.access_token,
@@ -294,7 +296,7 @@ class AuthService:
         token = self.encode_jwt(user.id, platform_user.username)
         return token
 
-    async def get_all_tokens(self, db_session: AsyncSession, type: Platform) -> list[TokenVaultDomain]:
+    async def get_all_tokens(self, db_session: AsyncSession, type: IntegrationPlatform) -> list[TokenVaultDomain]:
         return await self.token_vault_repo.get_all_by_platform(db_session, type)
 
     async def get_current_user(
@@ -330,10 +332,10 @@ class AuthService:
         db_session: AsyncSession,
         user_id: UUID,
         code: str,
-        type: Platform,
+        type: IntegrationPlatform,
         code_verifier: str | None = None,
     ) -> AuthUserSchema:
-        
+
         strtg = manager.get_strategy(type)
         if strtg is None:
             raise HTTPException(status_code=400, detail="Platform not supported")
@@ -380,16 +382,16 @@ class AuthService:
             raise HTTPException(status_code=404, detail="User not found")
 
     async def delete_integration(
-        self, db_session: AsyncSession, user_id: UUID, type: Platform, platform_user_id: str
+        self, db_session: AsyncSession, user_id: UUID, type: IntegrationPlatform, platform_user_id: str
     ) -> AuthUserSchema:
         try:
             db_user = await self.user_repo.get_one(db_session, user_id, column="id")
             integration = find(
                 db_user.linked_accounts,
-                lambda x: x.platform == Platform(type) and x.platform_user_id == platform_user_id,
+                lambda x: x.platform == IntegrationPlatform(type) and x.platform_user_id == platform_user_id,
             )
             for link in db_user.linked_accounts:
-                if link.platform == Platform(type) and link.platform_user_id == platform_user_id:
+                if link.platform == IntegrationPlatform(type) and link.platform_user_id == platform_user_id:
                     print(link)
             print(f"type: {type}, platform_user_id: {platform_user_id}")
             if not integration:
@@ -402,7 +404,7 @@ class AuthService:
             raise HTTPException(status_code=404, detail="User not found")
 
     async def connect_bot(
-        self, db_session: AsyncSession, user: AuthUserSchema, type: Platform, platform_user_id: str
+        self, db_session: AsyncSession, user: AuthUserSchema, type: IntegrationPlatform, platform_user_id: str
     ) -> None:
         strtg = manager.get_strategy(type)
         if strtg is None:
@@ -434,7 +436,7 @@ class AuthService:
         link.bot_connection = is_connected
         await self.link_repo.update(db_session, link)
 
-    async def bot_was_disconnected(self, db_session: AsyncSession, tokens: dict, type: Platform) -> None:
+    async def bot_was_disconnected(self, db_session: AsyncSession, tokens: dict, type: IntegrationPlatform) -> None:
         user = await user_repository.get_by_tokens(db_session, tokens["access_token"], tokens["refresh_token"], type)
 
         link = find(user.linked_accounts, lambda x: x.platform == type)

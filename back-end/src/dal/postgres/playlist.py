@@ -21,7 +21,7 @@ from src.dal.abstract import IPlaylistRepository
 from src.exceptions import NotActivePlaylist
 
 
-from src._types import DB_DonationPlatform, Platform, DeleteStatus, _All_Platforms
+from src._types import DonationRuleScope, TrackSource, DeleteStatus, ContentSettingScope
 
 
 class PlaylistRepository(
@@ -80,7 +80,7 @@ class PlaylistRepository(
         return [PlaylistSchema.model_validate(item) for item in result]
 
     async def get_user_playlists_by_sourse(
-        self, session: AsyncSession, owner_id: UUID, platform_user_id: str, source: Platform
+        self, session: AsyncSession, owner_id: UUID, platform_user_id: str, source: TrackSource
     ) -> list[PlaylistSchema]:
 
         target_source = {"platform": source.value, "platform_user_id": platform_user_id}
@@ -107,7 +107,7 @@ class PlaylistRepository(
 
             general_content_settings = ContentSettingsCreate(
                 settings_id=new_settings.id,
-                platform=_All_Platforms.GENERAL,
+                platform=ContentSettingScope.GENERAL,
                 min_views=10_000,
                 min_likes=500,
                 max_duration=600,
@@ -116,7 +116,7 @@ class PlaylistRepository(
             )
             general_donation_rule = DonationRulesCreate(
                 settings_id=new_settings.id,
-                platform=DB_DonationPlatform.GENERAL,
+                platform=DonationRuleScope.GENERAL,
                 name="General",
                 slug="general",
                 currency="USD",
