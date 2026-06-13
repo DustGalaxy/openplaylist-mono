@@ -1,3 +1,7 @@
+from src.models import model_rebuild
+
+model_rebuild()
+
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI, Response
@@ -15,12 +19,13 @@ from src.adapters._rabbit import broker, declare
 from src.dal._redis.broker import get_broker
 from src.adapters._sio.routes import PlstUpdsNamespace, BasicNamespace
 from src.services.sio_service import room_manager
-from src.models import model_rebuild
+
 from src.settings import settings
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+
     await broker.start()
     await declare()
     get_broker().connect()
@@ -31,8 +36,6 @@ async def lifespan(app: FastAPI):
     get_broker().close()
     await broker.stop()
 
-
-model_rebuild()
 
 app = FastAPI(lifespan=lifespan)
 

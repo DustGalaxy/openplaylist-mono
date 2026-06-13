@@ -74,10 +74,11 @@ async def da_refresh_tokens(
         link = await linked_accounts_repository.get_by_id_platform(
             session, event.platform_user_id, IntegrationPlatform.DA
         )
+        tokens = await token_vault_repository.get_by_id_link(session, link.id)
 
         if not link:
             return
-        link.tokens.access_token = event.access_token
-        link.tokens.refresh_token = event.refresh_token
-        link.tokens.expires_at = event.expires_at
-        await token_vault_repository.update(session, link.tokens)
+        tokens.access_token = event.access_token
+        tokens.refresh_token = event.refresh_token
+        tokens.expires_at = event.expires_at
+        await token_vault_repository.update(session, tokens)

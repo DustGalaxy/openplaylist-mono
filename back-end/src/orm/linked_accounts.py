@@ -24,4 +24,4 @@ class LinkedAccounts(Base, UUIDMixin, TimestampMixin):
 
     bot_connection: Mapped[bool] = mapped_column("bot_connection", nullable=False, default=False)
 
-    tokens: Mapped[list["TokenVault"]] = relationship(lazy="selectin", back_populates="linked_account")
+    tokens: Mapped["TokenVault"] = relationship(lazy="selectin", back_populates="linked_account")

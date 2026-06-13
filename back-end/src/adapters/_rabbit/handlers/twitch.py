@@ -83,11 +83,14 @@ async def twitch_refresh_tokens(
         except NotFoundException:
             # TODO: log
             return
+        tokens = await token_vault_repository.get_by_id_link(session, link.id)
 
-        link.tokens.access_token = event.access_token
-        link.tokens.refresh_token = event.refresh_token
-        link.tokens.expires_at = event.expires_in + int(datetime.now().timestamp())
-        await token_vault_repository.update(session, link.tokens)
+        if not link:
+            return
+        tokens.access_token = event.access_token
+        tokens.refresh_token = event.refresh_token
+        tokens.expires_at = event.expires_in + int(datetime.now().timestamp())
+        await token_vault_repository.update(session, tokens)
 
 
 @broker.subscriber("user.token.died", exchange=main_exchange)

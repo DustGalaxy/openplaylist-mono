@@ -1,5 +1,6 @@
 import { getConfig } from '@/lib/utils'
 import { authStrategyManager } from './authStrategyManager'
+import pkceChallenge from 'pkce-challenge'
 /**
  * OAuth Platform Configuration
  * Defines how to build OAuth authorization URLs for each platform
@@ -144,12 +145,11 @@ export async function buildOAuthUrl(
   })
 
   if (platform === 'donatex') {
-    const { codeVerifier, codeChallenge } = await generatePKCE().then(
-      (result) => result,
-    )
-    params.set('code_challenge_method', platformConfig.code_challenge_method!)
-    params.set('code_challenge', codeChallenge)
-    window.sessionStorage.setItem('code_verifier', codeVerifier)
+    const { code_verifier, code_challenge, code_challenge_method } =
+      await pkceChallenge()
+    params.set('code_challenge_method', code_challenge_method)
+    params.set('code_challenge', code_challenge)
+    window.sessionStorage.setItem('code_verifier', code_verifier)
   }
 
   if (platform === 'google') {

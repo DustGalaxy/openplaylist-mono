@@ -31,7 +31,7 @@ from src.models.order import OrderCreate, DAExtraData, OrderDomain
 from src.models.playlist import PlaylistSchema
 from src.models.auth_user import AuthUserSchema
 from src.exceptions import NotAuthorizedException
-from src._types import _All_Platforms, AsyncSession, ChatPlatform, DonationPlatform, Platform
+from src._types import DonationRuleScope, AsyncSession, Platform, ContentSettingScope, GENERAL_SCOPE
 from src.utils import find
 
 
@@ -96,12 +96,10 @@ class ValidationEngine:
     def __init__(self, owner_is_vip: bool):
         self.owner_is_vip = owner_is_vip
 
-    def get_content_settigs(
-        self, settings: SettingsSchema, platform: Platform
-    ) -> dict:
+    def get_content_settigs(self, settings: SettingsSchema, platform: ContentSettingScope) -> dict:
         base_obj = next(
             (c for c in settings.content_settings if c.platform == platform),
-            find(settings.content_settings, lambda x: x.platform == _All_Platforms.GENERAL),
+            find(settings.content_settings, lambda x: x.platform == ContentSettingScope.GENERAL),
         )
         if base_obj is None:
             raise ValueError(f"Cannot find base settings for {platform} and Platform.GENERAL settings not found")
@@ -134,10 +132,10 @@ class ValidationEngine:
 
         return effective
 
-    def get_donations_settings(self, settings: SettingsSchema, platform: Platform) -> dict:
+    def get_donations_settings(self, settings: SettingsSchema, platform: DonationRuleScope) -> dict:
         base_obj = next(
             (c for c in settings.donation_rules if c.platform == platform),
-            find(settings.donation_rules, lambda x: x.platform == _All_Platforms.GENERAL),
+            find(settings.donation_rules, lambda x: x.platform == DonationRuleScope.GENERAL),
         )
         if base_obj is None:
             raise ValueError("Cannot find base settings for platform")
@@ -160,14 +158,14 @@ class ValidationEngine:
         rules = [
             (
                 lambda: (
-                    new_track.source in DonationPlatform
+                    new_track.source in DonationRuleScope
                     and effective_donation_settings.get("amount", 0) != new_track.extra_data.donation_currency_amount  # type: ignore
                 ),
                 "Wrong donation amount",
             ),
             (
                 lambda: (
-                    new_track.source in DonationPlatform
+                    new_track.source in DonationRuleScope
                     and effective_donation_settings.get("currency", "") != new_track.extra_data.currency_code  # type: ignore
                 ),
                 "Wrong donation currency",
@@ -329,8 +327,8 @@ class SettingsLowService:
         result = None
 
         if len(setting) > 1:
-            result = find(setting, lambda x: x.platform == (platform if is_vip else _All_Platforms.GENERAL)) or find(
-                setting, lambda x: x.platform is _All_Platforms.GENERAL
+            result = find(setting, lambda x: x.platform == (platform if is_vip else GENERAL_SCOPE)) or find(
+                setting, lambda x: x.platform is GENERAL_SCOPE
             )
         else:
             result = setting[0]

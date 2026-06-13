@@ -3,6 +3,7 @@ from fastapi import HTTPException
 from src.services.auth.twitch_service import AuthTwitchService
 from src.services.auth.da_service import AuthDAService
 from src.services.auth.google_service import AuthGoogleService
+from src.services.auth.donatex_service import AuthDonateXService
 from src.dto.internal.auth import IntegrationStrategy, PlatformCap
 from src._types import IntegrationPlatform, IntegrationType
 
@@ -43,3 +44,4 @@ manager = AuthStrategyManager()
 manager.register(AuthTwitchService())
 manager.register(AuthDAService())
 manager.register(AuthGoogleService())
+manager.register(AuthDonateXService())

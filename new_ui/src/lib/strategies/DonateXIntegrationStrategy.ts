@@ -5,13 +5,15 @@ export class DonateXIntegrayionStrategy implements IAuthIntegrationStrategy {
   private readonly platformDisplayName = 'DonateX'
 
   getIntegrationEndpoint(): string {
-    return  `/user/integration/${this.platformName}`
+    return `/user/integration/${this.platformName}`
   }
 
   formatIntegrationPayload(code: string): Record<string, unknown> {
+    const code_verifier = window.sessionStorage.getItem('code_verifier')
+    window.sessionStorage.removeItem('code_verifier')
     return {
-      code: code,
-      
+      code,
+      code_verifier,
     }
   }
   getErrorMessage(context: 'network' | 'auth_failed'): string {

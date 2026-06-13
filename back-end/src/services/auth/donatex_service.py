@@ -26,7 +26,7 @@ class AuthDonateXService(IntegrationStrategy):
     meta: PlatformMeta = PlatformMeta(
         platform=IntegrationPlatform.DONATEX,
         integration_type=IntegrationType.BOT_ONLY,
-        auth_flow=AuthFlow.AUTH_CODE,
+        auth_flow=AuthFlow.PKCE,
         allow_email_collision=False,
         bot_capabilities={
             PlatformCap.DONATIONS,
@@ -37,16 +37,18 @@ class AuthDonateXService(IntegrationStrategy):
         return super().get_bot_queue()
 
     def get_token(self, code, code_verifier) -> DonateXTokenResponse:
+        data = {
+            "code": code,
+            "client_id": settings.DONATEX_CLIENT_ID,
+            "client_secret": settings.DONATEX_CLIENT_SECRET,
+            "grant_type": "authorization_code",
+            "redirect_uri": settings.DONATEX_REDIRECT_URI,
+            "code_verifier": code_verifier,
+        }
+        logger.error(f"Data for access token request {self.name}: {data}")
         response = httpx.post(
             settings.DONATEX_URL + "/connect/token",
-            data={
-                "code": code,
-                "client_id": settings.DONATEX_CLIENT_ID,
-                "client_secret": settings.DONATEX_CLIENT_SECRET,
-                "grant_type": "authorization_code",
-                "redirect_uri": settings.DONATEX_REDIRECT_URI,
-                "code_verifier": code_verifier,
-            },
+            data=data,
         )
         if response.status_code != 200:
             logger.error(f"Failed to get access token from {self.name}: {response.text}")

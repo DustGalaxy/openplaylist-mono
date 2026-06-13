@@ -83,6 +83,7 @@ async def add_integration_oauth(
     platform: IntegrationPlatform,
     body: OAuthBody,
 ):
+    print(f"{body=}")
     strtg = manager.get(platform)
     if strtg.meta.auth_flow == AuthFlow.USER_KEY:
         raise HTTPException(400, f"{platform} uses personal token flow, use /integration/{platform}/token")

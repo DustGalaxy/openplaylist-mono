@@ -23,7 +23,7 @@ class LinkedAccountsDomain(BaseModel):
 
     bot_connection: bool
 
-    tokens: "TokenVaultDomain"
+
 
     created_at: datetime
     updated_at: datetime

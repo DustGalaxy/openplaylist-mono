@@ -51,7 +51,7 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: str = Field(alias="GOOGLE_CLIENT_SECRET")
     GOOGLE_REDIRECT_URI: str = ""
 
-    DONATEX_URL: str = Field(alias="DONATEX_URL", default="https://donatex.com/api")
+    DONATEX_URL: str = Field(alias="DONATEX_URL", default="https://donatex.gg/api")
     DONATEX_CLIENT_ID: str = Field(alias="DONATEX_CLIENT_ID", default="2bca17b98ef34185")
     DONATEX_CLIENT_SECRET: str = Field(alias="DONATEX_CLIENT_SECRET")
     DONATEX_REDIRECT_URI: str = ""
