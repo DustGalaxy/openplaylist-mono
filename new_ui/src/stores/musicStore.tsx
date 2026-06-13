@@ -508,7 +508,7 @@ export const useMusicStore = create<StoreState>((set, get) => {
 
     sortPlaylist(playlist: ClientPlaylist) {
       const { sort_settings } = playlist.settings
-      let tracks = [...playlist.track_data]
+      const tracks = [...playlist.track_data]
 
       // Если shuffle включен — делаем случайную перестановку
       // if (sort_settings.shuffle !== 'none') {
@@ -520,19 +520,24 @@ export const useMusicStore = create<StoreState>((set, get) => {
       // }
 
       // Сортировка по priority и date
-      const sortedTracks = [...tracks].sort((a, b) => {
-        // Сначала priority
-        if (sort_settings.priority !== 'none' && a.priority !== b.priority) {
-          return sort_settings.priority === 'asc'
-            ? a.priority - b.priority
-            : b.priority - a.priority
+
+      const sortedTracks = tracks.sort((a, b) => {
+        // 1. Уровень: Сортировка по priority (если включена)
+        if (sort_settings.priority !== 'none') {
+          const valA = a.priority ?? 0
+          const valB = b.priority ?? 0
+
+          if (valA !== valB) {
+            return sort_settings.priority === 'asc' ? valA - valB : valB - valA
+          }
         }
 
-        // Потом created_at (дата создания)
-        if (sort_settings.date !== 'none' && a.created_at !== b.created_at) {
-          const dateA = new Date(a.created_at).getTime()
-          const dateB = new Date(b.created_at).getTime()
-          return sort_settings.date === 'asc' ? dateA - dateB : dateB - dateA
+        // 2. Уровень: Сортировка по date (если включена и предыдущий уровень вернул равенство)
+        if (sort_settings.date !== 'none') {
+          if (a.created_at !== b.created_at) {
+            const compareResult = a.created_at.localeCompare(b.created_at)
+            return sort_settings.date === 'asc' ? compareResult : -compareResult
+          }
         }
 
         return 0

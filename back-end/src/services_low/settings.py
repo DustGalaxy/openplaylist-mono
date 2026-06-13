@@ -32,7 +32,7 @@ from src.models.playlist import PlaylistSchema
 from src.models.auth_user import AuthUserSchema
 from src.exceptions import NotAuthorizedException
 from src._types import DonationRuleScope, AsyncSession, Platform, ContentSettingScope, GENERAL_SCOPE
-from src.utils import find
+from src.utils import find, find_all
 
 
 class Strategy(Protocol):
@@ -132,15 +132,22 @@ class ValidationEngine:
 
         return effective
 
-    def get_donations_settings(self, settings: SettingsSchema, platform: DonationRuleScope) -> dict:
-        base_obj = next(
-            (c for c in settings.donation_rules if c.platform == platform),
-            find(settings.donation_rules, lambda x: x.platform == DonationRuleScope.GENERAL),
-        )
+    def get_donations_settings(self, settings: SettingsSchema, platform: DonationRuleScope) -> list[dict]:
+
+        base_obj = [c for c in settings.donation_rules if c.platform == platform]
+        if not base_obj:
+            base_obj = find_all(settings.donation_rules, lambda x: x.platform == DonationRuleScope.GENERAL)
+
         if base_obj is None:
             raise ValueError("Cannot find base settings for platform")
 
-        return self._to_donation_dict(base_obj)
+        return [self._to_donation_dict(obj) for obj in base_obj]
+
+    def check_donation_rules(self, rules: list[dict], field_name: str, value: Any) -> bool:
+        for rule in rules:
+            if rule[field_name] == value:
+                return True
+        return False
 
     def identify_roles(self, role_str: str) -> list[str]:
         return role_str.split(":") if role_str else []
@@ -151,22 +158,30 @@ class ValidationEngine:
 
         # requester_roles = self.identify_roles(new_track.priority)
 
-        effective_content_settings = self.get_content_settigs(settings, new_track.source)
+        effective_content_settings = self.get_content_settigs(settings, new_track.source)  # pyright: ignore[reportArgumentType]
 
-        effective_donation_settings = self.get_donations_settings(settings, new_track.source)
+        effective_donation_settings = self.get_donations_settings(settings, new_track.source)  # pyright: ignore[reportArgumentType]
 
         rules = [
             (
                 lambda: (
                     new_track.source in DonationRuleScope
-                    and effective_donation_settings.get("amount", 0) != new_track.extra_data.donation_amount  # type: ignore
+                    and not self.check_donation_rules(
+                        effective_donation_settings,
+                        "amount",
+                        new_track.extra_data.donation_amount,  # pyright: ignore[reportAttributeAccessIssue]
+                    )  # type: ignore
                 ),
                 "Wrong donation amount",
             ),
             (
                 lambda: (
                     new_track.source in DonationRuleScope
-                    and effective_donation_settings.get("currency", "") != new_track.extra_data.donation_currency  # type: ignore
+                    and not self.check_donation_rules(
+                        effective_donation_settings,
+                        "currency",
+                        new_track.extra_data.donation_currency,  # pyright: ignore[reportAttributeAccessIssue]
+                    )  # type: ignore
                 ),
                 "Wrong donation currency",
             ),

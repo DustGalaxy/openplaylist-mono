@@ -155,14 +155,14 @@ export default function SortPanel() {
       {/* Priority Direction */}
       <div className="flex flex-col gap-1">
         <DirectionButton
-          title={t('sort.priority.highFirst')}
+          title={t('sort.priority.lowFirst')}
           direction="up"
           isActive={sortSettings.priority === 'asc'}
           disabled={sortSettings.priority === 'none'}
           onClick={() => updateSettings({ ...sortSettings, priority: 'asc' })}
         />
         <DirectionButton
-          title={t('sort.priority.lowFirst')}
+          title={t('sort.priority.highFirst')}
           direction="down"
           isActive={sortSettings.priority === 'desc'}
           disabled={sortSettings.priority === 'none'}
