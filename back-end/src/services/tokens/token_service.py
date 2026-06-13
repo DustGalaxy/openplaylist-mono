@@ -8,7 +8,6 @@ from src.dal.postgres.token import token_vault_repository, TokenVaultRepository
 
 from src.services.tokens.manager import manager
 from src.database import async_session_maker
-from src._types import Platform
 
 
 class TokenService:
@@ -19,20 +18,14 @@ class TokenService:
     async def create(
         self,
         db_session: AsyncSession,
-        user_id: UUID,
         linked_account_id: UUID,
-        platform: Platform,
-        platform_user_id: str,
         token_type: str,
         access_token: str,
         refresh_token: str,
         expires_at: int,
     ) -> TokenVaultDomain:
         data = TokenVaultCreate(
-            user_id=user_id,
             linked_account_id=linked_account_id,
-            platform=platform,
-            platform_user_id=platform_user_id,
             token_type=token_type,
             access_token=access_token,
             refresh_token=refresh_token,
@@ -44,7 +37,12 @@ class TokenService:
         return await self.token_repository.get_one(db_session, linked_account_id, column="linked_account_id")
 
     async def update_tokens(
-        self, db_session: AsyncSession, linked_account_id: UUID, access_token: str, refresh_token: str, expires_at: int
+        self,
+        db_session: AsyncSession,
+        linked_account_id: UUID,
+        access_token: str,
+        refresh_token: str | None,
+        expires_at: int | None,
     ) -> TokenVaultDomain:
         tokens = await self.token_repository.get_one(db_session, linked_account_id, column="linked_account_id")
         tokens.access_token = access_token
@@ -54,7 +52,10 @@ class TokenService:
         return await self.token_repository.update(db_session, tokens)
 
     async def refresh_token(self, token_vault: TokenVaultDomain) -> TokenVaultDomain:
-        strategy = self.strategy_manager.get_strategy(token_vault.platform)
+        strategy = self.strategy_manager.get_strategy(token_vault.linked_account.platform)
+
+        if token_vault.refresh_token is None:
+            raise Exception("Refresh token is not set")
 
         tokens = await strategy.refresh_token(token_vault.refresh_token)
 

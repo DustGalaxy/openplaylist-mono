@@ -50,7 +50,6 @@ const BACKEND_DOMAIN = import.meta.env.DEV
   ? 'http://localhost:8000'
   : PROJECT_DOMAIN
 
-
 window.appConfig = {
   PROJECT_DOMAIN: PROJECT_DOMAIN,
   BACKEND_DOMAIN,
@@ -77,7 +76,7 @@ window.appConfig = {
   DONATEX_SCOPES: ['user.read', 'offline_access', 'donations.subscribe'],
   DONATEX_CODE_CHALLENGE_METHOD: 'S256',
 
-  DA_CLIENT_ID: '18779',
+  DA_CLIENT_ID: import.meta.env.DEV ? '19392' : '18779',
   DA_REDIRECT_URI: `${PROJECT_DOMAIN}/oauth-callback`,
   DA_SCOPES: ['oauth-user-show', 'oauth-donation-subscribe'],
 }

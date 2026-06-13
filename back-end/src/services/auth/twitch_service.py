@@ -6,26 +6,40 @@ import httpx
 from faststream.rabbit import RabbitQueue
 
 from src.dto.internal.twitch import TwitchUserResponse, TwitchAuthResponse
-from src.dto.internal.auth import PlatformUser, AuthStrategy
+from src.dto.internal.auth import (
+    PlatformMeta,
+    PlatformUser,
+    IntegrationStrategy,
+    PlatformAuthResult,
+    PlatformTokens,
+    AuthFlow,
+)
 from src.dto.internal.token import Tokens
 from src.models.auth_user import AuthUserSchema
 from src.adapters._rabbit.event_broker import bot_twitch_connect_request
 
 from src.settings import settings
-from src._types import Platform
+from src._types import IntegrationPlatform, IntegrationType, PlatformCap
 from src.utils import find
 
 logger = logging.getLogger(__name__)
 
 
-class AuthTwitchService(AuthStrategy):
-    def __init__(self, queue: RabbitQueue):
-        self.bot_connect_request_queue = queue
+class AuthTwitchService(IntegrationStrategy):
+    meta: PlatformMeta = PlatformMeta(
+        platform=IntegrationPlatform.TWITCH,
+        integration_type=IntegrationType.IDENTITY_AND_BOT,
+        auth_flow=AuthFlow.AUTH_CODE,
+        allow_email_collision=True,
+        bot_capabilities={
+            PlatformCap.CHAT,
+        },
+    )
 
-    def allow_email_collision(self) -> bool:
-        return True
+    def get_bot_queue(self) -> RabbitQueue | None:
+        return bot_twitch_connect_request
 
-    def get_token(self, code) -> TwitchAuthResponse:
+    def get_token(self, code: str) -> TwitchAuthResponse:
         response = httpx.post(
             f"{settings.TWITCH_URL}/oauth2/token",
             data={
@@ -70,7 +84,7 @@ class AuthTwitchService(AuthStrategy):
         return True
 
     def get_data(self, access_token: str, user: AuthUserSchema | None = None) -> TwitchUserResponse:
-        twitch_acc = find(user.linked_accounts, lambda x: x.platform == Platform.TWITCH) if user else None
+        twitch_acc = find(user.linked_accounts, lambda x: x.platform == IntegrationPlatform.TWITCH) if user else None
 
         response = httpx.get(
             "https://api.twitch.tv/helix/users",
@@ -90,7 +104,16 @@ class AuthTwitchService(AuthStrategy):
 
         return TwitchUserResponse.model_validate(result)
 
-    async def fetch_identity(self, code: str) -> PlatformUser:
+    async def fetch_identity(
+        self,
+        code: str | None = None,
+        code_verifier: str | None = None,
+        user_key: str | None = None,
+    ) -> PlatformAuthResult:
+
+        if not code:
+            raise HTTPException(400, "code is required")
+
         token = self.get_token(code)
         twitch_user = self.get_data(token.access_token)
         user = PlatformUser(
@@ -99,11 +122,14 @@ class AuthTwitchService(AuthStrategy):
             avatar_url=twitch_user.profile_image_url,
             email=twitch_user.email,
             email_verified=twitch_user.email_verified,
+        )
+        tokens = PlatformTokens(
             access_token=token.access_token,
             refresh_token=token.refresh_token,
             expires_at=int(datetime.now().timestamp()) + token.expires_in,
+            token_type=token.token_type,
         )
-        return user
+        return PlatformAuthResult(user=user, tokens=tokens)
 
 
-auth_twitch_service = AuthTwitchService(bot_twitch_connect_request)
+auth_twitch_service = AuthTwitchService()

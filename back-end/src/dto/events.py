@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from src._types import Platform, Status
+from src._types import TrackSource, Status
 
 
 class OrderCreated(BaseModel):
@@ -18,7 +18,7 @@ class OrderCreated(BaseModel):
     duration: int
     views: int
     likes: int
-    source: Platform
+    source: TrackSource
     created_at: datetime
 
 
@@ -40,7 +40,7 @@ class PlaylistTrackAdded(BaseModel):
     duration: int
     requester_nickname: str
     created_at: datetime
-    source: Platform
+    source: TrackSource
 
 
 class PlayNow(BaseModel):

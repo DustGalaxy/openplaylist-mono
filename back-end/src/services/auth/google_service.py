@@ -7,21 +7,32 @@ from faststream.rabbit import RabbitQueue
 import jwt
 
 from src.dto.internal.google import GoogleTokenResponseDTO, GoogleIdTokenPayloadDTO
-from src.dto.internal.auth import PlatformUser, AuthStrategy
+from src.dto.internal.auth import (
+    PlatformMeta,
+    PlatformUser,
+    IntegrationStrategy,
+    PlatformAuthResult,
+    PlatformTokens,
+    AuthFlow,
+)
 from src.dto.internal.token import Tokens
-from src.adapters._rabbit.event_broker import bot_google_connect_request
 
 from src.settings import settings
+from src._types import IntegrationPlatform, IntegrationType
 
 logger = logging.getLogger(__name__)
 
 
-class AuthGoogleService(AuthStrategy):
-    def __init__(self, queue: RabbitQueue):
-        self.bot_connect_request_queue = queue
+class AuthGoogleService(IntegrationStrategy):
+    meta: PlatformMeta = PlatformMeta(
+        platform=IntegrationPlatform.GOOGLE,
+        integration_type=IntegrationType.IDENTITY_ONLY,
+        auth_flow=AuthFlow.AUTH_CODE,
+        allow_email_collision=True,
+    )
 
-    def allow_email_collision(self) -> bool:
-        return True
+    def get_bot_queue(self) -> RabbitQueue | None:
+        return None
 
     def get_token(self, code) -> GoogleTokenResponseDTO:
         response = httpx.post(
@@ -77,7 +88,9 @@ class AuthGoogleService(AuthStrategy):
 
         return GoogleIdTokenPayloadDTO.model_validate(user_info)
 
-    async def fetch_identity(self, code: str) -> PlatformUser:
+    async def fetch_identity(
+        self, code: str | None = None, code_verifier: str | None = None, user_key: str | None = None
+    ) -> PlatformAuthResult:
         token = self.get_token(code)
         google_user = self.get_data(token.id_token)
         user = PlatformUser(
@@ -86,11 +99,14 @@ class AuthGoogleService(AuthStrategy):
             avatar_url=google_user.picture or "",
             email=google_user.email,
             email_verified=google_user.email_verified,
+        )
+        tokens = PlatformTokens(
             access_token=token.access_token,
             refresh_token=token.refresh_token,
             expires_at=int(datetime.now().timestamp()) + token.expires_in,
+            token_type=token.token_type,
         )
-        return user
+        return PlatformAuthResult(user=user, tokens=tokens)
 
 
-auth_googleservice = AuthGoogleService(bot_google_connect_request)
+auth_googleservice = AuthGoogleService()

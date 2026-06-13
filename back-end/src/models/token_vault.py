@@ -1,44 +1,37 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
 from uuid import UUID
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.models.linked_accounts import LinkedAccountsDomain
 
 from pydantic import BaseModel, ConfigDict
-
-from src._types import Platform
 
 
 class TokenVaultDomain(BaseModel):
     id: UUID
 
-    user_id: UUID
     linked_account_id: UUID
-
-    platform: Platform
-    platform_user_id: str
+    linked_account: "LinkedAccountsDomain"
 
     access_token: str
-    refresh_token: str
+    refresh_token: str | None
     token_type: str
-    expires_at: int
+    expires_at: int | None
     last_update: datetime
 
     created_at: datetime
     updated_at: datetime
-    
+
     model_config = ConfigDict(from_attributes=True)
 
 
 class TokenVaultCreate(BaseModel):
-    user_id: UUID
     linked_account_id: UUID
-
-    platform: Platform
-    platform_user_id: str
-
     access_token: str
-    refresh_token: str
+    refresh_token: str | None = None
     token_type: str
-    expires_at: int
+    expires_at: int | None = None
     last_update: datetime = datetime.now()
 
 

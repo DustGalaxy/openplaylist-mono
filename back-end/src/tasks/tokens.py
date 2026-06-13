@@ -5,7 +5,6 @@ from src.services.tokens.token_service import token_service
 from src.adapters._rabbit.event_broker import broker as rabbit_broker, topic_exchange
 
 from src.database import async_session_maker
-from src.settings import settings
 from taskiq_broker import task_broker as taskiq_broker
 
 
@@ -19,14 +18,14 @@ async def refresh_tokens():
 
         await rabbit_broker.publish(
             message={
-                "user_id": str(token.user_id),
-                "platform_user_id": str(token.platform_user_id),
-                "platform": str(token.platform),
+                "user_id": str(token.linked_account.user_id),
+                "platform_user_id": str(token.linked_account.platform_user_id),
+                "platform": str(token.linked_account.platform),
                 "access_token": fresh_token.access_token,
                 "refresh_token": fresh_token.refresh_token,
             },
             exchange=topic_exchange,
-            routing_key=f"auth.token.refreshed.{token.platform}",
+            routing_key=f"auth.token.refreshed.{token.linked_account.platform}",
             persist=True,
             expiration=3600,
         )

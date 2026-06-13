@@ -103,6 +103,7 @@ services:
       - ./back-end/src:/app/src
       - ./back-end/alembic.ini:/app/alembic.ini
       - ./back-end/alembic:/app/alembic
+      - ./back-end/main.py:/app/main.py
     labels:
       - "traefik.enable=true"
       # Направляем все запросы, начинающиеся с /api, на бэкенд

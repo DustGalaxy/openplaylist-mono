@@ -1,16 +1,17 @@
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Body, Response
+from fastapi import APIRouter, Body, HTTPException, Response
 
-from src.dto.token import CodeDTO
-from src.dto.user import IntegrationRead, UserRead
+from src.dto.token import BotConnectBody, CodeDTO, OAuthBody, UserKeyBody
+from src.dto.user import IntegrationRead, UserPatch, UserRead
 
 from src.services.auth.auth_service import auth_service
 from src.models.auth_user import AuthUserUpdate
 from src.adapters._fastapi.dependencies import DB_SESSION, CURR_USER
-from src._types import Platform
+from src._types import AuthFlow, IntegrationPlatform, Platform
 from src.settings import settings
+from src.services.auth.strategy_manager import manager
 
 router = APIRouter(prefix="/user")
 
@@ -39,9 +40,10 @@ async def me(
 async def patch_me(
     db_session: DB_SESSION,
     curr_user: CURR_USER,
-    data: AuthUserUpdate,
+    data: UserPatch,
 ):
-    upd_user = await auth_service.user_repo.patch(db_session, data, curr_user.id)
+    patch = AuthUserUpdate.model_validate(data)
+    upd_user = await auth_service.user_repo.patch(db_session, patch, curr_user.id)
     return UserRead.model_validate(upd_user)
 
 
@@ -55,14 +57,14 @@ async def patch_me(
 #     return UserRead.model_validate(upd_user)
 
 
-@router.post("/bots/{type_}/connect")
+@router.post("/bots/{platform}/connect")
 async def connect_bot(
     db_session: DB_SESSION,
     curr_user: CURR_USER,
-    type_: Platform,
-    body: dict = Body(),
+    platform: IntegrationPlatform,
+    body: BotConnectBody,
 ):
-    await auth_service.connect_bot(db_session, curr_user, type_, body.get("platform_user_id", ""))
+    await auth_service.connect_bot(db_session, curr_user, platform, body.platform_user_id)
     return {"message": "Bot connected"}
 
 
@@ -74,28 +76,57 @@ async def get_integration(
     return [IntegrationRead.model_validate(i) for i in integrations]
 
 
-@router.post("/integration/{type}")
-async def integration(
+@router.post("/integration/{platform}")
+async def add_integration_oauth(
     db_session: DB_SESSION,
-    code: CodeDTO,
-    type: Platform,
     curr_user: CURR_USER,
+    platform: IntegrationPlatform,
+    body: OAuthBody,
 ):
+    print(f"{body=}")
+    strtg = manager.get(platform)
+    if strtg.meta.auth_flow == AuthFlow.USER_KEY:
+        raise HTTPException(400, f"{platform} uses personal token flow, use /integration/{platform}/token")
 
-    await auth_service.add_integration(db_session, curr_user.id, code.code, type)
+    await auth_service.add_integration(
+        db_session,
+        user_id=curr_user.id,
+        platform=platform,
+        code=body.code,
+        code_verifier=body.code_verifier,
+    )
     return {"message": "Integration added"}
 
 
-@router.delete("/integration/{type}/{platform_user_id}", status_code=204)
+@router.post("/integration/{platform}/token")
+async def add_integration_user_key(
+    db_session: DB_SESSION,
+    curr_user: CURR_USER,
+    platform: IntegrationPlatform,
+    body: UserKeyBody,
+):
+    strtg = manager.get(platform)
+    if strtg.meta.auth_flow != AuthFlow.USER_KEY:
+        raise HTTPException(400, f"{platform} uses OAuth flow, use /integration/{platform}")
+
+    await auth_service.add_integration(
+        db_session,
+        user_id=curr_user.id,
+        platform=platform,
+        user_key=body.user_key,
+    )
+    return {"message": "Integration added"}
+
+
+@router.delete("/integration/{platform}/{platform_user_id}", status_code=204)
 async def delete_integration(
     db_session: DB_SESSION,
-    type: Platform,
-    platform_user_id: str,
     curr_user: CURR_USER,
+    platform: IntegrationPlatform,
+    platform_user_id: str,
 ):
+    await auth_service.delete_integration(db_session, curr_user.id, platform, platform_user_id)
 
-    await auth_service.delete_integration(db_session, curr_user.id, type, platform_user_id)
-    return {"message": "Integration deleted"}
 
 @router.delete("/me", status_code=204)
 async def delete_me(

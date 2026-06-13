@@ -4,14 +4,14 @@ from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict
 
 from src.models.settings import SortSettings
-from src._types import Platform, DonationPlatform, ChatPlatform, _All_Platforms, DB_DonationPlatform
+from src._types import ContentSettingScope, DonationRuleScope, ChatRuleScope, BlockListScope
 
 
 class ReadContentSettings(BaseModel):
     id: UUID
     settings_id: UUID
 
-    platform: _All_Platforms
+    platform: ContentSettingScope
     min_views: int
     min_likes: int
     max_duration: int
@@ -25,7 +25,7 @@ class ReadBlockList(BaseModel):
     id: UUID
     settings_id: UUID
 
-    platform: Platform
+    platform: BlockListScope
     trigger_type: str
     trigger_value: str
 
@@ -36,7 +36,7 @@ class ReadDonationRules(BaseModel):
     id: UUID
     settings_id: UUID
 
-    platform: DB_DonationPlatform
+    platform: DonationRuleScope
     name: str
     slug: str
     currency: str = Field("USD", min_length=3, max_length=3)
@@ -51,7 +51,7 @@ class ReadChatRules(BaseModel):
     id: UUID
     settings_id: UUID
 
-    platform: ChatPlatform
+    platform: ChatRuleScope
     key: str
     priority: int
     content_settings: Optional[dict] = None

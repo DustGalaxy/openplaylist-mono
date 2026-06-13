@@ -4,7 +4,10 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
-from src._types import Platform
+from src._types import IntegrationPlatform
+
+if TYPE_CHECKING:
+    from src.models.token_vault import TokenVaultDomain
 
 
 class LinkedAccountsDomain(BaseModel):
@@ -12,13 +15,15 @@ class LinkedAccountsDomain(BaseModel):
 
     user_id: UUID
 
-    platform: Platform
+    platform: IntegrationPlatform
     platform_user_id: str
     platform_username: str
     platform_avatar_url: str
-    platform_user_email: str
+    platform_user_email: str | None
 
     bot_connection: bool
+
+
 
     created_at: datetime
     updated_at: datetime
@@ -28,7 +33,7 @@ class LinkedAccountsDomain(BaseModel):
 class LinkedAccountsCreate(BaseModel):
     user_id: UUID
 
-    platform: Platform
+    platform: IntegrationPlatform
     platform_user_id: str
     platform_username: str
     platform_avatar_url: str

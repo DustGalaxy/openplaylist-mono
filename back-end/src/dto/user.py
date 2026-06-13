@@ -3,7 +3,7 @@ from typing import Literal
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
-from src._types import Platform
+from src._types import IntegrationPlatform
 
 
 class UserDTO(BaseModel):
@@ -33,13 +33,21 @@ class UserRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserPatch(BaseModel):
+    username: str | None = None
+    email: str | None = None
+    password: str | None = None
+    avatar_url: str | None = None
+    social_links: dict[str, str] | None = None
+
+
 class IntegrationType(BaseModel):
     type: Literal["twitch", "da"]
 
 
 class IntegrationRead(BaseModel):
     id: UUID
-    platform: Platform
+    platform: IntegrationPlatform
     platform_user_id: str
     platform_avatar_url: str
     platform_username: str

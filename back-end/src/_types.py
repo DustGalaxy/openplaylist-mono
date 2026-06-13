@@ -18,35 +18,88 @@ class PlaylistLogsEventTypes(StrEnum):
     ERROR = "error"
 
 
-class _All_Platforms(StrEnum):
+# базовые платформы — единый источник строковых значений
+class Platform(StrEnum):
     TWITCH = "twitch"
     YOUTUBE = "youtube"
     GOOGLE = "google"
-    WEB = "web"
     DA = "donationalerts"
-    GENERAL = "__general__"
+    WEB = "web"
+    DONATEX = "donatex"
 
 
-class Platform(StrEnum):
-    TWITCH = _All_Platforms.TWITCH
-    DA = _All_Platforms.DA
-    YOUTUBE = _All_Platforms.YOUTUBE
-    GOOGLE = _All_Platforms.GOOGLE
-    WEB = _All_Platforms.WEB
+# служебный sentinel — только для БД, не платформа
+GENERAL_SCOPE = "__general__"
 
 
-class ChatPlatform(StrEnum):
-    TWITCH = _All_Platforms.TWITCH
-    YOUTUBE = _All_Platforms.YOUTUBE
+# --- каждая таблица получает свой явный scope ---
 
 
-class DonationPlatform(StrEnum):
-    DA = _All_Platforms.DA
+class ContentSettingScope(StrEnum):
+    TWITCH = Platform.TWITCH
+    YOUTUBE = Platform.YOUTUBE
+    WEB = Platform.WEB
+    DA = Platform.DA
+    DONATEX = Platform.DONATEX
+    GENERAL = GENERAL_SCOPE
 
 
-class DB_DonationPlatform(StrEnum):
-    GENERAL = _All_Platforms.GENERAL
-    DA = _All_Platforms.DA
+class BlockListScope(StrEnum):
+    TWITCH = Platform.TWITCH
+    YOUTUBE = Platform.YOUTUBE
+    DA = Platform.DA
+    WEB = Platform.WEB
+    DONATEX = Platform.DONATEX
+
+
+class DonationRuleScope(StrEnum):
+    DA = Platform.DA
+    DONATEX = Platform.DONATEX
+    GENERAL = GENERAL_SCOPE
+
+
+class ChatRuleScope(StrEnum):
+    TWITCH = Platform.TWITCH
+    YOUTUBE = Platform.YOUTUBE
+
+
+# --- интеграции — отдельный контекст ---
+
+
+class IntegrationPlatform(StrEnum):
+    TWITCH = Platform.TWITCH
+    YOUTUBE = Platform.YOUTUBE
+    GOOGLE = Platform.GOOGLE
+    DA = Platform.DA
+    DONATEX = Platform.DONATEX
+
+
+class IntegrationType(StrEnum):
+    IDENTITY_ONLY = "identity_only"
+    BOT_ONLY = "bot_only"
+    IDENTITY_AND_BOT = "identity_and_bot"
+
+
+class AuthFlow(StrEnum):
+    AUTH_CODE = "oauth2_code"
+    PKCE = "oauth2_pkce"
+    USER_KEY = "user_key"
+
+
+# --- источник трека ---
+
+
+class TrackSource(StrEnum):
+    TWITCH = Platform.TWITCH
+    YOUTUBE = Platform.YOUTUBE
+    WEB = Platform.WEB
+    DA = Platform.DA
+    DONATEX = Platform.DONATEX
+
+
+class PlatformCap(StrEnum):
+    CHAT = "chat"  # чат
+    DONATIONS = "donations"  # пожертвования
 
 
 Status = Literal["in playlist", "removed", "listened", "skipped", "reported"]
