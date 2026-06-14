@@ -1,5 +1,5 @@
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class ConfigClass(BaseSettings):
@@ -12,5 +12,6 @@ class ConfigClass(BaseSettings):
     BOT_ID: str = Field(alias="BOT_ID")
     OWNER_ID: str = Field(alias="OWNER_ID")
 
+    model_config = SettingsConfigDict(env_file=".env")
 
 settings = ConfigClass() # pyright: ignore[reportCallIssue]

@@ -9,6 +9,7 @@ class Tokens(BaseModel):
     access_token: str
     refresh_token: str
     expires_at: int
+    bot_settings: dict | None = None
 
 
 class DATokenRefreshed(BaseModel):

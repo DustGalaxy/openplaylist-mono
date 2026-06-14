@@ -4,19 +4,19 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Settings } from 'lucide-react'
+import type { Integration } from '@/types/user'
+import type { FieldDef } from '@/features/user-settings/botSettings/types'
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import Btn from '@/components/ui/my-btn'
 import { updateBotSettings } from '@/api/api-user'
 import { getBotSettingsConfig } from '@/features/user-settings/botSettings/registry'
-import type { Integration } from '@/types/user'
-import type { FieldDef } from '@/features/user-settings/botSettings/types'
 
 interface BotSettingsModalProps {
   integration: Integration
@@ -100,22 +100,19 @@ export function BotSettingsModal({
           ))}
         </div>
 
-        <DialogFooter className="px-6 pb-5 pt-4 border-t border-white/5 flex flex-row justify-end gap-2">
-          <Button
-            variant="ghost"
-            onClick={() => setOpen(false)}
-            disabled={saving}
-            className="text-text-secondary hover:text-text-main border border-white/10"
-          >
-            {t('botSettings.cancel')}
-          </Button>
-          <Button
+        <DialogFooter className="px-6 pb-5 pt-4 border-t w-full border-white/5 flex flex-row justify-between gap-2">
+          <Btn
+            text={saving ? '...' : t('botSettings.save')}
             onClick={handleSave}
             disabled={saving}
-            className="bg-level-2 border border-level-3/70 border-b-[3px] border-b-level-3 text-text-main hover:border-level-3"
-          >
-            {saving ? '...' : t('botSettings.save')}
-          </Button>
+            className="bg-level-2 font-mono text-base px-2"
+          ></Btn>
+          <Btn
+            text={t('botSettings.cancel')}
+            onClick={() => setOpen(false)}
+            disabled={saving}
+            className="bg-level-2 font-mono text-base px-2"
+          ></Btn>
         </DialogFooter>
       </DialogContent>
     </Dialog>

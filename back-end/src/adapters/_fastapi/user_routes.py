@@ -13,6 +13,8 @@ from src._types import AuthFlow, IntegrationPlatform
 from src.settings import settings
 from src.services.auth.strategy_manager import manager
 
+from src.utils import find
+
 router = APIRouter(prefix="/user")
 
 
@@ -82,6 +84,17 @@ async def update_bot_settings(
         platform_user_id=body.platform_user_id,
         settings=body.settings,
     )
+    return result
+
+
+@router.post("/bots/{platform}/disconect", status_code=204)
+async def diconnect_bot(
+    db_session: DB_SESSION,
+    curr_user: CURR_USER,
+    platform: IntegrationPlatform,
+    body: BotConnectBody,
+):
+    result = await auth_service.disconect_bot(db_session, curr_user,  platform, body.platform_user_id)
     return result
 
 

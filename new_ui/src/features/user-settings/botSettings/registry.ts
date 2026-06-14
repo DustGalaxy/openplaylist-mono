@@ -1,4 +1,3 @@
-
 import type { BotSettingsConfig } from './types'
 
 const registry: Record<string, BotSettingsConfig> = {
@@ -12,12 +11,6 @@ const registry: Record<string, BotSettingsConfig> = {
         maxLength: 5,
         placeholder: '!',
       },
-      {
-        type: 'toggle',
-        key: 'announce_songs',
-        labelKey: 'botSettings.twitch.announceSongs.label',
-        descKey: 'botSettings.twitch.announceSongs.desc',
-      },
     ],
   },
   donationalerts: {
@@ -25,6 +18,8 @@ const registry: Record<string, BotSettingsConfig> = {
   },
 }
 
-export function getBotSettingsConfig(platform: string): BotSettingsConfig | null {
+export function getBotSettingsConfig(
+  platform: string,
+): BotSettingsConfig | null {
   return registry[platform] ?? null
 }

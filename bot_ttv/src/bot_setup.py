@@ -24,7 +24,9 @@ from src.acl.user import get_users
 from src.components.listners import Listner
 from src.components.music_request import MusicRequest
 from src.components.main_commands import MainCommands
+
 from src.log_setup import LOGGER
+from src.utils import find
 from src.config import settings
 
 context = {"bot": None}
@@ -33,6 +35,7 @@ context = {"bot": None}
 class Bot(commands.AutoBot):
     def __init__(self, users: list[Tokens]) -> None:
         self.users = users
+        self.prefixes = {user.platform_user_id: user.bot_settings.prefix for user in users}
         super().__init__(
             client_id=settings.TWITCH_CLIENT_ID,
             client_secret=settings.TWICTH_CLIENT_SECRET,
@@ -47,7 +50,7 @@ class Bot(commands.AutoBot):
 
     async def custom_prefix(self, bot: Self, message: twitchio.ChatMessage) -> str:
 
-        return "::" if message.broadcaster.id else "!!"
+        return bot.prefixes.get(message.broadcaster.id, "::")
 
     async def setup_hook(self) -> None:
         # Add our component which contains our commands...
@@ -109,8 +112,8 @@ class Bot(commands.AutoBot):
         LOGGER.info("Publishing refreshed tokens to RabbitMQ...")
 
     async def remove_token(self, user_id: str) -> None:
-        token = await super().remove_token(user_id)
-        print(token)
+        await super().remove_token(user_id)
+
         LOGGER.info("Removed token for user: %s", user_id)
 
     async def event_ready(self) -> None:
@@ -119,8 +122,6 @@ class Bot(commands.AutoBot):
 
 async def setup_bot() -> commands.Bot:
     users = await get_users()
-    LOGGER.info(f"Users: {users}")
-
     ttvbot = Bot(users)
     for user in users:
         try:

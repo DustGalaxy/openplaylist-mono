@@ -698,26 +698,40 @@
       }
     },
     "integrations": {
-      "connected": "Connected Accounts",
+      "connectedAccounts": "Connected Accounts",
       "empty": "No connected accounts yet",
       "emptyHintLong": "Connect your streaming and donation platforms to manage your playlists",
       "addAccounts": "Add Accounts",
       "connectHint": "Connect your account to get started",
       "connectAccount": "+ Connect Account",
-      "botConnected": "✓ Bot Connected",
+      "botConnected": "Bot Connected",
       "connectBot": "Connect Bot",
       "connecting": "⟳ Connecting...",
       "connected": "Account connected successfully",
+      "addAnother": "Add another account",
+      "alreadyConnected": "One account already connected",
       "connectFailed": "Failed to connect account",
-      "disconnect": "✕ Disconnect",
+      "disconnect": "Disconnect",
       "removing": "⟳ Removing...",
       "disconnected": "Account disconnected successfully",
       "disconnectFailed": "Failed to disconnect account",
+      "disconnectBot": "Disconnect Bot",
       "botConnecting": "Connecting bot...",
-      "botConnected": "Bot connected successfully",
       "botConnectFailed": "Failed to connect bot",
       "botDisconnecting": "Disconnecting bot...",
       "botDisconnected": "Bot disconnected successfully"
+    }
+  },
+  "botSettings": {
+    "title": "Bot Settings",
+    "save": "Save",
+    "cancel": "Cancel",
+    "twitch": {
+      "prefix": {
+        "label": "Command prefix",
+        "placeholder": "Enter command prefix",
+        "hint": "The character(s) that will prefix bot commands in Twitch chat. For example, if you set it to '!', viewers would use '!mr' to submit a track."
+      }
     }
   },
   "publicSearch": {

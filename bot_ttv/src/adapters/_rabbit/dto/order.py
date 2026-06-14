@@ -10,6 +10,7 @@ Source = Literal["twitch", "youtube", "web"]
 class OrderUpdate(BaseModel):
     order_id: UUID
     owner_id: UUID
+    owner_platform_id: str
     requester_nickname: str
     playlist_name: str
     status: Status

@@ -66,6 +66,21 @@ export const connectBot = async (
   )
   return response.status === 200
 }
+export const disconnectBot = async (
+  platform: string,
+  platform_user_id: string,
+) => {
+  const config = getConfig()
+  const response = await apiClient(
+    config.AUTH_API_URL + `/user/bots/${platform}/disconnect`,
+    {
+      method: 'POST',
+      withCredentials: true,
+      data: { platform_user_id: platform_user_id.toString() },
+    },
+  )
+  return response.status === 200
+}
 
 export async function updateBotSettings(
   platform: string,

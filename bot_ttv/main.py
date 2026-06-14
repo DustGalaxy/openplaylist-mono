@@ -9,7 +9,7 @@ import twitchio
 from src.log_setup import LOGGER
 from src.adapters._rabbit.handlers import broker
 from src.adapters._redis.broker import redis_adapter
-from src.bot_setup import setup_bot
+from src.bot_setup import setup_bot, context
 
 
 @asynccontextmanager
@@ -20,21 +20,24 @@ async def lifespan(_app: FastStream):
 
     redis_adapter.connect()
     LOGGER.info("Redis adapter connected.")
-    
-    bot = await setup_bot()
+    asyncio.create_task(async_setup_wrapper())
     LOGGER.info("FastStream application starting up...")
 
-    asyncio.create_task(bot.start(load_tokens=False))
-    LOGGER.info("TwitchIO bot task scheduled.")
     yield
     await broker.stop()
 
     redis_adapter.close()
     LOGGER.info("FastStream application shutting down...")
 
-    if bot:
-        await bot.close()
+    if bot := context.get("bot"):
+        await bot.close() # type: ignore
         LOGGER.info("TwitchIO bot disconnected.")
 
 
 app = FastStream(broker, lifespan=lifespan)
+
+
+async def async_setup_wrapper():
+    bot = await setup_bot()
+    await bot.start(load_tokens=False, save_tokens=False)
+    LOGGER.info("TwitchIO bot task scheduled.")

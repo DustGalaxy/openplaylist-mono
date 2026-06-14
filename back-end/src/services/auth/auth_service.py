@@ -404,8 +404,6 @@ class AuthService:
 
             if integration.bot_connection and (queue := manager.get(integration.platform).get_bot_disconect_queue()):
                 try:
-                    print(queue)
-                    print(f"{integration.platform_user_id=}")
                     await broker.request(
                         str(integration.platform_user_id), queue=queue, exchange=main_exchange, timeout=5
                     )
@@ -443,15 +441,21 @@ class AuthService:
         if queue is None:
             raise HTTPException(500, f"Bot settings queue not configured for {platform}")
 
-        response = await broker.request(
-            {
-                "settings": validated,
-            },
-            queue,
-            main_exchange,
-        )
-        if not response:
-            raise HTTPException(500, f"Bot {platform} not accepted new settings by unknown reason")
+        try:
+            response = await broker.request(
+                {
+                    "platform_user_id": platform_user_id,
+                    "settings": validated,
+                },
+                queue,
+                main_exchange,
+                timeout=10,
+            )
+
+            if not response:
+                raise HTTPException(500, f"Bot {platform} not accepted new settings by unknown reason")
+        except TimeoutError:
+            raise HTTPException(500, f"Bot {platform} unavalible")
 
         link.bot_settings = validated
         await self.link_repo.update(db_session, link)
@@ -508,6 +512,31 @@ class AuthService:
             await sio_service.ack_bot_connection(str(link.platform), str(link.user_id), str(link.platform_user_id))
         except TimeoutError:
             raise HTTPException(500, "Failed to connect bot. Try again later.")
+
+    async def disconect_bot(
+        self, db_session: AsyncSession, user: AuthUserSchema, platform: IntegrationPlatform, platform_user_id: str
+    ):
+        integration = find(
+            user.linked_accounts,
+            lambda x: x.platform == platform and x.platform_user_id == platform_user_id,
+        )
+
+        if not integration:
+            raise HTTPException(
+                status_code=400, detail=f"User does not have a {platform} integration with given platform_user_id"
+            )
+
+        if integration.bot_connection and (queue := manager.get(integration.platform).get_bot_disconect_queue()):
+            try:
+                await broker.request(str(integration.platform_user_id), queue=queue, exchange=main_exchange, timeout=5)
+                integration.bot_connection = False
+                await self.link_repo.update(db_session, integration)
+                return True
+            except TimeoutError:
+                raise HTTPException(status_code=500, detail="Bot unavalible")
+
+        else:
+            return True
 
     async def bot_was_disconnected(
         self,

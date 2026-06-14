@@ -19,7 +19,7 @@ from src.dto.internal.auth import (
 )
 from src.dto.internal.token import Tokens
 from src.models.auth_user import AuthUserSchema
-from src.adapters._rabbit.event_broker import bot_twitch_connect_request, bot_twitch_disconect
+from src.adapters._rabbit.event_broker import bot_twitch_connect_request, bot_twitch_disconect, bot_twitch_settings
 
 from src.settings import settings
 from src._types import IntegrationPlatform, IntegrationType, PlatformCap
@@ -42,6 +42,10 @@ class AuthTwitchService(IntegrationStrategy, RefreshTokenStrategy):
 
     def get_bot_queue(self) -> RabbitQueue | None:
         return bot_twitch_connect_request
+    
+    def get_bot_settings_queue(self) -> RabbitQueue | None:
+        return bot_twitch_settings
+
     def get_bot_disconect_queue(self) -> RabbitQueue | None:
         return bot_twitch_disconect
     def get_token(self, code: str) -> TwitchAuthResponse:

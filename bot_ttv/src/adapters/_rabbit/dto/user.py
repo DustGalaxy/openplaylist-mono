@@ -1,6 +1,7 @@
 from enum import Enum
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict
+from pydantic.fields import Field
 
 
 class Platform(Enum):
@@ -12,7 +13,15 @@ class Platform(Enum):
 class TTVUser(BaseModel):
     user_id: str
     twitch_id: str
-    
+
+
+class TwitchBotSettings(BaseModel):
+    prefix: str = Field("::", max_length=5)
+
+
+class SettingsConteiner(BaseModel):
+    platform_user_id: str
+    settings: TwitchBotSettings
 
 
 class LinkedAccountWithTokensRead(BaseModel):
@@ -35,3 +44,4 @@ class Tokens(BaseModel):
     access_token: str
     refresh_token: str
     expires_at: int
+    bot_settings: TwitchBotSettings 

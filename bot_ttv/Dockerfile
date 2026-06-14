@@ -10,4 +10,4 @@ RUN uv sync --frozen --no-cache --no-dev
 
 COPY . .
 
-CMD ["uv", "run", "faststream", "run", "main:app"]
+CMD ["uv", "run", "--no-dev", "faststream", "run", "main:app", "--no-schema"]

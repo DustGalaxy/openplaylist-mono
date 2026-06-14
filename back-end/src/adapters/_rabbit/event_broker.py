@@ -29,6 +29,7 @@ bot_twitch_connect_response = RabbitQueue("bot.twitch.connect.response", durable
 bot_twitch_order_new = RabbitQueue("bot.twitch.order.new", durable=True)
 bot_twitch_ack_connection = RabbitQueue("bot.twitch.ack.connection", durable=True)
 bot_twitch_disconect = RabbitQueue("bot.twitch.disconnect", durable=True)
+bot_twitch_settings = RabbitQueue("bot.twitch.settings", durable=True)
 
 # --- google
 

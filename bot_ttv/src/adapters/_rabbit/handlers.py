@@ -2,7 +2,7 @@ from faststream import Context
 from faststream.rabbit.message import RabbitMessage
 
 from src.log_setup import LOGGER
-from src.adapters._rabbit.dto.user import Tokens, LinkedAccountWithTokensRead
+from src.adapters._rabbit.dto.user import Tokens, SettingsConteiner
 from src.adapters._rabbit.dto.order import OrderUpdate
 from src.adapters._rabbit.broker import (
     broker,
@@ -13,9 +13,9 @@ from src.adapters._rabbit.broker import (
     bot_order_completed,
     bot_order_cancelled,
     bot_order_partially_completed,
+    bot_twitch_settings,
 )
 from src.bot_setup import Bot, context, eventsub
-from src.utils import get_twitch_id
 
 
 @broker.subscriber(bot_order_completed, exchange=main_exchange)
@@ -24,12 +24,10 @@ from src.utils import get_twitch_id
 async def order_status(message: RabbitMessage = Context()) -> None:
     await message.ack()
     bot: Bot = context["bot"]  # pyright: ignore[reportAssignmentType]
-    LOGGER.info(f"ttvbot inst - {bot}")
     if bot is None:
         return
     event: OrderUpdate = OrderUpdate.model_validate_json(message.body)
-    ttv_id = await get_twitch_id(str(event.owner_id))
-    user = bot.create_partialuser(user_id=ttv_id)
+    user = bot.create_partialuser(user_id=event.owner_platform_id)
     await user.send_message(sender=bot.bot_id, message=f"@{event.requester_nickname} {event.details}")
 
 
@@ -37,7 +35,6 @@ async def order_status(message: RabbitMessage = Context()) -> None:
 async def connect_to_twitch(message: RabbitMessage = Context()):
     await message.ack()
     bot: Bot = context["bot"]  # pyright: ignore[reportAssignmentType]
-    LOGGER.info(f"ttvbot inst - {bot}")
     if bot is None:
         return False
 
@@ -60,9 +57,7 @@ async def connect_to_twitch(message: RabbitMessage = Context()):
 
 @broker.subscriber(bot_twitch_disconnect, exchange=main_exchange)
 async def disconnect_from_twitch(msg: str) -> bool:
-
     bot: Bot = context["bot"]  # pyright: ignore[reportAssignmentType]
-    LOGGER.info(f"ttvbot inst - {bot}")
     if bot is None:
         return True
 
@@ -75,12 +70,19 @@ async def disconnect_from_twitch(msg: str) -> bool:
         return False
 
 
+@broker.subscriber(bot_twitch_settings, exchange=main_exchange)
+async def settings(msg: SettingsConteiner):
+    bot: Bot = context["bot"]  # pyright: ignore[reportAssignmentType]
+    if bot is None:
+        return
+
+    bot.prefixes[msg.platform_user_id] = msg.settings.prefix
+
+
 @broker.subscriber("auth.token.refreshed.twitch", exchange=topic_exchange)
 async def tokens_refreshed(message: RabbitMessage = Context()) -> None:
     await message.ack()
     bot: Bot = context["bot"]  # pyright: ignore[reportAssignmentType]
-
-    LOGGER.info(f"ttvbot inst - {bot}")
     if bot is None:
         return
 

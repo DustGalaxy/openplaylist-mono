@@ -164,9 +164,6 @@ services:
     build:
       context: ./bot_ttv
       dockerfile: ./Dockerfile
-    depends_on:
-      backend:
-        condition: service_healthy
     env_file:
       - ./bot_ttv/.env
     volumes:

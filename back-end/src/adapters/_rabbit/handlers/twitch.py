@@ -55,6 +55,7 @@ async def get_all_twitch_users(
                 expires_at=token.expires_at,  # type: ignore
                 platform=token.linked_account.platform,
                 platform_user_id=token.linked_account.platform_user_id,
+                bot_settings=token.linked_account.bot_settings,
             )
             for token in tokens
         ]
