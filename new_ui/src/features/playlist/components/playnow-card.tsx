@@ -254,7 +254,7 @@ export default function PlayNowCard({ track }: { track: Track }) {
                     ${
                       isOpen
                         ? 'bg-level-1 text-level-3 shadow-inner translate-y-[2px]'
-                        : 'bg-level-2 text-text-main hover:text-text-main shadow-[0_2px_0_0_rgb(245,106,25)] active:translate-y-[2px] active:shadow-none'
+                        : 'bg-level-2 text-text-main hover:text-text-main shadow-[0_2px_0_0_theme(colors.level-3)] active:translate-y-[2px] active:shadow-none'
                     }
                   `}
           >

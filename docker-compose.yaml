@@ -175,6 +175,18 @@ services:
     networks:
       - default
 
+  bot-donatex:
+    build:
+      context: ./bot_donatex
+      dockerfile: ./Dockerfile
+    env_file:
+      - ./bot_donatex/.env
+    volumes:
+      - ./bot_donatex/src:/app/src
+      - ./bot_donatex/main.py:/app/main.py
+    networks:
+      - default
+
   bot-da:
     build:
       context: ./bot_da

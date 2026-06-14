@@ -8,7 +8,7 @@ from src.database import async_session_maker
 from taskiq_broker import task_broker as taskiq_broker
 
 
-@taskiq_broker.task(schedule=[{"cron": "*/10 * * * *"}])
+@taskiq_broker.task(schedule=[{"cron": "*/30 * * * *"}])
 async def refresh_tokens():
     async with async_session_maker() as session:
         tokens = await token_service.fetch_tokens_to_refresh(session)

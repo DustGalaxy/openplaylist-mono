@@ -1,14 +1,16 @@
-from src.dto.internal.token import TokenStrategy
+from src.dto.internal.auth import RefreshTokenStrategy, IntegrationPlatform
 
-from src.services.auth.twitch_service import auth_twitch_service
-from src.services.auth.da_service import auth_da_service
+from src.services.auth.twitch_service import AuthTwitchService
+from src.services.auth.da_service import AuthDAService
+from src.services.auth.donatex_service import AuthDonateXService
+from src.services.auth.google_service import AuthGoogleService
 
 
 class TokenStrategyManager:
     def __init__(self):
         self._registry = {}
 
-    def register(self, mark: str, **kwargs):
+    def register(self, mark: IntegrationPlatform, **kwargs):
         """
         Registers a strategy class with the given mark.
         This method returns a decorator that instantiates the strategy class
@@ -29,10 +31,10 @@ class TokenStrategyManager:
 
         return wrapper
 
-    def add_strategy(self, mark: str, strategy: TokenStrategy):
+    def add_strategy(self, mark: IntegrationPlatform, strategy: RefreshTokenStrategy):
         self._registry[mark] = strategy
 
-    def get_strategy(self, obj: str) -> TokenStrategy:
+    def get_strategy(self, obj: IntegrationPlatform) -> RefreshTokenStrategy:
         strategy = self._registry.get(obj)
         if strategy is None:
             raise NotImplementedError(f"Strategy for {obj} is not implemented")
@@ -40,5 +42,7 @@ class TokenStrategyManager:
 
 
 manager = TokenStrategyManager()
-manager.add_strategy("twitch", auth_twitch_service)
-manager.add_strategy("da", auth_da_service)
+manager.add_strategy(IntegrationPlatform.TWITCH, AuthTwitchService())
+manager.add_strategy(IntegrationPlatform.DA, AuthDAService())
+manager.add_strategy(IntegrationPlatform.GOOGLE, AuthGoogleService())
+manager.add_strategy(IntegrationPlatform.DONATEX, AuthDonateXService())

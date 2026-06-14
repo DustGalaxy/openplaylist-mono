@@ -18,6 +18,7 @@ from src.dto.internal.auth import (
     PlatformAuthResult,
     PlatformMeta,
     AuthFlow,
+    RefreshTokenStrategy,
 )
 from src.adapters._rabbit.event_broker import bot_da_connect_request
 from src._types import PlatformCap
@@ -25,7 +26,7 @@ from src._types import PlatformCap
 logger = logging.getLogger(__name__)
 
 
-class AuthDAService(IntegrationStrategy):
+class AuthDAService(IntegrationStrategy, RefreshTokenStrategy):
     meta: PlatformMeta = PlatformMeta(
         platform=IntegrationPlatform.DA,
         integration_type=IntegrationType.IDENTITY_AND_BOT,
@@ -134,10 +135,6 @@ class AuthDAService(IntegrationStrategy):
             except json.JSONDecodeError as e:
                 logger.error(f"Failed to decode JSON refresh token response: {e}")
                 raise HTTPException(status_code=400)
-
-    def validate_token(self, tokens: Tokens) -> bool:
-
-        return True
 
     async def fetch_identity(
         self, code: str | None = None, code_verifier: str | None = None, user_key: str | None = None

@@ -1,11 +1,12 @@
 from datetime import datetime
+import time
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.token_vault import TokenVaultCreate, TokenVaultDomain
 from src.dal.postgres.token import token_vault_repository, TokenVaultRepository
-
+from src.dto.internal.token import Tokens
 from src.services.tokens.manager import manager
 from src.database import async_session_maker
 
@@ -58,7 +59,7 @@ class TokenService:
             raise Exception("Refresh token is not set")
 
         tokens = await strategy.refresh_token(token_vault.refresh_token)
-
+        tokens = Tokens.model_validate(tokens)
         token_vault.access_token = tokens.access_token
         token_vault.refresh_token = tokens.refresh_token
         token_vault.token_type = tokens.token_type

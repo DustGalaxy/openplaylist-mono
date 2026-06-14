@@ -1,13 +1,13 @@
 import enum
-from typing import Literal, Optional
+from typing import Literal
 from uuid import UUID
 
-from sqlalchemy import CheckConstraint, Enum, ForeignKey, Index, Integer, String, UniqueConstraint
+from sqlalchemy import Enum, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ARRAY, UUID as PGUUID, JSONB
 
 from src.database import Base, UUIDMixin, TimestampMixin
-from src._types import ContentSettingScope, BlockListScope, ChatRuleScope, DonationRuleScope, Platform
+from src._types import ContentSettingScope, BlockListScope, ChatRuleScope, DonationRuleScope
 
 
 class Settings(Base, UUIDMixin, TimestampMixin):
@@ -71,7 +71,7 @@ class ContentSettings(Base, UUIDMixin, TimestampMixin):
         back_populates="content_settings",
         lazy="selectin",
     )
-    platform: Mapped[ContentSettingScope] = mapped_column(Enum(ContentSettingScope), nullable=False)
+    platform: Mapped[ContentSettingScope] = mapped_column(Enum(ContentSettingScope, native_enum=False), nullable=False)
 
     min_views: Mapped[int | None] = mapped_column(default=10_000, nullable=False)
     min_likes: Mapped[int] = mapped_column(default=500, nullable=False)
@@ -94,10 +94,10 @@ class BlockList(Base, UUIDMixin, TimestampMixin):
         lazy="selectin",
     )
 
-    trigger_type: Mapped[BlockTrigger] = mapped_column(Enum(BlockTrigger))
+    trigger_type: Mapped[BlockTrigger] = mapped_column(Enum(BlockTrigger, native_enum=False))
     trigger_value: Mapped[str] = mapped_column(String(255))
 
-    platform: Mapped[BlockListScope] = mapped_column(Enum(BlockListScope), nullable=False)
+    platform: Mapped[BlockListScope] = mapped_column(Enum(BlockListScope, native_enum=False), nullable=False)
 
 
 class DonationRules(Base, UUIDMixin, TimestampMixin):
@@ -108,7 +108,7 @@ class DonationRules(Base, UUIDMixin, TimestampMixin):
         back_populates="donation_rules",
         lazy="selectin",
     )
-    platform: Mapped[DonationRuleScope] = mapped_column(Enum(DonationRuleScope), nullable=False)
+    platform: Mapped[DonationRuleScope] = mapped_column(Enum(DonationRuleScope, native_enum=False), nullable=False)
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -140,7 +140,7 @@ class ChatRules(Base, UUIDMixin, TimestampMixin):
         back_populates="chat_rules",
         lazy="selectin",
     )
-    platform: Mapped[ChatRuleScope] = mapped_column(Enum(ChatRuleScope), nullable=False)
+    platform: Mapped[ChatRuleScope] = mapped_column(Enum(ChatRuleScope, native_enum=False), nullable=False)
 
     key: Mapped[str] = mapped_column(String(255), nullable=False)
     priority: Mapped[int] = mapped_column(Integer, nullable=False)

@@ -1,3 +1,5 @@
+import type { BotSettings } from './botSettings'
+
 export interface Integration {
   id: string
   platform: string
@@ -5,6 +7,8 @@ export interface Integration {
   platform_avatar_url: string
   platform_username: string
   bot_connection: boolean
+  bot_settings: BotSettings
+  is_dead: boolean
   created_at: string
 }
 

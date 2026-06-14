@@ -118,16 +118,16 @@ async def refresh_access_token(refresh_token: str, user_id: UUID, platform_user_
             response = await client.post(TOKEN_URL, data=data)
             response.raise_for_status()
             new_token_data = response.json()
-            if not new_token_data.refresh_token:
-                new_token_data.refresh_token = refresh_token
+            if not new_token_data["refresh_token"]:
+                new_token_data["refresh_token"] = refresh_token
 
             await rabbit_broker.publish(
                 DATokenRefreshed(
                     user_id=user_id,
                     platform_user_id=platform_user_id,
-                    access_token=new_token_data.access_token,
-                    refresh_token=new_token_data.refresh_token,
-                    expires_at=new_token_data.expires_in + int(time.time()),
+                    access_token=new_token_data["access_token"],
+                    refresh_token=new_token_data['refresh_token'],
+                    expires_at=new_token_data['expires_in'] + int(time.time()),
                 ),
                 auth_user_da_tokens_refreshed,
                 main_exchange,

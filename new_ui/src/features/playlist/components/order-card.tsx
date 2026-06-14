@@ -172,7 +172,7 @@ export default function OrderCard({
           track.id === playlist.now_playing?.id
             ? 'border-level-3'
             : 'border-level-3/15'
-        } relative w-full h-full min-w-0 rounded-l-(--rounded-std) ${isOpen ? 'z-3' : 'z-2'} bg-level-2 transition-all duration-500 ease-in-out origin-bottom`}
+        } relative w-full h-full min-w-0 rounded-sm ${isOpen ? 'z-3' : 'z-2'} bg-level-2 transition-all duration-500 ease-in-out origin-bottom`}
         style={{
           transform: isOpen ? 'rotateX(-55deg)' : 'rotateX(0deg)',
           transformStyle: 'preserve-3d',
@@ -181,7 +181,7 @@ export default function OrderCard({
       >
         {/* 📟 ВЕРХНИЙ ТОРЕЦ */}
         <div
-          className="absolute top-0 left-0 right-0 h-[32px] bg-level-2 rounded-t-(--rounded-std) flex items-center px-4 gap-4 transition-all duration-300 ease-out"
+          className="absolute top-0 left-0 right-0 ring-1 ring-black/25 h-[32px] bg-level-2  rounded-t-sm flex items-center px-4 gap-4 transition-all duration-300 ease-out"
           style={{
             transform: 'translateY(-100%) rotateX(90deg)',
             transformOrigin: 'bottom',
@@ -287,7 +287,7 @@ export default function OrderCard({
       </div>
 
       {/* Нижная строка */}
-      <div className="flex flex-col justify-between bg-level-2 h-full rounded-r-(--rounded-std) items-end pb-2.5 pr-2 w-full self-end">
+      <div className="flex flex-col justify-between rounded-sm  bg-level-2 h-full rounded-r-(--rounded-std) items-end pb-2.5 pr-2 w-full self-end">
         {/* Ретро индикаторы */}
         <div className="flex gap-2 text-xs mt-1 font-mono">
           {/* Дата */}
@@ -342,7 +342,7 @@ export default function OrderCard({
             className={`flex items-center justify-center gap-1 h-8 px-2.5 rounded-(--rounded-std) font-mono text-[11px] font-bold uppercase tracking-wider transition-all duration-150 border border-level-3/40 ${
               isOpen
                 ? 'bg-level-1 text-level-3 shadow-inner translate-y-[2px]'
-                : 'bg-level-2 text-text-main hover:text-text-main shadow-[0_2px_0_0_rgb(245,106,25)] active:translate-y-[2px] active:shadow-none'
+                : 'bg-level-2 text-text-main hover:text-text-main shadow-[0_2px_0_0_theme(colors.level-3)] active:translate-y-[2px] active:shadow-none'
             }`}
           >
             <span>{t('playlist.track.ejectBtn')}</span>

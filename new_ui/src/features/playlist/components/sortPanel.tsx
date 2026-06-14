@@ -54,6 +54,7 @@ const SortButton = ({
         `px-5 pt-0.5 pb-[3px]            
         sm:pt-1 sm:pb-[5px] 
         cursor-pointer 
+        ring-1 ring-level-3/40
         transition-all 
         duration-100 
         ease-out border-level-2 bg-level-2          

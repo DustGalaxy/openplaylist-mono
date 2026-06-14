@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Protocol, TypedDict, overload
+from typing import ClassVar, Protocol, TypedDict, overload, Any
 
 from pydantic import BaseModel
 from faststream.rabbit import RabbitQueue
@@ -38,8 +38,13 @@ class PlatformMeta(BaseModel):
 # --- Единый протокол стратегии ---
 
 
+class RefreshTokenStrategy(Protocol):
+    async def refresh_token(self, refresh_token: str) -> Any: ...
+
+
 class IntegrationStrategy(Protocol):
     meta: PlatformMeta
+    bot_settings_schema: type[BaseModel] | None = None
 
     async def fetch_identity(
         self,
@@ -49,4 +54,10 @@ class IntegrationStrategy(Protocol):
     ) -> PlatformAuthResult: ...
 
     def get_bot_queue(self) -> RabbitQueue | None:
+        return None
+
+    def get_bot_settings_queue(self) -> RabbitQueue | None:
+        return None
+
+    def get_bot_disconect_queue(self) -> RabbitQueue | None:
         return None

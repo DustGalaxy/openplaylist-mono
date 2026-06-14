@@ -46,3 +46,6 @@ class AuthUserUpdate(BaseModel):
     password: str | None = None
     avatar_url: str | None = None
     social_links: dict[str, str] | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+

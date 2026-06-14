@@ -9,10 +9,10 @@ bot_order_partially_completed = RabbitQueue("bot.order.partially_completed", dur
 
 playlist_settings_request = RabbitQueue("playlist.settings.request", durable=True)
 auth_user_twitch_tokens_refreshed = RabbitQueue("auth.user.twtich.tokens.refreshed", durable=True)
-user_token_died = RabbitQueue("user.token.died", durable=True)
+user_token_died = RabbitQueue("twitch.user.token.died", durable=True)
 
 bot_twitch_connect_request = RabbitQueue("bot.twitch.connect.request", durable=True)
-bot_twitch_disconnect_request = RabbitQueue("bot.twitch.disconnect.request", durable=True)
+bot_twitch_disconnect = RabbitQueue("bot.twitch.disconnect", durable=True)
 
 main_exchange = RabbitExchange("main_exchange", ExchangeType.DIRECT, durable=True)
 topic_exchange = RabbitExchange("topic_exchange", ExchangeType.TOPIC, durable=True)

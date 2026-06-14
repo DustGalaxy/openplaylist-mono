@@ -22,3 +22,4 @@ __pycache__*
 letsencrypt/acme.json
 back-end/src/src.zip
 *.com.json
+*.zip

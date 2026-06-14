@@ -18,5 +18,3 @@ class UserKeyBody(BaseModel):
     user_key: str
 
 
-class BotConnectBody(BaseModel):
-    platform_user_id: str

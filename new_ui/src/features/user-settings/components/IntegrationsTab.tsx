@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import type { Integration } from '@/types/user'
-import { connectBot, deleteIntegration } from '@/api/api-user'
+import {
+  connectBot,
+  deleteIntegration,
+  updateBotSettings,
+} from '@/api/api-user'
 import { getGlobalSocket } from '@/api/io-sockets'
 import Btn from '@/components/ui/my-btn'
 import {
@@ -11,16 +15,13 @@ import {
   sectionTitleClass,
   statusOpenClass,
 } from '@/features/landing/styles'
+import { D } from '@thesvg/react'
+import { BotSettingsModal } from './BotSettingsModal'
 
 interface IntegrationsTabProps {
   initialIntegrations: Array<Integration>
   platformConfigs: {
-    twitch: {
-      name: string
-      icon: React.ReactNode
-      loginHandler: (value: boolean) => void
-    }
-    da: {
+    [key: string]: {
       name: string
       icon: React.ReactNode
       loginHandler: (value: boolean) => void
@@ -40,19 +41,29 @@ export function IntegrationsTab({
   useEffect(() => {
     const global_socket = getGlobalSocket()
 
-    const handleBotConnected = (platform: string) => {
+    const handleBotConnected = (platform: string, platform_user_id: string) => {
+      console.log(`ack_bot_connected:${platform} !!!!!!!`)
+
       setIntegrations((prevItems) =>
         prevItems.map((item) =>
-          item.platform === platform ? { ...item, bot_connection: true } : item,
+          item.platform === platform &&
+          item.platform_user_id == platform_user_id
+            ? { ...item, bot_connection: true }
+            : item,
         ),
       )
-      setLoading((prev) => ({ ...prev, [`${platform}-bot`]: false }))
+      setLoading((prev) => ({
+        ...prev,
+        [`${platform}-${platform_user_id}-bot`]: false,
+      }))
       toast.success(t('settings.integrations.botConnected'))
     }
 
     Object.keys(platformConfigs).forEach((platform) => {
-      global_socket.on(`ack_bot_connected:${platform}`, () =>
-        handleBotConnected(platform),
+      console.log('register ', `ack_bot_connected:${platform}`)
+
+      global_socket.on(`ack_bot_connected:${platform}`, (platform_user_id: string) =>
+        handleBotConnected(platform, platform_user_id),
       )
     })
 
@@ -191,7 +202,7 @@ export function IntegrationsTab({
               key={platform}
               className={`flex flex-col items-center gap-4 p-4 sm:p-6 ${innerPanelClass} hover:border-level-3/30 transition-all`}
             >
-              <div className="w-[56px] h-[56px] flex items-center justify-center rounded-lg">
+              <div className="w-14 h-14 flex items-center justify-center rounded-lg">
                 {config.icon}
               </div>
               <div className="text-center">
@@ -232,44 +243,56 @@ function IntegrationCard({
   loading,
 }: IntegrationCardProps) {
   const { t } = useTranslation()
+  const [intgr, setIntgr] = useState(integration)
+
+  async function onSettingsUpdated(updated: Integration) {
+    setIntgr(updated)
+  }
+
   return (
     <div
       className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 ${innerPanelClass} hover:border-level-3/30 transition-all`}
     >
       <div className="flex items-center gap-4 flex-1 min-w-0">
-        <div className="w-[56px] h-[56px] flex items-center justify-center bg-level-2 rounded-lg flex-shrink-0">
+        <div className="w-14 h-14 flex items-center justify-center bg-level-2 rounded-lg shrink-0">
           {config.icon}
         </div>
 
         <div className="flex flex-col gap-1">
           <div className="text-lg font-semibold">{config.name}</div>
           <div className="text-sm text-text-secondary">
-            @{integration.platform_username}
+            @{intgr.platform_username}
           </div>
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
-        {integration.bot_connection ? (
-          <div
-            className={`px-4 py-2 rounded-(--rounded-std) text-sm font-semibold border ${statusOpenClass}`}
-          >
-            {t('settings.integrations.botConnected')}
+        {intgr.bot_connection ? (
+          <div>
+            <div
+              className={`px-4 py-2 rounded-(--rounded-std) text-sm font-semibold border ${statusOpenClass}`}
+            >
+              {t('settings.integrations.botConnected')}
+            </div>
+            {intgr.bot_connection && (
+              <BotSettingsModal
+                integration={intgr}
+                platformName={config.name}
+                platformIcon={config.icon}
+                onSaved={onSettingsUpdated}
+              />
+            )}
           </div>
         ) : (
           <Btn
             text={
-              loading[
-                `${integration.platform}-${integration.platform_user_id}-bot`
-              ]
+              loading[`${intgr.platform}-${intgr.platform_user_id}-bot`]
                 ? t('settings.integrations.connecting')
                 : t('settings.integrations.connectBot')
             }
             onClick={onConnectBot}
             disabled={
-              loading[
-                `${integration.platform}-${integration.platform_user_id}-bot`
-              ]
+              loading[`${intgr.platform}-${intgr.platform_user_id}-bot`]
             }
             className="px-4 py-2 text-sm w-full sm:w-auto"
           />
@@ -277,17 +300,13 @@ function IntegrationCard({
 
         <Btn
           text={
-            loading[
-              `${integration.platform}-${integration.platform_user_id}-delete`
-            ]
+            loading[`${intgr.platform}-${intgr.platform_user_id}-delete`]
               ? t('settings.integrations.removing')
               : t('settings.integrations.disconnect')
           }
           onClick={onDisconnect}
           disabled={
-            loading[
-              `${integration.platform}-${integration.platform_user_id}-delete`
-            ]
+            loading[`${intgr.platform}-${intgr.platform_user_id}-delete`]
           }
           className="px-4 py-2 text-sm w-full sm:w-auto"
         />

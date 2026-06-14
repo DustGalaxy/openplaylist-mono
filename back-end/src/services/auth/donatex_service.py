@@ -13,15 +13,16 @@ from src.dto.internal.auth import (
     PlatformAuthResult,
     PlatformTokens,
     AuthFlow,
+    RefreshTokenStrategy,
 )
-
+from src.adapters._rabbit.event_broker import bot_donatex_connect_request
 from src.settings import settings
 from src._types import IntegrationPlatform, IntegrationType, PlatformCap
 
 logger = logging.getLogger(__name__)
 
 
-class AuthDonateXService(IntegrationStrategy):
+class AuthDonateXService(IntegrationStrategy, RefreshTokenStrategy):
     name: str = "DonateX"
     meta: PlatformMeta = PlatformMeta(
         platform=IntegrationPlatform.DONATEX,
@@ -34,7 +35,7 @@ class AuthDonateXService(IntegrationStrategy):
     )
 
     def get_bot_queue(self) -> RabbitQueue | None:
-        return super().get_bot_queue()
+        return bot_donatex_connect_request
 
     def get_token(self, code, code_verifier) -> DonateXTokenResponse:
         data = {

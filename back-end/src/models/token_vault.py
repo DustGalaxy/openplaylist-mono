@@ -18,7 +18,9 @@ class TokenVaultDomain(BaseModel):
     refresh_token: str | None
     token_type: str
     expires_at: int | None
+
     last_update: datetime
+    
 
     created_at: datetime
     updated_at: datetime

@@ -87,7 +87,7 @@ export default function SettingsModal() {
 
   const retroTabStyles = `
     bg-level-2 data-[state=active]:bg-level-2 border-2 justify-start
-
+    ring-1 ring-level-3/40
     shadow-[0_3px_0_0_theme(colors.level-3),_0_0px_10px_rgba(0,0,0,0.4),_0_2px_4px_rgba(0,0,0,0.3)]
     sm:shadow-[0_5px_0_0_theme(colors.level-3),_0_0px_15px_rgba(0,0,0,0.55),_0_4px_8px_rgba(0,0,0,0.45)]
     
@@ -120,7 +120,7 @@ export default function SettingsModal() {
           onClick={() => setCountToDelete(3)}
         />
       </DialogTrigger>
-      <DialogContent className="max-w-[425px] md:max-w-[1200px] bg-level-1 border-level-3 text-text-main h-[700px] overflow-scroll">
+      <DialogContent className="max-w-[425px] md:max-w-[1200px] bg-level-1 border-level-3 text-text-main h-[900px] overflow-scroll">
         <Tabs className="w-full flex justify-start min-h-full">
           <DialogHeader>
             <DialogTitle className="text-xl">
@@ -131,7 +131,7 @@ export default function SettingsModal() {
 
           <TabsList
             defaultValue="general"
-            className="w-full flex items-center justify-start bg-transparent px-0 mx-0 gap-1"
+            className="w-full flex items-center font-mono justify-start bg-transparent px-0 mx-0 gap-4"
           >
             <TabsTrigger className={retroTabStyles} value="general">
               {t('playlistSettings.tabs.basic')}

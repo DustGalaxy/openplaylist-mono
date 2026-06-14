@@ -5,6 +5,18 @@ from pydantic import BaseModel
 from src._types import Status, TrackSource
 
 
+class DonatexNewOrder(BaseModel):
+    request_id: UUID
+    owner_platform_id: str
+    owner_id: UUID
+    requester_id: str
+    requester_nickname: str
+    donation_amount: float = 0.0
+    donation_currency: str
+    yt_video_url: str
+    priority: str = "donation"
+    source: TrackSource = TrackSource.DONATEX
+
 class DANewOrder(BaseModel):
     request_id: UUID
     owner_platform_id: str

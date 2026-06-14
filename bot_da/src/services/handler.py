@@ -7,11 +7,11 @@ from uuid6 import uuid7
 from dto.da import DonationData
 from dto.order import OrderNew
 from adapters._rabbit.broker import rabbit_broker, order_new, main_exchange
-
+from utils import extract_youtube_url
 
 logger = logging.getLogger(__name__)
 
-async def _request_processing(owner_id: UUID, donation: DonationData):
+async def _request_processing(owner_id: UUID, donation: DonationData, yt_url: str):
     logger.info("Donation is valid. Requesting order...")
 
     await rabbit_broker.publish(
@@ -23,7 +23,7 @@ async def _request_processing(owner_id: UUID, donation: DonationData):
             requester_nickname=donation.username,
             donation_amount=donation.amount_in_user_currency,
             donation_currency=donation.currency,
-            yt_video_url=donation.message,
+            yt_video_url=yt_url,
             priority="donation",
         ),
         order_new,
@@ -41,7 +41,9 @@ async def handler(message_str: str, owner_id: UUID, channel_name: str) -> None:
                     f"Received donation: ID={donation_data.get('id')}, User={donation_data.get('username') or donation_data.get('name')}, Amount={donation_data.get('amount')} {donation_data.get('currency')}"
                 )
                 donation = DonationData.model_validate(donation_data)
-                await _request_processing(owner_id, donation)
+                yt_url = extract_youtube_url(donation.message)
+                if yt_url:
+                    await _request_processing(owner_id, donation, yt_url)
 
             elif (
                 "type" in message["result"]

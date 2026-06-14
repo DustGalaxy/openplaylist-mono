@@ -4,8 +4,10 @@ from uuid import UUID
 
 from adapters._rabbit.dto import ConnectionData
 
+
 class Handler(Protocol):
     async def __call__(self, message_str: str, owner_id: UUID, channel_name: str) -> None: ...
+
 
 class IDonationAlertsListener(ABC):
     @abstractmethod
@@ -18,6 +20,8 @@ class IDonationAlertsListener(ABC):
         expires_at: int,
         handler: Handler,
     ): ...
+
+    platform_user_id: str
 
     @abstractmethod
     async def start(self): ...

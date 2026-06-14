@@ -91,7 +91,7 @@ function RouteComponent() {
       <div className={pageInnerClass}>
         <Tabs className="w-full" onValueChange={(value) => setPlstOpen(false)}>
           <TabsList className="w-full flex flex-nowrap items-center justify-start gap-2 overflow-hidden bg-transparent p-0 h-auto">
-            <div title={t('dashboard.tooltip.addPlaylist')} className="mb-0.75">
+            <div title={t('dashboard.tooltip.addPlaylist')} className="mb-0.75 ml-0.25">
               <AddPlaylistModal />
             </div>
             <HorizontalScrollStrip>

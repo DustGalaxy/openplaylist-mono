@@ -14,7 +14,7 @@ auth_user_da_tokens_refreshed = RabbitQueue("auth.user.da.tokens.refreshed", dur
 playlist_settings_exchange = RabbitExchange("config_fanout_exchange", durable=False, auto_delete=True)
 
 playlist_settings_request = RabbitQueue("playlist.settings.request", durable=True)
-
+bot_da_disconect = RabbitQueue("bot.da.disconnect", durable=True)
 bot_da_connect_request = RabbitQueue("bot.da.connect.request", durable=True)
 
 order_new = RabbitQueue("bot.da.order.new", durable=True)

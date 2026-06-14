@@ -53,5 +53,17 @@ class TokenVaultRepository(crud_factory(TokenVault, TokenVaultDomain, TokenVault
 
         return [self.to_repr(item) for item in result]
 
+    async def get_for_bots(self, session: AsyncSession, platform: IntegrationPlatform) -> list[TokenVaultDomain]:
+        stmt = (
+            select(TokenVault)
+            .join(LinkedAccounts, TokenVault.linked_account_id == LinkedAccounts.id)
+            .where(LinkedAccounts.platform == platform, LinkedAccounts.bot_connection == True)
+        )
+
+        result = await session.execute(stmt)
+        result = result.unique().scalars().all()
+
+        return [self.to_repr(item) for item in result]
+
 
 token_vault_repository = TokenVaultRepository()

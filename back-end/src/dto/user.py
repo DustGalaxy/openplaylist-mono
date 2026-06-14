@@ -6,11 +6,6 @@ from pydantic import BaseModel, ConfigDict, Field
 from src._types import IntegrationPlatform
 
 
-class UserDTO(BaseModel):
-    id: UUID
-    twitch_id: str
-
-
 class HttpClassicLogin(BaseModel):
     email: str
     password: str
@@ -37,12 +32,8 @@ class UserPatch(BaseModel):
     username: str | None = None
     email: str | None = None
     password: str | None = None
-    avatar_url: str | None = None
+    avatar_url: str | None = Field(None, alias="profile_image_url")
     social_links: dict[str, str] | None = None
-
-
-class IntegrationType(BaseModel):
-    type: Literal["twitch", "da"]
 
 
 class IntegrationRead(BaseModel):
@@ -51,7 +42,11 @@ class IntegrationRead(BaseModel):
     platform_user_id: str
     platform_avatar_url: str
     platform_username: str
+
     bot_connection: bool
+    bot_settings: dict | None
+    is_dead: bool
+
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 

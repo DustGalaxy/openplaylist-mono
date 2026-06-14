@@ -1,15 +1,15 @@
 from datetime import datetime
-from typing import Any
 
-from fastapi import APIRouter, Body, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response
 
-from src.dto.token import BotConnectBody, CodeDTO, OAuthBody, UserKeyBody
+from src.dto.token import OAuthBody, UserKeyBody
+from src.dto.bots import BotConnectBody, UpdateBotSettingsBody
 from src.dto.user import IntegrationRead, UserPatch, UserRead
 
 from src.services.auth.auth_service import auth_service
 from src.models.auth_user import AuthUserUpdate
 from src.adapters._fastapi.dependencies import DB_SESSION, CURR_USER
-from src._types import AuthFlow, IntegrationPlatform, Platform
+from src._types import AuthFlow, IntegrationPlatform
 from src.settings import settings
 from src.services.auth.strategy_manager import manager
 
@@ -42,7 +42,7 @@ async def patch_me(
     curr_user: CURR_USER,
     data: UserPatch,
 ):
-    patch = AuthUserUpdate.model_validate(data)
+    patch = AuthUserUpdate.model_validate(data.model_dump(exclude_unset=True))
     upd_user = await auth_service.user_repo.patch(db_session, patch, curr_user.id)
     return UserRead.model_validate(upd_user)
 
@@ -68,12 +68,28 @@ async def connect_bot(
     return {"message": "Bot connected"}
 
 
+@router.patch("/bots/{platform}/settings")
+async def update_bot_settings(
+    db_session: DB_SESSION,
+    curr_user: CURR_USER,
+    platform: IntegrationPlatform,
+    body: UpdateBotSettingsBody,
+):
+    result = await auth_service.update_bot_settings(
+        db_session,
+        user=curr_user,
+        platform=platform,
+        platform_user_id=body.platform_user_id,
+        settings=body.settings,
+    )
+    return result
+
+
 @router.get("/integration")
 async def get_integration(
     curr_user: CURR_USER,
 ):
-    integrations = auth_service.intergations(curr_user)
-    return [IntegrationRead.model_validate(i) for i in integrations]
+    return [IntegrationRead.model_validate(i) for i in auth_service.intergations(curr_user)]
 
 
 @router.post("/integration/{platform}")

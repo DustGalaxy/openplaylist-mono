@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 
 from src.dto.internal.token import Tokens
 
+
 class TwitchAuthResponse(BaseModel):
     access_token: str
     refresh_token: str
@@ -24,3 +25,7 @@ class TwitchUserResponse(BaseModel):
     view_count: int
 
     created_at: str
+
+
+class TwitchBotSettings(BaseModel):
+    prefix: str = Field("::", max_length=5)

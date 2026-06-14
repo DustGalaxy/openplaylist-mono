@@ -29,6 +29,27 @@ class AuthStrategyManager:
             IntegrationType.IDENTITY_AND_BOT,
         )
 
+    def validate_bot_settings(
+        self,
+        platform: IntegrationPlatform,
+        settings: dict,
+    ) -> dict:
+        strtg = self.get(platform)
+
+        if not self.supports_bot(platform):
+            raise HTTPException(400, f"{platform} does not support bot")
+
+        if strtg.bot_settings_schema is None:
+            return {}
+
+        return strtg.bot_settings_schema.model_validate(settings).model_dump()
+
+    def default_bot_settings(self, platform: IntegrationPlatform) -> dict:
+        strtg = self.get(platform)
+        if strtg.bot_settings_schema is None:
+            return {}
+        return strtg.bot_settings_schema().model_dump()
+
     def supports_bot(self, platform: IntegrationPlatform) -> bool:
         strtg = self.get(platform)
         return strtg.meta.integration_type in (

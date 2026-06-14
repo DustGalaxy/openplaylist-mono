@@ -109,8 +109,8 @@ class Bot(commands.AutoBot):
         LOGGER.info("Publishing refreshed tokens to RabbitMQ...")
 
     async def remove_token(self, user_id: str) -> None:
-        await super().remove_token(user_id)
-
+        token = await super().remove_token(user_id)
+        print(token)
         LOGGER.info("Removed token for user: %s", user_id)
 
     async def event_ready(self) -> None:
@@ -127,7 +127,11 @@ async def setup_bot() -> commands.Bot:
             await ttvbot.add_token(user.access_token, user.refresh_token, user.platform_user_id)
         except InvalidTokenException:
             await broker.publish(
-                {"access_token": user.access_token, "refresh_token": user.refresh_token},
+                {
+                    "access_token": user.access_token,
+                    "refresh_token": user.refresh_token,
+                    "platform_user_id": user.platform_user_id,
+                },
                 user_token_died,
                 exchange=main_exchange,
             )

@@ -29,6 +29,7 @@ from src.models.linked_accounts import LinkedAccountsCreate, LinkedAccountsDomai
 
 from src.services.auth.strategy_manager import manager
 from src.services.tokens.token_service import token_service
+from src.services.sio_service import sio_service
 
 from src._types import AuthFlow, IntegrationPlatform
 from src.database import get_async_session
@@ -50,6 +51,7 @@ class AuthService:
         self.hasher = PasswordHasher()
 
     def intergations(self, user: AuthUserSchema) -> list[dict]:
+
         return [x.model_dump() for x in user.linked_accounts]
 
     def encode_jwt(self, id: UUID, user_name: str) -> str:
@@ -292,13 +294,13 @@ class AuthService:
         return token
 
     async def get_all_tokens(self, db_session: AsyncSession, type: IntegrationPlatform) -> list[TokenVaultDomain]:
-        return await self.token_vault_repo.get_all_by_platform(db_session, type)
+        return await self.token_vault_repo.get_for_bots(db_session, type)
 
     async def get_current_user(
         self,
         db_session: Annotated[AsyncSession, Depends(get_async_session)],
         token: str = Depends(security_scheme),
-    ):
+    ) -> AuthUserSchema:
         try:
             payload = jwt.decode(token, settings.JWT_PUBLIC_KEY, algorithms=[settings.JWT_ALGORITHM])
             user_id = payload["sub"]
@@ -309,6 +311,7 @@ class AuthService:
                 raise HTTPException(status_code=401, detail="Session expired")
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
             raise HTTPException(status_code=401, detail="Not authenticated")
+
         try:
             user: AuthUserSchema = await self.user_repo.get_one(db_session, UUID(user_id))
         except NotFoundException:
@@ -395,18 +398,64 @@ class AuthService:
                 db_user.linked_accounts,
                 lambda x: x.platform == IntegrationPlatform(type) and x.platform_user_id == platform_user_id,
             )
-            for link in db_user.linked_accounts:
-                if link.platform == IntegrationPlatform(type) and link.platform_user_id == platform_user_id:
-                    print(link)
-            print(f"type: {type}, platform_user_id: {platform_user_id}")
+
             if not integration:
                 raise HTTPException(status_code=400, detail=f"User does not have a {type} integration")
+
+            if integration.bot_connection and (queue := manager.get(integration.platform).get_bot_disconect_queue()):
+                try:
+                    print(queue)
+                    print(f"{integration.platform_user_id=}")
+                    await broker.request(
+                        str(integration.platform_user_id), queue=queue, exchange=main_exchange, timeout=5
+                    )
+                except TimeoutError:
+                    pass
 
             await self.link_repo.remove(db_session, integration.id)
 
             return await self.user_repo.get_one(db_session, db_user.id)
         except NotFoundException:
             raise HTTPException(status_code=404, detail="User not found")
+
+    async def update_bot_settings(
+        self,
+        db_session: AsyncSession,
+        user: AuthUserSchema,
+        platform: IntegrationPlatform,
+        platform_user_id: str,
+        settings: dict,
+    ) -> dict:
+        validated = manager.validate_bot_settings(platform, settings)
+        strtg = manager.get(platform)
+        link = find(
+            user.linked_accounts,
+            lambda x: x.platform == platform and x.platform_user_id == platform_user_id,
+        )
+        if not link:
+            raise HTTPException(403, "Integration not found")
+
+        if not link.bot_connection:
+            raise HTTPException(400, "Bot is not connected")
+
+        queue = strtg.get_bot_settings_queue()
+
+        if queue is None:
+            raise HTTPException(500, f"Bot settings queue not configured for {platform}")
+
+        response = await broker.request(
+            {
+                "settings": validated,
+            },
+            queue,
+            main_exchange,
+        )
+        if not response:
+            raise HTTPException(500, f"Bot {platform} not accepted new settings by unknown reason")
+
+        link.bot_settings = validated
+        await self.link_repo.update(db_session, link)
+        return validated
 
     async def connect_bot(
         self,
@@ -432,26 +481,33 @@ class AuthService:
             raise HTTPException(500, f"Bot queue not configured for {platform}")
 
         tokens = await self.token_vault_repo.get_by_id_link(db_session, link.id)
+        defualt_settings = manager.default_bot_settings(platform)
+        try:
+            response = await broker.request(
+                {
+                    "access_token": tokens.access_token,
+                    "refresh_token": tokens.refresh_token,
+                    "expires_at": tokens.expires_at,
+                    "platform": platform.value,
+                    "platform_user_id": platform_user_id,
+                    "user_id": str(user.id),
+                    "settings": defualt_settings,
+                },
+                queue,
+                main_exchange,
+                timeout=10,
+            )
 
-        response = await broker.request(
-            {
-                "access_token": tokens.access_token,
-                "refresh_token": tokens.refresh_token,
-                "expires_at": tokens.expires_at,
-                "platform": platform.value,
-                "platform_user_id": platform_user_id,
-                "user_id": str(user.id),
-            },
-            queue,
-            main_exchange,
-        )
+            is_connected = bool(await response.decode())
+            if not is_connected:
+                raise HTTPException(500, "Failed to connect bot. Try again later.")
 
-        is_connected = bool(await response.decode())
-        if not is_connected:
+            link.bot_settings = defualt_settings
+            link.bot_connection = True
+            await self.link_repo.update(db_session, link)
+            await sio_service.ack_bot_connection(str(link.platform), str(link.user_id), str(link.platform_user_id))
+        except TimeoutError:
             raise HTTPException(500, "Failed to connect bot. Try again later.")
-
-        link.bot_connection = True
-        await self.link_repo.update(db_session, link)
 
     async def bot_was_disconnected(
         self,
@@ -468,6 +524,7 @@ class AuthService:
             raise HTTPException(400, "Integration not found")
 
         link.bot_connection = False
+        link.is_dead = True
         await self.link_repo.update(db_session, link)
 
     async def delete_user(self, db_session: AsyncSession, user_id: UUID) -> None:

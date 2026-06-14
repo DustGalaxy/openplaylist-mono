@@ -9,7 +9,7 @@ from src.adapters._rabbit.broker import (
     main_exchange,
     topic_exchange,
     bot_twitch_connect_request,
-    bot_twitch_disconnect_request,
+    bot_twitch_disconnect,
     bot_order_completed,
     bot_order_cancelled,
     bot_order_partially_completed,
@@ -52,24 +52,27 @@ async def connect_to_twitch(message: RabbitMessage = Context()):
                 ),
             ]
         )
-
-        LOGGER.info("Complete 1 step. Now adding tokens...")
         return True
     except Exception as e:
         LOGGER.error(e)
         return False
 
 
-@broker.subscriber(bot_twitch_disconnect_request, exchange=main_exchange)
-async def disconnect_from_twitch(message: RabbitMessage = Context()) -> None:
-    await message.ack()
+@broker.subscriber(bot_twitch_disconnect, exchange=main_exchange)
+async def disconnect_from_twitch(msg: str) -> bool:
+
     bot: Bot = context["bot"]  # pyright: ignore[reportAssignmentType]
     LOGGER.info(f"ttvbot inst - {bot}")
     if bot is None:
-        return
-    event: Tokens = Tokens.model_validate_json(message.body)
+        return True
 
-    await bot.remove_token(event.platform_user_id)
+    platform_user_id: str = msg
+    try:
+        await bot.remove_token(platform_user_id)
+
+        return True
+    except Exception as e:
+        return False
 
 
 @broker.subscriber("auth.token.refreshed.twitch", exchange=topic_exchange)

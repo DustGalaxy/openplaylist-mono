@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
-from src._types import Status, TrackSource
+from src._types import TrackSource
 
 
 class WebExtraData(BaseModel):
@@ -25,13 +25,19 @@ class DAExtraData(BaseModel):
     donation_currency: str
 
 
-ExtraData = TTVExtraData | DAExtraData | YTExtraData | WebExtraData
+class DonatexExtraData(BaseModel):
+    donation_amount: float
+    donation_currency: str
+
+
+ExtraData = TTVExtraData | DAExtraData | YTExtraData | WebExtraData | DonatexExtraData
 
 STRATEGIES: dict[TrackSource, Type[ExtraData]] = {
     TrackSource.TWITCH: TTVExtraData,
     TrackSource.YOUTUBE: YTExtraData,
     TrackSource.WEB: WebExtraData,
     TrackSource.DA: DAExtraData,
+    TrackSource.DONATEX: DonatexExtraData,
 }
 
 

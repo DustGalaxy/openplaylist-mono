@@ -67,6 +67,23 @@ export const connectBot = async (
   return response.status === 200
 }
 
+export async function updateBotSettings(
+  platform: string,
+  platformUserId: string,
+  settings: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  const config = getConfig()
+  const res = await apiClient(
+    config.AUTH_API_URL + `/user/bots/${platform}/settings`,
+    {
+      method: 'PATCH',
+      withCredentials: true,
+      data: { platform_user_id: platformUserId.toString(), settings },
+    },
+  )
+  return res.data
+}
+
 export const updateUserProfile = async (payload: UserProfileUpdatePayload) => {
   const config = getConfig()
   const response = await apiClient(config.AUTH_API_URL + '/user/me', {

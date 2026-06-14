@@ -27,7 +27,7 @@ class Order(Base, UUIDMixin, TimestampMixin):
     owner_platform_id: Mapped[str]
     from_owner: Mapped[bool]
 
-    source: Mapped[Platform] = mapped_column(Enum(Platform), nullable=False)
+    source: Mapped[Platform] = mapped_column(Enum(Platform,native_enum=False), nullable=False)
 
     extra_data: Mapped[dict] = mapped_column(JSONB, nullable=True)
 

@@ -14,6 +14,7 @@ from src.dto.internal.auth import (
     PlatformAuthResult,
     PlatformTokens,
     AuthFlow,
+    RefreshTokenStrategy,
 )
 from src.dto.internal.token import Tokens
 
@@ -23,7 +24,7 @@ from src._types import IntegrationPlatform, IntegrationType
 logger = logging.getLogger(__name__)
 
 
-class AuthGoogleService(IntegrationStrategy):
+class AuthGoogleService(IntegrationStrategy, RefreshTokenStrategy):
     meta: PlatformMeta = PlatformMeta(
         platform=IntegrationPlatform.GOOGLE,
         integration_type=IntegrationType.IDENTITY_ONLY,

@@ -1,11 +1,13 @@
 from datetime import datetime
 import logging
+from typing import ClassVar
 
 from fastapi import HTTPException
 import httpx
 from faststream.rabbit import RabbitQueue
+from pydantic import BaseModel
 
-from src.dto.internal.twitch import TwitchUserResponse, TwitchAuthResponse
+from src.dto.internal.twitch import TwitchBotSettings, TwitchUserResponse, TwitchAuthResponse
 from src.dto.internal.auth import (
     PlatformMeta,
     PlatformUser,
@@ -13,10 +15,11 @@ from src.dto.internal.auth import (
     PlatformAuthResult,
     PlatformTokens,
     AuthFlow,
+    RefreshTokenStrategy,
 )
 from src.dto.internal.token import Tokens
 from src.models.auth_user import AuthUserSchema
-from src.adapters._rabbit.event_broker import bot_twitch_connect_request
+from src.adapters._rabbit.event_broker import bot_twitch_connect_request, bot_twitch_disconect
 
 from src.settings import settings
 from src._types import IntegrationPlatform, IntegrationType, PlatformCap
@@ -25,7 +28,7 @@ from src.utils import find
 logger = logging.getLogger(__name__)
 
 
-class AuthTwitchService(IntegrationStrategy):
+class AuthTwitchService(IntegrationStrategy, RefreshTokenStrategy):
     meta: PlatformMeta = PlatformMeta(
         platform=IntegrationPlatform.TWITCH,
         integration_type=IntegrationType.IDENTITY_AND_BOT,
@@ -35,10 +38,12 @@ class AuthTwitchService(IntegrationStrategy):
             PlatformCap.CHAT,
         },
     )
+    bot_settings_schema = TwitchBotSettings
 
     def get_bot_queue(self) -> RabbitQueue | None:
         return bot_twitch_connect_request
-
+    def get_bot_disconect_queue(self) -> RabbitQueue | None:
+        return bot_twitch_disconect
     def get_token(self, code: str) -> TwitchAuthResponse:
         response = httpx.post(
             f"{settings.TWITCH_URL}/oauth2/token",

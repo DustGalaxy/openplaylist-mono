@@ -6,13 +6,13 @@ export enum Platform {
   YouTube = 'youtube',
   Web = 'web',
   DonationAlerts = 'donationalerts',
-  // DonateX = 'donatex',
+  DonateX = 'donatex',
 }
 
 export enum DonationPlatform {
   General = '__general__',
   DonationAlerts = 'donationalerts',
-  // DonateX = 'donatex',
+  DonateX = 'donatex',
 }
 
 export enum ChatPlatform {
@@ -25,14 +25,14 @@ export enum RequestPlatform {
   Twitch = 'twitch',
   YouTube = 'youtube',
   DonationAlerts = 'donationalerts',
-  // DonateX = 'donatex',
+  DonateX = 'donatex',
 }
 
 export enum ExternalContentPlatform {
   Twitch = 'twitch',
   YouTube = 'youtube',
   DonationAlerts = 'donationalerts',
-  // DonateX = 'donatex',
+  DonateX = 'donatex',
 }
 
 export type Role = {

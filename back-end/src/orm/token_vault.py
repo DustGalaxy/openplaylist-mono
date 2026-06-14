@@ -18,6 +18,7 @@ class TokenVault(Base, UUIDMixin, TimestampMixin):
     refresh_token: Mapped[str | None] = mapped_column("refresh_token", nullable=True)
     token_type: Mapped[str] = mapped_column("token_type", nullable=False)
     expires_at: Mapped[int | None] = mapped_column("expires_at", nullable=True)
+
     last_update: Mapped[datetime] = mapped_column("last_update", nullable=False, server_default=func.now())
 
     linked_account_id: Mapped[UUID] = mapped_column(

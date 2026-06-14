@@ -1,5 +1,6 @@
 import re
 from urllib import parse
+from typing import Callable, Optional
 
 
 def video_id(value: str) -> str | None:
@@ -25,29 +26,33 @@ def video_id(value: str) -> str | None:
     return None
 
 
-def extract_data_from_msg(msg: str) -> dict[str, str]:
-    # Regex pattern to match common YouTube URL formats
-    youtube_pattern = r"(?:https?://)?(?:www\.)?(?:youtube\.com|youtu\.be)/(?:watch\?v=|embed/|v/|shorts/|live/|playlist\?list=|user/|channel/|c/)([a-zA-Z0-9_-]{11}|[a-zA-Z0-9_-]+)"
+def extract_youtube_url(text: str) -> Optional[str]:
+    """
+    Extracts the first valid YouTube or YouTube Music URL from a text string.
+    Supports: youtube.com, youtu.be, music.youtube.com, /shorts/, /embed/, etc.
+    """
+    if not text or not isinstance(text, str):
+        return None
 
-    # Find all matches in the text
-    urls = re.findall(youtube_pattern, msg)
+    # Updated regex to include music.youtube.com
+    youtube_regex = (
+        r"(https?://)?(www\.)?(m\.|music\.)?"
+        r"(youtube\.com|youtu\.be|youtube-nocookie\.com)"
+        r"(/shorts/|/embed/|/v/|/watch\?v=|/)?"
+        r"([a-zA-Z0-9_-]{11})"
+        r'(\?[^ \s\n\t"\'<>*,;]*)?'
+    )
 
-    # Reconstruct full URLs for consistency if only IDs are extracted
-    found_urls = []
-    for match in urls:
-        # If the match is just the ID, reconstruct a standard URL
-        if len(match) == 11 and not match.startswith(("http", "www")):
-            found_urls.append(f"https://www.youtube.com/watch?v={match}")
-        else:
-            found_urls.append(match)  # If it's a full URL or other format, keep as is
+    match = re.search(youtube_regex, text)
+    if match:
+        return match.group(0).strip(".,?!:;)")
 
-    if not bool(len(found_urls)):
-        raise ValueError("No valid YouTube URLs found in the message")
+    return None
 
-    yt_url = found_urls[-1]
-    playlsit_name = msg[: msg.find(yt_url)].strip()
 
-    if not bool(len(playlsit_name)):
-        raise ValueError("No playlist name found in the message")
+def find[T](list_to_search: list[T], condition_func: Callable[[T], bool]) -> T | None:
+    return next((item for item in list_to_search if condition_func(item)), None)
 
-    return {"playlsit_name": playlsit_name, "yt_url": yt_url}
+
+def find_all[T](list_to_search: list[T], condition_func: Callable[[T], bool]) -> list[T]:
+    return [item for item in list_to_search if condition_func(item)]

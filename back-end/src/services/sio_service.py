@@ -123,9 +123,10 @@ class SioPlaylistUpdateService:
             namespace=self.namespace,
         )
 
-    async def ack_bot_connection(self, type: str, user_id: str):
+    async def ack_bot_connection(self, type: str, user_id: str, platform_user_id: str):
         sid = get_broker().hget(f"basic:users:{user_id}", "sid")
-        await self.sio.emit(f"ack_bot_connected:{type}", to=sid, namespace="/")
+        print("ack bot connection with sid: ", sid, " and type: ", type)
+        await self.sio.emit(f"ack_bot_connected:{type.lower()}", data=platform_user_id, to=sid, namespace="/")
 
     async def set_private(self, data: Private):
         room_id = data.playlist_id

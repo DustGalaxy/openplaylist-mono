@@ -37,15 +37,6 @@ async def order_new_from_twitch(
     await kick("order.new", taskiq_broker, event, False, labels={"user_id": str(event.owner_id)})
 
 
-@broker.subscriber(bot_twitch_ack_connection, exchange=main_exchange)
-async def ack_twitch_connection(
-    message: RabbitMessage = Context(),
-):
-    await message.ack()
-    user_id = message.body.decode()
-    await sio_service.ack_bot_connection("twitch", user_id)
-
-
 @broker.subscriber(auth_user_twitch_all_request, exchange=main_exchange)
 async def get_all_twitch_users(
     message: RabbitMessage = Context(),
@@ -93,7 +84,7 @@ async def twitch_refresh_tokens(
         await token_vault_repository.update(session, tokens)
 
 
-@broker.subscriber("user.token.died", exchange=main_exchange)
+@broker.subscriber("twitch.user.token.died", exchange=main_exchange)
 async def user_token_died(
     message: RabbitMessage = Context(),
 ):
@@ -102,4 +93,4 @@ async def user_token_died(
     async with async_session_maker() as session:
         from src.services.auth.auth_service import auth_service
 
-        await auth_service.bot_was_disconnected(session, IntegrationPlatform.TWITCH, event["user_id"])
+        await auth_service.bot_was_disconnected(session, IntegrationPlatform.TWITCH, event["platform_user_id"])

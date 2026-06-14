@@ -1,3 +1,5 @@
+import json
+
 from faststream import Context
 from faststream.rabbit.message import RabbitMessage
 
@@ -82,3 +84,15 @@ async def da_refresh_tokens(
         tokens.refresh_token = event.refresh_token
         tokens.expires_at = event.expires_at
         await token_vault_repository.update(session, tokens)
+
+
+@broker.subscriber("da.user.token.died", exchange=main_exchange)
+async def user_token_died(
+    message: RabbitMessage = Context(),
+):
+    await message.ack()
+    event: dict = json.loads(message.body)
+    async with async_session_maker() as session:
+        from src.services.auth.auth_service import auth_service
+
+        await auth_service.bot_was_disconnected(session, IntegrationPlatform.TWITCH, event["platform_user_id"])

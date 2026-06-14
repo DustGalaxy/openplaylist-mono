@@ -1,6 +1,5 @@
 from pydantic import BaseModel, ConfigDict
 
-from src.dto.internal.token import Tokens
 
 class DAUser(BaseModel):
     id: str
@@ -20,3 +19,6 @@ class DAToken(BaseModel):
     expires_in: int
     expires_at: int
     token_type: str
+
+
+# class DABotSettings(BaseModel):
