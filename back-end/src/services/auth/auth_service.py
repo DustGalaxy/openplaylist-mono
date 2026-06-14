@@ -360,7 +360,18 @@ class AuthService:
             db_user.linked_accounts,
             lambda x: x.platform == platform and x.platform_user_id == result.user.id,
         )
+
         if existing:
+            if existing.is_dead:
+                tokens = await self.token_vault_repo.get_by_id_link(db_session, existing.id)
+                tokens.refresh_token = result.tokens.refresh_token
+                tokens.access_token = result.tokens.access_token
+                tokens.expires_at = result.tokens.expires_at
+                existing.is_dead = False
+                await self.token_vault_repo.update(db_session, tokens)
+                await self.link_repo.update(db_session, existing)
+                return await self.user_repo.get_one(db_session, user_id)
+
             raise HTTPException(400, f"User already has a {platform} integration")
 
         # создаём линк и токен
@@ -513,7 +524,7 @@ class AuthService:
         except TimeoutError:
             raise HTTPException(500, "Failed to connect bot. Try again later.")
 
-    async def disconect_bot(
+    async def disconnect_bot(
         self, db_session: AsyncSession, user: AuthUserSchema, platform: IntegrationPlatform, platform_user_id: str
     ):
         integration = find(

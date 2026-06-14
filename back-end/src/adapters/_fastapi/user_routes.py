@@ -87,14 +87,14 @@ async def update_bot_settings(
     return result
 
 
-@router.post("/bots/{platform}/disconect", status_code=204)
+@router.post("/bots/{platform}/disconnect", status_code=204)
 async def diconnect_bot(
     db_session: DB_SESSION,
     curr_user: CURR_USER,
     platform: IntegrationPlatform,
     body: BotConnectBody,
 ):
-    result = await auth_service.disconect_bot(db_session, curr_user,  platform, body.platform_user_id)
+    result = await auth_service.disconnect_bot(db_session, curr_user, platform, body.platform_user_id)
     return result
 
 
@@ -112,7 +112,6 @@ async def add_integration_oauth(
     platform: IntegrationPlatform,
     body: OAuthBody,
 ):
-    print(f"{body=}")
     strtg = manager.get(platform)
     if strtg.meta.auth_flow == AuthFlow.USER_KEY:
         raise HTTPException(400, f"{platform} uses personal token flow, use /integration/{platform}/token")

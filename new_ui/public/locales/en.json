@@ -719,12 +719,16 @@
       "botConnecting": "Connecting bot...",
       "botConnectFailed": "Failed to connect bot",
       "botDisconnecting": "Disconnecting bot...",
-      "botDisconnected": "Bot disconnected successfully"
+      "botDisconnected": "Bot disconnected successfully",
+      "deadBanner": "Token expired or connection lost. Please reconnect your account.",
+      "reconnect": "Reconnect account",
+      "tokenExpired": "Token expired."
     }
   },
   "botSettings": {
     "title": "Bot Settings",
     "save": "Save",
+    "saved": "Settings saved successfully",
     "cancel": "Cancel",
     "twitch": {
       "prefix": {

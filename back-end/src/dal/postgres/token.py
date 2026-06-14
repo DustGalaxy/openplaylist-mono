@@ -17,7 +17,7 @@ from src._types import IntegrationPlatform
 
 class TokenVaultRepository(crud_factory(TokenVault, TokenVaultDomain, TokenVaultCreate, TokenVaultUpdate)):
     def to_inner(self, data: TokenVaultCreate | TokenVaultDomain | TokenVaultUpdate) -> dict:
-        return data.model_dump(exclude_unset=True)
+        return data.model_dump(exclude_unset=True, exclude={"linked_account"})
 
     def to_repr(self, object: TokenVault) -> TokenVaultDomain:
         return self.domain_model.model_validate(object)
