@@ -487,7 +487,18 @@
       "private": "PRIVATE",
       "externalSources": "Внешние источники контента",
       "integrationsLoading": "Загрузка интеграций…",
-      "integrationsEmpty": "Подключите интеграции в настройках аккаунта"
+      "integrationsEmpty": "Подключите интеграции в настройках аккаунта",
+      "addHelp": "ADD — приоритеты суммируются.",
+      "maxHelp": "MAX — берётся максимальный приоритет.",
+      "priorityMode": "Режим приоритета",
+      "priorityModeHelp": "Режим приоритета определяет, как суммируются приоритеты ролей и донатов для трека.",
+      "priorityModeAdd": "ADD",
+      "priorityModeMax": "MAX",
+      "priorityModeAddHelp": "ADD — приоритеты суммируются.",
+      "priorityModeMaxHelp": "MAX — берётся максимальный приоритет.",
+      "publicHelp": "PUBLIC — плейлист виден всем, кто знает ссылку или найдёт его в поиске.",
+      "privateHelp": "PRIVATE — плейлист виден только вам.",
+      "externalSourcesHelp": "Разрешить добавление треков из внешних источников учитывая конкретные акаунты."
     },
     "validation": {
       "title": "Валидация видео",
@@ -694,7 +705,7 @@
       "addAccounts": "Добавить аккаунты",
       "connectHint": "Подключите аккаунт, чтобы начать",
       "connectAccount": "+ Подключить аккаунт",
-      "addAnother": "+ Подключить еще аккаунт",
+      "addAnother": "Подключить еще аккаунт",
       "botConnected": " Бот подключён",
       "connectBot": "Подключить бота",
       "connecting": "⟳ Подключение…",

@@ -200,6 +200,7 @@ function PlaylistView() {
             <YoutubePlayer
               playOnReady={true}
               pause={isPaused}
+              setIsPaused={setIsPaused}
               nowPlay={nowPlaying}
               className={`sm:row-span-2 ${showConsole || showContentSettings ? '' : 'col-span-2'} flex items-center justify-center`}
             />

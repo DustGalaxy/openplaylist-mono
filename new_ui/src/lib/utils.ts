@@ -46,30 +46,17 @@ export function computePriority(
   settings: PlaylistSettings,
 ): number {
   if (typeof track.priority === 'number') return track.priority
-  console.log(track)
-
   const labels = (track.priority || '').split(':')
-  console.log('labels: ', labels)
-
   if (labels.length === 0) return 0
   var vals: number[] = []
   var rules = []
   if (labels.length === 1 && labels[0].includes('donation')) {
-    console.log('doantion detected')
-
     rules = settings.donation_rules.filter(
       (r) =>
         ((r.platform as string) === track.source ||
           (r.platform as string) === Platform.General) &&
         r.currency === track.extra_data.donation_currency &&
         r.amount === track.extra_data.donation_amount,
-    )
-
-    console.log(
-      'selected rules: ',
-      rules,
-      ' all rules: ',
-      settings.donation_rules,
     )
   } else {
     rules = settings.chat_rules.filter(

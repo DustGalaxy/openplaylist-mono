@@ -19,10 +19,9 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  Languages,
-} from "lucide-react"
+import { Languages } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
+import { useState } from 'react'
 
 export default function MenuDropdown() {
   const { t, i18n } = useTranslation()
@@ -34,7 +33,12 @@ export default function MenuDropdown() {
     { code: 'ru', label: 'Русский' },
     { code: 'en', label: 'English' },
   ]
-
+  useState(() => {
+    const storedLanguage = window.localStorage.getItem('Lng')
+    if (storedLanguage && storedLanguage !== i18n.language) {
+      i18n.changeLanguage(storedLanguage)
+    }
+  })
   const currentLanguage = languages.find(
     (language) => language.code === i18n.language,
   )
@@ -42,6 +46,7 @@ export default function MenuDropdown() {
     language: (typeof languages)[number]['code'],
   ) => {
     i18n.changeLanguage(language)
+    window.localStorage.setItem('Lng', language)
   }
 
   return (
@@ -72,11 +77,15 @@ export default function MenuDropdown() {
             focus:text-text-main
             focus:bg-level-1"
             >
-              <Languages  size={16}/><span>{currentLanguage?.label}</span>
+              <Languages size={16} />
+              <span>{currentLanguage?.label}</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent className="bg-level-2 text-text-main border-0">
-                <DropdownMenuRadioGroup value={currentLanguage?.code} onValueChange={(value) => handleLanguageChange(value)}>
+                <DropdownMenuRadioGroup
+                  value={currentLanguage?.code}
+                  onValueChange={(value) => handleLanguageChange(value)}
+                >
                   {languages.map((language) => (
                     <DropdownMenuRadioItem
                       key={language.code}

@@ -6,8 +6,8 @@ i18n
   .use(Backend) // Загрузка файлов из папки public/locales
   .use(initReactI18next)
   .init({
-    fallbackLng: 'ru',
-    lng: 'ru',
+    fallbackLng: 'en',
+    lng: 'en',
     supportedLngs: ['ru', 'en'],
     interpolation: {
       escapeValue: false,

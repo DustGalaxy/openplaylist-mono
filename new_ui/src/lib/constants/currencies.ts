@@ -1,61 +1,303 @@
-export const allCurrencies = [
-  'AXG', // Anguilla
-  'BAM', // Bosnia and Herzegovina convertible mark
-  'BMD', // Bermudian dollar
-  'BOV', // Bolivian Mvdol (funds code)
-  'CHE', // WIR Euro (complementary currency)
-  'CHW', // WIR Franc (complementary currency)
-  'CLF', // Chilean Unidad de Fomento (funds code)
-  'COU', // Colombian Unidad de Valor Real (funds code)
-  'CUC', // Cuban convertible peso
-  'KID', // Kiribati dollar
-  'KPW', // North Korean won
-  'LAK', // Lao kip
-  'MGA', // Malagasy ariary
-  'MRO', // Mauritanian ouguiya (pre-2018)
-  'MXV', // Mexican Unidad de Inversion (funds code)
-  'OMR', // Omani rial
-  'PRB', // Transnistrian ruble
-  'SSP', // South Sudanese pound
-  'STD', // São Tomé and Príncipe dobra (pre-2018)
-  'SVC', // Salvadoran colón
-  'TJS', // Tajikistani somoni
-  'TMT', // Turkmenistan manat
-  'TVD', // Tuvaluan dollar
-  'USN', // United States dollar (next day) (funds code)
-  'UYI', // Uruguay Peso en Unidades Indexadas (funds code)
-  'VED', // Venezuelan bolívar digital
-  'VES', // Venezuelan bolívar soberano
-  'VND', // Vietnamese đồng
-  'XAF', // Central African CFA franc
-  'XAG', // Silver (troy ounce)
-  'XAU', // Gold (troy ounce)
-  'XBA', // European Composite Unit (EURCO) (bond market unit)
-  'XBB', // European Monetary Unit (E.M.U.-6) (bond market unit)
-  'XBC', // European Unit of Account 9 (E.U.A.-9) (bond market unit)
-  'XBD', // European Unit of Account 17 (E.U.A.-17) (bond market unit)
-  'XDR', // Special Drawing Rights
-  'XOF', // West African CFA franc
-  'XPD', // Palladium (troy ounce)
-  'XPF', // CFP franc
-  'XPT', // Platinum (troy ounce)
-  'XSU', // Sucre (ALBA regional currency)
-  'XTS', // Code reserved for testing purposes
-  'XUA', // ADB Unit of Account
-  'XUG', // Uganda shilling (pre-1987)
-  'XXX', // No currency
-  'ZWL', // Zimbabwean dollar (no longer in active use)
+import type { Currency } from '@/types/utils'
+
+const CURRENCIES: Array<Currency> = [
+  { code: 'USD', name: 'US Dollar', symbol: '$', decimals: 2, number: '840' },
+  { code: 'EUR', name: 'Euro', symbol: '€', decimals: 2, number: '978' },
+  {
+    code: 'UAH',
+    name: 'Ukrainian Hryvnia',
+    symbol: '₴',
+    decimals: 2,
+    number: '980',
+  },
+  {
+    code: 'JPY',
+    name: 'Japanese Yen',
+    symbol: '¥',
+    decimals: 0,
+    number: '392',
+  },
+  {
+    code: 'GBP',
+    name: 'British Pound',
+    symbol: '£',
+    decimals: 2,
+    number: '826',
+  },
+  {
+    code: 'AUD',
+    name: 'Australian Dollar',
+    symbol: 'A$',
+    decimals: 2,
+    number: '036',
+  },
+  {
+    code: 'CAD',
+    name: 'Canadian Dollar',
+    symbol: 'C$',
+    decimals: 2,
+    number: '124',
+  },
+  {
+    code: 'CHF',
+    name: 'Swiss Franc',
+    symbol: 'CHF',
+    decimals: 2,
+    number: '756',
+  },
+  {
+    code: 'CNY',
+    name: 'Chinese Yuan',
+    symbol: '¥',
+    decimals: 2,
+    number: '156',
+  },
+  {
+    code: 'HKD',
+    name: 'Hong Kong Dollar',
+    symbol: 'HK$',
+    decimals: 2,
+    number: '344',
+  },
+  {
+    code: 'NZD',
+    name: 'New Zealand Dollar',
+    symbol: 'NZ$',
+    decimals: 2,
+    number: '554',
+  },
+  {
+    code: 'SEK',
+    name: 'Swedish Krona',
+    symbol: 'kr',
+    decimals: 2,
+    number: '752',
+  },
+  {
+    code: 'KRW',
+    name: 'South Korean Won',
+    symbol: '₩',
+    decimals: 0,
+    number: '410',
+  },
+  {
+    code: 'SGD',
+    name: 'Singapore Dollar',
+    symbol: 'S$',
+    decimals: 2,
+    number: '702',
+  },
+  {
+    code: 'NOK',
+    name: 'Norwegian Krone',
+    symbol: 'kr',
+    decimals: 2,
+    number: '578',
+  },
+  {
+    code: 'MXN',
+    name: 'Mexican Peso',
+    symbol: '$',
+    decimals: 2,
+    number: '484',
+  },
+  {
+    code: 'INR',
+    name: 'Indian Rupee',
+    symbol: '₹',
+    decimals: 2,
+    number: '356',
+  },
+  {
+    code: 'RUB',
+    name: 'Russian Ruble',
+    symbol: '₽',
+    decimals: 2,
+    number: '643',
+  },
+  {
+    code: 'ZAR',
+    name: 'South African Rand',
+    symbol: 'R',
+    decimals: 2,
+    number: '710',
+  },
+  {
+    code: 'TRY',
+    name: 'Turkish Lira',
+    symbol: '₺',
+    decimals: 2,
+    number: '949',
+  },
+  {
+    code: 'BRL',
+    name: 'Brazilian Real',
+    symbol: 'R$',
+    decimals: 2,
+    number: '986',
+  },
+  {
+    code: 'TWD',
+    name: 'New Taiwan Dollar',
+    symbol: 'NT$',
+    decimals: 2,
+    number: '901',
+  },
+  {
+    code: 'DKK',
+    name: 'Danish Krone',
+    symbol: 'kr',
+    decimals: 2,
+    number: '208',
+  },
+  {
+    code: 'PLN',
+    name: 'Polish Zloty',
+    symbol: 'zł',
+    decimals: 2,
+    number: '985',
+  },
+  {
+    code: 'AED',
+    name: 'UAE Dirham',
+    symbol: 'د.إ',
+    decimals: 2,
+    number: '784',
+  },
+  {
+    code: 'SAR',
+    name: 'Saudi Riyal',
+    symbol: 'ر.س',
+    decimals: 2,
+    number: '682',
+  },
+  { code: 'THB', name: 'Thai Baht', symbol: '฿', decimals: 2, number: '764' },
+  {
+    code: 'IDR',
+    name: 'Indonesian Rupiah',
+    symbol: 'Rp',
+    decimals: 2,
+    number: '360',
+  },
+  {
+    code: 'MYR',
+    name: 'Malaysian Ringgit',
+    symbol: 'RM',
+    decimals: 2,
+    number: '458',
+  },
+  {
+    code: 'PHP',
+    name: 'Philippine Peso',
+    symbol: '₱',
+    decimals: 2,
+    number: '608',
+  },
+  {
+    code: 'VND',
+    name: 'Vietnamese Dong',
+    symbol: '₫',
+    decimals: 0,
+    number: '704',
+  },
+  {
+    code: 'ILS',
+    name: 'Israeli New Shekel',
+    symbol: '₪',
+    decimals: 2,
+    number: '376',
+  },
+  {
+    code: 'EGP',
+    name: 'Egyptian Pound',
+    symbol: 'E£',
+    decimals: 2,
+    number: '818',
+  },
+  {
+    code: 'ARS',
+    name: 'Argentine Peso',
+    symbol: '$',
+    decimals: 2,
+    number: '032',
+  },
+  {
+    code: 'CLP',
+    name: 'Chilean Peso',
+    symbol: '$',
+    decimals: 0,
+    number: '152',
+  },
+  {
+    code: 'COP',
+    name: 'Colombian Peso',
+    symbol: '$',
+    decimals: 2,
+    number: '170',
+  },
+  {
+    code: 'PEN',
+    name: 'Peruvian Sol',
+    symbol: 'S/.',
+    decimals: 2,
+    number: '604',
+  },
+  {
+    code: 'CZK',
+    name: 'Czech Koruna',
+    symbol: 'Kč',
+    decimals: 2,
+    number: '203',
+  },
+  {
+    code: 'HUF',
+    name: 'Hungarian Forint',
+    symbol: 'Ft',
+    decimals: 2,
+    number: '348',
+  },
+  {
+    code: 'RON',
+    name: 'Romanian Leu',
+    symbol: 'lei',
+    decimals: 2,
+    number: '946',
+  },
+  {
+    code: 'BGN',
+    name: 'Bulgarian Lev',
+    symbol: 'лв',
+    decimals: 2,
+    number: '975',
+  },
+  {
+    code: 'KZT',
+    name: 'Kazakhstani Tenge',
+    symbol: '₸',
+    decimals: 2,
+    number: '398',
+  },
+  {
+    code: 'GEL',
+    name: 'Georgian Lari',
+    symbol: '₾',
+    decimals: 2,
+    number: '981',
+  },
+  {
+    code: 'NZD',
+    name: 'New Zealand Dollar',
+    symbol: 'NZ$',
+    decimals: 2,
+    number: '554',
+  },
+  {
+    code: 'KWD',
+    name: 'Kuwaiti Dinar',
+    symbol: 'د.ك',
+    decimals: 3,
+    number: '414',
+  },
 ]
 
-// Currencies to include in the dropdown
-export const customCurrencies = [
-  'DKK',
-  'SEK',
-  'NOK',
-  'EUR',
-  'USD',
-  'CAD',
-  'GBP',
-  'AUD',
-  'NZD',
-]
+export default CURRENCIES

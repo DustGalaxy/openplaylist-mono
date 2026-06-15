@@ -486,7 +486,19 @@
       "private": "PRIVATE",
       "externalSources": "External content sources",
       "integrationsLoading": "Loading integrations...",
-      "integrationsEmpty": "Connect integrations in account settings"
+      "integrationsEmpty": "Connect integrations in account settings",
+
+      "addHelp": "ADD — priorities are summed up.",
+      "maxHelp": "MAX — the highest priority is used.",
+      "priorityMode": "Priority mode",
+      "priorityModeHelp": "Priority mode determines how the priorities of roles and donations are combined for a track.",
+      "priorityModeAdd": "ADD",
+      "priorityModeMax": "MAX",
+      "priorityModeAddHelp": "ADD — priorities are summed up.",
+      "priorityModeMaxHelp": "MAX — the highest priority is used.",
+      "publicHelp": "PUBLIC — the playlist is visible to anyone who has the link or finds it via search.",
+      "privateHelp": "PRIVATE — the playlist is visible only to you.",
+      "externalSourcesHelp": "Allow adding tracks from external sources considering specific accounts."
     },
     "validation": {
       "title": "Video validation",
@@ -698,26 +710,44 @@
       }
     },
     "integrations": {
-      "connected": "Connected Accounts",
+      "connectedAccounts": "Connected Accounts",
       "empty": "No connected accounts yet",
       "emptyHintLong": "Connect your streaming and donation platforms to manage your playlists",
       "addAccounts": "Add Accounts",
       "connectHint": "Connect your account to get started",
       "connectAccount": "+ Connect Account",
-      "botConnected": "✓ Bot Connected",
+      "botConnected": "Bot Connected",
       "connectBot": "Connect Bot",
       "connecting": "⟳ Connecting...",
       "connected": "Account connected successfully",
+      "addAnother": "Add another account",
+      "alreadyConnected": "One account already connected",
       "connectFailed": "Failed to connect account",
-      "disconnect": "✕ Disconnect",
+      "disconnect": "Disconnect",
       "removing": "⟳ Removing...",
       "disconnected": "Account disconnected successfully",
       "disconnectFailed": "Failed to disconnect account",
+      "disconnectBot": "Disconnect Bot",
       "botConnecting": "Connecting bot...",
-      "botConnected": "Bot connected successfully",
       "botConnectFailed": "Failed to connect bot",
       "botDisconnecting": "Disconnecting bot...",
-      "botDisconnected": "Bot disconnected successfully"
+      "botDisconnected": "Bot disconnected successfully",
+      "deadBanner": "Token expired or connection lost. Please reconnect your account.",
+      "reconnect": "Reconnect account",
+      "tokenExpired": "Token expired."
+    }
+  },
+  "botSettings": {
+    "title": "Bot Settings",
+    "save": "Save",
+    "saved": "Settings saved successfully",
+    "cancel": "Cancel",
+    "twitch": {
+      "prefix": {
+        "label": "Command prefix",
+        "placeholder": "Enter command prefix",
+        "hint": "The character(s) that will prefix bot commands in Twitch chat. For example, if you set it to '!', viewers would use '!mr' to submit a track."
+      }
     }
   },
   "publicSearch": {

@@ -10,22 +10,22 @@ import { usePlaylist } from '@/features/playlist/context/playlist-context'
 type YoutubePlayerProps = {
   nowPlay: string | undefined
   pause: boolean
+  setIsPaused: React.Dispatch<React.SetStateAction<boolean>>
   playOnReady?: boolean
   className?: string
-  
 }
 
 const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
   nowPlay,
   pause,
+  setIsPaused,
   playOnReady = true,
   className = '',
-  
 }) => {
   const playlist = usePlaylist()
   const { height, width } = useWindowDimensions()
   const { playNext } = useMusicStore()
-  const playerRef = React.useRef<YouTubePlayer>(null);
+  const playerRef = React.useRef<YouTubePlayer>(null)
 
   const opts: YouTubeProps['opts'] = {
     height: width > 650 ? '360' : '180',
@@ -45,7 +45,6 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
     } else {
       playerRef.current.playVideo()
     }
-    
   }, [pause])
 
   const _onReady = async (event: YouTubeEvent<any>) => {
@@ -57,7 +56,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
 
     // await sleep(50)
     event.target.playVideo()
-
+    event.target.playVideo()
     // event.target.seekTo(0)
   }
 
@@ -68,6 +67,8 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
       opts={opts}
       id="player"
       onReady={_onReady}
+      onPause={() => setIsPaused(true)}
+      onPlay={() => setIsPaused(false)}
       // onStateChange={async (e) => {
       //   if (e.data === YouTube.PlayerState.CUED) {
       //     if (!nowPlay || !playOnReady) return

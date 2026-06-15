@@ -486,7 +486,19 @@
       "private": "PRIVATE",
       "externalSources": "External content sources",
       "integrationsLoading": "Loading integrations...",
-      "integrationsEmpty": "Connect integrations in account settings"
+      "integrationsEmpty": "Connect integrations in account settings",
+
+      "addHelp": "ADD — priorities are summed up.",
+      "maxHelp": "MAX — the highest priority is used.",
+      "priorityMode": "Priority mode",
+      "priorityModeHelp": "Priority mode determines how the priorities of roles and donations are combined for a track.",
+      "priorityModeAdd": "ADD",
+      "priorityModeMax": "MAX",
+      "priorityModeAddHelp": "ADD — priorities are summed up.",
+      "priorityModeMaxHelp": "MAX — the highest priority is used.",
+      "publicHelp": "PUBLIC — the playlist is visible to anyone who has the link or finds it via search.",
+      "privateHelp": "PRIVATE — the playlist is visible only to you.",
+      "externalSourcesHelp": "Allow adding tracks from external sources considering specific accounts."
     },
     "validation": {
       "title": "Video validation",

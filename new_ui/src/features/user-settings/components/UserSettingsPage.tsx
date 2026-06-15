@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Integration, UserProfile } from '@/types/user'
 import DonationAlerts from '@/components/icons/icon-da'
 import Twitch from '@/components/icons/icon-twtich'
@@ -10,7 +10,6 @@ import {
   gradientTextClass,
   pageInnerClass,
   pageWrapClass,
-  panelClass,
 } from '@/features/landing/styles'
 import { useTranslation } from 'react-i18next'
 import { ProfileTab } from './ProfileTab'
@@ -18,14 +17,39 @@ import { AccountTab } from './AccountTab'
 import { IntegrationsTab } from './IntegrationsTab'
 import { useOAuthUrl } from '@/hooks/useAuthUrl'
 
+// ─── Hash helpers ──────────────────────────────────────────────────────────────
+
+const HASH_PREFIX = 'tab-'
+const VALID_TABS = ['profile', 'account', 'integrations'] as const
+type TabId = (typeof VALID_TABS)[number]
+
+function getHashTabId(): TabId {
+  const hash = window.location.hash.slice(1)
+  if (hash.startsWith(HASH_PREFIX)) {
+    const id = hash.slice(HASH_PREFIX.length)
+    if ((VALID_TABS as readonly string[]).includes(id)) {
+      return id as TabId
+    }
+  }
+  return 'profile'
+}
+
+function setHashTabId(id: TabId) {
+  history.replaceState(
+    null,
+    '',
+    `${window.location.pathname}${window.location.search}#${HASH_PREFIX}${id}`,
+  )
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 interface UserSettingsPageProps {
   user: UserProfile | null
   expired_at: number | null
   integrations: Array<Integration>
   onUserUpdate: (patch: Partial<UserProfile>) => void
 }
-
-type TabId = 'profile' | 'account' | 'integrations'
 
 interface Tab {
   id: TabId
@@ -40,13 +64,26 @@ export function UserSettingsPage({
   onUserUpdate,
 }: UserSettingsPageProps) {
   const { t } = useTranslation()
-  const [activeTab, setActiveTab] = useState<TabId>('profile')
+  const [activeTab, setActiveTab] = useState<TabId>(() => getHashTabId())
+
+  // Синхронизация с браузерными кнопками назад/вперёд
+  useEffect(() => {
+    const onHashChange = () => setActiveTab(getHashTabId())
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
+
+  const handleTabChange = (id: TabId) => {
+    setActiveTab(id)
+    setHashTabId(id)
+  }
 
   const TABS: Array<Tab> = [
     { id: 'profile', label: t('settings.tabs.profile'), icon: '👤' },
     { id: 'account', label: t('settings.tabs.account'), icon: '⚙️' },
     { id: 'integrations', label: t('settings.tabs.integrations'), icon: '🔗' },
   ]
+
   const handleOAuthRedirect = useOAuthUrl()
 
   const platformConfigs = {
@@ -80,7 +117,7 @@ export function UserSettingsPage({
     },
     donatex: {
       name: t('platform.donatex'),
-      icon: <img src="/donatex-icon.png" width={45} height={45}></img>,
+      icon: <img src="/donatex-icon.png" width={45} height={45} />,
       loginHandler: async () => {
         await handleOAuthRedirect('donatex', true)
       },
@@ -102,38 +139,12 @@ export function UserSettingsPage({
           </p>
         </header>
 
-        {/* <div className={`flex flex-col gap-4 p-4 sm:p-6 ${panelClass}`}>
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
-            <div className="rounded-full w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-accent-1 to-accent-2 p-1 shrink-0 shadow-lg">
-              <div className="w-full h-full rounded-full bg-level-2 overflow-hidden">
-                <img
-                  src={user?.avatar_url || ''}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-            <div>
-              <p className="text-lg font-semibold text-text-main">
-                {user?.username || settingsCopy.title}
-              </p>
-              <p className="text-sm text-text-secondary">
-                {user?.email ?? t('settings.profile.noEmail')}
-              </p>
-            </div>
-          </div>
-
-          {!user?.email_confirmed ? (
-            <EmailNotConfirmedAlert email={user?.email} />
-          ) : null}
-        </div> */}
-
         <div className="flex flex-col sm:flex-row flex-wrap gap-2">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={`flex flex-1 sm:flex-initial items-center justify-center gap-2 ${filterTabBaseClass} ${
                 activeTab === tab.id
                   ? filterTabActiveClass

@@ -1,10 +1,8 @@
 import React from 'react'
 
-import { currencies as AllCurrencies } from 'country-data-list'
 import type { SelectProps } from '@radix-ui/react-select'
+import type { Currency } from '@/types/utils'
 import { cn } from '@/lib/utils'
-
-// data
 
 // shadcn
 import {
@@ -15,20 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
-// radix-ui
-
-// constants
-import { allCurrencies, customCurrencies } from '@/lib/constants/currencies'
+import CURRENCIES from '@/lib/constants/currencies'
 
 // types
-export interface Currency {
-  code: string
-  decimals: number
-  name: string
-  number: string
-  symbol?: string
-}
 
 interface CurrencySelectProps extends Omit<SelectProps, 'onValueChange'> {
   onValueChange?: (value: string) => void
@@ -41,61 +28,7 @@ interface CurrencySelectProps extends Omit<SelectProps, 'onValueChange'> {
   className?: string
 }
 
-// Кэш для каждого типа валют
-const currenciesCache = new Map<string, Array<Currency>>()
-
-const getUniqueCurrencies = (type: string): Array<Currency> => {
-  if (currenciesCache.has(type)) {
-    return currenciesCache.get(type)!
-  }
-
-  const currencyMap = new Map<string, Currency>()
-
-  AllCurrencies.all.forEach((currency: Currency) => {
-    if (currency.code && currency.name && currency.symbol) {
-      let shouldInclude = false
-
-      switch (type) {
-        case 'custom':
-          shouldInclude = customCurrencies.includes(currency.code)
-          break
-        case 'all':
-          shouldInclude = !allCurrencies.includes(currency.code)
-          break
-        default:
-          shouldInclude = !allCurrencies.includes(currency.code)
-      }
-
-      if (shouldInclude) {
-        // Special handling for Euro
-        if (currency.code === 'EUR') {
-          currencyMap.set(currency.code, {
-            code: currency.code,
-            name: 'Euro',
-            symbol: currency.symbol,
-            decimals: currency.decimals,
-            number: currency.number,
-          })
-        } else {
-          currencyMap.set(currency.code, {
-            code: currency.code,
-            name: currency.name,
-            symbol: currency.symbol,
-            decimals: currency.decimals,
-            number: currency.number,
-          })
-        }
-      }
-    }
-  })
-
-  const result = Array.from(currencyMap.values()).sort((a, b) =>
-    a.name.localeCompare(b.name),
-  )
-
-  currenciesCache.set(type, result)
-  return result
-}
+// Переменная-заглушка со списком валют
 
 const CurrencySelectComponent = React.forwardRef<
   HTMLButtonElement,
@@ -108,7 +41,7 @@ const CurrencySelectComponent = React.forwardRef<
       onCurrencySelect,
       name,
       placeholder = 'Select currency',
-      currencies = 'withdrawal',
+      currencies = 'all',
       variant = 'default',
       valid = true,
       className = '',
@@ -119,7 +52,8 @@ const CurrencySelectComponent = React.forwardRef<
     const [selectedCurrency, setSelectedCurrency] =
       React.useState<Currency | null>(null)
 
-    const uniqueCurrencies = getUniqueCurrencies(currencies)
+    // Используем заглушку напрямую
+    const uniqueCurrencies = CURRENCIES
 
     const handleValueChange = (newValue: string) => {
       const fullCurrencyData = uniqueCurrencies.find(
@@ -174,6 +108,9 @@ const CurrencySelectComponent = React.forwardRef<
                 className=" focus:bg-level-3"
               >
                 <div className="flex items-center w-full gap-2">
+                  <span className="text-sm text-text-main  text-center w-6 shrink-0">
+                    {currency?.symbol}
+                  </span>
                   <span className="text-sm text-text-main w-8 text-left">
                     {currency?.code}
                   </span>

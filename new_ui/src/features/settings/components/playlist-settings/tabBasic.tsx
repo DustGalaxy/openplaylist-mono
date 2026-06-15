@@ -43,6 +43,9 @@ const TabBasic = ({
   const { t } = useTranslation()
   const [plstMode, setPlstMode] = React.useState(playlist.settings.mode)
   const [isPublic, setIsPublic] = React.useState(playlist.is_public)
+  const [priorityMode, setPriorityMode] = React.useState(
+    playlist.settings.cost_mode,
+  )
   const [integrations, setIntegrations] = useState<Array<Integration>>([])
   const [isLoadingIntegrations, setIsLoadingIntegrations] = useState(false)
 
@@ -74,6 +77,7 @@ const TabBasic = ({
       spotify: <Spotify className={iconStyles} />,
       donationalerts: <DonationAlerts className={iconStyles} />,
       da: <DonationAlerts className={iconStyles} />,
+      donatex: <img src="/donatex-icon.png" width={45} height={45}></img>,
       google: <Google className={iconStyles} />,
     }
     return platformIcons[platform.toLowerCase()] || null
@@ -241,11 +245,71 @@ const TabBasic = ({
           />
         </div>
       </div>
+      <DialogDescription>
+        <div className="py-1">{t('playlistSettings.basic.publicHelp')}</div>
+        <div className="py-1">{t('playlistSettings.basic.privateHelp')}</div>
+      </DialogDescription>
+
+      <div className="grid grid-cols-[auto_1fr] gap-2">
+        <Label className=" text-lg">
+          {t('playlistSettings.basic.priorityMode')}
+        </Label>
+
+        <div
+          className={`flex items-center  cursor-pointer  
+          py-1 pl-4 pr-[2px] rounded-l-(--rounded-std)  justify-end`}
+        >
+          <ContentSwitch
+            leftLabel={
+              <Label
+                htmlFor="max-id"
+                className={`${priorityMode === 'max' ? 'text-shadow-accent-1 text-shadow-md font-bold ' : ''} 
+                    flex cursor-pointer transition-all duration-100 text-lg`}
+              >
+                {t('playlistSettings.basic.priorityModeMax')}
+              </Label>
+            }
+            rightLabel={
+              <Label
+                htmlFor="add-id"
+                className={`${priorityMode === 'add' ? 'text-shadow-accent-3 text-shadow-md font-bold' : ''} 
+                    cursor-pointer transition-all duration-100 text-lg`}
+              >
+                {t('playlistSettings.basic.priorityModeAdd')}
+              </Label>
+            }
+            onChange={(value) => {
+              if (value === 'right') {
+                setPriorityMode('add')
+                setSettings({ ...settings, cost_mode: 'add' })
+                canPatchSettings.current = true
+              } else {
+                setPriorityMode('max')
+                setSettings({ ...settings, cost_mode: 'max' })
+                canPatchSettings.current = true
+              }
+            }}
+            defaultValue={priorityMode === 'max' ? 'left' : 'right'}
+          />
+        </div>
+        <DialogDescription>
+          <div className="py-1">
+            {t('playlistSettings.basic.priorityModeAddHelp')}
+          </div>
+          <div className="py-1">
+            {t('playlistSettings.basic.priorityModeMaxHelp')}
+          </div>
+        </DialogDescription>
+      </div>
       <div className="mb-4">
         <Label className=" text-lg">
           {t('playlistSettings.basic.externalSources')}
         </Label>
-
+        <DialogDescription>
+          <div className="py-1">
+            {t('playlistSettings.basic.externalSourcesHelp')}
+          </div>
+        </DialogDescription>
         <div className=" rounded-(--rounded-std) w-full mt-3">
           {isLoadingIntegrations ? (
             <div className="text-center py-4 text-sm text-gray-500">
