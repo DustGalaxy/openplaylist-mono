@@ -26,8 +26,8 @@
   },
   "brand": {
     "name": "OpenPlaylist",
-    "nameWithVersion": "OpenPlaylist v2026.1beta",
-    "version": "2026.1 beta"
+    "nameWithVersion": "OpenPlaylist v2026.2beta",
+    "version": "2026.2 beta"
   },
   "nav": {
     "login": "Login",
@@ -36,7 +36,8 @@
     "logout": "Logout",
     "statistic": "Statistic",
     "history": "History",
-    "myPlaylists": "My playlists"
+    "myPlaylists": "My playlists",
+    "theme": "Theme"
   },
   "footer": {
     "description": "A platform for streamers and viewers: shared playlists, track requests, flexible rules, and queue sync without reloading the page.",
@@ -428,7 +429,9 @@
       "next": "Next track",
       "pause": "Pause",
       "play": "Play",
-      "shuffle": "Shuffle"
+      "shuffle": "Shuffle",
+      "showSavedTracks": "Show saved tracks",
+      "hideSavedTracks": "Hide saved tracks"
     }
   },
   "playlistSettings": {
