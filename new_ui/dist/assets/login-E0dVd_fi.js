@@ -1,1 +1,0 @@
-import{nt as e}from"./vendor-radix-NRr7Hcei.js";import"./index-B6-ft4HQ.js";import{n as t}from"./auth-Buv6T6ZB.js";var n=e(),r=function(){return(0,n.jsx)(`div`,{className:`min-h-screen flex items-center justify-center bg-level-1 px-4`,children:(0,n.jsx)(t,{})})};export{r as component};
