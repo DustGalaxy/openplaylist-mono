@@ -33,14 +33,14 @@ function ContentSwitch({
       onClick={toggle}
       style={{ width, height }}
       className={cn(
-        'relative flex cursor-pointer select-none items-center rounded-2xl border border-neutral-700 bg-neutral-900 p-1.5 transition-colors duration-300',
+        'relative flex cursor-pointer select-none items-center rounded-2xl border-2 border-level-3/40 bg-level-2 p-1.5 transition-colors duration-300',
         className,
       )}
     >
       {/* Текст 1 (Справа) */}
       <div
         className={cn(
-          'absolute right-5 font-medium text-neutral-200 transition-all duration-300 ease-out',
+          'absolute right-5 font-medium text-text-main transition-all duration-300 ease-out',
           isRight
             ? 'pointer-events-none scale-95 opacity-0'
             : 'scale-100 opacity-100',
@@ -51,7 +51,7 @@ function ContentSwitch({
       {/* Текст 2 (Слева) */}
       <div
         className={cn(
-          'absolute left-5 font-medium text-neutral-200 transition-all duration-300 ease-out',
+          'absolute left-5 font-medium text-text-main transition-all duration-300 ease-out',
           isRight
             ? 'scale-100 opacity-100'
             : 'pointer-events-none scale-95 opacity-0',
@@ -67,7 +67,7 @@ function ContentSwitch({
             ? `translateX(calc(${width} - ${height} + 3px))`
             : 'translateX(0px)',
         }}
-        className="h-full aspect-square rounded-xl bg-neutral-300 shadow-md transition-transform duration-300 ease-in-out"
+        className="h-full aspect-square rounded-xl bg-level-3 shadow-md transition-transform duration-300 ease-in-out"
       />
     </div>
   )

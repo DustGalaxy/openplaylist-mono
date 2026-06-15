@@ -11,11 +11,6 @@ interface SocialAuthButtonsProps {
   mode: 'login' | 'register'
 }
 
-const platformColors: Record<string, { bg: string; hover: string }> = {
-  twitch: { bg: 'bg-level-2', hover: '' },
-  da: { bg: 'bg-level-2', hover: '' },
-}
-
 export function SocialAuthButtons({
   isLoading,
   onPlatformClick,
@@ -30,9 +25,9 @@ export function SocialAuthButtons({
         const config = getOAuthPlatformConfig(platform, window.location.origin)
         if (!config) return null
 
-        const colors = platformColors[platform] || {
-          bg: 'bg-primary',
-          hover: 'hover:bg-primary/80',
+        const colors = {
+          bg: 'bg-level-2',
+          hover: 'hover:bg-level-2/80',
         }
         const buttonText =
           mode === 'login'

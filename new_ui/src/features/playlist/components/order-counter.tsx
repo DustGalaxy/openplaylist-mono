@@ -1,5 +1,5 @@
+import { List } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import List from '@/components/icons/icon-list'
 
 export default function Counter({ number }: { number: number }) {
   const { t } = useTranslation()

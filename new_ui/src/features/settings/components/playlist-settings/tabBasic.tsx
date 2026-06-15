@@ -161,7 +161,7 @@ const TabBasic = ({
               leftLabel={
                 <Label
                   htmlFor="flow-id"
-                  className={`${plstMode === 'flow' ? 'text-shadow-accent-1 text-shadow-md font-bold ' : ''} 
+                  className={`text-shadow-md font-semibold
                     flex cursor-pointer transition-all duration-100 text-lg`}
                 >
                   {t('playlistSettings.basic.flow')}
@@ -170,7 +170,7 @@ const TabBasic = ({
               rightLabel={
                 <Label
                   htmlFor="static-id"
-                  className={`${plstMode === 'static' ? 'text-shadow-accent-3 text-shadow-md font-bold' : ''} 
+                  className={`text-shadow-md font-semibold
                     cursor-pointer transition-all duration-100 text-lg`}
                 >
                   {t('playlistSettings.basic.static')}
@@ -209,7 +209,7 @@ const TabBasic = ({
             leftLabel={
               <Label
                 htmlFor="public-id"
-                className={`${isPublic ? 'text-shadow-accent-1 text-shadow-md font-bold ' : ''} 
+                className={`text-shadow-md font-semibold
                     flex cursor-pointer transition-all duration-100 text-lg`}
               >
                 {t('playlistSettings.basic.public')}
@@ -218,7 +218,7 @@ const TabBasic = ({
             rightLabel={
               <Label
                 htmlFor="private-id"
-                className={`${!isPublic ? 'text-shadow-accent-3 text-shadow-md font-bold' : ''} 
+                className={`text-shadow-md font-semibold
                     cursor-pointer transition-all duration-100 text-lg`}
               >
                 {t('playlistSettings.basic.private')}
@@ -263,7 +263,7 @@ const TabBasic = ({
             leftLabel={
               <Label
                 htmlFor="max-id"
-                className={`${priorityMode === 'max' ? 'text-shadow-accent-1 text-shadow-md font-bold ' : ''} 
+                className={`text-shadow-md font-semibold
                     flex cursor-pointer transition-all duration-100 text-lg`}
               >
                 {t('playlistSettings.basic.priorityModeMax')}
@@ -272,7 +272,7 @@ const TabBasic = ({
             rightLabel={
               <Label
                 htmlFor="add-id"
-                className={`${priorityMode === 'add' ? 'text-shadow-accent-3 text-shadow-md font-bold' : ''} 
+                className={`text-shadow-md font-semibold 
                     cursor-pointer transition-all duration-100 text-lg`}
               >
                 {t('playlistSettings.basic.priorityModeAdd')}

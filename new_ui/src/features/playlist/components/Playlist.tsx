@@ -1,42 +1,33 @@
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Clock,
-  Eye,
-  List,
   Music2,
+  PanelLeftClose,
+  PanelLeftOpen,
   Pause,
   Play,
-  RefreshCcw,
-  Settings,
-  Shield,
-  Share2 as ShareIcon,
-  ThumbsUp,
-  User,
   Repeat,
-  RepeatOff,
   Repeat1,
-  SkipForward,
+  RepeatOff,
+  Share2 as ShareIcon,
+  Shield,
+  Shuffle,
   SkipBack,
-  ArrowUpRight,
+  SkipForward,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import OrderCard from './order-card'
 import OrderMiniCard from './order-mini-card'
-import Btn from '@/components/ui/my-btn'
-import LeftPanel from '@/components/icons/icon-left-panel'
-import RightPanel from '@/components/icons/icon-right-panel'
 import YoutubePlayer from './YoutubePlayer'
-import Priority from '@/components/icons/icon-priority'
-import PlayNowCard from './playnow-card'
 import Counter from './order-counter'
 import { PlaylistQueueInput } from './bar'
-import Shuffle from '@/components/icons/icon-shuffle'
-import type { SortSettings } from '@/types/playlist'
-import SettingsModal from '@/features/settings/components/playlist-settings/settingsModal'
 import SavedList from './saved-list'
 import SortPanel from './sortPanel'
-import type { ClientPlaylist } from '@/types/playlist'
+import LogPanel from './LogPanel'
+import TrackCard from './TrackCard'
+import type { ClientPlaylist, SortSettings } from '@/types/playlist'
+import Btn from '@/components/ui/my-btn'
+
+import SettingsModal from '@/features/settings/components/playlist-settings/settingsModal'
 import { changePlaylistActive } from '@/api/api-playlist'
 import { useMusicStore } from '@/stores/musicStore'
 import {
@@ -54,7 +45,6 @@ import {
   PlaylistProvider,
   usePlaylist,
 } from '@/features/playlist/context/playlist-context'
-import LogPanel from './LogPanel'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import { InfoCardGroup } from '@/components/ui/info-card-group'
 
@@ -112,7 +102,7 @@ const SortButton = ({
         isActive ? activeStateClass : notActiveStateClass,
       )}
     >
-      <Icon className="size-6 sm:size-8" />
+      <Icon />
     </button>
   )
 }
@@ -336,7 +326,7 @@ function PlaylistView() {
                       changePlaylistActive(playlist.id, activePlst)
                     }}
                     className={cn(
-                      'inline-flex items-center gap-1.5  px-3 py-1.5 text-xs font-mono min-h-11',
+                      'inline-flex items-center gap-1.5  px-3 py-1.5 text-sm font-mono min-h-11',
                       activePlst ? statusOpenClass : statusClosedClass,
                     )}
                   />
@@ -387,7 +377,7 @@ function PlaylistView() {
 
         <div className="flex items-center  justify-center w-full">
           {playlist.now_playing?.yt_video_id ? (
-            <PlayNowCard track={playlist.now_playing} />
+            <TrackCard track={playlist.now_playing} type="now-playing" />
           ) : (
             <div
               className={`flex flex-col items-center justify-center gap-2 py-8 px-4 text-center w-full border-dashed ${innerPanelClass}`}
@@ -411,11 +401,16 @@ function PlaylistView() {
         <div className="flex gap-2 shrink-0">
           <SortPanel />
           <Btn
-            text={toggled ? <RightPanel /> : <LeftPanel />}
+            text={toggled ? <PanelLeftClose /> : <PanelLeftOpen />}
             className="px-2 bg-level-2 hidden sm:block"
             onClick={() => {
               setToggled(!toggled)
             }}
+            title={
+              toggled
+                ? t('playlist.tooltip.hideSavedTracks')
+                : t('playlist.tooltip.showSavedTracks')
+            }
           />
         </div>
       </div>
@@ -456,11 +451,7 @@ function PlaylistView() {
             {playlist.track_data.length > 0 ? (
               visibleTracks.length > 0 ? (
                 visibleTracks.map((track) => (
-                  <OrderCard
-                    key={track.id}
-                    track={track}
-                    btns_type="playlist"
-                  />
+                  <TrackCard key={track.id} track={track} type="playlist" />
                 ))
               ) : (
                 <p className="text-sm text-text-secondary py-8 text-center w-full">

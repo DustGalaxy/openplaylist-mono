@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import Settings from '@/components/icons/icon-settings'
+
 import { Label } from '@/components/ui/label'
 import Btn from '@/components/ui/my-btn'
 
@@ -13,7 +13,11 @@ import TabChatPlatformRoles from './tabChatPlatformRoles.tsx'
 import TabBlock from './tabBlock'
 
 import TabDonation from './tabDonation.tsx'
-import type { ClientPlaylist, PlaylistPatch, PlaylistSettings } from '@/types/playlist'
+import type {
+  ClientPlaylist,
+  PlaylistPatch,
+  PlaylistSettings,
+} from '@/types/playlist'
 import { usePlaylist } from '@/features/playlist/context/playlist-context'
 import {
   Dialog,
@@ -26,6 +30,7 @@ import {
 import useMusicStore from '@/stores/musicStore'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import { deletePlaylist } from '@/api/api-playlist'
+import { Settings } from 'lucide-react'
 
 export default function SettingsModal() {
   const { t } = useTranslation()
@@ -42,7 +47,6 @@ export default function SettingsModal() {
     setSettings(playlist.settings)
     setPlst(playlist)
   }, [playlist])
-
 
   const canPatchSettings = React.useRef(false)
   useDebouncedEffect(
@@ -126,7 +130,9 @@ export default function SettingsModal() {
             <DialogTitle className="text-xl">
               {t('playlistSettings.title')}
             </DialogTitle>
-            <DialogDescription>{t('playlistSettings.description')}</DialogDescription>
+            <DialogDescription>
+              {t('playlistSettings.description')}
+            </DialogDescription>
           </DialogHeader>
 
           <TabsList
@@ -213,7 +219,9 @@ export default function SettingsModal() {
                     } else if (countToDelete === 1) {
                       await deletePlaylist(playlist.id)
                       useMusicStore.getState().deletePlaylist(playlist.id)
-                      setCountToDelete(t('playlistSettings.delete.deleted') as any)
+                      setCountToDelete(
+                        t('playlistSettings.delete.deleted') as any,
+                      )
                       toast.success(
                         t('playlistSettings.toast.playlistDeleted', {
                           name: playlist.name,

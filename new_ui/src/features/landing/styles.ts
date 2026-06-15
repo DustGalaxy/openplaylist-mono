@@ -2,7 +2,7 @@ export const gradientTextClass =
   'text-transparent bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)] bg-clip-text bg-[length:200%_auto] animate-bg-move'
 
 export const panelClass =
-  'rounded-(--rounded-std) border border-level-3/35 bg-level-2/95 shadow-[0_8px_32px_rgba(0,0,0,0.35)]'
+  'rounded-(--rounded-std) border border-level-3/35 bg-level-2/95 shadow-[0_8px_20px_rgba(0,0,0,0.35)]'
 
 /** Stronger accent border — landing hero cards, footer */
 export const panelAccentClass =
@@ -27,8 +27,7 @@ export const filterTabActiveClass =
 export const filterTabInactiveClass =
   'border-white/5 bg-level-1/30 text-text-secondary hover:border-level-3/30 hover:text-text-main'
 
-export const statusOpenClass =
-  ' text-emerald-200/90'
+export const statusOpenClass = ' text-emerald-500'
 
 export const statusClosedClass =
   'border-white/10 bg-level-1/60 text-text-secondary'

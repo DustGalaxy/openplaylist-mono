@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next'
 import Disc from '@/components/icons/icon-disc'
 import Dashboard from '@/components/icons/icon-dashboard'
 import MenuDropdown from './menu-dropdown'
-import Search from '@/components/icons/icon-search'
+
 import { useAuthStore } from '@/stores/authStore'
+import { useState } from 'react'
+import { Search, Turntable } from 'lucide-react'
 
 export default function Header() {
   const { t, i18n } = useTranslation()
@@ -12,6 +14,12 @@ export default function Header() {
   const navigate = useNavigate()
   const windowWidth = window.innerWidth
 
+  useState(() => {
+    const storedLanguage = window.localStorage.getItem('Lng')
+    if (storedLanguage && storedLanguage !== i18n.language) {
+      i18n.changeLanguage(storedLanguage)
+    }
+  })
   return (
     <div className="w-full flex sticky top-0 z-50 justify-center">
       <header
@@ -38,25 +46,37 @@ export default function Header() {
             </div>
 
             {isAuthenticated && (
-              <div className="px-2 ">
-                <Link to="/dashboard">
-                  <Dashboard className="w-8 sm:w-8" />
+              <div className="px-2 flex place-content-center ">
+                <Link to="/dashboard" className="flex items-center">
+                  <Turntable className="w-8 h-8 stroke-[1.2]" />
                 </Link>
               </div>
             )}
 
-            <div className="px-2">
-              <Link to="/view">
-                <Search className="w-8 sm:w-8" />
+            <div className="px-2 flex place-content-center ">
+              <Link to="/view" className="flex items-center">
+                <Search className="w-8 h-8 stroke-[1.2]" />
               </Link>
             </div>
           </div>
 
           <div className="flex gap-2 items-center">
             {!isAuthenticated ? (
-              <div className="pr-4 ">
+              <div className="flex items-center gap-4 pr-4">
+                <select
+                  value={i18n.language}
+                  onChange={(e) => {
+                    i18n.changeLanguage(e.target.value)
+                    window.localStorage.setItem('Lng', e.target.value)
+                  }}
+                  className="bg-level-2 text-text-main text-base rounded-md p-1 border border-level-3/40 cursor-pointer outline-none"
+                >
+                  <option value="ru">Русский</option>
+                  <option value="en">English</option>
+                </select>
+
                 <button
-                  className="cursor-pointer"
+                  className="cursor-pointer text-base sm:text-lg"
                   onClick={() => navigate({ to: '/login' })}
                 >
                   {t('nav.login')}

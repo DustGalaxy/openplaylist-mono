@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog'
 import { createNewPlaylist } from '@/api/api-playlist'
 import useMusicStore from '@/stores/musicStore'
+import { Plus } from 'lucide-react'
 
 export default function AddPlaylistModal() {
   const { t } = useTranslation()
@@ -66,15 +67,12 @@ export default function AddPlaylistModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Btn
-          text={<Add width={33} height={33} />}
-          className="flex p-1 bg-level-2 mr-1"
-        />
+      <DialogTrigger asChild className="m-1.5">
+        <Btn text={<Plus size={26} />} className="flex p-1 bg-level-2 mr-1" />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-level-1 border-level-3 text-text-main ">
+      <DialogContent className="sm:max-w-[425px]  border-level-3 text-text-main ">
         <DialogHeader>
-          <DialogTitle className="text-xl">
+          <DialogTitle className="text-xl text-text-main font-bold">
             {t('playlist.create.title')}
           </DialogTitle>
           <DialogDescription>
@@ -111,7 +109,7 @@ export default function AddPlaylistModal() {
                   ? t('common.toast.saving')
                   : t('playlist.create.submit')
               }
-              className="w-full"
+              className="w-full font-mono"
               disabled={isLoading}
               onClick={handleCreatePlaylist}
             />

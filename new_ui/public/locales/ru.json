@@ -26,8 +26,8 @@
   },
   "brand": {
     "name": "OpenPlaylist",
-    "nameWithVersion": "OpenPlaylist v2026.1beta",
-    "version": "2026.1 beta"
+    "nameWithVersion": "OpenPlaylist v2026.2beta",
+    "version": "2026.2 beta"
   },
   "nav": {
     "login": "Вход",
@@ -36,7 +36,8 @@
     "logout": "Выход",
     "statistic": "Статистика",
     "history": "История",
-    "myPlaylists": "Мои плейлисты"
+    "myPlaylists": "Мои плейлисты",
+    "theme": "Тема"
   },
   "footer": {
     "description": "Платформа для стримеров и зрителей: общие плейлисты, заявки на треки, гибкие правила и синхронизация очереди без перезагрузки страницы.",

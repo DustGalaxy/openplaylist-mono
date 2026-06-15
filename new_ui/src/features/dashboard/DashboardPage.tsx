@@ -205,7 +205,7 @@ export default function Dashboard() {
           </TabsContent>
 
           {sortedPlsts.map((plst) => (
-            <TabsContent key={plst.id} value={plst.id} className="mt-4">
+            <TabsContent key={plst.id} value={plst.id} className="">
               <Playlist playlist={plst} />
             </TabsContent>
           ))}

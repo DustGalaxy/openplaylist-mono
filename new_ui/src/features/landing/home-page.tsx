@@ -6,6 +6,7 @@ import {
   Search,
   Shield,
   Sparkles,
+  Turntable,
   Users,
   Zap,
 } from 'lucide-react'
@@ -117,7 +118,8 @@ export default function HomePage() {
                   <Btn
                     text={
                       <div className="flex items-center gap-2">
-                        <Dashboard /> {t('landing.goToPlaylists')}
+                        <Turntable />
+                        {t('landing.goToPlaylists')}
                       </div>
                     }
                     className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-[220px]"
@@ -140,7 +142,6 @@ export default function HomePage() {
                   className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-[200px]"
                   onClick={() => navigate({ to: '/view' })}
                 />
-                
               </div>
             </div>
 

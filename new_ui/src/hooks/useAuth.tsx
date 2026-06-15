@@ -211,7 +211,8 @@ export const useIntegration = (
         if (axios.isAxiosError(error)) {
           const axiosError = error as AxiosError
           if (axiosError.code === 'ERR_NETWORK' || !axiosError.response) {
-            const strategy = authStrategyManager.getIntegrationStrategy(platform)
+            const strategy =
+              authStrategyManager.getIntegrationStrategy(platform)
             console.error(
               strategy.getErrorMessage('network'),
               axiosError.message,
@@ -224,7 +225,8 @@ export const useIntegration = (
             axiosError.response.status === 400 ||
             axiosError.response.status === 401
           ) {
-            const strategy = authStrategyManager.getIntegrationStrategy(platform)
+            const strategy =
+              authStrategyManager.getIntegrationStrategy(platform)
             throw new Error(strategy.getErrorMessage('auth_failed'))
           }
         }
@@ -232,13 +234,8 @@ export const useIntegration = (
       }
     },
     onSuccess: () => {
-      const redirectToPath =
-        localStorage.getItem(REDIRECT_AFTER_LOGIN_KEY) || '/dashboard'
-
       localStorage.removeItem(OAUTH_STATE_KEY)
-      localStorage.removeItem(REDIRECT_AFTER_LOGIN_KEY)
-
-      navigate({ to: redirectToPath })
+      navigate({ to: '/settings', hash: 'tab-integrations' })
     },
     onError: (error) => {
       console.error(`${platform} integration error:`, error)
@@ -278,7 +275,10 @@ export const useAuthLogin = (
           const axiosError = error as AxiosError
           if (axiosError.code === 'ERR_NETWORK' || !axiosError.response) {
             const strategy = authStrategyManager.getLoginStrategy(platform)
-            console.error(strategy.getErrorMessage('network'), axiosError.message)
+            console.error(
+              strategy.getErrorMessage('network'),
+              axiosError.message,
+            )
             throw new Error(
               `Server is unreachable. Cannot complete ${platform} authentication.`,
             )
@@ -311,13 +311,10 @@ export const useAuthLogin = (
 
           if (userProfileResponse && userProfileResponse.user) {
             setUser(userProfileResponse.user, userProfileResponse.expired_at)
-            const redirectToPath =
-              localStorage.getItem(REDIRECT_AFTER_LOGIN_KEY) || '/dashboard'
 
             localStorage.removeItem(OAUTH_STATE_KEY)
-            localStorage.removeItem(REDIRECT_AFTER_LOGIN_KEY)
 
-            navigate({ to: redirectToPath })
+            navigate({ to: '/dashboard' })
           } else {
             console.error(
               'Backend exchange successful, but /api/me returned no user data.',
@@ -373,7 +370,6 @@ export const useAuthLogin = (
   })
   return mutationResult
 }
-
 
 // --- 3. Мутация для выхода из системы ---
 async function logoutBackend(): Promise<void> {

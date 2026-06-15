@@ -91,11 +91,6 @@ export const useOAuthUrl = () => {
     localStorage.setItem(OAUTH_STATE_KEY, serializedState)
 
     // 4. Save current location for redirect after OAuth completes
-    const currentPath =
-      routerState.location.pathname +
-      routerState.location.searchStr +
-      routerState.location.hash
-    localStorage.setItem(REDIRECT_AFTER_LOGIN_KEY, currentPath)
 
     // 5. Build complete OAuth authorization URL
     const redirectUri = `${window.location.origin}/oauth-callback`
