@@ -506,7 +506,7 @@ class AuthService:
                     "platform": platform.value,
                     "platform_user_id": platform_user_id,
                     "user_id": str(user.id),
-                    "settings": defualt_settings,
+                    "bot_settings": defualt_settings,
                 },
                 queue,
                 main_exchange,

@@ -1,3 +1,5 @@
+import json
+
 from faststream import Context
 from faststream.rabbit.message import RabbitMessage
 
@@ -37,9 +39,8 @@ async def connect_to_twitch(message: RabbitMessage = Context()):
     bot: Bot = context["bot"]  # pyright: ignore[reportAssignmentType]
     if bot is None:
         return False
-
-    event: Tokens = Tokens.model_validate_json(message.body)
     try:
+        event: Tokens = Tokens.model_validate_json(message.body)
         await bot.add_token(event.access_token, event.refresh_token, event.platform_user_id)
         await bot.multi_subscribe(
             [
