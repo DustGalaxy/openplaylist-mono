@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
-import Search from '@/components/icons/icon-search'
+import { Search } from 'lucide-react'
 
 export default function SearchBar({
   value,

@@ -163,18 +163,23 @@ function RouteComponent() {
       },
     )
 
-    plst_upds_socket.on('settings_changed:' + playlist.id, (payload: unknown) => {
-      setPlaylistState((prevState) => {
-        if (!prevState) return prevState
-        const parsed =
-          payload && typeof payload === 'string' ? JSON.parse(payload) : payload
-        if (!parsed) return prevState
-        return {
-          ...prevState,
-          settings: parsed,
-        }
-      })
-    })
+    plst_upds_socket.on(
+      'settings_changed:' + playlist.id,
+      (payload: unknown) => {
+        setPlaylistState((prevState) => {
+          if (!prevState) return prevState
+          const parsed =
+            payload && typeof payload === 'string'
+              ? JSON.parse(payload)
+              : payload
+          if (!parsed) return prevState
+          return {
+            ...prevState,
+            settings: parsed,
+          }
+        })
+      },
+    )
 
     plst_upds_socket.on('kicked_from_playlist', () => {
       window.location.href = '/view'
@@ -243,7 +248,9 @@ function RouteComponent() {
         </section>
 
         {/* Playlist detail */}
-        <section className={`relative overflow-hidden p-5 sm:p-8 ${panelClass}`}>
+        <section
+          className={`relative overflow-hidden p-5 sm:p-8 ${panelClass}`}
+        >
           <div
             className="pointer-events-none absolute -top-24 right-0 h-48 w-48 rounded-full bg-[var(--color-accent-3)] opacity-[0.07] blur-[80px]"
             aria-hidden
@@ -259,7 +266,9 @@ function RouteComponent() {
               <ListMusic className="h-6 w-6" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className={`text-xs font-medium uppercase tracking-wider mb-1 ${gradientTextClass}`}>
+              <p
+                className={`text-xs font-medium uppercase tracking-wider mb-1 ${gradientTextClass}`}
+              >
                 {t('publicView.playlist')}
               </p>
               <h1 className="text-2xl sm:text-3xl font-bold text-text-main leading-tight break-words">
@@ -273,7 +282,9 @@ function RouteComponent() {
         {/* Track queue */}
         <section className={`p-5 sm:p-8 ${panelClass}`}>
           <div className="flex items-center justify-between mb-6">
-            <h2 className={`text-lg font-semibold text-text-main  ${sectionTitleClass}`}>
+            <h2
+              className={`text-lg font-semibold text-text-main  ${sectionTitleClass}`}
+            >
               {t('publicView.queue')}
             </h2>
             <span className="text-sm text-text-secondary tabular-nums">
@@ -293,7 +304,7 @@ function RouteComponent() {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-4 items-stretch">
+            <div className="flex flex-col gap-1 ">
               {playlistState.track_data.map((track) => (
                 <ViewTrackCard
                   key={track.id}

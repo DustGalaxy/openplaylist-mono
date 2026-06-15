@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Calendar, Music2 } from 'lucide-react'
 
 import ViewPlayNowCard from './view-track-card'
-import AddBar from '@/features/playlist/components/addbar'
+import AddBar from '@/features/public-playlist/components/addbar'
 import {
   filterTabActiveClass,
   filterTabBaseClass,
