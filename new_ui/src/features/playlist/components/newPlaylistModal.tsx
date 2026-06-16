@@ -70,7 +70,7 @@ export default function AddPlaylistModal() {
       <DialogTrigger asChild className="m-1.5">
         <Btn text={<Plus size={26} />} className="flex p-1 bg-level-2 mr-1" />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]  border-level-3 text-text-main ">
+      <DialogContent className="sm:max-w-[425px] bg-level-2 border-level-3 text-text-main ">
         <DialogHeader>
           <DialogTitle className="text-xl text-text-main font-bold">
             {t('playlist.create.title')}
