@@ -102,7 +102,7 @@ export function UserSettingsPage({
       },
     },
     donationalerts: {
-      name: t('platform.donationAlerts'),
+      name: t('platform.donationalerts'),
       icon: <DonationAlerts width={45} height={45} />,
       loginHandler: async () => {
         await handleOAuthRedirect('donationalerts', true)

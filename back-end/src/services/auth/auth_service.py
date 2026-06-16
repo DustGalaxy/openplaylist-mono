@@ -230,7 +230,7 @@ class AuthService:
         # level 2 - another link with email already exists
         try:
             link_by_email = await self.link_repo.get_by_email_platform(
-                db_session, platform_user.email, IntegrationPlatform(type)
+                db_session, platform_user.email, IntegrationPlatform(platform)
             )
 
             if not strtg.meta.allow_email_collision:
@@ -239,7 +239,7 @@ class AuthService:
             raise NeedConfirmationException(
                 data={
                     "user_id": str(link_by_email.user_id),
-                    "platform": type,
+                    "platform": platform,
                     "platform_user_id": platform_user.id,
                     "platform_user_email": platform_user.email,
                     "platform_username": platform_user.username,
@@ -271,7 +271,7 @@ class AuthService:
             db_session,
             LinkedAccountsCreate(
                 user_id=user.id,
-                platform=IntegrationPlatform(type),
+                platform=IntegrationPlatform(platform),
                 platform_user_id=platform_user.id,
                 platform_username=platform_user.username,
                 platform_avatar_url=platform_user.avatar_url,
