@@ -1,5 +1,5 @@
 from pydantic import Field, model_validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -56,7 +56,6 @@ class Settings(BaseSettings):
     DONATEX_CLIENT_SECRET: str = Field(alias="DONATEX_CLIENT_SECRET")
     DONATEX_REDIRECT_URI: str = ""
 
-
     EMAIL_COMFIRM_ADRESS: str = ""  # Вычисляется динамически
     SMTP_EMAIL_ADDRESS: str = Field(alias="SMTP_EMAIL_ADDRESS", default="midnulltest@gmail.com")
     SMTP_EMAIL_PASSWORD: str = Field(alias="SMTP_EMAIL_PASSWORD")
@@ -78,9 +77,7 @@ class Settings(BaseSettings):
         self.DONATEX_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
         return self
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
 settings = Settings()  # pyright: ignore[reportCallIssue]

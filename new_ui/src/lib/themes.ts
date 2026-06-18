@@ -25,6 +25,8 @@ export interface Theme {
   textMain: string
   textSecondary: string
   textPlaceholder: string
+  // shadows
+  shadow1: string
 }
 
 // ─── Built-in presets ────────────────────────────────────────────────────────
@@ -110,7 +112,7 @@ export const PRESET_THEMES: Theme[] = [
   {
     id: 'light-mint',
     name: 'Свежая мята',
-    level1: 'rgba(245, 240, 247, 1)',
+    level1: 'rgb(238, 246, 241)',
     level2: 'rgba(239, 242, 237, 1)',
     level3: '#059669',
     level4: 'rgba(5, 150, 105, 0.12)',
