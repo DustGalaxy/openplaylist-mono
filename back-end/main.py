@@ -41,7 +41,7 @@ app = FastAPI(lifespan=lifespan)
 
 sio.register_namespace(PlstUpdsNamespace("/plst_upds"))
 sio.register_namespace(BasicNamespace("/"))
-sio_asgi_app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=app, socketio_path="/api/socket.io")
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -67,8 +67,8 @@ api_route.include_router(user_router)
 api_route.include_router(order_router)
 api_route.include_router(playlist_router)
 api_route.include_router(settings_router)
-app.add_route("/api/socket.io/", route=sio_asgi_app, methods=["GET", "POST"])
-app.add_api_websocket_route("/api/socket.io/", sio_asgi_app)
+# app.add_route("/api/socket.io/", route=sio_asgi_app, methods=["GET", "POST"])
+# app.add_api_websocket_route("/api/socket.io/", sio_asgi_app)
 
 app.include_router(api_route)
 
@@ -82,6 +82,8 @@ async def logout(response: Response):
 async def root():
     return {"status": "ok"}
 
+
+sio_asgi_app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=app, socketio_path="/api/socket.io")
 
 if __name__ == "__main__":
     import uvicorn
