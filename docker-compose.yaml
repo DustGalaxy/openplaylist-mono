@@ -73,6 +73,9 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp" # Для поддержки HTTP/3 (опционально)
+    dns:
+    - 8.8.8.8
+    - 1.1.1.1
     environment:
       PROJECT_DOMAIN: "${PROJECT_DOMAIN:-openplaylist.localhost}"
     volumes:
