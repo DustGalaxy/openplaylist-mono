@@ -8,6 +8,9 @@ volumes:
   redis_data:
     driver: local
 
+  caddy_data:
+  caddy_config:
+
 networks:
   default:
     driver: bridge
@@ -63,26 +66,24 @@ services:
     networks:
       - default
 
-  traefik:
-    image: traefik:v3.6.7
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.myresolver.acme.email=nikitavolov444@gmail.com"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+  caddy:
+    image: caddy:2.11-alpine
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
+      - "443:443/udp" # Для поддержки HTTP/3 (опционально)
+    environment:
+      PROJECT_DOMAIN: "${PROJECT_DOMAIN:-openplaylist.localhost}"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./letsencrypt:/letsencrypt
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
     networks:
       - default
 
@@ -104,15 +105,6 @@ services:
       - ./back-end/alembic.ini:/app/alembic.ini
       - ./back-end/alembic:/app/alembic
       - ./back-end/main.py:/app/main.py
-    labels:
-      - "traefik.enable=true"
-      # Направляем все запросы, начинающиеся с /api, на бэкенд
-      - "traefik.http.routers.backend.rule=Host(`${PROJECT_DOMAIN:-openplaylist.localhost}`) && PathPrefix(`/api`)"
-      - "traefik.http.services.backend.loadbalancer.server.port=8000"
-      - "traefik.http.routers.backend.entrypoints=websecure"
-      - "traefik.http.routers.backend.tls=true"
-      - "traefik.http.routers.backend.priority=100"
-      - "traefik.http.routers.backend.tls.certresolver=myresolver"
     networks:
       - default
     healthcheck:
@@ -199,16 +191,5 @@ services:
     build:
       context: ./new_ui
       dockerfile: Dockerfile
-    depends_on:
-      traefik:
-        condition: service_started
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`${PROJECT_DOMAIN:-openplaylist.localhost}`)"
-      - "traefik.http.routers.frontend.entrypoints=websecure" # Добавлено
-      - "traefik.http.routers.frontend.tls=true"
-      - "traefik.http.routers.frontend.tls.certresolver=myresolver" # Добавлено для корректного SSL
-      - "traefik.http.routers.frontend.priority=1" # Добавлено: минимальный приоритет
-      - "traefik.http.services.frontend.loadbalancer.server.port=80"
     networks:
       - default
