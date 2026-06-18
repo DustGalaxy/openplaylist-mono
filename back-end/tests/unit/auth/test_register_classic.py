@@ -7,27 +7,7 @@ from unittest.mock import MagicMock, AsyncMock
 from fastapi import HTTPException
 from simple_repository.exceptions import NotFoundException
 
-from src.services.auth.auth_service import AuthService
 from src.models.auth_user import AuthUserSchema
-
-
-@pytest.fixture
-def auth_service():
-    """Инициализируем оригинальный AuthService с AsyncMock репозиториями."""
-    user_repo = AsyncMock()
-    link_repo = AsyncMock()
-    token_vault_repo = AsyncMock()
-    service = AuthService(user_repo, link_repo, token_vault_repo)
-
-    # Мокаем hasher целиком, чтобы избежать read-only ограничений argon2 в Си
-    service.hasher = MagicMock()
-
-    return service
-
-
-@pytest.fixture
-def mock_db_session():
-    return MagicMock()
 
 
 @pytest.mark.asyncio

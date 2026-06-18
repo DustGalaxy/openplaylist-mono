@@ -29,14 +29,9 @@ class LinkedAccountsRepository(
         )
 
         res = await session.execute(stmt)
-        user = res.unique().scalars().one_or_none()
+        link = res.unique().scalars().one_or_none()
 
-        if not user:
-            raise NotFoundException(
-                f"{self.sqla_model.__tablename__} with platform_user_id={platform_user_id} and platform={platform} not found"
-            )
-
-        return LinkedAccountsDomain.model_validate(user)
+        return LinkedAccountsDomain.model_validate(link)
 
     async def get_by_email_platform(self, session: AsyncSession, email: str, platform: IntegrationPlatform):
         stmt = select(LinkedAccounts).where(

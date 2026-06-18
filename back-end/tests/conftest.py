@@ -1,3 +1,5 @@
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -7,11 +9,28 @@ from main import app
 
 from src.adapters._redis.broker import RedisAdapter
 from src.settings import settings
-
+from src.services.auth.auth_service import AuthService
 
 @pytest.fixture(scope="session")
 def anyio_backend():
     return "asyncio"
+
+@pytest.fixture
+def auth_service():
+    """Инициализируем оригинальный AuthService с AsyncMock репозиториями."""
+    user_repo = AsyncMock()
+    link_repo = AsyncMock()
+    token_vault_repo = AsyncMock()
+    service = AuthService(user_repo, link_repo, token_vault_repo)
+    
+    # Мокаем hasher целиком, чтобы избежать read-only ограничений argon2 в Си
+    service.hasher = MagicMock()
+    
+    return service
+
+@pytest.fixture
+def mock_db_session():
+    return MagicMock()
 
 
 @pytest.fixture
