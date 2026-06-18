@@ -89,7 +89,7 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(
-        "main:app",
+        "main:sio_asgi_app",
         host=settings.SELF_HOST,
         port=settings.SELF_PORT,
         log_level=settings.SELF_LOG_LEVEL,
