@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from fastapi.testclient import TestClient
 
-from database import async_session_maker, create_db, drop_db
+from src.database import async_session_maker, create_db, drop_db
 
 from main import app
 
@@ -33,15 +33,15 @@ def mock_db_session():
     return MagicMock()
 
 
-@pytest.fixture
-async def db_session():
-    # Создаем движок, накатываем миграции, отдаем сессию
-    await create_db()
+# @pytest.fixture
+# async def db_session():
+#     # Создаем движок, накатываем миграции, отдаем сессию
+#     await create_db()
 
-    async with async_session_maker() as session:
-        yield session
+#     async with async_session_maker() as session:
+#         yield session
 
-    await drop_db()
+#     await drop_db()
 
 
 _broker = None

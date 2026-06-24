@@ -10,6 +10,7 @@ from src.models.settings import SettingsSchema
 from src.services_low.settings import get_settings_service, SettingsLowService
 from src.services_low.playlist import get_playlist_service, PlaylistLowService
 from src.services.playlist_log import get_playlist_log_service, PlaylistLogService
+from src.services.stream_service import get_stream_service, StreamService
 from src.services.auth.auth_service import auth_service
 from src.orm.playlist import Playlist
 from src.orm.settings import Settings
@@ -18,10 +19,12 @@ from src.database import AsyncSession, get_async_session
 from src.exceptions import NotAuthorizedException
 
 
-DB_SESSION = Annotated[AsyncSession, Depends(get_async_session)]
 SETTINGS_SERVICE = Annotated[SettingsLowService, Depends(get_settings_service)]
 PLST_SERVICE = Annotated[PlaylistLowService, Depends(get_playlist_service)]
 PLST_LOG_SERVICE = Annotated[PlaylistLogService, Depends(get_playlist_log_service)]
+STREAM_SERVICE = Annotated[StreamService, Depends(get_stream_service)]
+
+DB_SESSION = Annotated[AsyncSession, Depends(get_async_session)]
 CURR_USER = Annotated[User, Depends(auth_service.get_current_user)]
 
 
