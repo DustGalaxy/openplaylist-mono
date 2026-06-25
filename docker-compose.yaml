@@ -1,19 +1,4 @@
-volumes:
-  postgres_data:
-    driver: local
-
-  rabbitmq_data:
-    driver: local
-
-  redis_data:
-    driver: local
-
-  caddy_data:
-  caddy_config:
-
-networks:
-  default:
-    driver: bridge
+version: '3.8'
 
 services:
 
@@ -28,9 +13,16 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
       test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
+      interval: 15s
+      timeout: 10s
       retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 250M
+        reservations:
+          memory: 100M
 
   redis:
     image: redis:alpine
@@ -43,9 +35,16 @@ services:
       - redis_data:/data
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
-      interval: 1s
-      timeout: 3s
-      retries: 30
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+        reservations:
+          memory: 30M
 
   database:
     image: postgres:14
@@ -54,10 +53,10 @@ services:
       POSTGRES_PASSWORD: postgres
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U openplaylist_mono_user -d openplaylist_mono" ]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 15s
     ports:
       - "5438:5432"
     volumes:
@@ -65,6 +64,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - default
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+        reservations:
+          memory: 100M
 
   caddy:
     image: caddy:2.11-alpine
@@ -72,10 +77,10 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "443:443/udp" # Для поддержки HTTP/3 (опционально)
+      - "443:443/udp"
     dns:
-    - 8.8.8.8
-    - 1.1.1.1
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       PROJECT_DOMAIN: "${PROJECT_DOMAIN:-openplaylist.localhost}"
     volumes:
@@ -89,6 +94,12 @@ services:
         condition: service_started
     networks:
       - default
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+        reservations:
+          memory: 30M
 
   backend:
     build: ./back-end
@@ -114,11 +125,16 @@ services:
     healthcheck:
       test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').getcode()" ]
       interval: 30s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
-
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     stop_grace_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+        reservations:
+          memory: 150M
 
   task-worker:
     build:
@@ -137,6 +153,12 @@ services:
       - ./back-end/src:/app/src
     networks:
       - default
+    deploy:
+      resources:
+        limits:
+          memory: 250M
+        reservations:
+          memory: 100M
 
   task-schuduler:
     build:
@@ -155,6 +177,12 @@ services:
       - ./back-end/src:/app/src
     networks:
       - default
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+        reservations:
+          memory: 50M
 
   bot-ttv:
     build:
@@ -167,6 +195,12 @@ services:
       - ./bot_ttv/main.py:/app/main.py
     networks:
       - default
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+        reservations:
+          memory: 50M
 
   bot-donatex:
     build:
@@ -179,6 +213,12 @@ services:
       - ./bot_donatex/main.py:/app/main.py
     networks:
       - default
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+        reservations:
+          memory: 50M
 
   bot-da:
     build:
@@ -190,6 +230,12 @@ services:
       - ./bot_da/src:/app/src
     networks:
       - default
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+        reservations:
+          memory: 50M
 
   frontend:
     build:
@@ -197,3 +243,9 @@ services:
       dockerfile: Dockerfile
     networks:
       - default
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+        reservations:
+          memory: 30M
