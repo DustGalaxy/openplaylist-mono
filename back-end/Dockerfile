@@ -13,4 +13,5 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["uv", "run", "--no-dev", "main.py"]
+# Пример изменения CMD в Dockerfile
+CMD ["uv", "run", "--no-dev" "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
