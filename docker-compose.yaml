@@ -1,4 +1,19 @@
-version: '3.8'
+volumes:
+  postgres_data:
+    driver: local
+
+  rabbitmq_data:
+    driver: local
+
+  redis_data:
+    driver: local
+
+  caddy_data:
+  caddy_config:
+
+networks:
+  default:
+    driver: bridge
 
 services:
 
