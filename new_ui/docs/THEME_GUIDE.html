@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Theme Creation Guide</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0e0e16;
+        --surface: #17172a;
+        --surface2: #1f1f38;
+        --border: rgba(255, 255, 255, 0.08);
+        --border2: rgba(255, 255, 255, 0.14);
+        --text: #e8e6f5;
+        --muted: #8884aa;
+        --faint: #4e4b6a;
+        --accent: #8b5cf6;
+        --accent-t: rgba(139, 92, 246, 0.14);
+        --ok: #10b981;
+        --ok-t: rgba(16, 185, 129, 0.12);
+        --warn: #d97706;
+        --warn-t: rgba(217, 119, 6, 0.12);
+        --fail: #ef4444;
+        --fail-t: rgba(239, 68, 68, 0.1);
+        --font: 'Inter', 'SF Pro Text', system-ui, sans-serif;
+        --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      }
+
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #f6f5ff;
+          --surface: #ffffff;
+          --surface2: #eeecfa;
+          --border: rgba(0, 0, 0, 0.08);
+          --border2: rgba(0, 0, 0, 0.14);
+          --text: #12103a;
+          --muted: #6660a0;
+          --faint: #b8b4d8;
+          --accent: #6d3ef0;
+          --accent-t: rgba(109, 62, 240, 0.1);
+        }
+      }
+
+      html {
+        font-size: 15px;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font);
+        line-height: 1.7;
+        min-height: 100vh;
+      }
+
+      /* ── Layout ── */
+      .page {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 3rem 2rem 6rem;
+      }
+
+      /* ── Header ── */
+      .header {
+        margin-bottom: 3.5rem;
+        padding-bottom: 2rem;
+        border-bottom: 0.5px solid var(--border2);
+      }
+      .header-eyebrow {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 0.75rem;
+      }
+      .header h1 {
+        font-size: clamp(28px, 4vw, 40px);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        color: var(--text);
+        margin-bottom: 0.75rem;
+      }
+      .header p {
+        font-size: 15px;
+        color: var(--muted);
+        max-width: 540px;
+        line-height: 1.65;
+      }
+
+      /* ── Sections ── */
+      .section {
+        margin-bottom: 3.5rem;
+      }
+      .section-eyebrow {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+        margin-bottom: 0.6rem;
+      }
+      .section > h2 {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: -0.015em;
+        color: var(--text);
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 0.5px solid var(--border);
+      }
+      h3 {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        margin: 1.5rem 0 0.6rem;
+        letter-spacing: 0.01em;
+      }
+      p {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+      p + p {
+        margin-top: 0.6rem;
+      }
+
+      /* ── Token grid ── */
+      .token-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+      }
+      .token-card {
+        background: var(--surface);
+        border: 0.5px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 14px;
+      }
+      .token-card.full {
+        grid-column: 1 / -1;
+      }
+      .token-name {
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--accent);
+        margin-bottom: 5px;
+      }
+      .token-desc {
+        font-size: 12px;
+        color: var(--text);
+        line-height: 1.55;
+        margin-bottom: 4px;
+      }
+      .token-rule {
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      /* ── Flow steps ── */
+      .flow {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        margin: 0.75rem 0 1.25rem;
+      }
+      .flow-step {
+        background: var(--surface2);
+        border: 0.5px solid var(--border2);
+        border-radius: 6px;
+        padding: 5px 10px;
+        font-size: 12px;
+        color: var(--text);
+        white-space: nowrap;
+      }
+      .flow-arrow {
+        font-size: 12px;
+        color: var(--faint);
+      }
+
+      /* ── Harmony cards ── */
+      .harmony-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 8px;
+        margin-top: 0.75rem;
+      }
+      .harmony-card {
+        background: var(--surface);
+        border: 0.5px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 14px;
+      }
+      .h-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 4px;
+      }
+      .h-desc {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+        line-height: 1.55;
+      }
+      .h-example {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--accent);
+        background: var(--accent-t);
+        padding: 3px 7px;
+        border-radius: 4px;
+        display: inline-block;
+      }
+
+      /* ── HSL diagram ── */
+      .hsl-diagram {
+        background: var(--surface);
+        border: 0.5px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-top: 0.75rem;
+      }
+      .hsl-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      .hsl-row:last-child {
+        margin-bottom: 0;
+      }
+      .hsl-label {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--faint);
+        width: 18px;
+        flex-shrink: 0;
+      }
+      .hsl-bar {
+        height: 7px;
+        border-radius: 4px;
+        flex: 1;
+      }
+      .hsl-hint {
+        font-size: 11px;
+        color: var(--muted);
+        min-width: 180px;
+      }
+
+      /* ── Rule blocks ── */
+      .rule-block {
+        background: var(--surface);
+        border: 0.5px solid var(--border);
+        border-left: 2px solid var(--accent);
+        border-radius: 8px;
+        padding: 11px 14px;
+        margin-top: 0.75rem;
+      }
+      .rule-block.ok {
+        border-left-color: var(--ok);
+      }
+      .rule-block.warn {
+        border-left-color: var(--warn);
+      }
+      .rule-block.fail {
+        border-left-color: var(--fail);
+      }
+      .rule-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 5px;
+      }
+      .rule-text {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+      .rule-text code {
+        font-family: var(--mono);
+        font-size: 11px;
+        background: var(--surface2);
+        padding: 1px 5px;
+        border-radius: 3px;
+        color: var(--text);
+      }
+
+      /* ── Contrast table ── */
+      .table-wrap {
+        overflow-x: auto;
+        margin-top: 0.75rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      th {
+        text-align: left;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--faint);
+        padding: 7px 10px;
+        border-bottom: 0.5px solid var(--border2);
+      }
+      td {
+        padding: 8px 10px;
+        border-bottom: 0.5px solid var(--border);
+        color: var(--muted);
+        vertical-align: middle;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      td code {
+        font-family: var(--mono);
+        font-size: 11px;
+        background: var(--surface2);
+        padding: 1px 5px;
+        border-radius: 3px;
+        color: var(--text);
+      }
+      .badge {
+        display: inline-flex;
+        padding: 2px 7px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .badge.aaa {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--ok);
+      }
+      .badge.aa {
+        background: rgba(16, 185, 129, 0.1);
+        color: #34d399;
+      }
+      .badge.lg {
+        background: rgba(217, 119, 6, 0.12);
+        color: var(--warn);
+      }
+      .badge.fail {
+        background: var(--fail-t);
+        color: var(--fail);
+      }
+
+      /* ── Checklist ── */
+      .checklist {
+        list-style: none;
+        margin-top: 0.75rem;
+      }
+      .checklist li {
+        display: flex;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 0.5px solid var(--border);
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+      .checklist li:last-child {
+        border-bottom: none;
+      }
+      .check-box {
+        width: 16px;
+        height: 16px;
+        border: 1.5px solid var(--border2);
+        border-radius: 4px;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+
+      /* ── Anti-patterns ── */
+      .antipattern + .antipattern {
+        margin-top: 8px;
+      }
+
+      /* ── Divider ── */
+      .divider {
+        height: 0.5px;
+        background: var(--border);
+        margin: 3rem 0;
+      }
+
+      /* ── Footer ── */
+      .footer {
+        padding-top: 2rem;
+        border-top: 0.5px solid var(--border);
+        font-size: 11px;
+        color: var(--faint);
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-eyebrow">Color System</div>
+        <h1>Theme Creation Guide</h1>
+        <p>
+          Профессиональный гайд по построению UI-тем. Архитектура токенов,
+          цветовые гармонии, требования WCAG и антипаттерны — всё необходимое
+          для создания согласованной и доступной темы.
+        </p>
+      </header>
+
+      <!-- 1. Token Architecture -->
+      <section class="section">
+        <div class="section-eyebrow">01 — Архитектура</div>
+        <h2>Структура токенов темы</h2>
+        <p>
+          Тема состоит из 7 токенов с чёткой ролью. Токены не взаимозаменяемы —
+          подмена одного другим нарушает визуальную иерархию.
+        </p>
+
+        <div class="token-grid" style="margin-top: 1rem">
+          <div class="token-card">
+            <div class="token-name">level1</div>
+            <div class="token-desc">
+              Базовый фон. Самый тёмный (dark) или самый светлый (light) слой.
+              Страница, канвас.
+            </div>
+            <div class="token-rule">
+              dark: S = 20–55%, L = 5–8% &nbsp;·&nbsp; light: L = 94–100%
+            </div>
+          </div>
+          <div class="token-card">
+            <div class="token-name">level2</div>
+            <div class="token-desc">
+              Фон карточек, панелей, сайдбара. Всегда поверх level1.
+            </div>
+            <div class="token-rule">
+              dark: L на 5–8% светлее level1 &nbsp;·&nbsp; light: L на 5–8%
+              темнее level1
+            </div>
+          </div>
+          <div class="token-card">
+            <div class="token-name">level3</div>
+            <div class="token-desc">
+              Акцентный цвет. Кнопки, иконки, активные состояния. Опорная точка
+              палитры.
+            </div>
+            <div class="token-rule">
+              Фиксирован. Вся остальная палитра строится вокруг него.
+            </div>
+          </div>
+          <div class="token-card">
+            <div class="token-name">level4</div>
+            <div class="token-desc">
+              Полупрозрачная подложка. Выделения, hover-состояния,
+              tint-карточки.
+            </div>
+            <div class="token-rule">
+              = level3 + opacity 0.10–0.18. Не кастомный цвет.
+            </div>
+          </div>
+          <div class="token-card">
+            <div class="token-name">textMain</div>
+            <div class="token-desc">
+              Основной текст. Заголовки, тело, важные данные.
+            </div>
+            <div class="token-rule">Контраст к level2: ≥ 7.0:1 (WCAG AAA)</div>
+          </div>
+          <div class="token-card">
+            <div class="token-name">textSecondary</div>
+            <div class="token-desc">
+              Вторичный текст. Подписи, метки, описания.
+            </div>
+            <div class="token-rule">Контраст к level2: ≥ 4.5:1 (WCAG AA)</div>
+          </div>
+          <div class="token-card full">
+            <div class="token-name">textPlaceholder</div>
+            <div class="token-desc">
+              Плейсхолдеры и hint-текст. Всегда производный от textMain.
+            </div>
+            <div class="token-rule">
+              = textMain + opacity 0.35–0.45. Никогда отдельный самостоятельный
+              цвет.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- 2. Process -->
+      <section class="section">
+        <div class="section-eyebrow">02 — Процесс</div>
+        <h2>Алгоритм построения темы</h2>
+
+        <div class="flow">
+          <div class="flow-step">1. Зафиксировать level3</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">2. Определить гармонию</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">3. Вывести фоны в HSL</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">4. Подобрать текст</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">5. Проверить контраст</div>
+        </div>
+
+        <h3>Шаг 1–2 &nbsp;·&nbsp; Гармония фонов</h3>
+        <p>
+          Фоны не должны быть нейтральными. Hue level1 и level2 задаётся
+          выбранной гармонией относительно Hue акцента.
+        </p>
+
+        <div class="harmony-grid">
+          <div class="harmony-card">
+            <div class="h-name">Монохром</div>
+            <div class="h-desc">
+              Фоны — тот же Hue, что у level3. Меняется только Lightness.
+            </div>
+            <div class="h-example">H=220 → level1: hsl(220,38%,7%)</div>
+          </div>
+          <div class="harmony-card">
+            <div class="h-name">Аналог</div>
+            <div class="h-desc">
+              Фоны сдвинуты на ±20–40° от Hue акцента по цветовому кругу.
+            </div>
+            <div class="h-example">H=330 → level2: hsl(292,34%,13%)</div>
+          </div>
+          <div class="harmony-card">
+            <div class="h-name">Сплит-комплементар</div>
+            <div class="h-desc">
+              Фоны на ~150° от акцента. Высокий визуальный контраст, акцент
+              «горит».
+            </div>
+            <div class="h-example">H=30 → level2: hsl(248,28%,13%)</div>
+          </div>
+        </div>
+
+        <h3>Шаг 3 &nbsp;·&nbsp; Диапазоны HSL для фонов</h3>
+        <p>
+          HSL как рабочее пространство позволяет независимо управлять оттенком,
+          насыщенностью и яркостью — в отличие от rgba.
+        </p>
+
+        <div class="hsl-diagram">
+          <div class="hsl-row">
+            <div class="hsl-label">L1</div>
+            <div
+              class="hsl-bar"
+              style="background: linear-gradient(to right, #060614, #14103c)"
+            ></div>
+            <div class="hsl-hint">dark — L: 5–8% &nbsp;·&nbsp; S: 25–55%</div>
+          </div>
+          <div class="hsl-row">
+            <div class="hsl-label">L2</div>
+            <div
+              class="hsl-bar"
+              style="background: linear-gradient(to right, #131030, #221e50)"
+            ></div>
+            <div class="hsl-hint">
+              dark — L: 12–16% &nbsp;·&nbsp; S: немного ниже L1
+            </div>
+          </div>
+          <div class="hsl-row">
+            <div class="hsl-label">L2</div>
+            <div
+              class="hsl-bar"
+              style="
+                background: linear-gradient(to right, #dde4f4, #eaedf8);
+                border: 0.5px solid var(--border);
+              "
+            ></div>
+            <div class="hsl-hint">
+              light — L: 84–92% &nbsp;·&nbsp; S: 15–40%
+            </div>
+          </div>
+          <div class="hsl-row">
+            <div class="hsl-label">L1</div>
+            <div
+              class="hsl-bar"
+              style="
+                background: linear-gradient(to right, #f2f4fc, #ffffff);
+                border: 0.5px solid var(--border);
+              "
+            ></div>
+            <div class="hsl-hint">
+              light — L: 94–100% &nbsp;·&nbsp; S: 0–20%
+            </div>
+          </div>
+        </div>
+
+        <div class="rule-block" style="margin-top: 10px">
+          <div class="rule-title">Правило разницы между слоями</div>
+          <div class="rule-text">
+            level1 и level2 должны различаться на ≥ 5–6 единиц Lightness и ≥ 3
+            единицы Saturation. Меньшая разница — слои сливаются, поверхности не
+            читаются.
+          </div>
+        </div>
+
+        <h3>Шаг 4 &nbsp;·&nbsp; Текст с тонированием</h3>
+        <p>
+          textMain и textSecondary тонируются в сторону акцента — чистый
+          белый/чёрный создаёт зрительное напряжение и разрывает единство
+          палитры.
+        </p>
+
+        <div class="rule-block ok" style="margin-top: 0.75rem">
+          <div class="rule-title">Формула — dark-тема</div>
+          <div class="rule-text">
+            textMain → <code>hsl(H±10, 60–100%, 93–97%)</code><br />
+            textSecondary → <code>hsl(H±15, 25–45%, 60–72%)</code><br />
+            где H — Hue из level3.
+          </div>
+        </div>
+        <div class="rule-block ok">
+          <div class="rule-title">Формула — light-тема</div>
+          <div class="rule-text">
+            textMain → <code>hsl(H±10, 40–80%, 8–14%)</code><br />
+            textSecondary → <code>hsl(H±15, 20–38%, 30–46%)</code>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- 3. WCAG -->
+      <section class="section">
+        <div class="section-eyebrow">03 — Доступность</div>
+        <h2>Требования WCAG 2.1</h2>
+        <p>
+          Контраст проверяется через относительную яркость (relative luminance),
+          не визуально. Значения ниже приведены для основного тела текста
+          (размер ≥ 16px или bold ≥ 14px).
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Пара цветов</th>
+                <th>Минимум</th>
+                <th>Уровень</th>
+                <th>Применение</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>textMain</code> на <code>level2</code></td>
+                <td>7.0:1</td>
+                <td><span class="badge aaa">AAA</span></td>
+                <td>Тело, заголовки</td>
+              </tr>
+              <tr>
+                <td><code>textSecondary</code> на <code>level2</code></td>
+                <td>4.5:1</td>
+                <td><span class="badge aa">AA</span></td>
+                <td>Подписи, метки</td>
+              </tr>
+              <tr>
+                <td>white на <code>level3</code></td>
+                <td>3.0:1</td>
+                <td><span class="badge lg">AA Large</span></td>
+                <td>Текст кнопок ≥ 18px / bold 14px</td>
+              </tr>
+              <tr>
+                <td><code>textMain</code> на <code>level1</code></td>
+                <td>4.5:1</td>
+                <td><span class="badge aa">AA</span></td>
+                <td>Текст вне карточек</td>
+              </tr>
+              <tr>
+                <td><code>level3</code> на <code>level2</code></td>
+                <td>3.0:1</td>
+                <td><span class="badge lg">AA Large</span></td>
+                <td>Границы, иконки, декор</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="rule-block warn" style="margin-top: 1rem">
+          <div class="rule-title">Критично для тёплых акцентов</div>
+          <div class="rule-text">
+            Оранж, жёлтый и светло-зелёный имеют высокую luminance. Белый текст
+            на них часто не проходит даже 3:1. Всегда проверяй формулой WCAG
+            2.1, не на глаз.
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- 4. Anti-patterns -->
+      <section class="section">
+        <div class="section-eyebrow">04 — Ошибки</div>
+        <h2>Антипаттерны</h2>
+
+        <div class="rule-block fail antipattern">
+          <div class="rule-title">Нейтральные фоны</div>
+          <div class="rule-text">
+            level1/level2 в чистом сером (#1a1a1a) без тонирования. Акцент
+            «висит в воздухе» вместо того, чтобы быть частью единой палитры.
+            Каждый фон должен нести оттенок, связанный с гармонией акцента.
+          </div>
+        </div>
+
+        <div class="rule-block fail antipattern">
+          <div class="rule-title">level2 неотличим от level1</div>
+          <div class="rule-text">
+            Разница &lt; 4% по Lightness — карточки и страница сливаются.
+            Минимум: 5–6 единиц L и ощутимое различие по Saturation.
+          </div>
+        </div>
+
+        <div class="rule-block fail antipattern">
+          <div class="rule-title">Чистый белый / чёрный текст</div>
+          <div class="rule-text">
+            #ffffff на тёмной теме и #000000 на светлой вызывают зрительное
+            напряжение и разрывают цветовое единство. textMain всегда получает
+            тинт в сторону Hue акцента.
+          </div>
+        </div>
+
+        <div class="rule-block fail antipattern">
+          <div class="rule-title">
+            textSecondary слишком близко или далеко от textMain
+          </div>
+          <div class="rule-text">
+            Разница L &lt; 15% — иерархия не читается. Разница L &gt; 40% —
+            secondary пропадает. Оптимум: 60–72% L (dark) или 30–46% L (light).
+          </div>
+        </div>
+
+        <div class="rule-block fail antipattern">
+          <div class="rule-title">Инвертированный порядок в light-теме</div>
+          <div class="rule-text">
+            level1 = белый (100% L), level2 = чуть серее (96% L) → карточки
+            «утоплены» вместо того, чтобы быть приподняты. В light-теме level2
+            всегда темнее level1.
+          </div>
+        </div>
+
+        <div class="rule-block fail antipattern">
+          <div class="rule-title">textPlaceholder как отдельный цвет</div>
+          <div class="rule-text">
+            Кастомный цвет для плейсхолдеров нарушает иерархию и создаёт лишний
+            токен без смысловой нагрузки. textPlaceholder = textMain + opacity,
+            всегда.
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- 5. Checklist -->
+      <section class="section">
+        <div class="section-eyebrow">05 — Чеклист</div>
+        <h2>Финальная проверка перед публикацией</h2>
+        <ul class="checklist">
+          <li>
+            <div class="check-box"></div>
+            Hue level1/level2 не нейтральный — связан с level3 через выбранную
+            гармонию
+          </li>
+          <li>
+            <div class="check-box"></div>
+            level2 отличается от level1 на ≥ 5% L и ≥ 3% S
+          </li>
+          <li>
+            <div class="check-box"></div>
+            textMain / level2 ≥ 7:1 · textSecondary / level2 ≥ 4.5:1
+          </li>
+          <li>
+            <div class="check-box"></div>
+            Белый текст на level3 ≥ 3:1 — проверено формулой, не визуально
+          </li>
+          <li>
+            <div class="check-box"></div>
+            textMain тонирован в сторону Hue level3, не чистый белый/чёрный
+          </li>
+          <li>
+            <div class="check-box"></div>
+            textPlaceholder = textMain + opacity 0.35–0.45, не отдельный цвет
+          </li>
+          <li>
+            <div class="check-box"></div>
+            level4 = level3 + opacity 0.10–0.18, не кастомный цвет
+          </li>
+          <li>
+            <div class="check-box"></div>
+            В light-теме: level2 темнее level1 (карточки приподняты над фоном)
+          </li>
+        </ul>
+      </section>
+
+      <footer class="footer">
+        <span>Theme Creation Guide · Color System v2</span>
+        <span>WCAG 2.1 · HSL color model</span>
+      </footer>
+    </div>
+  </body>
+</html>

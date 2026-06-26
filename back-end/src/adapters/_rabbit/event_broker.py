@@ -60,7 +60,7 @@ playlist_track_move = RabbitQueue("playlist.track.move", durable=True)
 playlist_privacy_private = RabbitQueue("playlist.privacy.private", durable=True)
 playlist_privacy_public = RabbitQueue("playlist.privacy.public", durable=True)
 
-playlist_settings_request = RabbitQueue("playlist.settings.request", durable=True, exclusive=True)
+# playlist_settings_request = RabbitQueue("playlist.settings.request", durable=True, exclusive=True)
 
 
 async def declare():
@@ -92,7 +92,7 @@ async def declare():
     await broker.declare_queue(playlist_track_move)
     await broker.declare_queue(playlist_privacy_private)
     await broker.declare_queue(playlist_privacy_public)
-    await broker.declare_queue(playlist_settings_request)
+    # await broker.declare_queue(playlist_settings_request)
 
 
 def get_broker():

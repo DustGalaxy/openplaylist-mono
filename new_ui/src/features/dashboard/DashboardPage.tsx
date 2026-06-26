@@ -148,7 +148,7 @@ export default function Dashboard() {
           <TabsList className="w-full flex flex-nowrap items-center justify-start gap-2 overflow-hidden bg-transparent p-0 h-auto">
             <div
               title={t('dashboard.tooltip.addPlaylist')}
-              className="mb-0.75 ml-0.25"
+              className="mb-1.5 ml-px"
             >
               <AddPlaylistModal />
             </div>
@@ -164,8 +164,8 @@ export default function Dashboard() {
                     className={cn(
                       filterTabBaseClass,
                       filterTabInactiveClass,
-                      'shrink-0 flex-none min-w-[4rem] font-medium',
-                      'data-[state=active]:!border-level-3/60 data-[state=active]:!bg-level-1 data-[state=active]:!text-text-main data-[state=active]:!shadow-[0_0_12px_rgba(245,106,25,0.15)]',
+                      'shrink-0 flex-none min-w-16 font-medium',
+                      'data-[state=active]:border-level-3/60! data-[state=active]:bg-level-1! data-[state=active]:text-text-main! data-[state=active]:shadow-[0_0_12px_rgba(245,106,25,0.15)]!',
                     )}
                   >
                     {plst.name}

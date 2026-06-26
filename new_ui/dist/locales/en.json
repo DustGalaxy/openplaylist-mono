@@ -40,20 +40,24 @@
     "theme": "Theme"
   },
   "footer": {
-    "description": "A platform for streamers and viewers: shared playlists, track requests, flexible rules, and queue sync without reloading the page.",
+    "description": "Interactive music for everyone. Create your own playlists, share your favorite tracks, or request music on your favorite creators' streams.",
     "navigation": "Navigation",
     "features": "Features",
     "searchPlaylists": "Search playlists",
-    "login": "Login",
-    "register": "Sign up",
+    "login": "Log in",
+    "register": "Join now",
     "highlights": {
-      "realtimeQueue": "Real-time track queue",
-      "rulesAndBlocks": "Rules and block lists",
-      "donationPriority": "Donation priority boosts",
-      "integrations": "Twitch and DonationAlerts integration"
+      "realtimeQueue": "Live track queue",
+      "rulesAndBlocks": "Smart filters & blocklists",
+      "donationPriority": "Donation priority bumps",
+      "integrations": "Streaming and donation platform sync"
     },
-    "copyright": "© {{year}} OpenPlaylist. Built for live streams.",
-    "techStack": "REST + WebSocket · React · FastAPI"
+    "copyright": {
+      "start": "© {{year}} OpenPlaylist. Crafted by ",
+      "link": "DustGalaxy",
+      "end": " with ❤️ for creators and listeners."
+    },
+    "techStack": "Powered by Socket.IO · React · FastAPI · & lots of tea 🍵"
   },
   "landing": {
     "eyebrow": "Playlists for streams and communities",
@@ -490,7 +494,6 @@
       "externalSources": "External content sources",
       "integrationsLoading": "Loading integrations...",
       "integrationsEmpty": "Connect integrations in account settings",
-
       "addHelp": "ADD — priorities are summed up.",
       "maxHelp": "MAX — the highest priority is used.",
       "priorityMode": "Priority mode",
