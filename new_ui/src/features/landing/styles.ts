@@ -2,7 +2,7 @@ export const gradientTextClass =
   'text-transparent bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)] bg-clip-text bg-[length:200%_auto] animate-bg-move'
 
 export const panelClass =
-  'rounded-(--rounded-std) border border-level-3/35 bg-level-2/95 shadow-[0_8px_20px_rgba(0,0,0,0.35)]'
+  'rounded-(--rounded-std) border border-level-3/35 bg-level-2/95 shadow-[0_8px_20px_rgba(0,0,0,0.15)]'
 
 /** Stronger accent border — landing hero cards, footer */
 export const panelAccentClass =

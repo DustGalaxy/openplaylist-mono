@@ -1,7 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import Disc from '@/components/icons/icon-disc'
-import Dashboard from '@/components/icons/icon-dashboard'
 import MenuDropdown from './menu-dropdown'
 
 import { useAuthStore } from '@/stores/authStore'
@@ -24,10 +23,10 @@ export default function Header() {
     <div className="w-full flex sticky top-0 z-50 justify-center">
       <header
         className="px-1 py-2 mx-5 mt-2 flex 
-      w-full md:w-[900px] rounded-full bg-level-2 
+      w-full md:w-225 rounded-full bg-level-2 
       text-text-main text-2xl justify-between
-      border-2 border-level-3 shadow-[-1px_1px_6px_rgba(0,0,0,0.4),-1px_1px_4px_rgba(0,0,0,0.3)]
-      sm:shadow-[-2px_2px_10px_rgba(0,0,0,0.45),-2px_2px_4px_rgba(0,0,0,0.35)]"
+      border-2 border-level-3 
+      sm:shadow-[-2px_2px_10px_rgba(0,0,0,0.15),-2px_2px_4px_rgba(0,0,0,0.15)]"
       >
         <nav className="flex flex-row justify-between w-full @container  gap-2  items-center">
           <div className="flex gap-2">
@@ -36,11 +35,11 @@ export default function Header() {
                 <Disc />
                 <h1
                   className="hidden @[400px]:block text-lg sm:text-xl font-bold text-center h-full text-transparent  relative drop-shadow-2xl
-                  bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)]  
-                  bg-clip-text bg-[length:200%_auto]  leading-normal animate-bg-move transition-all"
+                  bg-linear-to-r from-(--color-accent-2) via-(--color-accent-3) to-(--color-accent-1)  
+                  bg-clip-text bg-size-[200%_auto]  leading-normal animate-bg-move transition-all"
                 >
                   {windowWidth > 400 && t('brand.name')}
-                  {windowWidth > 600 && ` ${t('brand.version')}`}
+                  {windowWidth > 600 && t('brand.version')}
                 </h1>
               </Link>
             </div>
@@ -54,7 +53,11 @@ export default function Header() {
             )}
 
             <div className="px-2 flex place-content-center ">
-              <Link to="/view" className="flex items-center">
+              <Link
+                to="/view"
+                className="flex items-center"
+                search={{ p: undefined }}
+              >
                 <Search className="w-8 h-8 stroke-[1.2]" />
               </Link>
             </div>
@@ -83,7 +86,7 @@ export default function Header() {
                 </button>
               </div>
             ) : (
-              <div className="flex gap-2 h-[33px] items-center">
+              <div className="flex gap-2 h-8.25 items-center">
                 <div className="px-2   flex items-center">
                   <MenuDropdown />
                 </div>

@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, Trans } from 'react-i18next'
 import Disc from '@/components/icons/icon-disc'
 import { useAuthStore } from '@/stores/authStore'
 import React from 'react'
@@ -32,15 +32,14 @@ export default function Footer() {
       <div
         className="
           w-full max-w-5xl rounded-(--rounded-std) border-2 border-level-3 bg-level-2
-          shadow-[-1px_1px_6px_rgba(0,0,0,0.4),-1px_1px_4px_rgba(0,0,0,0.3)]
-          sm:shadow-[-2px_2px_10px_rgba(0,0,0,0.45),-2px_2px_4px_rgba(0,0,0,0.35)]
-          overflow-hidden
+          sm:shadow-[-2px_2px_10px_rgba(0,0,0,0.15),-2px_2px_4px_rgba(0,0,0,0.15)]
+          overflow-hidden text-text-main
         "
       >
-        <div
-          className=" h-1 w-full bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)] bg-[length:200%_auto] animate-bg-move"
+        {/* <div
+          className=" h-1 w-full bg-linear-to-r from-(--color-accent-2) via-(--color-accent-3) to-(--color-accent-1) bg-size-[200%_auto] animate-bg-move"
           aria-hidden
-        />
+        /> */}
 
         <div
           className="px-6 py-8 sm:px-10 sm:py-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]"
@@ -49,7 +48,7 @@ export default function Footer() {
           <div className="flex flex-col gap-4 text-left">
             <Link to="/" className="inline-flex items-center gap-2 w-fit group">
               <Disc />
-              <span className="text-lg font-bold text-transparent bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)] bg-clip-text bg-[length:200%_auto] animate-bg-move">
+              <span className="text-lg font-bold text-transparent bg-linear-to-r from-(--color-accent-2) via-(--color-accent-3) to-(--color-accent-1) bg-clip-text bg-size-[200%_auto] animate-bg-move">
                 {t('brand.name')}
               </span>
             </Link>
@@ -100,7 +99,7 @@ export default function Footer() {
                   className="text-sm text-text-secondary flex items-start gap-2"
                 >
                   <span
-                    className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-r from-[var(--color-accent-2)] to-[var(--color-accent-3)]"
+                    className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-linear-to-r from-(--color-accent-2) to-(--color-accent-3)"
                     aria-hidden
                   />
                   {t(key)}
@@ -110,8 +109,14 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-level-3/40 px-6 py-4 sm:px-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-text-placeholder">
-          <p>{t('footer.copyright', { year })}</p>
+        <div className="border-t border-level-3/40 px-6 py-4 sm:px-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-text-secondary">
+          <span>
+            {t('footer.copyright.start', { year: 2026 })}
+            <a href="https://github.com/DustGalaxy" className='underline'>
+              {t('footer.copyright.link')}
+            </a>
+            {t('footer.copyright.end')}
+          </span>
           <p className="text-text-secondary">{t('footer.techStack')}</p>
         </div>
       </div>

@@ -13,9 +13,9 @@ sio = socketio.AsyncServer(
         "http://127.0.0.1:3000",
     ],
 )
-sio.instrument(
-    auth={
-        "username": "admin",
-        "password": "admin123",
-    }
-)
+# sio.instrument(
+#     auth={
+#         "username": "admin",
+#         "password": "admin123",
+#     }
+# )

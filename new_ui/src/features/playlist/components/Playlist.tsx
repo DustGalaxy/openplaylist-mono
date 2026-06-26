@@ -48,65 +48,6 @@ import {
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import { InfoCardGroup } from '@/components/ui/info-card-group'
 
-const activeStateClass = `
-        translate-y-[3px] 
-        sm:translate-y-[5px] 
-        shadow-[0_0px_0_0_theme(colors.level-3),0_0px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)]
-        `
-const notActiveStateClass = `
-        box-border
-        shadow-[0_3px_0_0_theme(colors.level-3),_0_0px_10px_rgba(0,0,0,0.4),_0_2px_4px_rgba(0,0,0,0.3)] 
-        sm:shadow-[0_3px_0_0_theme(colors.level-3),_0_0px_15px_rgba(0,0,0,0.55),_0_4px_8px_rgba(0,0,0,0.45)] 
-
-        hover:text-shadow-[0_0_4px_rgba(255,255,255,0.8),_0_0_25px_rgba(255,255,255,0.4)]
-        hover:[&_svg]:drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]
-
-        disabled:cursor-not-allowed
-        disabled:opacity-50
-        disabled:shadow-none
-        disabled:hover:shadow-none
-        disabled:hover:text-shadow-none
-        disabled:[&_svg]:drop-shadow-none
-        disabled:active:shadow-none
-        disabled:active:translate-y-0
-
-        transform translate-y-0
-        `
-
-const SortButton = ({
-  icon: Icon,
-  isActive,
-  onClick,
-  ...props
-}: {
-  icon: React.ComponentType<{ className?: string }>
-  isActive: boolean
-  onClick: () => void
-  [key: string]: any
-}) => {
-  return (
-    <button
-      {...props}
-      onClick={onClick}
-      className={cn(
-        `px-5 pt-0.5 pb-[3px]            
-        sm:pt-1 sm:pb-[5px] 
-        ring-1 ring-level-3/40
-        cursor-pointer 
-        transition-all 
-        duration-100 
-        ease-out border-level-2 bg-level-2          
-        rounded-[var(--rounded-std)] 
-        flex items-center justify-center 
-`,
-        isActive ? activeStateClass : notActiveStateClass,
-      )}
-    >
-      <Icon />
-    </button>
-  )
-}
-
 export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
   return (
     <PlaylistProvider playlist={playlist}>
@@ -186,7 +127,7 @@ function PlaylistView() {
         <div
           className={`flex flex-col gap-4  px-3 pt-3 pb-4 ${panelClass} w-full`}
         >
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3  z-1">
             <YoutubePlayer
               playOnReady={true}
               pause={isPaused}
@@ -230,7 +171,7 @@ function PlaylistView() {
                   user_cooldown={contentSettings.user_cooldown}
                   max_playlist_size={playlist.settings.max_playlist_size}
                   priorityMode={playlist.settings.cost_mode}
-                  className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-0.25 sm:gap-0.5"
+                  className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-px sm:gap-0.5"
                 />
               </div>
             )}
@@ -291,9 +232,10 @@ function PlaylistView() {
                   playNext(playlist, 'skipped')
                 }}
               />
-              <SortButton
+
+              <Btn
                 title={t(`playlist.tooltip.shuffle`)}
-                icon={Shuffle}
+                text={<Shuffle />}
                 isActive={sortSettings.shuffle !== 'none'}
                 onClick={() =>
                   updateSettings({
@@ -301,11 +243,12 @@ function PlaylistView() {
                     shuffle: sortSettings.shuffle === 'none' ? 'desc' : 'none',
                   })
                 }
+                className="px-5"
               />
             </div>
 
             <div className="flex gap-2  justify-between ">
-              <div className="w-[1px] h-[70%] self-center bg-text-secondary" />
+              <div className="w-px h-[70%] self-center bg-text-secondary" />
               <div className="flex w-full  gap-2 justify-between ">
                 <div className="flex gap-2 justify-between w-full ">
                   <Btn
@@ -367,7 +310,7 @@ function PlaylistView() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <div className="w-[1px] h-[70%] self-center bg-text-secondary" />
+                  <div className="w-px h-[70%] self-center bg-text-secondary" />
                   <SettingsModal />
                 </div>
               </div>
@@ -375,15 +318,15 @@ function PlaylistView() {
           </div>
         </div>
 
-        <div className="flex items-center  justify-center w-full">
+        <div className="flex items-center  justify-center w-full mb-1 z-0">
           {playlist.now_playing?.yt_video_id ? (
             <TrackCard track={playlist.now_playing} type="now-playing" />
           ) : (
             <div
-              className={`flex flex-col items-center justify-center gap-2 py-8 px-4 text-center w-full border-dashed ${innerPanelClass}`}
+              className={`flex flex-col items-center justify-center gap-2 py-8 px-4   text-center w-full border-dashed ${innerPanelClass}`}
             >
               <Music2
-                className="h-8 w-8 text-text-placeholder"
+                className="h-8 w-8 text-text-main"
                 strokeWidth={1.5}
               />
               <p className="text-sm text-text-secondary">
@@ -395,7 +338,7 @@ function PlaylistView() {
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
-        <div className="flex w-full min-w-0 gap-2">
+        <div className="flex w-full min-w-0 gap-2 translate-y-1">
           <PlaylistQueueInput onSearchQueryChange={setQueueSearch} />
         </div>
         <div className="flex gap-2 shrink-0">

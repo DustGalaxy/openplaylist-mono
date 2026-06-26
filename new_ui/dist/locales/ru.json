@@ -40,20 +40,24 @@
     "theme": "Тема"
   },
   "footer": {
-    "description": "Платформа для стримеров и зрителей: общие плейлисты, заявки на треки, гибкие правила и синхронизация очереди без перезагрузки страницы.",
+    "description": "Интерактивная музыка для всех. Создавайте свои плейлисты, делитесь любимыми треками или заказывайте музыку на стримах любимых авторов.",
     "navigation": "Навигация",
     "features": "Возможности",
     "searchPlaylists": "Поиск плейлистов",
-    "login": "Вход",
-    "register": "Регистрация",
+    "login": "Войти",
+    "register": "Создать аккаунт",
     "highlights": {
-      "realtimeQueue": "Очередь треков в реальном времени",
-      "rulesAndBlocks": "Правила и блок-листы",
-      "donationPriority": "Приоритет от донатов",
-      "integrations": "Интеграция Twitch и DonationAlerts"
+      "realtimeQueue": "Живая очередь треков",
+      "rulesAndBlocks": "Умная модерация и блок-листы",
+      "donationPriority": "Приоритет для платных заказов",
+      "integrations": "Синхронизация со стриминг и донат платформами"
     },
-    "copyright": "© {{year}} OpenPlaylist. Сделано для живых эфиров.",
-    "techStack": "REST + WebSocket · React · FastAPI"
+    "copyright": {
+      "start": "© {{year}} OpenPlaylist. Закодил ",
+      "link": "DustGalaxy",
+      "end": " с ❤️ для авторов и слушателей."
+    },
+    "techStack": "Socket.IO · React · FastAPI · И много чая 🍵"
   },
   "landing": {
     "eyebrow": "Плейлисты для стримов и сообществ",

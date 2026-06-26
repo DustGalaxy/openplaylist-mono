@@ -178,54 +178,57 @@ export default function TrackCard({
     : 'Н/Д'
 
   return (
-    /* ВНЕШНИЙ КОНТЕЙНЕР — динамическая высота h-[100px] или h-[78px] */
+    /* ВНЕШНИЙ КОНТЕЙНЕР — добавили правильную точку начала перспективы [perspective-origin:bottom] */
     <div
-      className={`relative w-full grid grid-cols-[1fr_auto] rounded-(--rounded-std) min-w-[600px] [perspective:1200px] ${
-        isOpen ? 'z-50' : 'z-1'
-      } ${isNowPlayingType ? 'h-[100px]' : 'h-[78px]'}`}
+      className="relative w-full grid grid-cols-[1fr_auto] rounded-(--rounded-std) min-w-150 perspective-[1000px] perspective-origin-bottom h-19.5"
+      style={{
+        zIndex: isOpen ? 50 : 1,
+        // При открытии z-index срабатывает мгновенно (0ms),
+        // а при закрытии — удерживается 500ms и переключается только в самом конце
+        transition: isOpen ? 'z-index 250ms' : 'z-index 200ms step-end',
+        transitionBehavior: 'allow-discrete', // Позволяет анимировать дискретный z-index
+      }}
     >
-      {/* КОНТЕЙНЕР-ОБЕРТКА ДЛЯ ТЕНИ */}
+      {/* КОНТЕЙНЕР-ОБЕРТКА ДЛЯ ТЕНИ — добавили preserve-3d, чтобы передать перспективу внутрь */}
       <div
         className="relative w-full h-full min-w-0 transition-all duration-500 ease-in-out"
         style={{
-          boxShadow: isOpen
-            ? isNowPlayingType
-              ? '0 20px 40px rgba(0, 0, 0, 0.6), inset 0 2px 0 rgba(255,255,255,0.1)'
-              : '0 20px 30px -15px rgba(0, 0, 0, 0.6)'
-            : 'none',
+          transformStyle: 'preserve-3d',
+          boxShadow: isOpen ? '0 20px 30px -15px rgba(0, 0, 0, 0.6)' : 'none',
         }}
       >
-        {/* ФИЗИЧЕСКИЙ КОРПУС КАРТОЧКИ — динамические рамки, скругления и углы поворота */}
+        {/* ФИЗИЧЕСКИЙ КОРПУС КАРТОЧКИ */}
         <div
-          className={`relative w-full h-full min-w-0 bg-level-2 transition-all duration-500 ease-in-out origin-bottom ${
-            isNowPlayingType ? 'rounded-l-(--rounded-std)' : 'rounded-sm'
-          } ${
+          className={`relative w-full h-full min-w-0 bg-level-2 origin-bottom rounded-sm ${
             isCurrentTrackPlaying
-              ? isNowPlayingType
-                ? 'border-2 border-level-3'
-                : 'border border-level-3'
+              ? 'border border-level-3'
               : 'border border-level-3/15'
           }`}
           style={{
-            transform: isOpen
-              ? isNowPlayingType
-                ? 'rotateX(-60deg)'
-                : 'rotateX(-55deg)'
-              : 'rotateX(0deg)',
+            transform: isOpen ? 'rotateX(-55deg)' : 'rotateX(0deg)',
             transformStyle: 'preserve-3d',
+
+            // Точная настройка анимации: трансформация идет 500ms, а тень начинается с задержкой в 150ms
+            transition: isOpen
+              ? 'transform 500ms ease-in-out, box-shadow 500ms ease-out 50ms'
+              : 'transform 500ms ease-in-out, box-shadow 300ms ease-in',
+
+            // Структура теней строго совпадает в обоих состояниях для плавной интерполяции
+            boxShadow: isOpen
+              ? 'inset 0 -60px 50px -30px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 15px 25px -5px rgba(0, 0, 0, 0.4)'
+              : 'inset 0 0 50px -30px rgba(0, 0, 0, 0), inset 0 1px 0 rgba(255, 255, 255, 0), 0 0 0 0 rgba(0, 0, 0, 0)',
           }}
         >
           {/* 📟 ВЕРХНИЙ ТОРЕЦ */}
           <div
-            className={`absolute top-0 left-0 right-0 h-[32px] bg-level-2 flex items-center px-4 gap-4 transition-all duration-300 ease-out ${
-              isNowPlayingType
-                ? 'border-b border-level-3/30 rounded-t-(--rounded-std)'
-                : 'ring-1 ring-black/25 rounded-t-sm'
-            }`}
+            className={`absolute top-0 left-0 right-0 h-8 
+              bg-level-2 flex items-center px-4 gap-4
+               transition-all duration-300 ease-out ring-1 ring-black/25 rounded-t-sm
+            `}
             style={{
               transform: 'translateY(-100%) rotateX(90deg)',
               transformOrigin: 'bottom',
-              opacity: isOpen ? 1 : 0,
+              // opacity: isOpen ? 1 : 0,
               pointerEvents: isOpen ? 'auto' : 'none',
             }}
           >
@@ -242,7 +245,7 @@ export default function TrackCard({
               </span>
             </div>
 
-            <div className="w-[1px] h-3 bg-white/10" />
+            <div className="w-px h-3 bg-white/10" />
 
             {/* Видео ID */}
             <div
@@ -292,7 +295,7 @@ export default function TrackCard({
           <div className="flex gap-3 ml-2 h-full pr-2 py-2 items-center min-w-0">
             {/* Превью трека */}
             <div
-              className={`relative aspect-video flex-shrink-0 rounded-(--rounded-std) h-[72px] overflow-hidden`}
+              className={`relative aspect-video shrink-0 rounded-(--rounded-std) h-18 overflow-hidden`}
             >
               <img
                 className="w-full h-full object-cover"
@@ -301,7 +304,7 @@ export default function TrackCard({
               />
               <div
                 title={t('playlist.track.duration')}
-                className="absolute text-[12px] bottom-[3px] right-[3px] px-1.5 py-0.5 rounded-md font-mono bg-[#000000a7] text-white cursor-help"
+                className="absolute text-[12px] bottom-0.75 right-0.75 px-1.5 py-0.5 rounded-md font-mono bg-[#000000a7] text-white cursor-help"
               >
                 {formatTime(track.duration ? +track.duration : 0)}
               </div>
@@ -322,7 +325,7 @@ export default function TrackCard({
                 <Person
                   width={18}
                   height={18}
-                  className="fill-text-main flex-shrink-0"
+                  className="fill-text-main shrink-0"
                 />
                 <span className="truncate">{track.requester_nickname}</span>
               </div>
@@ -333,7 +336,7 @@ export default function TrackCard({
 
       {/* НИЖНЯЯ СТРОКА (ПРАВАЯ СЕКЦИЯ КОНТЕЙНЕРА) */}
       <div
-        className={`flex flex-col justify-between bg-level-2 h-full rounded-r-(--rounded-std) items-end pb-2.5 pr-2 w-full self-end ${
+        className={`flex flex-col justify-between bg-level-2 h-full rounded-r-(--rounded-std) items-end ml-1 pb-2.5 pr-2 w-full self-end ${
           isNowPlayingType ? '' : 'rounded-sm'
         }`}
       >
@@ -351,7 +354,7 @@ export default function TrackCard({
           {/* Приоритет */}
           <div
             title={t('playlist.track.priority')}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-level-1/60 border border-white/5 shadow-inner min-w-[45px] justify-center cursor-help"
+            className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-level-1/60 border border-white/5 shadow-inner min-w-11.25 justify-center cursor-help"
           >
             <ArrowUpRight
               className={`w-3.5 h-3.5 ${+track.priority > 0 ? 'text-level-3 animate-pulse' : 'text-text-placeholder'}`}
@@ -388,7 +391,7 @@ export default function TrackCard({
             />
           </div>
 
-          <div className="w-[1px] h-6 bg-white/5 mx-1" />
+          <div className="w-px h-6 bg-white/5 mx-1" />
 
           {/* Кнопка EJECT */}
           <button
@@ -396,8 +399,8 @@ export default function TrackCard({
             title={t('playlist.track.eject')}
             className={`flex items-center justify-center gap-1 h-8 px-2.5 rounded-(--rounded-std) font-mono text-[11px] font-bold uppercase tracking-wider transition-all duration-150 border border-level-3/40 ${
               isOpen
-                ? 'bg-level-1 text-level-3 shadow-inner translate-y-[2px]'
-                : 'bg-level-2 text-text-main hover:text-text-main shadow-[0_2px_0_0_theme(colors.level-3)] active:translate-y-[2px] active:shadow-none'
+                ? 'bg-level-1 text-level-3 shadow-inner translate-y-0.5'
+                : 'bg-level-2 text-text-main hover:text-text-main shadow-[0_2px_0_0_var(--color-level-3)] active:translate-y-0.5 active:shadow-none'
             }`}
           >
             <span>{t('playlist.track.ejectBtn')}</span>
