@@ -1,147 +1,139 @@
-from fastapi import HTTPException
+import logging
+
 import jwt
 import socketio
+from fastapi import HTTPException
 
 from src.services.stream_service import StreamService
 from src.settings import settings
 from src.services.realtime.sio_playlist import sio_playlist_service, room_manager
+from src.services.realtime.sio_widget import sio_widget_service
 from src.dal._redis.broker import get_broker
-
 from src.database import async_session_maker
-from src.adapters._sio.init import sio
+
+logger = logging.getLogger("uvicorn.error")
 
 
-class BasicNamespace(socketio.AsyncNamespace):
-    async def on_connect(self, sid, environ, auth):
-        print(f"Новый клиент подключился к Basic с sid: {sid}")
+class BaseNamespace(socketio.AsyncNamespace):
+    """Базовый класс для неймспейсов с общими утилитами и логированием."""
 
-        cookie_string = environ.get("HTTP_COOKIE")
-        if cookie_string:
-            # Простая функция для парсинга куки
-            def parse_cookies(cookie_str):
-                cookies = {}
-                for item in cookie_str.split(";"):
-                    if "=" in item:
-                        key, value = item.strip().split("=", 1)
-                        cookies[key] = value
-                return cookies
+    def __init__(self, namespace: str, redis_prefix: str):
+        super().__init__(namespace)
+        self.namespace = namespace
+        self.redis_prefix = redis_prefix
 
-            parsed_cookies = parse_cookies(cookie_string)
-            auth = parsed_cookies.get("auth")
-
-            if auth:
-                print("Найден auth")
-                user = jwt.decode(auth, settings.JWT_PUBLIC_KEY, algorithms=[settings.JWT_ALGORITHM])
-
-                await self.save_session(sid, {"user_id": user["sub"]})
-                get_broker().hset(f"basic:users:{user['sub']}", "sid", sid)
-            else:
-                print("Кука 'auth' не найдена.")
-                # Опционально, можно отключить клиента, если аутентификация не прошла
-                await sio.disconnect(sid)
-        else:
-            print("Куки не переданы.")
-            await sio.disconnect(sid)
-
-    async def on_disconnect(self, sid, namespace=None):
-        print("disconnect ", sid)
-        user_id = await self.get_session(sid)
-        get_broker().hdel(f"basic:users:{user_id}", "sid")
-        await self.disconnect(sid)
-
-
-class PlstUpdsNamespace(socketio.AsyncNamespace):
-    def get_auth(self, cookie_string) -> str | None:
-
-        def parse_cookies(cookie_str):
-            cookies = {}
-            for item in cookie_str.split(";"):
-                if "=" in item:
-                    key, value = item.strip().split("=", 1)
-                    cookies[key] = value
-            return cookies
-
-        parsed_cookies = parse_cookies(cookie_string)
-        auth = parsed_cookies.get("auth")
-        return auth
-
-    async def on_connect(self, sid, environ, auth):
-        print(f"Новый клиент подключился к PlstUpds с sid: {sid}")
-
+    def _get_auth_from_cookies(self, environ) -> str | None:
         cookie_string = environ.get("HTTP_COOKIE")
         if not cookie_string:
-            print("Куки не переданы.")
-            await sio.disconnect(sid, namespace="/plst_upds")
-            return
+            return None
 
-        if auth := self.get_auth(cookie_string):
-            print("Найден auth")
+        cookies = {}
+        for item in cookie_string.split(";"):
+            if "=" in item:
+                key, value = item.strip().split("=", 1)
+                cookies[key] = value
+        return cookies.get("auth")
+
+    async def _authenticate_via_cookie(self, sid, environ) -> str | None:
+        auth = self._get_auth_from_cookies(environ)
+        if not auth:
+            logger.warning(f"Namespace {self.namespace}: Auth cookie missing for sid {sid}")
+            return None
+
+        try:
             user = jwt.decode(auth, settings.JWT_PUBLIC_KEY, algorithms=[settings.JWT_ALGORITHM])
+            user_id = str(user["sub"])
 
-            await self.save_session(sid, {"user_id": user["sub"]})
-            get_broker().hset(f"playlist:users:{user['sub']}", "sid", sid)
-        else:
-            print("Кука 'auth' не найдена.")
-            await sio.disconnect(sid, namespace="/plst_upds")
+            await self.save_session(sid, {"user_id": user_id}, self.namespace)
+            get_broker().hset(f"{self.redis_prefix}:users:{user_id}", "sid", sid)
+            return user_id
+        except Exception as e:
+            logger.error(f"Namespace {self.namespace}: JWT decode failed for sid {sid}: {e}")
+            return None
 
-    async def on_subscribe(self, sid, data):
-        user = await self.get_session(sid)
-        if user:
-            await sio_playlist_service.sub_plst_upds(sid, data["playlist_id"], user["user_id"])
+    async def _clean_redis_session(self, sid):
+        session = await self.get_session(sid, self.namespace)
+        if session and "user_id" in session:
+            user_id = session["user_id"]
+            get_broker().hdel(f"{self.redis_prefix}:users:{user_id}", "sid")
 
-    async def on_unsubscribe(self, sid, data):
-        user = await self.get_session(sid)
-        if user:
-            await sio_playlist_service.unsub_plst_upds(sid, data["playlist_id"], user["user_id"])
+
+class BasicNamespace(BaseNamespace):
+    def __init__(self, namespace: str):
+        super().__init__(namespace, redis_prefix="basic")
+
+    async def on_connect(self, sid, environ, auth):
+        logger.info(f"Connect: sid {sid} to {self.namespace}")
+        user_id = await self._authenticate_via_cookie(sid, environ)
+        if not user_id:
+            return False
 
     async def on_disconnect(self, sid, namespace=None):
-        print("disconnect ", sid, namespace)
-        room_manager.disconnect(sid, namespace="/plst_upds")
-        await self.disconnect(sid, namespace="/plst_upds")
+        logger.info(f"Disconnect: sid {sid} from {self.namespace}")
+        await self._clean_redis_session(sid)
 
 
-class WidgetsNamespace(socketio.AsyncNamespace):
-    def __init__(self, namespace=None):
-        super().__init__(namespace)
+class PlstUpdsNamespace(BaseNamespace):
+    def __init__(self, namespace: str):
+        super().__init__(namespace, redis_prefix="playlist")
+
+    async def on_connect(self, sid, environ, auth):
+        logger.info(f"Connect: sid {sid} to {self.namespace}")
+        user_id = await self._authenticate_via_cookie(sid, environ)
+        if not user_id:
+            return False
+
+    async def on_subscribe(self, sid, data):
+        session = await self.get_session(sid, self.namespace)
+        if session and "user_id" in session:
+            playlist_id = data.get("playlist_id")
+            logger.info(f"Subscribe: sid {sid} (user {session['user_id']}) to playlist {playlist_id}")
+            await sio_playlist_service.sub_plst_upds(sid, playlist_id, session["user_id"])
+
+    async def on_unsubscribe(self, sid, data):
+        session = await self.get_session(sid, self.namespace)
+        if session and "user_id" in session:
+            playlist_id = data.get("playlist_id")
+            logger.info(f"Unsubscribe: sid {sid} (user {session['user_id']}) from playlist {playlist_id}")
+            await sio_playlist_service.unsub_plst_upds(sid, playlist_id, session["user_id"])
+
+    async def on_disconnect(self, sid, namespace=None):
+        logger.info(f"Disconnect: sid {sid} from {self.namespace}")
+        room_manager.disconnect(sid, namespace=self.namespace)
+        await self._clean_redis_session(sid)
+
+
+class WidgetsNamespace(BaseNamespace):
+    def __init__(self, namespace: str):
+        super().__init__(namespace, redis_prefix="widget")
         self.stream_service = StreamService()
 
     async def on_connect(self, sid, environ, auth):
-        print(f"Новое подключение к /widgets, sid: {sid}")
-        
-        if not auth or "token" not in auth:
-            print("Отклонено: токен отсутствует в auth")
-            return False  # В socketio возвращение False внутри on_connect отклоняет соединение
+        logger.info(f"Connect: sid {sid} to {self.namespace}")
 
-        incoming_token = auth["token"]
+        if not auth or "token" not in auth:
+            logger.warning(f"Disconnect: sid {sid} rejected, token missing in auth")
+            return False
 
         try:
-            # Открываем сессию БД, если она нужна внутри репозиториев сервиса
             async with async_session_maker() as db_session:
-                # 1. Валидируем составной токен и извлекаем user_id
-                user_id = await self.stream_service.verify_token(db_session, incoming_token)
-                
-                # 2. Сохраняем внутреннюю сессию socket.io
-                await self.save_session(sid, {"user_id": str(user_id)})
-                
-                # 3. Маппим user_id -> sid в Redis
-                get_broker().hset(f"widget:users:{user_id}", "sid", sid)
-                
-                # 4. Прогрев данных: получаем последний играющий трек и сразу шлем его на этот sid
+                user_id = await self.stream_service.verify_token(db_session, auth["token"])
+
+                await self.save_session(sid, {"user_id": user_id}, self.namespace)
+                get_broker().hset(f"{self.redis_prefix}:users:{user_id}", "sid", sid)
+
                 current_track = await self.stream_service.get_current_playing_track(db_session, user_id)
                 if current_track:
-                    await self.emit("current_track", current_track, to=sid)
-                    
+                    await sio_widget_service.current_track(current_track, user_id)
+
         except HTTPException:
-            print("Отклонено: невалидный токен виджета")
+            logger.warning(f"Disconnect: sid {sid} rejected, invalid widget token")
             return False
         except Exception as e:
-            print(f"Внутренняя ошибка при подключении виджета: {e}")
+            logger.error(f"Internal error on widget connect (sid {sid}): {e}")
             return False
 
-    async def on_disconnect(self, sid):
-        print(f"Виджет отключился, sid: {sid}")
-        session = await self.get_session(sid)
-        if session and "user_id" in session:
-            user_id = session["user_id"]
-            # Чистим привязку в Redis
-            get_broker().hdel(f"widget:users:{user_id}", "sid")
+    async def on_disconnect(self, sid, namespace=None):
+        logger.info(f"Disconnect: sid {sid} from {self.namespace}")
+        await self._clean_redis_session(sid)
+        await self.disconnect(sid, namespace=self.namespace)

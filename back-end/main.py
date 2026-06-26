@@ -1,7 +1,3 @@
-from src.models import model_rebuild
-
-model_rebuild()
-
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI, Response
@@ -9,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import socketio
 
+import src.models  # noqa: F401
 from src.adapters._fastapi.login_routes import router as login_router
 from src.adapters._fastapi.user_routes import router as user_router
 from src.adapters._fastapi.order_routes import router as order_router
@@ -17,7 +14,7 @@ from src.adapters._fastapi.settings_routes import router as settings_router
 from src.adapters._sio.init import sio
 from src.adapters._rabbit import broker, declare
 from src.dal._redis.broker import get_broker
-from src.adapters._sio.routes import PlstUpdsNamespace, BasicNamespace
+from src.adapters._sio.routes import PlstUpdsNamespace, BasicNamespace, WidgetsNamespace
 from src.services.realtime.sio_playlist import room_manager
 
 from src.settings import settings
@@ -39,6 +36,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+sio.register_namespace(WidgetsNamespace("/widget"))
 sio.register_namespace(PlstUpdsNamespace("/plst_upds"))
 sio.register_namespace(BasicNamespace("/"))
 

@@ -25,7 +25,7 @@ class SioPlaylistUpdateService:
         self.namespace = "/plst_upds"
 
     async def uid_from_sid(self, sid):
-        return await self.sio.get_session(sid)
+        return await self.sio.get_session(sid, self.namespace)
 
     def sid_from_uid(self, user_id):
         return str(get_broker().hget(f"playlist:users:{user_id}", "sid"))

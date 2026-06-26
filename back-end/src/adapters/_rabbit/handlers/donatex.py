@@ -1,4 +1,3 @@
-from datetime import datetime
 import json
 
 from faststream import Context
@@ -8,18 +7,13 @@ from simple_repository.exceptions import NotFoundException
 from src.adapters._rabbit.event_broker import (
     get_broker,
     main_exchange,
-    bot_donatex_ack_connection,
-    bot_donatex_connect_request,
-    bot_donatex_connect_response,
     bot_donatex_order_new,
     auth_user_donatex_all_request,
-    auth_user_donatex_tokens_refreshed
+    auth_user_donatex_tokens_refreshed,
 )
 from src.dto.order import DonatexNewOrder
 from src.adapters._rabbit.dto import Tokens, DonateXTokenRefreshed
-from src.services.realtime.sio_playlist import sio_playlist_service
 
-from src.services.tokens.token_service import token_service
 from src.dal.postgres.token import token_vault_repository
 from src.dal.postgres.linked_account import linked_accounts_repository
 from src._types import IntegrationPlatform
@@ -27,6 +21,7 @@ from src.database import async_session_maker
 from src.utils import kick
 
 broker = get_broker()
+
 
 @broker.subscriber(bot_donatex_order_new, exchange=main_exchange)
 async def order_new_from_donatex(
@@ -38,16 +33,6 @@ async def order_new_from_donatex(
     from taskiq_broker import task_broker as taskiq_broker
 
     await kick("order.new", taskiq_broker, event, False, labels={"user_id": str(event.owner_id)})
-
-
-@broker.subscriber(bot_donatex_ack_connection, exchange=main_exchange)
-async def ack_donetex_connection(
-    message: RabbitMessage = Context(),
-):
-    await message.ack()
-    user_id = message.body.decode()
-    platform_user_id = 
-    await sio_playlist_service.ack_bot_connection("donatex", user_id, platform_user_id)
 
 
 @broker.subscriber(auth_user_donatex_all_request, exchange=main_exchange)
