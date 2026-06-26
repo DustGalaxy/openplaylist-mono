@@ -18,7 +18,7 @@ from src.adapters._sio.init import sio
 from src.adapters._rabbit import broker, declare
 from src.dal._redis.broker import get_broker
 from src.adapters._sio.routes import PlstUpdsNamespace, BasicNamespace
-from src.services.sio_service import room_manager
+from src.services.realtime.sio_playlist import room_manager
 
 from src.settings import settings
 

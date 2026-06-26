@@ -28,6 +28,9 @@ class StreamService:
         repo = get_stream_token_repository()
         await repo.upsert(db_session, user_id, token_hash)
 
+    async def get_current_playing_track(self, ):
+        pass
+
     async def verify_token(self, db_session: AsyncSession, incoming_public_token: str) -> UUID:
         """Проверяет составной токен, пришедший из OBS"""
         try:

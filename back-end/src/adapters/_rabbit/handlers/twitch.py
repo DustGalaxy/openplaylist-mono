@@ -15,7 +15,6 @@ from src.adapters._rabbit.event_broker import (
 )
 from src.dto.order import TTVNewOrder
 from src.adapters._rabbit.dto import Tokens, TwitchTokenRefreshed
-from src.services.sio_service import sio_service
 
 from src.services.tokens.token_service import token_service
 from src.dal.postgres.token import token_vault_repository

@@ -17,7 +17,7 @@ from src.adapters._rabbit.event_broker import (
 )
 from src.dto.order import DonatexNewOrder
 from src.adapters._rabbit.dto import Tokens, DonateXTokenRefreshed
-from src.services.sio_service import sio_service
+from src.services.realtime.sio_playlist import sio_playlist_service
 
 from src.services.tokens.token_service import token_service
 from src.dal.postgres.token import token_vault_repository
@@ -46,7 +46,8 @@ async def ack_donetex_connection(
 ):
     await message.ack()
     user_id = message.body.decode()
-    await sio_service.ack_bot_connection("donatex", user_id)
+    platform_user_id = 
+    await sio_playlist_service.ack_bot_connection("donatex", user_id, platform_user_id)
 
 
 @broker.subscriber(auth_user_donatex_all_request, exchange=main_exchange)

@@ -19,7 +19,7 @@ from src.database import async_session_maker
 
 from src.dal.postgres.token import token_vault_repository
 from src.dal.postgres.linked_account import linked_accounts_repository
-from src.services.sio_service import sio_service
+from src.services.realtime.sio_playlist import sio_playlist_service
 
 from src.utils import kick
 
@@ -42,7 +42,8 @@ async def ack_da_connection(
 ):
     await message.ack()
     user_id = message.body.decode()
-    await sio_service.ack_bot_connection("da", user_id)
+    platform_user_id = 
+    await sio_playlist_service.ack_bot_connection("da", user_id, platform_user_id)
 
 
 @broker.subscriber(auth_user_da_all_request, exchange=main_exchange)

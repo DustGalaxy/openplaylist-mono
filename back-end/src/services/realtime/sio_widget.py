@@ -1,4 +1,4 @@
-from typing import Any, Set
+
 from uuid import UUID
 
 import socketio
@@ -11,82 +11,24 @@ from src.dto.events import (
 )
 from src.dto.settings import ReadPlaylistSettings
 from src.adapters._sio.init import sio
-from src.dal._redis.broker import get_broker, RedisAdapter
+from src.dal._redis.broker import get_broker
 from src.dal.postgres.playlist import playlist_repository
 from src.models.playlist_logs import PlaylistLogSchema
 from src.models.order import OrderDomain
 from src.database import async_session_maker
+from .sio_room_manager import room_manager
 
 
-class RoomManager:
-    def __init__(self, redis: RedisAdapter):
-        self.redis_adapter = redis
-
-    def enter_room(self, sid: str, room: str, namespace="/") -> None:
-        with self.redis_adapter.broker.pipeline(transaction=True) as pipe:
-            pipe.sadd(f"{namespace}:rooms-to-sids:{room}", sid)
-            pipe.sadd(f"{namespace}:sids-to-rooms:{sid}", room)
-            pipe.execute()
-
-    def leave_room(self, sid: str, room: str, namespace="/") -> None:
-        with self.redis_adapter.broker.pipeline(transaction=True) as pipe:
-            pipe.srem(f"{namespace}:rooms-to-sids:{room}", sid)
-            pipe.srem(f"{namespace}:sids-to-rooms:{sid}", room)
-            pipe.execute()
-
-    def get_rooms(self, sid: str, namespace="/") -> Set[Any]:
-        return self.redis_adapter.smembers(f"{namespace}:sids-to-rooms:{sid}")  # pyright: ignore[reportReturnType]
-
-    def get_sids(self, room: str, namespace="/") -> Set[Any]:
-        return self.redis_adapter.smembers(f"{namespace}:rooms-to-sids:{room}")  # pyright: ignore[reportReturnType]
-
-    def clear_room(self, room: str, namespace="/") -> None:
-        room_key = f"{namespace}:rooms-to-sids:{room}"
-        sids = self.redis_adapter.smembers(room_key)
-        if not sids:
-            return
-
-        with self.redis_adapter.broker.pipeline(transaction=True) as pipe:
-            for sid in sids:  # pyright: ignore[reportGeneralTypeIssues]
-                pipe.srem(f"{namespace}:sids-to-rooms:{sid}", room)
-
-            pipe.delete(room_key)
-            pipe.execute()
-
-    def disconnect(self, sid: str, namespace="/") -> None:
-        sid_rooms_key = f"{namespace}:sids-to-rooms:{sid}"
-        rooms = self.redis_adapter.smembers(sid_rooms_key)
-
-        if not rooms:
-            return
-        print(f"disconnecting {sid} from rooms {rooms}")
-        with self.redis_adapter.broker.pipeline(transaction=True) as pipe:
-            for room_name in rooms:  # pyright: ignore[reportGeneralTypeIssues]
-                pipe.srem(f"{namespace}:rooms-to-sids:{room_name}", sid)
-
-            pipe.delete(sid_rooms_key)
-            pipe.execute()
-
-    def start_up(self):
-        with self.redis_adapter.broker.pipeline(transaction=True) as pipe:
-            pipe.delete("*:rooms-to-sids:*")
-            pipe.delete("*:sids-to-rooms:*")
-            pipe.execute()
-
-
-room_manager = RoomManager(get_broker())
-
-
-class SioPlaylistUpdateService:
+class SioWidgetService:
     def __init__(self, sio):
         self.sio: socketio.AsyncServer = sio
-        self.namespace = "/plst_upds"
+        self.namespace = "/widget"
 
     async def uid_from_sid(self, sid):
         return await self.sio.get_session(sid)
 
     def sid_from_uid(self, user_id):
-        return str(get_broker().hget(f"playlist:users:{user_id}", "sid"))
+        return str(get_broker().hget(f"widget:users:{user_id}", "sid"))
 
     async def log(self, log: PlaylistLogSchema):
         owner_sid = self.sid_from_uid(log.user_id)
@@ -158,4 +100,4 @@ class SioPlaylistUpdateService:
         print(f"⬅️ Пользователь {user_id} вышел из комнаты {playlist_id}")
 
 
-sio_service = SioPlaylistUpdateService(sio)
+sio_playlist_service = SioPlaylistUpdateService(sio)
