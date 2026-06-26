@@ -88,8 +88,8 @@ class MusicRequest(commands.Component):
         self.bot.safe_dispatch(
             "new_order",
             payload=NewOrderPayload(
-                broadcaster_id=int(ctx.channel.id),
-                chatter_id=int(ctx.author.id),
+                broadcaster_id=str(ctx.channel.id),
+                chatter_id=str(ctx.author.id),
                 chatter_nickname=ctx.author.name or "annonymous",
                 yt_video_url=yt_url,
                 priority="".join(priority_song),
