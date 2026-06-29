@@ -34,7 +34,7 @@ async def order_new_from_twitch(
 
     from taskiq_broker import task_broker as taskiq_broker
 
-    await kick("order.new", taskiq_broker, event, False, labels={"user_id": str(event.owner_id)})
+    await kick("order.new", taskiq_broker, event, event.owner_platform_id == event.requester_id, labels={"user_id": str(event.owner_id)})
 
 
 @broker.subscriber(auth_user_twitch_all_request, exchange=main_exchange)

@@ -6,5 +6,8 @@ dist
 .venv
 *.env
 test
+tests
 __pycache__
 Dockerfile*
+.pytest_cache
+.history
