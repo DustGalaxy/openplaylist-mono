@@ -13,6 +13,7 @@ from src.orm.token_vault import TokenVault  # noqa: F401
 from src.orm.playlist import Playlist, Order, OrderPlaylistStatus  # noqa: F401
 from src.orm.settings import Settings, BlockList, ContentSettings, DonationRules, ChatRules, Base as SettingsBase  # noqa: F401
 from src.orm.playlist_logs import PlaylistLog  # noqa: F401
+from src.orm.stream_token import StreamToken
 
 from src.database import Base
 

@@ -73,7 +73,9 @@ const TabValidation = ({
   return (
     <div>
       <div className="gap-1 flex flex-col">
-        <Label className=" text-xl">{t('playlistSettings.validation.title')}</Label>
+        <Label className=" text-xl">
+          {t('playlistSettings.validation.title')}
+        </Label>
         <DialogDescription>
           {t('playlistSettings.validation.description')}
         </DialogDescription>
@@ -84,8 +86,14 @@ const TabValidation = ({
         >
           <TabsList className="flex flex-col h-full items-start">
             {Object.entries(Platform).map(([key, val], i) => (
-              <TabsTrigger key={key} value={val} className="  w-full">
-                <Label className="w-full text-lg text-left">{key === 'General' ? t(`common.general`) : key} </Label>
+              <TabsTrigger
+                key={key}
+                value={val}
+                className="w-full ring-0 data-[state=active]:ring-2 data-[state=active]:bg-level-2 ring-level-3"
+              >
+                <Label className="w-full text-base text-left cursor-pointer">
+                  {key === 'General' ? t(`common.general`) : key}{' '}
+                </Label>
               </TabsTrigger>
             ))}
           </TabsList>

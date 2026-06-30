@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from simple_repository import crud_factory
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,12 +14,16 @@ from src.orm.stream_token import StreamToken
 
 class StreamTokenRepository:
     async def upsert(self, session: AsyncSession, user_id: UUID, token_hash: str):
-        instance = StreamToken(user_id=user_id, token_hash=token_hash)
         try:
-            session.add(instance)
+            stmt = insert(StreamToken).values(user_id=user_id, token_hash=token_hash)
+
+            upsert_stmt = stmt.on_conflict_do_update(
+                index_elements=["user_id"],
+                set_={"token_hash": stmt.excluded.token_hash},
+            ).returning(StreamToken)
+            result = await session.execute(upsert_stmt)
             await session.commit()
-            await session.refresh(instance)
-            return instance
+            return result.scalar_one()
 
         except IntegrityError as e:
             await session.rollback()

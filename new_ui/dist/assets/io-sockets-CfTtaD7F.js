@@ -1,1 +1,0 @@
-import{$ as e}from"./index-ChnJTjHY.js";import{t}from"./vendor-socket-BmBfgkYP.js";var n,r=()=>(n||=t(e().WS_API_URL+`/plst_upds`,{withCredentials:!0,path:e().SOCKET_PATH}),n),i,a=()=>(i||=t(e().WS_API_URL,{withCredentials:!0,path:e().SOCKET_PATH}),i);export{r as n,a as t};

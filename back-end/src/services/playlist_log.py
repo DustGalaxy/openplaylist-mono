@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.services.realtime.sio_playlist import sio_playlist_service
+from src.services.realtime.sio_widget import sio_widget_service
 from src.models.playlist_logs import PlaylistLogSchema, PlaylistLogCreate
 from src.dal.postgres.playlist_logs import get_playlist_logs_repository
 

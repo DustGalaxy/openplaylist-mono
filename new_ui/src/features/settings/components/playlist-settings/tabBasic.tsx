@@ -24,6 +24,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { getUserIntegrations } from '@/api/api-user'
 import PlaylistDetailsForm from './playlist-details-form'
 import ContentSwitch from '@/components/ui/content-switch'
+import { Switch } from '@/components/ui/switch'
 
 const TabBasic = ({
   playlist,
@@ -45,6 +46,9 @@ const TabBasic = ({
   const [isPublic, setIsPublic] = React.useState(playlist.is_public)
   const [priorityMode, setPriorityMode] = React.useState(
     playlist.settings.cost_mode,
+  )
+  const [showInWidget, setShowInWinget] = React.useState(
+    playlist.show_in_widget,
   )
   const [integrations, setIntegrations] = useState<Array<Integration>>([])
   const [isLoadingIntegrations, setIsLoadingIntegrations] = useState(false)
@@ -155,7 +159,7 @@ const TabBasic = ({
 
           <div
             className={`flex items-center  cursor-pointer  
-          py-1 pl-4 pr-[2px] rounded-l-(--rounded-std)  justify-end`}
+          py-1 pl-4 pr-0.5 rounded-l-(--rounded-std)  justify-end`}
           >
             <ContentSwitch
               leftLabel={
@@ -203,7 +207,7 @@ const TabBasic = ({
 
         <div
           className={`flex items-center  cursor-pointer  
-          py-1 pl-4 pr-[2px] rounded-l-(--rounded-std)  justify-end`}
+          py-1 pl-4 pr-0.5 rounded-l-(--rounded-std)  justify-end`}
         >
           <ContentSwitch
             leftLabel={
@@ -257,7 +261,7 @@ const TabBasic = ({
 
         <div
           className={`flex items-center  cursor-pointer  
-          py-1 pl-4 pr-[2px] rounded-l-(--rounded-std)  justify-end`}
+          py-1 pl-4 pr-0.5 rounded-l-(--rounded-std)  justify-end`}
         >
           <ContentSwitch
             leftLabel={
@@ -301,6 +305,54 @@ const TabBasic = ({
           </div>
         </DialogDescription>
       </div>
+
+      <div className="grid grid-cols-[auto_1fr] items-center gap-2 mb-4">
+        <Label className="text-lg">
+          {t('playlistSettings.basic.showInWidget')}
+        </Label>
+        <div
+          className={`flex items-center  cursor-pointer  
+          py-1 pl-4 pr-0.5 rounded-l-(--rounded-std)  justify-end`}
+        >
+          <ContentSwitch
+            leftLabel={
+              <Label
+                htmlFor="widget-no-id"
+                className={`text-shadow-md font-semibold
+                    flex cursor-pointer transition-all duration-100 text-lg`}
+              >
+                {t('playlistSettings.basic.showInWidgetNo')}
+              </Label>
+            }
+            rightLabel={
+              <Label
+                htmlFor="widget-yes-id"
+                className={`text-shadow-md font-semibold 
+                    cursor-pointer transition-all duration-100 text-lg`}
+              >
+                {t('playlistSettings.basic.showInWidgetYes')}
+              </Label>
+            }
+            onChange={(value) => {
+              setShowInWinget(value === 'right')
+              setPlst({ ...playlist, show_in_widget: value === 'right' })
+              canPatchPlaylist.current = true
+            }}
+            defaultValue={showInWidget ? 'right' : 'left'}
+          />
+        </div>
+
+        {/* <Switch
+          checked={showInWidget}
+          onCheckedChange={(value) => {
+            setShowInWinget(value)
+            setPlst({ ...playlist, show_in_widget: value })
+            canPatchPlaylist.current = true
+          }}
+          className="justify-self-end ring-2 ring-level-3 scale-130"
+        /> */}
+      </div>
+
       <div className="mb-4">
         <Label className=" text-lg">
           {t('playlistSettings.basic.externalSources')}
@@ -351,11 +403,11 @@ const TabBasic = ({
                           integration.platform_user_id,
                         )
                       }
-                      className="mt-0.5 flex-shrink-0 rounded-[4px] border-level-3 cursor-pointer"
+                      className="mt-0.5 shrink-0 rounded-lg border-level-3 cursor-pointer"
                     />
 
                     <div className="flex items-center gap-3 flex-1">
-                      <div className="w-6 h-6 flex items-center justify-center rounded flex-shrink-0">
+                      <div className="w-6 h-6 flex items-center justify-center rounded shrink-0">
                         {getPlatformIcon(integration.platform)}
                       </div>
                       <div className="flex flex-col min-w-0">

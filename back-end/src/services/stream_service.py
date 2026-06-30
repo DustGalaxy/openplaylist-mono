@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.dal.postgres.stream_token import get_stream_token_repository
 from src.models.stream_token import StreamTokenSchema, StreamTokenPatch
 
+from src.dal.postgres.playlist_logs import get_playlist_logs_repository
 
 class StreamService:
     def _hash(self, token: str) -> str:
@@ -18,6 +19,7 @@ class StreamService:
         raw_token = secrets.token_hex(64)  # 128 символов
         # Публичный токен, который отдаем пользователю (в БД не сохраняем)
         public_token = f"{user_id}:{raw_token}"
+        print(f"!!!!!! NEW TOKEN - {public_token}")
         return public_token
 
     async def save(self, db_session: AsyncSession, user_id: UUID, public_token: str):
@@ -26,14 +28,21 @@ class StreamService:
         token_hash = self._hash(raw_token)
         
         repo = get_stream_token_repository()
+        print(f"!!!!!! TOKEN TO SAVE - {public_token}")
+        print(f"!!!!!! TOKEN HASH TO SAVE - {token_hash}")
         await repo.upsert(db_session, user_id, token_hash)
 
     async def get_current_playing_track(self, db_session: AsyncSession, user_id: UUID):
-        pass
+        data = await get_playlist_logs_repository().get_last_playnow(db_session, user_id)
+        if not data:
+            return None
+        
+        return data.event_data
 
     async def verify_token(self, db_session: AsyncSession, incoming_public_token: str) -> UUID:
         """Проверяет составной токен, пришедший из OBS"""
         try:
+            # UUID:HEX
             user_id_str, raw_token = incoming_public_token.split(":", 1)
             user_id = UUID(user_id_str)
         except ValueError:

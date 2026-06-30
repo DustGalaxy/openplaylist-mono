@@ -164,13 +164,14 @@ export const postPlayNow = async (
   return response
 }
 
-export const createNewPlaylist = async (name: string, description?: string) => {
+export const createNewPlaylist = async (name: string, showInWidget: boolean, description?: string) => {
   const config = getConfig()
   const response = await apiClient(config.PLST_API_URL + ``, {
     method: 'POST',
     withCredentials: true,
     data: {
       name: name,
+      show_in_widget: showInWidget,
       description: description,
     },
   })
@@ -183,6 +184,7 @@ export const deletePlaylist = async (playlist_id: string) => {
     method: 'DELETE',
     withCredentials: true,
   })
+  return response.status == 204
 }
 
 export const getPublicPlaylists = async (query: string) => {

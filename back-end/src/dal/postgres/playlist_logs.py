@@ -8,6 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.playlist_logs import PlaylistLogSchema, PlaylistLogCreate
 from src.orm.playlist_logs import PlaylistLog
+from src.orm.playlist import Playlist
+from src._types import PlaylistLogsEventTypes
 
 
 class PlaylistLogsRepository(crud_factory(PlaylistLog, PlaylistLogSchema, PlaylistLogCreate, dict)):
@@ -28,6 +30,22 @@ class PlaylistLogsRepository(crud_factory(PlaylistLog, PlaylistLogSchema, Playli
         result = await session.execute(stmt)
 
         return [self.to_repr(item) for item in result.unique().scalars().all()]
+
+    async def get_last_playnow(self, session: AsyncSession, user_id: UUID) -> PlaylistLogSchema | None:
+        stmt = (
+            select(PlaylistLog)
+            .join(Playlist)
+            .where(
+                Playlist.show_in_widget,
+                PlaylistLog.user_id == user_id,
+                PlaylistLog.event_type == PlaylistLogsEventTypes.PLAY_TRACK,
+            )
+            .order_by(PlaylistLog.created_at.desc())
+            .limit(1)
+        )
+        result = await session.execute(stmt)
+        data = result.scalar_one_or_none()
+        return self.to_repr(data) if data else None
 
 
 _playlist_logs_repository = PlaylistLogsRepository()

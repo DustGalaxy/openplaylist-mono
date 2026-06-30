@@ -362,10 +362,12 @@
       "title": "New playlist",
       "description": "Form to create a new playlist",
       "nameLabel": "Playlist name",
-      "nameHint": "must be unique",
+      "nameHint": "Must be unique for your account",
       "namePlaceholder": "Type name...",
       "descriptionLabel": "Playlist description",
       "descriptionPlaceholder": "Type description...",
+      "showInWidget": "Show playlist activity in widget?",
+      "showInWidgetHint": "Widget for OBS and show last played track",
       "submit": "Create",
       "submitting": "Creating...",
       "success": "Playlist created successfully! You can start adding tracks or configure rules.",
@@ -504,7 +506,10 @@
       "priorityModeMaxHelp": "MAX — the highest priority is used.",
       "publicHelp": "PUBLIC — the playlist is visible to anyone who has the link or finds it via search.",
       "privateHelp": "PRIVATE — the playlist is visible only to you.",
-      "externalSourcesHelp": "Allow adding tracks from external sources considering specific accounts."
+      "externalSourcesHelp": "Allow adding tracks from external sources considering specific accounts.",
+      "showInWidget": "Show playlist activity in widget?",
+      "showInWidgetYes": "Yes",
+      "showInWidgetNo": "No"
     },
     "validation": {
       "title": "Video validation",
@@ -621,7 +626,8 @@
     "tabs": {
       "profile": "Profile",
       "account": "Account",
-      "integrations": "Integrations"
+      "integrations": "Integrations",
+      "widget": "OBS Widget"
     },
     "emailNotConfirmed": {
       "title": "Email is not confirmed",
@@ -741,6 +747,31 @@
       "deadBanner": "Token expired or connection lost. Please reconnect your account.",
       "reconnect": "Reconnect account",
       "tokenExpired": "Token expired."
+    },
+    "widget": {
+      "linkTitle": "Widget link",
+      "copyLink": "Copy",
+      "generate": "Generate",
+      "regenerate": "Regenerate",
+      "generateConfirm": "This creates a new widget link, shown only once. Save it now — continue?",
+      "regenerateConfirm": "This invalidates the current link and shows the new one only once. Update OBS afterwards. Continue?",
+      "regenerated": "Widget link generated — copy and save it now, it won't be shown again",
+      "regenerateFailed": "Failed to generate widget link",
+      "noTokenWarning": "No widget link saved in this browser. Click \"Generate\" — the link is shown only once and stored only on this device.",
+      "noTokenPlaceholder": "No link yet — click Generate",
+      "linkHint": "Add this URL as a Browser Source in OBS. It's stored only in this browser — clearing site data or opening this page on another device means generating a new one (which breaks the old OBS source until you update it).",
+      "appearanceTitle": "Appearance",
+      "showIcon": "Show disc icon",
+      "textColor": "Text color",
+      "bgColor": "Background color",
+      "bgOpacity": "Background opacity",
+      "fontSize": "Font size",
+      "previewTitle": "Preview",
+      "demoTrack": "Imagine Dragons – Believer",
+      "cssTitle": "OBS Custom CSS",
+      "cssCopy": "Copy CSS",
+      "cssCopied": "CSS copied — paste it into OBS Browser Source → Custom CSS",
+      "cssHint": "In OBS: select the widget Browser Source → Properties → paste into the \"Custom CSS\" field → OK."
     }
   },
   "botSettings": {

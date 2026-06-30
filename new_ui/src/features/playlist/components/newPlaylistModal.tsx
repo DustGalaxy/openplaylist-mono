@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import Add from '@/components/icons/icon-add'
+
 import { Input } from '@/components/ui/input'
 import Btn from '@/components/ui/my-btn'
 
@@ -19,11 +19,15 @@ import {
 import { createNewPlaylist } from '@/api/api-playlist'
 import useMusicStore from '@/stores/musicStore'
 import { Plus } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
 
 export default function AddPlaylistModal() {
   const { t } = useTranslation()
+
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
+  const [showInWidget, setShowInWinget] = React.useState(false)
+
   const [isLoading, setIsLoading] = React.useState(false)
   const [open, setOpen] = React.useState(false)
 
@@ -39,7 +43,7 @@ export default function AddPlaylistModal() {
     const loadingToast = toast.loading(t('playlist.create.submitting'))
 
     try {
-      const newPlst = await createNewPlaylist(name, description)
+      const newPlst = await createNewPlaylist(name, showInWidget, description)
 
       if (newPlst) {
         addPlaylist(newPlst)
@@ -70,7 +74,7 @@ export default function AddPlaylistModal() {
       <DialogTrigger asChild className="m-1.5">
         <Btn text={<Plus size={26} />} className="flex p-1 bg-level-2 mr-1" />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-level-2 border-level-3 text-text-main ">
+      <DialogContent className="sm:max-w-106.25 bg-level-2 border-level-3 text-text-main ">
         <DialogHeader>
           <DialogTitle className="text-xl text-text-main font-bold">
             {t('playlist.create.title')}
@@ -84,7 +88,7 @@ export default function AddPlaylistModal() {
         <Input
           type="text"
           placeholder={t('playlist.create.namePlaceholder')}
-          className="border-level-3 border-1 w-full mb-4"
+          className="border-level-3 border w-full mb-4"
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={isLoading}
@@ -96,11 +100,24 @@ export default function AddPlaylistModal() {
         <Input
           type="text"
           placeholder={t('playlist.create.descriptionPlaceholder')}
-          className="border-level-3 border-1 w-full mb-4"
+          className="border-level-3 border w-full mb-4"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           disabled={isLoading}
         />
+        <div className="flex items-center justify-between">
+          <Label className="text-lg">{t('playlist.create.showInWidget')}</Label>
+          <Switch
+            checked={showInWidget}
+            onCheckedChange={(v) => setShowInWinget(v)}
+            className="ring-1 ring-level-3"
+          />
+        </div>
+
+        <DialogDescription>
+          {t('playlist.create.showInWidgetHint')}
+        </DialogDescription>
+
         <DialogFooter>
           <DialogClose asChild>
             <Btn

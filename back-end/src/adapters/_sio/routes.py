@@ -123,6 +123,7 @@ class WidgetsNamespace(BaseNamespace):
                 get_broker().hset(f"{self.redis_prefix}:users:{user_id}", "sid", sid)
 
                 current_track = await self.stream_service.get_current_playing_track(db_session, user_id)
+                logger.info(f"current_track: {current_track}")
                 if current_track:
                     await sio_widget_service.current_track(current_track, user_id)
 

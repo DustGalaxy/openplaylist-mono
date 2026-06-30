@@ -156,6 +156,7 @@ export type InputPlaylist = {
   is_allow_external_requests: boolean
   tags: Array<string>
   allow_sources: Array<AllowSources>
+  show_in_widget: boolean
   track_data: Array<Track>
   now_playing: string | undefined
   created_at: string
@@ -183,6 +184,7 @@ export type ClientPlaylist = {
   is_allow_external_requests: boolean
   tags: Array<string>
   allow_sources: Array<AllowSources>
+  show_in_widget: boolean
   track_data: Array<Track>
 
   isSub: boolean

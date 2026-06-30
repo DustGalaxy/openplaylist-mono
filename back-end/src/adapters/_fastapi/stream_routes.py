@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
 from fastapi import Body
 
 from .dependencies import CURR_USER, DB_SESSION, STREAM_SERVICE
@@ -16,3 +17,7 @@ async def gen_token(db_session: DB_SESSION, user: CURR_USER, service: STREAM_SER
 
     return pub_token
 
+
+# @router.get("/widget")
+# async def gen_widget():
+#     return FileResponse("./src/adapters/_fastapi/templates/widget.html")

@@ -50,6 +50,8 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
     allow_sources: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list, server_default='[]')
     is_allow_external_requests: Mapped[bool] = mapped_column(default=False, nullable=False)
 
+    show_in_widget: Mapped[bool] = mapped_column(default=False, nullable=False)
+
     now_playing: Mapped[str] = mapped_column(String, nullable=True)
 
     order_associations: Mapped[list["OrderPlaylistStatus"]] = relationship(back_populates="playlist", lazy="selectin", cascade="all, delete-orphan")

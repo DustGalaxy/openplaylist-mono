@@ -20,6 +20,7 @@ class ReadPlaylist(BaseModel):
     is_favorite: bool
     is_allow_external_requests: bool
     allow_sources: list[AllowedSource]
+    show_in_widget: bool
 
     now_playing: str | None = Field(None)
 
@@ -60,6 +61,8 @@ class PlaylistBaseinfo(BaseModel):
 class NewPlaylist(BaseModel):
     name: str
     description: str
+    show_in_widget: bool
+
 
 
 class PlayNow(BaseModel):
