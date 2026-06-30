@@ -1,0 +1,873 @@
+{
+  "errorPage": {
+    "eyebrow": "Упс! Что-то сломалось",
+    "title": "Произошла ошибка",
+    "logLabel": "Лог ошибки:",
+    "unknownError": "Неизвестная системная ошибка",
+    "retryBtn": "Попробовать снова",
+    "homeBtn": "На главную"
+  },
+  "common": {
+    "or": "или",
+    "cancel": "Отмена",
+    "toast": {
+      "copied": "Скопировано в буфер обмена!",
+      "saving": "Сохраняется...",
+      "saved": "Сохранено успешно",
+      "saveFailed": "Ошибка сохранения",
+      "loading": "Загрузка...",
+      "success": "Готово!",
+      "error": "Что-то пошло не так",
+      "confirming": "Обработка..."
+    },
+    "web": "Веб",
+    "general": "Общие",
+    "general2": "Общая"
+  },
+  "brand": {
+    "name": "OpenPlaylist",
+    "nameWithVersion": "OpenPlaylist v2026.2beta",
+    "version": "2026.2 beta"
+  },
+  "nav": {
+    "login": "Вход",
+    "signUp": "Регистрация",
+    "settings": "Настройки",
+    "logout": "Выход",
+    "statistic": "Статистика",
+    "history": "История",
+    "myPlaylists": "Мои плейлисты",
+    "theme": "Тема"
+  },
+  "footer": {
+    "description": "Интерактивная музыка для всех. Создавайте свои плейлисты, делитесь любимыми треками или заказывайте музыку на стримах любимых авторов.",
+    "navigation": "Навигация",
+    "features": "Возможности",
+    "searchPlaylists": "Поиск плейлистов",
+    "login": "Войти",
+    "register": "Создать аккаунт",
+    "highlights": {
+      "realtimeQueue": "Живая очередь треков",
+      "rulesAndBlocks": "Умная модерация и блок-листы",
+      "donationPriority": "Приоритет для платных заказов",
+      "integrations": "Синхронизация со стриминг и донат платформами"
+    },
+    "copyright": {
+      "start": "© {{year}} OpenPlaylist. Закодил ",
+      "link": "DustGalaxy",
+      "end": " с ❤️ для авторов и слушателей."
+    },
+    "techStack": "Socket.IO · React · FastAPI · И много чая 🍵"
+  },
+  "landing": {
+    "eyebrow": "Плейлисты для стримов и сообществ",
+    "title": "OPEN PLAYLIST",
+    "heroBody": "<0>OpenPlaylist</0> — место, где плейлист общий, а не личный список треков. Зрители предлагают музыку, правила фильтруют заявки, а вы управляете эфиром в один клик.",
+    "goToPlaylists": "К плейлистам",
+    "loginAndStart": "Войти и начать",
+    "findPlaylist": "Найти плейлист",
+    "audienceTitle": "Для кого",
+    "audienceSubtitle": "Стримеры · зрители · любители музыки",
+    "audienceBullets": {
+      "sharedQueue": "Совместная очередь с приоритетами и донатами",
+      "validation": "Валидация YouTube-треков по вашим настройкам",
+      "publicPrivate": "Публичные и приватные плейлисты",
+      "sync": "Синхронизация дашборда и зрительской страницы"
+    },
+    "featuresTitle": "Что умеет платформа",
+    "featuresSubtitle": "От заявки зрителя до воспроизведения — всё связано настройками, realtime-обновлениями и понятным дашбордом.",
+    "howItWorksTitle": "Как это работает",
+    "features": {
+      "liveQueue": {
+        "title": "Живая очередь",
+        "description": "Заявки от зрителей сразу попадают в плейлист. Все подключённые клиенты видят изменения в реальном времени."
+      },
+      "smartRules": {
+        "title": "Умные правила",
+        "description": "Лимиты по длительности, просмотрам, кулдаунам и блок-листам — вы сами решаете, что допустить в эфир."
+      },
+      "donations": {
+        "title": "Донаты и приоритет",
+        "description": "Настройте приоритеты для донатов и ролей из чата Twitch — очередь учитывает вклад аудитории."
+      },
+      "publicAccess": {
+        "title": "Публичный доступ",
+        "description": "Открытые плейлисты можно найти по имени или автору. Зрители отправляют треки без лишних шагов."
+      }
+    },
+    "steps": {
+      "create": {
+        "title": "Создайте плейлист",
+        "text": "Войдите через Twitch или email, настройте режим flow/static и правила контента."
+      },
+      "share": {
+        "title": "Откройте для всех",
+        "text": "Дайте ссылку на плейлист — зрители они ищут трек и отправляют заявку в очередь. Или подключите бота в профиле."
+      },
+      "stream": {
+        "title": "Ведите эфир",
+        "text": "Управляйте воспроизведением с дашборда: воспроизведение, пропуск, сортировка и логи."
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Вход",
+      "subtitle": "Подключите свой аккаунт",
+      "tab": {
+        "social": "Соцсети",
+        "classic": "Email и пароль"
+      },
+      "socialHint": "Войдите через любимую платформу",
+      "socialFallbackHint": "Нет привязки к соцсети? Войдите по email →",
+      "field": {
+        "email": "Email",
+        "password": "Пароль"
+      },
+      "placeholder": {
+        "email": "you@example.com",
+        "password": "••••••••"
+      },
+      "submit": "Войти",
+      "submitLoading": "Вход…",
+      "backToSocial": "Назад к входу через соцсети",
+      "legal": "Входя, вы соглашаетесь с Условиями использования и Политикой конфиденциальности",
+      "registerPrompt": "Нет аккаунта?",
+      "registerLink": "Зарегистрироваться",
+      "error": {
+        "socialFailed": "Ошибка входа через соцсеть",
+        "fillAll": "Заполните все поля",
+        "profileLoad": "Вход выполнен, но профиль не загрузился. Попробуйте снова.",
+        "failed": "Ошибка входа. Попробуйте снова.",
+        "unexpected": "Произошла непредвиденная ошибка"
+      }
+    },
+    "register": {
+      "title": "Создать аккаунт",
+      "subtitle": "Присоединяйтесь, чтобы начать",
+      "tab": {
+        "social": "Соцсети",
+        "classic": "Email и пароль"
+      },
+      "socialHint": "Зарегистрируйтесь через любимую платформу",
+      "emailHint": "Предпочитаете email? Используйте форму справа →",
+      "field": {
+        "username": "Имя пользователя",
+        "email": "Email",
+        "password": "Пароль",
+        "confirmPassword": "Подтвердите пароль"
+      },
+      "placeholder": {
+        "username": "your_username",
+        "email": "you@example.com",
+        "password": "••••••••"
+      },
+      "passwordHint": "Не менее 8 символов",
+      "submit": "Регистрация",
+      "submitLoading": "Создание аккаунта…",
+      "backToSocial": "Назад к регистрации через соцсети",
+      "legal": "Регистрируясь, вы соглашаетесь с Условиями использования и Политикой конфиденциальности",
+      "loginPrompt": "Уже есть аккаунт?",
+      "loginLink": "Войти",
+      "error": {
+        "socialFailed": "Ошибка регистрации через соцсеть",
+        "fillAll": "Заполните все поля",
+        "passwordMismatch": "Пароли не совпадают",
+        "passwordShort": "Пароль должен быть не менее 8 символов",
+        "failed": "Ошибка регистрации. Попробуйте снова.",
+        "unexpected": "Произошла непредвиденная ошибка"
+      }
+    },
+    "page": {
+      "noAccount": "Нет аккаунта?",
+      "createAccount": "Создать аккаунт",
+      "hasAccount": "Уже есть аккаунт?",
+      "loginInstead": "Войти"
+    },
+    "social": {
+      "loginWith": "Войти через {{platform}}",
+      "signUpWith": "Регистрация через {{platform}}"
+    },
+    "emailConfirm": {
+      "invalidLink": "Недействительная ссылка",
+      "missingParams": "Отсутствуют параметры подтверждения",
+      "missingParamsDetail": "В ссылке подтверждения не хватает параметров. Проверьте письмо и попробуйте снова.",
+      "verifyingEmail": "Подтверждаем адрес: {{email}}",
+      "confirmedLoggedIn": "Email подтверждён. Вы вошли в аккаунт.",
+      "confirmationFailedFallback": "Подтверждение не удалось. Попробуйте снова.",
+      "confirming": "Подтверждение email…",
+      "confirmed": "Email подтверждён!",
+      "redirecting": "Перенаправление…",
+      "networkError": "Сетевая ошибка. Проверьте подключение.",
+      "invalid": "Недействительная ссылка подтверждения",
+      "expired": "Ссылка подтверждения истекла",
+      "tryAgain": "Попробовать снова",
+      "backToLogin": "Назад ко входу",
+      "failed": "Подтверждение не удалось",
+      "pleaseWait": "Пожалуйста, не закрывайте страницу…"
+    },
+    "oauthCallback": {
+      "linking": "Привязка аккаунта",
+      "authorizing": "Авторизация",
+      "sendingCode": "Отправка кода…",
+      "codeSent": "Код отправлен, ожидание ответа…",
+      "error": "Произошла ошибка",
+      "unknownError": "Неизвестная ошибка",
+      "initializing": "Инициализация…",
+      "pleaseWait": "Пожалуйста, подождите.",
+      "authFailed": "Ошибка авторизации. Попробуйте снова.",
+      "linkFailed": "Не удалось привязать аккаунт."
+    },
+    "logout": {
+      "title": "Выход из системы…",
+      "pleaseWait": "Пожалуйста, подождите, выполняется выход…",
+      "redirecting": "Вы вышли из системы. Перенаправление…",
+      "success": "Вы успешно вышли из системы",
+      "error": "Ошибка при выходе",
+      "errorDetail": "Ошибка при выходе: {{message}}",
+      "errorLocalClear": "(Сервер может быть недоступен. Локальная сессия будет очищена.)"
+    }
+  },
+  "meta": {
+    "login": {
+      "title": "Вход — OpenPlaylist",
+      "description": "Войдите в OpenPlaylist"
+    },
+    "register": {
+      "title": "Регистрация — OpenPlaylist",
+      "description": "Создайте аккаунт OpenPlaylist"
+    }
+  },
+  "dashboard": {
+    "eyebrow": "Ваши плейлисты",
+    "title": "Дашборд",
+    "subtitle": "Управляйте плейлистами, очередью и воспроизведением.",
+    "empty": {
+      "title": "Плейлистов пока нет",
+      "hint": "Нажмите +, чтобы создать первый плейлист."
+    },
+    "tooltip": {
+      "addPlaylist": "Создать плейлист",
+      "playlist": "Плейлист - {{playlistName}}"
+    }
+  },
+  "playlist": {
+    "track": {
+      "ejectBtn": "Извлечь",
+      "play": "Воспроизвести следующей",
+      "copy": "Скопировать ссылку на YouTube",
+      "save": "Сохранить трек",
+      "unsave": "Удалить из сохраненных",
+      "remove": "Удалить из очереди",
+      "add": "Добавить в плейлист",
+      "source": "Источник запроса",
+      "video_id": "YouTube Video ID (Открыть оригинал)",
+      "status": "Статус трека",
+      "duration": "Длительность",
+      "date": "Дата добавления - {{date}}",
+      "priority": "Приоритет трека",
+      "requester": "Кто заказал трек",
+      "eject": "Показать/скрыть техническую информацию"
+    },
+    "tooltip": {
+      "validation": "Предпросмотр правил",
+      "logs": "Логи плейлиста",
+      "share": "Поделиться ссылкой на плейлист",
+      "status": "Статус плейлиста",
+      "repeatMode": {
+        "all": "Повторять все",
+        "once": "Повторять один",
+        "none": "Не повторять"
+      },
+      "prev": "Предыдущий трек",
+      "next": "Следующий трек",
+      "pause": "Пауза",
+      "play": "Воспроизвести",
+      "shuffle": "Случайная очередь"
+    },
+    "log": {
+      "title": "Лог",
+      "add_track": "Добавлен трек '{{title}}'",
+      "add_track_error": "Не удалось добавить трек '{{title}}' по причине: {{error}}",
+      "remove_track": "Удален трек '{{title}}'",
+      "play_track": "Воспроизведен трек '{{title}}'",
+      "listen_track": "Прослушан трек '{{title}}'",
+      "skip_track": "Пропущен трек '{{title}}'",
+      "report_track": "Жалоба на трек '{{title}}'",
+      "no_track": "Трек не воспроизводится",
+      "modal": {
+        "title": "Лог для {{name}}",
+        "close": "Закрыть",
+        "id": "ID лога",
+        "created_at": "Время",
+        "event_type": "Тип события",
+        "platform": "Платформа",
+        "initiated_by": "Инициатор",
+        "owner": "Владелец",
+        "guest": "Гость",
+        "payload": "Данные события (JSON)"
+      },
+      "errors": {
+        "Playlist is not active": "Плейлист не активен",
+        "Wrong donation amount": "Неверная сумма доната",
+        "Wrong donation currency": "Неверная валюта доната",
+        "Blacklisted user": "Пользователь в черном списке",
+        "Blacklisted track": "Трек в черном списке",
+        "Not enough views": "Недостаточно просмотров",
+        "Not enough likes": "Недостаточно лайков",
+        "Too long": "Трек слишком длинный",
+        "Playlist is full": "Плейлист заполнен",
+        "Track cooldown": "Трек на перезарядке (cooldown)",
+        "User cooldown": "Пользователь на перезарядке (cooldown)",
+        "unknown": "Неизвестная ошибка"
+      },
+      "types": {
+        "add_track": "Добавление трека",
+        "add_track_error": "Ошибка добавления трека",
+        "play_track": "Воспроизведение трека",
+        "remove_track": "Удаление трека",
+        "listen_track": "Прослушивание трека",
+        "skip_track": "Пропуск трека",
+        "report_track": "Жалоба на трек",
+        "error": "Системная ошибка"
+      }
+    },
+    "stats": {
+      "mode": "Режим",
+      "minViews": "Мин. просмотры",
+      "minLikes": "Мин. лайки",
+      "maxDuration": "Макс. длительность",
+      "trackCd": "КД трека",
+      "userCd": "КД пользователя",
+      "maxSize": "Макс. размер",
+      "priorityMode": "Режим приоритета",
+      "durationSec": "{{count}} сек",
+      "cooldownMin": "{{count}} мин",
+      "maxSizeUnlimited": "∞"
+    },
+    "toast": {
+      "linkCopied": "Ссылка на плейлист скопирована!",
+      "created": "Плейлист \"{{name}}\" создан",
+      "deleted": "Плейлист удалён",
+      "deleteFailed": "Не удалось удалить плейлист",
+      "updated": "Плейлист обновлён",
+      "updateFailed": "Не удалось обновить плейлист",
+      "requestAdded": "Трек добавлен в очередь",
+      "requestAddedFailed": "Не удалось добавить трек",
+      "requestRemoved": "Трек удалён из очереди",
+      "requestRemoveFailed": "Не удалось удалить трек",
+      "playNowSet": "Трек будет воспроизведён следующим",
+      "playNowFailed": "Не удалось установить трек",
+      "visibilityUpdated": "Доступность плейлиста обновлена",
+      "modeUpdated": "Режим плейлиста обновлён",
+      "activeUpdated": "Заявки обновлены"
+    },
+    "status": {
+      "online": "Онлайн",
+      "offline": "Офлайн"
+    },
+    "nowPlaying": {
+      "empty": "Сейчас ничего не играет."
+    },
+    "saved": {
+      "title": "Сохранённые",
+      "empty": "Нет сохранённых треков"
+    },
+    "queue": {
+      "noMatch": "Нет треков по вашему запросу.",
+      "empty": "Треков пока нет.",
+      "mode": {
+        "add": "Добавить трек",
+        "search": "Поиск в очереди"
+      },
+      "placeholder": {
+        "add": "Вставьте ссылку YouTube…",
+        "search": "Поиск по названию в очереди…",
+        "searchRequester": "Поиск в очереди по названию или автору заявки…"
+      },
+      "submit": "Добавить"
+    },
+    "addbar": {
+      "placeholder": "Вставьте URL сюда"
+    },
+    "create": {
+      "title": "Новый плейлист",
+      "description": "Форма создания плейлиста",
+      "nameLabel": "Название плейлиста",
+      "nameHint": "Должно быть уникальным для вашего аккаунта",
+      "namePlaceholder": "Введите название…",
+      "descriptionLabel": "Описание плейлиста",
+      "descriptionPlaceholder": "Введите описание…",
+      "showInWidget": "Отображать активность в виджете?",
+      "showInWidgetHint": "OBS Виджет отображает играющий прямо сейчас трек из плейлистов которые могут отображатся в виджете",
+      "submit": "Создать",
+      "submitting": "Создание…",
+      "success": "Плейлист создан! Вы можете добавлять треки или настраивать правила.",
+      "failed": "Не удалось создать плейлист"
+    },
+    "trackCount_one": "{{count}} трек",
+    "trackCount_few": "{{count}} трека",
+    "trackCount_many": "{{count}} треков",
+    "report": {
+      "title": "Жалоба",
+      "description": "Пожаловаться на трек или автора заявки и при необходимости добавить в блок-лист.",
+      "blockUserLabel": "Заблокировать пользователя: {{nickname}} ({{platform}})",
+      "blockTrackLabel": "Заблокировать трек: {{id}}",
+      "reason": "Причина",
+      "reasonPlaceholder": "Опишите причину…",
+      "blockUser": "Заблокировать пользователя",
+      "blockTrack": "Заблокировать трек",
+      "submit": "Отправить жалобу",
+      "submitting": "Отправка…",
+      "cancel": "Отмена",
+      "error": {
+        "invalidId": "Недействительный ID",
+        "invalidYoutubeId": "Недействительный ID видео YouTube.",
+        "blockFailed": "Не удалось заблокировать пользователя.",
+        "validation": "Укажите причину или выберите блокировку пользователя и/или трека.",
+        "generic": "Ошибка при отправке жалобы",
+        "processFailed": "Ошибка при обработке жалобы."
+      },
+      "success": {
+        "userBlocked": "пользователь заблокирован",
+        "trackBlocked": "трек заблокирован",
+        "tracksRemoved": "удалён {{count}} трек",
+        "tracksRemoved_few": "удалено {{count}} трека",
+        "tracksRemoved_many": "удалено {{count}} треков",
+        "reportSubmitted": "жалоба отправлена",
+        "recorded": "Жалоба зарегистрирована."
+      }
+    }
+  },
+  "playlistSettings": {
+    "title": "Настройки плейлиста",
+    "description": "Изменения сохраняются автоматически",
+    "tabs": {
+      "basic": "Основные",
+      "validation": "Валидация",
+      "donation": "Донаты",
+      "chatRoles": "Роли чата",
+      "block": "Блок-лист",
+      "delete": "Удалить"
+    },
+    "toast": {
+      "settingsSaved": "Настройки сохранены успешно",
+      "settingsFailed": "Не удалось сохранить настройки",
+      "playlistSaved": "Плейлист сохранён успешно",
+      "playlistFailed": "Не удалось сохранить плейлист",
+      "playlistDeleted": "Плейлист \"{{name}}\" удалён",
+      "detailsUpdated": "Данные плейлиста обновлены",
+      "detailsUpdateFailed": "Не удалось обновить данные",
+      "modeChanged": "Режим плейлиста изменён",
+      "modeChangeFailed": "Не удалось изменить режим",
+      "privacyUpdated": "Приватность обновлена",
+      "privacyUpdateFailed": "Не удалось обновить приватность",
+      "validationRulesSaved": "Правила валидации сохранены",
+      "validationRulesFailed": "Не удалось сохранить правила",
+      "validationRulesLoaded": "Загрузка настроек…",
+      "validationRulesLoadFailed": "Не удалось загрузить настройки"
+    },
+    "delete": {
+      "title": "Удалить плейлист",
+      "button": "Удалить",
+      "deleted": "Удалено"
+    },
+    "details": {
+      "name": "Название плейлиста",
+      "nameHelp": "Отображается в дашборде и публичных списках.",
+      "description": "Описание",
+      "descriptionHelp": "Краткое описание для зрителей (необязательно).",
+      "namePlaceholder": "Введите название плейлиста",
+      "descriptionPlaceholder": "Введите описание плейлиста",
+      "nameRequired": "Название плейлиста обязательно",
+      "nameTooLong": "Название слишком длинное",
+      "descriptionTooLong": "Описание слишком длинное"
+    },
+    "basic": {
+      "modeTitle": "Режим плейлиста",
+      "flow": "FLOW",
+      "static": "STATIC",
+      "flowHelp": "Flow — очередь заявок от зрителей.",
+      "staticHelp": "Static — обычный плейлист.",
+      "privacy": "Приватность",
+      "public": "PUBLIC",
+      "private": "PRIVATE",
+      "externalSources": "Внешние источники контента",
+      "integrationsLoading": "Загрузка интеграций…",
+      "integrationsEmpty": "Подключите интеграции в настройках аккаунта",
+      "addHelp": "ADD — приоритеты суммируются.",
+      "maxHelp": "MAX — берётся максимальный приоритет.",
+      "priorityMode": "Режим приоритета",
+      "priorityModeHelp": "Режим приоритета определяет, как суммируются приоритеты ролей и донатов для трека.",
+      "priorityModeAdd": "ADD",
+      "priorityModeMax": "MAX",
+      "priorityModeAddHelp": "ADD — приоритеты суммируются.",
+      "priorityModeMaxHelp": "MAX — берётся максимальный приоритет.",
+      "publicHelp": "PUBLIC — плейлист виден всем, кто знает ссылку или найдёт его в поиске.",
+      "privateHelp": "PRIVATE — плейлист виден только вам.",
+      "externalSourcesHelp": "Разрешить добавление треков из внешних источников учитывая конкретные акаунты.",
+      "showInWidget": "Отображать активность в виджете?",
+      "showInWidgetYes": "Да",
+      "showInWidgetNo": "Нет"
+    },
+    "validation": {
+      "title": "Валидация видео",
+      "description": "Настройки валидации видео. Значения не могут быть отрицательными.",
+      "notInitialized": "Раздел не инициализирован",
+      "minViews": "Мин. просмотры",
+      "minViewsDesc": "Не каждое видео может иметь лайки. 0 означает, что все видео проходят валидацию.",
+      "minLikes": "Мин. лайки",
+      "maxDuration": "Макс. длительность",
+      "trackCooldown": "Кулдаун трека",
+      "trackCooldownDesc": "Время после которого трек может быть добавлен ещё раз.",
+      "userCooldown": "Кулдаун пользователя",
+      "initFailed": "Не удалось инициализировать настройки",
+      "tabtitle": "валидация"
+    },
+    "donation": {
+      "title": "Приём донатов",
+      "name": "Название",
+      "slug": "Slug",
+      "amount": "Сумма",
+      "currency": "Валюта",
+      "priority": "Приоритет",
+      "add": "Добавить",
+      "ruleName": "Название правила",
+      "ruleSlug": "rule-slug",
+      "noRules": "Правил пока нет",
+      "fillAll": "Заполните все поля",
+      "createSuccess": "Правило создано",
+      "createFailed": "Не удалось создать правило",
+      "deleteConfirm": "Удалить это правило?",
+      "deleteRuleConfirm": "Удалить это правило доната?",
+      "deleteSuccess": "Правило удалено",
+      "deleteFailed": "Не удалось удалить правило",
+      "updateSuccess": "Правило обновлено",
+      "updateFailed": "Не удалось обновить правило",
+      "saving": "Сохранение правила…",
+      "deleting": "Удаление правила…"
+    },
+    "block": {
+      "title": "Блок-листы",
+      "description": "Блокировка пользователей и треков.",
+      "selectTriggerType": "Тип идентификатора",
+      "selectPlatform": "Выберите платформу",
+      "enterNicknameOrId": "Никнейм или ID пользователя",
+      "userBlockedSuccess": "Пользователь заблокирован!",
+      "userBlockFailed": "Не удалось заблокировать пользователя.",
+      "validationRequired": "Укажите ник/ID и платформу.",
+      "trackYoutubeRequired": "Укажите ID видео YouTube.",
+      "trackYoutubeLength": "ID видео YouTube — 11 символов.",
+      "trackAlreadyBlocked": "Трек уже в блок-листе.",
+      "trackBlockedSuccess": "Трек заблокирован!",
+      "blockTrackYoutubeLabel": "Заблокировать трек (ID YouTube)",
+      "triggerUserName": "Имя пользователя",
+      "triggerUserId": "ID пользователя",
+      "blockUser": "Заблокировать пользователя",
+      "blockTrack": "Заблокировать трек",
+      "userId": "ID пользователя",
+      "userName": "Имя пользователя",
+      "blockedVideoId": "ID заблокированного видео",
+      "openOnYoutube": "Открыть на YouTube в новой вкладке",
+      "unblockUser": "Разблокировать пользователя",
+      "unblockTrack": "Разблокировать трек",
+      "unblockUserAria": "Разблокировать {{type}}: {{value}}",
+      "unblockTrackAria": "Разблокировать трек {{id}}",
+      "userUnblocked": "Пользователь разблокирован!",
+      "userUnblockFailed": "Не удалось разблокировать пользователя.",
+      "trackUnblocked": "Трек разблокирован!",
+      "emptyUsers": "Заблокированных пользователей нет",
+      "emptyTracks": "Заблокированных треков нет"
+    },
+    "chatRoles": {
+      "title": "Роли чата",
+      "addRoleHint": "Добавьте роль, чтобы начать",
+      "selectRole": "Выберите роль",
+      "addRole": "Добавить роль…",
+      "add": "Добавить",
+      "noRoles": "Ролей пока нет",
+      "addSuccess": "Роль добавлена",
+      "addFailed": "Не удалось добавить роль",
+      "removeSuccess": "Роль удалена",
+      "removeFailed": "Не удалось удалить роль"
+    },
+    "priority": {
+      "title": "Приоритет",
+      "costMode": "Режим стоимости",
+      "costHelp": "Задайте приоритет для типов пользователей. Может быть отрицательным.",
+      "costHelpMax": "MAX — берётся максимальный балл роли для трека.",
+      "costHelpAdd": "ADD — баллы всех ролей пользователя суммируются.",
+      "add": "ADD",
+      "max": "MAX",
+      "addHelp": "ADD — приоритеты суммируются.",
+      "maxHelp": "MAX — берётся максимальный приоритет.",
+      "twitch": "Twitch",
+      "donations": "Донаты",
+      "donater": "Донатер"
+    }
+  },
+  "settings": {
+    "eyebrow": "Аккаунт",
+    "title": "Настройки",
+    "subtitle": "Управление аккаунтом и интеграциями",
+    "unauth": {
+      "title": "Настройки",
+      "message": "Войдите, чтобы управлять аккаунтом.",
+      "cta": "Перейти ко входу"
+    },
+    "tabs": {
+      "profile": "Профиль",
+      "account": "Аккаунт",
+      "integrations": "Интеграции",
+      "widget": "OBS Виджет"
+    },
+    "emailNotConfirmed": {
+      "title": "Email не подтверждён",
+      "body": "Подтвердите {{email}}, чтобы полноценно использовать вход по email и восстановление аккаунта.",
+      "defaultEmail": "ваш email"
+    },
+    "account": {
+      "profileData": "Данные профиля",
+      "avatar": "Аватар",
+      "password": "Пароль",
+      "saveProfile": "Сохранить профиль",
+      "saveAvatar": "Сохранить аватар",
+      "changePassword": "Сменить пароль",
+      "profileUpdated": "Профиль обновлён",
+      "avatarUpdated": "Аватар обновлён",
+      "passwordChanged": "Пароль изменён",
+      "nickname": "Никнейм",
+      "email": "Email",
+      "avatarUrl": "URL аватара",
+      "currentPassword": "Текущий пароль",
+      "newPassword": "Новый пароль",
+      "confirmPassword": "Подтвердите новый пароль",
+      "nicknamePlaceholder": "Ваш никнейм",
+      "nicknameHelp": "Отображается в плейлистах и публичной активности.",
+      "emailHelp": "Используется для входа и уведомлений.",
+      "avatarHelp": "URL изображения профиля.",
+      "passwordHelp": "Не менее 8 символов.",
+      "currentPasswordPlaceholder": "Текущий пароль",
+      "newPasswordPlaceholder": "Новый пароль",
+      "confirmPasswordPlaceholder": "Повторите новый пароль",
+      "updateFailed": "Не удалось обновить настройки",
+      "validation": {
+        "nicknameRequired": "Никнейм обязателен",
+        "nicknameShort": "Никнейм — не менее 3 символов",
+        "emailRequired": "Email обязателен",
+        "emailInvalid": "Введите корректный email",
+        "avatarRequired": "URL аватара обязателен",
+        "urlInvalid": "Введите корректный URL",
+        "passwordFillAll": "Заполните все поля пароля",
+        "passwordShort": "Новый пароль — не менее 8 символов",
+        "passwordMismatch": "Пароли не совпадают",
+        "passwordSame": "Новый пароль должен отличаться от текущего"
+      },
+      "saving": "Сохранение…"
+    },
+    "profile": {
+      "overview": "Обзор профиля",
+      "noEmail": "Email не указан",
+      "noSocialLinks": "Соцсети не привязаны",
+      "noSocialLinksYet": "Ссылки на соцсети ещё не добавлены",
+      "platformPlaceholder": "например, Twitch, GitHub, LinkedIn",
+      "removePlatform": "Удалить {{platform}}",
+      "deletePlatformAria": "Удалить ссылку {{platform}}",
+      "confirmDeleteBody": "Удалить {{platform}}? Это действие нельзя отменить.",
+      "deleting": "Удаление…",
+      "delete": "Удалить",
+      "linkDeleted": "Ссылка удалена",
+      "linkDeleteFailed": "Не удалось удалить ссылку",
+      "linkAddedSuccess": "Ссылка успешно добавлена",
+      "duplicatePlatform": "{{platform}} уже добавлена",
+      "validation": {
+        "platformRequired": "Укажите название платформы",
+        "platformMin": "Название платформы — не менее {{min}} символов",
+        "platformMax": "Название платформы — не более {{max}} символов",
+        "platformChars": "Допустимы буквы, цифры, пробелы, дефисы и подчёркивания",
+        "urlRequired": "Укажите URL",
+        "urlMin": "URL — не менее {{min}} символов",
+        "urlProtocol": "URL должен начинаться с http:// или https://",
+        "urlInvalid": "Введите корректный URL"
+      },
+      "addSocialLinks": "Добавить ссылки",
+      "platform": "Платформа",
+      "url": "URL",
+      "urlPlaceholder": "https://…",
+      "addLink": "+ Добавить ссылку",
+      "adding": "Добавление…",
+      "linkAdded": "Ссылка добавлена",
+      "linkFailed": "Не удалось добавить ссылку",
+      "confirmDeletion": "Подтвердите удаление",
+      "deleteLink": "Удалить ссылку",
+      "killUserProfile": {
+        "title": "Удаление профиля",
+        "btnText": "Удалить профиль",
+        "body": "Вы действительно хотите удалить свой профиль? Это действие нельзя отменить.",
+        "deleting": "Удаление...",
+        "deleted": "Профиль удалён",
+        "deleteFailed": "Не удалось удалить профиль"
+      }
+    },
+    "integrations": {
+      "connectedAccounts": "Подключённые аккаунты",
+      "empty": "Подключённых аккаунтов нет",
+      "emptyHintLong": "Подключите стриминговые и донат-платформы для управления плейлистами",
+      "addAccounts": "Добавить аккаунты",
+      "connectHint": "Подключите аккаунт, чтобы начать",
+      "connectAccount": "+ Подключить аккаунт",
+      "addAnother": "Подключить еще аккаунт",
+      "botConnected": " Бот подключён",
+      "connectBot": "Подключить бота",
+      "connecting": "⟳ Подключение…",
+      "connected": "Аккаунт подключен успешно",
+      "alreadyConnected": "Один аккаунт уже подключен",
+      "connectFailed": "Не удалось подключить аккаунт",
+      "disconnect": "Отключить",
+      "removing": "⟳ Удаление…",
+      "disconnected": "Аккаунт отключен успешно",
+      "disconnectFailed": "Не удалось отключить аккаунт",
+      "disconnectBot": "Отключить бота",
+      "botConnecting": "Подключение бота…",
+      "botConnectFailed": "Не удалось подключить бота",
+      "botDisconnecting": "Отключение бота…",
+      "botDisconnected": "Бот отключен успешно",
+      "deadBanner": "Токен просрочен или аккаунт отключён. Пожалуйста, переподключите аккаунт.",
+      "reconnect": "Переподключить аккаунт",
+      "tokenExpired": "Токен просрочен."
+    },
+    "widget": {
+      "linkTitle": "Ссылка на виджет",
+      "copyLink": "Копировать",
+      "generate": "Сгенерировать",
+      "regenerate": "Перевыпустить",
+      "generateConfirm": "Будет создана новая ссылка для виджета, она отобразится только один раз. Сохраните её сразу. Продолжить?",
+      "regenerateConfirm": "Текущая ссылка перестанет работать, а новая отобразится только один раз. После этого потребуется обновить ссылку в OBS. Продолжить?",
+      "regenerated": "Ссылка на виджет сгенерирована — скопируйте и сохраните её прямо сейчас, больше она не покажется",
+      "regenerateFailed": "Не удалось сгенерировать ссылку для виджета",
+      "noTokenWarning": "В этом браузере нет сохраненной ссылки на виджет. Нажмите «Сгенерировать» — ссылка показывается только один раз и хранится только на этом устройстве.",
+      "noTokenPlaceholder": "Ссылки еще нет — нажмите Сгенерировать",
+      "linkHint": "Добавьте этот URL как «Браузер» (Browser Source) в OBS. Ссылка хранится только в этом браузере — очистка данных сайта или открытие этой страницы на другом устройстве потребует генерации новой (что сломает старый источник в OBS, пока вы его не обновите).",
+      "appearanceTitle": "Внешний вид",
+      "showIcon": "Показывать иконку диска",
+      "textColor": "Цвет текста",
+      "bgColor": "Цвет фона",
+      "bgOpacity": "Прозрачность фона",
+      "fontSize": "Размер шрифта",
+      "previewTitle": "Предпросмотр",
+      "demoTrack": "Imagine Dragons – Believer",
+      "cssTitle": "Пользовательский CSS для OBS",
+      "cssCopy": "Копировать CSS",
+      "cssCopied": "CSS скопирован — вставьте его в OBS (Источник «Браузер» → Свойства → Пользовательский CSS)",
+      "cssHint": "В OBS: выберите источник-браузер виджета → Свойства → вставьте скопированный код в поле «Пользовательский CSS» (Custom CSS) → OK."
+    }
+  },
+  "botSettings": {
+    "title": "Настройки бота",
+    "save": "Сохранить",
+    "saved": "Настройки успешно сохранены",
+    "cancel": "Отмена",
+    "twitch": {
+      "prefix": {
+        "label": "Префикс команд",
+        "placeholder": "Введите префикс команд",
+        "hint": "Символ(ы), который(е) будут использоваться как префикс для команд бота в чате Twitch. Например, если вы установите его на '!', зрители будут использовать '!mr' для отправки трека."
+      }
+    }
+  },
+  "publicSearch": {
+    "title": "Найти публичный плейлист",
+    "subtitle": "По имени плейлиста, нику автора или фрагменту описания",
+    "placeholder": "Имя плейлиста, ник автора или текст в описании…",
+    "searching": "Ищем плейлисты…",
+    "notFound": "Плейлисты не найдены",
+    "notFoundHint": "Попробуйте другой запрос",
+    "notFoundHintFull": "Попробуйте другое слово или проверьте, что плейлист открыт для публичного просмотра.",
+    "noDescription": "Нет описания",
+    "openPlaylist": "Открыть плейлист",
+    "initialHint": "Введите запрос для поиска",
+    "initialHintFull": "Введите запрос и нажмите «Найти», чтобы увидеть публичные плейлисты.",
+    "submit": "Найти",
+    "searchPlaceholder": "Поиск…"
+  },
+  "publicView": {
+    "eyebrow": "Публичные плейлисты",
+    "searchTitle": "Поиск и просмотр",
+    "searchSubtitle": "Найдите плейлист и отправьте трек в очередь",
+    "browseSubtitle": "Найдите открытый плейлист стримера и следите за очередью в реальном времени",
+    "notFound": "Плейлист не найден",
+    "notFoundUnavailable": "Плейлист не найден или недоступен",
+    "notFoundCheckLink": "Проверьте ссылку или найдите другой плейлист ниже.",
+    "anotherPlaylist": "Другой плейлист",
+    "searchPublic": "Поиск публичных плейлистов",
+    "resetSearch": "Сбросить поиск",
+    "resetSearchAgain": "Сбросить и искать заново",
+    "playlist": "Плейлист",
+    "queue": "Очередь треков",
+    "queueEmpty": "Очередь пуста",
+    "queueEmptyHint": "Станьте первым — добавьте трек!",
+    "queueEmptyPlaylist": "В плейлисте пока нет треков",
+    "queueEmptyWaiting": "Заявки появятся здесь, когда зрители отправят музыку.",
+    "modeFlow": "Режим flow",
+    "modeStatic": "Режим static",
+    "nowPlayingHint": "Трек появится здесь, когда стример запустит воспроизведение",
+    "trackCount_one": "{{count}} трек",
+    "trackCount_few": "{{count}} трека",
+    "trackCount_many": "{{count}} треков",
+    "requestsOpen": "Заявки от зрителей открыты",
+    "requestsClosed": "Внешние заявки закрыты",
+    "noDescription": "Описание не указано.",
+    "playlistSettings": "Настройки плейлиста",
+    "addTrack": "Добавить трек",
+    "nowPlaying": "Сейчас играет",
+    "nowPlayingEmpty": "Сейчас ничего не играет"
+  },
+  "platform": {
+    "twitch": "Twitch",
+    "discord": "Discord",
+    "youtube": "YouTube",
+    "donationalerts": "Donation Alerts",
+    "donationAlerts": "Donation Alerts",
+    "x": "X",
+    "google": "Google",
+    "github": "GitHub",
+    "spotify": "Spotify",
+    "da": "Donation Alerts",
+    "donatex": "DonateX",
+    "donatepay": "DonatePay"
+  },
+  "twitch": {
+    "role": {
+      "broadcaster": "Ведущий",
+      "moderator": "Модератор",
+      "vip": "VIP",
+      "subscriber": "Подписчик",
+      "Turbo": "Turbo",
+      "artist": "Артист",
+      "follower": "Фолловер"
+    }
+  },
+  "oauth": {
+    "platform": {
+      "twitch": "Twitch",
+      "da": "Donation Alerts",
+      "google": "Google"
+    }
+  },
+  "placeholder": {
+    "history": "Страница /history",
+    "statistic": "Страница /statistic"
+  },
+  "sort": {
+    "date": {
+      "title": "Сортировка по дате",
+      "olderFirst": "Сначала старые",
+      "newerFirst": "Сначала новые"
+    },
+    "priority": {
+      "title": "Сортировка по приоритету",
+      "highFirst": "Сначала с высоким приоритетом",
+      "lowFirst": "Сначала с низким приоритетом"
+    }
+  }
+}

@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>OBS Widget</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0);
+        overflow: hidden;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* Контейнер теперь занимает 100% окна OBS */
+      #widget-container {
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        padding: 1vmin;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* Служебный статус подключения */
+      #connect_status {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(18, 18, 18, 0.9);
+        color: #a0a0a0;
+        font-size: 18vmin;
+        padding: 4px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-left: 3px solid #ffb703;
+        transition: all 0.3s ease;
+        z-index: 10;
+      }
+
+      #connect_status.connected {
+        opacity: 0;
+        transform: translateY(-5px);
+        pointer-events: none;
+      }
+
+      #connect_status.error {
+        border-left-color: #e63946;
+        color: #f1faee;
+      }
+
+      /* Резиновая карточка трека */
+      .track-card {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        box-sizing: border-box;
+
+        display: flex;
+        align-items: center;
+        gap: 4vmin;
+
+        background: rgba(18, 18, 18, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1vmin;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .track-card.active {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      .track-info {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex-grow: 1;
+        height: 100%;
+        position: relative;
+        white-space: nowrap;
+      }
+
+      /* Название трека */
+      #track-title {
+        display: inline-block;
+        color: #ffffff;
+        font-size: 20vmin;
+        font-weight: 800;
+        line-height: 1.3;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        will-change: transform;
+        position: relative;
+        text-align: center;
+        -webkit-font-smoothing: antialiased;
+        transform: translateZ(0);
+      }
+
+      /* Уменьшаем размер диска */
+      .vinyl-wrapper {
+        position: relative;
+        height: 70%;
+        aspect-ratio: 1 / 1;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .vinyl-svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .vinyl-disk {
+        animation: spin 3s linear infinite;
+        animation-play-state: paused;
+        transform-origin: 12px 12px;
+      }
+
+      .vinyl-needle {
+        animation: pointing 2s ease-in-out infinite alternate;
+        animation-play-state: paused;
+        transform-origin: 23px 5px;
+      }
+
+      .track-card.active .vinyl-disk,
+      .track-card.active .vinyl-needle {
+        animation-play-state: running;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes pointing {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(15deg);
+        }
+      }
+
+      @keyframes marquee {
+        0% {
+          transform: translateX(0);
+        }
+        10% {
+          transform: translateX(0);
+        }
+        90% {
+          transform: translateX(var(--scroll-distance, 0));
+        }
+        100% {
+          transform: translateX(var(--scroll-distance, 0));
+        }
+      }
+
+      #track-artist {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  </head>
+
+  <body>
+    <div id="widget-container">
+      <div id="connect_status">...</div>
+
+      <div id="content" class="track-card">
+        <div class="vinyl-wrapper">
+          <svg
+            class="vinyl-svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g class="vinyl-disk">
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                fill="#111"
+                stroke="#444"
+                stroke-width="1"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="7"
+                fill="#111"
+                stroke="#333"
+                stroke-width="0.5"
+                stroke-dasharray="2 1"
+              />
+              <circle cx="12" cy="12" r="4" fill="#ffb703" />
+              <circle cx="12" cy="12" r="1.5" fill="#111" />
+            </g>
+            <g class="vinyl-needle">
+              <path
+                d="M23 5L18 8V11"
+                stroke="#fff"
+                stroke-width="1"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <circle cx="23" cy="5" r="1" fill="#fff" />
+            </g>
+          </svg>
+        </div>
+        <div class="track-info">
+          <div id="track-title"></div>
+          <div id="track-artist"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Словари локализации
+      const locales = {
+        ru: {
+          waiting: 'Ожидание подключения...',
+          connected: 'Подключено',
+          auth_error: 'Ошибка авторизации',
+          no_token: 'Ошибка: Токен отсутствует',
+          lost_conn: 'Потеряно соединение',
+        },
+        en: {
+          waiting: 'Connecting...',
+          connected: 'Connected',
+          auth_error: 'Authentication error',
+          no_token: 'Error: Token is missing',
+          lost_conn: 'Connection lost',
+        },
+      }
+
+      const urlParams = new URLSearchParams(window.location.search)
+      const token = urlParams.get('token')
+
+      // Определяем язык (дефолт — 'ru')
+      const lang = urlParams.get('lang') === 'en' ? 'en' : 'ru'
+      const t = locales[lang]
+
+      const statusEl = document.getElementById('connect_status')
+      const cardEl = document.getElementById('content')
+      const titleEl = document.getElementById('track-title')
+
+      // Устанавливаем стартовый статус на нужном языке
+      statusEl.innerText = t.waiting
+
+      if (!token) {
+        statusEl.innerText = t.no_token
+        statusEl.classList.add('error')
+        throw new Error('Token is missing in URL')
+      }
+
+      const socket = io('/widget', {
+        auth: { token: token },
+        path: '/api/socket.io',
+        transports: ['websocket'],
+      })
+
+      socket.on('current_track', (data) => {
+        if (data && data.title) {
+          cardEl.classList.remove('active')
+
+          setTimeout(() => {
+            titleEl.innerText = data.title
+            titleEl.style.animation = 'none'
+            const trackInfo = cardEl.querySelector('.track-info')
+            trackInfo.style.justifyContent = 'center'
+
+            const containerWidth = trackInfo.offsetWidth
+            const textWidth = titleEl.offsetWidth
+
+            if (textWidth > containerWidth) {
+              trackInfo.style.justifyContent = 'flex-start'
+              const scrollDistance = containerWidth - textWidth
+              const duration = Math.abs(scrollDistance) / 40
+
+              titleEl.style.setProperty(
+                '--scroll-distance',
+                `${scrollDistance}px`,
+              )
+              titleEl.style.animation = `marquee ${Math.max(duration, 2)}s ease-in-out infinite alternate`
+            }
+
+            cardEl.classList.add('active')
+          }, 300)
+        }
+      })
+
+      socket.on('connect', () => {
+        statusEl.innerText = t.connected
+        statusEl.classList.remove('error')
+        statusEl.classList.add('connected')
+      })
+
+      socket.on('connect_error', (error) => {
+        statusEl.innerText = t.auth_error
+        statusEl.classList.remove('connected')
+        statusEl.classList.add('error')
+      })
+
+      socket.on('disconnect', () => {
+        statusEl.innerText = t.lost_conn
+        statusEl.classList.remove('connected')
+        statusEl.classList.add('error')
+        cardEl.classList.remove('active')
+      })
+    </script>
+  </body>
+</html>
