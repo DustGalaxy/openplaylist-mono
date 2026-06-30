@@ -10,14 +10,11 @@ from src.adapters._rabbit.event_broker import (
     main_exchange,
     auth_user_twitch_all_request,
     bot_twitch_order_new,
-    bot_twitch_ack_connection,
     auth_user_twitch_tokens_refreshed,
 )
 from src.dto.order import TTVNewOrder
 from src.adapters._rabbit.dto import Tokens, TwitchTokenRefreshed
-from src.services.sio_service import sio_service
 
-from src.services.tokens.token_service import token_service
 from src.dal.postgres.token import token_vault_repository
 from src.dal.postgres.linked_account import linked_accounts_repository
 from src._types import IntegrationPlatform

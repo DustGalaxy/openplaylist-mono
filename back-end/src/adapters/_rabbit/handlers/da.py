@@ -11,7 +11,6 @@ from src.adapters._rabbit.event_broker import (
     auth_user_da_all_request,
     auth_user_da_tokens_refreshed,
     bot_da_order_new,
-    bot_da_ack_connection,
 )
 from src.dto.order import DANewOrder
 from src._types import IntegrationPlatform
@@ -19,7 +18,6 @@ from src.database import async_session_maker
 
 from src.dal.postgres.token import token_vault_repository
 from src.dal.postgres.linked_account import linked_accounts_repository
-from src.services.sio_service import sio_service
 
 from src.utils import kick
 
@@ -34,15 +32,6 @@ async def order_new_from_da(
     from taskiq_broker import task_broker as taskiq_broker
 
     await kick("order.new", taskiq_broker, event, False, labels={"user_id": str(event.owner_id)})
-
-
-@broker.subscriber(bot_da_ack_connection, exchange=main_exchange)
-async def ack_da_connection(
-    message: RabbitMessage = Context(),
-):
-    await message.ack()
-    user_id = message.body.decode()
-    await sio_service.ack_bot_connection("da", user_id)
 
 
 @broker.subscriber(auth_user_da_all_request, exchange=main_exchange)

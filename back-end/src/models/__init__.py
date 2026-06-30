@@ -9,3 +9,6 @@ def model_rebuild():
     TokenVaultDomain.model_rebuild(_types_namespace={"LinkedAccountsDomain": LinkedAccountsDomain})
 
     AuthUserSchema.model_rebuild(_types_namespace={"LinkedAccountsDomain": LinkedAccountsDomain})
+
+
+model_rebuild()

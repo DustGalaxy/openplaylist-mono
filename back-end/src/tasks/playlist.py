@@ -7,7 +7,7 @@ from src.dto.events import Deleted, Moved, PlayNow, Private
 from src.dto.settings import ReadPlaylistSettings
 from src.services.playlist_service import add_to_playlist
 from src.services_low.playlist import playlist_service
-from src.services.sio_service import sio_service
+from src.services.realtime.sio_playlist import sio_playlist_service
 from src.models.order import OrderCreate, OrderDomain
 from src.services.playlist_log import playlist_log_service
 from src.dal._redis.broker import get_broker
@@ -20,34 +20,34 @@ from src.utils import kick, conditional_trace
 
 @taskiq_broker.task(task_name="playlist.track.playnow")
 async def playlist_track_playnow_handler(event: PlayNow):
-    await sio_service.set_playnow(event)
+    await sio_playlist_service.set_playnow(event)
 
 
 @conditional_trace("order-flow:step-3")
 @taskiq_broker.task(task_name="playlist.track.added")
 async def playlist_track_added_handler(payload: OrderDomain, playlist_id: UUID):
-    await sio_service.add_track(payload, playlist_id)
+    await sio_playlist_service.add_track(payload, playlist_id)
     return True
 
 
 @taskiq_broker.task(task_name="playlist.track.deleted")
 async def playlist_track_deleted_handler(payload: Deleted):
-    await sio_service.delete_track(payload)
+    await sio_playlist_service.delete_track(payload)
 
 
 @taskiq_broker.task(task_name="playlist.track.move")
 async def playlist_track_move_handler(event: Moved):
-    await sio_service.move_track(event)
+    await sio_playlist_service.move_track(event)
 
 
 @taskiq_broker.task(task_name="playlist.privacy.private")
 async def playlist_privacy_private_handler(event: Private):
-    await sio_service.set_private(event)
+    await sio_playlist_service.set_private(event)
 
 
 @taskiq_broker.task(task_name="playlist.settings_changed")
 async def playlist_settings_changed_handler(event: ReadPlaylistSettings):
-    await sio_service.settings_changed(event)
+    await sio_playlist_service.settings_changed(event)
 
 
 # ОДУМАЙСЯ

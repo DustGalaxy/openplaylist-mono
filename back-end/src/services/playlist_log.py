@@ -2,7 +2,8 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.services.sio_service import sio_service
+from src.services.realtime.sio_playlist import sio_playlist_service
+from src.services.realtime.sio_widget import sio_widget_service
 from src.models.playlist_logs import PlaylistLogSchema, PlaylistLogCreate
 from src.dal.postgres.playlist_logs import get_playlist_logs_repository
 
@@ -19,7 +20,7 @@ class PlaylistLogService:
         event_data: dict,
     ):
 
-        await sio_service.log(
+        await sio_playlist_service.log(
             await get_playlist_logs_repository().create(
                 session,
                 PlaylistLogCreate(

@@ -92,8 +92,8 @@ export default function SettingsModal() {
   const retroTabStyles = `
     bg-level-2 data-[state=active]:bg-level-2 border-2 justify-start
     ring-1 ring-level-3/40
-    shadow-[0_3px_0_0_theme(colors.level-3),_0_0px_10px_rgba(0,0,0,0.4),_0_2px_4px_rgba(0,0,0,0.3)]
-    sm:shadow-[0_5px_0_0_theme(colors.level-3),_0_0px_15px_rgba(0,0,0,0.55),_0_4px_8px_rgba(0,0,0,0.45)]
+    shadow-[0_3px_0_0_var(--color-level-3),0_4px_5px_-1px_rgba(0,0,0,0.5)] 
+    sm:shadow-[0_3px_0_0_var(--color-level-3),0_5px_8px_-1px_rgba(0,0,0,0.55)]
     
     hover:shadow-[0_6px_0_0_theme(colors.level-3),0_0px_15px_rgba(255,255,255,0.25),0_4px_8px_rgba(255,255,255,0.15)]
     hover:text-shadow-[0_0_4px_rgba(255,255,255,0.8),_0_0_25px_rgba(255,255,255,0.4)]
@@ -120,11 +120,11 @@ export default function SettingsModal() {
         <Btn
           text={<Settings />}
           title={t('playlistSettings.title')}
-          className="flex w-[50px] bg-level-2"
+          className="flex w-12.5 bg-level-2"
           onClick={() => setCountToDelete(3)}
         />
       </DialogTrigger>
-      <DialogContent className="max-w-[425px] md:max-w-[1200px] bg-level-1 border-level-3 text-text-main h-[900px] overflow-scroll">
+      <DialogContent className="max-w-106.25 md:max-w-300 bg-level-1 border-level-3 text-text-main h-225 overflow-scroll">
         <Tabs className="w-full flex justify-start min-h-full">
           <DialogHeader>
             <DialogTitle className="text-xl">

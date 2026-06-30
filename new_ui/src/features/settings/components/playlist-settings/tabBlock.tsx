@@ -4,7 +4,7 @@ import type { ClientPlaylist } from '@/types/playlist'
 import { RequestPlatform } from '@/types/playlist'
 import { Label } from '@/components/ui/label'
 import { DialogDescription } from '@/components/ui/dialog'
-import Add from '@/components/icons/icon-add'
+import { Plus } from 'lucide-react'
 import { blockUser } from '@/api/api-playlist'
 import {
   Select,
@@ -67,7 +67,7 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
             }}
           >
             <Btn
-              text={<Add className="text-text-main" width={20} height={20} />}
+              text={<Plus className="text-text-main" width={20} height={20} />}
               className="cursor-pointer px-2 bg-level-2"
               type="submit"
             ></Btn>
@@ -161,7 +161,7 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
             }}
           >
             <Btn
-              text={<Add className="text-text-main" width={20} height={20} />}
+              text={<Plus className="text-text-main" width={20} height={20} />}
               className="cursor-pointer px-2 bg-level-2"
               type="submit"
             ></Btn>

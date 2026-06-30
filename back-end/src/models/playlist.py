@@ -24,6 +24,7 @@ class PlaylistSchema(BaseModel):
     allow_sources: list[AllowedSource] = Field(default_factory=list)
     is_public: bool
     is_favorite: bool
+    show_in_widget: bool
 
     track_data: list[OrderDomain] = Field(default_factory=list)
     active_tracks: list[OrderDomain] = Field(default_factory=list)
@@ -48,6 +49,7 @@ class PlaylistPatch(BaseModel):
     is_public: bool | None = None
     is_favorite: bool | None = None
     is_allow_external_requests: bool | None = None
+    show_in_widget: bool | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

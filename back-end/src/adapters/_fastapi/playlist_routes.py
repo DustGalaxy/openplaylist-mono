@@ -14,13 +14,19 @@ from src.dto.playlist_log import ReadPlaylistLog
 from src.models.playlist import PlaylistPatch, PlaylistSchema
 from src.models.settings import SettingsSchema
 from src.services.playlist_log import playlist_log_service
-
+from src.services.realtime.sio_widget import sio_widget_service
 
 from src.utils import kick, find
 from src._types import DeleteStatus, PlaylistLogsEventTypes
 from taskiq_broker import task_broker as task_broker
 
-from src.adapters._fastapi.dependencies import CURR_USER, DB_SESSION, PLST_SERVICE, PLST_LOG_SERVICE, SETTINGS_SERVICE as SE
+from src.adapters._fastapi.dependencies import (
+    CURR_USER,
+    DB_SESSION,
+    PLST_SERVICE,
+    PLST_LOG_SERVICE,
+    SETTINGS_SERVICE as SE,
+)
 
 router = APIRouter(prefix="/playlist")
 
@@ -167,6 +173,7 @@ async def get_public_playlist(
 
     return ReadPlaylist.model_validate(res)
 
+
 @router.get("/{playlist_id}/logs")
 async def get_logs(
     db_session: DB_SESSION,
@@ -176,8 +183,8 @@ async def get_logs(
 ) -> list[ReadPlaylistLog]:
     logs = await service.get_logs(db_session, playlist_id, current_user.id)
 
-
     return [ReadPlaylistLog.model_validate(log) for log in logs]
+
 
 @router.get("/{playlist_id}/baseinfo")
 async def get_playlist_baseinfo(
@@ -221,21 +228,16 @@ async def set_play_now_for_playlist(
 
         await kick("playlist.track.playnow", task_broker, playnow)
 
-        if order is None:
-            data = {
-                "title": None,
-                "id": None,
-                "platform": None,
-                "by_owner": None,
-            }
-
-        else:
-            data = {
+        data = (
+            {"title": None, "id": None, "platform": None, "by_owner": None}
+            if not order
+            else {
                 "title": f"{order.title}",
                 "id": f"{order.yt_video_id}",
                 "platform": order.source,
                 "by_owner": order.from_owner,
             }
+        )
 
         await playlist_log_service.log_and_emit(
             db_session,
@@ -244,6 +246,11 @@ async def set_play_now_for_playlist(
             PlaylistLogsEventTypes.PLAY_TRACK,
             data,
         )
+
+        plst = await service.get(db_session, playlist_id, current_user)
+        if plst.show_in_widget:
+            await sio_widget_service.current_track(data, current_user.id)
+
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")
 

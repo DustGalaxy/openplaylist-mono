@@ -139,3 +139,13 @@ export const deleteUser = async () => {
   })
   return response.status === 204
 }
+
+
+export const getWidgetToken = async () => {
+  const config = getConfig()
+  const response = await apiClient(config.AUTH_API_URL + '/stream/gen-token', {
+    method: 'GET',
+    withCredentials: true,
+  })
+  return response.data
+}

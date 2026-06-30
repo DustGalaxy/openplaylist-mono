@@ -29,7 +29,7 @@ from src.models.linked_accounts import LinkedAccountsCreate, LinkedAccountsDomai
 
 from src.services.auth.strategy_manager import manager
 from src.services.tokens.token_service import token_service
-from src.services.sio_service import sio_service
+from src.services.realtime.sio_playlist import sio_playlist_service
 
 from src._types import AuthFlow, IntegrationPlatform
 from src.database import get_async_session
@@ -520,7 +520,7 @@ class AuthService:
             link.bot_settings = defualt_settings
             link.bot_connection = True
             await self.link_repo.update(db_session, link)
-            await sio_service.ack_bot_connection(str(link.platform), str(link.user_id), str(link.platform_user_id))
+            await sio_playlist_service.ack_bot_connection(str(link.platform), str(link.user_id), str(link.platform_user_id))
         except TimeoutError:
             raise HTTPException(500, "Failed to connect bot. Try again later.")
 

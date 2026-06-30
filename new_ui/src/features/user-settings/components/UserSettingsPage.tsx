@@ -16,11 +16,12 @@ import { ProfileTab } from './ProfileTab'
 import { AccountTab } from './AccountTab'
 import { IntegrationsTab } from './IntegrationsTab'
 import { useOAuthUrl } from '@/hooks/useAuthUrl'
+import WidgetTab from './WidgetTab'
 
 // ─── Hash helpers ──────────────────────────────────────────────────────────────
 
 const HASH_PREFIX = 'tab-'
-const VALID_TABS = ['profile', 'account', 'integrations'] as const
+const VALID_TABS = ['profile', 'account', 'integrations', 'widget'] as const
 type TabId = (typeof VALID_TABS)[number]
 
 function getHashTabId(): TabId {
@@ -82,6 +83,7 @@ export function UserSettingsPage({
     { id: 'profile', label: t('settings.tabs.profile'), icon: '👤' },
     { id: 'account', label: t('settings.tabs.account'), icon: '⚙️' },
     { id: 'integrations', label: t('settings.tabs.integrations'), icon: '🔗' },
+    { id: 'widget', label: t('settings.tabs.widget'), icon: '🖼️' },
   ]
 
   const handleOAuthRedirect = useOAuthUrl()
@@ -157,7 +159,7 @@ export function UserSettingsPage({
           ))}
         </div>
 
-        <div className="min-h-[320px]">
+        <div className="min-h-80">
           {activeTab === 'profile' && <ProfileTab user={user} />}
           {activeTab === 'account' && (
             <AccountTab
@@ -172,6 +174,7 @@ export function UserSettingsPage({
               platformConfigs={platformConfigs}
             />
           )}
+          {activeTab === 'widget' && <WidgetTab />}
         </div>
       </div>
     </div>

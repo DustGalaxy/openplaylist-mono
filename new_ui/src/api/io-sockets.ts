@@ -1,4 +1,4 @@
-import { io, Socket } from 'socket.io-client'
+import { io, type Socket } from 'socket.io-client'
 import { getConfig } from '@/lib/utils'
 
 let plst_upds_socket: Socket
@@ -8,7 +8,7 @@ export const getPlsUpdsSocket = () => {
     plst_upds_socket = io(getConfig().WS_API_URL + '/plst_upds', {
       withCredentials: true,
       path: getConfig().SOCKET_PATH,
-      transports: ["websocket"]
+      transports: ['websocket'],
     })
   }
   return plst_upds_socket
@@ -21,7 +21,7 @@ export const getGlobalSocket = () => {
     global_socket = io(getConfig().WS_API_URL, {
       withCredentials: true,
       path: getConfig().SOCKET_PATH,
-      transports: ["websocket"]
+      transports: ['websocket'],
     })
   }
   return global_socket
