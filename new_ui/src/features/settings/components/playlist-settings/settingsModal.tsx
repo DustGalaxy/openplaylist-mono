@@ -78,6 +78,7 @@ export default function SettingsModal() {
           is_favorite: plst.is_favorite,
           is_allow_external_requests: plst.is_allow_external_requests,
           allow_sources: plst.allow_sources,
+          show_in_widget: plst.show_in_widget,
           tags: plst.tags,
         }
         await requestPlaylistPatch(plst.id, obj)

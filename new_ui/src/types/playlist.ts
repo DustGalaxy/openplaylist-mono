@@ -171,6 +171,7 @@ export type PlaylistPatch = {
   allow_sources?: Array<AllowSources>
   is_public?: boolean
   is_favorite?: boolean
+  show_in_widget: boolean
   is_allow_external_requests?: boolean
 }
 
