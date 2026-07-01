@@ -158,23 +158,27 @@ export const useMusicStore = create<StoreState>((set, get) => {
       get().syncPlSettings(playlistId, parsed)
     }
 
-    s.on('add_track:' + playlistId, addHandler)
-    s.on('playnow:' + playlistId, playNowHandler)
-    s.on('delete_track:' + playlistId, removedHandler)
-    s.on('settings_changed:' + playlistId, settingsChangedHandler)
-    s.on('connect', () => {
+    const connectHandler = () => {
       console.debug('socket connect - re-subscribing to playlist', playlistId)
       if (s !== undefined && s.emit)
         s.emit('subscribe', { playlist_id: playlistId })
-    })
-    s.on('disconnect', () => {
+    }
+
+    const disconnectHandler = () => {
       console.debug(
         'socket disconnect - unsubscribing from playlist',
         playlistId,
       )
       if (s !== undefined && s.emit)
         s.emit('unsubscribe', { playlist_id: playlistId })
-    })
+    }
+
+    s.on('add_track:' + playlistId, addHandler)
+    s.on('playnow:' + playlistId, playNowHandler)
+    s.on('delete_track:' + playlistId, removedHandler)
+    s.on('settings_changed:' + playlistId, settingsChangedHandler)
+    s.on('connect', connectHandler)
+    s.on('disconnect', disconnectHandler)
 
     set((st) => ({
       socketHandlers: {
@@ -184,6 +188,8 @@ export const useMusicStore = create<StoreState>((set, get) => {
           playNowHandler,
           removedHandler,
           settingsChangedHandler,
+          connectHandler,
+          disconnectHandler,
         },
       },
     }))
@@ -200,6 +206,8 @@ export const useMusicStore = create<StoreState>((set, get) => {
     if (h.removedHandler) s.off('delete_track:' + playlistId, h.removedHandler)
     if (h.settingsChangedHandler)
       s.off('settings_changed:' + playlistId, h.settingsChangedHandler)
+    if (h.connectHandler) s.off('connect', h.connectHandler)
+    if (h.disconnectHandler) s.off('disconnect', h.disconnectHandler)
 
     const newHandlers = { ...handlers }
     delete newHandlers[playlistId]
@@ -223,7 +231,26 @@ export const useMusicStore = create<StoreState>((set, get) => {
     },
 
     setSocket(s) {
-      if (s === get().socket) return
+      const oldSocket = get().socket
+      if (s === oldSocket) return
+
+      if (oldSocket) {
+        get().playlists.forEach((plst) => {
+          const handlers = get().socketHandlers || {}
+          const h = handlers[plst.id]
+          if (h) {
+            if (h.addHandler) oldSocket.off('add_track:' + plst.id, h.addHandler)
+            if (h.playNowHandler) oldSocket.off('playnow:' + plst.id, h.playNowHandler)
+            if (h.removedHandler) oldSocket.off('delete_track:' + plst.id, h.removedHandler)
+            if (h.settingsChangedHandler)
+              oldSocket.off('settings_changed:' + plst.id, h.settingsChangedHandler)
+            if (h.connectHandler) oldSocket.off('connect', h.connectHandler)
+            if (h.disconnectHandler) oldSocket.off('disconnect', h.disconnectHandler)
+          }
+        })
+        set(() => ({ socketHandlers: {} }))
+      }
+
       set(() => ({ socket: s }))
       if (s) {
         get().playlists.forEach((plst) => get().subscribePlaylist(plst.id))
@@ -276,11 +303,11 @@ export const useMusicStore = create<StoreState>((set, get) => {
     },
 
     /* ---- ADD flow ---- */
-    async requestAddTrack(playlistId, yt_video_url, ownerId = null) {
+    async requestAddTrack(playlistId: string, yt_video_url: string, ownerId?: string) {
       // optimistic: add to playlist
       const { user } = useAuthStore.getState()
-      var owner_id = get().playlists.find((p) => p.id === playlistId)?.owner_id
-      owner_id = owner_id ? owner_id : ownerId
+      const foundOwnerId = get().playlists.find((p) => p.id === playlistId)?.owner_id
+      const owner_id = foundOwnerId || ownerId
       if (!user || !owner_id) {
         console.debug('no user in requestAddTrack')
         return
@@ -298,11 +325,12 @@ export const useMusicStore = create<StoreState>((set, get) => {
       }
       console.debug('order', order)
 
-      await addTrackToPlaylist(order)
+      const addTrackFn = get().api.addTrack || addTrackToPlaylist
+      await addTrackFn(order)
     },
 
     // server sync (socket handler должен вызвать это)
-    syncAddTrack(playlistId, track) {
+    syncAddTrack(playlistId: string, track: Track) {
       const pl = get().playlists.find((p) => p.id === playlistId)
       console.debug('syncAddTrack', playlistId, track)
       if (!pl) {
@@ -329,54 +357,140 @@ export const useMusicStore = create<StoreState>((set, get) => {
     },
 
     /* ---- PLAY NOW flow ---- */
-    async requestPlayNow(playlistId, track_id) {
-      await postPlayNow(playlistId, track_id)
-      console.debug('requestPlayNow')
+    async requestPlayNow(playlistId: string, track_id: string | undefined) {
+      console.debug('requestPlayNow', playlistId, track_id)
+
+      // Add to pendingPlays to identify our own updates
+      set((state) => {
+        const pending = { ...state.pendingPlays }
+        if (!pending[playlistId]) {
+          pending[playlistId] = new Set()
+        }
+        const newSet = new Set(pending[playlistId])
+        if (track_id) {
+          newSet.add(track_id)
+        }
+        pending[playlistId] = newSet
+        return { pendingPlays: pending }
+      })
+
+      // Store original playlists state in case we need to revert
+      const originalPlaylists = get().playlists
+
+      // Apply optimistic update immediately
+      set((state) => ({
+        playlists: state.playlists.map((p) => {
+          if (p.id === playlistId) {
+            const track = p.track_data.find((t) => t.id === track_id)
+            const prevNowPlaying = p.settings.mode === 'flow' ? p.now_playing : undefined
+            return {
+              ...p,
+              track_data: prevNowPlaying
+                ? [
+                    prevNowPlaying,
+                    ...p.track_data.filter((t) => t.id !== prevNowPlaying.id),
+                  ]
+                : p.track_data,
+              now_playing: track,
+            }
+          }
+          return p
+        })
+      }))
+
+      try {
+        const playNowFn = get().api.playNow || postPlayNow
+        await (playNowFn as (playlistId: string, trackId?: string) => Promise<any>)(playlistId, track_id)
+      } catch (error) {
+        console.error('Failed to request play now, reverting optimistic update:', error)
+        // Revert pending state and playlist state
+        set((state) => {
+          const pending = { ...state.pendingPlays }
+          if (pending[playlistId] && track_id) {
+            const newSet = new Set(pending[playlistId])
+            newSet.delete(track_id)
+            pending[playlistId] = newSet
+          }
+          return {
+            pendingPlays: pending,
+            playlists: originalPlaylists
+          }
+        })
+        throw error
+      }
     },
 
     // called by socket when server broadcasts playnow
-    syncPlayNow(playlistId, track) {
+    syncPlayNow(playlistId: string, track: Track | undefined) {
       const pl = get().playlists.find((p) => p.id === playlistId)
       if (!pl) return
 
-      const prevNowPlaying =
-        pl.settings.mode === 'flow' ? pl.now_playing : undefined
-      console.debug('syncPlayNow')
+      console.debug('syncPlayNow', playlistId, track)
 
-      set((state) => ({
-        playlists: state.playlists.map((p) =>
-          p.id === playlistId
-            ? {
-                ...p,
-                track_data: prevNowPlaying
-                  ? [
-                      prevNowPlaying,
-                      ...p.track_data.filter((t) => t.id !== prevNowPlaying.id),
-                    ]
-                  : p.track_data,
-                now_playing: track,
-              }
-            : p,
-        ),
-      }))
+      // Check if we initiated this play now request optimistically
+      const pending = get().pendingPlays[playlistId]
+      const wasPending = track && pending && pending.has(track.id)
+
+      if (wasPending) {
+        // Just clean up from pending
+        set((state) => {
+          const pendingPlays = { ...state.pendingPlays }
+          if (pendingPlays[playlistId] && track) {
+            const newSet = new Set(pendingPlays[playlistId])
+            newSet.delete(track.id)
+            pendingPlays[playlistId] = newSet
+          }
+          return { pendingPlays }
+        })
+      } else {
+        // Apply update from server since it was initiated by another client
+        const prevNowPlaying =
+          pl.settings.mode === 'flow' ? pl.now_playing : undefined
+
+        set((state) => ({
+          playlists: state.playlists.map((p) =>
+            p.id === playlistId
+              ? {
+                  ...p,
+                  track_data: prevNowPlaying
+                    ? [
+                        prevNowPlaying,
+                        ...p.track_data.filter((t) => t.id !== prevNowPlaying.id),
+                      ]
+                    : p.track_data,
+                  now_playing: track,
+                }
+              : p,
+          ),
+        }))
+      }
     },
 
     /* ---- REMOVE flow ---- */
-    async requestRemoveTrack(playlistId, orderId, reason?: string) {
+    async requestRemoveTrack(playlistId: string, orderId: string, reason?: string) {
       console.debug(
         'requestRemoveTrack, playlistId - ',
         playlistId,
         'orderId - ',
         orderId,
       )
-      await removeTrackFromPlaylist(playlistId, orderId, reason)
-    },
 
-    syncRemoveTrack(playlistId, orderId) {
-      console.debug('syncRemoveTrack')
-      console.debug(' get().playlists', get().playlists)
-      const pl = get().playlists.find((p) => p.id === playlistId)
-      if (!pl) return
+      // Add to pendingRemoves to identify our own updates
+      set((state) => {
+        const pending = { ...state.pendingRemoves }
+        if (!pending[playlistId]) {
+          pending[playlistId] = new Set()
+        }
+        const newSet = new Set(pending[playlistId])
+        newSet.add(orderId)
+        pending[playlistId] = newSet
+        return { pendingRemoves: pending }
+      })
+
+      // Store original playlists state in case we need to revert
+      const originalPlaylists = get().playlists
+
+      // Apply optimistic update immediately
       set((state) => ({
         playlists: state.playlists.map((p) =>
           p.id === playlistId
@@ -385,11 +499,74 @@ export const useMusicStore = create<StoreState>((set, get) => {
                 track_data: p.track_data.filter((t) => t.id !== orderId),
               })
             : p,
-        ),
+        )
       }))
 
-      if (pl.now_playing?.id === orderId) {
-        get().playNext(pl, 'removed')
+      try {
+        const removeFn = get().api.removeTrack || removeTrackFromPlaylist
+        await removeFn(playlistId, orderId, reason)
+      } catch (error) {
+        console.error('Failed to request remove track, reverting optimistic update:', error)
+        // Revert pending state and playlist state
+        set((state) => {
+          const pending = { ...state.pendingRemoves }
+          if (pending[playlistId]) {
+            const newSet = new Set(pending[playlistId])
+            newSet.delete(orderId)
+            pending[playlistId] = newSet
+          }
+          return {
+            pendingRemoves: pending,
+            playlists: originalPlaylists
+          }
+        })
+        throw error
+      }
+    },
+
+    syncRemoveTrack(playlistId: string, orderId: string) {
+      console.debug('syncRemoveTrack', playlistId, orderId)
+
+      // Check if we initiated this remove request optimistically
+      const pending = get().pendingRemoves[playlistId]
+      const wasPending = pending && pending.has(orderId)
+
+      if (wasPending) {
+        // Clean up from pending
+        set((state) => {
+          const pendingRemoves = { ...state.pendingRemoves }
+          if (pendingRemoves[playlistId]) {
+            const newSet = new Set(pendingRemoves[playlistId])
+            newSet.delete(orderId)
+            pendingRemoves[playlistId] = newSet
+          }
+          return { pendingRemoves }
+        })
+      } else {
+        // Apply update from server since it was initiated by another client
+        set((state) => ({
+          playlists: state.playlists.map((p) =>
+            p.id === playlistId
+              ? get().sortPlaylist({
+                  ...p,
+                  track_data: p.track_data.filter((t) => t.id !== orderId),
+                })
+              : p,
+          ),
+        }))
+      }
+
+      // Check if the deleted track was currently playing
+      // Get fresh playlist data to avoid stale objects and potential infinite loops
+      const freshPl = get().playlists.find((p) => p.id === playlistId)
+      if (!freshPl) return
+
+      // ONLY the owner/streamer of the playlist should trigger next track playback changes!
+      const { user } = useAuthStore.getState()
+      const isOwner = user && user.id === freshPl.owner_id
+
+      if (freshPl.now_playing?.id === orderId && isOwner) {
+        get().playNext(freshPl, 'removed')
       }
     },
 

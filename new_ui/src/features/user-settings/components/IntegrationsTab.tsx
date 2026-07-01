@@ -182,7 +182,7 @@ export function IntegrationsTab({
     <div className="flex flex-col gap-6">
       {/* Dead integrations banner — shown only when relevant */}
       {deadCount > 0 && (
-        <div className="flex items-start gap-3 px-4 py-3 rounded-[var(--rounded-std)] border border-amber-500/30 bg-amber-500/8 text-amber-200">
+        <div className="flex items-start gap-3 px-4 py-3 rounded-(--rounded-std) border border-amber-500/30 bg-amber-500/8 text-amber-200">
           <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-amber-400" />
           <p className="text-sm leading-snug">
             {t('settings.integrations.deadBanner', { count: deadCount })}
@@ -240,7 +240,7 @@ export function IntegrationsTab({
             ))
           ) : (
             <div className="text-center py-10 px-4">
-              <div className="mx-auto mb-3 h-10 w-10 rounded-[var(--rounded-std)] bg-level-1 border border-level-3/30 flex items-center justify-center">
+              <div className="mx-auto mb-3 h-10 w-10 rounded-(--rounded-std) bg-level-1 border border-level-3/30 flex items-center justify-center">
                 <Link2 className="h-5 w-5 text-text-placeholder" />
               </div>
               <p className="text-text-main font-medium text-sm">
@@ -269,7 +269,7 @@ export function IntegrationsTab({
                 key={platform}
                 className={`flex items-center gap-4 p-4 ${innerPanelClass} transition-all hover:border-level-3/30'`}
               >
-                <div className="w-12 h-12 shrink-0 flex p-1 items-center justify-center rounded-[var(--rounded-std)] bg-level-2 ">
+                <div className="w-12 h-12 shrink-0 flex p-1 items-center justify-center rounded-(--rounded-std) bg-level-2 ">
                   {config.icon}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -399,7 +399,7 @@ function IntegrationCard({
           <>
             <button
               onClick={onReconnect}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[var(--rounded-std)] border border-amber-500/50 bg-amber-500/10 text-amber-200 text-xs font-mono hover:bg-amber-500/20 hover:border-amber-500/70 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-(--rounded-std) border border-amber-500/50 bg-amber-500/10 text-amber-200 text-xs font-mono hover:bg-amber-500/20 hover:border-amber-500/70 transition-colors"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               {t('settings.integrations.reconnect')}
@@ -429,7 +429,7 @@ function IntegrationCard({
                   onClick={onDisconnectBot}
                   disabled={isBotDeleteLoading}
                   title={t('settings.integrations.disconnectBot')}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[var(--rounded-std)] border border-white/10 bg-level-1/50 text-text-secondary text-sm font-mono hover:border-danger/40 hover:text-danger hover:bg-danger/8 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-(--rounded-std) border border-white/10 bg-level-1/50 text-text-secondary text-sm font-mono hover:border-danger/40 hover:text-danger hover:bg-danger/8 disabled:opacity-40 disabled:pointer-events-none transition-colors"
                 >
                   <BotOff className="h-3.5 w-3.5" />
                   {isBotDeleteLoading

@@ -7,6 +7,17 @@ import useWindowDimensions from '@/hooks/useWindowDimensions'
 import useMusicStore from '@/stores/musicStore'
 import { usePlaylist } from '@/features/playlist/context/playlist-context'
 
+
+enum NextReason {
+  skip = "skip",
+  breakPriority = "breakPriority",
+}
+
+type EventNext = {
+  yt_id: string
+  reason: NextReason
+}
+
 type YoutubePlayerProps = {
   nowPlay: string | undefined
   pause: boolean
@@ -38,6 +49,8 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
     },
   }
 
+
+
   useEffect(() => {
     if (!playerRef.current) return
     if (pause) {
@@ -62,8 +75,10 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
 
   return (
     <YouTube
+
       videoId={nowPlay || ''}
-      className={className}
+
+      className={className + " invisible hidden"}
       opts={opts}
       id="player"
       onReady={_onReady}

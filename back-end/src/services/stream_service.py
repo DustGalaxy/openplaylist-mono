@@ -19,7 +19,6 @@ class StreamService:
         raw_token = secrets.token_hex(64)  # 128 символов
         # Публичный токен, который отдаем пользователю (в БД не сохраняем)
         public_token = f"{user_id}:{raw_token}"
-        print(f"!!!!!! NEW TOKEN - {public_token}")
         return public_token
 
     async def save(self, db_session: AsyncSession, user_id: UUID, public_token: str):
@@ -28,8 +27,6 @@ class StreamService:
         token_hash = self._hash(raw_token)
         
         repo = get_stream_token_repository()
-        print(f"!!!!!! TOKEN TO SAVE - {public_token}")
-        print(f"!!!!!! TOKEN HASH TO SAVE - {token_hash}")
         await repo.upsert(db_session, user_id, token_hash)
 
     async def get_current_playing_track(self, db_session: AsyncSession, user_id: UUID):
