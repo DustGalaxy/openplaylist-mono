@@ -78,7 +78,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
 
       videoId={nowPlay || ''}
 
-      className={className + " invisible hidden"}
+      className={className + " "}
       opts={opts}
       id="player"
       onReady={_onReady}

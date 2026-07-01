@@ -3,112 +3,113 @@ import Arrow from '@/components/icons/icon-arrow'
 
 import useMusicStore from '@/stores/musicStore'
 import { usePlaylist } from '@/features/playlist/context/playlist-context'
-import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import type { SortSettings } from '@/types/playlist'
-import { toast } from 'sonner'
-import { ArrowUpRight, Calendar } from 'lucide-react'
+import { ArrowUpRight, Calendar, Minus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Btn from '@/components/ui/my-btn'
+
+type SortDirection = 'none' | 'asc' | 'desc'
+
+/** none → asc → desc → none */
+const nextDirection = (current: SortDirection): SortDirection => {
+  if (current === 'none') return 'asc'
+  if (current === 'asc') return 'desc'
+  return 'none'
+}
+
+/** Small indicator that always renders — line for none, arrow for asc/desc */
+function SortDirectionIndicator({ direction }: { direction: SortDirection }) {
+  if (direction === 'none') {
+    return (
+      <Minus
+        key="none"
+        className="size-2 sm:size-3 text-text-placeholder animate-[sort-pop_250ms_ease-out]"
+      />
+    )
+  }
+
+  return (
+    <Arrow
+      key={direction}
+      className={`size-2 sm:size-3 transition-transform duration-200 animate-[sort-pop_250ms_ease-out] ${
+        direction === 'asc' ? 'rotate-180' : ''
+      }`}
+    />
+  )
+}
 
 export default function SortPanel() {
   const playlist = usePlaylist()
   const { requestPlSettings } = useMusicStore()
   const { t } = useTranslation()
-  const setPlaylist = useMusicStore((s) => s.setPlaylist)
-  const [sortSettings, setSortSettings] = React.useState<SortSettings>(
-    playlist.settings.sort_settings,
-  )
-  const canRequest = React.useRef(false)
 
-  useDebouncedEffect(
-    sortSettings,
-    async () => {
-      if (!canRequest.current) return
-      canRequest.current = false
-      await requestPlSettings(playlist.id, { sort_settings: sortSettings })
-      toast.success(t('common.toast.saved'))
-    },
-    2000,
-  )
+  const sortSettings = playlist.settings.sort_settings
 
-  const updateSettings = (newSettings: SortSettings) => {
-    setSortSettings(newSettings)
-    setPlaylist({
-      ...playlist,
-      settings: { ...playlist.settings, sort_settings: newSettings },
+  const updateSettings = (newSettings: Partial<SortSettings>) => {
+    requestPlSettings(playlist.id, {
+      sort_settings: {
+        ...sortSettings,
+        ...newSettings,
+      },
     })
-    canRequest.current = true
   }
 
   return (
-    <div className="flex gap-2 sm:gap-3 justify-center items-end">
-      {/* Priority Категория (Использует isActive только для визуала вжатости) */}
-      <Btn
-        title={t('sort.priority.title')}
-        isActive={sortSettings.priority !== 'none'}
-        onClick={() =>
-          updateSettings({
-            ...sortSettings,
-            priority: sortSettings.priority === 'none' ? 'desc' : 'none',
-          })
+    <>
+      {/* Inline keyframe for the pop animation */}
+      <style>{`
+        @keyframes sort-pop {
+          0%   { transform: scale(0.5); opacity: 0.3; }
+          60%  { transform: scale(1.25); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
         }
-        className="px-5"
-        text={<ArrowUpRight className="size-6 sm:size-8 p-1" />}
-      />
+      `}</style>
 
-      {/* Priority Направление */}
-      <div className="flex flex-col gap-1">
+      <div className="flex gap-2 sm:gap-3 justify-center items-end">
+        {/* Priority — cycles: none → asc → desc → none */}
         <Btn
-          title={t('sort.priority.lowFirst')}
-          isActive={sortSettings.priority === 'asc'}
-          disabled={sortSettings.priority === 'none'}
-          onClick={() => updateSettings({ ...sortSettings, priority: 'asc' })}
-          className="px-5 pt-px! pb-px! sm:pt-0.5! sm:pb-0.75!"
-          text={<Arrow className="size-2 sm:size-3 rotate-180" />}
+          title={
+            sortSettings.priority === 'asc'
+              ? t('sort.priority.lowFirst')
+              : sortSettings.priority === 'desc'
+                ? t('sort.priority.highFirst')
+                : t('sort.priority.title')
+          }
+          isActive={sortSettings.priority !== 'none'}
+          onClick={() =>
+            updateSettings({ priority: nextDirection(sortSettings.priority) })
+          }
+          className="px-5"
+          text={
+            <span className="flex items-center gap-1">
+              <ArrowUpRight className="size-6 sm:size-8 p-1" />
+              <SortDirectionIndicator direction={sortSettings.priority} />
+            </span>
+          }
         />
+
+        {/* Date — cycles: none → asc → desc → none */}
         <Btn
-          title={t('sort.priority.highFirst')}
-          isActive={sortSettings.priority === 'desc'}
-          disabled={sortSettings.priority === 'none'}
-          onClick={() => updateSettings({ ...sortSettings, priority: 'desc' })}
-          className="px-5 pt-px! pb-px! sm:pt-0.5! sm:pb-0.75!"
-          text={<Arrow className="size-2 sm:size-3" />}
+          title={
+            sortSettings.date === 'asc'
+              ? t('sort.date.olderFirst')
+              : sortSettings.date === 'desc'
+                ? t('sort.date.newerFirst')
+                : t('sort.date.title')
+          }
+          isActive={sortSettings.date !== 'none'}
+          onClick={() =>
+            updateSettings({ date: nextDirection(sortSettings.date) })
+          }
+          className="px-5"
+          text={
+            <span className="flex items-center gap-1">
+              <Calendar className="size-6 sm:size-8 p-1" />
+              <SortDirectionIndicator direction={sortSettings.date} />
+            </span>
+          }
         />
       </div>
-
-      {/* Date Категория */}
-      <Btn
-        title={t('sort.date.title')}
-        isActive={sortSettings.date !== 'none'}
-        onClick={() =>
-          updateSettings({
-            ...sortSettings,
-            date: sortSettings.date === 'none' ? 'desc' : 'none',
-          })
-        }
-        className="px-5"
-        text={<Calendar className="size-6 sm:size-8 p-1" />}
-      />
-
-      {/* Date Направление */}
-      <div className="flex flex-col gap-1">
-        <Btn
-          title={t('sort.date.olderFirst')}
-          isActive={sortSettings.date === 'asc'}
-          disabled={sortSettings.date === 'none'}
-          onClick={() => updateSettings({ ...sortSettings, date: 'asc' })}
-          className="px-5 pt-px! pb-px! sm:pt-0.5! sm:pb-0.75!"
-          text={<Arrow className="size-2 sm:size-3 rotate-180" />}
-        />
-        <Btn
-          title={t('sort.date.newerFirst')}
-          isActive={sortSettings.date === 'desc'}
-          disabled={sortSettings.date === 'none'}
-          onClick={() => updateSettings({ ...sortSettings, date: 'desc' })}
-          className="px-5 pt-px! pb-px! sm:pt-0.5! sm:pb-0.75!"
-          text={<Arrow className="size-2 sm:size-3" />}
-        />
-      </div>
-    </div>
+    </>
   )
 }

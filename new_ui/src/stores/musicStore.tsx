@@ -81,7 +81,7 @@ type StoreState = {
 
   // playback controls (local)
   playNext: (
-    pl: ClientPlaylist,
+    pl: string | ClientPlaylist,
     reason?: string,
     forceNextTrack?: Track,
   ) => void
@@ -348,9 +348,9 @@ export const useMusicStore = create<StoreState>((set, get) => {
         playlists: state.playlists.map((p) =>
           p.id === playlistId
             ? get().sortPlaylist({
-                ...p,
-                track_data: [...p.track_data, newTrack],
-              })
+              ...p,
+              track_data: [...p.track_data, newTrack],
+            })
             : p,
         ),
       }))
@@ -387,9 +387,9 @@ export const useMusicStore = create<StoreState>((set, get) => {
               ...p,
               track_data: prevNowPlaying
                 ? [
-                    prevNowPlaying,
-                    ...p.track_data.filter((t) => t.id !== prevNowPlaying.id),
-                  ]
+                  prevNowPlaying,
+                  ...p.track_data.filter((t) => t.id !== prevNowPlaying.id),
+                ]
                 : p.track_data,
               now_playing: track,
             }
@@ -451,15 +451,15 @@ export const useMusicStore = create<StoreState>((set, get) => {
           playlists: state.playlists.map((p) =>
             p.id === playlistId
               ? {
-                  ...p,
-                  track_data: prevNowPlaying
-                    ? [
-                        prevNowPlaying,
-                        ...p.track_data.filter((t) => t.id !== prevNowPlaying.id),
-                      ]
-                    : p.track_data,
-                  now_playing: track,
-                }
+                ...p,
+                track_data: prevNowPlaying
+                  ? [
+                    prevNowPlaying,
+                    ...p.track_data.filter((t) => t.id !== prevNowPlaying.id),
+                  ]
+                  : p.track_data,
+                now_playing: track,
+              }
               : p,
           ),
         }))
@@ -495,9 +495,9 @@ export const useMusicStore = create<StoreState>((set, get) => {
         playlists: state.playlists.map((p) =>
           p.id === playlistId
             ? get().sortPlaylist({
-                ...p,
-                track_data: p.track_data.filter((t) => t.id !== orderId),
-              })
+              ...p,
+              track_data: p.track_data.filter((t) => t.id !== orderId),
+            })
             : p,
         )
       }))
@@ -548,9 +548,9 @@ export const useMusicStore = create<StoreState>((set, get) => {
           playlists: state.playlists.map((p) =>
             p.id === playlistId
               ? get().sortPlaylist({
-                  ...p,
-                  track_data: p.track_data.filter((t) => t.id !== orderId),
-                })
+                ...p,
+                track_data: p.track_data.filter((t) => t.id !== orderId),
+              })
               : p,
           ),
         }))
@@ -571,8 +571,28 @@ export const useMusicStore = create<StoreState>((set, get) => {
     },
 
     async requestPlaylistPatch(id: string, plst: PlaylistPatch) {
-      const response = await patchPlaylist(id, plst)
-      get().syncPlaylistPatch(response)
+      const originalPlaylists = get().playlists
+
+      // Optimistic update
+      set((state) => ({
+        playlists: state.playlists.map((p) =>
+          p.id === id
+            ? {
+              ...p,
+              ...plst,
+            }
+            : p,
+        ),
+      }))
+
+      try {
+        const response = await patchPlaylist(id, plst)
+        get().syncPlaylistPatch(response)
+      } catch (error) {
+        console.error('Failed to patch playlist, reverting:', error)
+        set(() => ({ playlists: originalPlaylists }))
+        throw error
+      }
     },
 
     syncPlaylistPatch(plst) {
@@ -580,107 +600,149 @@ export const useMusicStore = create<StoreState>((set, get) => {
         playlists: state.playlists.map((p) =>
           p.id === plst.id
             ? {
-                ...p,
-                name: plst.name,
-                description: plst.description,
-                is_public: plst.is_public,
-                is_favorite: plst.is_favorite,
-                is_allow_external_requests: plst.is_allow_external_requests,
-                allow_sources: plst.allow_sources,
-                tags: plst.tags,
-              }
+              ...p,
+              name: plst.name,
+              description: plst.description,
+              is_public: plst.is_public,
+              is_favorite: plst.is_favorite,
+              is_allow_external_requests: plst.is_allow_external_requests,
+              allow_sources: plst.allow_sources,
+              tags: plst.tags,
+            }
             : p,
         ),
       }))
     },
 
     async requestPlSettings(playlist_id, settings) {
-      const res = await changePlaylistSettings(playlist_id, settings)
-      get().syncPlSettings(playlist_id, res)
+      const originalPlaylists = get().playlists
+
+      // Optimistic update
+      set((state) => ({
+        playlists: state.playlists.map((p) => {
+          if (p.id === playlist_id) {
+            const newSettings = {
+              ...p.settings,
+              ...settings,
+              sort_settings: {
+                ...p.settings.sort_settings,
+                ...(settings.sort_settings || {}),
+              },
+            }
+            return get().sortPlaylist({ ...p, settings: newSettings })
+          }
+          return p
+        }),
+      }))
+
+      try {
+        const res = await changePlaylistSettings(playlist_id, settings)
+        get().syncPlSettings(playlist_id, res)
+      } catch (error) {
+        console.error('Failed to change playlist settings, reverting:', error)
+        set(() => ({ playlists: originalPlaylists }))
+        throw error
+      }
     },
 
     syncPlSettings(playlist_id, settings) {
-      const pl = get().playlists.find((p) => p.id === playlist_id)
-
-      if (!pl) return
       set((state) => ({
         playlists: state.playlists.map((p) =>
-          p.id === playlist_id ? { ...p, settings } : p,
+          p.id === playlist_id
+            ? get().sortPlaylist({ ...p, settings })
+            : p,
         ),
       }))
     },
 
     /* ---- Playback navigation ---- */
     playNext(pl, reason?: string, forceNextTrack?: Track) {
+      const playlistId = typeof pl === 'string' ? pl : pl.id
+      const currentPl = get().playlists.find((p) => p.id === playlistId)
+      if (!currentPl) return
+
       const repeatHandler = () => {
-        if (pl.settings.sort_settings.shuffle !== 'none') {
-          const list = pl.track_data.filter((t) => t.id !== pl.now_playing?.id)
-          return list[Math.floor(Math.random() * list.length)]
+        if (currentPl.settings.sort_settings.shuffle !== 'none') {
+          const list = currentPl.track_data.filter((t) => t.id !== currentPl.now_playing?.id)
+          return list.length > 0 ? list[Math.floor(Math.random() * list.length)] : undefined
         }
-        if (pl.settings.repeat_mode === 'all') {
+        if (currentPl.settings.repeat_mode === 'all') {
           if (
-            pl.track_data[pl.track_data.length - 1].id === pl.now_playing?.id
+            currentPl.track_data.length > 0 &&
+            currentPl.track_data[currentPl.track_data.length - 1].id === currentPl.now_playing?.id
           ) {
-            return pl.track_data[0]
+            return currentPl.track_data[0]
           } else {
-            return pl.track_data[
-              pl.track_data.findIndex((t) => t.id === pl.now_playing?.id) + 1
-            ]
+            const idx = currentPl.track_data.findIndex((t) => t.id === currentPl.now_playing?.id)
+            return idx !== -1 && idx < currentPl.track_data.length - 1
+              ? currentPl.track_data[idx + 1]
+              : undefined
           }
         } else {
-          return pl.track_data.length > 0
-            ? pl.track_data[pl.track_data.length - 1].id === pl.now_playing?.id
-              ? undefined
-              : pl.track_data[
-                  pl.track_data.findIndex((t) => t.id === pl.now_playing?.id) +
-                    1
-                ]
-            : undefined
+          if (currentPl.track_data.length > 0) {
+            const idx = currentPl.track_data.findIndex((t) => t.id === currentPl.now_playing?.id)
+            return idx !== -1 && idx < currentPl.track_data.length - 1
+              ? currentPl.track_data[idx + 1]
+              : undefined
+          }
+          return undefined
         }
       }
 
       set((state) => ({
         playlists: state.playlists.map((p) =>
-          p.id === pl.id
+          p.id === playlistId
             ? {
-                ...p,
-                history: pl.now_playing
-                  ? [...p.history, pl.now_playing].slice(-99)
-                  : p.history,
-              }
+              ...p,
+              history: currentPl.now_playing
+                ? [...p.history, currentPl.now_playing].slice(-99)
+                : p.history,
+            }
             : p,
         ),
       }))
 
       if (forceNextTrack) {
-        get().requestPlayNow(pl.id, forceNextTrack.id)
+        get().requestPlayNow(playlistId, forceNextTrack.id)
         return
       }
 
       let nextTrack = undefined
 
-      if (pl.now_playing === undefined) {
-        nextTrack = pl.track_data[0] || undefined
-      } else if (pl.settings.mode === 'flow') {
-        nextTrack = pl.track_data[0] || undefined
-        pl.now_playing &&
-          get().requestRemoveTrack(pl.id, pl.now_playing.id, reason)
+      if (currentPl.now_playing === undefined) {
+        nextTrack = currentPl.track_data[0] || undefined
+      } else if (currentPl.settings.mode === 'flow') {
+        nextTrack = currentPl.track_data[0] || undefined
+        currentPl.now_playing &&
+          get().requestRemoveTrack(playlistId, currentPl.now_playing.id, reason)
       } else {
         nextTrack = repeatHandler()
       }
 
-      get().requestPlayNow(pl.id, nextTrack?.id || undefined)
+      get().requestPlayNow(playlistId, nextTrack?.id || undefined)
     },
 
     playPrev(playlistId: string) {
       const pl = get().playlists.find((p) => p.id === playlistId)
-      if (!pl) return
+      if (!pl || pl.history.length === 0) return
 
-      const track = pl.history.pop()
-      console.log('playPrev, track from history', track)
+      const newHistory = [...pl.history]
+      const prevTrack = newHistory.pop()
 
-      if (!track) return
-      get().requestPlayNow(pl.id, track.id || undefined)
+      set((state) => ({
+        playlists: state.playlists.map((p) =>
+          p.id === playlistId
+            ? {
+              ...p,
+              history: newHistory,
+            }
+            : p,
+        ),
+      }))
+
+      if (prevTrack) {
+        get().requestPlayNow(playlistId, prevTrack.id)
+      }
     },
 
     sortPlaylist(playlist: ClientPlaylist) {

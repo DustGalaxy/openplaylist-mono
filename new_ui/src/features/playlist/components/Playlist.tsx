@@ -147,11 +147,10 @@ function PlaylistView() {
                           key={setting.platform}
                           type="button"
                           onClick={() => setSelectedContentSettingIndex(index)}
-                          className={`${filterTabBaseClass} ${
-                            selectedContentSettingIndex === index
-                              ? filterTabActiveClass
-                              : filterTabInactiveClass
-                          }`}
+                          className={`${filterTabBaseClass} ${selectedContentSettingIndex === index
+                            ? filterTabActiveClass
+                            : filterTabInactiveClass
+                            }`}
                         >
                           {setting.platform === Platform.General
                             ? t('common.general')
