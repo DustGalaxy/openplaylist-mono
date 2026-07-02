@@ -45,7 +45,6 @@ import {
   PlaylistProvider,
   usePlaylist,
 } from '@/features/playlist/context/playlist-context'
-import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import { InfoCardGroup } from '@/components/ui/info-card-group'
 
 export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
@@ -73,9 +72,6 @@ function PlaylistView() {
   const [queueSearch, setQueueSearch] = React.useState('')
 
   const [isPaused, setIsPaused] = React.useState(false)
-  const [sortSettings, setSortSettings] = React.useState<SortSettings>(
-    playlist.settings.sort_settings,
-  )
   const { playNext, requestPlSettings, playPrev } = useMusicStore()
 
   const visibleTracks = React.useMemo(() => {
@@ -96,23 +92,8 @@ function PlaylistView() {
     setActivePlst(playlist.is_allow_external_requests)
   }, [playlist.is_allow_external_requests])
 
-  const canRequest = React.useRef(false)
 
-  useDebouncedEffect(
-    sortSettings,
-    async () => {
-      if (!canRequest.current) return
-      canRequest.current = false
-      await requestPlSettings(playlist.id, { sort_settings: sortSettings })
-    },
-    2000,
-  )
 
-  const updateSettings = (newSettings: SortSettings) => {
-    setSortSettings(newSettings)
-    playlist.settings.sort_settings = newSettings
-    canRequest.current = true
-  }
 
   const [showConsole, setShowConsole] = React.useState(false)
   const [showContentSettings, setShowContentSettings] = React.useState(false)
@@ -204,17 +185,17 @@ function PlaylistView() {
                   }
                 }}
               />
-              {
-                <Btn
-                  title={t(`playlist.tooltip.prev`)}
-                  text={<SkipBack />}
-                  disabled={playlist.settings.mode !== 'static'}
-                  className={`px-2 bg-level-2 `}
-                  onClick={() => {
-                    playPrev(playlist.id)
-                  }}
-                />
-              }
+
+              <Btn
+                title={t(`playlist.tooltip.prev`)}
+                text={<SkipBack />}
+                disabled={playlist.settings.mode !== 'static'}
+                className={`px-2 bg-level-2 `}
+                onClick={() => {
+                  playPrev(playlist.id)
+                }}
+              />
+
               <Btn
                 title={t(`playlist.tooltip.${isPaused ? 'play' : 'pause'}`)}
                 text={isPaused ? <Play /> : <Pause />}
@@ -235,11 +216,10 @@ function PlaylistView() {
               <Btn
                 title={t(`playlist.tooltip.shuffle`)}
                 text={<Shuffle />}
-                isActive={sortSettings.shuffle !== 'none'}
+                isActive={playlist.settings.shuffle}
                 onClick={() =>
-                  updateSettings({
-                    ...sortSettings,
-                    shuffle: sortSettings.shuffle === 'none' ? 'desc' : 'none',
+                  requestPlSettings(playlist.id, {
+                    shuffle: !playlist.settings.shuffle,
                   })
                 }
                 className="px-5"

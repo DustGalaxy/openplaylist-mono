@@ -1,9 +1,8 @@
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal, Optional, Dict, Any
 from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict
 
-from src.models.settings import SortSettings
 from src._types import ContentSettingScope, DonationRuleScope, ChatRuleScope, BlockListScope
 
 
@@ -68,7 +67,9 @@ class ReadPlaylistSettings(BaseModel):
 
     mode: Literal["flow", "static"]
     repeat_mode: Literal["all", "once", "none"]
-    sort_settings: SortSettings
+    mode_settings: Dict[str, Any]
+    sync_playback_position: bool
+    shuffle: bool
     cost_mode: Literal["add", "max"]
 
     track_black_list: list[str] = Field(default_factory=list)

@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from enum import StrEnum
 from typing import Literal
 
@@ -87,6 +88,18 @@ class AuthFlow(StrEnum):
 
 
 # --- источник трека ---
+
+
+class PlaylistMode(StrEnum):
+    FLOW = "flow"
+    STATIC = "static"
+    STREAM = "stream"
+
+
+class SortSettings(BaseModel):
+    date: Literal["asc", "desc", "none"]
+    priority: Literal["asc", "desc", "none"]
+    shuffle: Literal["asc", "desc", "none"]
 
 
 class TrackSource(StrEnum):

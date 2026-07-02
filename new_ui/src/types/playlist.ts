@@ -67,6 +67,7 @@ export type Track = {
   source: Platform // twitch | youtube | web
   extra_data: Record<string, any>
   loading?: boolean // для оптимистичного состояния
+  from_owner?: boolean // трек добавлен самим стримером (с бэкенда)
 }
 
 export type ContentSettings = {
@@ -115,7 +116,6 @@ export type ReadBlockList = {
 export type SortSettings = {
   date: 'desc' | 'asc' | 'none'
   priority: 'desc' | 'asc' | 'none'
-  shuffle: 'desc' | 'asc' | 'none'
 }
 
 export interface AllowSources {
@@ -123,15 +123,37 @@ export interface AllowSources {
   platform_user_id: string
 }
 
+export type PlaylistMode = 'flow' | 'static' | 'stream'
+
+/**
+ * Настройки VIP-прерывания для одного режима.
+ * priority_break_point === 0 → прерывание выключено, режим ведёт себя как раньше.
+ * background_track_ids используется только когда владелец режима — 'stream';
+ * для flow/static остаётся пустым и игнорируется.
+ */
+export type ModeSettings = {
+  priority_break_point: number
+  sort_settings_vip: SortSettings
+  sort_settings_background: SortSettings
+  background_track_ids: Array<string>
+}
+
+export type ModeSettingsMap = Record<PlaylistMode, ModeSettings>
+
 export type PlaylistSettings = {
   id: string
   playlist_id: string
 
   max_playlist_size: number
 
-  mode: 'flow' | 'static'
+  mode: PlaylistMode
   repeat_mode: 'all' | 'once' | 'none'
-  sort_settings: SortSettings
+  mode_settings: ModeSettingsMap
+  shuffle: boolean
+  // Переключатель "синхронизировать тайминг": true → позиция резюма хранится
+  // на бэкенде (доступна с любого устройства, гостям и виджету), false →
+  // только в localStorage текущего браузера.
+  sync_playback_position: boolean
 
   cost_mode: 'add' | 'max'
 
@@ -174,6 +196,12 @@ export type PlaylistPatch = {
   is_allow_external_requests?: boolean
 }
 
+/** Прерванный VIP-заявкой фоновый трек — чисто клиентское состояние, на бэкенд не уходит. */
+export type PausedBackgroundTrack = {
+  track_id: string
+  position_seconds: number
+}
+
 export type ClientPlaylist = {
   id: string
   owner_id: string
@@ -193,6 +221,8 @@ export type ClientPlaylist = {
   created_at: string
   updated_at: string
   settings: PlaylistSettings
+
+  paused_background: PausedBackgroundTrack | null
 }
 
 export type SortBy = 'priority' | 'date' | 'shuffle'
@@ -200,6 +230,18 @@ export type SortBy = 'priority' | 'date' | 'shuffle'
 export type PlayNow = {
   playlist_id: string
   track_id: string
+}
+
+/**
+ * Позиция воспроизведения для восстановления после перезагрузки страницы.
+ * Независима от paused_background — пишется на любую смену/паузу трека,
+ * не только на VIP-прерывания. Источник — localStorage либо бэкенд
+ * (переключатель "синхронизировать тайминг" в настройках виджета/плейлиста).
+ */
+export type PlaybackPosition = {
+  track_id: string
+  position_seconds: number
+  updated_at: string // ISO
 }
 
 /* API callbacks — передаются извне приложением */

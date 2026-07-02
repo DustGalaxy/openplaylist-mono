@@ -1,17 +1,15 @@
 from datetime import datetime
 from enum import Enum
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Dict, Any
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
-from src._types import ContentSettingScope, DonationRuleScope, ChatRuleScope, BlockListScope
-
-
-class SortSettings(BaseModel):
-    date: Literal["asc", "desc", "none"]
-    priority: Literal["asc", "desc", "none"]
-    shuffle: Literal["asc", "desc", "none"]
-
+from src._types import (
+    ContentSettingScope,
+    DonationRuleScope,
+    ChatRuleScope,
+    BlockListScope,
+)
 
 # --- Enums ---
 
@@ -77,9 +75,11 @@ class ChatRulesSchema(SubSchema):
 class SettingsSchema(BaseSchema):
     playlist_id: UUID
     max_playlist_size: int
-    mode: Literal["flow", "static"]
+    mode: Literal["flow", "stream", "static"]
     repeat_mode: Literal["all", "once", "none"]
-    sort_settings: SortSettings
+    mode_settings: Dict[str, Any]
+    sync_playback_position: bool
+    shuffle: bool
     cost_mode: Literal["add", "max"]
 
     track_black_list: List[str] = []
@@ -139,9 +139,12 @@ class SettingsPatch(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     max_playlist_size: Optional[int] = None
-    mode: Optional[Literal["flow", "static"]] = None
+    mode: Optional[Literal["flow", "stream", "static"]] = None
     repeat_mode: Optional[Literal["all", "once", "none"]] = None
-    sort_settings: Optional[SortSettings] = None
+    # sort_settings: Optional[SortSettings] = None
+    mode_settings: Optional[Dict[str, Any]] = None
+    sync_playback_position: Optional[bool] = None
+    shuffle: Optional[bool] = None
     cost_mode: Optional[Literal["add", "max"]] = None
     track_black_list: Optional[List[str]] = None
 
