@@ -36,7 +36,7 @@ export default function SettingsModal() {
   const { t } = useTranslation()
   const playlist = usePlaylist()
   const [settings, setSettings] = React.useState<PlaylistSettings>()
-  const [plst, setPlst] = React.useState<ClientPlaylist>()
+  const [plst, setPlst] = React.useState<ClientPlaylist>(playlist)
 
   const [countToDelete, setCountToDelete] = React.useState(3)
   const [deleteTimeout, setDeleteTimeout] = React.useState(false)
@@ -95,7 +95,7 @@ export default function SettingsModal() {
     shadow-[0_3px_0_0_var(--color-level-3),0_4px_5px_-1px_rgba(0,0,0,0.5)] 
     sm:shadow-[0_3px_0_0_var(--color-level-3),0_5px_8px_-1px_rgba(0,0,0,0.55)]
     
-    hover:shadow-[0_6px_0_0_theme(colors.level-3),0_0px_15px_rgba(255,255,255,0.25),0_4px_8px_rgba(255,255,255,0.15)]
+    hover:shadow-[0_3px_0_0_var(--color-level-3),0_0px_15px_rgba(255,255,255,0.25),0_4px_8px_rgba(255,255,255,0.15)]
     hover:text-shadow-[0_0_4px_rgba(255,255,255,0.8),_0_0_25px_rgba(255,255,255,0.4)]
     hover:[&_svg]:drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]
 
@@ -111,7 +111,7 @@ export default function SettingsModal() {
     transform translate-y-0 transition-all duration-100
     data-[state=active]:translate-y-[3px]
     sm:data-[state=active]:translate-y-[5px]
-    data-[state=active]:shadow-[0_0px_0_0_theme(colors.level-3),0_0px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)]
+    data-[state=active]:shadow-[0_0px_0_0_var(--color-level-3),0_0px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)]
   `
 
   return (
@@ -120,12 +120,17 @@ export default function SettingsModal() {
         <Btn
           text={<Settings />}
           title={t('playlistSettings.title')}
-          className="flex w-12.5 bg-level-2"
+          className="flex px-2 bg-level-2"
           onClick={() => setCountToDelete(3)}
         />
       </DialogTrigger>
-      <DialogContent className="max-w-106.25 md:max-w-300 bg-level-1 border-level-3 text-text-main h-225 overflow-scroll">
-        <Tabs className="w-full flex justify-start min-h-full">
+      <DialogContent className="fixed 
+      top-10! bottom-10! left-0! right-0! translate-x-0! translate-y-0! w-screen max-w-full px-1 sm:px-4 h-screen max-h-[90vh] 
+      sm:top-[50%]! sm:left-[50%]! sm:-translate-x-1/2! sm:-translate-y-1/2! 
+      sm:max-w-6xl sm:h-[80vh] rounded-t-xl sm:rounded-xl bg-level-1 border-level-3 text-text-main flex flex-col overflow-auto">
+
+
+        <Tabs className="min-w-full flex justify-start ">
           <DialogHeader>
             <DialogTitle className="text-xl">
               {t('playlistSettings.title')}
@@ -137,7 +142,7 @@ export default function SettingsModal() {
 
           <TabsList
             defaultValue="general"
-            className="w-full flex items-center font-mono justify-start bg-transparent px-0 mx-0 gap-4"
+            className="w-full grid grid-cols-3 sm:grid-cols-6 font-mono justify-start items-center bg-transparent px-0 mx-0 gap-4 mb-3"
           >
             <TabsTrigger className={retroTabStyles} value="general">
               {t('playlistSettings.tabs.basic')}

@@ -39,7 +39,7 @@ function ModeButton({
       onClick={onClick}
       className={cn(
         filterTabBaseClass,
-        'px-2.5 shrink-0',
+        'px-1 sm:px-2.5 shrink-0',
         active ? filterTabActiveClass : filterTabInactiveClass,
       )}
     >
@@ -108,7 +108,7 @@ export function PlaylistQueueInput({
 
   return (
     <form
-      className="flex w-full min-w-0 items-center gap-2"
+      className="flex w-full min-w-0 items-center gap-1 sm:gap-2"
       onSubmit={handleSubmit}
     >
       <div className="flex shrink-0 gap-1">
@@ -151,7 +151,7 @@ export function PlaylistQueueInput({
           text={t('playlist.queue.submit')}
           disabled={!value.trim()}
           type="submit"
-          className="h-11 shrink-0 px-4 bg-level-2 text-sm font-semibold text-text-main"
+          className="h-11 shrink-0 px-2 sm:px-4 bg-level-2 text-xs sm:text-sm font-semibold text-text-main "
         />
       )}
     </form>

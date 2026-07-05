@@ -38,7 +38,7 @@ export default function Btn({
         /* ХОВЕР (работает всегда, кроме отключенного состояния) */
         hover:text-shadow-[0_0_4px_rgba(255,255,255,0.8),0_0_25px_rgba(255,255,255,0.4)]
         hover:[&_svg]:drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]
-        
+
         disabled:cursor-not-allowed
         disabled:opacity-50
         disabled:shadow-none
@@ -46,14 +46,14 @@ export default function Btn({
         disabled:hover:text-shadow-none
         disabled:[&_svg]:drop-shadow-none
         disabled:active:shadow-none
-        disabled:active:translate-y-0
+        disabled:translate-y-0
       `,
         // 1. ЛОГИКА ТРАНСФОРМАЦИИ СДВИГА
         isToggleMode
           ? isActive
-            ? 'translate-y-0.75 sm:translate-y-1.25' // Вжата, но кликабельна для отжатия
-            : 'transform translate-y-0'
-          : 'transform translate-y-0 active:translate-y-0.75 sm:active:translate-y-1.25',
+            ? 'transform translate-y-0 '
+            : '-translate-y-0.75 sm:-translate-y-1.25'
+          : 'transform -translate-y-0.75 sm:-translate-y-1.25 active:translate-y-0',
 
         // 2. ЛОГИКА ТЕНЕЙ И ЦВЕТНОГО ТОРЦА
         isToggleMode

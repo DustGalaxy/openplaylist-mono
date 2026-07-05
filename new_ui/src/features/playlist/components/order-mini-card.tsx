@@ -17,21 +17,24 @@ import { formatTime } from '@/lib/utils'
 import useMusicStore from '@/stores/musicStore'
 import { useSavedStore } from '@/stores/savedStore'
 import Person from '@/components/icons/icon-person'
+import useWindowDimensions from '@/hooks/useWindowDimensions'
 
 interface OrderMiniCardProps {
   track: any // Track | SavedTrack
   btns_type?: 'playlist' | 'non-playlist'
+  isDragging?: boolean
 }
 
-export default function OrderMiniCard({
+function OrderMiniCardImpl({
   track,
   btns_type = 'playlist',
+  isDragging = false,
 }: OrderMiniCardProps) {
   const { t, i18n } = useTranslation()
   const playlist = usePlaylist()
   const bgUrl = `https://img.youtube.com/vi/${track.yt_video_id}/mqdefault.jpg`
   const [actionsOpen, setActionsOpen] = useState(false)
-
+  const { height, width } = useWindowDimensions()
   const { requestPlayNow, requestAddTrack, requestRemoveTrack } =
     useMusicStore()
   const { isSaved, addTrack, removeTrack } = useSavedStore()
@@ -59,27 +62,29 @@ export default function OrderMiniCard({
 
   // Toggle action panel (tap on mobile, hover still works on desktop via group-hover)
   const handleCardTap = useCallback(() => {
-    setActionsOpen((prev) => !prev)
+    if (width < 768) {
+      setActionsOpen((prev) => !prev)
+    }
   }, [])
 
   // Форматирование дат
   const formattedDate = track.created_at
     ? new Date(track.created_at).toLocaleDateString(i18n.language, {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      })
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
     : 'Н/Д'
 
   const longFormatDate = track.created_at
     ? new Date(track.created_at).toLocaleDateString(i18n.language, {
-        day: 'numeric',
-        month: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-      })
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+    })
     : 'Н/Д'
 
   // Сборка кнопок
@@ -148,15 +153,17 @@ export default function OrderMiniCard({
   const buttons = getButtons()
 
   return (
-    <div className="group relative w-full rounded-(--rounded-std) overflow-hidden border border-level-3/20 bg-level-2 transition-all duration-300 shadow-md hover:shadow-lg">
-      {/* Контейнер обложки и контента — tappable on mobile */}
+    <div
+      className={`group relative w-full rounded-(--rounded-std) overflow-hidden border border-level-3/20 bg-level-2 shadow-md hover:shadow-lg ${isDragging ? '' : 'transition-all duration-300'
+        }`}
+    >
       <div
-        className="relative w-full h-[92px] p-2.5 flex flex-col justify-between z-10 cursor-pointer select-none"
+        className="relative w-full h-23 p-2.5 flex flex-col justify-between z-10 cursor-pointer select-none"
         onClick={handleCardTap}
       >
-        {/* Задний фон обложки */}
         <div
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-100"
+          className={`absolute inset-0 bg-cover bg-center ${isDragging ? '' : 'transition-transform duration-500 group-hover:scale-100'
+            }`}
           style={{ backgroundImage: `url('${bgUrl}')` }}
         />
 
@@ -213,7 +220,7 @@ export default function OrderMiniCard({
                 {/* Приоритет */}
                 <div
                   title={t('playlist.track.priority')}
-                  className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-level-2/90 border border-level-3/20 shadow-inner min-w-[35px] justify-center cursor-help"
+                  className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-level-2/90 border border-level-3/20 shadow-inner min-w-8.75 justify-center cursor-help"
                 >
                   <ArrowUpRight
                     className={`w-3 h-3 ${+track.priority > 0 ? 'text-level-3 animate-pulse' : 'text-text-placeholder'}`}
@@ -229,6 +236,7 @@ export default function OrderMiniCard({
 
             {/* Tap affordance chevron */}
             <ChevronDown
+              style={{ display: width < 768 ? 'block' : 'none' }}
               className={`w-4 h-4 text-text-placeholder transition-transform duration-300 ${actionsOpen ? 'rotate-180' : ''}`}
             />
           </div>
@@ -237,17 +245,16 @@ export default function OrderMiniCard({
 
       {/* Панель управления — opens on tap (mobile) OR hover (desktop) */}
       <div
-        className={`w-full flex gap-2 justify-center items-center bg-level-1/5 shadow-inner border-t border-level-3/10 transition-all duration-300 ease-in-out px-3 overflow-hidden ${
-          actionsOpen
-            ? 'max-h-14 opacity-100 py-2.5'
-            : 'max-h-0 opacity-0 group-hover:max-h-14 group-hover:opacity-100 group-hover:py-2.5'
-        }`}
+        className={`w-full flex gap-2 justify-center items-center bg-level-1/5 shadow-inner border-t border-level-3/10 transition-all duration-300 ease-in-out px-3 overflow-hidden ${actionsOpen
+          ? 'max-h-14 opacity-100 py-2.5'
+          : 'max-h-0 opacity-0 group-hover:max-h-14 group-hover:opacity-100 group-hover:py-2.5'
+          }`}
       >
         {buttons.map((btn, index) => (
           <Btn
             key={index}
             text={btn.icon}
-            className={`${btn.className} h-9 w-9 text-[12px] flex items-center justify-center transition-all rounded-md shadow-sm active:translate-y-[1px]`}
+            className={`${btn.className} h-9 w-9 text-[12px] flex items-center justify-center transition-all rounded-md shadow-sm active:translate-y-px`}
             onClick={(e) => {
               e.stopPropagation()
               btn.on_click()
@@ -259,3 +266,17 @@ export default function OrderMiniCard({
     </div>
   )
 }
+
+function areEqual(prev: OrderMiniCardProps, next: OrderMiniCardProps) {
+  return (
+    prev.track.id === next.track.id &&
+    prev.track.priority === next.track.priority &&
+    prev.track.title === next.track.title &&
+    prev.track.requester_nickname === next.track.requester_nickname &&
+    prev.btns_type === next.btns_type &&
+    prev.isDragging === next.isDragging
+  )
+}
+
+const OrderMiniCard = React.memo(OrderMiniCardImpl, areEqual)
+export default OrderMiniCard

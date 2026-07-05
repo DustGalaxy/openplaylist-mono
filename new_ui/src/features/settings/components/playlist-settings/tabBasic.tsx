@@ -157,7 +157,7 @@ const TabBasic = ({
     canPatchPlaylist.current = true
   }
   return (
-    <div>
+    <div className='flex flex-col gap-4'>
       <PlaylistDetailsForm
         playlist={playlist}
         setPlst={setPlst}
@@ -251,7 +251,7 @@ const TabBasic = ({
         <div className="py-1">{t('playlistSettings.basic.privateHelp')}</div>
       </DialogDescription>
 
-      <div className={`p-4 mb-4 ${innerPanelClass}`}>
+      <div className={``}>
         <Label htmlFor="break-point-id" className="text-lg">
           {t('playlistSettings.basic.breakPoint')}
         </Label>
@@ -398,7 +398,7 @@ const TabBasic = ({
         </DialogDescription>
       </div>
 
-      <div className="grid grid-cols-[auto_1fr] items-center gap-2 mb-4">
+      <div className="grid grid-cols-[auto_1fr] items-center gap-2">
         <Label className="text-lg">
           {t('playlistSettings.basic.showInWidget')}
         </Label>
@@ -445,7 +445,7 @@ const TabBasic = ({
         /> */}
       </div>
 
-      <div className="mb-4">
+      <div className="">
         <Label className=" text-lg">
           {t('playlistSettings.basic.externalSources')}
         </Label>

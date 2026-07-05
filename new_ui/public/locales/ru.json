@@ -485,10 +485,16 @@
     },
     "basic": {
       "modeTitle": "Режим плейлиста",
-      "flow": "FLOW",
-      "static": "STATIC",
-      "flowHelp": "Flow — очередь заявок от зрителей.",
-      "staticHelp": "Static — обычный плейлист.",
+      "mode": {
+        "flow": "FLOW",
+        "static": "STATIC",
+        "stream": "STREAM"
+      },
+      "modeHelp": {
+        "flow": "Flow — очередь запросов от зрителей.",
+        "static": "Static — обычный плейлист.",
+        "stream": "Stream — фоновая музыка с запросами от зрителей"
+      },
       "privacy": "Приватность",
       "public": "PUBLIC",
       "private": "PRIVATE",
@@ -508,7 +514,11 @@
       "externalSourcesHelp": "Разрешить добавление треков из внешних источников учитывая конкретные акаунты.",
       "showInWidget": "Отображать активность в виджете?",
       "showInWidgetYes": "Да",
-      "showInWidgetNo": "Нет"
+      "showInWidgetNo": "Нет",
+      "breakPoint": "Перелом приоритета",
+      "breakPointHelp": "Треки чей приоритет равен или выше считаются VIP. Могут прерывать обычные и фоновые треки",
+      "breakPointDisabled": "Отключено",
+      "breakPointEnabled": "Включено"
     },
     "validation": {
       "title": "Валидация видео",
@@ -859,6 +869,18 @@
     "statistic": "Страница /statistic"
   },
   "sort": {
+    "tabs": {
+      "vip": "VIP",
+      "regular": "Треки",
+      "background": "Фон"
+    },
+    "mode": {
+      "auto": "Авто",
+      "random": "Шафл",
+      "free": "Свой",
+      "randomHint": "Треки воспроизводятся в случайном порядке",
+      "freeHint": "Перетаскивайте треки вручную для изменения порядка"
+    },
     "date": {
       "title": "Сортировка по дате",
       "olderFirst": "Сначала старые",

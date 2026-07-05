@@ -486,10 +486,16 @@
     },
     "basic": {
       "modeTitle": "Playlist mode",
-      "flow": "FLOW",
-      "static": "STATIC",
-      "flowHelp": "Flow — viewer request queue.",
-      "staticHelp": "Static — normal playlist.",
+      "mode": {
+        "flow": "FLOW",
+        "static": "STATIC",
+        "stream": "STREAM"
+      },
+      "modeHelp": {
+        "flow": "Flow — viewer request queue.",
+        "static": "Static — normal playlist.",
+        "stream": "Stream — backgroud track with viewer requests"
+      },
       "privacy": "Privacy",
       "public": "PUBLIC",
       "private": "PRIVATE",
@@ -509,7 +515,11 @@
       "externalSourcesHelp": "Allow adding tracks from external sources considering specific accounts.",
       "showInWidget": "Show playlist activity in widget?",
       "showInWidgetYes": "Yes",
-      "showInWidgetNo": "No"
+      "showInWidgetNo": "No",
+      "breakPoint": "Priority Break",
+      "breakPointHelp": "Tracks with a priority equal to or higher than are considered VIP. They can interrupt regular and background tracks",
+      "breakPointDisabled": "Disabled",
+      "breakPointEnabled": "Enabled"
     },
     "validation": {
       "title": "Video validation",
@@ -877,6 +887,18 @@
     "statistic": "Hello \"/statistic\"!"
   },
   "sort": {
+    "tabs": {
+      "vip": "VIP",
+      "regular": "Tracks",
+      "background": "Back"
+    },
+    "mode": {
+      "auto": "Auto",
+      "random": "Random",
+      "free": "Free",
+      "randomHint": "Tracks are shuffled randomly",
+      "freeHint": "Drag tracks to reorder manually"
+    },
     "date": {
       "title": "Date sorting",
       "olderFirst": "Older first",

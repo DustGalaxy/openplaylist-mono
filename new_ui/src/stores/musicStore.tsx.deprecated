@@ -5,28 +5,35 @@ import { create } from 'zustand'
 import { v4 as uuidv4 } from 'uuid'
 import { useAuthStore } from './authStore'
 
-import type {
-  ApiCallbacks,
-  ClientPlaylist,
-  InputPlaylist,
-  Order,
-  PlayNow,
-  PlaylistPatch,
-  PlaylistSettings,
-  SocketLike,
-  Track,
+import {
+  PlaylistMode,
+  type ApiCallbacks,
+  type ClientPlaylist,
+  type InputPlaylist,
+  type ModeSettings,
+  type Order,
+  type OrderMode,
+  type PlayNow,
+  type PlaylistPatch,
+  type PlaylistSettings,
+  type SocketLike,
+  type Track,
 } from '@/types/playlist'
 import {
   addTrackToPlaylist,
   changePlaylistSettings,
   patchPlaylist,
+  postPauseState,
   postPlayNow,
+  postPositionState,
   removeTrackFromPlaylist,
 } from '@/api/api-playlist'
 import { computePriority } from '@/lib/utils'
 import { getActiveModeSettings, isVipTrack, splitQueue } from '@/lib/queueSplit'
 
 /* ---------- Типы ---------- */
+
+type ReorderGroup = 'vip' | 'regular' | 'background'
 
 /* Store */
 type StoreState = {
@@ -72,15 +79,81 @@ type StoreState = {
 
   sortPlaylist: (plst: ClientPlaylist) => ClientPlaylist
 
+  requestReorder: (
+    playlistId: string,
+    mode: PlaylistMode,
+    group: ReorderGroup,
+    orderedIds: Array<string>,
+  ) => Promise<void>
+  requestReorderStep: (
+    playlistId: string,
+    group: ReorderGroup,
+    trackId: string,
+    dir: 'up' | 'down',
+  ) => Promise<void>
+
   subscribePlaylist: (playlistId: string) => void
   unsubscribePlaylist: (playlistId: string) => void
+
+  requestPlaybackState: (playlistId: string, is_paused: boolean) => Promise<void>
+  requestPositionState: (playlistId: string, position: number) => Promise<void>
+}
+
+/* ---------- Playback selection helpers ---------- */
+
+/**
+ * Выбор следующего трека внутри одной группы (vip/regular/background).
+ * - random: случайный трек из группы (исключая текущий, если он ещё жив в списке).
+ * - auto/free: последовательно по порядку массива (для free порядок уже задан
+ *   manual_order_ids на этапе splitQueue/sortByRules, для auto — priority/date).
+ * repeatAll: если true и дошли до конца списка — начинаем сначала (для static
+ *   repeat_mode='all' и для background-репита, который крутится всегда по кругу).
+ */
+
+function isLastInGroup(list: Array<Track>, currentId: string | undefined): boolean {
+  if (currentId === undefined || list.length === 0) return true
+  const idx = list.findIndex((t) => t.id === currentId)
+  return idx === -1 || idx === list.length - 1
+}
+
+function pickNextFromGroup(
+  list: Array<Track>,
+  currentId: string | undefined,
+  orderMode: OrderMode,
+  repeatAll: boolean,
+): Track | undefined {
+  if (list.length === 0) return undefined
+
+  if (orderMode === 'random') {
+    const pool = currentId ? list.filter((t) => t.id !== currentId) : list
+    if (pool.length > 0) return pool[Math.floor(Math.random() * pool.length)]
+    return repeatAll ? list[Math.floor(Math.random() * list.length)] : undefined
+  }
+
+  if (currentId === undefined) return list[0]
+  const idx = list.findIndex((t) => t.id === currentId)
+  if (idx === -1) return list[0]
+  if (idx + 1 < list.length) return list[idx + 1]
+  return repeatAll ? list[0] : undefined
+}
+
+function isBackgroundTrack(
+  mode: PlaylistMode,
+  modeSettings: ModeSettings,
+  trackId: string,
+): boolean {
+  return mode === 'stream' && modeSettings.background_track_ids.includes(trackId)
+}
+
+/** Safe emit — socket may be undefined or not yet support emit. */
+function safeEmit(s: SocketLike | undefined, event: string, payload: any) {
+  if (s !== undefined && s.emit) s.emit(event, payload)
 }
 
 /* ---------- Implementation ---------- */
 
 export const useMusicStore = create<StoreState>((set, get) => {
   function registerSocketHandlers(playlistId: string) {
-    console.debug('registerSocketHandlers', playlistId)
     const s = get().socket
     if (!s) return
     const handlers = get().socketHandlers || {}
@@ -123,18 +196,24 @@ export const useMusicStore = create<StoreState>((set, get) => {
       get().syncPlSettings(playlistId, parsed)
     }
 
+    const playbackStateHandler = (payload: any) => {
+      if (!payload) return
+      const parsed = typeof payload === 'string' ? JSON.parse(payload) : payload
+      if (typeof parsed.is_paused !== 'boolean') return
+      set((state) => ({
+        playlists: state.playlists.map((p) =>
+          p.id === playlistId ? { ...p, is_paused: parsed.is_paused } : p,
+        ),
+      }))
+    }
+
     s.on('add_track:' + playlistId, addHandler)
     s.on('playnow:' + playlistId, playNowHandler)
     s.on('delete_track:' + playlistId, removedHandler)
     s.on('settings_changed:' + playlistId, settingsChangedHandler)
-    s.on('connect', () => {
-      console.debug('socket connect - re-subscribing to playlist', playlistId)
-      if (s !== undefined && s.emit) s.emit('subscribe', { playlist_id: playlistId })
-    })
-    s.on('disconnect', () => {
-      console.debug('socket disconnect - unsubscribing from playlist', playlistId)
-      if (s !== undefined && s.emit) s.emit('unsubscribe', { playlist_id: playlistId })
-    })
+    s.on('playback_state:' + playlistId, playbackStateHandler)
+    s.on('connect', () => safeEmit(s, 'subscribe', { playlist_id: playlistId }))
+    s.on('disconnect', () => safeEmit(s, 'unsubscribe', { playlist_id: playlistId }))
 
     set((st) => ({
       socketHandlers: {
@@ -144,6 +223,7 @@ export const useMusicStore = create<StoreState>((set, get) => {
           playNowHandler,
           removedHandler,
           settingsChangedHandler,
+          playbackStateHandler
         },
       },
     }))
@@ -159,6 +239,7 @@ export const useMusicStore = create<StoreState>((set, get) => {
     if (h.playNowHandler) s.off('playnow:' + playlistId, h.playNowHandler)
     if (h.removedHandler) s.off('delete_track:' + playlistId, h.removedHandler)
     if (h.settingsChangedHandler) s.off('settings_changed:' + playlistId, h.settingsChangedHandler)
+    if (h.playbackStateHandler) s.off('playback_state:' + playlistId, h.playbackStateHandler)
 
     const newHandlers = { ...handlers }
     delete newHandlers[playlistId]
@@ -201,7 +282,7 @@ export const useMusicStore = create<StoreState>((set, get) => {
 
     addPlaylist(pls: ClientPlaylist) {
       set((state) => ({
-        playlists: [...state.playlists, { ...pls, paused_background: pls.paused_background ?? null }],
+        playlists: [...state.playlists, { ...pls, paused_background: pls.paused_background ?? null, is_paused: pls.is_paused ?? true }],
       }))
       get().subscribePlaylist(pls.id)
     },
@@ -213,8 +294,9 @@ export const useMusicStore = create<StoreState>((set, get) => {
     },
 
     setPlaylistsFromServer(pls) {
+      const existing = get().playlists
       const pl = pls.map((p) =>
-        this.sortPlaylist({
+        get().sortPlaylist({
           ...p,
           isSub: false,
           history: [],
@@ -231,21 +313,39 @@ export const useMusicStore = create<StoreState>((set, get) => {
           settings: {
             ...p.settings,
           },
-          paused_background: null,
+          paused_background: existing.find((e) => e.id === p.id)?.paused_background ?? null,
+          is_paused: existing.find((e) => e.id === p.id)?.is_paused ?? true,
         }),
       )
       set(() => ({ playlists: pl }))
     },
 
+    requestPlaybackState(playlistId, is_paused) {
+      set((state) => ({
+        playlists: state.playlists.map((p) =>
+          p.id === playlistId ? { ...p, is_paused } : p,
+        ),
+      }))
+      postPauseState(playlistId, is_paused).catch(() => {
+        // ponytail: команда важнее подтверждения, ответ не смотрим
+      })
+    },
+
+    async requestPositionState(playlistId, position) {
+      // Fire-and-forget, как requestPlaybackState — тайминг не критичен
+      // для локального состояния, поэтому нет optimistic-поля и rollback.
+      try {
+        await postPositionState(playlistId, position)
+      } catch {
+        // Бэкенд ещё может быть не готов — не роняем воспроизведение из-за этого.
+      }
+    },
+
     /* ---- ADD flow ---- */
     async requestAddTrack(playlistId, yt_video_url, ownerId?) {
       const { user } = useAuthStore.getState()
-      var owner_id = get().playlists.find((p) => p.id === playlistId)?.owner_id
-      owner_id = owner_id ? owner_id : ownerId
-      if (!user || !owner_id) {
-        console.debug('no user in requestAddTrack')
-        return
-      }
+      const owner_id = get().playlists.find((p) => p.id === playlistId)?.owner_id ?? ownerId
+      if (!user || !owner_id) return
       const order: Order = {
         request_id: uuidv4(),
         owner_id: owner_id,
@@ -257,7 +357,6 @@ export const useMusicStore = create<StoreState>((set, get) => {
         priority: 'bms',
         source: 'web',
       }
-      console.debug('order', order)
 
       const addTrackFn = get().api.addTrack || addTrackToPlaylist
       await addTrackFn(order)
@@ -265,7 +364,6 @@ export const useMusicStore = create<StoreState>((set, get) => {
 
     syncAddTrack(playlistId, track) {
       const pl = get().playlists.find((p) => p.id === playlistId)
-      console.debug('syncAddTrack', playlistId, track)
       if (!pl) return
 
       const newTrack = {
@@ -287,6 +385,9 @@ export const useMusicStore = create<StoreState>((set, get) => {
       const newTrackIsVip = isVipTrack(newTrack, modeSettings)
       const currentlyPlayingIsVip = nowPlaying !== undefined && isVipTrack(nowPlaying, modeSettings)
 
+      // Премиум-трек не прерывает уже играющий премиум (см. гайд: "премиум
+      // треки не прерывают друг друга, а просто встают в очередь") — поэтому
+      // прерывание срабатывает только когда сейчас играет НЕ vip.
       if (
         newTrackIsVip &&
         nowPlaying !== undefined &&
@@ -301,7 +402,7 @@ export const useMusicStore = create<StoreState>((set, get) => {
                 ...p,
                 paused_background: {
                   track_id: nowPlaying.id,
-                  position_seconds: position,
+                  position: position,
                 },
               }
               : p,
@@ -558,6 +659,8 @@ export const useMusicStore = create<StoreState>((set, get) => {
 
     /* ---- Playback navigation ---- */
     playNext(pl, reason, forceNextTrack) {
+      const fresh = get().playlists.find((p) => p.id === pl.id) ?? pl
+      pl = fresh
       set((state) => ({
         playlists: state.playlists.map((p) =>
           p.id === pl.id
@@ -575,60 +678,83 @@ export const useMusicStore = create<StoreState>((set, get) => {
       }
 
       const modeSettings = getActiveModeSettings(pl)
-      const { vip, background } = splitQueue(pl)
+      const { vip, regular, background } = splitQueue(pl)
 
       const currentWasVip = pl.now_playing !== undefined && isVipTrack(pl.now_playing, modeSettings)
       const remainingVip = pl.now_playing
         ? vip.filter((t) => t.id !== pl.now_playing?.id)
         : vip
 
-      if (currentWasVip) {
-        if (remainingVip.length > 0) {
-          get().requestPlayNow(pl.id, remainingVip[0].id)
-          return
-        }
-        if (pl.paused_background) {
+      const vipOrderMode: OrderMode = pl.settings.shuffle ? 'random' : modeSettings.sort_settings_vip.order_mode
+      const regularOrderMode: OrderMode = pl.settings.shuffle
+        ? 'random'
+        : modeSettings.sort_settings_regular.order_mode
+      const repeatAll = pl.settings.repeat_mode === 'all'
+
+      // Static ничего не удаляет — vip/regular всегда полные группы, и
+      // "remainingVip.length > 0" после первого же сыгранного vip-трека будет
+      // true навсегда (сам трек остаётся в списке). Поэтому static идёт по
+      // позиции внутри своей текущей группы, а не по факту "существует ли vip".
+      if (pl.settings.mode === PlaylistMode.Static) {
+        const currentGroup = currentWasVip ? vip : regular
+
+        let nextTrack: Track | undefined
+        if (pl.now_playing === undefined) {
+          nextTrack = vip[0] ?? regular[0] ?? undefined
+        } else if (!isLastInGroup(currentGroup, pl.now_playing?.id)) {
+          // в текущей группе (vip или regular) есть ещё непроигранные —
+          // остаёмся внутри неё, paused_background не трогаем
+          nextTrack = pickNextFromGroup(
+            currentGroup,
+            pl.now_playing.id,
+            currentWasVip ? vipOrderMode : regularOrderMode,
+            false,
+          )
+        } else if (currentWasVip && pl.paused_background) {
+          // vip-группа отыграна ПОЛНОСТЬЮ — только теперь возвращаемся в фон
+
           get().requestPlayNow(pl.id, pl.paused_background.track_id)
           return
+        } else if (currentWasVip) {
+          nextTrack = regular[0] ?? (repeatAll ? vip[0] : undefined)
+        } else {
+          nextTrack = vip[0] ?? (repeatAll ? regular[0] : undefined)
         }
-      } else if (remainingVip.length > 0) {
-        get().requestPlayNow(pl.id, remainingVip[0].id)
+
+        get().requestPlayNow(pl.id, nextTrack?.id || undefined)
         return
       }
 
-      const repeatHandler = () => {
-        if (pl.settings.shuffle) {
-          const list = background.filter((t) => t.id !== pl.now_playing?.id)
-          return list[Math.floor(Math.random() * list.length)]
-        }
-        if (pl.settings.repeat_mode === 'all') {
-          if (background.length === 0) return undefined
-          const lastId = background[background.length - 1].id
-          if (lastId === pl.now_playing?.id) {
-            return background[0]
-          }
-          const idx = background.findIndex((t) => t.id === pl.now_playing?.id)
-          return background[idx + 1]
-        }
-        if (background.length === 0) return undefined
-        const lastId = background[background.length - 1].id
-        if (lastId === pl.now_playing?.id) return undefined
-        const idx = background.findIndex((t) => t.id === pl.now_playing?.id)
-        return background[idx + 1]
+      // flow/stream — vip реально удаляется после отыгрыша (см. ветки ниже),
+      // remainingVip тут корректно отражает то, что ещё не сыграно.
+      if (remainingVip.length > 0) {
+        const next = pickNextFromGroup(remainingVip, undefined, vipOrderMode, false)
+        get().requestPlayNow(pl.id, next?.id)
+        return
       }
+
+      if (currentWasVip && pl.paused_background) {
+        get().requestPlayNow(pl.id, pl.paused_background.track_id)
+        return
+      }
+
+      const wasBackgroundTrack =
+        pl.now_playing !== undefined && isBackgroundTrack(pl.settings.mode, modeSettings, pl.now_playing.id)
 
       let nextTrack: Track | undefined
 
       if (pl.now_playing === undefined) {
-        nextTrack = background[0] || undefined
+        nextTrack = regular[0] ?? background[0] ?? undefined
       } else if (pl.settings.mode === 'flow') {
-        nextTrack = background[0] || undefined
+        nextTrack = pickNextFromGroup(regular, pl.now_playing.id, regularOrderMode, false)
         get().requestRemoveTrack(pl.id, pl.now_playing.id, reason)
-      } else if (pl.settings.mode === 'stream' && !currentWasVip) {
-        get().requestRemoveTrack(pl.id, pl.now_playing.id, reason)
-        nextTrack = background[0] || undefined
+      } else if (pl.settings.mode === 'stream' && wasBackgroundTrack) {
+        const bgOrderMode: OrderMode = pl.settings.shuffle ? 'random' : 'auto'
+        nextTrack = pickNextFromGroup(background, pl.now_playing.id, bgOrderMode, true)
       } else {
-        nextTrack = repeatHandler()
+        // stream: доиграла обычная заявка
+        get().requestRemoveTrack(pl.id, pl.now_playing.id, reason)
+        nextTrack = pickNextFromGroup(regular, pl.now_playing.id, regularOrderMode, false) ?? background[0]
       }
 
       get().requestPlayNow(pl.id, nextTrack?.id || undefined)
@@ -636,11 +762,19 @@ export const useMusicStore = create<StoreState>((set, get) => {
 
     playPrev(playlistId) {
       const pl = get().playlists.find((p) => p.id === playlistId)
-      if (!pl) return
+      if (!pl || pl.history.length === 0) return
 
-      const track = pl.history.pop()
-      if (!track) return
-      get().requestPlayNow(pl.id, track.id || undefined)
+      const prevTrack = pl.history[pl.history.length - 1]
+
+      // Снимаем трек с вершины истории ДО requestPlayNow — иначе повторный
+      // клик "назад" во время pending-запроса схватит тот же самый трек.
+      set((state) => ({
+        playlists: state.playlists.map((p) =>
+          p.id === playlistId ? { ...p, history: p.history.slice(0, -1) } : p,
+        ),
+      }))
+
+      get().requestPlayNow(playlistId, prevTrack.id)
     },
 
     clearPausedBackground(playlistId) {
@@ -651,9 +785,94 @@ export const useMusicStore = create<StoreState>((set, get) => {
       }))
     },
 
+    async requestReorder(playlistId, mode, group, orderedIds) {
+      const pl = get().playlists.find((p) => p.id === playlistId)
+      if (!pl) return
+
+      const originalPlaylists = get().playlists
+
+      set((state) => ({
+        playlists: state.playlists.map((p) => {
+          if (p.id !== playlistId) return p
+
+          const current = p.settings.mode_settings[mode]
+          const updatedModeSettings: ModeSettings =
+            group === 'background'
+              ? { ...current, background_track_ids: orderedIds }
+              : {
+                ...current,
+                ...(group === 'vip'
+                  ? { sort_settings_vip: { ...current.sort_settings_vip, manual_order_ids: orderedIds } }
+                  : { sort_settings_regular: { ...current.sort_settings_regular, manual_order_ids: orderedIds } }),
+              }
+
+          return {
+            ...p,
+            settings: {
+              ...p.settings,
+              mode_settings: {
+                ...p.settings.mode_settings,
+                [mode]: updatedModeSettings,
+              },
+            },
+          }
+        }),
+      }))
+
+      try {
+        // ponytail: заглушка — реальный PATCH endpoint ещё не готов на бэке.
+        // Контракт: PATCH /api/playlist/{id}/reorder { mode, group, ordered_ids }
+        console.debug('[stub] requestReorder', { playlistId, mode, group, orderedIds })
+        await Promise.resolve()
+      } catch (error) {
+        console.error('Failed to reorder tracks, reverting:', error)
+        set(() => ({ playlists: originalPlaylists }))
+        throw error
+      }
+    },
+
+    async requestReorderStep(playlistId, group, trackId, dir) {
+      const pl = get().playlists.find((p) => p.id === playlistId)
+      if (!pl) return
+
+      const mode = pl.settings.mode
+      const modeSettings = pl.settings.mode_settings[mode]
+
+      let currentIds: Array<string>
+
+      if (group === 'background') {
+        if (mode !== 'stream') {
+          console.error('Background group reorder only valid in stream mode')
+          return
+        }
+        currentIds = modeSettings.background_track_ids
+      } else {
+        const settings = group === 'vip' ? modeSettings.sort_settings_vip : modeSettings.sort_settings_regular
+        // Фолбэк: free только что включили и manual_order_ids ещё пуст —
+        // берём текущий видимый порядок ЭТОЙ группы (не весь track_data,
+        // иначе в id-массив попадают чужие треки из другой группы).
+        const { vip, regular } = splitQueue(pl)
+        const visibleGroup = group === 'vip' ? vip : regular
+        currentIds = settings.manual_order_ids.length > 0
+          ? settings.manual_order_ids
+          : visibleGroup.map((t) => t.id)
+      }
+
+      const idx = currentIds.indexOf(trackId)
+      if (idx === -1) return
+
+      const swapWith = dir === 'up' ? idx - 1 : idx + 1
+      if (swapWith < 0 || swapWith >= currentIds.length) return
+
+      const next = [...currentIds]
+        ;[next[idx], next[swapWith]] = [next[swapWith], next[idx]]
+
+      await get().requestReorder(playlistId, mode, group, next)
+    },
+
     sortPlaylist(playlist) {
-      const { vip, background } = splitQueue(playlist)
-      return { ...playlist, track_data: [...vip, ...background] }
+      const { vip, regular, background } = splitQueue(playlist)
+      return { ...playlist, track_data: [...vip, ...regular, ...background] }
     },
 
     subscribePlaylist(playlistId) {

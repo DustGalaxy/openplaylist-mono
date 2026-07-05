@@ -15,12 +15,19 @@ class Listner(commands.Component):
     @commands.Component.listener()
     async def event_safe_new_order(self, payload: NewOrderPayload):
         LOGGER.info(f"Event safe new order: {payload}")
-        uid = find(self.bot.users, lambda x: str(x.platform_user_id) == str(payload.broadcaster_id)).user_id # type: ignore
+        LOGGER.info(f"Event users: {self.bot.users}")
+        user = find(self.bot.users, lambda x: str(x.platform_user_id) == str(payload.broadcaster_id))
+
+        if not user:
+            LOGGER.error(f"User not found for broadcaster_id: {payload.broadcaster_id}")
+            return
+            
+        uid = user.user_id
         event = OrderNew(
             request_id=uuid.uuid4(),
             owner_platform_id=str(payload.broadcaster_id),
             owner_id=uuid.UUID(uid),
-            requester_id=payload.chatter_id,
+            requester_id=str(payload.chatter_id),
             requester_nickname=payload.chatter_nickname,
             yt_video_url=payload.yt_video_url,
             priority=payload.priority,

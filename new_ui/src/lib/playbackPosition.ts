@@ -1,5 +1,5 @@
 import type { PlaybackPosition } from '@/types/playlist'
-
+import { getPlaybackState, postPositionState } from '@/api/api-playlist'
 const STORAGE_PREFIX = 'playbackPosition:'
 
 /**
@@ -55,20 +55,21 @@ export const localPlaybackPositionStore: PlaybackPositionStore = {
  * молчаливым fallback-ом на пустоту.
  */
 export const backendPlaybackPositionStore: PlaybackPositionStore = {
-  async save() {
-    throw new Error(
-      'backendPlaybackPositionStore.save: backend endpoint not wired yet',
-    )
+  async save(playlistId, pos) {
+    await postPositionState(playlistId, pos.position)
   },
-  async load() {
-    throw new Error(
-      'backendPlaybackPositionStore.load: backend endpoint not wired yet',
-    )
+  async load(playlistId) {
+    const raw = await getPlaybackState(playlistId)
+    if (!raw || raw.position === undefined) return null
+    return {
+      track_id: raw.track_id,
+      position: parseFloat(raw.position),
+      updated_at: raw.updated_at,
+    }
   },
   async clear() {
-    throw new Error(
-      'backendPlaybackPositionStore.clear: backend endpoint not wired yet',
-    )
+    // ponytail: DELETE для /state контрактом не предусмотрен — no-op,
+    // следующий save перезапишет значение.
   },
 }
 

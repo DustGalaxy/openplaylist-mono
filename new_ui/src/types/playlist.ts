@@ -113,32 +113,39 @@ export type ReadBlockList = {
   trigger_value: string
 }
 
-export type SortSettings = {
-  date: 'desc' | 'asc' | 'none'
-  priority: 'desc' | 'asc' | 'none'
-}
-
 export interface AllowSources {
   platform: Platform
   platform_user_id: string
 }
 
-export type PlaylistMode = 'flow' | 'static' | 'stream'
+export enum PlaylistMode {
+  Flow = 'flow',
+  Static = 'static',
+  Stream = 'stream',
+}
 
-/**
- * Настройки VIP-прерывания для одного режима.
- * priority_break_point === 0 → прерывание выключено, режим ведёт себя как раньше.
- * background_track_ids используется только когда владелец режима — 'stream';
- * для flow/static остаётся пустым и игнорируется.
- */
+export type OrderMode = 'auto' | 'random' | 'free'
+
+export type SortSettings = {
+  order_mode: OrderMode
+  date: 'desc' | 'asc' | 'none'
+  priority: 'desc' | 'asc' | 'none'
+  manual_order_ids: Array<string>
+}
+
 export type ModeSettings = {
   priority_break_point: number
   sort_settings_vip: SortSettings
+  sort_settings_regular: SortSettings
   sort_settings_background: SortSettings
   background_track_ids: Array<string>
 }
 
-export type ModeSettingsMap = Record<PlaylistMode, ModeSettings>
+export type ModeSettingsMap = {
+  [PlaylistMode.Flow]: ModeSettings;
+  [PlaylistMode.Static]: ModeSettings;
+  [PlaylistMode.Stream]: ModeSettings;
+};
 
 export type PlaylistSettings = {
   id: string
@@ -199,7 +206,7 @@ export type PlaylistPatch = {
 /** Прерванный VIP-заявкой фоновый трек — чисто клиентское состояние, на бэкенд не уходит. */
 export type PausedBackgroundTrack = {
   track_id: string
-  position_seconds: number
+  position: number
 }
 
 export type ClientPlaylist = {
@@ -211,6 +218,7 @@ export type ClientPlaylist = {
   is_favorite: boolean
   is_allow_external_requests: boolean
   tags: Array<string>
+
   allow_sources: Array<AllowSources>
   show_in_widget: boolean
   track_data: Array<Track>
@@ -223,6 +231,7 @@ export type ClientPlaylist = {
   settings: PlaylistSettings
 
   paused_background: PausedBackgroundTrack | null
+  is_paused: boolean
 }
 
 export type SortBy = 'priority' | 'date' | 'shuffle'
@@ -240,7 +249,7 @@ export type PlayNow = {
  */
 export type PlaybackPosition = {
   track_id: string
-  position_seconds: number
+  position: number
   updated_at: string // ISO
 }
 
@@ -251,7 +260,7 @@ export type ApiCallbacks = {
     playlistId: string,
     orderId: string,
   ) => Promise<ResponseLike | void>
-  playNow?: (playlistId: string, orderId: string) => Promise<any>
+  playNow?: (playlistId: string, orderId: string | undefined) => Promise<any>
   // прочие методы при необходимости
 }
 

@@ -65,7 +65,7 @@ class ReadPlaylistSettings(BaseModel):
 
     max_playlist_size: int = Field(0, ge=0)
 
-    mode: Literal["flow", "static"]
+    mode: Literal["flow", "stream", "static"]
     repeat_mode: Literal["all", "once", "none"]
     mode_settings: Dict[str, Any]
     sync_playback_position: bool

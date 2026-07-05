@@ -62,12 +62,15 @@ export default function Dashboard() {
     return redirect({ to: '/login' })
   }
 
-  usePlstUpdates('connect', () => {})
-  usePlstUpdates('disconnect', () => {})
+  usePlstUpdates('connect', () => { })
+  usePlstUpdates('disconnect', () => { })
 
   const { data: playlistsData, isLoading } = useQuery({
     queryKey: ['playlistsData'],
     queryFn: fetchUserPlaylistData,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchInterval: false
   })
   const [plsts, setPlsts] = useState<Array<ClientPlaylist>>([])
 
