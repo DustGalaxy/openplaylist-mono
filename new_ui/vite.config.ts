@@ -14,9 +14,9 @@ export default defineConfig({
     visualizer({ open: true, filename: 'dist/stats.html', gzipSize: true }),
   ],
   define: {
-    'console.log': '(() => {})',
-    'console.info': '(() => {})',
-    'console.debug': '(() => {})',
+    // 'console.log': '(() => {})',
+    // 'console.info': '(() => {})',
+    // 'console.debug': '(() => {})',
   },
   build: {
     rolldownOptions: {

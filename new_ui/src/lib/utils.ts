@@ -121,7 +121,7 @@ export function removeNullAndUndefined<T extends Record<string, any>>(
 
   for (const [key, value] of Object.entries(obj)) {
     if (value !== null && value !== undefined) {
-      ;(result as any)[key] = value
+      ; (result as any)[key] = value
     }
   }
 

@@ -97,6 +97,20 @@ class PlstUpdsNamespace(BaseNamespace):
             logger.info(f"Unsubscribe: sid {sid} (user {session['user_id']}) from playlist {playlist_id}")
             await sio_playlist_service.unsub_plst_upds(sid, playlist_id, session["user_id"])
 
+    async def on_playback_subscribe(self, sid, data):
+        session = await self.get_session(sid, self.namespace)
+        if session and "user_id" in session:
+            playlist_id = data.get("playlist_id")
+            logger.info(f"Subscribe: sid {sid} (user {session['user_id']}) to playlist {playlist_id}")
+            await sio_playlist_service.sub_playback(sid, playlist_id, session["user_id"])
+
+    async def on_playback_unsubscribe(self, sid, data):
+        session = await self.get_session(sid, self.namespace)
+        if session and "user_id" in session:
+            playlist_id = data.get("playlist_id")
+            logger.info(f"Subscribe: sid {sid} (user {session['user_id']}) to playlist {playlist_id}")
+            await sio_playlist_service.unsub_playback(sid, playlist_id, session["user_id"])
+
     async def on_disconnect(self, sid, namespace=None):
         logger.info(f"Disconnect: sid {sid} from {self.namespace}")
         room_manager.disconnect(sid, namespace=self.namespace)

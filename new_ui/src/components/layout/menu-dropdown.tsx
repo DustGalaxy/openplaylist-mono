@@ -10,7 +10,10 @@ import {
 } from 'lucide-react'
 import { useCallback, useState, useMemo } from 'react'
 import type { Theme } from '@/lib/themes'
-
+import { useEffect } from 'react'
+import { Move } from 'lucide-react'
+import { useAppSettingsStore } from '@/stores/appSettingsStore'
+import type { MoveMethod } from '@/types/appSettings'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -236,7 +239,11 @@ export default function MenuDropdown() {
   const { user } = useAuthStore()
   const navigate = useNavigate()
   if (!user) return null
+  const { settings, setSetting, loadSettings } = useAppSettingsStore()
 
+  useEffect(() => {
+    void loadSettings()
+  }, [loadSettings])
   const languages = [
     { code: 'ru', label: 'Русский' },
     { code: 'en', label: 'English' },
@@ -334,7 +341,40 @@ export default function MenuDropdown() {
             </DropdownMenuPortal>
           </DropdownMenuGroup>
         </DropdownMenuSub>
-
+        <DropdownMenuSub>
+          <DropdownMenuGroup>
+            <DropdownMenuSubTrigger
+              className="flex gap-2 items-center
+      bg-level-2 text-text-main
+      data-[state=open]:bg-level-1 data-[state=open]:text-text-main
+      focus:text-text-main focus:bg-level-1"
+            >
+              <Move size={16} />
+              {t('nav.moveMethod')}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent className="bg-level-2 text-text-main border-0">
+                <DropdownMenuRadioGroup
+                  value={settings.moveMethod}
+                  onValueChange={(value) => setSetting('moveMethod', value as MoveMethod)}
+                >
+                  <DropdownMenuRadioItem
+                    value="dnd"
+                    className="text-text-main focus:bg-level-3 bg-level-2"
+                  >
+                    {t('nav.moveMethod.dnd')}
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem
+                    value="arrows"
+                    className="text-text-main focus:bg-level-3 bg-level-2"
+                  >
+                    {t('nav.moveMethod.arrows')}
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuGroup>
+        </DropdownMenuSub>
         <DropdownMenuItem
           disabled
           onClick={() => navigate({ to: '/statistic' })}

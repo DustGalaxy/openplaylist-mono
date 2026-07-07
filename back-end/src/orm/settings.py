@@ -7,7 +7,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ARRAY, UUID as PGUUID, JSONB
 
 from src.database import Base, UUIDMixin, TimestampMixin
-from src._types import ContentSettingScope, BlockListScope, ChatRuleScope, DonationRuleScope
+from src._types import (
+    ContentSettingScope,
+    BlockListScope,
+    ChatRuleScope,
+    DonationRuleScope,
+)
 
 
 class Settings(Base, UUIDMixin, TimestampMixin):
@@ -21,11 +26,38 @@ class Settings(Base, UUIDMixin, TimestampMixin):
     )
 
     max_playlist_size: Mapped[int] = mapped_column(default=0, nullable=False)
+    sync_playback_position: Mapped[bool] = mapped_column(default=False, nullable=False)
 
-    mode: Mapped[Literal["flow", "static"]] = mapped_column(default="flow", nullable=False)
+    mode: Mapped[Literal["flow", "static", "stream"]] = mapped_column(default="static", nullable=False)
     repeat_mode: Mapped[Literal["all", "once", "none"]] = mapped_column(default="none", nullable=False)
-    sort_settings: Mapped[dict] = mapped_column(
-        JSONB, nullable=False, default={"date": "desc", "priority": "none", "shuffle": "none"}
+    shuffle: Mapped[bool] = mapped_column(default=False, nullable=False)
+
+    mode_settings: Mapped[dict] = mapped_column(
+        JSONB,
+        default={
+            "flow": {
+                "priority_break_point": 0,
+                "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+                "sort_settings_regular": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+                "sort_settings_background": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+                "background_track_ids": [],
+            },
+            "static": {
+                "priority_break_point": 0,
+                "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+                "sort_settings_regular": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+                "sort_settings_background": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+                "background_track_ids": [],
+            },
+            "stream": {
+                "priority_break_point": 0,
+                "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+                "sort_settings_regular": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+                "sort_settings_background": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+                "background_track_ids": [],
+            },
+        },
+        nullable=False,
     )
 
     cost_mode: Mapped[Literal["add", "max"]] = mapped_column(default="max", nullable=False)

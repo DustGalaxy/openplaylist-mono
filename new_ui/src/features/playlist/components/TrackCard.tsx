@@ -25,11 +25,13 @@ export type TrackCardType = 'playlist' | 'non-playlist' | 'now-playing'
 interface TrackCardProps {
   track: Track
   type?: TrackCardType
+  isDragging?: boolean
 }
 
-export default function TrackCard({
+function TrackCardImpl({
   track,
   type = 'playlist',
+  isDragging = false,
 }: TrackCardProps) {
   const { t, i18n } = useTranslation()
   const playlist = usePlaylist()
@@ -160,21 +162,21 @@ export default function TrackCard({
   // Форматирование дат
   const formattedDate = track.created_at
     ? new Date(track.created_at).toLocaleDateString(i18n.language, {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      })
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
     : 'Н/Д'
 
   const longFormatDate = track.created_at
     ? new Date(track.created_at).toLocaleDateString(i18n.language, {
-        day: 'numeric',
-        month: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-      })
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+    })
     : 'Н/Д'
 
   return (
@@ -199,11 +201,10 @@ export default function TrackCard({
       >
         {/* ФИЗИЧЕСКИЙ КОРПУС КАРТОЧКИ */}
         <div
-          className={`relative w-full h-full min-w-0 bg-level-2 origin-bottom rounded-sm ${
-            isCurrentTrackPlaying
-              ? 'border border-level-3'
-              : 'border border-level-3/15'
-          }`}
+          className={`relative w-full h-full min-w-0 bg-level-2 origin-bottom rounded-sm ${isCurrentTrackPlaying
+            ? 'border border-level-3'
+            : 'border border-level-3/15'
+            }`}
           style={{
             transform: isOpen ? 'rotateX(-55deg)' : 'rotateX(0deg)',
             transformStyle: 'preserve-3d',
@@ -271,20 +272,18 @@ export default function TrackCard({
               className="flex items-center gap-1.5 text-[10px] font-mono ml-auto bg-level-1/40 px-2 py-0.5 rounded border border-white/5 cursor-help"
             >
               <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  isCurrentTrackPlaying
-                    ? 'bg-emerald-500 shadow-[0_0_6px_#10b981]'
-                    : isNowPlayingType
-                      ? 'bg-text-secondary shadow-[0_0_6px_#10b981]'
-                      : 'bg-[#b77f10] shadow-[0_0_6px_#b77f10]'
-                } animate-pulse`}
+                className={`w-1.5 h-1.5 rounded-full ${isCurrentTrackPlaying
+                  ? 'bg-emerald-500 shadow-[0_0_6px_#10b981]'
+                  : isNowPlayingType
+                    ? 'bg-text-secondary shadow-[0_0_6px_#10b981]'
+                    : 'bg-[#b77f10] shadow-[0_0_6px_#b77f10]'
+                  } animate-pulse`}
               />
               <span
-                className={`font-bold uppercase tracking-widest text-[9px] ${
-                  isCurrentTrackPlaying
-                    ? 'text-emerald-500'
-                    : 'text-text-secondary'
-                }`}
+                className={`font-bold uppercase tracking-widest text-[9px] ${isCurrentTrackPlaying
+                  ? 'text-emerald-500'
+                  : 'text-text-secondary'
+                  }`}
               >
                 {isCurrentTrackPlaying ? 'READY' : 'WAITING'}
               </span>
@@ -336,9 +335,8 @@ export default function TrackCard({
 
       {/* НИЖНЯЯ СТРОКА (ПРАВАЯ СЕКЦИЯ КОНТЕЙНЕРА) */}
       <div
-        className={`flex flex-col justify-between bg-level-2 h-full rounded-r-(--rounded-std) items-end ml-1 pb-2.5 pr-2 w-full self-end ${
-          isNowPlayingType ? '' : 'rounded-sm'
-        }`}
+        className={`flex flex-col justify-between bg-level-2 h-full rounded-r-(--rounded-std) items-end ml-1 pb-2.5 pr-2 w-full self-end ${isNowPlayingType ? '' : 'rounded-sm'
+          }`}
       >
         {/* Ретро индикаторы */}
         <div className="flex gap-2 text-xs mt-1 font-mono">
@@ -354,7 +352,7 @@ export default function TrackCard({
           {/* Приоритет */}
           <div
             title={t('playlist.track.priority')}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-level-1/60 border border-white/5 shadow-inner min-w-11.25 justify-center cursor-help"
+            className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-level-1/60 border border-white/5 shadow-inner min-w-16 justify-start cursor-help"
           >
             <ArrowUpRight
               className={`w-3.5 h-3.5 ${+track.priority > 0 ? 'text-level-3 animate-pulse' : 'text-text-placeholder'}`}
@@ -397,11 +395,10 @@ export default function TrackCard({
           <button
             onClick={() => setIsOpen(!isOpen)}
             title={t('playlist.track.eject')}
-            className={`flex items-center justify-center gap-1 h-8 px-2.5 rounded-(--rounded-std) font-mono text-[11px] font-bold uppercase tracking-wider transition-all duration-150 border border-level-3/40 ${
-              isOpen
-                ? 'bg-level-1 text-level-3 shadow-inner translate-y-0.5'
-                : 'bg-level-2 text-text-main hover:text-text-main shadow-[0_2px_0_0_var(--color-level-3)] active:translate-y-0.5 active:shadow-none'
-            }`}
+            className={`flex items-center justify-center gap-1 h-8 px-2.5 rounded-(--rounded-std) font-mono text-[11px] font-bold uppercase tracking-wider transition-all duration-150 border border-level-3/40 ${isOpen
+              ? 'bg-level-1 text-level-3 shadow-inner translate-y-0.5'
+              : 'bg-level-2 text-text-main hover:text-text-main shadow-[0_2px_0_0_var(--color-level-3)] active:translate-y-0.5 active:shadow-none'
+              }`}
           >
             <span>{t('playlist.track.ejectBtn')}</span>
             <ChevronDown
@@ -413,3 +410,17 @@ export default function TrackCard({
     </div>
   )
 }
+
+function areEqual(prev: TrackCardProps, next: TrackCardProps) {
+  return (
+    prev.track.id === next.track.id &&
+    prev.track.priority === next.track.priority &&
+    prev.track.title === next.track.title &&
+    prev.track.requester_nickname === next.track.requester_nickname &&
+    prev.type === next.type &&
+    prev.isDragging === next.isDragging
+  )
+}
+
+const TrackCard = React.memo(TrackCardImpl, areEqual)
+export default TrackCard

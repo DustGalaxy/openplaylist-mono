@@ -4,7 +4,6 @@ from src.dal.postgres.playlist import playlist_repository
 from src.services_low.settings import get_settings_service
 
 from src.models.auth_user import AuthUserSchema as User
-from src.models.playlist import PlaylistSchema
 from src.models.order import OrderDomain, OrderCreate, WebExtraData
 
 from src._types import AsyncSession

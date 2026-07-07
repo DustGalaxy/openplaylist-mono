@@ -8,10 +8,6 @@ import {
   innerPanelClass,
   sectionTitleClass,
 } from '@/features/landing/styles'
-// ponytail: assumed to live in api-user.ts next to connectBot/deleteIntegration.
-// Rename/adjust if your real endpoint differs — see api-widget-snippet.ts.
-// Note: backend only stores a hash, there's no GET — the plaintext token
-// exists only in the regenerate response, so it's cached client-side.
 import { getWidgetToken as regenerateWidgetToken } from '@/api/api-user'
 
 const STORAGE_KEY = 'widgetAppearance'

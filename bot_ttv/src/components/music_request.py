@@ -92,7 +92,7 @@ class MusicRequest(commands.Component):
                 chatter_id=str(ctx.author.id),
                 chatter_nickname=ctx.author.name or "annonymous",
                 yt_video_url=yt_url,
-                priority="".join(priority_song),
+                priority=":".join(priority_song),
             ),
         )
 

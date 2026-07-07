@@ -39,11 +39,18 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
+      // Оптимизация: сохраняем только user и expired_at. 
+      // isAuthenticated вычисляется автоматически при инициализации, предотвращая десинхронизацию.
       partialize: (state) => ({
         user: state.user,
         expired_at: state.expired_at,
-        isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.isAuthenticated = !!state.user
+          state.isLoadingAuth = false
+        }
+      },
     },
   ),
 )

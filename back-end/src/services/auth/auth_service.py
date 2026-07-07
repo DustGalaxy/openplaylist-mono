@@ -42,9 +42,7 @@ security_scheme = APIKeyCookie(name=settings.COOKIE_NAME)
 
 
 class AuthService:
-    def __init__(
-        self, user_repo: UserRepository, link_repo: LinkedAccountsRepository, token_vault_repo: TokenVaultRepository
-    ):
+    def __init__(self, user_repo: UserRepository, link_repo: LinkedAccountsRepository, token_vault_repo: TokenVaultRepository):
         self.user_repo: UserRepository = user_repo
         self.link_repo: LinkedAccountsRepository = link_repo
         self.token_vault_repo: TokenVaultRepository = token_vault_repo
@@ -296,6 +294,16 @@ class AuthService:
     async def get_all_tokens(self, db_session: AsyncSession, type: IntegrationPlatform) -> list[TokenVaultDomain]:
         return await self.token_vault_repo.get_for_bots(db_session, type)
 
+    async def get_current_user_id(
+        self,
+        token: str = Depends(security_scheme),
+    ) -> UUID:
+        try:
+            payload = jwt.decode(token, settings.JWT_PUBLIC_KEY, algorithms=[settings.JWT_ALGORITHM])
+            return payload["sub"]
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
     async def get_current_user(
         self,
         db_session: Annotated[AsyncSession, Depends(get_async_session)],
@@ -303,17 +311,11 @@ class AuthService:
     ) -> AuthUserSchema:
         try:
             payload = jwt.decode(token, settings.JWT_PUBLIC_KEY, algorithms=[settings.JWT_ALGORITHM])
-            user_id = payload["sub"]
-            # username = payload["username"]
-            exp = payload["exp"]
+            user: AuthUserSchema = await self.user_repo.get_one(db_session, UUID(payload["sub"]))
 
-            if exp < int(datetime.now().timestamp()):
-                raise HTTPException(status_code=401, detail="Session expired")
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
             raise HTTPException(status_code=401, detail="Not authenticated")
 
-        try:
-            user: AuthUserSchema = await self.user_repo.get_one(db_session, UUID(user_id))
         except NotFoundException:
             raise HTTPException(status_code=404, detail="User not found")
 
@@ -415,9 +417,7 @@ class AuthService:
 
             if integration.bot_connection and (queue := manager.get(integration.platform).get_bot_disconect_queue()):
                 try:
-                    await broker.request(
-                        str(integration.platform_user_id), queue=queue, exchange=main_exchange, timeout=5
-                    )
+                    await broker.request(str(integration.platform_user_id), queue=queue, exchange=main_exchange, timeout=5)
                 except TimeoutError:
                     pass
 

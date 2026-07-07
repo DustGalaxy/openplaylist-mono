@@ -4,6 +4,7 @@ import socketio
 
 from src.adapters._sio.init import sio
 from src.dal._redis.broker import get_broker
+from src.dto.playback import Pause, Seek
 
 
 class SioWidgetService:
@@ -17,16 +18,20 @@ class SioWidgetService:
     def sid_from_uid(self, user_id: str | UUID):
         return str(get_broker().hget(f"widget:users:{user_id}", "sid"))
 
-    async def emit(
-        self, event, data=None, to=None, room=None, skip_sid=None, namespace=None, callback=None, ignore_queue=False
-    ):
-        await self.sio.emit(
-            event, data, to, room, skip_sid, namespace if namespace else self.namespace, callback, ignore_queue
-        )
+    async def emit(self, event, data=None, to=None, room=None, skip_sid=None, namespace=None, callback=None, ignore_queue=False):
+        await self.sio.emit(event, data, to, room, skip_sid, namespace if namespace else self.namespace, callback, ignore_queue)
 
     async def current_track(self, track: dict, user_id: str | UUID):
         sid = self.sid_from_uid(user_id)
         await self.emit("current_track", track, to=sid)
+
+    async def pause(self, user_id: UUID, data: Pause):
+        sid = self.sid_from_uid(user_id)
+        await self.emit("pause", data.model_dump_json(), to=sid)
+
+    async def seek(self, user_id: UUID, data: Seek):
+        sid = self.sid_from_uid(user_id)
+        await self.emit("seek", data.model_dump_json(), to=sid)
 
 
 sio_widget_service = SioWidgetService(sio)

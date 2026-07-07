@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  CloudSync,
   Music2,
   PanelLeftClose,
   PanelLeftOpen,
@@ -14,6 +15,7 @@ import {
   Shuffle,
   SkipBack,
   SkipForward,
+  Terminal,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import OrderMiniCard from './order-mini-card'
@@ -24,12 +26,13 @@ import SavedList from './saved-list'
 import SortPanel from './sortPanel'
 import LogPanel from './LogPanel'
 import TrackCard from './TrackCard'
-import type { ClientPlaylist, SortSettings } from '@/types/playlist'
+import type { ClientPlaylist } from '@/types/playlist'
 import Btn from '@/components/ui/my-btn'
 
 import SettingsModal from '@/features/settings/components/playlist-settings/settingsModal'
 import { changePlaylistActive } from '@/api/api-playlist'
 import { useMusicStore } from '@/stores/musicStore'
+import { useAppSettingsStore } from '@/stores/appSettingsStore'
 import {
   filterTabActiveClass,
   filterTabBaseClass,
@@ -45,8 +48,11 @@ import {
   PlaylistProvider,
   usePlaylist,
 } from '@/features/playlist/context/playlist-context'
-import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import { InfoCardGroup } from '@/components/ui/info-card-group'
+import { ReorderableList } from '@/components/dnd/ReorderableList'
+import { ReorderRail } from '@/components/dnd/ReorderRail'
+import { MiniCardDragGhost } from '@/components/dnd/DragGhost'
+import { splitQueue } from '@/stores/musicStore/helpers'
 
 export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
   return (
@@ -59,6 +65,7 @@ export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
 function PlaylistView() {
   const { t } = useTranslation()
   const playlist = usePlaylist()
+  const moveMethod = useAppSettingsStore((s) => s.settings.moveMethod)
   const [toggled, setToggled] = React.useState(false)
   const [activePlst, setActivePlst] = React.useState(
     playlist.is_allow_external_requests,
@@ -66,53 +73,46 @@ function PlaylistView() {
   const [nowPlaying, setNowPlaying] = React.useState<string | undefined>(
     playlist.now_playing?.yt_video_id,
   )
+
   const [repeatMode, setRepeatMode] = React.useState(
     playlist.settings.repeat_mode,
   )
 
   const [queueSearch, setQueueSearch] = React.useState('')
 
-  const [isPaused, setIsPaused] = React.useState(false)
-  const [sortSettings, setSortSettings] = React.useState<SortSettings>(
-    playlist.settings.sort_settings,
-  )
-  const { playNext, requestPlSettings, playPrev } = useMusicStore()
+  const isPaused = playlist.is_paused ?? true
+  const { playNext, requestPlSettings, playPrev, requestReorder, requestReorderStep, requestPlaybackState, getPlayerPosition } = useMusicStore()
 
   const visibleTracks = React.useMemo(() => {
     const q = queueSearch.trim().toLowerCase()
-    if (!q) return playlist.track_data
-    return playlist.track_data.filter(
+
+    const { vip, regular, background } = splitQueue(playlist)
+    const combined = [vip.filter(
       (track) =>
         track.title.toLowerCase().includes(q) ||
         track.requester_nickname.toLowerCase().includes(q),
-    )
-  }, [playlist.track_data, queueSearch])
+    ), regular.filter(
+      (track) =>
+        track.title.toLowerCase().includes(q) ||
+        track.requester_nickname.toLowerCase().includes(q),
+    ), background.filter(
+      (track) =>
+        track.title.toLowerCase().includes(q) ||
+        track.requester_nickname.toLowerCase().includes(q),
+    )]
+    if (!q) return combined
+    return combined
+  }, [playlist, queueSearch])
 
   useEffect(() => {
-    setNowPlaying(playlist.now_playing?.yt_video_id)
+    if (playlist.now_playing?.yt_video_id) {
+      setNowPlaying(playlist.now_playing?.yt_video_id)
+    }
   }, [playlist])
 
   useEffect(() => {
     setActivePlst(playlist.is_allow_external_requests)
   }, [playlist.is_allow_external_requests])
-
-  const canRequest = React.useRef(false)
-
-  useDebouncedEffect(
-    sortSettings,
-    async () => {
-      if (!canRequest.current) return
-      canRequest.current = false
-      await requestPlSettings(playlist.id, { sort_settings: sortSettings })
-    },
-    2000,
-  )
-
-  const updateSettings = (newSettings: SortSettings) => {
-    setSortSettings(newSettings)
-    playlist.settings.sort_settings = newSettings
-    canRequest.current = true
-  }
 
   const [showConsole, setShowConsole] = React.useState(false)
   const [showContentSettings, setShowContentSettings] = React.useState(false)
@@ -131,7 +131,9 @@ function PlaylistView() {
             <YoutubePlayer
               playOnReady={true}
               pause={isPaused}
-              setIsPaused={setIsPaused}
+              setIsPaused={(val: boolean, pos: number) => {
+                requestPlaybackState(playlist.id, val, pos, playlist.now_playing?.id)
+              }}
               nowPlay={nowPlaying}
               className={`sm:row-span-2 ${showConsole || showContentSettings ? '' : 'col-span-2'} flex items-center justify-center`}
             />
@@ -147,11 +149,10 @@ function PlaylistView() {
                           key={setting.platform}
                           type="button"
                           onClick={() => setSelectedContentSettingIndex(index)}
-                          className={`${filterTabBaseClass} ${
-                            selectedContentSettingIndex === index
-                              ? filterTabActiveClass
-                              : filterTabInactiveClass
-                          }`}
+                          className={`${filterTabBaseClass} ${selectedContentSettingIndex === index
+                            ? filterTabActiveClass
+                            : filterTabInactiveClass
+                            }`}
                         >
                           {setting.platform === Platform.General
                             ? t('common.general')
@@ -205,23 +206,26 @@ function PlaylistView() {
                   }
                 }}
               />
-              {
-                <Btn
-                  title={t(`playlist.tooltip.prev`)}
-                  text={<SkipBack />}
-                  disabled={playlist.settings.mode !== 'static'}
-                  className={`px-2 bg-level-2 `}
-                  onClick={() => {
-                    playPrev(playlist.id)
-                  }}
-                />
-              }
+
+              <Btn
+                title={t(`playlist.tooltip.prev`)}
+                text={<SkipBack />}
+                disabled={playlist.settings.mode !== 'static'}
+                className={`px-2 bg-level-2 `}
+                onClick={() => {
+                  playPrev(playlist.id)
+                }}
+              />
+
               <Btn
                 title={t(`playlist.tooltip.${isPaused ? 'play' : 'pause'}`)}
                 text={isPaused ? <Play /> : <Pause />}
                 className="px-2 bg-level-2"
                 onClick={() => {
-                  isPaused ? setIsPaused(false) : setIsPaused(true)
+                  if (!getPlayerPosition) return
+                  let pos = getPlayerPosition()
+                  if (!pos) pos = 0.0
+                  requestPlaybackState(playlist.id, !isPaused, pos, playlist.now_playing.id)
                 }}
               />
               <Btn
@@ -236,21 +240,20 @@ function PlaylistView() {
               <Btn
                 title={t(`playlist.tooltip.shuffle`)}
                 text={<Shuffle />}
-                isActive={sortSettings.shuffle !== 'none'}
+                isActive={playlist.settings.shuffle}
                 onClick={() =>
-                  updateSettings({
-                    ...sortSettings,
-                    shuffle: sortSettings.shuffle === 'none' ? 'desc' : 'none',
+                  requestPlSettings(playlist.id, {
+                    shuffle: !playlist.settings.shuffle,
                   })
                 }
-                className="px-5"
+                className="px-2"
               />
             </div>
 
-            <div className="flex gap-2  justify-between ">
-              <div className="w-px h-[70%] self-center bg-text-secondary" />
-              <div className="flex w-full  gap-2 justify-between ">
-                <div className="flex gap-2 justify-between w-full ">
+            <div className="flex gap-1 sm:gap-2  justify-between ">
+              <div className="hidden sm:block w-px h-[70%] self-center bg-text-secondary" />
+              <div className="flex w-full gap-1 sm:gap-2 justify-between ">
+                <div className="flex gap-1 sm:gap-2 justify-between w-full ">
                   <Btn
                     title={t('playlist.tooltip.status')}
                     text={
@@ -269,15 +272,29 @@ function PlaylistView() {
                       changePlaylistActive(playlist.id, activePlst)
                     }}
                     className={cn(
-                      'inline-flex items-center gap-1.5  px-3 py-1.5 text-sm font-mono min-h-11',
+                      'inline-flex items-center gap-1.5 px-1.5 py-1 sm:px-3 sm:py-1.5 text-sm font-mono',
                       activePlst ? statusOpenClass : statusClosedClass,
                     )}
+                  />
+
+                  <Btn
+
+                    text={<CloudSync />}
+                    title={t('playlist.tooltip.sync')}
+                    isActive={playlist.settings.sync_playback_position}
+                    onClick={() => {
+                      requestPlSettings(playlist.id, {
+                        sync_playback_position: !playlist.settings.sync_playback_position,
+                      })
+                    }}
+                    className="px-2 bg-level-2"
+
                   />
                   <div className="flex gap-2">
                     <Btn
                       text={<ShareIcon />}
                       title={t('playlist.tooltip.share')}
-                      className="px-3 bg-level-2"
+                      className="px-2 bg-level-2"
                       onClick={() => {
                         navigator.clipboard.writeText(
                           window.location.origin + '/view?p=' + playlist.id,
@@ -286,9 +303,9 @@ function PlaylistView() {
                       }}
                     />
                     <Btn
-                      text={'>_'}
+                      text={<Terminal />}
                       title={t('playlist.tooltip.logs')}
-                      className="px-3.25 bg-level-2 font-bold font-mono"
+                      className="px-2 bg-level-2 font-bold font-mono"
                       onClick={() => {
                         if (showContentSettings) {
                           setShowContentSettings(false)
@@ -299,7 +316,7 @@ function PlaylistView() {
                     <Btn
                       text={<Shield />}
                       title={t('playlist.tooltip.validation')}
-                      className="px-3 bg-level-2"
+                      className="px-2 bg-level-2"
                       onClick={() => {
                         if (showConsole) {
                           setShowConsole(false)
@@ -309,7 +326,7 @@ function PlaylistView() {
                     />
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1 sm:gap-2">
                   <div className="w-px h-[70%] self-center bg-text-secondary" />
                   <SettingsModal />
                 </div>
@@ -342,7 +359,7 @@ function PlaylistView() {
           <PlaylistQueueInput onSearchQueryChange={setQueueSearch} />
         </div>
         <div className="flex gap-2 shrink-0">
-          <SortPanel />
+
           <Btn
             text={toggled ? <PanelLeftClose /> : <PanelLeftOpen />}
             className="px-2 bg-level-2 hidden sm:block"
@@ -357,11 +374,16 @@ function PlaylistView() {
           />
         </div>
       </div>
-      <div className="flex justify-end">
-        <Counter number={playlist.track_data.length} />
+
+      <div className="flex flex-col md:flex-row md:justify-between">
+        <SortPanel />
+        <Counter number={playlist.track_data.length} className=' justify-self-center md:justify-self-end' />
       </div>
 
       <div className="flex w-full gap-2 sm:gap-4">
+
+        {/* Saved section toggle */}
+
         <div className={`w-full ${toggled ? 'block' : 'hidden'}`}>
           <div className="w-full text-lg font-semibold text-text-main flex items-center justify-center pb-2">
             {t('playlist.saved.title')}
@@ -385,17 +407,52 @@ function PlaylistView() {
           </div>
         </div>
 
+        {/* Playlist section */}
+
         <div className="w-full @container">
           <div
-            className="w-full items-center flex-col gap-y-2 sm:gap-y-4
+            className="w-full items-center flex-col 
             [@container_(width_<_600px)]:hidden
             [@container_(width_>=_600px)]:flex"
           >
             {playlist.track_data.length > 0 ? (
               visibleTracks.length > 0 ? (
-                visibleTracks.map((track) => (
-                  <TrackCard key={track.id} track={track} type="playlist" />
-                ))
+                <div className="flex flex-col gap-4 w-full ">
+                  {visibleTracks.map((group, i) => {
+                    const groupName = i === 0 ? "vip" : i === 1 ? "regular" : "background"
+                    const settings = i === 0 ? playlist.settings.mode_settings[playlist.settings.mode].sort_settings_vip
+                      : i === 1 ? playlist.settings.mode_settings[playlist.settings.mode].sort_settings_regular
+                        : playlist.settings.mode_settings[playlist.settings.mode].sort_settings_background
+                    const active = settings.order_mode === "free" || groupName === "background"
+
+                    return group.length ? <div>
+                      <div className={`flex flex-col gap-4 relative w-full h-4 ${groupName === "background" ? "block" : "hidden"}`}>
+                        <div className="absolute left-0 right-0 h-px bg-text-secondary" />
+                        <div className="absolute left-1/2 transform -translate-x-1/2 text-text-secondary font-mono -translate-y-1/2 bg-level-1 px-4 rounded-full">
+                          {groupName}
+                        </div>
+                      </div>
+                      <ReorderableList
+
+                        items={group}
+                        orderedIds={group.map(t => t.id)}
+                        mode={moveMethod}
+                        onReorder={(ids) => {
+                          requestReorder(playlist.id, playlist.settings.mode, groupName, ids)
+                        }}
+                        onStep={() => { }}
+                        renderItem={(track, isFirst, isLast, isDragging) => (
+                          <ReorderRail id={track.id} mode={moveMethod} isFirst={isFirst} isLast={isLast} isActive={active} onMove={(dir) => {
+                            requestReorderStep(playlist.id, groupName, track.id, dir)
+                          }}>
+                            {() => <TrackCard track={track} type="playlist" isDragging={isDragging} />}
+                          </ReorderRail>
+                        )}
+                        renderGhost={(track) => <MiniCardDragGhost title={track.title} duration={track.duration} />}
+                      /> </div> : <></>
+                  })}
+                </div>
+
               ) : (
                 <p className="text-sm text-text-secondary py-8 text-center w-full">
                   {t('playlist.queue.noMatch')}
@@ -414,13 +471,43 @@ function PlaylistView() {
           >
             {playlist.track_data.length > 0 ? (
               visibleTracks.length > 0 ? (
-                visibleTracks.map((track) => (
-                  <OrderMiniCard
-                    key={track.id}
-                    track={track}
-                    btns_type="playlist"
-                  />
-                ))
+
+                <div className="flex flex-col gap-4 w-full ">
+                  {visibleTracks.map((group, i) => {
+                    const groupName = i === 0 ? "vip" : i === 1 ? "regular" : "background"
+                    const settings = i === 0 ? playlist.settings.mode_settings[playlist.settings.mode].sort_settings_vip
+                      : i === 1 ? playlist.settings.mode_settings[playlist.settings.mode].sort_settings_regular
+                        : playlist.settings.mode_settings[playlist.settings.mode].sort_settings_background
+                    const active = settings.order_mode === "free" || groupName === "background"
+
+                    return group.length ? <div>
+                      <div className={`flex flex-col gap-4 relative w-full h-4 ${groupName === "background" ? "block" : "hidden"}`}>
+                        <div className="absolute left-0 right-0 h-px bg-text-secondary" />
+                        <div className="absolute left-1/2 transform -translate-x-1/2 text-text-secondary font-mono -translate-y-1/2 bg-level-1 px-4 rounded-full">
+                          {groupName}
+                        </div>
+                      </div>
+                      <ReorderableList
+
+                        items={group}
+                        orderedIds={group.map(t => t.id)} // временно, пока free-режим не подключён к mode_settings
+                        mode={moveMethod}
+                        onReorder={(ids) => {
+                          requestReorder(playlist.id, playlist.settings.mode, groupName, ids)
+                        }} // заглушка на тест
+                        onStep={() => { }}
+                        renderItem={(track, isFirst, isLast, isDragging) => (
+                          <ReorderRail id={track.id} mode={moveMethod} isFirst={isFirst} isLast={isLast} isActive={active} onMove={(dir) => {
+                            requestReorderStep(playlist.id, groupName, track.id, dir)
+                          }}>
+                            {() => <OrderMiniCard track={track} btns_type="playlist" isDragging={isDragging} />}
+                          </ReorderRail>
+                        )}
+                        renderGhost={(track) => <MiniCardDragGhost title={track.title} duration={track.duration} />}
+                      /> </div> : <></>
+                  })}
+                </div>
+
               ) : (
                 <p className="text-sm text-text-secondary py-8 text-center w-full">
                   {t('playlist.queue.noMatch')}

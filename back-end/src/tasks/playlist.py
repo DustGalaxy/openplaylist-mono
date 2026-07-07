@@ -110,6 +110,5 @@ async def handle_order_created(
                     "errors": error_list,
                 },
             )
-            
 
     return tracks, errors

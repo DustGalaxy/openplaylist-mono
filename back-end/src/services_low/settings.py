@@ -59,9 +59,7 @@ class StrategyManager:
         else:
             strategy = self._registry.get(type(obj))
         if strategy is None:
-            raise NotImplementedError(
-                f"Strategy for {type(obj) if not isinstance(obj, str) else obj} is not implemented"
-            )
+            raise NotImplementedError(f"Strategy for {type(obj) if not isinstance(obj, str) else obj} is not implemented")
         return strategy
 
 
@@ -158,9 +156,9 @@ class ValidationEngine:
 
         # requester_roles = self.identify_roles(new_track.priority)
 
-        effective_content_settings = self.get_content_settigs(settings, new_track.source)  # pyright: ignore[reportArgumentType]
+        effective_content_settings = self.get_content_settigs(settings, new_track.source)  # ty:ignore[invalid-argument-type]
 
-        effective_donation_settings = self.get_donations_settings(settings, new_track.source)  # pyright: ignore[reportArgumentType]
+        effective_donation_settings = self.get_donations_settings(settings, new_track.source)  # ty:ignore[invalid-argument-type]
 
         rules = [
             (
@@ -169,8 +167,8 @@ class ValidationEngine:
                     and not self.check_donation_rules(
                         effective_donation_settings,
                         "amount",
-                        new_track.extra_data.donation_amount,  # pyright: ignore[reportAttributeAccessIssue]
-                    )  # type: ignore
+                        new_track.extra_data.donation_amount,  # ty:ignore[unresolved-attribute]
+                    )
                 ),
                 "Wrong donation amount",
             ),
@@ -180,8 +178,8 @@ class ValidationEngine:
                     and not self.check_donation_rules(
                         effective_donation_settings,
                         "currency",
-                        new_track.extra_data.donation_currency,  # pyright: ignore[reportAttributeAccessIssue]
-                    )  # type: ignore
+                        new_track.extra_data.donation_currency,  # ty:ignore[unresolved-attribute]
+                    )
                 ),
                 "Wrong donation currency",
             ),
@@ -359,7 +357,7 @@ class SettingsLowService:
     ) -> list[str]:
 
         settings = await self.repository.get_one(session, playlsit.id, "playlist_id")
-        is_vip = (user.vip_expires_at and user.vip_expires_at > datetime.now()) or False
+        is_vip: bool = bool(user.vip_expires_at and user.vip_expires_at > datetime.now()) or False
 
         validation_engine = ValidationEngine(owner_is_vip=is_vip)
         return validation_engine.validate_track(new_track, settings, playlsit)

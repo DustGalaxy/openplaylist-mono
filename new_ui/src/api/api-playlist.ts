@@ -36,7 +36,7 @@ export const fetchUserPlaylistData = async () => {
     withCredentials: true,
   })
     .then((res) => res.data)
-    .catch((error) => {})
+    .catch((error) => { })
   return response
 }
 
@@ -53,7 +53,7 @@ export const changePlaylistActive = async (
     },
   })
     .then((res) => res.data)
-    .catch((error) => {})
+    .catch((error) => { })
   return response
 }
 
@@ -117,8 +117,8 @@ export const removeTrackFromPlaylist = async (
   const config = getConfig()
   const response = await apiClient(
     config.PLST_API_URL +
-      `/${playlist_id}/track/${track_id}` +
-      `?reason=${reason}`,
+    `/${playlist_id}/track/${track_id}` +
+    `?reason=${reason}`,
     {
       method: 'DELETE',
       withCredentials: true,
@@ -288,4 +288,42 @@ export async function fetchPlaylistLogs(
   if (!response.status || response.status !== 200)
     throw new Error('Failed to fetch logs')
   return response.data
+}
+
+
+export const postPauseState = async (playlist_id: string, is_paused: boolean, position: number, track_id: string) => {
+  const config = getConfig()
+  return apiClient(config.AUTH_API_URL + `/playback/${playlist_id}/state/pause`, {
+    method: 'POST',
+    withCredentials: true,
+    data: { is_paused, position, track_id },
+  })
+}
+
+export const postSeekState = async (playlist_id: string, position: number, track_id: string) => {
+  const config = getConfig()
+  return apiClient(config.AUTH_API_URL + `/playback/${playlist_id}/state/seek`, {
+    method: 'POST',
+    withCredentials: true,
+    data: { position, track_id },
+  })
+}
+
+export const postPositionState = async (playlist_id: string, position: number) => {
+  const config = getConfig()
+  return apiClient(config.AUTH_API_URL + `/playback/${playlist_id}/state/position`, {
+    method: 'POST',
+    withCredentials: true,
+    data: position
+  })
+}
+
+export const getPlaybackState = async (
+  playlist_id: string,
+): Promise<Record<string, string> | null> => {
+  const config = getConfig()
+  const response = await apiClient(config.AUTH_API_URL + `/playback/${playlist_id}/state`, {
+    method: 'GET',
+  }).catch(() => null)
+  return response ? response.data : null
 }
