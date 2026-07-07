@@ -70,7 +70,8 @@ export type StoreState = {
   subscribePlaylist: (playlistId: string) => void
   unsubscribePlaylist: (playlistId: string) => void
 
-  requestPlaybackState: (playlistId: string, is_paused: boolean) => Promise<void>
+  requestPlaybackState: (playlistId: string, is_paused: boolean, position: number, track_id: string | undefined) => Promise<void>
+  requestSeekState: (playlistId: string, position: number, track_id: string | undefined) => Promise<void>
   requestPositionState: (playlistId: string, position: number) => Promise<void>
 }
 

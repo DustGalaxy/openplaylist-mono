@@ -1,4 +1,3 @@
-
 from uuid import UUID
 
 import socketio
@@ -10,6 +9,7 @@ from src.dto.events import (
     Private,
 )
 from src.dto.settings import ReadPlaylistSettings
+from src.dto.playback import Pause, Seek
 from src.adapters._sio.init import sio
 from src.dal._redis.broker import get_broker
 from src.dal.postgres.playlist import playlist_repository
@@ -52,6 +52,24 @@ class SioPlaylistUpdateService:
             namespace=self.namespace,
         )
 
+    async def pause(self, playlist_id: UUID, data: Pause):
+        sids = room_manager.get_sids(f"playback:{str(playlist_id)}", self.namespace)
+        await self.sio.emit(
+            f"playback_pause:{str(playlist_id)}",
+            data.model_dump_json(),
+            to=[*sids],
+            namespace=self.namespace,
+        )
+
+    async def seek(self, playlist_id: UUID, data: Seek):
+        sids = room_manager.get_sids(f"playback:{str(playlist_id)}", self.namespace)
+        await self.sio.emit(
+            f"playback_seek:{str(playlist_id)}",
+            data.model_dump_json(),
+            to=[*sids],
+            namespace=self.namespace,
+        )
+
     async def move_track(self, data: Moved):
         sids = room_manager.get_sids(data.playlist_id, self.namespace)
         await self.sio.emit("move_track", data, to=[*sids], namespace=self.namespace)
@@ -81,6 +99,23 @@ class SioPlaylistUpdateService:
             await self.sio.emit("kicked_from_playlist", to=sid, namespace=self.namespace)
             room_manager.leave_room(sid, room_id, self.namespace)
             print(f"⬅️ Пользователь {sid} был выгнан из комнаты {room_id}")
+
+    async def sub_playback(self, sid, playlist_id: UUID, user_id: str):
+        async with async_session_maker() as session:
+            plst = await playlist_repository.get_one(session, playlist_id)
+
+        print(f"ℹ️ Пользователь {user_id} хочет войти в комнату playback:{playlist_id}, owner_id={plst.owner_id}")
+        if (user_id == str(plst.owner_id)) or plst.is_public:
+            await self.sio.emit("playback_subscribe_success", to=sid, namespace=self.namespace)
+            room_manager.enter_room(sid, f"playback:{str(playlist_id)}", self.namespace)
+            print(f"➡️ Пользователь {user_id} вошел в комнату {playlist_id}")
+
+        else:
+            await self.sio.emit("playback_subscribe_denied", {"room_id": playlist_id}, to=sid, namespace=self.namespace)
+
+    async def unsub_playback(self, sid, playlist_id: UUID, user_id: str):
+        room_manager.leave_room(sid, f"playback:{str(playlist_id)}", namespace=self.namespace)
+        print(f"⬅️ Пользователь {user_id} вышел из комнаты playback:{playlist_id}")
 
     async def sub_plst_upds(self, sid, playlist_id: UUID, user_id: str):
         async with async_session_maker() as session:

@@ -32,13 +32,15 @@ function SortDirectionIndicator({ direction }: { direction: SortDirection }) {
   return direction === 'asc' ? <ArrowUp01 className={styleBase} /> : <ArrowDown01 className={styleBase} />
 }
 
-function OrderModeToggle({
+export function OrderModeToggle({
   value,
   onChange,
 }: {
-  value: OrderMode
+  value: OrderMode | null
   onChange: (m: OrderMode) => void
 }) {
+
+
   const { t } = useTranslation()
   const modes: Array<{ key: OrderMode; label: string; icon: React.ComponentType<{ className?: string }> }> = [
     { key: 'auto', label: t('sort.mode.auto'), icon: ArrowUpDown },
@@ -70,7 +72,7 @@ function OrderModeToggle({
   )
 }
 
-function SortButtons({
+export function SortButtons({
   sortSettings,
   onChange,
 }: {

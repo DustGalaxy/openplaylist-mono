@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, status, Body
+from fastapi import APIRouter, HTTPException, status
 from simple_repository.exceptions import NotFoundException
 
 from src.dto.playlist import (
@@ -15,7 +15,7 @@ from src.models.playlist import PlaylistPatch, PlaylistSchema
 from src.models.settings import SettingsSchema
 from src.services.playlist_log import playlist_log_service
 from src.services.realtime.sio_widget import sio_widget_service
-from src.services.playlist_service import set_paused_state, set_position_state, get_playback_state
+
 
 from src.utils import kick, find
 from src._types import DeleteStatus, PlaylistLogsEventTypes
@@ -270,37 +270,3 @@ async def delete_track_from_playlist(
         await kick("playlist.track.deleted", task_broker, {"track_id": track_id, "playlist_id": str(playlist_id)})
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")
-
-
-# --- state operations ---
-
-
-@router.post("/{playlist_id}/state/pause", status_code=status.HTTP_200_OK)
-async def post_pause_state(
-    db_session: DB_SESSION, current_user: CURR_USER, playlist_id: UUID, is_paused: bool = Body(alias="is_paused")
-) -> None:
-    try:
-        await set_paused_state(db_session, playlist_id, is_paused, current_user)
-        await kick("playlist.playback.paused", task_broker, {"playlist_id": str(playlist_id), "is_paused": is_paused})
-    except NotFoundException:
-        raise HTTPException(status_code=404, detail="Playlist not found")
-    except PermissionError:
-        raise HTTPException(status_code=403, detail="You are not the owner of this playlist")
-
-
-@router.post("/{playlist_id}/state/position", status_code=status.HTTP_200_OK)
-async def post_position_state(
-    db_session: DB_SESSION, current_user: CURR_USER, playlist_id: UUID, position: float = Body(alias="position")
-) -> None:
-    try:
-        await set_position_state(db_session, playlist_id, position, current_user)
-        await kick("playlist.playback.position", task_broker, {"playlist_id": str(playlist_id), "position": position})
-    except NotFoundException:
-        raise HTTPException(status_code=404, detail="Playlist not found")
-    except PermissionError:
-        raise HTTPException(status_code=403, detail="You are not the owner of this playlist")
-
-
-@router.get("/{playlist_id}/state", status_code=status.HTTP_200_OK)
-async def get_state(playlist_id: UUID) -> dict[str, str | None]:
-    return await get_playback_state(playlist_id)

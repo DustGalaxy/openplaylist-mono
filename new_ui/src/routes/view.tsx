@@ -1,12 +1,15 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ListMusic, Radio } from 'lucide-react'
+import { ListMusic, Pause, Play, Radio, Repeat, Repeat1, RepeatOff, Shuffle, SkipBack, SkipForward } from 'lucide-react'
 
 import type { ClientPlaylist, InputPlaylist, Track } from '@/types/playlist'
 import ViewInfoBar from '@/features/public-playlist/components/ViewInfoBar'
 import { fetchPlaylistPublic } from '@/api/api-playlist'
-import ViewTrackCard from '@/features/public-playlist/components/view-track-card'
+import { useViewerPlayback } from '@/features/public-playlist/hooks/useViewerPlayback'
+import ViewerPlayer from '@/features/public-playlist/components/ViewerPlayer'
+import ViewerQueuePanel from '@/features/public-playlist/components/ViewerQueuePanel'
+import { RadioTower } from 'lucide-react'
 import SearchPlaylist from '@/features/public-playlist/components/search-playlist'
 import { getPlsUpdsSocket } from '@/api/io-sockets'
 import {
@@ -16,6 +19,9 @@ import {
   panelClass,
   sectionTitleClass,
 } from '@/features/landing/styles'
+import Btn from '@/components/ui/my-btn'
+import { PlaylistProvider } from '@/features/playlist/context/playlist-context'
+import { computePriority } from '@/lib/utils'
 
 export const Route = createFileRoute('/view')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -68,7 +74,7 @@ function ViewPageShell({
           <p
             className={`inline-flex items-center gap-2 text-sm font-medium mb-3 ${gradientTextClass}`}
           >
-            <Radio className="h-4 w-4 text-[var(--color-accent-2)]" />
+            <Radio className="h-4 w-4 text-(--color-accent-2)" />
             {t('publicView.eyebrow')}
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold text-text-main mb-2">
@@ -87,12 +93,16 @@ function ViewPageShell({
 function RouteComponent() {
   const { t } = useTranslation()
   const { playlist } = Route.useLoaderData()
+
   const { p: playlistIdFromUrl } = Route.useSearch()
   const [playlistState, setPlaylistState] = useState<ClientPlaylist | null>(
     playlist,
   )
-
+  const viewer = useViewerPlayback(playlistState)
   useEffect(() => {
+    if (playlist) {
+      playlist.track_data = playlist.track_data.map((track) => { return { ...track, priority: computePriority(track, playlist.settings) } })
+    }
     setPlaylistState(playlist)
   }, [playlist])
 
@@ -252,14 +262,14 @@ function RouteComponent() {
           className={`relative overflow-hidden p-5 sm:p-8 ${panelClass}`}
         >
           <div
-            className="pointer-events-none absolute -top-24 right-0 h-48 w-48 rounded-full bg-[var(--color-accent-3)] opacity-[0.07] blur-[80px]"
+            className="pointer-events-none absolute -top-24 right-0 h-48 w-48 rounded-full bg-(--color-accent-3) opacity-[0.07] blur-[80px]"
             aria-hidden
           />
           <header className="relative flex items-start gap-4 mb-8 pb-6 border-b border-white/5">
             <div
               className="
                 flex h-12 w-12 shrink-0 items-center justify-center rounded-(--rounded-std)
-                bg-gradient-to-br from-[var(--color-accent-2)]/20 via-[var(--color-accent-3)]/20 to-[var(--color-accent-1)]/20
+                bg-linear-to-br from-accent-2/20 via-accent-3/20 to-accent-1/20
                 border border-white/10 text-level-3
               "
             >
@@ -271,7 +281,7 @@ function RouteComponent() {
               >
                 {t('publicView.playlist')}
               </p>
-              <h1 className="text-2xl sm:text-3xl font-bold text-text-main leading-tight break-words">
+              <h1 className="text-2xl sm:text-3xl font-bold text-text-main leading-tight wrap-break-word">
                 {playlistState.name}
               </h1>
             </div>
@@ -280,7 +290,7 @@ function RouteComponent() {
         </section>
 
         {/* Track queue */}
-        <section className={`p-5 sm:p-8 ${panelClass}`}>
+        <section className={`p-5 sm:p-8 `}>
           <div className="flex items-center justify-between mb-6">
             <h2
               className={`text-lg font-semibold text-text-main  ${sectionTitleClass}`}
@@ -305,13 +315,71 @@ function RouteComponent() {
             </div>
           ) : (
             <div className="flex flex-col gap-1 ">
-              {playlistState.track_data.map((track) => (
-                <ViewTrackCard
-                  key={track.id}
-                  track={track}
-                  playlist={playlistState}
-                />
-              ))}
+              <PlaylistProvider playlist={playlist}>
+                <div className="flex flex-col gap-4">
+                  <ViewerPlayer
+                    nowPlay={viewer.currentTrack?.yt_video_id}
+                    playing={viewer.isPlaying}
+                    seekSignal={viewer.seekSignal}
+                    onPlayerStateChange={viewer.onPlayerStateChange}
+                    onEnded={viewer.handleEnded}
+                    registerPositionGetter={viewer.registerPositionGetter}
+                  />
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Btn
+                      text={viewer.repeatMode === 'all' ? <Repeat /> : viewer.repeatMode === 'once' ? <Repeat1 /> : <RepeatOff />}
+                      title={t(`playlist.tooltip.repeatMode.${viewer.repeatMode}`)}
+                      className="px-2 bg-level-2"
+                      disabled={viewer.mode === 'synced'}
+                      onClick={() =>
+                        viewer.setRepeatMode(viewer.repeatMode === 'all' ? 'once' : viewer.repeatMode === 'once' ? 'none' : 'all')
+                      }
+                    />
+                    <Btn text={<SkipBack />} title={t('playlist.tooltip.prev')} className="px-2 bg-level-2" disabled={viewer.mode === 'synced'} onClick={viewer.prev} />
+                    <Btn
+                      text={viewer.isPlaying ? <Pause /> : <Play />}
+                      title={t(`playlist.tooltip.${viewer.isPlaying ? 'pause' : 'play'}`)}
+                      className="px-2 bg-level-2"
+                      disabled={viewer.mode === 'synced'}
+                      onClick={viewer.togglePlay}
+                    />
+                    <Btn text={<SkipForward />} title={t('playlist.tooltip.next')} className="px-2 bg-level-2" disabled={viewer.mode === 'synced'} onClick={viewer.next} />
+                    <Btn
+                      text={<Shuffle />}
+                      title={t('playlist.tooltip.shuffle')}
+                      isActive={viewer.shuffle}
+                      className="px-2"
+                      disabled={viewer.mode === 'synced'}
+                      onClick={() => viewer.setShuffle(!viewer.shuffle)}
+                    />
+
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border ml-auto ${viewer.mode === 'synced' ? 'border-emerald-400/40 text-emerald-300' : 'border-white/10 text-text-secondary'
+                        }`}
+                    >
+                      <RadioTower className="h-3.5 w-3.5" />
+                      {viewer.mode === 'synced' ? t('publicView.syncOn') : t('publicView.syncOff')}
+                    </span>
+                    <Btn
+                      text={viewer.syncing ? '…' : viewer.mode === 'synced' ? t('publicView.desync') : t('publicView.syncBtn')}
+                      disabled={!viewer.canSync || viewer.syncing}
+                      onClick={() => (viewer.mode === 'synced' ? viewer.desync() : viewer.sync())}
+                      className="h-9 px-3 text-xs bg-level-2"
+                    />
+                  </div>
+
+                  <ViewerQueuePanel
+                    tracks={viewer.orderedTracks}
+                    sort={viewer.sort}
+                    onSortChange={viewer.setSort}
+                    activeTrackId={viewer.currentTrack?.id}
+                    isPlaying={viewer.isPlaying}
+                    onPlay={(track) => viewer.playTrack(track)}
+                  />
+
+                </div>
+              </PlaylistProvider>
             </div>
           )}
         </section>

@@ -5,11 +5,12 @@ import useWindowDimensions from '@/hooks/useWindowDimensions'
 import useMusicStore from '@/stores/musicStore'
 import { usePlaylist } from '@/features/playlist/context/playlist-context'
 import { getPlaybackPositionStore } from '@/lib/playbackPosition'
+import { useThrottle } from '@/hooks/useThrottle'
 
 type YoutubePlayerProps = {
   nowPlay: string | undefined
   pause: boolean
-  setIsPaused: React.Dispatch<React.SetStateAction<boolean>>
+  setIsPaused: (val: boolean, pos: number) => void
   playOnReady?: boolean
   className?: string
 }
@@ -23,7 +24,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
 }) => {
   const playlist = usePlaylist()
   const { height, width } = useWindowDimensions()
-  const { playNext, setGetPlayerPosition, clearPausedBackground } =
+  const { playNext, setGetPlayerPosition, clearPausedBackground, requestSeekState } =
     useMusicStore()
 
   const playerRef = useRef<HTMLVideoElement | null>(null)
@@ -37,6 +38,9 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
 
   const currentTrackRef = useRef(playlist.now_playing)
   currentTrackRef.current = playlist.now_playing
+
+  const lastSampledPosRef = useRef<number>(0)
+  const lastSampledAtRef = useRef<number>(Date.now())
 
   const savePosition = () => {
     const track = currentTrackRef.current
@@ -88,22 +92,30 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
     playerRef.current.volume = 1
   }, [])
 
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const pos = playerRef.current?.currentTime
+      if (pos !== undefined) {
+        lastSampledPosRef.current = pos
+        lastSampledAtRef.current = Date.now()
+      }
+    }, 500)
+    return () => window.clearInterval(id)
+  }, [])
+
   const handlePlay = () => {
-    if (!pause) return
-    setIsPaused(false)
+    if (!pause || !playerRef.current?.currentTime) return
+    setIsPaused(false, playerRef.current.currentTime)
     savePosition()
   }
 
   const handlePause = () => {
-
-
     if (isTabHiddenRef.current) {
       console.log('Пауза проигнорирована: вкладка в фоне');
       return;
     }
-
-    if (pause) return
-    setIsPaused(true)
+    if (pause || !playerRef.current?.currentTime) return
+    setIsPaused(true, playerRef.current.currentTime)
     savePosition()
   }
 
@@ -117,6 +129,24 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
     }
     playNext(playlist, 'listened')
   }
+
+  const runSeek = async (event: { time: number | undefined }) => {
+    if (!nowPlay || event?.time === undefined) return
+
+    const expectedElapsed = pauseRef.current
+      ? 0
+      : (Date.now() - lastSampledAtRef.current) / 1000
+    const expectedPos = lastSampledPosRef.current + expectedElapsed
+    const drift = Math.abs(event.time - expectedPos)
+
+    // Естественный дрейф между сэмплами — максимум пара секунд.
+    // Большой скачок = реальный юзер-сик, маленький = ложное срабатывание
+    // внутреннего load()-таймера react-player.
+    if (drift < 2) return
+
+    await requestSeekState(playlist.id, event.time, playlist.now_playing?.id)
+  }
+  const handleSeek = useThrottle(runSeek, 1000)
 
   const handleReady = async () => {
     if (isReadyRef.current || !nowPlay || !playOnReady || !playerRef.current) return
@@ -137,7 +167,6 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
       } catch { }
     }
 
-    console.log("pos", pos)
     playerRef.current.currentTime = pos
   }
 
@@ -169,6 +198,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
           }
         }}
 
+        onSeeked={handleSeek}
         onReady={handleReady}
         onPlay={handlePlay}
         onPause={handlePause}

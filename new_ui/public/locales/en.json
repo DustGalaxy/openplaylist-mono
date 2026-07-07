@@ -37,7 +37,10 @@
     "statistic": "Statistic",
     "history": "History",
     "myPlaylists": "My playlists",
-    "theme": "Theme"
+    "theme": "Theme",
+    "moveMethod": "Move Method",
+    "moveMethod.dnd": "Drag",
+    "moveMethod.arrows": "Arrows"
   },
   "footer": {
     "description": "Interactive music for everyone. Create your own playlists, share your favorite tracks, or request music on your favorite creators' streams.",
@@ -437,7 +440,8 @@
       "play": "Play",
       "shuffle": "Shuffle",
       "showSavedTracks": "Show saved tracks",
-      "hideSavedTracks": "Hide saved tracks"
+      "hideSavedTracks": "Hide saved tracks",
+      "sync": "Player sync"
     }
   },
   "playlistSettings": {
@@ -843,6 +847,10 @@
     "addTrack": "Add track",
     "nowPlaying": "Now playing",
     "nowPlayingEmpty": "Nothing playing right now",
+    "syncBtn": "Sync",
+    "desyncBtn": "Desync",
+    "syncOff": "Sync Off",
+    "syncOn": "Sync On",
     "toast": {
       "trackAdded": "Your track has been added to the queue!",
       "trackAddFailed": "Failed to add track. Try again or check the playlist rules.",

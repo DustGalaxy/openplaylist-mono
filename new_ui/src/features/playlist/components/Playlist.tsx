@@ -81,7 +81,7 @@ function PlaylistView() {
   const [queueSearch, setQueueSearch] = React.useState('')
 
   const isPaused = playlist.is_paused ?? true
-  const { playNext, requestPlSettings, playPrev, requestReorder, requestReorderStep, requestPlaybackState } = useMusicStore()
+  const { playNext, requestPlSettings, playPrev, requestReorder, requestReorderStep, requestPlaybackState, getPlayerPosition } = useMusicStore()
 
   const visibleTracks = React.useMemo(() => {
     const q = queueSearch.trim().toLowerCase()
@@ -131,9 +131,8 @@ function PlaylistView() {
             <YoutubePlayer
               playOnReady={true}
               pause={isPaused}
-              setIsPaused={(val) => {
-                const next = typeof val === 'function' ? (val as (p: boolean) => boolean)(isPaused) : val
-                requestPlaybackState(playlist.id, next)
+              setIsPaused={(val: boolean, pos: number) => {
+                requestPlaybackState(playlist.id, val, pos, playlist.now_playing?.id)
               }}
               nowPlay={nowPlaying}
               className={`sm:row-span-2 ${showConsole || showContentSettings ? '' : 'col-span-2'} flex items-center justify-center`}
@@ -223,7 +222,10 @@ function PlaylistView() {
                 text={isPaused ? <Play /> : <Pause />}
                 className="px-2 bg-level-2"
                 onClick={() => {
-                  requestPlaybackState(playlist.id, !isPaused)
+                  if (!getPlayerPosition) return
+                  let pos = getPlayerPosition()
+                  if (!pos) pos = 0.0
+                  requestPlaybackState(playlist.id, !isPaused, pos, playlist.now_playing.id)
                 }}
               />
               <Btn

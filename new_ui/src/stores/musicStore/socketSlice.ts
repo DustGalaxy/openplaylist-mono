@@ -55,7 +55,7 @@ export function createSocketSlice(
       get().syncPlSettings(playlistId, parsed)
     }
 
-    const playbackStateHandler = (payload: any) => {
+    const pauseStateHandler = (payload: any) => {
       if (!payload) return
       const parsed = typeof payload === 'string' ? JSON.parse(payload) : payload
       if (typeof parsed.is_paused !== 'boolean') return
@@ -66,11 +66,14 @@ export function createSocketSlice(
       }))
     }
 
+    const seekStateHandler = (payload: any) => { }
+
     s.on('add_track:' + playlistId, addHandler)
     s.on('playnow:' + playlistId, playNowHandler)
     s.on('delete_track:' + playlistId, removedHandler)
     s.on('settings_changed:' + playlistId, settingsChangedHandler)
-    s.on('playback_state:' + playlistId, playbackStateHandler)
+    s.on('playback_pause:' + playlistId, pauseStateHandler)
+    s.on('playback_seek:' + playlistId, seekStateHandler)
     s.on('connect', () => safeEmit(s, 'subscribe', { playlist_id: playlistId }))
     s.on('disconnect', () => safeEmit(s, 'unsubscribe', { playlist_id: playlistId }))
 
@@ -82,7 +85,8 @@ export function createSocketSlice(
           playNowHandler,
           removedHandler,
           settingsChangedHandler,
-          playbackStateHandler,
+          pauseStateHandler,
+          seekStateHandler,
         },
       },
     }))
@@ -98,7 +102,8 @@ export function createSocketSlice(
     if (h.playNowHandler) s.off('playnow:' + playlistId, h.playNowHandler)
     if (h.removedHandler) s.off('delete_track:' + playlistId, h.removedHandler)
     if (h.settingsChangedHandler) s.off('settings_changed:' + playlistId, h.settingsChangedHandler)
-    if (h.playbackStateHandler) s.off('playback_state:' + playlistId, h.playbackStateHandler)
+    if (h.pauseStateHandler) s.off('playback_pause:' + playlistId, h.pauseStateHandler)
+    if (h.seekStateHandler) s.off('playback_seek:' + playlistId, h.seekStateHandler)
 
     const newHandlers = { ...handlers }
     delete newHandlers[playlistId]

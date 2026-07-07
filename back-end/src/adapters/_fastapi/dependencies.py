@@ -26,6 +26,7 @@ STREAM_SERVICE = Annotated[StreamService, Depends(get_stream_service)]
 
 DB_SESSION = Annotated[AsyncSession, Depends(get_async_session)]
 CURR_USER = Annotated[User, Depends(auth_service.get_current_user)]
+USER_ID = Annotated[UUID, Depends(auth_service.get_current_user_id)]
 
 
 async def get_current_settings(playlist_id: UUID, current_user: CURR_USER, session: DB_SESSION):

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 
 import { PlaylistMode, type OrderMode, type Track } from '@/types/playlist'
-import { postPauseState, postPlayNow, postPositionState } from '@/api/api-playlist'
+import { postPauseState, postPlayNow, postPositionState, postSeekState } from '@/api/api-playlist'
 import { isBackgroundTrack, isLastInGroup, pickNextFromGroup, getActiveModeSettings, isVipTrack, splitQueue } from './helpers'
 import type { GetFn, SetFn, StoreState } from './types'
 
@@ -19,6 +19,7 @@ export function createPlaybackSlice(
   | 'playPrev'
   | 'clearPausedBackground'
   | 'requestPlaybackState'
+  | 'requestSeekState'
   | 'requestPositionState'
 > {
   return {
@@ -29,13 +30,19 @@ export function createPlaybackSlice(
       set(() => ({ getPlayerPosition: getter }))
     },
 
-    async requestPlaybackState(playlistId, is_paused) {
+    async requestPlaybackState(playlistId, is_paused, position, track_id) {
       set((state) => ({
         playlists: state.playlists.map((p) =>
           p.id === playlistId ? { ...p, is_paused } : p,
         ),
       }))
-      postPauseState(playlistId, is_paused).catch(() => {
+      postPauseState(playlistId, is_paused, position, track_id).catch(() => {
+        // ponytail: команда важнее подтверждения, ответ не смотрим
+      })
+    },
+
+    async requestSeekState(playlistId, position, track_id) {
+      postSeekState(playlistId, position, track_id).catch(() => {
         // ponytail: команда важнее подтверждения, ответ не смотрим
       })
     },

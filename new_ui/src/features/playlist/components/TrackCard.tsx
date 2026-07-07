@@ -202,8 +202,8 @@ function TrackCardImpl({
         {/* ФИЗИЧЕСКИЙ КОРПУС КАРТОЧКИ */}
         <div
           className={`relative w-full h-full min-w-0 bg-level-2 origin-bottom rounded-sm ${isCurrentTrackPlaying
-              ? 'border border-level-3'
-              : 'border border-level-3/15'
+            ? 'border border-level-3'
+            : 'border border-level-3/15'
             }`}
           style={{
             transform: isOpen ? 'rotateX(-55deg)' : 'rotateX(0deg)',
@@ -273,16 +273,16 @@ function TrackCardImpl({
             >
               <span
                 className={`w-1.5 h-1.5 rounded-full ${isCurrentTrackPlaying
-                    ? 'bg-emerald-500 shadow-[0_0_6px_#10b981]'
-                    : isNowPlayingType
-                      ? 'bg-text-secondary shadow-[0_0_6px_#10b981]'
-                      : 'bg-[#b77f10] shadow-[0_0_6px_#b77f10]'
+                  ? 'bg-emerald-500 shadow-[0_0_6px_#10b981]'
+                  : isNowPlayingType
+                    ? 'bg-text-secondary shadow-[0_0_6px_#10b981]'
+                    : 'bg-[#b77f10] shadow-[0_0_6px_#b77f10]'
                   } animate-pulse`}
               />
               <span
                 className={`font-bold uppercase tracking-widest text-[9px] ${isCurrentTrackPlaying
-                    ? 'text-emerald-500'
-                    : 'text-text-secondary'
+                  ? 'text-emerald-500'
+                  : 'text-text-secondary'
                   }`}
               >
                 {isCurrentTrackPlaying ? 'READY' : 'WAITING'}
@@ -352,7 +352,7 @@ function TrackCardImpl({
           {/* Приоритет */}
           <div
             title={t('playlist.track.priority')}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-level-1/60 border border-white/5 shadow-inner min-w-11.25 justify-center cursor-help"
+            className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-level-1/60 border border-white/5 shadow-inner min-w-16 justify-start cursor-help"
           >
             <ArrowUpRight
               className={`w-3.5 h-3.5 ${+track.priority > 0 ? 'text-level-3 animate-pulse' : 'text-text-placeholder'}`}
@@ -396,8 +396,8 @@ function TrackCardImpl({
             onClick={() => setIsOpen(!isOpen)}
             title={t('playlist.track.eject')}
             className={`flex items-center justify-center gap-1 h-8 px-2.5 rounded-(--rounded-std) font-mono text-[11px] font-bold uppercase tracking-wider transition-all duration-150 border border-level-3/40 ${isOpen
-                ? 'bg-level-1 text-level-3 shadow-inner translate-y-0.5'
-                : 'bg-level-2 text-text-main hover:text-text-main shadow-[0_2px_0_0_var(--color-level-3)] active:translate-y-0.5 active:shadow-none'
+              ? 'bg-level-1 text-level-3 shadow-inner translate-y-0.5'
+              : 'bg-level-2 text-text-main hover:text-text-main shadow-[0_2px_0_0_var(--color-level-3)] active:translate-y-0.5 active:shadow-none'
               }`}
           >
             <span>{t('playlist.track.ejectBtn')}</span>

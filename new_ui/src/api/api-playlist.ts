@@ -291,18 +291,27 @@ export async function fetchPlaylistLogs(
 }
 
 
-export const postPauseState = async (playlist_id: string, is_paused: boolean) => {
+export const postPauseState = async (playlist_id: string, is_paused: boolean, position: number, track_id: string) => {
   const config = getConfig()
-  return apiClient(config.PLST_API_URL + `/${playlist_id}/state/pause`, {
+  return apiClient(config.AUTH_API_URL + `/playback/${playlist_id}/state/pause`, {
     method: 'POST',
     withCredentials: true,
-    data: is_paused,
+    data: { is_paused, position, track_id },
+  })
+}
+
+export const postSeekState = async (playlist_id: string, position: number, track_id: string) => {
+  const config = getConfig()
+  return apiClient(config.AUTH_API_URL + `/playback/${playlist_id}/state/seek`, {
+    method: 'POST',
+    withCredentials: true,
+    data: { position, track_id },
   })
 }
 
 export const postPositionState = async (playlist_id: string, position: number) => {
   const config = getConfig()
-  return apiClient(config.PLST_API_URL + `/${playlist_id}/state/position`, {
+  return apiClient(config.AUTH_API_URL + `/playback/${playlist_id}/state/position`, {
     method: 'POST',
     withCredentials: true,
     data: position
@@ -313,7 +322,7 @@ export const getPlaybackState = async (
   playlist_id: string,
 ): Promise<Record<string, string> | null> => {
   const config = getConfig()
-  const response = await apiClient(config.PLST_API_URL + `/${playlist_id}/state`, {
+  const response = await apiClient(config.AUTH_API_URL + `/playback/${playlist_id}/state`, {
     method: 'GET',
   }).catch(() => null)
   return response ? response.data : null
