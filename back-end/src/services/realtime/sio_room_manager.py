@@ -1,31 +1,29 @@
-from typing import Any, Set
-
 from src.dal._redis.broker import get_broker, RedisAdapter
 
 
 class RoomManager:
     def __init__(self, redis: RedisAdapter):
-        self.redis_adapter = redis
+        self.redis_adapter: RedisAdapter = redis
 
-    def enter_room(self, sid: str, room: str, namespace="/") -> None:
+    def enter_room(self, sid: str, room: str, namespace: str = "/") -> None:
         with self.redis_adapter.broker.pipeline(transaction=True) as pipe:
             pipe.sadd(f"{namespace}:rooms-to-sids:{room}", sid)
             pipe.sadd(f"{namespace}:sids-to-rooms:{sid}", room)
             pipe.execute()
 
-    def leave_room(self, sid: str, room: str, namespace="/") -> None:
+    def leave_room(self, sid: str, room: str, namespace: str = "/") -> None:
         with self.redis_adapter.broker.pipeline(transaction=True) as pipe:
             pipe.srem(f"{namespace}:rooms-to-sids:{room}", sid)
             pipe.srem(f"{namespace}:sids-to-rooms:{sid}", room)
             pipe.execute()
 
-    def get_rooms(self, sid: str, namespace="/") -> Set[Any]:
+    def get_rooms(self, sid: str, namespace: str = "/") -> set[str]:
         return self.redis_adapter.smembers(f"{namespace}:sids-to-rooms:{sid}")  # pyright: ignore[reportReturnType]
 
-    def get_sids(self, room: str, namespace="/") -> Set[Any]:
+    def get_sids(self, room: str, namespace: str = "/") -> set[str]:
         return self.redis_adapter.smembers(f"{namespace}:rooms-to-sids:{room}")  # pyright: ignore[reportReturnType]
 
-    def clear_room(self, room: str, namespace="/") -> None:
+    def clear_room(self, room: str, namespace: str = "/") -> None:
         room_key = f"{namespace}:rooms-to-sids:{room}"
         sids = self.redis_adapter.smembers(room_key)
         if not sids:
@@ -38,7 +36,7 @@ class RoomManager:
             pipe.delete(room_key)
             pipe.execute()
 
-    def disconnect(self, sid: str, namespace="/") -> None:
+    def disconnect(self, sid: str, namespace: str = "/") -> None:
         sid_rooms_key = f"{namespace}:sids-to-rooms:{sid}"
         rooms = self.redis_adapter.smembers(sid_rooms_key)
 

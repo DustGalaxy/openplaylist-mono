@@ -52,5 +52,5 @@ async def post_position_state(db_session: DB_SESSION, current_user: USER_ID, pla
 
 
 @router.get("/{playlist_id}/state", status_code=status.HTTP_200_OK)
-async def get_state(playlist_id: UUID) -> dict[str, str | None]:
-    return get_playback_state(playlist_id)
+async def get_state(playlist_id: UUID):
+    return await get_playback_state(playlist_id)

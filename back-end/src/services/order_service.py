@@ -1,6 +1,6 @@
 import re
 import json
-from typing import Union
+from typing import TypedDict
 
 from pytubefix import YouTube
 import requests
@@ -13,19 +13,21 @@ from src.utils import extract_youtube_video_id, parse_ISO_8601
 from src.settings import settings
 from src.exceptions import NotEmbeddable
 
+VideoInfo = TypedDict("VideoInfo", {"title": str, "author": str, "embeddable": bool, "views": int, "likes": int, "length": int})
+
 
 class OrderService:
-    def get_data_from_pytube(self, url):
+    def get_data_from_pytube(self, url: str) -> VideoInfo:
         yt = YouTube(url)
         try:
             first_part = yt.initial_data["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][0]
             second_part = first_part.get("videoPrimaryInfoRenderer") or first_part.get("videoSecondaryInfoRenderer")
 
-            likes = second_part["videoActions"]["menuRenderer"]["topLevelButtons"][0][
-                "segmentedLikeDislikeButtonViewModel"
-            ]["likeButtonViewModel"]["likeButtonViewModel"]["toggleButtonViewModel"]["toggleButtonViewModel"][
-                "defaultButtonViewModel"
-            ]["buttonViewModel"]["accessibilityText"]
+            likes = second_part["videoActions"]["menuRenderer"]["topLevelButtons"][0]["segmentedLikeDislikeButtonViewModel"][
+                "likeButtonViewModel"
+            ]["likeButtonViewModel"]["toggleButtonViewModel"]["toggleButtonViewModel"]["defaultButtonViewModel"][
+                "buttonViewModel"
+            ]["accessibilityText"]
 
             likes_text = likes
             like_template = r"like this video along with (.*?) other people"
@@ -33,19 +35,21 @@ class OrderService:
             matches = re.findall(like_template, text, re.MULTILINE)
             likes = None
             if len(matches) >= 1:
-                like_str = matches[0]
+                like_str: str = matches[0]
                 likes = int(like_str.replace(",", ""))
         except Exception:
             likes = None
 
         return {
-            "title": yt.title,
-            "length": yt.length,
+            "title": yt.title if yt.title else "Unknown",
+            "author": yt.author if yt.author else "Unknown",
+            "embeddable": bool(yt.embed_html),
+            "length": yt.length if yt.length else 0,
             "likes": likes if likes else 0,
-            "views": yt.views,
+            "views": yt.views if yt.views else 0,
         }
 
-    def get_data_from_youtube_api(self, video_id, api_key) -> dict:
+    def get_data_from_youtube_api(self, video_id: str, api_key: str) -> VideoInfo:
         BASE_YOUTUBE_API_VIDEOS_URL = "https://www.googleapis.com/youtube/v3/videos"
 
         params = {
@@ -72,24 +76,24 @@ class OrderService:
             "length": parse_ISO_8601(video_item["contentDetails"]["duration"]),  # формат ISO 8601 (например, PT4M13S)
         }
 
-    def get_from_cache(self, video_id) -> dict | None:
+    def get_from_cache(self, video_id: str) -> VideoInfo | None:
         data = get_broker().get(video_id)
         if data is not None and str(data) != "None":
             return json.loads(str(data))
         else:
             return
 
-    def save_to_cache(self, video_id, data):
+    def save_to_cache(self, video_id: str, data: VideoInfo):
         return get_broker().set(video_id, json.dumps(data), ex=60 * 60 * 24 * 3)
 
     async def init_order(
-        self, order: Union[WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder], from_owner: bool = False
+        self, order: WebNewOrder | TTVNewOrder | YTNewOrder | DANewOrder, from_owner: bool = False
     ) -> OrderCreate:
         yt_video_id = extract_youtube_video_id(order.yt_video_url)
         if not yt_video_id:
             raise ValueError("Invalid YouTube video URL")
         yt_video_id = yt_video_id.strip()
-        data: dict = self.get_from_cache(yt_video_id)  # pyright: ignore[reportAssignmentType]
+        data: VideoInfo | None = self.get_from_cache(yt_video_id)
 
         if not data:
             try:

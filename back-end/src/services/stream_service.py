@@ -1,12 +1,12 @@
 import hashlib
 import secrets
+from typing import Any
 from uuid import UUID
 
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.dal.postgres.stream_token import get_stream_token_repository
-from src.models.stream_token import StreamTokenSchema, StreamTokenPatch
 
 from src.dal.postgres.playlist_logs import get_playlist_logs_repository
 
@@ -28,7 +28,7 @@ class StreamService:
         repo = get_stream_token_repository()
         await repo.upsert(db_session, user_id, token_hash)
 
-    async def get_current_playing_track(self, db_session: AsyncSession, user_id: UUID):
+    async def get_current_playing_track(self, db_session: AsyncSession, user_id: UUID) -> dict[str, Any] | None:
         data = await get_playlist_logs_repository().get_last_playnow(db_session, user_id)
         return data.event_data if data else None
 

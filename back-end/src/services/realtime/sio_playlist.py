@@ -1,3 +1,4 @@
+from typing import Literal
 from uuid import UUID
 
 import socketio
@@ -20,14 +21,14 @@ from .sio_room_manager import room_manager
 
 
 class SioPlaylistUpdateService:
-    def __init__(self, sio):
+    def __init__(self, sio: socketio.AsyncServer):
         self.sio: socketio.AsyncServer = sio
-        self.namespace = "/plst_upds"
+        self.namespace: Literal["/plst_upds"] = "/plst_upds"
 
-    async def uid_from_sid(self, sid):
+    async def uid_from_sid(self, sid: str) -> str | UUID:
         return await self.sio.get_session(sid, self.namespace)
 
-    def sid_from_uid(self, user_id):
+    def sid_from_uid(self, user_id: str | UUID) -> str:
         return str(get_broker().hget(f"playlist:users:{user_id}", "sid"))
 
     async def log(self, log: PlaylistLogSchema):
@@ -100,7 +101,7 @@ class SioPlaylistUpdateService:
             room_manager.leave_room(sid, room_id, self.namespace)
             print(f"⬅️ Пользователь {sid} был выгнан из комнаты {room_id}")
 
-    async def sub_playback(self, sid, playlist_id: UUID, user_id: str):
+    async def sub_playback(self, sid: str, playlist_id: UUID, user_id: str):
         async with async_session_maker() as session:
             plst = await playlist_repository.get_one(session, playlist_id)
 
@@ -113,11 +114,11 @@ class SioPlaylistUpdateService:
         else:
             await self.sio.emit("playback_subscribe_denied", {"room_id": playlist_id}, to=sid, namespace=self.namespace)
 
-    async def unsub_playback(self, sid, playlist_id: UUID, user_id: str):
+    async def unsub_playback(self, sid: str, playlist_id: UUID, user_id: str):
         room_manager.leave_room(sid, f"playback:{str(playlist_id)}", namespace=self.namespace)
         print(f"⬅️ Пользователь {user_id} вышел из комнаты playback:{playlist_id}")
 
-    async def sub_plst_upds(self, sid, playlist_id: UUID, user_id: str):
+    async def sub_plst_upds(self, sid: str, playlist_id: UUID, user_id: str):
         async with async_session_maker() as session:
             plst = await playlist_repository.get_one(session, playlist_id)
 
@@ -130,7 +131,7 @@ class SioPlaylistUpdateService:
         else:
             await self.sio.emit("subscribe_denied", {"room_id": playlist_id}, to=sid, namespace=self.namespace)
 
-    async def unsub_plst_upds(self, sid, playlist_id: UUID, user_id: UUID):
+    async def unsub_plst_upds(self, sid: str, playlist_id: UUID, user_id: UUID):
         room_manager.leave_room(sid, str(playlist_id), namespace=self.namespace)
         print(f"⬅️ Пользователь {user_id} вышел из комнаты {playlist_id}")
 

@@ -1,3 +1,6 @@
+# pyright: reportUnknownParameterType=false, reportMissingParameterType=false
+
+from typing import Any, Literal
 from uuid import UUID
 
 import socketio
@@ -8,20 +11,22 @@ from src.dto.playback import Pause, Seek
 
 
 class SioWidgetService:
-    def __init__(self, sio):
+    def __init__(self, sio: socketio.AsyncServer):
         self.sio: socketio.AsyncServer = sio
-        self.namespace = "/widget"
+        self.namespace: Literal["/widget"] = "/widget"
 
-    async def uid_from_sid(self, sid):
+    async def uid_from_sid(self, sid: str) -> str:
         return await self.sio.get_session(sid, self.namespace)
 
     def sid_from_uid(self, user_id: str | UUID):
         return str(get_broker().hget(f"widget:users:{user_id}", "sid"))
 
-    async def emit(self, event, data=None, to=None, room=None, skip_sid=None, namespace=None, callback=None, ignore_queue=False):
+    async def emit(
+        self, event, data=None, to=None, room=None, skip_sid=None, namespace=None, callback=None, ignore_queue=False
+    ) -> None:
         await self.sio.emit(event, data, to, room, skip_sid, namespace if namespace else self.namespace, callback, ignore_queue)
 
-    async def current_track(self, track: dict, user_id: str | UUID):
+    async def current_track(self, track: dict[str, Any], user_id: str | UUID):
         sid = self.sid_from_uid(user_id)
         await self.emit("current_track", track, to=sid)
 

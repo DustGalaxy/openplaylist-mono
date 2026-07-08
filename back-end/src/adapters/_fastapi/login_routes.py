@@ -63,7 +63,7 @@ async def login_by_social(
     db_session: DB_SESSION,
     body: OAuthBody,
     platform: IntegrationPlatform,
-) -> dict | None:
+) -> dict[str, str | dict[str, str]] | None:
     try:
         token = await auth_service.login_by_social(
             db_session,
@@ -104,7 +104,7 @@ async def confirm_account_merge(
     if not raw_data:
         raise HTTPException(status_code=400, detail="Link session expired")
 
-    data: dict = json.loads(raw_data)
+    data: dict[str, str] = json.loads(raw_data)
     if not is_confirmed:
         new_user = AuthUserCreate(
             username=data["username"],
@@ -112,7 +112,7 @@ async def confirm_account_merge(
             avatar_url=data["avatar_url"],
         )
         user = await auth_service.create_user(db_session, new_user)
-        data["user_id"] = user.id
+        data["user_id"] = str(user.id)
         new_link = LinkedAccountsCreate.model_validate(data)
         await auth_service.create_link(db_session, new_link)
 
