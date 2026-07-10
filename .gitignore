@@ -23,3 +23,4 @@ letsencrypt/acme.json
 back-end/src/src.zip
 *.com.json
 *.zip
+.pytest_cache
