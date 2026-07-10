@@ -10,8 +10,10 @@ from src.dto.playback import Pause, Seek
 
 STATE_EXPIRE_SECONDS = 259200  # 60 * 60 * 24 * 3
 
+State = TypedDict("State", {"is_paused": str, "position": str, "track_id": str | None})
 
-def parse_state(state: dict[str, str]) -> TypedDict[{"is_paused": str, "position": str, "track_id": str | None}]:
+
+def parse_state(state: dict[str, str]) -> State:
     if not state:
         return {"is_paused": "True", "position": "0.0", "track_id": None}
     return {

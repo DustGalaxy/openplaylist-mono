@@ -1,12 +1,19 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { ArrowUpRight, Calendar, ClipboardCopy, Pause, Play } from 'lucide-react'
+import {
+  ArrowUpRight,
+  Calendar,
+  ClipboardCopy,
+  Pause,
+  Play,
+} from 'lucide-react'
 import type { Track } from '@/types/playlist'
 import Btn from '@/components/ui/my-btn'
 import { computePriority, formatTime } from '@/lib/utils'
 import Person from '@/components/icons/icon-person'
 import { usePlaylist } from '@/features/playlist/context/playlist-context'
+import DDPlaylistPicker from './DDPlaylistPicker.tsx'
 
 interface ViewerTrackCardProps {
   track: Track
@@ -26,37 +33,41 @@ function ViewerTrackCardImpl({
   const { t, i18n } = useTranslation()
   const playlist = usePlaylist()
   const copyLink = async () => {
-    await navigator.clipboard.writeText(`https://www.youtube.com/watch?v=${track.yt_video_id}`)
+    await navigator.clipboard.writeText(
+      `https://www.youtube.com/watch?v=${track.yt_video_id}`,
+    )
     toast.success(t('common.toast.copied'))
   }
 
   const formattedDate = track.created_at
     ? new Date(track.created_at).toLocaleDateString(i18n.language, {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    })
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
     : 'Н/Д'
 
   const longFormatDate = track.created_at
     ? new Date(track.created_at).toLocaleDateString(i18n.language, {
-      day: 'numeric',
-      month: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-    })
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+      })
     : 'Н/Д'
   const priority = computePriority(track, playlist.settings)
   return (
     <div
-      className={`relative w-full grid grid-cols-[1fr_auto] rounded-(--rounded-std) min-w-150 h-19.5 ${isDragging ? 'opacity-0' : ''
-        }`}
+      className={`relative w-full grid grid-cols-[1fr_auto] rounded-(--rounded-std) min-w-150 h-19.5 ${
+        isDragging ? 'opacity-0' : ''
+      }`}
     >
       <div
-        className={`relative w-full h-full min-w-0 bg-level-2 rounded-sm ${isActive ? 'border border-level-3' : 'border border-level-3/15'
-          }`}
+        className={`relative w-full h-full min-w-0 bg-level-2 rounded-sm ${
+          isActive ? 'border border-level-3' : 'border border-level-3/15'
+        }`}
       >
         <div className="flex gap-3 ml-2 h-full pr-2 py-2 items-center min-w-0">
           <div className="relative aspect-video shrink-0 rounded-(--rounded-std) h-18 overflow-hidden">
@@ -74,14 +85,21 @@ function ViewerTrackCardImpl({
           </div>
 
           <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
-            <div className="text-[18px] font-semibold text-left truncate text-text-main" title={track.title}>
+            <div
+              className="text-[18px] font-semibold text-left truncate text-text-main"
+              title={track.title}
+            >
               {track.title}
             </div>
             <div
               title={t('playlist.track.requester')}
               className="text-[14px] text-text-secondary flex gap-1 items-center font-medium cursor-help"
             >
-              <Person width={18} height={18} className="fill-text-main shrink-0" />
+              <Person
+                width={18}
+                height={18}
+                className="fill-text-main shrink-0"
+              />
               <span className="truncate">{track.requester_nickname}</span>
             </div>
           </div>
@@ -104,7 +122,9 @@ function ViewerTrackCardImpl({
             <ArrowUpRight
               className={`w-3.5 h-3.5 ${+priority > 0 ? 'text-level-3 animate-pulse' : 'text-text-placeholder'}`}
             />
-            <span className={`font-bold ${+priority > 0 ? 'text-text-main' : 'text-text-placeholder'}`}>
+            <span
+              className={`font-bold ${+priority > 0 ? 'text-text-main' : 'text-text-placeholder'}`}
+            >
               {priority}
             </span>
           </div>
@@ -115,9 +135,17 @@ function ViewerTrackCardImpl({
             text={<Play />}
             className="px-1 bg-level-2"
             onClick={onPlay}
-            title={t(`playlist.tooltip.${isActive && isPlaying ? 'pause' : 'play'}`)}
+            title={t(
+              `playlist.tooltip.${isActive && isPlaying ? 'pause' : 'play'}`,
+            )}
           />
-          <Btn text={<ClipboardCopy />} className="px-1 bg-level-2" onClick={copyLink} title={t('playlist.track.copy')} />
+          <Btn
+            text={<ClipboardCopy />}
+            className="px-1 bg-level-2"
+            onClick={copyLink}
+            title={t('playlist.track.copy')}
+          />
+          <DDPlaylistPicker track={track} />
         </div>
       </div>
     </div>

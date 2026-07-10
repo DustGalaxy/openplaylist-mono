@@ -36,7 +36,19 @@ export const fetchUserPlaylistData = async () => {
     withCredentials: true,
   })
     .then((res) => res.data)
-    .catch((error) => { })
+    .catch((error) => {})
+  return response
+}
+
+export const fetchUserPlaylistPreviews = async () => {
+  const config = getConfig()
+  const response = await apiClient(config.PLST_API_URL + '/me', {
+    method: 'GET',
+    withCredentials: true,
+    params: { preview: true },
+  })
+    .then((res) => res.data)
+    .catch((error) => {})
   return response
 }
 
@@ -53,7 +65,7 @@ export const changePlaylistActive = async (
     },
   })
     .then((res) => res.data)
-    .catch((error) => { })
+    .catch((error) => {})
   return response
 }
 
@@ -117,8 +129,8 @@ export const removeTrackFromPlaylist = async (
   const config = getConfig()
   const response = await apiClient(
     config.PLST_API_URL +
-    `/${playlist_id}/track/${track_id}` +
-    `?reason=${reason}`,
+      `/${playlist_id}/track/${track_id}` +
+      `?reason=${reason}`,
     {
       method: 'DELETE',
       withCredentials: true,
@@ -164,7 +176,11 @@ export const postPlayNow = async (
   return response
 }
 
-export const createNewPlaylist = async (name: string, showInWidget: boolean, description?: string) => {
+export const createNewPlaylist = async (
+  name: string,
+  showInWidget: boolean,
+  description?: string,
+) => {
   const config = getConfig()
   const response = await apiClient(config.PLST_API_URL + ``, {
     method: 'POST',
@@ -290,40 +306,63 @@ export async function fetchPlaylistLogs(
   return response.data
 }
 
-
-export const postPauseState = async (playlist_id: string, is_paused: boolean, position: number, track_id: string) => {
+export const postPauseState = async (
+  playlist_id: string,
+  is_paused: boolean,
+  position: number,
+  track_id: string,
+) => {
   const config = getConfig()
-  return apiClient(config.AUTH_API_URL + `/playback/${playlist_id}/state/pause`, {
-    method: 'POST',
-    withCredentials: true,
-    data: { is_paused, position, track_id },
-  })
+  return apiClient(
+    config.AUTH_API_URL + `/playback/${playlist_id}/state/pause`,
+    {
+      method: 'POST',
+      withCredentials: true,
+      data: { is_paused, position, track_id },
+    },
+  )
 }
 
-export const postSeekState = async (playlist_id: string, position: number, track_id: string) => {
+export const postSeekState = async (
+  playlist_id: string,
+  position: number,
+  track_id: string,
+) => {
   const config = getConfig()
-  return apiClient(config.AUTH_API_URL + `/playback/${playlist_id}/state/seek`, {
-    method: 'POST',
-    withCredentials: true,
-    data: { position, track_id },
-  })
+  return apiClient(
+    config.AUTH_API_URL + `/playback/${playlist_id}/state/seek`,
+    {
+      method: 'POST',
+      withCredentials: true,
+      data: { position, track_id },
+    },
+  )
 }
 
-export const postPositionState = async (playlist_id: string, position: number) => {
+export const postPositionState = async (
+  playlist_id: string,
+  position: number,
+) => {
   const config = getConfig()
-  return apiClient(config.AUTH_API_URL + `/playback/${playlist_id}/state/position`, {
-    method: 'POST',
-    withCredentials: true,
-    data: position
-  })
+  return apiClient(
+    config.AUTH_API_URL + `/playback/${playlist_id}/state/position`,
+    {
+      method: 'POST',
+      withCredentials: true,
+      data: position,
+    },
+  )
 }
 
 export const getPlaybackState = async (
   playlist_id: string,
 ): Promise<Record<string, string> | null> => {
   const config = getConfig()
-  const response = await apiClient(config.AUTH_API_URL + `/playback/${playlist_id}/state`, {
-    method: 'GET',
-  }).catch(() => null)
+  const response = await apiClient(
+    config.AUTH_API_URL + `/playback/${playlist_id}/state`,
+    {
+      method: 'GET',
+    },
+  ).catch(() => null)
   return response ? response.data : null
 }

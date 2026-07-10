@@ -13,7 +13,12 @@ export function createTrackSlice(
   get: GetFn,
 ): Pick<
   StoreState,
-  'pendingAdds' | 'pendingRemoves' | 'requestAddTrack' | 'syncAddTrack' | 'requestRemoveTrack' | 'syncRemoveTrack'
+  | 'pendingAdds'
+  | 'pendingRemoves'
+  | 'requestAddTrack'
+  | 'syncAddTrack'
+  | 'requestRemoveTrack'
+  | 'syncRemoveTrack'
 > {
   return {
     pendingAdds: {},
@@ -21,7 +26,8 @@ export function createTrackSlice(
 
     async requestAddTrack(playlistId, yt_video_url, ownerId?) {
       const { user } = useAuthStore.getState()
-      const owner_id = get().playlists.find((p) => p.id === playlistId)?.owner_id ?? ownerId
+      const owner_id =
+        get().playlists.find((p) => p.id === playlistId)?.owner_id ?? ownerId
       if (!user || !owner_id) return
       const order: Order = {
         request_id: uuidv4(),
@@ -31,7 +37,7 @@ export function createTrackSlice(
         requester_nickname: user.username,
         playlist_id: playlistId,
         yt_video_url: yt_video_url,
-        priority: 'bms',
+        priority: 'playlist_owner',
         source: 'web',
       }
 
@@ -54,13 +60,16 @@ export function createTrackSlice(
       })
 
       set((state) => ({
-        playlists: state.playlists.map((p) => (p.id === playlistId ? updatedPl : p)),
+        playlists: state.playlists.map((p) =>
+          p.id === playlistId ? updatedPl : p,
+        ),
       }))
 
       const modeSettings = getActiveModeSettings(updatedPl)
       const nowPlaying = updatedPl.now_playing
       const newTrackIsVip = isVipTrack(newTrack, modeSettings)
-      const currentlyPlayingIsVip = nowPlaying !== undefined && isVipTrack(nowPlaying, modeSettings)
+      const currentlyPlayingIsVip =
+        nowPlaying !== undefined && isVipTrack(nowPlaying, modeSettings)
 
       // Премиум-трек не прерывает уже играющий премиум (см. гайд: "премиум
       // треки не прерывают друг друга, а просто встают в очередь") — поэтому
@@ -76,12 +85,12 @@ export function createTrackSlice(
           playlists: state.playlists.map((p) =>
             p.id === playlistId
               ? {
-                ...p,
-                paused_background: {
-                  track_id: nowPlaying.id,
-                  position: position,
-                },
-              }
+                  ...p,
+                  paused_background: {
+                    track_id: nowPlaying.id,
+                    position: position,
+                  },
+                }
               : p,
           ),
         }))
@@ -105,9 +114,9 @@ export function createTrackSlice(
         playlists: state.playlists.map((p) =>
           p.id === playlistId
             ? get().sortPlaylist({
-              ...p,
-              track_data: p.track_data.filter((t) => t.id !== orderId),
-            })
+                ...p,
+                track_data: p.track_data.filter((t) => t.id !== orderId),
+              })
             : p,
         ),
       }))
@@ -155,9 +164,9 @@ export function createTrackSlice(
           playlists: state.playlists.map((p) =>
             p.id === playlistId
               ? get().sortPlaylist({
-                ...p,
-                track_data: p.track_data.filter((t) => t.id !== orderId),
-              })
+                  ...p,
+                  track_data: p.track_data.filter((t) => t.id !== orderId),
+                })
               : p,
           ),
         }))
