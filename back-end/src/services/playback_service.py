@@ -23,12 +23,7 @@ def parse_state(state: dict[str, str]) -> TypedDict[{"is_paused": str, "position
 
 async def get_all(playlist_id: UUID) -> dict[str, str]:
     res = get_broker().hgetall(f"playback:{playlist_id}")
-
-    if inspect.isawaitable(res):
-        return await res
-
-    else:
-        return res
+    return (await res) if inspect.isawaitable(res) else res
 
 
 async def check_owner(session: AsyncSession, playlist_id: UUID, user_id: UUID):
