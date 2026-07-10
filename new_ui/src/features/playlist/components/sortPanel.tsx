@@ -1,9 +1,20 @@
 import React from 'react'
-import Arrow from '@/components/icons/icon-arrow'
 import useMusicStore from '@/stores/musicStore'
 import { usePlaylist } from '@/features/playlist/context/playlist-context'
 import type { SortSettings, OrderMode } from '@/types/playlist'
-import { ArrowUpRight, Calendar, Minus, Shuffle, GripVertical, Crown, ListMusic, Layers, ArrowUpDown, ArrowDown01, ArrowUp01 } from 'lucide-react'
+import {
+  ArrowUpRight,
+  Calendar,
+  Minus,
+  Shuffle,
+  GripVertical,
+  Crown,
+  ListMusic,
+  Layers,
+  ArrowUpDown,
+  ArrowDown01,
+  ArrowUp01,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -17,7 +28,10 @@ type SortDirection = 'none' | 'asc' | 'desc'
 type QueueGroup = 'vip' | 'regular' | 'background'
 
 // Маппинг иконок для сжатого состояния
-const queueIcons: Record<QueueGroup, React.ComponentType<{ className?: string }>> = {
+const queueIcons: Record<
+  QueueGroup,
+  React.ComponentType<{ className?: string }>
+> = {
   vip: Crown,
   regular: ListMusic,
   background: Layers,
@@ -28,8 +42,13 @@ const nextDirection = (d: SortDirection): SortDirection =>
 
 function SortDirectionIndicator({ direction }: { direction: SortDirection }) {
   const styleBase = `size-4 transition-transform duration-200 animate-[sort-pop_250ms_ease-out]`
-  if (direction === 'none') return <Minus className={cn(styleBase, "text-text-placeholder")} />
-  return direction === 'asc' ? <ArrowUp01 className={styleBase} /> : <ArrowDown01 className={styleBase} />
+  if (direction === 'none')
+    return <Minus className={cn(styleBase, 'text-text-placeholder')} />
+  return direction === 'asc' ? (
+    <ArrowUp01 className={styleBase} />
+  ) : (
+    <ArrowDown01 className={styleBase} />
+  )
 }
 
 export function OrderModeToggle({
@@ -39,10 +58,12 @@ export function OrderModeToggle({
   value: OrderMode | null
   onChange: (m: OrderMode) => void
 }) {
-
-
   const { t } = useTranslation()
-  const modes: Array<{ key: OrderMode; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  const modes: Array<{
+    key: OrderMode
+    label: string
+    icon: React.ComponentType<{ className?: string }>
+  }> = [
     { key: 'auto', label: t('sort.mode.auto'), icon: ArrowUpDown },
     { key: 'random', label: t('sort.mode.random'), icon: Shuffle },
     { key: 'free', label: t('sort.mode.free'), icon: GripVertical },
@@ -85,7 +106,7 @@ export function SortButtons({
     return (
       <div className="hidden md:flex items-center gap-1 text-text-placeholder text-xs py-2 ">
         <Shuffle className="size-4" />
-        <span className=''>{t('sort.mode.randomHint')}</span>
+        <span className="">{t('sort.mode.randomHint')}</span>
       </div>
     )
   }
@@ -94,7 +115,7 @@ export function SortButtons({
     return (
       <div className="hidden md:flex items-center gap-1 text-text-placeholder text-xs py-2">
         <GripVertical className="size-4" />
-        <span className='hidden md:inline'>{t('sort.mode.freeHint')}</span>
+        <span className="hidden md:inline">{t('sort.mode.freeHint')}</span>
       </div>
     )
   }
@@ -103,16 +124,22 @@ export function SortButtons({
     <div className="flex gap-2 sm:gap-3 justify-center items-end">
       <button
         title={
-          sortSettings.priority === 'asc' ? t('sort.priority.lowFirst')
-            : sortSettings.priority === 'desc' ? t('sort.priority.highFirst')
+          sortSettings.priority === 'asc'
+            ? t('sort.priority.lowFirst')
+            : sortSettings.priority === 'desc'
+              ? t('sort.priority.highFirst')
               : t('sort.priority.title')
         }
-        onClick={() => onChange({ priority: nextDirection(sortSettings.priority) })}
+        onClick={() =>
+          onChange({ priority: nextDirection(sortSettings.priority) })
+        }
         className={cn(
           filterTabBaseClass,
           'p-1 text-xs flex items-center justify-center',
-          sortSettings.priority !== 'none' ? filterTabActiveClass : filterTabInactiveClass,
-          "flex"
+          sortSettings.priority !== 'none'
+            ? filterTabActiveClass
+            : filterTabInactiveClass,
+          'flex',
         )}
       >
         <span className="flex flex-col sm:flex-row items-center gap-1">
@@ -123,16 +150,20 @@ export function SortButtons({
 
       <button
         title={
-          sortSettings.date === 'asc' ? t('sort.date.olderFirst')
-            : sortSettings.date === 'desc' ? t('sort.date.newerFirst')
+          sortSettings.date === 'asc'
+            ? t('sort.date.olderFirst')
+            : sortSettings.date === 'desc'
+              ? t('sort.date.newerFirst')
               : t('sort.date.title')
         }
         onClick={() => onChange({ date: nextDirection(sortSettings.date) })}
         className={cn(
           filterTabBaseClass,
           'p-1 text-xs  items-center justify-center',
-          sortSettings.date !== 'none' ? filterTabActiveClass : filterTabInactiveClass,
-          "flex "
+          sortSettings.date !== 'none'
+            ? filterTabActiveClass
+            : filterTabInactiveClass,
+          'flex ',
         )}
       >
         <span className="flex flex-col sm:flex-row items-center gap-1">
@@ -164,7 +195,8 @@ export default function SortPanel() {
   const [activeTab, setActiveTab] = React.useState<QueueGroup>('regular')
   const tab = groups.includes(activeTab) ? activeTab : 'regular'
 
-  const settingsKey = tab === 'vip' ? 'sort_settings_vip' : 'sort_settings_regular'
+  const settingsKey =
+    tab === 'vip' ? 'sort_settings_vip' : 'sort_settings_regular'
 
   const updateSettings = (patch: Partial<SortSettings>) => {
     requestPlSettings(playlist.id, {
@@ -179,7 +211,9 @@ export default function SortPanel() {
   }
 
   return (
-    <div className={`flex flex-row ${tab !== 'background' && 'justify-between'} sm:justify-start  gap-1 sm:gap-2 items-center`}>
+    <div
+      className={`flex flex-row ${tab !== 'background' && 'justify-between'} sm:justify-start  gap-1 sm:gap-2 items-center`}
+    >
       <style>{`
         @keyframes sort-pop {
           0%   { transform: scale(0.5); opacity: 0.3; }
@@ -206,30 +240,37 @@ export default function SortPanel() {
               >
                 <Icon className="size-4" />
                 {/* Текст скрывается на мобильных / в сжатом режиме */}
-                <span className="hidden md:inline ml-1.5">{t(`sort.tabs.${g}`)}</span>
+                <span className="hidden md:inline ml-1.5">
+                  {t(`sort.tabs.${g}`)}
+                </span>
               </button>
             )
           })}
-
         </div>
       )}
-      <div className={`w-px h-6 bg-text-main ${showTabs ? "block" : "hidden"}`} />
+      <div
+        className={`w-px h-6 bg-text-main ${showTabs ? 'block' : 'hidden'}`}
+      />
       {tab === 'background' ? (
         <div className="flex items-center gap-1 text-text-placeholder text-xs py-2">
           <GripVertical className="size-4" />
-          <span className='hidden sm:inline'>{t('sort.mode.freeHint')}</span>
+          <span className="hidden sm:inline">{t('sort.mode.freeHint')}</span>
         </div>
       ) : (
         <>
-          <div className='flex items-center-safe gap-1'>
+          <div className="flex items-center-safe gap-1">
             <OrderModeToggle
               value={activeModeSettings[settingsKey].order_mode}
               onChange={(order_mode) => updateSettings({ order_mode })}
             />
-
           </div>
-          <div className={`w-px h-6 bg-text-main ${activeModeSettings[settingsKey].order_mode === "auto" ? "block" : "hidden sm:block"}`} />
-          <SortButtons sortSettings={activeModeSettings[settingsKey]} onChange={updateSettings} />
+          <div
+            className={`w-px h-6 bg-text-main ${activeModeSettings[settingsKey].order_mode === 'auto' ? 'block' : 'hidden sm:block'}`}
+          />
+          <SortButtons
+            sortSettings={activeModeSettings[settingsKey]}
+            onChange={updateSettings}
+          />
         </>
       )}
     </div>
