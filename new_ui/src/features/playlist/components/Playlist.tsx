@@ -29,7 +29,7 @@ import TrackCard from './TrackCard'
 import type { ClientPlaylist } from '@/types/playlist'
 import Btn from '@/components/ui/my-btn'
 
-import SettingsModal from '@/features/settings/components/playlist-settings/settingsModal'
+import SettingsModal from '@/features/playlist-settings/components/playlist-settings/settingsModal'
 import { changePlaylistActive } from '@/api/api-playlist'
 import { useMusicStore } from '@/stores/musicStore'
 import { useAppSettingsStore } from '@/stores/appSettingsStore'
@@ -81,25 +81,37 @@ function PlaylistView() {
   const [queueSearch, setQueueSearch] = React.useState('')
 
   const isPaused = playlist.is_paused ?? true
-  const { playNext, requestPlSettings, playPrev, requestReorder, requestReorderStep, requestPlaybackState, getPlayerPosition } = useMusicStore()
+  const {
+    playNext,
+    requestPlSettings,
+    playPrev,
+    requestReorder,
+    requestReorderStep,
+    requestPlaybackState,
+    getPlayerPosition,
+  } = useMusicStore()
 
   const visibleTracks = React.useMemo(() => {
     const q = queueSearch.trim().toLowerCase()
 
     const { vip, regular, background } = splitQueue(playlist)
-    const combined = [vip.filter(
-      (track) =>
-        track.title.toLowerCase().includes(q) ||
-        track.requester_nickname.toLowerCase().includes(q),
-    ), regular.filter(
-      (track) =>
-        track.title.toLowerCase().includes(q) ||
-        track.requester_nickname.toLowerCase().includes(q),
-    ), background.filter(
-      (track) =>
-        track.title.toLowerCase().includes(q) ||
-        track.requester_nickname.toLowerCase().includes(q),
-    )]
+    const combined = [
+      vip.filter(
+        (track) =>
+          track.title.toLowerCase().includes(q) ||
+          track.requester_nickname.toLowerCase().includes(q),
+      ),
+      regular.filter(
+        (track) =>
+          track.title.toLowerCase().includes(q) ||
+          track.requester_nickname.toLowerCase().includes(q),
+      ),
+      background.filter(
+        (track) =>
+          track.title.toLowerCase().includes(q) ||
+          track.requester_nickname.toLowerCase().includes(q),
+      ),
+    ]
     if (!q) return combined
     return combined
   }, [playlist, queueSearch])
@@ -132,7 +144,12 @@ function PlaylistView() {
               playOnReady={true}
               pause={isPaused}
               setIsPaused={(val: boolean, pos: number) => {
-                requestPlaybackState(playlist.id, val, pos, playlist.now_playing?.id)
+                requestPlaybackState(
+                  playlist.id,
+                  val,
+                  pos,
+                  playlist.now_playing?.id,
+                )
               }}
               nowPlay={nowPlaying}
               className={`sm:row-span-2 ${showConsole || showContentSettings ? '' : 'col-span-2'} flex items-center justify-center`}
@@ -149,10 +166,11 @@ function PlaylistView() {
                           key={setting.platform}
                           type="button"
                           onClick={() => setSelectedContentSettingIndex(index)}
-                          className={`${filterTabBaseClass} ${selectedContentSettingIndex === index
-                            ? filterTabActiveClass
-                            : filterTabInactiveClass
-                            }`}
+                          className={`${filterTabBaseClass} ${
+                            selectedContentSettingIndex === index
+                              ? filterTabActiveClass
+                              : filterTabInactiveClass
+                          }`}
                         >
                           {setting.platform === Platform.General
                             ? t('common.general')
@@ -225,7 +243,12 @@ function PlaylistView() {
                   if (!getPlayerPosition) return
                   let pos = getPlayerPosition()
                   if (!pos) pos = 0.0
-                  requestPlaybackState(playlist.id, !isPaused, pos, playlist.now_playing.id)
+                  requestPlaybackState(
+                    playlist.id,
+                    !isPaused,
+                    pos,
+                    playlist.now_playing.id,
+                  )
                 }}
               />
               <Btn
@@ -278,17 +301,16 @@ function PlaylistView() {
                   />
 
                   <Btn
-
                     text={<CloudSync />}
                     title={t('playlist.tooltip.sync')}
                     isActive={playlist.settings.sync_playback_position}
                     onClick={() => {
                       requestPlSettings(playlist.id, {
-                        sync_playback_position: !playlist.settings.sync_playback_position,
+                        sync_playback_position:
+                          !playlist.settings.sync_playback_position,
                       })
                     }}
                     className="px-2 bg-level-2"
-
                   />
                   <div className="flex gap-2">
                     <Btn
@@ -342,10 +364,7 @@ function PlaylistView() {
             <div
               className={`flex flex-col items-center justify-center gap-2 py-8 px-4   text-center w-full border-dashed ${innerPanelClass}`}
             >
-              <Music2
-                className="h-8 w-8 text-text-main"
-                strokeWidth={1.5}
-              />
+              <Music2 className="h-8 w-8 text-text-main" strokeWidth={1.5} />
               <p className="text-sm text-text-secondary">
                 {t('playlist.nowPlaying.empty')}
               </p>
@@ -359,7 +378,6 @@ function PlaylistView() {
           <PlaylistQueueInput onSearchQueryChange={setQueueSearch} />
         </div>
         <div className="flex gap-2 shrink-0">
-
           <Btn
             text={toggled ? <PanelLeftClose /> : <PanelLeftOpen />}
             className="px-2 bg-level-2 hidden sm:block"
@@ -377,11 +395,13 @@ function PlaylistView() {
 
       <div className="flex flex-col md:flex-row md:justify-between">
         <SortPanel />
-        <Counter number={playlist.track_data.length} className=' justify-self-center md:justify-self-end' />
+        <Counter
+          number={playlist.track_data.length}
+          className=" justify-self-center md:justify-self-end"
+        />
       </div>
 
       <div className="flex w-full gap-2 sm:gap-4">
-
         {/* Saved section toggle */}
 
         <div className={`w-full ${toggled ? 'block' : 'hidden'}`}>
@@ -419,40 +439,85 @@ function PlaylistView() {
               visibleTracks.length > 0 ? (
                 <div className="flex flex-col gap-4 w-full ">
                   {visibleTracks.map((group, i) => {
-                    const groupName = i === 0 ? "vip" : i === 1 ? "regular" : "background"
-                    const settings = i === 0 ? playlist.settings.mode_settings[playlist.settings.mode].sort_settings_vip
-                      : i === 1 ? playlist.settings.mode_settings[playlist.settings.mode].sort_settings_regular
-                        : playlist.settings.mode_settings[playlist.settings.mode].sort_settings_background
-                    const active = settings.order_mode === "free" || groupName === "background"
+                    const groupName =
+                      i === 0 ? 'vip' : i === 1 ? 'regular' : 'background'
+                    const settings =
+                      i === 0
+                        ? playlist.settings.mode_settings[
+                            playlist.settings.mode
+                          ].sort_settings_vip
+                        : i === 1
+                          ? playlist.settings.mode_settings[
+                              playlist.settings.mode
+                            ].sort_settings_regular
+                          : playlist.settings.mode_settings[
+                              playlist.settings.mode
+                            ].sort_settings_background
+                    const active =
+                      settings.order_mode === 'free' ||
+                      groupName === 'background'
 
-                    return group.length ? <div>
-                      <div className={`flex flex-col gap-4 relative w-full h-4 ${groupName === "background" ? "block" : "hidden"}`}>
-                        <div className="absolute left-0 right-0 h-px bg-text-secondary" />
-                        <div className="absolute left-1/2 transform -translate-x-1/2 text-text-secondary font-mono -translate-y-1/2 bg-level-1 px-4 rounded-full">
-                          {groupName}
+                    return group.length ? (
+                      <div>
+                        <div
+                          className={`flex flex-col gap-4 relative w-full h-4 ${groupName === 'background' ? 'block' : 'hidden'}`}
+                        >
+                          <div className="absolute left-0 right-0 h-px bg-text-secondary" />
+                          <div className="absolute left-1/2 transform -translate-x-1/2 text-text-secondary font-mono -translate-y-1/2 bg-level-1 px-4 rounded-full">
+                            {groupName}
+                          </div>
                         </div>
+                        <ReorderableList
+                          items={group}
+                          orderedIds={group.map((t) => t.id)}
+                          mode={moveMethod}
+                          onReorder={(ids) => {
+                            requestReorder(
+                              playlist.id,
+                              playlist.settings.mode,
+                              groupName,
+                              ids,
+                            )
+                          }}
+                          onStep={() => {}}
+                          renderItem={(track, isFirst, isLast, isDragging) => (
+                            <ReorderRail
+                              id={track.id}
+                              mode={moveMethod}
+                              isFirst={isFirst}
+                              isLast={isLast}
+                              isActive={active}
+                              onMove={(dir) => {
+                                requestReorderStep(
+                                  playlist.id,
+                                  groupName,
+                                  track.id,
+                                  dir,
+                                )
+                              }}
+                            >
+                              {() => (
+                                <TrackCard
+                                  track={track}
+                                  type="playlist"
+                                  isDragging={isDragging}
+                                />
+                              )}
+                            </ReorderRail>
+                          )}
+                          renderGhost={(track) => (
+                            <MiniCardDragGhost
+                              title={track.title}
+                              duration={track.duration}
+                            />
+                          )}
+                        />{' '}
                       </div>
-                      <ReorderableList
-
-                        items={group}
-                        orderedIds={group.map(t => t.id)}
-                        mode={moveMethod}
-                        onReorder={(ids) => {
-                          requestReorder(playlist.id, playlist.settings.mode, groupName, ids)
-                        }}
-                        onStep={() => { }}
-                        renderItem={(track, isFirst, isLast, isDragging) => (
-                          <ReorderRail id={track.id} mode={moveMethod} isFirst={isFirst} isLast={isLast} isActive={active} onMove={(dir) => {
-                            requestReorderStep(playlist.id, groupName, track.id, dir)
-                          }}>
-                            {() => <TrackCard track={track} type="playlist" isDragging={isDragging} />}
-                          </ReorderRail>
-                        )}
-                        renderGhost={(track) => <MiniCardDragGhost title={track.title} duration={track.duration} />}
-                      /> </div> : <></>
+                    ) : (
+                      <></>
+                    )
                   })}
                 </div>
-
               ) : (
                 <p className="text-sm text-text-secondary py-8 text-center w-full">
                   {t('playlist.queue.noMatch')}
@@ -471,43 +536,87 @@ function PlaylistView() {
           >
             {playlist.track_data.length > 0 ? (
               visibleTracks.length > 0 ? (
-
                 <div className="flex flex-col gap-4 w-full ">
                   {visibleTracks.map((group, i) => {
-                    const groupName = i === 0 ? "vip" : i === 1 ? "regular" : "background"
-                    const settings = i === 0 ? playlist.settings.mode_settings[playlist.settings.mode].sort_settings_vip
-                      : i === 1 ? playlist.settings.mode_settings[playlist.settings.mode].sort_settings_regular
-                        : playlist.settings.mode_settings[playlist.settings.mode].sort_settings_background
-                    const active = settings.order_mode === "free" || groupName === "background"
+                    const groupName =
+                      i === 0 ? 'vip' : i === 1 ? 'regular' : 'background'
+                    const settings =
+                      i === 0
+                        ? playlist.settings.mode_settings[
+                            playlist.settings.mode
+                          ].sort_settings_vip
+                        : i === 1
+                          ? playlist.settings.mode_settings[
+                              playlist.settings.mode
+                            ].sort_settings_regular
+                          : playlist.settings.mode_settings[
+                              playlist.settings.mode
+                            ].sort_settings_background
+                    const active =
+                      settings.order_mode === 'free' ||
+                      groupName === 'background'
 
-                    return group.length ? <div>
-                      <div className={`flex flex-col gap-4 relative w-full h-4 ${groupName === "background" ? "block" : "hidden"}`}>
-                        <div className="absolute left-0 right-0 h-px bg-text-secondary" />
-                        <div className="absolute left-1/2 transform -translate-x-1/2 text-text-secondary font-mono -translate-y-1/2 bg-level-1 px-4 rounded-full">
-                          {groupName}
+                    return group.length ? (
+                      <div>
+                        <div
+                          className={`flex flex-col gap-4 relative w-full h-4 ${groupName === 'background' ? 'block' : 'hidden'}`}
+                        >
+                          <div className="absolute left-0 right-0 h-px bg-text-secondary" />
+                          <div className="absolute left-1/2 transform -translate-x-1/2 text-text-secondary font-mono -translate-y-1/2 bg-level-1 px-4 rounded-full">
+                            {groupName}
+                          </div>
                         </div>
+                        <ReorderableList
+                          items={group}
+                          orderedIds={group.map((t) => t.id)} // временно, пока free-режим не подключён к mode_settings
+                          mode={moveMethod}
+                          onReorder={(ids) => {
+                            requestReorder(
+                              playlist.id,
+                              playlist.settings.mode,
+                              groupName,
+                              ids,
+                            )
+                          }} // заглушка на тест
+                          onStep={() => {}}
+                          renderItem={(track, isFirst, isLast, isDragging) => (
+                            <ReorderRail
+                              id={track.id}
+                              mode={moveMethod}
+                              isFirst={isFirst}
+                              isLast={isLast}
+                              isActive={active}
+                              onMove={(dir) => {
+                                requestReorderStep(
+                                  playlist.id,
+                                  groupName,
+                                  track.id,
+                                  dir,
+                                )
+                              }}
+                            >
+                              {() => (
+                                <OrderMiniCard
+                                  track={track}
+                                  btns_type="playlist"
+                                  isDragging={isDragging}
+                                />
+                              )}
+                            </ReorderRail>
+                          )}
+                          renderGhost={(track) => (
+                            <MiniCardDragGhost
+                              title={track.title}
+                              duration={track.duration}
+                            />
+                          )}
+                        />{' '}
                       </div>
-                      <ReorderableList
-
-                        items={group}
-                        orderedIds={group.map(t => t.id)} // временно, пока free-режим не подключён к mode_settings
-                        mode={moveMethod}
-                        onReorder={(ids) => {
-                          requestReorder(playlist.id, playlist.settings.mode, groupName, ids)
-                        }} // заглушка на тест
-                        onStep={() => { }}
-                        renderItem={(track, isFirst, isLast, isDragging) => (
-                          <ReorderRail id={track.id} mode={moveMethod} isFirst={isFirst} isLast={isLast} isActive={active} onMove={(dir) => {
-                            requestReorderStep(playlist.id, groupName, track.id, dir)
-                          }}>
-                            {() => <OrderMiniCard track={track} btns_type="playlist" isDragging={isDragging} />}
-                          </ReorderRail>
-                        )}
-                        renderGhost={(track) => <MiniCardDragGhost title={track.title} duration={track.duration} />}
-                      /> </div> : <></>
+                    ) : (
+                      <></>
+                    )
                   })}
                 </div>
-
               ) : (
                 <p className="text-sm text-text-secondary py-8 text-center w-full">
                   {t('playlist.queue.noMatch')}
