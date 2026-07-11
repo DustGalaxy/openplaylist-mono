@@ -1,4 +1,4 @@
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { Trans, useTranslation } from 'react-i18next'
 import {
   ListMusic,
@@ -10,7 +10,6 @@ import {
   Users,
   Zap,
 } from 'lucide-react'
-import Dashboard from '@/components/icons/icon-dashboard'
 import Btn from '@/components/ui/my-btn'
 import SearchPlaylist from '@/features/public-playlist/components/search-playlist'
 import { gradientTextClass, panelClass } from '@/features/landing/styles'
@@ -51,7 +50,7 @@ function FeatureCard({
         className="
           mb-4 inline-flex h-11 w-11 items-center justify-center rounded-(--rounded-std)
           bg-level-1 border border-level-3/40 text-level-3
-          group-hover:text-transparent group-hover:bg-gradient-to-br group-hover:from-[var(--color-accent-2)] group-hover:via-[var(--color-accent-3)] group-hover:to-[var(--color-accent-1)]
+          group-hover:text-transparent group-hover:bg-linear-to-br group-hover:from-(--color-accent-2) group-hover:via-(--color-accent-3) group-hover:to-(--color-accent-1)
           transition-colors
         "
       >
@@ -77,8 +76,8 @@ export default function HomePage() {
           className="pointer-events-none absolute inset-0 opacity-30"
           aria-hidden
         >
-          <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-[var(--color-accent-3)] blur-[120px]" />
-          <div className="absolute bottom-0 right-1/4 h-48 w-48 rounded-full bg-[var(--color-accent-2)] blur-[100px]" />
+          <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-(--color-accent-3) blur-[120px]" />
+          <div className="absolute bottom-0 right-1/4 h-48 w-48 rounded-full bg-(--color-accent-2) blur-[100px]" />
         </div>
 
         <div className="relative mx-auto max-w-5xl">
@@ -87,15 +86,15 @@ export default function HomePage() {
               <p
                 className={`inline-flex items-center gap-2 text-sm font-medium mb-4 ${gradientTextClass}`}
               >
-                <Sparkles className="h-4 w-4 text-[var(--color-accent-2)]" />
+                <Sparkles className="h-4 w-4 text-(--color-accent-2)" />
                 {t('landing.eyebrow')}
               </p>
 
               <h1
                 className="
                   text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.05] mb-6
-                  text-transparent bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)]
-                  bg-clip-text bg-[length:200%_auto] animate-bg-move-w-shadow
+                  text-transparent bg-linear-to-r from-(--color-accent-2) via-(--color-accent-3) to-(--color-accent-1)
+                  bg-clip-text bg-size-[200%_auto] animate-bg-move-w-shadow
                 "
               >
                 {t('landing.title')}
@@ -122,13 +121,13 @@ export default function HomePage() {
                         {t('landing.goToPlaylists')}
                       </div>
                     }
-                    className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-[220px]"
+                    className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-55"
                     onClick={() => navigate({ to: '/dashboard' })}
                   />
                 ) : (
                   <Btn
                     text={t('landing.loginAndStart')}
-                    className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-[200px]"
+                    className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-50"
                     onClick={() => navigate({ to: '/login' })}
                   />
                 )}
@@ -139,7 +138,7 @@ export default function HomePage() {
                       {t('landing.findPlaylist')}
                     </div>
                   }
-                  className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-[200px]"
+                  className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-50"
                   onClick={() => navigate({ to: '/view' })}
                 />
               </div>

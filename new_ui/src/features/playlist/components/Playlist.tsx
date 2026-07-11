@@ -53,6 +53,7 @@ import { ReorderableList } from '@/components/dnd/ReorderableList'
 import { ReorderRail } from '@/components/dnd/ReorderRail'
 import { MiniCardDragGhost } from '@/components/dnd/DragGhost'
 import { splitQueue } from '@/stores/musicStore/helpers'
+import { Slider } from '@/components/ui/slider'
 
 export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
   return (
@@ -81,6 +82,7 @@ function PlaylistView() {
   const [queueSearch, setQueueSearch] = React.useState('')
 
   const isPaused = playlist.is_paused ?? true
+  const [volume, setVolume] = React.useState<number>(0.5)
   const {
     playNext,
     requestPlSettings,
@@ -140,20 +142,34 @@ function PlaylistView() {
           className={`flex flex-col gap-4  px-3 pt-3 pb-4 ${panelClass} w-full`}
         >
           <div className="grid grid-cols-2 gap-2 sm:gap-3  z-1">
-            <YoutubePlayer
-              playOnReady={true}
-              pause={isPaused}
-              setIsPaused={(val: boolean, pos: number) => {
-                requestPlaybackState(
-                  playlist.id,
-                  val,
-                  pos,
-                  playlist.now_playing?.id,
-                )
-              }}
-              nowPlay={nowPlaying}
-              className={`sm:row-span-2 ${showConsole || showContentSettings ? '' : 'col-span-2'} flex items-center justify-center`}
-            />
+            <div>
+              {' '}
+              <YoutubePlayer
+                playOnReady={true}
+                volume={volume}
+                pause={isPaused}
+                setIsPaused={(val: boolean, pos: number) => {
+                  requestPlaybackState(
+                    playlist.id,
+                    val,
+                    pos,
+                    playlist.now_playing?.id,
+                  )
+                }}
+                nowPlay={nowPlaying}
+                className={`sm:row-span-2 ${showConsole || showContentSettings ? '' : 'col-span-2'} flex items-center justify-center`}
+              />
+              <Slider
+                defaultValue={[0.75]}
+                onValueChange={(value) => {
+                  setVolume(value[0])
+                }}
+                max={1}
+                step={0.01}
+                className="mx-auto w-full"
+              />
+            </div>
+
             {showConsole && <LogPanel />}
 
             {showContentSettings && (

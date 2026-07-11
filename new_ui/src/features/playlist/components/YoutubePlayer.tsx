@@ -10,6 +10,7 @@ import { useThrottle } from '@/hooks/useThrottle'
 type YoutubePlayerProps = {
   nowPlay: string | undefined
   pause: boolean
+  volume: number
   setIsPaused: (val: boolean, pos: number) => void
   playOnReady?: boolean
   className?: string
@@ -18,14 +19,19 @@ type YoutubePlayerProps = {
 const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
   nowPlay,
   pause,
+  volume,
   setIsPaused,
   playOnReady = true,
   className = '',
 }) => {
   const playlist = usePlaylist()
-  const { height, width } = useWindowDimensions()
-  const { playNext, setGetPlayerPosition, clearPausedBackground, requestSeekState } =
-    useMusicStore()
+  const { width } = useWindowDimensions()
+  const {
+    playNext,
+    setGetPlayerPosition,
+    clearPausedBackground,
+    requestSeekState,
+  } = useMusicStore()
 
   const playerRef = useRef<HTMLVideoElement | null>(null)
   const isReadyRef = useRef(false)
@@ -53,19 +59,20 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
         position: seconds,
         updated_at: new Date().toISOString(),
       })
-      .catch(() => { })
+      .catch(() => {})
   }
 
-  const isTabHiddenRef = useRef(false);
+  const isTabHiddenRef = useRef(false)
 
   useEffect(() => {
     const handleVisibilityChange = () => {
-      isTabHiddenRef.current = document.hidden;
-    };
+      isTabHiddenRef.current = document.hidden
+    }
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () =>
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
 
   useEffect(() => {
     setGetPlayerPosition(() => playerRef.current?.currentTime ?? 0)
@@ -111,8 +118,8 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
 
   const handlePause = () => {
     if (isTabHiddenRef.current) {
-      console.log('Пауза проигнорирована: вкладка в фоне');
-      return;
+      console.log('Пауза проигнорирована: вкладка в фоне')
+      return
     }
     if (pause || !playerRef.current?.currentTime) return
     setIsPaused(true, playerRef.current.currentTime)
@@ -149,7 +156,8 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
   const handleSeek = useThrottle(runSeek, 1000)
 
   const handleReady = async () => {
-    if (isReadyRef.current || !nowPlay || !playOnReady || !playerRef.current) return
+    if (isReadyRef.current || !nowPlay || !playOnReady || !playerRef.current)
+      return
     isReadyRef.current = true
 
     const paused = playlist.paused_background
@@ -164,7 +172,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
         if (saved && saved.track_id === playlist.now_playing.id) {
           pos = saved.position
         }
-      } catch { }
+      } catch {}
     }
 
     playerRef.current.currentTime = pos
@@ -175,7 +183,9 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
     isReadyRef.current = false
   }, [nowPlay])
 
-  const videoUrl = nowPlay ? `https://www.youtube.com/watch?v=${nowPlay}` : undefined
+  const videoUrl = nowPlay
+    ? `https://www.youtube.com/watch?v=${nowPlay}`
+    : undefined
   const playerStyle = {
     width: width > 650 ? '640px' : '320px',
     height: width > 650 ? '360px' : '180px',
@@ -190,14 +200,12 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
         src={videoUrl}
         playing={!pause}
         controls={true}
-
+        volume={volume}
         config={{
           youtube: {
-            color: 'white'
-
-          }
+            color: 'white',
+          },
         }}
-
         onSeeked={handleSeek}
         onReady={handleReady}
         onPlay={handlePlay}
