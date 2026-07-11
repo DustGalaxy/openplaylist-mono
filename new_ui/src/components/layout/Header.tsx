@@ -6,6 +6,7 @@ import MenuDropdown from './menu-dropdown'
 import { useAuthStore } from '@/stores/authStore'
 import { useState } from 'react'
 import { Search, Turntable } from 'lucide-react'
+import DDNotificationList from '@/features/notifications/components/DDNotificationList'
 
 export default function Header() {
   const { t, i18n } = useTranslation()
@@ -87,7 +88,8 @@ export default function Header() {
               </div>
             ) : (
               <div className="flex gap-2 h-8.25 items-center">
-                <div className="px-2   flex items-center">
+                <div className="px-2 gap-4  flex items-center">
+                  <DDNotificationList />
                   <MenuDropdown />
                 </div>
               </div>

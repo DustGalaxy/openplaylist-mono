@@ -5,6 +5,14 @@ from typing import Literal
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
+class NotificationType(StrEnum):
+    """Типы уведомлений для контроля валидности на уровне приложения."""
+
+    SYSTEM = "system"
+    LIKE = "like"
+    NEW_FOLLOWER = "new_follower"
+
+
 class PlaylistLogsEventTypes(StrEnum):
     ADD_TRACK = "add_track"
     ADD_TRACK_ERROR = "add_track_error"
