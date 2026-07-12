@@ -283,14 +283,13 @@ export function IntegrationsTab({
                   </p>
                 </div>
                 <Btn
-                  text={
-                    isConnected
-                      ? t('settings.integrations.addAnother')
-                      : t('settings.integrations.connectAccount')
-                  }
                   onClick={() => handleConnectPlatform(platform)}
                   className="shrink-0 px-3 py-2 text-xs font-mono"
-                />
+                >
+                  {isConnected
+                    ? t('settings.integrations.addAnother')
+                    : t('settings.integrations.connectAccount')}
+                </Btn>
               </div>
             )
           })}
@@ -439,15 +438,14 @@ function IntegrationCard({
               </>
             ) : (
               <Btn
-                text={
-                  isBotLoading
-                    ? t('settings.integrations.connecting')
-                    : t('settings.integrations.connectBot')
-                }
                 onClick={onConnectBot}
                 disabled={isBotLoading}
                 className="px-3 py-2 text-xs font-mono"
-              />
+              >
+                {isBotLoading
+                  ? t('settings.integrations.connecting')
+                  : t('settings.integrations.connectBot')}
+              </Btn>
             )}
             <DisconnectButton
               loading={isDeleteLoading}

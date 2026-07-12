@@ -1,16 +1,15 @@
 import { cn } from '@/lib/utils'
 
 interface BtnProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  text: React.ReactNode
   isActive?: boolean // Если true — кнопка визуально зафиксирована в нажатом состоянии
 }
 
 export default function Btn({
-  text,
   onClick,
   className,
   disabled = false,
   isActive,
+  children,
   ...props
 }: BtnProps) {
   const isToggleMode = isActive !== undefined
@@ -69,7 +68,7 @@ export default function Btn({
       )}
       {...props}
     >
-      {text}
+      {children}
     </button>
   )
 }

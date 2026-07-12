@@ -416,10 +416,11 @@ function SettingsSection({
       ) : null}
 
       <Btn
-        text={isSaving ? t('settings.account.saving') : section.submitText}
         disabled={isSaving}
         className="mt-6 w-full px-4 py-3 text-base font-semibold bg-level-1 text-text-main"
-      />
+      >
+        {isSaving ? t('settings.account.saving') : section.submitText}
+      </Btn>
     </form>
   )
 }

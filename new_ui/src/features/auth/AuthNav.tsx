@@ -20,11 +20,11 @@ export function AuthNav() {
         </div>
 
         <Link to="/settings">
-          <Btn text="Settings" className="px-4" />
+          <Btn className="px-4">Settings</Btn>
         </Link>
 
         <Link to="/logout">
-          <Btn text="Logout" className="px-4" />
+          <Btn className="px-4">Logout</Btn>
         </Link>
       </div>
     )
@@ -33,11 +33,11 @@ export function AuthNav() {
   return (
     <div className="flex items-center gap-3">
       <Link to="/login">
-        <Btn text="Login" className="px-4" />
+        <Btn className="px-4">Login</Btn>
       </Link>
 
       <Link to="/register">
-        <Btn text="Sign Up" className="px-4" />
+        <Btn className="px-4">Sign Up</Btn>
       </Link>
     </div>
   )

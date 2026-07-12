@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
+import type { Integration, UserProfile } from '@/types/user'
 import { getUserIntegrations } from '@/api/api-user'
 import { useAuthStore } from '@/stores/authStore'
 import { UserSettingsPage } from '@/features/user-settings'
-import { useTranslation } from 'react-i18next'
 import Btn from '@/components/ui/my-btn'
 import {
   gradientTextClass,
@@ -10,7 +11,6 @@ import {
   pageWrapClass,
   panelClass,
 } from '@/features/landing/styles'
-import type { Integration, UserProfile } from '@/types/user'
 
 export const Route = createFileRoute('/settings')({
   component: RouteComponent,
@@ -55,21 +55,22 @@ function RouteComponent() {
             className={`flex flex-col gap-6 text-text-main p-6 sm:p-8 ${panelClass}`}
           >
             <header>
-              <p
-                className={`text-sm font-medium mb-2 ${gradientTextClass}`}
-              >
+              <p className={`text-sm font-medium mb-2 ${gradientTextClass}`}>
                 {t('settings.eyebrow')}
               </p>
               <h1 className="text-2xl sm:text-3xl font-bold">
                 {t('settings.unauth.title')}
               </h1>
             </header>
-            <p className="text-text-secondary">{t('settings.unauth.message')}</p>
+            <p className="text-text-secondary">
+              {t('settings.unauth.message')}
+            </p>
             <Btn
-              text={t('settings.unauth.cta')}
               onClick={() => navigate({ to: '/login' })}
               className="px-6 h-12 text-base font-bold bg-level-2 text-text-main w-full sm:w-auto"
-            />
+            >
+              {t('settings.unauth.cta')}
+            </Btn>
           </div>
         </div>
       </div>

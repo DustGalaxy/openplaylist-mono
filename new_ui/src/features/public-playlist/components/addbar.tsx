@@ -56,15 +56,6 @@ export default function AddBar({ playlistId, ownerId }: AddBarProps) {
   return (
     <div className="flex gap-2 items-center w-full max-w-md">
       <Btn
-        text={
-          isLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin text-text-main" />
-          ) : (
-            <Plus
-              className={`w-4 h-4 text-text-main transition-transform duration-300 ${isVisible && !youtubeUrl ? 'rotate-45' : ''}`}
-            />
-          )
-        }
         className="px-2.5 h-9 bg-level-2 border border-level-3/20 hover:bg-level-3/10 shadow-sm shrink-0 flex items-center justify-center rounded-(--rounded-std)"
         disabled={isLoading}
         onClick={handleButtonClick}
@@ -73,7 +64,15 @@ export default function AddBar({ playlistId, ownerId }: AddBarProps) {
             ? t('playlist.addbar.submit')
             : t('playlist.addbar.toggle')
         }
-      />
+      >
+        {isLoading ? (
+          <Loader2 className="w-4 h-4 animate-spin text-text-main" />
+        ) : (
+          <Plus
+            className={`w-4 h-4 text-text-main transition-transform duration-300 ${isVisible && !youtubeUrl ? 'rotate-45' : ''}`}
+          />
+        )}
+      </Btn>
 
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out w-full ${

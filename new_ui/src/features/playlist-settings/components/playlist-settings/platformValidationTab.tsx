@@ -1,12 +1,12 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import type { ContentSettings, Platform } from '@/types/playlist'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import MyBtn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
 import UpDownBtn from '@/components/ui/funny-btn'
 import { DialogDescription } from '@/components/ui/dialog'
-import type { ContentSettings, Platform } from '@/types/playlist'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import { updateContent } from '@/api/settings/content'
 
@@ -55,14 +55,14 @@ const PlatformSettingsEditor = React.memo(
     if (!rules) {
       return (
         <TabsContent value={platform}>
-          <Label className="text-lg">{platformKey} {t('playlistSettings.validation.tabtitle')}</Label>
+          <Label className="text-lg">
+            {platformKey} {t('playlistSettings.validation.tabtitle')}
+          </Label>
           <Label>{t('playlistSettings.validation.notInitialized')}</Label>
           <div className="h-3" />
-          <MyBtn
-            text={t('playlistSettings.validation.notInitialized')}
-            onClick={() => initSection(platform)}
-            className="px-2"
-          />
+          <MyBtn onClick={() => initSection(platform)} className="px-2">
+            {t('playlistSettings.validation.notInitialized')}
+          </MyBtn>
         </TabsContent>
       )
     }
@@ -77,10 +77,15 @@ const PlatformSettingsEditor = React.memo(
 
     return (
       <TabsContent key={platformKey} value={platform}>
-        <Label className=" text-lg">{platformKey === "General" ? t(`common.general2`) : platformKey} {t('playlistSettings.validation.tabtitle')}</Label>
+        <Label className=" text-lg">
+          {platformKey === 'General' ? t(`common.general2`) : platformKey}{' '}
+          {t('playlistSettings.validation.tabtitle')}
+        </Label>
         <p className="h-3"></p>
         <div className="flex justify-between gap-2 items-center">
-          <Label className=" text-lg">{t('playlistSettings.validation.minViews')}</Label>
+          <Label className=" text-lg">
+            {t('playlistSettings.validation.minViews')}
+          </Label>
           <div className="flex rounded-(--rounded-std) items-center gap-0 overflow-hidden">
             <Input
               type="number"
@@ -102,7 +107,9 @@ const PlatformSettingsEditor = React.memo(
           </div>
         </div>
         <div className="flex justify-between gap-2 items-center">
-          <Label className=" text-lg">{t('playlistSettings.validation.minLikes')}</Label>
+          <Label className=" text-lg">
+            {t('playlistSettings.validation.minLikes')}
+          </Label>
           <div className="flex rounded-(--rounded-std) items-center gap-0 overflow-hidden">
             <Input
               type="number"
@@ -127,7 +134,9 @@ const PlatformSettingsEditor = React.memo(
           {t('playlistSettings.validation.minViewsDesc')}
         </DialogDescription>
         <div className="flex justify-between gap-2 items-center">
-          <Label className=" text-lg">{t('playlistSettings.validation.maxDuration')}</Label>
+          <Label className=" text-lg">
+            {t('playlistSettings.validation.maxDuration')}
+          </Label>
           <div className="flex rounded-(--rounded-std) items-center gap-0 overflow-hidden">
             <Input
               type="number"
@@ -154,7 +163,9 @@ const PlatformSettingsEditor = React.memo(
         </div>
 
         <div className="flex justify-between gap-2 items-center">
-          <Label className=" text-lg">{t('playlistSettings.validation.trackCooldown')}</Label>
+          <Label className=" text-lg">
+            {t('playlistSettings.validation.trackCooldown')}
+          </Label>
           <div className="flex rounded-(--rounded-std) items-center gap-0 overflow-hidden">
             <Input
               type="number"
@@ -182,11 +193,12 @@ const PlatformSettingsEditor = React.memo(
 
         <DialogDescription>
           {t('playlistSettings.validation.trackCooldownDesc')}
-          
         </DialogDescription>
 
         <div className="flex justify-between gap-2 items-center">
-          <Label className=" text-lg">{t('playlistSettings.validation.userCooldown')}</Label>
+          <Label className=" text-lg">
+            {t('playlistSettings.validation.userCooldown')}
+          </Label>
           <div className="flex rounded-(--rounded-std) items-center gap-0 overflow-hidden">
             <Input
               type="number"

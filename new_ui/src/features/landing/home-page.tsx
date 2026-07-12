@@ -115,32 +115,32 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 {isAuthenticated ? (
                   <Btn
-                    text={
-                      <div className="flex items-center gap-2">
-                        <Turntable />
-                        {t('landing.goToPlaylists')}
-                      </div>
-                    }
                     className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-55"
                     onClick={() => navigate({ to: '/dashboard' })}
-                  />
+                  >
+                    <div className="flex items-center gap-2">
+                      <Turntable />
+                      {t('landing.goToPlaylists')}
+                    </div>
+                  </Btn>
                 ) : (
                   <Btn
-                    text={t('landing.loginAndStart')}
                     className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-50"
                     onClick={() => navigate({ to: '/login' })}
-                  />
+                  >
+                    {t('landing.loginAndStart')}
+                  </Btn>
                 )}
                 <Btn
-                  text={
-                    <div className="flex items-center gap-2">
-                      <Search className="size-8" />
-                      {t('landing.findPlaylist')}
-                    </div>
-                  }
                   className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-50"
                   onClick={() => navigate({ to: '/view' })}
-                />
+                >
+                  {' '}
+                  <div className="flex items-center gap-2">
+                    <Search className="size-8" />
+                    {t('landing.findPlaylist')}
+                  </div>
+                </Btn>
               </div>
             </div>
 

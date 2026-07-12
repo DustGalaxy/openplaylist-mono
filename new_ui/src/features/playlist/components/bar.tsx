@@ -79,7 +79,11 @@ export function PlaylistQueueInput({
     if (mode !== 'add' || !value.trim()) return
     const loadingToast = toast.loading(t('common.toast.loading'))
     try {
-      const result = await requestAddTrack(playlist.id, value.trim(), playlist.owner_id)
+      const result = await requestAddTrack(
+        playlist.id,
+        value.trim(),
+        playlist.owner_id,
+      )
 
       toast.dismiss(loadingToast)
 
@@ -148,11 +152,12 @@ export function PlaylistQueueInput({
 
       {mode === 'add' && (
         <Btn
-          text={t('playlist.queue.submit')}
           disabled={!value.trim()}
           type="submit"
           className="h-11 shrink-0 px-2 sm:px-4 bg-level-2 text-xs sm:text-sm font-semibold text-text-main "
-        />
+        >
+          {t('playlist.queue.submit')}
+        </Btn>
       )}
     </form>
   )

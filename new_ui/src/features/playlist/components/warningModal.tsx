@@ -228,12 +228,18 @@ export default function WarningModal({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Btn text={<TriangleAlert />} className="px-1 bg-level-2" />
+        <Btn className="px-1 bg-level-2">
+          <TriangleAlert />
+        </Btn>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] bg-level-1 border-level-3 text-text-main overflow-scroll">
         <DialogHeader>
-          <DialogTitle className="text-xl">{t('playlist.report.title')}</DialogTitle>
-          <DialogDescription>{t('playlist.report.description')}</DialogDescription>
+          <DialogTitle className="text-xl">
+            {t('playlist.report.title')}
+          </DialogTitle>
+          <DialogDescription>
+            {t('playlist.report.description')}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-2">
@@ -277,21 +283,21 @@ export default function WarningModal({
         <DialogFooter>
           <div className="flex justify-between w-full">
             <Btn
-              text={
-                submitting
-                  ? t('playlist.report.submitting')
-                  : t('playlist.report.submit')
-              }
               className="w-full bg-level-2 sm:w-auto px-2"
               disabled={submitting}
               onClick={() => void handleSubmit()}
-            />
+            >
+              {submitting
+                ? t('playlist.report.submitting')
+                : t('playlist.report.submit')}
+            </Btn>
             <Btn
-              text={t('playlist.report.cancel')}
               className="bg-level-2 px-2"
               disabled={submitting}
               onClick={() => handleOpenChange(false)}
-            />
+            >
+              {t('playlist.report.cancel')}
+            </Btn>
           </div>
         </DialogFooter>
       </DialogContent>

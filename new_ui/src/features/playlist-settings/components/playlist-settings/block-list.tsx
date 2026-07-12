@@ -14,7 +14,8 @@ const BLOCK_ITEM_ROW =
 const BLOCK_ITEM_BADGE =
   'text-xs px-2 h-7 rounded-(--rounded-std) whitespace-nowrap flex items-center gap-1 shrink-0'
 const BLOCK_ITEM_CONTENT = 'min-w-0 flex flex-col justify-center leading-tight'
-const BLOCK_ITEM_UNBLOCK_BTN = 'px-2 bg-level-2 min-w-[44px] shrink-0 self-center'
+const BLOCK_ITEM_UNBLOCK_BTN =
+  'px-2 bg-level-2 min-w-[44px] shrink-0 self-center'
 
 const UserBlockItem = ({
   item,
@@ -65,7 +66,6 @@ const UserBlockItem = ({
           await unBlockCallback(item)
         }}
         className={BLOCK_ITEM_UNBLOCK_BTN}
-        text={<Trash width={20} height={20} />}
         props={{
           title: t('playlistSettings.block.unblockUser'),
           'aria-label': t('playlistSettings.block.unblockUserAria', {
@@ -73,7 +73,9 @@ const UserBlockItem = ({
             value: item.trigger_value,
           }),
         }}
-      />
+      >
+        <Trash className="size-5" />
+      </Btn>
     </div>
   )
 }
@@ -117,7 +119,9 @@ const TrackBlockItem = ({
         text={<Trash width={20} height={20} />}
         props={{
           title: t('playlistSettings.block.unblockTrack'),
-          'aria-label': t('playlistSettings.block.unblockTrackAria', { id: item }),
+          'aria-label': t('playlistSettings.block.unblockTrackAria', {
+            id: item,
+          }),
         }}
       />
     </div>

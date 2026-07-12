@@ -102,17 +102,19 @@ export function BotSettingsModal({
 
         <DialogFooter className="px-6 pb-5 pt-4 border-t w-full border-white/5 flex flex-row justify-between gap-2">
           <Btn
-            text={saving ? '...' : t('botSettings.save')}
             onClick={handleSave}
             disabled={saving}
             className="bg-level-2 font-mono text-base px-2"
-          ></Btn>
+          >
+            {saving ? '...' : t('botSettings.save')}
+          </Btn>
           <Btn
-            text={t('botSettings.cancel')}
             onClick={() => setOpen(false)}
             disabled={saving}
             className="bg-level-2 font-mono text-base px-2"
-          ></Btn>
+          >
+            {t('botSettings.cancel')}
+          </Btn>
         </DialogFooter>
       </DialogContent>
     </Dialog>

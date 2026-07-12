@@ -1,7 +1,19 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ListMusic, Pause, Play, Radio, Repeat, Repeat1, RepeatOff, Shuffle, SkipBack, SkipForward } from 'lucide-react'
+import {
+  ListMusic,
+  Pause,
+  Play,
+  Radio,
+  RadioTower,
+  Repeat,
+  Repeat1,
+  RepeatOff,
+  Shuffle,
+  SkipBack,
+  SkipForward,
+} from 'lucide-react'
 
 import type { ClientPlaylist, InputPlaylist, Track } from '@/types/playlist'
 import ViewInfoBar from '@/features/public-playlist/components/ViewInfoBar'
@@ -9,7 +21,7 @@ import { fetchPlaylistPublic } from '@/api/api-playlist'
 import { useViewerPlayback } from '@/features/public-playlist/hooks/useViewerPlayback'
 import ViewerPlayer from '@/features/public-playlist/components/ViewerPlayer'
 import ViewerQueuePanel from '@/features/public-playlist/components/ViewerQueuePanel'
-import { RadioTower } from 'lucide-react'
+
 import SearchPlaylist from '@/features/public-playlist/components/search-playlist'
 import { getPlsUpdsSocket } from '@/api/io-sockets'
 import {
@@ -101,7 +113,9 @@ function RouteComponent() {
   const viewer = useViewerPlayback(playlistState)
   useEffect(() => {
     if (playlist) {
-      playlist.track_data = playlist.track_data.map((track) => { return { ...track, priority: computePriority(track, playlist.settings) } })
+      playlist.track_data = playlist.track_data.map((track) => {
+        return { ...track, priority: computePriority(track, playlist.settings) }
+      })
     }
     setPlaylistState(playlist)
   }, [playlist])
@@ -328,45 +342,92 @@ function RouteComponent() {
 
                   <div className="flex flex-wrap items-center gap-2">
                     <Btn
-                      text={viewer.repeatMode === 'all' ? <Repeat /> : viewer.repeatMode === 'once' ? <Repeat1 /> : <RepeatOff />}
-                      title={t(`playlist.tooltip.repeatMode.${viewer.repeatMode}`)}
+                      title={t(
+                        `playlist.tooltip.repeatMode.${viewer.repeatMode}`,
+                      )}
                       className="px-2 bg-level-2"
                       disabled={viewer.mode === 'synced'}
                       onClick={() =>
-                        viewer.setRepeatMode(viewer.repeatMode === 'all' ? 'once' : viewer.repeatMode === 'once' ? 'none' : 'all')
+                        viewer.setRepeatMode(
+                          viewer.repeatMode === 'all'
+                            ? 'once'
+                            : viewer.repeatMode === 'once'
+                              ? 'none'
+                              : 'all',
+                        )
                       }
-                    />
-                    <Btn text={<SkipBack />} title={t('playlist.tooltip.prev')} className="px-2 bg-level-2" disabled={viewer.mode === 'synced'} onClick={viewer.prev} />
+                    >
+                      {viewer.repeatMode === 'all' ? (
+                        <Repeat />
+                      ) : viewer.repeatMode === 'once' ? (
+                        <Repeat1 />
+                      ) : (
+                        <RepeatOff />
+                      )}
+                    </Btn>
                     <Btn
-                      text={viewer.isPlaying ? <Pause /> : <Play />}
-                      title={t(`playlist.tooltip.${viewer.isPlaying ? 'pause' : 'play'}`)}
+                      title={t('playlist.tooltip.prev')}
+                      className="px-2 bg-level-2"
+                      disabled={viewer.mode === 'synced'}
+                      onClick={viewer.prev}
+                    >
+                      <SkipBack />
+                    </Btn>
+                    <Btn
+                      title={t(
+                        `playlist.tooltip.${viewer.isPlaying ? 'pause' : 'play'}`,
+                      )}
                       className="px-2 bg-level-2"
                       disabled={viewer.mode === 'synced'}
                       onClick={viewer.togglePlay}
-                    />
-                    <Btn text={<SkipForward />} title={t('playlist.tooltip.next')} className="px-2 bg-level-2" disabled={viewer.mode === 'synced'} onClick={viewer.next} />
+                    >
+                      {viewer.isPlaying ? <Pause /> : <Play />}
+                    </Btn>
                     <Btn
-                      text={<Shuffle />}
+                      title={t('playlist.tooltip.next')}
+                      className="px-2 bg-level-2"
+                      disabled={viewer.mode === 'synced'}
+                      onClick={viewer.next}
+                    >
+                      <SkipForward />
+                    </Btn>
+                    <Btn
                       title={t('playlist.tooltip.shuffle')}
                       isActive={viewer.shuffle}
                       className="px-2"
                       disabled={viewer.mode === 'synced'}
                       onClick={() => viewer.setShuffle(!viewer.shuffle)}
-                    />
+                    >
+                      <Shuffle />
+                    </Btn>
 
                     <span
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border ml-auto ${viewer.mode === 'synced' ? 'border-emerald-400/40 text-emerald-300' : 'border-white/10 text-text-secondary'
-                        }`}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border ml-auto ${
+                        viewer.mode === 'synced'
+                          ? 'border-emerald-400/40 text-emerald-300'
+                          : 'border-white/10 text-text-secondary'
+                      }`}
                     >
                       <RadioTower className="h-3.5 w-3.5" />
-                      {viewer.mode === 'synced' ? t('publicView.syncOn') : t('publicView.syncOff')}
+                      {viewer.mode === 'synced'
+                        ? t('publicView.syncOn')
+                        : t('publicView.syncOff')}
                     </span>
                     <Btn
-                      text={viewer.syncing ? '…' : viewer.mode === 'synced' ? t('publicView.desync') : t('publicView.syncBtn')}
                       disabled={!viewer.canSync || viewer.syncing}
-                      onClick={() => (viewer.mode === 'synced' ? viewer.desync() : viewer.sync())}
+                      onClick={() =>
+                        viewer.mode === 'synced'
+                          ? viewer.desync()
+                          : viewer.sync()
+                      }
                       className="h-9 px-3 text-xs bg-level-2"
-                    />
+                    >
+                      {viewer.syncing
+                        ? '…'
+                        : viewer.mode === 'synced'
+                          ? t('publicView.desync')
+                          : t('publicView.syncBtn')}
+                    </Btn>
                   </div>
 
                   <ViewerQueuePanel
@@ -377,7 +438,6 @@ function RouteComponent() {
                     isPlaying={viewer.isPlaying}
                     onPlay={(track) => viewer.playTrack(track)}
                   />
-
                 </div>
               </PlaylistProvider>
             </div>

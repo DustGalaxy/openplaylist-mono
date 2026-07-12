@@ -26,13 +26,17 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
     <div>
       <div>
         <div className="">
-          <Label className=" text-xl">{t('playlistSettings.block.title')}</Label>
+          <Label className=" text-xl">
+            {t('playlistSettings.block.title')}
+          </Label>
           <DialogDescription>
             <p>{t('playlistSettings.block.description')}</p>
           </DialogDescription>
         </div>
         <div>
-          <Label className=" text-lg">{t('playlistSettings.block.blockUser')}</Label>
+          <Label className=" text-lg">
+            {t('playlistSettings.block.blockUser')}
+          </Label>
           <form
             className="flex items-center gap-2 mt-2 w-full"
             onSubmit={async (e) => {
@@ -66,11 +70,9 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
               }
             }}
           >
-            <Btn
-              text={<Plus className="text-text-main" width={20} height={20} />}
-              className="cursor-pointer px-2 bg-level-2"
-              type="submit"
-            ></Btn>
+            <Btn className="cursor-pointer px-2 bg-level-2" type="submit">
+              <Plus className="text-text-main size-5" />
+            </Btn>
             <Select name="trigger_type">
               <SelectTrigger className="w-fit bg-level-2 ">
                 <SelectValue
@@ -160,11 +162,9 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
               form.reset()
             }}
           >
-            <Btn
-              text={<Plus className="text-text-main" width={20} height={20} />}
-              className="cursor-pointer px-2 bg-level-2"
-              type="submit"
-            ></Btn>
+            <Btn className="cursor-pointer px-2 bg-level-2" type="submit">
+              <Plus className="text-text-main size-5" />
+            </Btn>
 
             <input
               type="text"

@@ -446,15 +446,14 @@ export function ProfileTab({ user }: ProfileTabProps) {
             </div>
             <div className="flex items-end">
               <Btn
-                text={
-                  uiState.socialLoading.add
-                    ? t('settings.profile.adding')
-                    : t('settings.profile.addLink')
-                }
                 onClick={handleAddSocialLink}
                 disabled={uiState.socialLoading.add || false}
                 className="px-4 py-3 text-base font-semibold w-full sm:w-auto"
-              />
+              >
+                {uiState.socialLoading.add
+                  ? t('settings.profile.adding')
+                  : t('settings.profile.addLink')}
+              </Btn>
             </div>
           </div>
 
@@ -528,10 +527,11 @@ export function ProfileTab({ user }: ProfileTabProps) {
         </div>
 
         <Btn
-          text={t('settings.profile.killUserProfile.btnText')}
           className="px-4 py-3 text-base font-semibold w-full sm:w-auto bg-red-500/20 border border-red-500/50 hover:bg-red-500/30 transition-colors"
           onClick={handleKillProfile}
-        />
+        >
+          {t('settings.profile.killUserProfile.btnText')}
+        </Btn>
       </div>
     </div>
   )

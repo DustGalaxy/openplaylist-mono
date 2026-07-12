@@ -139,11 +139,12 @@ export default function ViewTrackCard({
           {buttons.map((btn, index) => (
             <Btn
               key={index}
-              text={btn.icon}
               className={`${btn.className} h-8 w-8 flex items-center justify-center rounded-md shadow-sm`}
               onClick={btn.on_click}
               title={btn.tooltip}
-            />
+            >
+              {btn.icon}
+            </Btn>
           ))}
         </div>
       </div>
@@ -198,11 +199,12 @@ export default function ViewTrackCard({
                 {buttons.map((btn, index) => (
                   <Btn
                     key={index}
-                    text={btn.icon}
                     className={`${btn.className} h-7 px-2.5 flex items-center justify-center rounded-md text-[12px] shadow-sm`}
                     onClick={btn.on_click}
                     title={btn.tooltip}
-                  />
+                  >
+                    {btn.icon}
+                  </Btn>
                 ))}
               </div>
 

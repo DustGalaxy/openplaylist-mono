@@ -19,6 +19,7 @@ declare global {
     appConfig: {
       PROJECT_DOMAIN: string
       BACKEND_DOMAIN: string
+      API_URL: string
       WS_API_URL: string
       SOCKET_PATH: string
       PLST_API_URL: string
@@ -55,6 +56,7 @@ window.appConfig = {
   BACKEND_DOMAIN,
   WS_API_URL: `${BACKEND_DOMAIN}`,
   SOCKET_PATH: '/api/socket.io',
+  API_URL: `${BACKEND_DOMAIN}/api`,
   PLST_API_URL: `${BACKEND_DOMAIN}/api/playlist`,
   AUTH_API_URL: `${BACKEND_DOMAIN}/api`,
   ORDER_API_URL: `${BACKEND_DOMAIN}/api/order`,

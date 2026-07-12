@@ -15,6 +15,9 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
+import ChatRoleItem from './chatRoleItem'
+import type { DragEndEvent } from '@dnd-kit/core'
+import type { ChatPlatform, ReadChatRules } from '@/types/playlist'
 import { Label } from '@/components/ui/label'
 import { DialogDescription } from '@/components/ui/dialog'
 import MyBtn from '@/components/ui/my-btn'
@@ -28,9 +31,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import UpDownBtn from '@/components/ui/funny-btn'
-import ChatRoleItem from './chatRoleItem'
-import type { DragEndEvent } from '@dnd-kit/core'
-import type { ChatPlatform, ReadChatRules } from '@/types/playlist'
 import default_roles from '@/lib/constants/roles'
 import { createChatRole, orderedChatRoles } from '@/api/settings/chat-roles'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
@@ -162,7 +162,9 @@ const PlatformChatRolesTab = React.memo(
             <div className="flex-1">
               <Select value={selectedRole} onValueChange={setSelectedRole}>
                 <SelectTrigger className="bg-level-2 border-level-3 h-8 text-xs">
-                  <SelectValue placeholder={t('playlistSettings.chatRoles.addRole')} />
+                  <SelectValue
+                    placeholder={t('playlistSettings.chatRoles.addRole')}
+                  />
                 </SelectTrigger>
                 <SelectContent className="bg-level-2 border-level-3">
                   {unusedRoles.map((role) => (
@@ -219,11 +221,12 @@ const PlatformChatRolesTab = React.memo(
             </div>
 
             <MyBtn
-              text={t('playlistSettings.chatRoles.add')}
               onClick={handleAddRole}
               disabled={!selectedRole || isCreating}
               className="px-3 h-8 text-xs bg-level-2 border border-level-3"
-            />
+            >
+              {t('playlistSettings.chatRoles.add')}
+            </MyBtn>
           </div>
         )}
 

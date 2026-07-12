@@ -1,20 +1,20 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { Label } from '@/components/ui/label'
-import { DialogDescription } from '@/components/ui/dialog'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import PlatformDonationEditor from './platformDonationTab'
 import type {
   ClientPlaylist,
   PlaylistSettings,
   ReadDonationRules,
 } from '@/types/playlist'
+import { Label } from '@/components/ui/label'
+import { DialogDescription } from '@/components/ui/dialog'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DonationPlatform } from '@/types/playlist'
 import {
   createDonationRule,
-  initPlatformDonation,
   deleteDonationRule,
+  initPlatformDonation,
 } from '@/api/settings/donation'
 
 const TabDonation = ({

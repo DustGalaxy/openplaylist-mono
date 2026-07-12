@@ -269,10 +269,10 @@ export default function MenuDropdown() {
     <DropdownMenu>
       <DropdownMenuTrigger>
         <div className="flex items-center gap-2">
-          <div className="hidden sm:block text-lg font-medium text-text-main">
+          {/* <div className="hidden sm:block text-lg font-medium text-text-main">
             {user.username}
-          </div>
-          <div className="rounded-full w-[33px] bg-level-3">
+          </div> */}
+          <div className="rounded-full w-8.5 bg-level-3  hover:ring-level-3 hover:ring-2 transition-all">
             <img src={user.avatar_url} className="rounded-full" alt="" />
           </div>
         </div>
@@ -280,10 +280,16 @@ export default function MenuDropdown() {
 
       <DropdownMenuContent
         side="bottom"
+        align="end"
         sideOffset={5}
         className="bg-level-2 border-level-3 text-text-main"
       >
-        <DropdownMenuLabel>{user.username}</DropdownMenuLabel>
+        <DropdownMenuLabel className="flex gap-2 items-center text-text-main text-[16px]">
+          <div className="rounded-full w-8.5 bg-level-3">
+            <img src={user.avatar_url} className="rounded-full" alt="" />
+          </div>
+          {user.username}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-level-3" />
 
         {/* Language picker */}
@@ -356,7 +362,9 @@ export default function MenuDropdown() {
               <DropdownMenuSubContent className="bg-level-2 text-text-main border-0">
                 <DropdownMenuRadioGroup
                   value={settings.moveMethod}
-                  onValueChange={(value) => setSetting('moveMethod', value as MoveMethod)}
+                  onValueChange={(value) =>
+                    setSetting('moveMethod', value as MoveMethod)
+                  }
                 >
                   <DropdownMenuRadioItem
                     value="dnd"

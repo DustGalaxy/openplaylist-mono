@@ -2,12 +2,12 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import type { DonationPlatform, ReadDonationRules } from '@/types/playlist'
 import { Label } from '@/components/ui/label'
 import UpDownBtn from '@/components/ui/funny-btn'
 import { Input } from '@/components/ui/input'
 import { CurrencySelect } from '@/components/ui/currency-selector'
 import MyBtn from '@/components/ui/my-btn'
-import type { DonationPlatform, ReadDonationRules } from '@/types/playlist'
 import { updateDonation } from '@/api/settings/donation'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 

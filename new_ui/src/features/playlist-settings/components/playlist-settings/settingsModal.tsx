@@ -119,18 +119,19 @@ export default function SettingsModal() {
     <Dialog>
       <DialogTrigger asChild>
         <Btn
-          text={<Settings />}
           title={t('playlistSettings.title')}
           className="flex px-2 bg-level-2"
           onClick={() => setCountToDelete(3)}
-        />
+        >
+          <Settings />
+        </Btn>
       </DialogTrigger>
-      <DialogContent className="fixed 
+      <DialogContent
+        className="fixed 
       top-10! bottom-10! left-0! right-0! translate-x-0! translate-y-0! w-screen max-w-full px-1 sm:px-4 h-screen max-h-[90vh] 
       sm:top-[50%]! sm:left-[50%]! sm:-translate-x-1/2! sm:-translate-y-1/2! 
-      sm:max-w-6xl sm:h-[80vh] rounded-t-xl sm:rounded-xl bg-level-1 border-level-3 text-text-main flex flex-col overflow-auto">
-
-
+      sm:max-w-6xl sm:h-[80vh] rounded-t-xl sm:rounded-xl bg-level-1 border-level-3 text-text-main flex flex-col overflow-auto"
+      >
         <Tabs className="min-w-full flex justify-start ">
           <DialogHeader>
             <DialogTitle className="text-xl">
@@ -208,11 +209,6 @@ export default function SettingsModal() {
               <div className="flex gap-2">
                 <Label className="text-red-500 text-xl"> {countToDelete}</Label>
                 <Btn
-                  text={
-                    <div className="py-1 px-2">
-                      {t('playlistSettings.delete.button')}
-                    </div>
-                  }
                   className="bg-level-2"
                   disabled={deleteTimeout || countToDelete === 0}
                   onClick={async () => {
@@ -237,7 +233,12 @@ export default function SettingsModal() {
                       setCountToDelete(3)
                     }
                   }}
-                />
+                >
+                  {' '}
+                  <div className="py-1 px-2">
+                    {t('playlistSettings.delete.button')}
+                  </div>
+                </Btn>
               </div>
             </div>
           </TabsContent>

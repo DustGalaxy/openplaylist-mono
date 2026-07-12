@@ -132,19 +132,21 @@ function ViewerTrackCardImpl({
 
         <div className="flex items-center gap-2 w-full  pl-4">
           <Btn
-            text={<Play />}
             className="px-1 bg-level-2"
             onClick={onPlay}
             title={t(
               `playlist.tooltip.${isActive && isPlaying ? 'pause' : 'play'}`,
             )}
-          />
+          >
+            <Play />
+          </Btn>
           <Btn
-            text={<ClipboardCopy />}
             className="px-1 bg-level-2"
             onClick={copyLink}
             title={t('playlist.track.copy')}
-          />
+          >
+            <ClipboardCopy />
+          </Btn>
           <DDPlaylistPicker track={track} />
         </div>
       </div>

@@ -36,7 +36,9 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       handleOAuthRedirect(platform, false)
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : t('auth.register.error.socialFailed')
+        err instanceof Error
+          ? err.message
+          : t('auth.register.error.socialFailed')
       setError(message)
       setIsLoading(false)
     }
@@ -111,8 +113,12 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="social">{t('auth.register.tab.social')}</TabsTrigger>
-          <TabsTrigger value="classic">{t('auth.register.tab.classic')}</TabsTrigger>
+          <TabsTrigger value="social">
+            {t('auth.register.tab.social')}
+          </TabsTrigger>
+          <TabsTrigger value="classic">
+            {t('auth.register.tab.classic')}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="social" className="space-y-4 ">
@@ -208,15 +214,14 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             </div>
 
             <Btn
-              text={
-                isLoading
-                  ? t('auth.register.submitLoading')
-                  : t('auth.register.submit')
-              }
               onClick={() => {}}
               disabled={isLoading}
               className="w-full text-text-main bg-level-2"
-            />
+            >
+              {isLoading
+                ? t('auth.register.submitLoading')
+                : t('auth.register.submit')}
+            </Btn>
           </form>
 
           <button
@@ -230,7 +235,9 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       </Tabs>
 
       <div className="space-y-3 text-center">
-        <p className="text-xs text-text-secondary">{t('auth.register.legal')}</p>
+        <p className="text-xs text-text-secondary">
+          {t('auth.register.legal')}
+        </p>
         <p className="text-sm text-text-main ">
           {t('auth.register.loginPrompt')}{' '}
           <Link to="/login" className="text-text-main  hover:underline">

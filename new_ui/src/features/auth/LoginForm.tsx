@@ -1,21 +1,19 @@
 import { useState } from 'react'
-import { useNavigate, Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import { useTranslation } from 'react-i18next'
 
+import { SocialAuthButtons } from './SocialAuthButtons'
+import type { BackendUserProfileResponse } from '@/hooks/useAuth'
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import {
-  fetchCurrentUserProfile,
-  type BackendUserProfileResponse,
-} from '@/hooks/useAuth'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { fetchCurrentUserProfile } from '@/hooks/useAuth'
 import { useOAuthUrl } from '@/hooks/useAuthUrl'
-import { getConfig, REDIRECT_AFTER_LOGIN_KEY } from '@/lib/utils'
+import { REDIRECT_AFTER_LOGIN_KEY, getConfig } from '@/lib/utils'
 import apiClient from '@/lib/axios'
-import { SocialAuthButtons } from './SocialAuthButtons'
 import { useAuthStore } from '@/stores/authStore'
 
 export interface LoginFormProps {
@@ -73,14 +71,13 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       )
 
       if (response.status === 200) {
-        const userProfileResponse = await queryClient.fetchQuery<
-          BackendUserProfileResponse | null
-        >({
-          queryKey: ['currentUserProfile'],
-          queryFn: fetchCurrentUserProfile,
-          staleTime: 0,
-          gcTime: 0,
-        })
+        const userProfileResponse =
+          await queryClient.fetchQuery<BackendUserProfileResponse | null>({
+            queryKey: ['currentUserProfile'],
+            queryFn: fetchCurrentUserProfile,
+            staleTime: 0,
+            gcTime: 0,
+          })
 
         if (userProfileResponse?.user) {
           setUser(userProfileResponse.user, userProfileResponse.expired_at)
@@ -125,7 +122,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="social">{t('auth.login.tab.social')}</TabsTrigger>
-          <TabsTrigger value="classic">{t('auth.login.tab.classic')}</TabsTrigger>
+          <TabsTrigger value="classic">
+            {t('auth.login.tab.classic')}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="social" className="space-y-4">
@@ -187,13 +186,14 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             </div>
 
             <Btn
-              text={
-                isLoading ? t('auth.login.submitLoading') : t('auth.login.submit')
-              }
               onClick={() => {}}
               disabled={isLoading}
               className="w-full text-text-main bg-level-2"
-            />
+            >
+              {isLoading
+                ? t('auth.login.submitLoading')
+                : t('auth.login.submit')}
+            </Btn>
           </form>
 
           <button

@@ -62,25 +62,23 @@ export default function ErrorComponent({ error }: ErrorComponentProps) {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             {/* Главное действие (3D CTA кнопка) */}
             <Btn
-              text={
-                <div className="flex items-center gap-2">
-                  <RotateCcw className="h-4 w-4" /> {t('errorPage.retryBtn')}
-                </div>
-              }
               className="px-6 h-12 text-base font-bold bg-level-2 text-text-main w-full sm:w-auto"
               onClick={() => router.invalidate()}
-            />
+            >
+              <div className="flex items-center gap-2">
+                <RotateCcw className="h-4 w-4" /> {t('errorPage.retryBtn')}
+              </div>
+            </Btn>
 
             <Btn
-              text={
-                <div className="flex items-center gap-2">
-                  <HomeIcon className="h-4 w-4" />
-                  {t('errorPage.homeBtn')}
-                </div>
-              }
               className="px-6 h-12 text-base font-bold bg-level-2 text-text-main w-full sm:w-auto"
               onClick={() => navigate({ to: '/' })}
-            />
+            >
+              <div className="flex items-center gap-2">
+                <HomeIcon className="h-4 w-4" />
+                {t('errorPage.homeBtn')}
+              </div>
+            </Btn>
           </div>
         </div>
       </div>

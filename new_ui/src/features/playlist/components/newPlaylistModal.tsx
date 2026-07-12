@@ -72,7 +72,9 @@ export default function AddPlaylistModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild className="m-1.5">
-        <Btn text={<Plus size={26} />} className="flex p-1 bg-level-2 mr-1" />
+        <Btn className="flex p-1 bg-level-2 mr-1">
+          <Plus size={26} />
+        </Btn>
       </DialogTrigger>
       <DialogContent className="sm:max-w-106.25 bg-level-2 border-level-3 text-text-main ">
         <DialogHeader>
@@ -121,15 +123,14 @@ export default function AddPlaylistModal() {
         <DialogFooter>
           <DialogClose asChild>
             <Btn
-              text={
-                isLoading
-                  ? t('common.toast.saving')
-                  : t('playlist.create.submit')
-              }
               className="w-full font-mono"
               disabled={isLoading}
               onClick={handleCreatePlaylist}
-            />
+            >
+              {isLoading
+                ? t('common.toast.saving')
+                : t('playlist.create.submit')}
+            </Btn>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

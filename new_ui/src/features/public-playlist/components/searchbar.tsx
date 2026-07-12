@@ -34,11 +34,12 @@ export default function SearchBar({
         />
       </div>
       <Btn
-        text={isLoading ? '…' : t('publicSearch.submit')}
         onClick={action}
         disabled={isLoading}
         className="h-11 px-5 bg-level-2 text-text-main font-semibold shrink-0"
-      />
+      >
+        {isLoading ? '…' : t('publicSearch.submit')}
+      </Btn>
     </div>
   )
 }

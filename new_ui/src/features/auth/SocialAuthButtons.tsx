@@ -37,11 +37,12 @@ export function SocialAuthButtons({
         return (
           <Btn
             key={platform}
-            text={buttonText}
             onClick={() => onPlatformClick(platform)}
             disabled={isLoading}
             className={`w-full ${colors.bg} ${colors.hover} text-text-main`}
-          />
+          >
+            {buttonText}
+          </Btn>
         )
       })}
     </div>

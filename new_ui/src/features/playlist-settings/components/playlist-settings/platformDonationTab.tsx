@@ -1,5 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import DonationItem from './donationItem'
+import type { DonationPlatform, ReadDonationRules } from '@/types/playlist'
 import { TabsContent } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import MyBtn from '@/components/ui/my-btn'
@@ -7,8 +9,6 @@ import { DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import UpDownBtn from '@/components/ui/funny-btn'
 import { CurrencySelect } from '@/components/ui/currency-selector'
-import DonationItem from './donationItem'
-import type { DonationPlatform, ReadDonationRules } from '@/types/playlist'
 
 interface PlatformDonationProps {
   platform: DonationPlatform
@@ -62,7 +62,6 @@ const PlatformDonationEditor = React.memo(
 
         <div className="flex gap-1 sm:gap-2">
           <MyBtn
-            text={t('playlistSettings.donation.add')}
             onClick={() =>
               createNewRule(
                 platform,
@@ -74,7 +73,9 @@ const PlatformDonationEditor = React.memo(
               )
             }
             className="px-2 text-sm h-8 self-end bg-level-2"
-          />
+          >
+            {t('playlistSettings.donation.add')}
+          </MyBtn>
           {/* Name */}
           <div className=" flex flex-col gap-1">
             <Label className="text-xs text-text-secondary">

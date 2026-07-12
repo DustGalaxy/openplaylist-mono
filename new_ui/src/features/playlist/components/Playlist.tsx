@@ -215,15 +215,6 @@ function PlaylistView() {
           <div className="  grid  sm:grid-cols-2 w-full gap-2">
             <div className="w-full gap-2 grid grid-cols-5  ">
               <Btn
-                text={
-                  repeatMode === 'all' ? (
-                    <Repeat />
-                  ) : repeatMode === 'once' ? (
-                    <Repeat1 />
-                  ) : (
-                    <RepeatOff />
-                  )
-                }
                 title={t(`playlist.tooltip.repeatMode.${repeatMode}`)}
                 className="px-2 bg-level-2"
                 onClick={() => {
@@ -239,21 +230,29 @@ function PlaylistView() {
                     requestPlSettings(playlist.id, { repeat_mode: 'all' })
                   }
                 }}
-              />
+              >
+                {repeatMode === 'all' ? (
+                  <Repeat />
+                ) : repeatMode === 'once' ? (
+                  <Repeat1 />
+                ) : (
+                  <RepeatOff />
+                )}
+              </Btn>
 
               <Btn
                 title={t(`playlist.tooltip.prev`)}
-                text={<SkipBack />}
                 disabled={playlist.settings.mode !== 'static'}
                 className={`px-2 bg-level-2 `}
                 onClick={() => {
                   playPrev(playlist.id)
                 }}
-              />
+              >
+                <SkipBack />
+              </Btn>
 
               <Btn
                 title={t(`playlist.tooltip.${isPaused ? 'play' : 'pause'}`)}
-                text={isPaused ? <Play /> : <Pause />}
                 className="px-2 bg-level-2"
                 onClick={() => {
                   if (!getPlayerPosition) return
@@ -266,19 +265,21 @@ function PlaylistView() {
                     playlist.now_playing.id,
                   )
                 }}
-              />
+              >
+                {isPaused ? <Play /> : <Pause />}
+              </Btn>
               <Btn
                 title={t(`playlist.tooltip.next`)}
-                text={<SkipForward />}
                 className="px-2 bg-level-2"
                 onClick={() => {
                   playNext(playlist, 'skipped')
                 }}
-              />
+              >
+                <SkipForward />
+              </Btn>
 
               <Btn
                 title={t(`playlist.tooltip.shuffle`)}
-                text={<Shuffle />}
                 isActive={playlist.settings.shuffle}
                 onClick={() =>
                   requestPlSettings(playlist.id, {
@@ -286,7 +287,9 @@ function PlaylistView() {
                   })
                 }
                 className="px-2"
-              />
+              >
+                <Shuffle />
+              </Btn>
             </div>
 
             <div className="flex gap-1 sm:gap-2  justify-between ">
@@ -295,17 +298,6 @@ function PlaylistView() {
                 <div className="flex gap-1 sm:gap-2 justify-between w-full ">
                   <Btn
                     title={t('playlist.tooltip.status')}
-                    text={
-                      <>
-                        <span
-                          className={`  h-1.5 w-1.5 rounded-full ${activePlst ? 'bg-emerald-400' : 'bg-text-placeholder'}`}
-                          aria-hidden
-                        />
-                        {activePlst
-                          ? t('playlist.status.online')
-                          : t('playlist.status.offline')}
-                      </>
-                    }
                     onClick={() => {
                       setActivePlst(!activePlst)
                       changePlaylistActive(playlist.id, activePlst)
@@ -314,10 +306,19 @@ function PlaylistView() {
                       'inline-flex items-center gap-1.5 px-1.5 py-1 sm:px-3 sm:py-1.5 text-sm font-mono',
                       activePlst ? statusOpenClass : statusClosedClass,
                     )}
-                  />
+                  >
+                    <>
+                      <span
+                        className={`  h-1.5 w-1.5 rounded-full ${activePlst ? 'bg-emerald-400' : 'bg-text-placeholder'}`}
+                        aria-hidden
+                      />
+                      {activePlst
+                        ? t('playlist.status.online')
+                        : t('playlist.status.offline')}
+                    </>
+                  </Btn>
 
                   <Btn
-                    text={<CloudSync />}
                     title={t('playlist.tooltip.sync')}
                     isActive={playlist.settings.sync_playback_position}
                     onClick={() => {
@@ -327,10 +328,11 @@ function PlaylistView() {
                       })
                     }}
                     className="px-2 bg-level-2"
-                  />
+                  >
+                    <CloudSync />
+                  </Btn>
                   <div className="flex gap-2">
                     <Btn
-                      text={<ShareIcon />}
                       title={t('playlist.tooltip.share')}
                       className="px-2 bg-level-2"
                       onClick={() => {
@@ -339,9 +341,10 @@ function PlaylistView() {
                         )
                         toast.success(t('playlist.toast.linkCopied'))
                       }}
-                    />
+                    >
+                      <ShareIcon />
+                    </Btn>
                     <Btn
-                      text={<Terminal />}
                       title={t('playlist.tooltip.logs')}
                       className="px-2 bg-level-2 font-bold font-mono"
                       onClick={() => {
@@ -350,9 +353,10 @@ function PlaylistView() {
                         }
                         setShowConsole(!showConsole)
                       }}
-                    />
+                    >
+                      <Terminal />
+                    </Btn>
                     <Btn
-                      text={<Shield />}
                       title={t('playlist.tooltip.validation')}
                       className="px-2 bg-level-2"
                       onClick={() => {
@@ -361,7 +365,9 @@ function PlaylistView() {
                         }
                         setShowContentSettings(!showContentSettings)
                       }}
-                    />
+                    >
+                      <Shield />
+                    </Btn>
                   </div>
                 </div>
                 <div className="flex gap-1 sm:gap-2">
@@ -395,7 +401,6 @@ function PlaylistView() {
         </div>
         <div className="flex gap-2 shrink-0">
           <Btn
-            text={toggled ? <PanelLeftClose /> : <PanelLeftOpen />}
             className="px-2 bg-level-2 hidden sm:block"
             onClick={() => {
               setToggled(!toggled)
@@ -405,7 +410,9 @@ function PlaylistView() {
                 ? t('playlist.tooltip.hideSavedTracks')
                 : t('playlist.tooltip.showSavedTracks')
             }
-          />
+          >
+            {toggled ? <PanelLeftClose /> : <PanelLeftOpen />}
+          </Btn>
         </div>
       </div>
 

@@ -74,7 +74,9 @@ export default function DDPlaylistPicker({ track }: { track: Track }) {
       <DropdownMenuTrigger asChild>
         <div className="flex items-center gap-2">
           <div className=" px-1 text-lg font-medium text-text-main bg-level-2">
-            <Btn isActive={isOpen} text={<ListPlus />} className="px-1" />
+            <Btn isActive={isOpen} className="px-1">
+              <ListPlus />
+            </Btn>
           </div>
         </div>
       </DropdownMenuTrigger>

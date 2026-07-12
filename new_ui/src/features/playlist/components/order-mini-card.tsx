@@ -70,21 +70,21 @@ function OrderMiniCardImpl({
   // Форматирование дат
   const formattedDate = track.created_at
     ? new Date(track.created_at).toLocaleDateString(i18n.language, {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    })
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
     : 'Н/Д'
 
   const longFormatDate = track.created_at
     ? new Date(track.created_at).toLocaleDateString(i18n.language, {
-      day: 'numeric',
-      month: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-    })
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+      })
     : 'Н/Д'
 
   // Сборка кнопок
@@ -154,16 +154,20 @@ function OrderMiniCardImpl({
 
   return (
     <div
-      className={`group relative w-full rounded-(--rounded-std) overflow-hidden border border-level-3/20 bg-level-2 shadow-md hover:shadow-lg ${isDragging ? '' : 'transition-all duration-300'
-        }`}
+      className={`group relative w-full rounded-(--rounded-std) overflow-hidden border border-level-3/20 bg-level-2 shadow-md hover:shadow-lg ${
+        isDragging ? '' : 'transition-all duration-300'
+      }`}
     >
       <div
         className="relative w-full h-23 p-2.5 flex flex-col justify-between z-10 cursor-pointer select-none"
         onClick={handleCardTap}
       >
         <div
-          className={`absolute inset-0 bg-cover bg-center ${isDragging ? '' : 'transition-transform duration-500 group-hover:scale-100'
-            }`}
+          className={`absolute inset-0 bg-cover bg-center ${
+            isDragging
+              ? ''
+              : 'transition-transform duration-500 group-hover:scale-100'
+          }`}
           style={{ backgroundImage: `url('${bgUrl}')` }}
         />
 
@@ -245,22 +249,24 @@ function OrderMiniCardImpl({
 
       {/* Панель управления — opens on tap (mobile) OR hover (desktop) */}
       <div
-        className={`w-full flex gap-2 justify-center items-center bg-level-1/5 shadow-inner border-t border-level-3/10 transition-all duration-300 ease-in-out px-3 overflow-hidden ${actionsOpen
-          ? 'max-h-14 opacity-100 py-2.5'
-          : 'max-h-0 opacity-0 group-hover:max-h-14 group-hover:opacity-100 group-hover:py-2.5'
-          }`}
+        className={`w-full flex gap-2 justify-center items-center bg-level-1/5 shadow-inner border-t border-level-3/10 transition-all duration-300 ease-in-out px-3 overflow-hidden ${
+          actionsOpen
+            ? 'max-h-14 opacity-100 py-2.5'
+            : 'max-h-0 opacity-0 group-hover:max-h-14 group-hover:opacity-100 group-hover:py-2.5'
+        }`}
       >
         {buttons.map((btn, index) => (
           <Btn
             key={index}
-            text={btn.icon}
             className={`${btn.className} h-9 w-9 text-[12px] flex items-center justify-center transition-all rounded-md shadow-sm active:translate-y-px`}
             onClick={(e) => {
               e.stopPropagation()
               btn.on_click()
             }}
             title={btn.tooltip}
-          />
+          >
+            {btn.icon}
+          </Btn>
         ))}
       </div>
     </div>

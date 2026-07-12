@@ -23,11 +23,9 @@ export function AuthPage({ defaultMode = 'login', onSuccess }: AuthPageProps) {
               <p className="text-text-secondary mb-3">
                 {t('auth.page.noAccount')}
               </p>
-              <Btn
-                text={t('auth.page.createAccount')}
-                onClick={() => setMode('register')}
-                className="w-full"
-              />
+              <Btn onClick={() => setMode('register')} className="w-full">
+                {t('auth.page.createAccount')}
+              </Btn>
             </div>
           </>
         ) : (
@@ -37,11 +35,9 @@ export function AuthPage({ defaultMode = 'login', onSuccess }: AuthPageProps) {
               <p className="text-text-secondary mb-3">
                 {t('auth.page.hasAccount')}
               </p>
-              <Btn
-                text={t('auth.page.loginInstead')}
-                onClick={() => setMode('login')}
-                className="w-full"
-              />
+              <Btn onClick={() => setMode('login')} className="w-full">
+                {t('auth.page.loginInstead')}
+              </Btn>
             </div>
           </>
         )}
