@@ -31,7 +31,7 @@ async def mark_as_read(
     await service.mark_direct_as_read(db_session, user_id, notification_id)
 
 
-@router.post("/mark-as-read-all", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/mark-all-as-read", status_code=status.HTTP_204_NO_CONTENT)
 async def mark_as_read_all(service: NOTIFY_SERVICE, user_id: UUID, db_session: DB_SESSION):
     await service.mark_all_as_read(db_session, user_id)
 

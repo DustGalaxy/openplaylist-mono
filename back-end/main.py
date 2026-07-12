@@ -13,6 +13,8 @@ from src.adapters._fastapi.playlist_routes import router as playlist_router
 from src.adapters._fastapi.settings_routes import router as settings_router
 from src.adapters._fastapi.stream_routes import router as stream_router
 from src.adapters._fastapi.playback_routes import router as playback_router
+from src.adapters._fastapi.notifications import router as notificattions_router
+
 from src.adapters._sio.init import sio
 from src.adapters._rabbit import broker, declare
 from src.dal._redis.broker import get_broker
@@ -69,6 +71,7 @@ api_route.include_router(playlist_router)
 api_route.include_router(settings_router)
 api_route.include_router(stream_router)
 api_route.include_router(playback_router)
+api_route.include_router(notificattions_router)
 # app.add_route("/api/socket.io/", route=sio_asgi_app, methods=["GET", "POST"])
 # app.add_api_websocket_route("/api/socket.io/", sio_asgi_app)
 

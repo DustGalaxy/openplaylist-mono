@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, Index, func, text
+from sqlalchemy import ForeignKey, Index, func, text, Enum
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -13,7 +13,7 @@ class DirectNotificationORM(Base, UUIDMixin, TimestampMixin):
     __tablename__: str = "direct_notifications"
 
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    notification_type: Mapped[NotificationType] = mapped_column(nullable=False)
+    notification_type: Mapped[NotificationType] = mapped_column(Enum(NotificationType, native_enum=False),nullable=False)
     notification_data: Mapped[dict] = mapped_column(JSONB, nullable=True)
     is_read: Mapped[bool] = mapped_column(nullable=False, default=False, server_default="false")
 
@@ -30,7 +30,7 @@ class EventNotificationORM(Base, UUIDMixin):
 
     target_id: Mapped[UUID] = mapped_column(nullable=False)
     target_type: Mapped[str] = mapped_column(nullable=False)
-    event_type: Mapped[NotificationType] = mapped_column(nullable=False)
+    event_type: Mapped[NotificationType] = mapped_column(Enum(NotificationType, native_enum=False), nullable=False)
     event_data: Mapped[dict] = mapped_column(JSONB, nullable=False)
     created_at: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now())
 
