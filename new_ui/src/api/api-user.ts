@@ -2,6 +2,10 @@ import type {
   UserPasswordUpdatePayload,
   UserProfileUpdatePayload,
 } from '@/types/user'
+import type {
+  SubscriptionPatchPayload,
+  SubscriptionSettings,
+} from '@/features/notifications/types'
 import apiClient from '@/lib/axios'
 import { getConfig } from '@/lib/utils'
 
@@ -140,12 +144,68 @@ export const deleteUser = async () => {
   return response.status === 204
 }
 
-
 export const getWidgetToken = async () => {
   const config = getConfig()
   const response = await apiClient(config.AUTH_API_URL + '/stream/gen-token', {
     method: 'GET',
     withCredentials: true,
   })
+  return response.data
+}
+
+export const createSubscription = async (
+  target_id: string,
+  target_type: string,
+  settings?: SubscriptionSettings,
+) => {
+  const config = getConfig()
+  const response = await apiClient(
+    config.API_URL + '/notifications/subscriptions',
+    {
+      method: 'POST',
+      withCredentials: true,
+      data: { target_id, target_type, settings },
+    },
+  )
+  return response.data
+}
+
+export const deleteSubscription = async (subscription_id: string) => {
+  const config = getConfig()
+  const response = await apiClient(
+    config.API_URL + `/notifications/subscriptions/${subscription_id}`,
+    {
+      method: 'DELETE',
+      withCredentials: true,
+    },
+  )
+  return response.status === 204
+}
+
+export const patchSubscriptionSettings = async (
+  subscription_id: string,
+  settings: SubscriptionPatchPayload,
+) => {
+  const config = getConfig()
+  const response = await apiClient(
+    config.API_URL + `/notifications/subscriptions/${subscription_id}`,
+    {
+      method: 'PATCH',
+      withCredentials: true,
+      data: settings,
+    },
+  )
+  return response.data
+}
+
+export const getSubscriptions = async () => {
+  const config = getConfig()
+  const response = await apiClient(
+    config.API_URL + '/notifications/subscriptions',
+    {
+      method: 'GET',
+      withCredentials: true,
+    },
+  )
   return response.data
 }

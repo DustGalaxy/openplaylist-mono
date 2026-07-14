@@ -15,7 +15,7 @@ from src.dto.internal.auth import (
     AuthFlow,
     RefreshTokenStrategy,
 )
-from src.adapters._rabbit.event_broker import bot_donatex_connect_request
+from src.adapters._rabbit.queues import bot_donatex_connect_request
 from src.settings import settings
 from src._types import IntegrationPlatform, IntegrationType, PlatformCap
 

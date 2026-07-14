@@ -4,7 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 from pydantic.fields import Field
 
-from src._types import NotificationType
+from src._types import NotificationType, PlaylistEventType, TargetType, UserEventType, UserTypes, PlaylistTypes
 
 
 # --- shared
@@ -16,12 +16,14 @@ class AddTrackEventNotification(BaseModel):
 class ReadNotification(BaseModel):
     id: UUID
 
-    type: NotificationType
+    type: NotificationType | UserEventType | PlaylistEventType
     data: dict
 
     is_read: bool
 
     created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 # --- event
@@ -33,18 +35,20 @@ class EvetnNotification(BaseModel):
     target_id: UUID
     target_type: str
 
-    event_type: NotificationType
-    event_data: dict
+    event_type: PlaylistEventType | UserEventType
+    event_data: UserTypes | PlaylistTypes
 
     created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class EventNotificationCreate(BaseModel):
     target_id: UUID
     target_type: str
 
-    event_type: NotificationType
-    event_data: dict
+    event_type: PlaylistEventType | UserEventType
+    event_data: UserTypes | PlaylistTypes
 
 
 # --- direct
@@ -91,6 +95,8 @@ class NotificationSettings(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class NotificationSettingsCreate(BaseModel):
     user_id: UUID
@@ -105,6 +111,10 @@ class NotificationSettingsPatch(BaseModel):
 # --- subscription
 
 
+class SubscriptionSettings(BaseModel):
+    allowed_event_types: list[PlaylistEventType | UserEventType] = Field(default_factory=list)
+
+
 class Subscription(BaseModel):
     id: UUID
 
@@ -113,6 +123,8 @@ class Subscription(BaseModel):
     target_id: UUID
     target_type: str
 
+    settings: SubscriptionSettings
+
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -120,6 +132,32 @@ class Subscription(BaseModel):
 
 class SubscriptionCreate(BaseModel):
     user_id: UUID
-
     target_id: UUID
-    target_type: str
+    target_type: TargetType
+    settings: SubscriptionSettings | None = None
+
+    # @model_validator(mode="after")
+    # def validate_events_for_target(self) -> Self:
+    #     if not self.settings:
+    #         return self
+
+    #     allowed_set = NOTIFICATION_EVENTS_MAP.get(self.target_type, set())
+    #     for event in self.settings.allowed_event_types:
+    #         if event not in allowed_set:
+    #             raise ValueError(f"Ивент '{event}' недопустим для типа подписки '{self.target_type}'")
+    #     return self
+
+
+class SubscriptionPatch(BaseModel):
+    tagret_id: UUID | None = None
+    target_type: TargetType | None = None
+    settings: SubscriptionSettings | None = None
+
+    # @model_validator(mode="after")
+    # def validate_events_for_target(self) -> Self:
+    #     allowed_set = NOTIFICATION_EVENTS_MAP.get(self.target_type, set())
+
+    #     for event in self.settings.allowed_event_types:
+    #         if event not in allowed_set:
+    #             raise ValueError(f"Ивент '{event}' недопустим для типа подписки '{self.target_type}'")
+    #     return self

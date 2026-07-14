@@ -1,8 +1,130 @@
 from pydantic import BaseModel
 from enum import StrEnum
-from typing import Literal
+from typing import Literal, TypedDict
 
 from sqlalchemy.ext.asyncio import AsyncSession
+
+# ==========================================
+# 1. ТИПЫ ИЗМЕНЕНИЙ (EVENT TYPES) AS ENUMS
+# ==========================================
+
+
+class PlaylistEventType(StrEnum):
+    TRACK_ADDED = "track.added"
+    TRACK_REMOVED = "track.removed"
+    BASIC_NAME = "basic.name"
+    BASIC_VISIBILITY = "basic.visibility"
+    REALTIME_SYNC = "realtime.sync"
+    RULES_MODE = "rules.mode"
+    RULES_VALIDATION = "rules.validation"
+    RULES_PRIORITIES = "rules.priorities"
+
+
+class UserEventType(StrEnum):
+    PLAYLIST_CREATE = "playlist.create"
+    PLAYLIST_DELETE = "playlist.delete"
+
+
+# ==========================================
+# 2. СТРУКТУРЫ ДАННЫХ (PAYLOADS) AS TYPEDDICTS
+# ==========================================
+
+
+class PlaylistBasePayload(TypedDict):
+    playlist_name: str
+    owner_name: str
+
+
+# Специфичные payload для каждого ивента плейлиста
+class TrackAddedPayload(PlaylistBasePayload):
+    count: int
+
+
+class TrackRemovedPayload(PlaylistBasePayload):
+    count: int
+
+
+class BasicNamePayload(PlaylistBasePayload):
+    old_name: str
+    new_name: str
+
+
+class BasicVisibilityPayload(PlaylistBasePayload):
+    is_public: bool
+
+
+class RealtimeSyncPayload(PlaylistBasePayload):
+    is_sync_on: bool
+
+
+class RulesModePayload(PlaylistBasePayload):
+    mode: str
+
+
+class RulesValidationPayload(PlaylistBasePayload):
+    count: int
+
+
+class RulesPrioritiesPayload(PlaylistBasePayload):
+    count: int
+
+
+class UserBasePayload(TypedDict):
+    username: str
+
+
+class UserPlaylistCreatePayload(UserBasePayload):
+    playlist_name: str
+
+
+class UserPlaylistDeletePayload(UserBasePayload):
+    playlist_name: str
+
+
+# ==========================================
+# 3. ОБЪЕДИНЯЮЩИЕ МАТРИЦЫ СОВМЕСТИМОСТИ
+# ==========================================
+
+# Ограничение по строкам для target_type
+TargetType = Literal["playlist", "user"]
+
+UserTypes = UserPlaylistCreatePayload | UserPlaylistDeletePayload
+PlaylistTypes = (
+    TrackAddedPayload
+    | TrackRemovedPayload
+    | BasicNamePayload
+    | BasicVisibilityPayload
+    | RealtimeSyncPayload
+    | RulesModePayload
+    | RulesValidationPayload
+    | RulesPrioritiesPayload
+)
+
+EVENTS_MAP = {
+    "playlist": {
+        PlaylistEventType.TRACK_ADDED: TrackAddedPayload,
+        PlaylistEventType.TRACK_REMOVED: TrackRemovedPayload,
+        PlaylistEventType.BASIC_NAME: BasicNamePayload,
+        PlaylistEventType.BASIC_VISIBILITY: BasicVisibilityPayload,
+        PlaylistEventType.REALTIME_SYNC: RealtimeSyncPayload,
+        PlaylistEventType.RULES_MODE: RulesModePayload,
+        PlaylistEventType.RULES_VALIDATION: RulesValidationPayload,
+        PlaylistEventType.RULES_PRIORITIES: RulesPrioritiesPayload,
+    },
+    "user": {
+        UserEventType.PLAYLIST_CREATE: UserPlaylistCreatePayload,
+        UserEventType.PLAYLIST_DELETE: UserPlaylistDeletePayload,
+    },
+}
+
+# Матрицы для валидаторов (какие ивенты доступны какому типу)
+PLAYLIST_EVENTS_SET = set(PlaylistEventType)
+USER_EVENTS_SET = set(UserEventType)
+
+NOTIFICATION_EVENT_TYPES_MAP = {
+    "playlist": PLAYLIST_EVENTS_SET,
+    "user": USER_EVENTS_SET,
+}
 
 
 class NotificationType(StrEnum):

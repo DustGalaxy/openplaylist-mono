@@ -3,7 +3,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { ru, enUS } from 'date-fns/locale'
 
 interface RelativeTimeProps {
-  timestamp: number | Date
+  timestamp: string
   lang?: string
   className?: string
 }
@@ -26,9 +26,9 @@ export const TimeAgo: React.FC<RelativeTimeProps> = ({
     return () => clearInterval(interval)
   }, [])
 
-  const utcString = timestamp.endsWith('Z') ? timestamp : `${timestamp}Z`;
-  const date = new Date(utcString);
-  
+  const utcString = timestamp.endsWith('Z') ? timestamp : `${timestamp}Z`
+  const date = new Date(utcString)
+
   // Функция из date-fns делает всю работу по склонениям
   const timeAgoText = formatDistanceToNow(date, {
     addSuffix: true,

@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react'
-import type { Integration, UserProfile } from '@/types/user'
-import DonationAlerts from '@/components/icons/icon-da'
-import Twitch from '@/components/icons/icon-twtich'
 import { Google } from '@thesvg/react'
+import { useTranslation } from 'react-i18next'
+import { ProfileTab } from './ProfileTab'
+import { AccountTab } from './AccountTab'
+import { IntegrationsTab } from './IntegrationsTab'
+import WidgetTab from './WidgetTab'
+import { SubsTab } from './SubsTab'
+import type { Integration, UserProfile } from '@/types/user'
+import { useOAuthUrl } from '@/hooks/useAuthUrl'
 import {
   filterTabActiveClass,
   filterTabBaseClass,
@@ -11,24 +16,26 @@ import {
   pageInnerClass,
   pageWrapClass,
 } from '@/features/landing/styles'
-import { useTranslation } from 'react-i18next'
-import { ProfileTab } from './ProfileTab'
-import { AccountTab } from './AccountTab'
-import { IntegrationsTab } from './IntegrationsTab'
-import { useOAuthUrl } from '@/hooks/useAuthUrl'
-import WidgetTab from './WidgetTab'
+import Twitch from '@/components/icons/icon-twtich'
+import DonationAlerts from '@/components/icons/icon-da'
 
 // ─── Hash helpers ──────────────────────────────────────────────────────────────
 
 const HASH_PREFIX = 'tab-'
-const VALID_TABS = ['profile', 'account', 'integrations', 'widget'] as const
+const VALID_TABS = [
+  'profile',
+  'account',
+  'integrations',
+  'subscriptions',
+  'widget',
+] as const
 type TabId = (typeof VALID_TABS)[number]
 
 function getHashTabId(): TabId {
   const hash = window.location.hash.slice(1)
   if (hash.startsWith(HASH_PREFIX)) {
     const id = hash.slice(HASH_PREFIX.length)
-    if ((VALID_TABS as readonly string[]).includes(id)) {
+    if ((VALID_TABS as ReadonlyArray<string>).includes(id)) {
       return id as TabId
     }
   }
@@ -83,6 +90,11 @@ export function UserSettingsPage({
     { id: 'profile', label: t('settings.tabs.profile'), icon: '👤' },
     { id: 'account', label: t('settings.tabs.account'), icon: '⚙️' },
     { id: 'integrations', label: t('settings.tabs.integrations'), icon: '🔗' },
+    {
+      id: 'subscriptions',
+      label: t('settings.tabs.subscriptions'),
+      icon: '🔔',
+    },
     { id: 'widget', label: t('settings.tabs.widget'), icon: '🖼️' },
   ]
 
@@ -174,6 +186,7 @@ export function UserSettingsPage({
               platformConfigs={platformConfigs}
             />
           )}
+          {activeTab === 'subscriptions' && <SubsTab />}
           {activeTab === 'widget' && <WidgetTab />}
         </div>
       </div>

@@ -151,6 +151,30 @@ services:
         reservations:
           memory: 150M
 
+  rabbit-worker:
+    build:
+      context: ./back-end
+      dockerfile: ./Dockerfile.rabbit_worker
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./back-end/.env
+    volumes:
+      - ./back-end/src:/app/src
+    networks:
+      - default
+    deploy:
+      resources:
+        limits:
+          memory: 250M
+        reservations:
+          memory: 100M
+
   task-worker:
     build:
       context: ./back-end

@@ -1,8 +1,10 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, HTTPException, status
 from simple_repository.exceptions import NotFoundException
 
+from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType
+from src.dto.internal.notifications import BaseEvent
 from src.dto.playlist import (
     NewPlaylist,
     PlaylistBaseinfo,
@@ -13,14 +15,14 @@ from src.dto.playlist import (
 from src.dto.playlist_log import ReadPlaylistLog
 from src.models.playlist import PlaylistPatch, PlaylistSchema
 from src.models.settings import SettingsSchema
-from src.services.playlist_log import playlist_log_service
-from src.services.realtime.sio_widget import sio_widget_service
-
+from src.services.notification.notifications_engine import notification_engine
 
 from src.utils import kick, find
-from src._types import DeleteStatus, PlaylistLogsEventTypes
+from src._types import DeleteStatus, UserEventType
 from taskiq_broker import task_broker as task_broker
 
+from src.adapters._rabbit.queues import fanout_exchange
+from src.adapters._rabbit.broker import get_broker
 from src.adapters._fastapi.dependencies import (
     CURR_USER,
     DB_SESSION,
@@ -69,7 +71,10 @@ async def create_playlist(
 
     result = created_playlist.model_dump()
     result["settings"] = settings.model_dump()
-
+    await notification_engine.add_event(
+        BaseEvent(target_id=created_playlist.id, target_type="user", event_type=UserEventType.PLAYLIST_CREATE),
+        extra_data={"playlist_name": created_playlist.name, "username": current_user.username},
+    )
     return ReadPlaylist.model_validate(result)
 
 
@@ -93,7 +98,12 @@ async def delete_playlist(
     playlist_id: UUID,
 ):
     try:
-        await service.delete_playlist(db_session, playlist_id, current_user)
+        plst = await service.get(db_session, playlist_id, current_user)
+        await notification_engine.add_event(
+            BaseEvent(target_id=plst.id, target_type="user", event_type=UserEventType.PLAYLIST_DELETE),
+            extra_data={"playlist_name": plst.name, "username": current_user.username},
+        )
+        await service.delete_playlist(db_session, playlist_id)
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")
     return {"message": "Playlist deleted"}
@@ -225,32 +235,23 @@ async def set_play_now_for_playlist(
     playnow: PlayNow,
 ) -> None:
     try:
-        order = await service.set_play_now(db_session, playlist_id, playnow.track_id, current_user)
-
-        await kick("playlist.track.playnow", task_broker, playnow)
-
-        data = (
-            {"title": None, "id": None, "platform": None, "by_owner": None}
-            if not order
-            else {
-                "title": f"{order.title}",
-                "id": f"{order.yt_video_id}",
-                "platform": order.source,
-                "by_owner": order.from_owner,
-            }
-        )
-
-        await playlist_log_service.log_and_emit(
-            db_session,
-            current_user.id,
-            playlist_id,
-            PlaylistLogsEventTypes.PLAY_TRACK,
-            data,
-        )
-
         plst = await service.get(db_session, playlist_id, current_user)
-        if plst.show_in_widget:
-            await sio_widget_service.current_track(data, current_user.id)
+        order = await service.set_play_now(db_session, plst, playnow.track_id, current_user)
+        await get_broker().publish(
+            InternalPlaylistEvent(
+                event_id=uuid4(),
+                event_type=InternalPlaylistEventType.TRACK_PLAY,
+                playlist_id=playlist_id,
+                playlist_name=plst.name,
+                playlist_is_public=plst.is_public,
+                show_in_widget=plst.show_in_widget,
+                user_id=current_user.id,
+                user_name=current_user.username,
+                track=order,
+            ),
+            exchange=fanout_exchange,
+        )
+        # await kick("playlist.track.playnow", task_broker, playnow)
 
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")
@@ -266,7 +267,27 @@ async def delete_track_from_playlist(
     reason: DeleteStatus = "listened",
 ) -> None:
     try:
-        await service.delete_track_from_playlist(db_session, playlist_id, track_id, current_user, reason)
+        playlist = await service.get(db_session, playlist_id, current_user)
+        order_to_delete = find(playlist.track_data, lambda x: x.id == track_id)
+
+        if not order_to_delete:
+            return None
+
+        await service.delete_track_from_playlist(db_session, playlist_id, track_id, reason)
+        await get_broker().publish(
+            InternalPlaylistEvent(
+                event_id=uuid4(),
+                event_type=InternalPlaylistEventType(f"track.{reason}"),
+                playlist_id=playlist_id,
+                playlist_name=playlist.name,
+                playlist_is_public=playlist.is_public,
+                show_in_widget=playlist.show_in_widget,
+                user_id=current_user.id,
+                user_name=current_user.username,
+                track=order_to_delete,
+            ),
+            exchange=fanout_exchange,
+        )
         await kick("playlist.track.deleted", task_broker, {"track_id": track_id, "playlist_id": str(playlist_id)})
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")

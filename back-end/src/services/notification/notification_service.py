@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,6 +8,7 @@ from src.models.notification import (
     EventNotificationCreate,
     SubscriptionCreate,
     NotificationSettingsPatch,
+    SubscriptionPatch,
 )
 
 from src.dal.postgres.notification import (
@@ -14,6 +16,8 @@ from src.dal.postgres.notification import (
     NotificationRepository,
     NotificationSettingsRepository,
     get_notification_settings_repo,
+    SubscriptionsRepository,
+    get_subs_settings_repo,
 )
 
 
@@ -21,6 +25,7 @@ class NotificationService:
     def __init__(self) -> None:
         self.repo: NotificationRepository = get_notification_repo()
         self.settings_repo: NotificationSettingsRepository = get_notification_settings_repo()
+        self.subs_repo: SubscriptionsRepository = get_subs_settings_repo()
 
     async def create_direct_notification(self, session: AsyncSession, data: DirectNotificationCreate):
         return await self.repo.create_direct(session, data)
@@ -29,13 +34,29 @@ class NotificationService:
         return await self.repo.create_event(session, data)
 
     async def create_subscription(self, session: AsyncSession, data: SubscriptionCreate):
-        return await self.repo.create_subscription(session, data)
+        return await self.subs_repo.create(session, data)
+
+    async def patch_subscription(self, session: AsyncSession, user_id: UUID, id: UUID, data: SubscriptionPatch):
+        sub = await self.subs_repo.get_one(session, id)
+        if sub.user_id != user_id:
+            raise PermissionError()
+
+        return await self.subs_repo.patch(session, data, id)
 
     async def remove_subscription(self, session: AsyncSession, user_id: UUID, id: UUID) -> bool:
-        return await self.repo.remove_subscription(session, user_id, id)
+        sub = await self.subs_repo.get_one(session, id)
+        if sub.user_id != user_id:
+            return False
+        return bool(await self.subs_repo.remove(session, id))
 
     async def get_feed(self, session: AsyncSession, user_id: UUID):
-        return await self.repo.get_full_notification_feed(session, user_id)
+        feed = await self.repo.get_full_notification_feed(session, user_id)
+
+        settings = await self.settings_repo.get_one(session, user_id, column="user_id")
+        settings.last_notification_read_ts = datetime.now()
+        await self.settings_repo.update(session, settings)
+
+        return feed
 
     async def unread_count(self, session: AsyncSession, user_id: UUID):
         return await self.repo.get_unread_notification_count(session, user_id)

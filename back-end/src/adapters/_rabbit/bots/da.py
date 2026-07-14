@@ -2,11 +2,10 @@ import json
 
 from faststream import Context
 from faststream.rabbit.message import RabbitMessage
+from faststream.rabbit import RabbitRouter
 
-
-from src.adapters._rabbit.dto import DATokenRefreshed, DAUser as DAUser_Rabbit
-from src.adapters._rabbit.event_broker import (
-    broker,
+from src.adapters._rabbit.bots.dto import DATokenRefreshed, DAUser as DAUser_Rabbit
+from src.adapters._rabbit.queues import (
     main_exchange,
     auth_user_da_all_request,
     auth_user_da_tokens_refreshed,
@@ -22,7 +21,10 @@ from src.dal.postgres.linked_account import linked_accounts_repository
 from src.utils import kick
 
 
-@broker.subscriber(bot_da_order_new, exchange=main_exchange)
+router = RabbitRouter()
+
+
+@router.subscriber(bot_da_order_new, exchange=main_exchange)
 async def order_new_from_da(
     message: RabbitMessage = Context(),
 ):
@@ -34,7 +36,7 @@ async def order_new_from_da(
     await kick("order.new", taskiq_broker, event, False, labels={"user_id": str(event.owner_id)})
 
 
-@broker.subscriber(auth_user_da_all_request, exchange=main_exchange)
+@router.subscriber(auth_user_da_all_request, exchange=main_exchange)
 async def get_all_da_users(
     message: RabbitMessage = Context(),
 ):
@@ -55,7 +57,7 @@ async def get_all_da_users(
         ]
 
 
-@broker.subscriber(auth_user_da_tokens_refreshed, exchange=main_exchange)
+@router.subscriber(auth_user_da_tokens_refreshed, exchange=main_exchange)
 async def da_refresh_tokens(
     message: RabbitMessage = Context(),
 ):
@@ -75,7 +77,7 @@ async def da_refresh_tokens(
         await token_vault_repository.update(session, tokens)
 
 
-@broker.subscriber("da.user.token.died", exchange=main_exchange)
+@router.subscriber("da.user.token.died", exchange=main_exchange)
 async def user_token_died(
     message: RabbitMessage = Context(),
 ):

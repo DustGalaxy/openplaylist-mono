@@ -1,20 +1,27 @@
 from uuid import UUID
 
+
 from src.database import async_session_maker
 from taskiq_broker import task_broker as taskiq_broker
 
+from src.dto.internal.notifications import BaseEvent
 from src.dto.events import Deleted, Moved, PlayNow, Private
 from src.dto.settings import ReadPlaylistSettings
 from src.services.playlist_service import add_to_playlist
 from src.services_low.playlist import playlist_service
 from src.services.realtime.sio_playlist import sio_playlist_service
+from src.services.notification.notifications_engine import notification_engine
 from src.models.order import OrderCreate, OrderDomain
 from src.services.playlist_log import playlist_log_service
 from src.dal._redis.broker import get_broker
 from src.dal.postgres.user import user_repository
 from src.dal.postgres.playlist_settings import playlist_settings_repository
 
-from src._types import PlaylistLogsEventTypes
+from src._types import (
+    NotificationType,
+    PlaylistEventType,
+    PlaylistLogsEventTypes,
+)
 from src.utils import kick, conditional_trace
 
 
@@ -74,8 +81,9 @@ async def handle_order_created(
     async with async_session_maker() as db_session:
         owner = await user_repository.get_one(db_session, typed_payload.owner_id)
         tracks, errors = await add_to_playlist(db_session, typed_payload, owner, typed_payload.from_owner)
-        print(tracks, "\n", errors)
-        for track, playlist_id in tracks:
+
+    async with async_session_maker() as db_session:
+        for track, playlist_name, playlist_id in tracks:
             await kick(
                 "playlist.track.added",
                 taskiq_broker,
@@ -94,6 +102,8 @@ async def handle_order_created(
                     "platform": typed_payload.source,
                 },
             )
+
+            
 
         for error_list, playlist_name, playlist_id in errors:
             await playlist_log_service.log_and_emit(

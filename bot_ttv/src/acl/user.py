@@ -2,7 +2,7 @@ import json
 
 from src.log_setup import LOGGER
 from src.adapters._rabbit.dto.user import Tokens
-from src.adapters._rabbit.handlers import main_exchange, broker
+from src.adapters._rabbit.bots import main_exchange, broker
 
 
 async def get_users():

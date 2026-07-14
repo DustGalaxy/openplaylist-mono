@@ -157,7 +157,7 @@ const TabBasic = ({
     canPatchPlaylist.current = true
   }
   return (
-    <div className='flex flex-col gap-4'>
+    <div className="flex flex-col gap-4">
       <PlaylistDetailsForm
         playlist={playlist}
         setPlst={setPlst}
@@ -171,31 +171,33 @@ const TabBasic = ({
           </Label>
 
           <div className="flex gap-1.5 justify-end">
-            {(['flow', 'static', 'stream'] as Array<PlaylistMode>).map(
-              (m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => {
-                    setPlstMode(m)
-                    setSettings({ ...settings, mode: m })
-                    canPatchSettings.current = true
-                  }}
-                  className={cn(
-                    filterTabBaseClass,
-                    'px-4 text-sm',
-                    plstMode === m ? filterTabActiveClass : filterTabInactiveClass,
-                  )}
-                >
-                  {t(`playlistSettings.basic.mode.${m}`)}
-                </button>
-              ),
-            )}
+            {(['static', 'stream'] as Array<PlaylistMode>).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => {
+                  setPlstMode(m)
+                  setSettings({ ...settings, mode: m })
+                  canPatchSettings.current = true
+                }}
+                className={cn(
+                  filterTabBaseClass,
+                  'px-4 text-sm',
+                  plstMode === m
+                    ? filterTabActiveClass
+                    : filterTabInactiveClass,
+                )}
+              >
+                {t(`playlistSettings.basic.mode.${m}`)}
+              </button>
+            ))}
           </div>
         </div>
       </div>
       <DialogDescription>
-        <div className="py-1">{t(`playlistSettings.basic.modeHelp.${plstMode}`)}</div>
+        <div className="py-1">
+          {t(`playlistSettings.basic.modeHelp.${plstMode}`)}
+        </div>
       </DialogDescription>
       <div className="grid grid-cols-[auto_1fr] gap-2">
         <Label className=" text-lg">
@@ -285,8 +287,8 @@ const TabBasic = ({
           {activeModeSettings.priority_break_point === 0
             ? t('playlistSettings.basic.breakPointDisabled')
             : t('playlistSettings.basic.breakPointEnabled', {
-              value: activeModeSettings.priority_break_point,
-            })}
+                value: activeModeSettings.priority_break_point,
+              })}
         </p>
 
         {plstMode === 'stream' && (
@@ -315,9 +317,12 @@ const TabBasic = ({
                       onClick={() => {
                         const nextIds = isBackground
                           ? activeModeSettings.background_track_ids.filter(
-                            (id) => id !== track.id,
-                          )
-                          : [...activeModeSettings.background_track_ids, track.id]
+                              (id) => id !== track.id,
+                            )
+                          : [
+                              ...activeModeSettings.background_track_ids,
+                              track.id,
+                            ]
                         setSettings({
                           ...settings,
                           mode_settings: {
@@ -333,7 +338,7 @@ const TabBasic = ({
                     >
                       <Checkbox
                         checked={isBackground}
-                        onCheckedChange={() => { }}
+                        onCheckedChange={() => {}}
                         className="mt-0.5 shrink-0 rounded-lg border-level-3 cursor-pointer"
                       />
                       <span className="text-sm truncate">{track.title}</span>

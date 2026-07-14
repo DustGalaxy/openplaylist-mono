@@ -15,6 +15,7 @@ from src.models.notification import (
     ReadNotification,
     Subscription,
     SubscriptionCreate,
+    SubscriptionPatch,
     NotificationSettings,
     NotificationSettingsCreate,
     NotificationSettingsPatch,
@@ -23,14 +24,6 @@ from src.orm.notification import EventNotificationORM, DirectNotificationORM, No
 
 
 class NotificationRepository:
-    # def to_inner(self, data: NotificationCreate | Notification | dict) -> dict:
-    #     if isinstance(data, dict):
-    #         return data
-    #     return data.model_dump(exclude_unset=True)
-
-    # def to_repr(self, object: NotificationORM) -> Notification:
-    #     return self.domain_model.model_validate(object)
-
     async def create_direct(
         self,
         session: AsyncSession,
@@ -77,41 +70,6 @@ class NotificationRepository:
             await session.rollback()
             raise RepositoryException(f"Failed to create {EventNotificationORM.__tablename__}: {e}") from e
 
-    async def create_subscription(
-        self,
-        session: AsyncSession,
-        data: SubscriptionCreate,
-    ) -> Subscription:
-        """Create a single entity"""
-        try:
-            db_model = SubscriptionORM(**data.model_dump())
-            session.add(db_model)
-            await session.commit()
-            await session.refresh(db_model)
-            return Subscription.model_validate(db_model)
-
-        except IntegrityError as e:
-            await session.rollback()
-            raise IntegrityConflictException(
-                f"{SubscriptionORM.__tablename__} conflicts with existing data: {e}",
-            ) from e
-
-        except Exception as e:
-            await session.rollback()
-            raise RepositoryException(f"Failed to create {SubscriptionORM.__tablename__}: {e}") from e
-
-    async def remove_subscription(self, session: AsyncSession, user_id: UUID, id: UUID) -> bool:
-        stmt = delete(SubscriptionORM).where(SubscriptionORM.user_id == user_id, SubscriptionORM.id == id)
-        result = await session.execute(stmt)
-        await session.commit()
-        return result.rowcount != 0
-
-    async def get_subscriptions(self, session: AsyncSession, user_id: UUID) -> list[Subscription]:
-        stmt = select(SubscriptionORM).where(SubscriptionORM.user_id == user_id)
-        result = await session.execute(stmt)
-        return [Subscription.model_validate(obj) for obj in result.all()]
-
-
     async def get_full_notification_feed(
         self,
         session: AsyncSession,
@@ -131,7 +89,8 @@ class NotificationRepository:
             .where(
                 DirectNotificationORM.user_id == user_id,
                 # Проверяем, что тип директ-ивента НЕ заглушен пользователем
-                ~NotificationSettingsORM.filters["muted_event_types"].has_key(DirectNotificationORM.notification_type),
+                ~NotificationSettingsORM.filters["muted_event_types"].has_key(DirectNotificationORM.notification_type).is_(False)
+                & NotificationSettingsORM.filters.is_not(None),
             )
         )
 
@@ -157,9 +116,11 @@ class NotificationRepository:
                 SubscriptionORM.user_id == user_id,
                 EventNotificationORM.created_at >= SubscriptionORM.created_at,
                 # 1. Проверяем черный список ИВЕНТОВ (например, track.added)
-                ~NotificationSettingsORM.filters["muted_event_types"].has_key(EventNotificationORM.event_type),
+                ~NotificationSettingsORM.filters["muted_event_types"].has_key(EventNotificationORM.event_type).is_(False)
+                & NotificationSettingsORM.filters.is_not(None),
                 # 2. Проверяем черный список ТАРГЕТОВ (например, у юзера глобально выключены уведомления от 'artist')
-                ~NotificationSettingsORM.filters["muted_target_types"].has_key(EventNotificationORM.target_type),
+                ~NotificationSettingsORM.filters["muted_target_types"].has_key(EventNotificationORM.target_type).is_(False)
+                & NotificationSettingsORM.filters.is_not(None),
             )
         )
 
@@ -237,6 +198,7 @@ class NotificationRepository:
         )
         await session.execute(stmt)
 
+
 _notification_repo = NotificationRepository()
 
 
@@ -263,8 +225,26 @@ class NotificationSettingsRepository(
         )
         await session.execute(stmt)
 
+
 _notification_settings_repo = NotificationSettingsRepository()
 
 
 def get_notification_settings_repo():
     return _notification_settings_repo
+
+
+class SubscriptionsRepository(crud_factory(SubscriptionORM, Subscription, SubscriptionCreate, SubscriptionPatch)):
+    def to_inner(self, data: SubscriptionCreate | Subscription | SubscriptionPatch) -> dict:
+        if isinstance(data, dict):
+            return data
+        return data.model_dump(exclude_unset=True)
+
+    def to_repr(self, object: SubscriptionORM) -> Subscription:
+        return self.domain_model.model_validate(object)
+
+
+_subs_settings_repo = SubscriptionsRepository()
+
+
+def get_subs_settings_repo():
+    return _subs_settings_repo

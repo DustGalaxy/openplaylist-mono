@@ -170,21 +170,9 @@ class PlaylistRepository(
             raise RepositoryException(f"Unexpected error in model {self.sqla_model.__tablename__}: {e}") from e
 
     async def remove_order_from_playlist(
-        self, session: AsyncSession, playlist_id: UUID, order_id: UUID, user_id: UUID, reason: DeleteStatus
+        self, session: AsyncSession, playlist_id: UUID, order_id: UUID, reason: DeleteStatus
     ):
         try:
-            plst = (
-                (
-                    await session.execute(
-                        select(Playlist).where(Playlist.id == playlist_id, Playlist.owner_id == user_id)
-                    )
-                )
-                .unique()
-                .scalar_one_or_none()
-            )
-            if not plst:
-                raise NotFoundException()
-
             orm_order = (
                 (
                     await session.execute(

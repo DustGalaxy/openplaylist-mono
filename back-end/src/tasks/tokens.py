@@ -2,7 +2,8 @@ import asyncio
 import random
 
 from src.services.tokens.token_service import token_service
-from src.adapters._rabbit.event_broker import broker as rabbit_broker, topic_exchange
+from src.adapters._rabbit.queues import topic_exchange
+from src.adapters._rabbit.broker import main_publisher
 
 from src.database import async_session_maker
 from taskiq_broker import task_broker as taskiq_broker
@@ -16,7 +17,7 @@ async def refresh_tokens():
     for token in tokens:
         fresh_token = await token_service.refresh_token(token)
 
-        await rabbit_broker.publish(
+        await main_publisher.publish(
             message={
                 "user_id": str(token.linked_account.user_id),
                 "platform_user_id": str(token.linked_account.platform_user_id),

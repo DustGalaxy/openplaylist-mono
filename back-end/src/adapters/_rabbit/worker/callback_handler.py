@@ -1,0 +1,39 @@
+from faststream.rabbit import RabbitRouter
+
+from src.adapters._rabbit.queues import (
+    fanout_exchange,
+)
+
+from src.models.order import OrderDomain
+from src.services.realtime.sio_playlist import sio_playlist_service
+from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType
+from src.dto.events import PlayNow, Deleted
+
+router = RabbitRouter()
+
+@router.subscriber("internal.playlist.callback", fanout_exchange)
+async def _(event: InternalPlaylistEvent):
+    match event.event_type:
+        case InternalPlaylistEventType.TRACK_ADDED:
+            if not event.track or not isinstance(event.track, OrderDomain):
+                return
+            await sio_playlist_service.add_track(event.track, event.playlist_id)
+
+        case InternalPlaylistEventType.TRACK_PLAY:
+            if not event.track or not isinstance(event.track, OrderDomain):
+                return
+            await sio_playlist_service.set_playnow(
+                PlayNow(track_id=str(event.track.id), playlist_id=str(event.playlist_id))
+            )
+
+        case (
+            InternalPlaylistEventType.TRACK_REMOVED
+            | InternalPlaylistEventType.TRACK_LISTENED
+            | InternalPlaylistEventType.TRACK_SKIPPED
+            | InternalPlaylistEventType.TRACK_REPORTED
+        ):
+            if not event.track or not isinstance(event.track, OrderDomain):
+                return
+            await sio_playlist_service.delete_track(
+                Deleted(track_id=str(event.track.id), playlist_id=str(event.playlist_id))
+            )

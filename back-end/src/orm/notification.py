@@ -5,15 +5,28 @@ from sqlalchemy import ForeignKey, Index, func, text, Enum
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src._types import NotificationType
+from src._types import NotificationType, PLAYLIST_EVENTS_SET, USER_EVENTS_SET
 from src.database import Base, UUIDMixin, TimestampMixin
+
+
+def get_default_subscription_settings(context) -> dict:
+    """Генерирует дефолтный белый список ивентов в зависимости от target_type."""
+    # Получаем target_type из текущих параметров вставляемой строки
+    target_type = context.get_current_parameters().get("target_type")
+
+    if target_type == "playlist":
+        return {"allowed_event_types": list(PLAYLIST_EVENTS_SET)}
+    if target_type == "user":
+        return {"allowed_event_types": list(USER_EVENTS_SET)}
+
+    return {"allowed_event_types": []}
 
 
 class DirectNotificationORM(Base, UUIDMixin, TimestampMixin):
     __tablename__: str = "direct_notifications"
 
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    notification_type: Mapped[NotificationType] = mapped_column(Enum(NotificationType, native_enum=False),nullable=False)
+    notification_type: Mapped[str] = mapped_column(nullable=False)
     notification_data: Mapped[dict] = mapped_column(JSONB, nullable=True)
     is_read: Mapped[bool] = mapped_column(nullable=False, default=False, server_default="false")
 
@@ -30,7 +43,7 @@ class EventNotificationORM(Base, UUIDMixin):
 
     target_id: Mapped[UUID] = mapped_column(nullable=False)
     target_type: Mapped[str] = mapped_column(nullable=False)
-    event_type: Mapped[NotificationType] = mapped_column(Enum(NotificationType, native_enum=False), nullable=False)
+    event_type: Mapped[str] = mapped_column(nullable=False)
     event_data: Mapped[dict] = mapped_column(JSONB, nullable=False)
     created_at: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now())
 
@@ -46,6 +59,12 @@ class SubscriptionORM(Base, UUIDMixin):
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     target_id: Mapped[UUID] = mapped_column(nullable=False)
     target_type: Mapped[str] = mapped_column(nullable=False)
+    settings: Mapped[dict] = mapped_column(
+        JSONB,
+        nullable=False,
+        insert_default=get_default_subscription_settings,
+        server_default='{"allowed_event_types": []}',
+    )
     created_at: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now())
 
     __table_args__ = (

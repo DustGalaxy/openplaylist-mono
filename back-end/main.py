@@ -16,7 +16,7 @@ from src.adapters._fastapi.playback_routes import router as playback_router
 from src.adapters._fastapi.notifications import router as notificattions_router
 
 from src.adapters._sio.init import sio
-from src.adapters._rabbit import broker, declare
+from src.adapters._rabbit.broker import get_broker as get_rabbit_broker
 from src.dal._redis.broker import get_broker
 from src.adapters._sio.routes import PlstUpdsNamespace, BasicNamespace, WidgetsNamespace
 from src.services.realtime.sio_playlist import room_manager
@@ -27,15 +27,14 @@ from src.settings import settings
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
-    await broker.start()
-    await declare()
+    await get_rabbit_broker().start()
     get_broker().connect()
 
     room_manager.start_up()
 
     yield
     get_broker().close()
-    await broker.stop()
+    await get_rabbit_broker().stop()
 
 
 app = FastAPI(lifespan=lifespan)

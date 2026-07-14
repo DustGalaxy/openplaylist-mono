@@ -19,7 +19,7 @@ from src.dto.internal.auth import (
 )
 from src.dto.internal.token import Tokens
 from src.models.auth_user import AuthUserSchema
-from src.adapters._rabbit.event_broker import bot_twitch_connect_request, bot_twitch_disconect, bot_twitch_settings
+from src.adapters._rabbit.queues import bot_twitch_connect_request, bot_twitch_disconect, bot_twitch_settings
 
 from src.settings import settings
 from src._types import IntegrationPlatform, IntegrationType, PlatformCap

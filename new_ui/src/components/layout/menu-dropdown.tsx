@@ -356,7 +356,7 @@ export default function MenuDropdown() {
       focus:text-text-main focus:bg-level-1"
             >
               <Move size={16} />
-              {t('nav.moveMethod')}
+              {t('nav.moveMethod.title')}
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent className="bg-level-2 text-text-main border-0">

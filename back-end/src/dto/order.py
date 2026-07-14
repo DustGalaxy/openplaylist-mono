@@ -3,6 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from src._types import Status, TrackSource
+from src.models.order import ExtraData
 
 
 class DonatexNewOrder(BaseModel):
@@ -16,6 +17,7 @@ class DonatexNewOrder(BaseModel):
     yt_video_url: str
     priority: str = "donation"
     source: TrackSource = TrackSource.DONATEX
+
 
 class DANewOrder(BaseModel):
     request_id: UUID
@@ -64,6 +66,9 @@ class YTNewOrder(BaseModel):
     source: TrackSource = TrackSource.YOUTUBE
 
 
+POSSIBLE_ORDER_TYPE = DANewOrder | WebNewOrder | YTNewOrder | TTVNewOrder | DonatexNewOrder | DANewOrder
+
+
 class OrderNew(BaseModel):
     request_id: UUID
     owner_id: UUID
@@ -74,6 +79,11 @@ class OrderNew(BaseModel):
     yt_video_id: str
     priority: str
     source: TrackSource
+
+
+class NewOrderPayload(BaseModel):
+    order: POSSIBLE_ORDER_TYPE
+    from_owner: bool
 
 
 class OrderUpdate(BaseModel):

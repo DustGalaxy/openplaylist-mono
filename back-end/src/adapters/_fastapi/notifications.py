@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 from uuid import UUID
 from .dependencies import USER_ID, DB_SESSION, NOTIFY_SERVICE
 from src.models.notification import (
@@ -6,7 +6,9 @@ from src.models.notification import (
     NotificationSettingsPatch,
     ReadNotification,
     SubscriptionCreate,
+    SubscriptionPatch,
 )
+from src.dto.notifications import NewSubscription, ChangeSettingsSubscription
 
 router = APIRouter(prefix="/notifications")
 
@@ -53,13 +55,27 @@ async def update_settings(
 
 # --- ПОДПИСКИ (Subscriptions) ---
 
+@router.get("/subscriptions", status_code=status.HTTP_200_OK)
+async def fetch_subscribe(service: NOTIFY_SERVICE, user_id: USER_ID, db_session: DB_SESSION):
+    return await service.subs_repo.get_many(db_session, user_id, column="user_id")
 
 @router.post("/subscriptions", status_code=status.HTTP_201_CREATED)
-async def subscribe(service: NOTIFY_SERVICE, user_id: USER_ID, db_session: DB_SESSION, data: SubscriptionCreate):
+async def subscribe(service: NOTIFY_SERVICE, user_id: USER_ID, db_session: DB_SESSION, data: NewSubscription):
     # Принудительно проставляем user_id из зависимостей авторизации для безопасности
-    data.user_id = user_id
-    return await service.create_subscription(db_session, data)
+    return await service.create_subscription(
+        db_session, SubscriptionCreate(user_id=user_id, **data.model_dump(exclude_unset=True))
+    )
 
+
+@router.patch("/subscriptions/{id}", status_code=status.HTTP_200_OK)
+async def patch_sub(
+    service: NOTIFY_SERVICE, user_id: USER_ID, db_session: DB_SESSION, id: UUID, data: ChangeSettingsSubscription
+):
+    # Принудительно проставляем user_id из зависимостей авторизации для безопасности
+    try:
+        return await service.patch_subscription(db_session, user_id, id, SubscriptionPatch(**data.model_dump()))
+    except PermissionError:
+        raise HTTPException(401)
 
 @router.delete("/subscriptions/{subscription_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def unsubscribe(service: NOTIFY_SERVICE, user_id: USER_ID, db_session: DB_SESSION, subscription_id: UUID):

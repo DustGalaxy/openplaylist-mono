@@ -1,18 +1,18 @@
 import json
 
 from faststream import Context
+from faststream.rabbit import RabbitRouter
 from faststream.rabbit.message import RabbitMessage
 from simple_repository.exceptions import NotFoundException
 
-from src.adapters._rabbit.event_broker import (
-    get_broker,
+from src.adapters._rabbit.queues import (
     main_exchange,
     bot_donatex_order_new,
     auth_user_donatex_all_request,
     auth_user_donatex_tokens_refreshed,
 )
 from src.dto.order import DonatexNewOrder
-from src.adapters._rabbit.dto import Tokens, DonateXTokenRefreshed
+from src.adapters._rabbit.bots.dto import Tokens, DonateXTokenRefreshed
 
 from src.dal.postgres.token import token_vault_repository
 from src.dal.postgres.linked_account import linked_accounts_repository
@@ -20,10 +20,10 @@ from src._types import IntegrationPlatform
 from src.database import async_session_maker
 from src.utils import kick
 
-broker = get_broker()
+router = RabbitRouter()
 
 
-@broker.subscriber(bot_donatex_order_new, exchange=main_exchange)
+@router.subscriber(bot_donatex_order_new, exchange=main_exchange)
 async def order_new_from_donatex(
     message: RabbitMessage = Context(),
 ):
@@ -35,7 +35,7 @@ async def order_new_from_donatex(
     await kick("order.new", taskiq_broker, event, False, labels={"user_id": str(event.owner_id)})
 
 
-@broker.subscriber(auth_user_donatex_all_request, exchange=main_exchange)
+@router.subscriber(auth_user_donatex_all_request, exchange=main_exchange)
 async def get_all_donatex_users(
     message: RabbitMessage = Context(),
 ):
@@ -58,7 +58,7 @@ async def get_all_donatex_users(
         ]
 
 
-@broker.subscriber(auth_user_donatex_tokens_refreshed, exchange=main_exchange)
+@router.subscriber(auth_user_donatex_tokens_refreshed, exchange=main_exchange)
 async def donatex_refresh_tokens(
     message: RabbitMessage = Context(),
 ):
@@ -82,7 +82,7 @@ async def donatex_refresh_tokens(
         await token_vault_repository.update(session, tokens)
 
 
-@broker.subscriber("donatex.user.token.died", exchange=main_exchange)
+@router.subscriber("donatex.user.token.died", exchange=main_exchange)
 async def user_token_died(
     message: RabbitMessage = Context(),
 ):

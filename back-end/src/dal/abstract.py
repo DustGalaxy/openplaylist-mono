@@ -48,7 +48,7 @@ class IPlaylistRepository(IAsyncCrud[Playlist, PlaylistSchema, PlaylistCreate, P
 
     @abstractmethod
     async def remove_order_from_playlist(
-        self, session: AsyncSession, playlist_id: UUID, order_id: UUID, user_id: UUID, reason: DeleteStatus
+        self, session: AsyncSession, playlist_id: UUID, order_id: UUID, reason: DeleteStatus
     ): ...
 
     @abstractmethod

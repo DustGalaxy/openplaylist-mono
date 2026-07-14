@@ -42,7 +42,6 @@ class RoomManager:
 
         if not rooms:
             return
-        print(f"disconnecting {sid} from rooms {rooms}")
         with self.redis_adapter.broker.pipeline(transaction=True) as pipe:
             for room_name in rooms:  # pyright: ignore[reportGeneralTypeIssues]
                 pipe.srem(f"{namespace}:rooms-to-sids:{room_name}", sid)

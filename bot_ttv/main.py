@@ -7,7 +7,7 @@ from faststream import FastStream
 import twitchio
 
 from src.log_setup import LOGGER
-from src.adapters._rabbit.handlers import broker
+from src.adapters._rabbit.bots import broker
 from src.adapters._redis.broker import redis_adapter
 from src.bot_setup import setup_bot, context
 

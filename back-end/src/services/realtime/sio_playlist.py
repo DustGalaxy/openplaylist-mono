@@ -33,7 +33,6 @@ class SioPlaylistUpdateService:
 
     async def log(self, log: PlaylistLogSchema):
         owner_sid = self.sid_from_uid(log.user_id)
-        print(f"sending msg for {owner_sid} in plst {log.playlist_id}, log: {log}")
         await self.sio.emit(f"log:{log.playlist_id}", log.model_dump_json(), to=owner_sid, namespace=self.namespace)
 
     async def set_playnow(self, data: PlayNow):

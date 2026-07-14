@@ -15,7 +15,7 @@ dependencies = [
     "uuid6>=2024.7.10",
     "python-dotenv>=1.1.0",
     "simple-repo-asyncsqla==2.2.0",
-    "faststream[rabbit]>=0.5.48",
+    "faststream[cli,rabbit]>=0.5.48",
     "asyncpg>=0.30.0",
     "pytubefix>=10.3.6",
     "redis>=7.1.0",
@@ -29,6 +29,7 @@ dependencies = [
     "httpx>=0.28.1",
     "google-api-python-client>=2.197.0",
     "isodate>=0.7.2",
+    "orjson>=3.11.9",
 ]
 
 [dependency-groups]

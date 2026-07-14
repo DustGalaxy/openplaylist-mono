@@ -2,6 +2,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  Bell,
   ListMusic,
   Pause,
   Play,
@@ -10,6 +11,7 @@ import {
   Repeat,
   Repeat1,
   RepeatOff,
+  Share2,
   Shuffle,
   SkipBack,
   SkipForward,
@@ -34,6 +36,10 @@ import {
 import Btn from '@/components/ui/my-btn'
 import { PlaylistProvider } from '@/features/playlist/context/playlist-context'
 import { computePriority } from '@/lib/utils'
+import { toast } from 'sonner'
+import { SubscriptionCreateModal } from '@/features/notifications/components/SubscriptionCreateModal'
+import type { SubscriptionSettings } from '@/features/notifications/types'
+import { createSubscription } from '@/api/api-user'
 
 export const Route = createFileRoute('/view')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -246,6 +252,15 @@ function RouteComponent() {
 
   const trackCount = playlistState.track_data.length
 
+  const [openNewSubModal, setOpenNewSubModal] = useState(false)
+
+  const handleCreateSubscription = async (settings: SubscriptionSettings) => {
+    await createSubscription(playlistState.id, 'playlist', settings)
+
+    setOpenNewSubModal(false)
+    toast.success(t('notifications.subscribed', 'Subscribed!'))
+  }
+
   return (
     <div className={pageWrapClass}>
       <div className={`${pageInnerClass} flex flex-col gap-8`}>
@@ -298,6 +313,30 @@ function RouteComponent() {
               <h1 className="text-2xl sm:text-3xl font-bold text-text-main leading-tight wrap-break-word">
                 {playlistState.name}
               </h1>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <Btn
+                title={t('publicView.copyLink')}
+                className="px-2 bg-level-2"
+                onClick={() => {
+                  const url = new URL(window.location.href)
+                  url.searchParams.set('p', playlistState.id)
+                  navigator.clipboard.writeText(url.toString())
+                  toast.success(
+                    t('playlist.toast.linkCopied', 'link copied to clipboard'),
+                  )
+                }}
+              >
+                <Share2 className="size-6" />
+              </Btn>
+              <Btn
+                onClick={() => setOpenNewSubModal(true)}
+                title={t('publicView.subscribe')}
+                className="px-2 bg-level-2"
+              >
+                <Bell className="size-6" />
+              </Btn>
             </div>
           </header>
           <ViewInfoBar playlist={playlistState} />
@@ -443,6 +482,13 @@ function RouteComponent() {
             </div>
           )}
         </section>
+        <SubscriptionCreateModal
+          isOpen={openNewSubModal}
+          targetName={playlistState.name}
+          targetType="playlist"
+          onCreate={handleCreateSubscription}
+          onClose={() => setOpenNewSubModal(false)}
+        />
       </div>
     </div>
   )

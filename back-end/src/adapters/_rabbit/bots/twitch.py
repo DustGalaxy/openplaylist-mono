@@ -1,19 +1,16 @@
 from datetime import datetime
-import json
 
-from faststream import Context
-from faststream.rabbit.message import RabbitMessage
+from faststream.rabbit import RabbitRouter
 from simple_repository.exceptions import NotFoundException
 
-from src.adapters._rabbit.event_broker import (
-    broker,
+from src.adapters._rabbit.queues import (
     main_exchange,
     auth_user_twitch_all_request,
     bot_twitch_order_new,
     auth_user_twitch_tokens_refreshed,
 )
 from src.dto.order import TTVNewOrder
-from src.adapters._rabbit.dto import Tokens, TwitchTokenRefreshed
+from src.adapters._rabbit.bots.dto import Tokens, TwitchTokenRefreshed
 
 from src.dal.postgres.token import token_vault_repository
 from src.dal.postgres.linked_account import linked_accounts_repository
@@ -21,25 +18,25 @@ from src._types import IntegrationPlatform
 from src.database import async_session_maker
 from src.utils import kick
 
+router = RabbitRouter()
 
-@broker.subscriber(bot_twitch_order_new, exchange=main_exchange)
-async def order_new_from_twitch(
-    message: RabbitMessage = Context(),
-):
-    await message.ack()
-    event: TTVNewOrder = TTVNewOrder.model_validate_json(message.body)
+
+@router.subscriber(bot_twitch_order_new, exchange=main_exchange)
+async def order_new_from_twitch(event: TTVNewOrder):
 
     from taskiq_broker import task_broker as taskiq_broker
 
-    await kick("order.new", taskiq_broker, event, event.owner_platform_id == event.requester_id, labels={"user_id": str(event.owner_id)})
+    await kick(
+        "order.new",
+        taskiq_broker,
+        event,
+        event.owner_platform_id == event.requester_id,
+        labels={"user_id": str(event.owner_id)},
+    )
 
 
-@broker.subscriber(auth_user_twitch_all_request, exchange=main_exchange)
-async def get_all_twitch_users(
-    message: RabbitMessage = Context(),
-):
-    await message.ack()
-    print("get_all_twitch_users")
+@router.subscriber(auth_user_twitch_all_request, exchange=main_exchange)
+async def get_all_twitch_users():
     async with async_session_maker() as session:
         from src.services.auth.auth_service import auth_service
 
@@ -58,12 +55,11 @@ async def get_all_twitch_users(
         ]
 
 
-@broker.subscriber(auth_user_twitch_tokens_refreshed, exchange=main_exchange)
+@router.subscriber(auth_user_twitch_tokens_refreshed, exchange=main_exchange)
 async def twitch_refresh_tokens(
-    message: RabbitMessage = Context(),
+    event: TwitchTokenRefreshed,
 ):
-    await message.ack()
-    event: TwitchTokenRefreshed = TwitchTokenRefreshed.model_validate_json(message.body)
+
     async with async_session_maker() as session:
         try:
             link = await linked_accounts_repository.get_by_id_platform(
@@ -82,12 +78,10 @@ async def twitch_refresh_tokens(
         await token_vault_repository.update(session, tokens)
 
 
-@broker.subscriber("twitch.user.token.died", exchange=main_exchange)
+@router.subscriber("twitch.user.token.died", exchange=main_exchange)
 async def user_token_died(
-    message: RabbitMessage = Context(),
+    event: dict,
 ):
-    await message.ack()
-    event: dict = json.loads(message.body)
     async with async_session_maker() as session:
         from src.services.auth.auth_service import auth_service
 

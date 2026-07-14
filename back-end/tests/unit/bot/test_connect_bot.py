@@ -8,7 +8,7 @@ from src._types import IntegrationPlatform
 from src.models.auth_user import AuthUserSchema
 from src.models.linked_accounts import LinkedAccountsDomain
 from src.models.token_vault import TokenVaultDomain
-from src.adapters._rabbit.event_broker import main_exchange
+from src.adapters._rabbit.queues import main_exchange
 
 
 @pytest.fixture

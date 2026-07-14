@@ -300,6 +300,9 @@ export function ProfileTab({ user }: ProfileTabProps) {
   }, [])
 
   const handleKillProfile = async () => {
+    if (!confirm(t('settings.profile.killUserProfile.confirmation'))) {
+      return
+    }
     toast.loading(t('settings.profile.killUserProfile.deleting'))
     const res = await deleteUser()
 

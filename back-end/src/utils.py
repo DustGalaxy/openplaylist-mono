@@ -11,6 +11,7 @@ from taskiq.kicker import AsyncKicker
 
 from src.dal._redis.broker import get_broker, RedisAdapter
 from src.settings import settings
+from src._types import EVENTS_MAP, PlaylistTypes, TargetType, UserTypes
 
 
 def find[T](list_to_search: list[T], condition_func: Callable[[T], bool]) -> T | None:
@@ -107,3 +108,7 @@ def conditional_trace(key_prefix: str):
         return func
 
     return decorator
+
+
+def get_event_payload_type(target_type: TargetType, event_type: str) -> UserTypes | PlaylistTypes:
+    return EVENTS_MAP[target_type][event_type]

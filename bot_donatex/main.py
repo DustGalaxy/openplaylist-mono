@@ -3,7 +3,7 @@ import logging
 
 from faststream import FastStream
 
-from src.adapters._rabbit.handlers import rabbit_broker as broker
+from src.adapters._rabbit.bots import rabbit_broker as broker
 from src.services.manager import SignalRManager
 from src.app_context import context
 

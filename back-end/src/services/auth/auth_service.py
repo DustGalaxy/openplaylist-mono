@@ -13,10 +13,10 @@ from simple_repository.exceptions import NotFoundException
 
 from src.tasks.email import send_email
 
-from src.adapters._rabbit.event_broker import (
-    broker,
+from src.adapters._rabbit.queues import (
     main_exchange,
 )
+from src.adapters._rabbit.broker import broker
 from src.dal._redis.broker import get_broker
 from src.dal.postgres.token import TokenVaultRepository
 from src.dal.postgres.linked_account import LinkedAccountsRepository
@@ -42,7 +42,9 @@ security_scheme = APIKeyCookie(name=settings.COOKIE_NAME)
 
 
 class AuthService:
-    def __init__(self, user_repo: UserRepository, link_repo: LinkedAccountsRepository, token_vault_repo: TokenVaultRepository):
+    def __init__(
+        self, user_repo: UserRepository, link_repo: LinkedAccountsRepository, token_vault_repo: TokenVaultRepository
+    ):
         self.user_repo: UserRepository = user_repo
         self.link_repo: LinkedAccountsRepository = link_repo
         self.token_vault_repo: TokenVaultRepository = token_vault_repo
@@ -300,7 +302,7 @@ class AuthService:
     ) -> UUID:
         try:
             payload = jwt.decode(token, settings.JWT_PUBLIC_KEY, algorithms=[settings.JWT_ALGORITHM])
-            return payload["sub"]
+            return UUID(payload["sub"])
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
             raise HTTPException(status_code=401, detail="Not authenticated")
 
@@ -417,7 +419,9 @@ class AuthService:
 
             if integration.bot_connection and (queue := manager.get(integration.platform).get_bot_disconect_queue()):
                 try:
-                    await broker.request(str(integration.platform_user_id), queue=queue, exchange=main_exchange, timeout=5)
+                    await broker.request(
+                        str(integration.platform_user_id), queue=queue, exchange=main_exchange, timeout=5
+                    )
                 except TimeoutError:
                     pass
 
@@ -520,7 +524,9 @@ class AuthService:
             link.bot_settings = defualt_settings
             link.bot_connection = True
             await self.link_repo.update(db_session, link)
-            await sio_playlist_service.ack_bot_connection(str(link.platform), str(link.user_id), str(link.platform_user_id))
+            await sio_playlist_service.ack_bot_connection(
+                str(link.platform), str(link.user_id), str(link.platform_user_id)
+            )
         except TimeoutError:
             raise HTTPException(500, "Failed to connect bot. Try again later.")
 

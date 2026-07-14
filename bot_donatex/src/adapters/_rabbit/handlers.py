@@ -7,7 +7,7 @@ from src.adapters._rabbit.broker import (
     user_token_died,
     bot_donatex_disconnect,
 )
-from src.adapters._rabbit.dto import ConnectionData
+from src.adapters._rabbit.bots.dto import ConnectionData
 from src.app_context import context
 from src.utils import find
 

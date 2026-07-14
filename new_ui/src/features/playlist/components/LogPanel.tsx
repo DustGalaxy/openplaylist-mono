@@ -197,8 +197,6 @@ export default function LogPanel() {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop =
         scrollContainerRef.current.scrollHeight
-      console.log("SCROLL!");
-      
     }
   }, [logs.length]) // Следим конкретно за длиной массива
 
@@ -294,14 +292,14 @@ export default function LogPanel() {
 
   if (logs.length === 0)
     return (
-      <div className="w-full h-[350px] bg-level-1 mt-1 rounded-[var(--rounded-std)] px-2 py-1.5" />
+      <div className="w-full h-87.5 bg-level-1 mt-1 rounded-(--rounded-std) px-2 py-1.5" />
     )
 
   return (
-    <div className="w-full bg-level-1 h-[345px] rounded-[var(--rounded-std)] px-2 py-1.5 font-mono text-xs overflow-x-scroll">
+    <div className="w-full bg-level-1 h-86.25 rounded-(--rounded-std) px-2 py-1.5 font-mono text-xs overflow-x-scroll">
       <div
         ref={scrollContainerRef}
-        className="flex flex-col w-fit gap-1 h-[330px] overflow-auto scroll-auto"
+        className="flex flex-col w-fit gap-1 h-82.5 overflow-auto scroll-auto"
       >
         {logs.map((log, i) => (
           <LogModal key={log.id || i} data={log}>
@@ -309,7 +307,7 @@ export default function LogPanel() {
               <TimeAgo
                 timestamp={log.created_at}
                 lang={i18n.language}
-                className="text-muted-foreground text-[9px] shrink-0 min-w-[45px]"
+                className="text-muted-foreground text-[9px] shrink-0 min-w-11.25"
               />
               <span className="truncate text-text-main/90">
                 {getLogBody(log)}

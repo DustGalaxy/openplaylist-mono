@@ -1,51 +1,19 @@
 {
-  "errorPage": {
-    "eyebrow": "Wow! Something went wrong",
-    "title": "Something went wrong",
-    "logLabel": "Error log:",
-    "unknownError": "Unknown system error",
-    "retryBtn": "Try again",
-    "homeBtn": "Go home"
-  },
-  "common": {
-    "or": "or",
-    "cancel": "Cancel",
-    "toast": {
-      "copied": "Copied to clipboard!",
-      "saving": "Saving...",
-      "saved": "Saved successfully",
-      "saveFailed": "Failed to save",
-      "loading": "Loading...",
-      "success": "Done!",
-      "error": "Something went wrong",
-      "confirming": "Processing..."
-    },
-    "web": "Web",
-    "general": "General",
-    "general2": "General"
-  },
   "brand": {
     "name": "OpenPlaylist",
-    "nameWithVersion": "OpenPlaylist v2026.2beta",
-    "version": "2026.2 beta"
-  },
-  "nav": {
-    "login": "Login",
-    "signUp": "Sign Up",
-    "settings": "Settings",
-    "logout": "Logout",
-    "statistic": "Statistic",
-    "history": "History",
-    "myPlaylists": "My playlists",
-    "theme": "Theme",
-    "moveMethod": "Move Method",
-    "moveMethod.dnd": "Drag",
-    "moveMethod.arrows": "Arrows"
+    "version": "2026.2 beta",
+    "nameWithVersion": "OpenPlaylist v2026.2beta"
   },
   "footer": {
     "description": "Interactive music for everyone. Create your own playlists, share your favorite tracks, or request music on your favorite creators' streams.",
     "navigation": "Navigation",
     "features": "Features",
+    "copyright": {
+      "start": "© {{year}} OpenPlaylist. Crafted by ",
+      "link": "DustGalaxy",
+      "end": " with ❤️ for creators and listeners."
+    },
+    "techStack": "Powered by Socket.IO · React · FastAPI · & lots of tea 🍵",
     "searchPlaylists": "Search playlists",
     "login": "Log in",
     "register": "Join now",
@@ -54,13 +22,378 @@
       "rulesAndBlocks": "Smart filters & blocklists",
       "donationPriority": "Donation priority bumps",
       "integrations": "Streaming and donation platform sync"
+    }
+  },
+  "nav": {
+    "myPlaylists": "My playlists",
+    "login": "Login",
+    "theme": "Theme",
+    "moveMethod": {
+      "title": "Move method",
+      "dnd": "Drag & Drop",
+      "arrows": "Arrows"
     },
-    "copyright": {
-      "start": "© {{year}} OpenPlaylist. Crafted by ",
-      "link": "DustGalaxy",
-      "end": " with ❤️ for creators and listeners."
+    "statistic": "Statistic",
+    "history": "History",
+    "settings": "Settings",
+    "logout": "Logout",
+    "signUp": "Sign Up",
+    "moveMethod.dnd": "Drag",
+    "moveMethod.arrows": "Arrows"
+  },
+  "errorPage": {
+    "eyebrow": "Wow! Something went wrong",
+    "title": "Something went wrong",
+    "logLabel": "Error log:",
+    "unknownError": "Unknown system error",
+    "retryBtn": "Try again",
+    "homeBtn": "Go home"
+  },
+  "playlist": {
+    "stats": {
+      "mode": "Mode",
+      "minViews": "Min views",
+      "minLikes": "Min likes",
+      "maxDuration": "Max duration",
+      "durationSec_one": "{{count}} sec",
+      "durationSec_other": "{{count}} secs",
+      "trackCd": "Track CD",
+      "cooldownMin_one": "{{count}}m",
+      "cooldownMin_other": "{{count}}m",
+      "userCd": "User CD",
+      "maxSize": "Max size",
+      "maxSizeUnlimited": "∞",
+      "priorityMode": "Priority mode",
+      "durationSec": "{{count}} sec",
+      "cooldownMin": "{{count}}m"
     },
-    "techStack": "Powered by Socket.IO · React · FastAPI · & lots of tea 🍵"
+    "toast": {
+      "requestAdded": "Track added to queue",
+      "requestAddedFailed": "Failed to add track",
+      "created": "Playlist \"{{name}}\" created successfully",
+      "linkCopied": "Playlist link copied to clipboard!",
+      "deleted": "Playlist deleted",
+      "deleteFailed": "Failed to delete playlist",
+      "updated": "Playlist updated",
+      "updateFailed": "Failed to update playlist",
+      "requestRemoved": "Track removed from queue",
+      "requestRemoveFailed": "Failed to remove track",
+      "playNowSet": "Track set to play next",
+      "playNowFailed": "Failed to set track",
+      "visibilityUpdated": "Playlist visibility updated",
+      "modeUpdated": "Playlist mode updated",
+      "activeUpdated": "Playlist requests updated"
+    },
+    "queue": {
+      "placeholder": {
+        "add": "Paste YouTube URL...",
+        "searchRequester": "Search queue by title or requester...",
+        "search": "Search queue by title..."
+      },
+      "mode": {
+        "add": "Add track",
+        "search": "Search queue"
+      },
+      "submit": "Add",
+      "noMatch": "No tracks match your search.",
+      "empty": "No tracks available."
+    },
+    "log": {
+      "modal": {
+        "title": "Log for {{name}}",
+        "created_at": "Timestamp",
+        "event_type": "Event Type",
+        "platform": "Platform",
+        "initiated_by": "Initiated By",
+        "owner": "Owner",
+        "guest": "Guest",
+        "payload": "Event Data (JSON)",
+        "close": "Close",
+        "id": "Log ID"
+      },
+      "types": {
+        "add_track_error": "Add Track Error",
+        "error": "System Error",
+        "add_track": "Add Track",
+        "play_track": "Play Track",
+        "remove_track": "Remove Track",
+        "listen_track": "Listen Track",
+        "skip_track": "Skip Track",
+        "report_track": "Report Track"
+      },
+      "errors": {
+        "unknown": "Неизвестная ошибка",
+        "Playlist is not active": "Playlist is not active",
+        "Wrong donation amount": "Wrong donation amount",
+        "Wrong donation currency": "Wrong donation currency",
+        "Blacklisted user": "Blacklisted user",
+        "Blacklisted track": "Blacklisted track",
+        "Not enough views": "Not enough views",
+        "Not enough likes": "Not enough likes",
+        "Too long": "Track is too long",
+        "Playlist is full": "Playlist is full",
+        "Track cooldown": "Track cooldown",
+        "User cooldown": "User cooldown"
+      },
+      "add_track": "Added track '{{title}}'",
+      "add_track_error": "Failed to add track '{{title}}' by reason: {{error}}",
+      "play_track": "Played track '{{title}}'",
+      "no_track": "No track played",
+      "remove_track": "Removed track '{{title}}'",
+      "listen_track": "Listened to track '{{title}}'",
+      "skip_track": "Skipped track '{{title}}'",
+      "report_track": "Reported track '{{title}}'",
+      "title": "Log"
+    },
+    "create": {
+      "submitting": "Creating...",
+      "success": "Playlist created successfully! You can start adding tracks or configure rules.",
+      "failed": "Failed to create playlist",
+      "title": "New playlist",
+      "description": "Form to create a new playlist",
+      "nameLabel": "Playlist name",
+      "nameHint": "Must be unique for your account",
+      "namePlaceholder": "Type name...",
+      "descriptionLabel": "Playlist description",
+      "descriptionPlaceholder": "Type description...",
+      "showInWidget": "Show playlist activity in widget?",
+      "showInWidgetHint": "Widget for OBS and show last played track",
+      "submit": "Create"
+    },
+    "trackCount_one": "{{count}} track",
+    "trackCount_other": "{{count}} tracks",
+    "track": {
+      "copy": "Copy YouTube link",
+      "save": "Save track",
+      "play": "Play next",
+      "remove": "Remove from queue",
+      "add": "Add to playlist",
+      "duration": "Duration",
+      "date": "Date added - {{date}}",
+      "priority": "Track priority",
+      "unsave": "Remove from saved",
+      "source": "Request source",
+      "video_id": "YouTube Video ID (Open original)",
+      "status": "Track status",
+      "requester": "Requested by",
+      "eject": "Show/hide technical details",
+      "ejectBtn": "Eject"
+    },
+    "tooltip": {
+      "prev": "Previous track",
+      "next": "Next track",
+      "shuffle": "Shuffle",
+      "status": "Playlist status",
+      "sync": "Player sync",
+      "share": "Share playlist link",
+      "logs": "Playlist action logs",
+      "validation": "Validation preview",
+      "hideSavedTracks": "Hide saved tracks",
+      "showSavedTracks": "Show saved tracks",
+      "repeatMode": {
+        "all": "Repeat all",
+        "once": "Repeat one",
+        "none": "Repeat off"
+      },
+      "pause": "Pause",
+      "play": "Play"
+    },
+    "status": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "nowPlaying": {
+      "empty": "No track is currently playing."
+    },
+    "saved": {
+      "title": "Saved",
+      "empty": "No saved tracks"
+    },
+    "report": {
+      "error": {
+        "invalidYoutubeId": "Invalid YouTube video ID.",
+        "blockFailed": "Failed to block user.",
+        "validation": "Add a reason or choose to block the user and/or track.",
+        "processFailed": "Something went wrong while processing the report.",
+        "invalidId": "Invalid ID",
+        "generic": "Failed to submit report"
+      },
+      "success": {
+        "userBlocked": "user blocked",
+        "trackBlocked": "track blocked",
+        "tracksRemoved_one": "{{count}} track removed",
+        "tracksRemoved_other": "{{count}} tracks removed",
+        "reportSubmitted": "report submitted",
+        "recorded": "Report recorded.",
+        "tracksRemoved": "{{count}} track removed"
+      },
+      "title": "Report",
+      "description": "Report a track or requester and optionally add them to your block lists.",
+      "reason": "Reason",
+      "reasonPlaceholder": "Describe the reason...",
+      "blockUserLabel": "Block user: {{nickname}} ({{platform}})",
+      "blockTrackLabel": "Block track: {{id}}",
+      "submitting": "Submitting...",
+      "submit": "Submit report",
+      "cancel": "Cancel",
+      "blockUser": "Block user",
+      "blockTrack": "Block track"
+    },
+    "addbar": {
+      "submit": "Add Track",
+      "toggle": "Toggle Add Track",
+      "placeholder": "Place url here"
+    }
+  },
+  "auth": {
+    "page": {
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create Account",
+      "hasAccount": "Already have an account?",
+      "loginInstead": "Login Instead"
+    },
+    "login": {
+      "error": {
+        "socialFailed": "Social login failed",
+        "fillAll": "Please fill in all fields",
+        "profileLoad": "Login succeeded but your profile could not be loaded. Please try again.",
+        "failed": "Login failed. Please try again.",
+        "unexpected": "An unexpected error occurred"
+      },
+      "title": "Login",
+      "subtitle": "Connect with your account",
+      "tab": {
+        "social": "Social Login",
+        "classic": "Email & Password"
+      },
+      "socialHint": "Sign in with your favorite platform",
+      "socialFallbackHint": "Don't have a social account linked? Log in via email →",
+      "field": {
+        "email": "Email",
+        "password": "Password"
+      },
+      "placeholder": {
+        "email": "you@example.com",
+        "password": "••••••••"
+      },
+      "submitLoading": "Logging in...",
+      "submit": "Login",
+      "backToSocial": "Back to social login",
+      "legal": "By logging in, you agree to our Terms of Service and Privacy Policy",
+      "registerPrompt": "Don't have an account?",
+      "registerLink": "Sign up here"
+    },
+    "register": {
+      "error": {
+        "socialFailed": "Social registration failed",
+        "fillAll": "Please fill in all fields",
+        "passwordMismatch": "Passwords do not match",
+        "passwordShort": "Password must be at least 8 characters",
+        "failed": "Registration failed. Please try again.",
+        "unexpected": "An unexpected error occurred"
+      },
+      "title": "Create Account",
+      "subtitle": "Join us to get started",
+      "tab": {
+        "social": "Social Sign Up",
+        "classic": "Email & Password"
+      },
+      "socialHint": "Sign up with your favorite platform",
+      "emailHint": "Prefer email? Use the form on the right →",
+      "field": {
+        "username": "Username",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm Password"
+      },
+      "placeholder": {
+        "username": "your_username",
+        "email": "you@example.com",
+        "password": "••••••••"
+      },
+      "passwordHint": "At least 8 characters",
+      "submitLoading": "Creating account...",
+      "submit": "Sign Up",
+      "backToSocial": "Back to social sign up",
+      "legal": "By signing up, you agree to our Terms of Service and Privacy Policy",
+      "loginPrompt": "Already have an account?",
+      "loginLink": "Log in here"
+    },
+    "social": {
+      "loginWith": "Login with {{platform}}",
+      "signUpWith": "Sign up with {{platform}}"
+    },
+    "emailConfirm": {
+      "missingParams": "Missing confirmation parameters",
+      "networkError": "Network error. Check your connection.",
+      "invalid": "Invalid confirmation link",
+      "expired": "Confirmation link expired",
+      "confirmationFailedFallback": "Confirmation failed. Please try again.",
+      "invalidLink": "Invalid Link",
+      "missingParamsDetail": "This confirmation link is missing required parameters. Please check your email and try again.",
+      "backToLogin": "Back to Login",
+      "confirming": "Confirming Email",
+      "verifyingEmail": "We're verifying your email address: {{email}}",
+      "pleaseWait": "Please don't close this page...",
+      "confirmed": "Email Confirmed!",
+      "confirmedLoggedIn": "Your email has been successfully verified. You're now logged in.",
+      "redirecting": "Redirecting...",
+      "failed": "Confirmation Failed",
+      "tryAgain": "Try Again"
+    },
+    "logout": {
+      "title": "Logging out...",
+      "pleaseWait": "Please wait, signing out...",
+      "errorDetail": "An error occurred while signing out: {{message}}",
+      "errorLocalClear": "(The server may be unavailable. Your local session will be cleared.)",
+      "redirecting": "You have been logged out. Redirecting...",
+      "success": "You have been logged out successfully",
+      "successToast": "Logged out successfully",
+      "error": "Logout failed"
+    },
+    "oauthCallback": {
+      "authFailed": "Authentication failed. Please try again.",
+      "linking": "Account Linking",
+      "authorizing": "Authorization",
+      "sendingCode": "Sending code...",
+      "codeSent": "Code sent, waiting for response...",
+      "error": "An error occurred",
+      "unknownError": "Unknown error",
+      "initializing": "Initializing...",
+      "pleaseWait": "Please wait.",
+      "linkFailed": "Failed to link account."
+    }
+  },
+  "common": {
+    "or": "or",
+    "cancel": "Cancel",
+    "save": "Сохранить",
+    "web": "Web",
+    "general2": "General",
+    "general": "General",
+    "toast": {
+      "loading": "Loading...",
+      "saving": "Saving...",
+      "copied": "Copied to clipboard!",
+      "confirming": "Processing...",
+      "saved": "Saved successfully",
+      "saveFailed": "Failed to save",
+      "success": "Done!",
+      "error": "Something went wrong"
+    }
+  },
+  "dashboard": {
+    "tooltip": {
+      "addPlaylist": "Create playlist",
+      "playlist": "Playlist - {{playlistName}}"
+    },
+    "empty": {
+      "title": "No playlists yet",
+      "hint": "Press + to create your first playlist."
+    },
+    "eyebrow": "Your playlists",
+    "title": "Dashboard",
+    "subtitle": "Manage playlists, queue tracks, and control playback."
   },
   "landing": {
     "eyebrow": "Playlists for streams and communities",
@@ -71,15 +404,15 @@
     "findPlaylist": "Find Playlist",
     "audienceTitle": "Who is it for?",
     "audienceSubtitle": "Streamers · Viewers · Music Lovers",
+    "featuresTitle": "Features",
+    "featuresSubtitle": "From viewer request to playback — everything is connected via settings, real-time updates, and an intuitive dashboard.",
+    "howItWorksTitle": "How it works",
     "audienceBullets": {
       "sharedQueue": "Shared queue with priorities and donations",
       "validation": "YouTube track validation based on your settings",
       "publicPrivate": "Public and private playlists",
       "sync": "Real-time dashboard and viewer page sync"
     },
-    "featuresTitle": "Features",
-    "featuresSubtitle": "From viewer request to playback — everything is connected via settings, real-time updates, and an intuitive dashboard.",
-    "howItWorksTitle": "How it works",
     "features": {
       "liveQueue": {
         "title": "Live Queue",
@@ -113,347 +446,179 @@
       }
     }
   },
-  "auth": {
-    "login": {
-      "title": "Login",
-      "subtitle": "Connect with your account",
-      "tab": {
-        "social": "Social Login",
-        "classic": "Email & Password"
+  "notifications": {
+    "events": {
+      "track.added": {
+        "label": "Track Addition",
+        "description": "When new songs are added to the playlist"
       },
-      "socialHint": "Sign in with your favorite platform",
-      "socialFallbackHint": "Don't have a social account linked? Log in via email →",
-      "field": {
-        "email": "Email",
-        "password": "Password"
+      "track.removed": {
+        "label": "Track Removal",
+        "description": "When tracks are removed from the playlist"
       },
-      "placeholder": {
-        "email": "you@example.com",
-        "password": "••••••••"
+      "basic.name": {
+        "label": "Renaming",
+        "description": "Changes to the playlist name or cover art"
       },
-      "submit": "Login",
-      "submitLoading": "Logging in...",
-      "backToSocial": "Back to social login",
-      "legal": "By logging in, you agree to our Terms of Service and Privacy Policy",
-      "registerPrompt": "Don't have an account?",
-      "registerLink": "Sign up here",
-      "error": {
-        "socialFailed": "Social login failed",
-        "fillAll": "Please fill in all fields",
-        "profileLoad": "Login succeeded but your profile could not be loaded. Please try again.",
-        "failed": "Login failed. Please try again.",
-        "unexpected": "An unexpected error occurred"
+      "basic.visibility": {
+        "label": "Privacy Status",
+        "description": "Changing privacy status (public/private)"
+      },
+      "realtime.sync": {
+        "label": "Synchronization",
+        "description": "Enabling/disabling live synchronization"
+      },
+      "rules.mode": {
+        "label": "Filtering Mode",
+        "description": "Changes to the global track filtering mode"
+      },
+      "rules.validation": {
+        "label": "Validation Rules",
+        "description": "Updates to track verification rules"
+      },
+      "rules.priorities": {
+        "label": "Sorting Priorities",
+        "description": "Changes to sorting trigger priorities"
+      },
+      "playlist.create": {
+        "label": "Playlist Creation",
+        "description": "When the user creates a new public playlist"
+      },
+      "playlist.delete": {
+        "label": "Playlist Deletion",
+        "description": "When the user deletes their playlists"
       }
-    },
-    "register": {
-      "title": "Create Account",
-      "subtitle": "Join us to get started",
-      "tab": {
-        "social": "Social Sign Up",
-        "classic": "Email & Password"
-      },
-      "socialHint": "Sign up with your favorite platform",
-      "emailHint": "Prefer email? Use the form on the right →",
-      "field": {
-        "username": "Username",
-        "email": "Email",
-        "password": "Password",
-        "confirmPassword": "Confirm Password"
-      },
-      "placeholder": {
-        "username": "your_username",
-        "email": "you@example.com",
-        "password": "••••••••"
-      },
-      "passwordHint": "At least 8 characters",
-      "submit": "Sign Up",
-      "submitLoading": "Creating account...",
-      "backToSocial": "Back to social sign up",
-      "legal": "By signing up, you agree to our Terms of Service and Privacy Policy",
-      "loginPrompt": "Already have an account?",
-      "loginLink": "Log in here",
-      "error": {
-        "socialFailed": "Social registration failed",
-        "fillAll": "Please fill in all fields",
-        "passwordMismatch": "Passwords do not match",
-        "passwordShort": "Password must be at least 8 characters",
-        "failed": "Registration failed. Please try again.",
-        "unexpected": "An unexpected error occurred"
-      }
-    },
-    "page": {
-      "noAccount": "Don't have an account?",
-      "createAccount": "Create Account",
-      "hasAccount": "Already have an account?",
-      "loginInstead": "Login Instead"
-    },
-    "social": {
-      "loginWith": "Login with {{platform}}",
-      "signUpWith": "Sign up with {{platform}}"
-    },
-    "emailConfirm": {
-      "invalidLink": "Invalid Link",
-      "missingParams": "Missing confirmation parameters",
-      "missingParamsDetail": "This confirmation link is missing required parameters. Please check your email and try again.",
-      "verifyingEmail": "We're verifying your email address: {{email}}",
-      "confirmedLoggedIn": "Your email has been successfully verified. You're now logged in.",
-      "confirmationFailedFallback": "Confirmation failed. Please try again.",
-      "confirming": "Confirming Email",
-      "confirmed": "Email Confirmed!",
-      "redirecting": "Redirecting...",
-      "networkError": "Network error. Check your connection.",
-      "invalid": "Invalid confirmation link",
-      "expired": "Confirmation link expired",
-      "tryAgain": "Try Again",
-      "backToLogin": "Back to Login",
-      "failed": "Confirmation Failed",
-      "pleaseWait": "Please don't close this page..."
-    },
-    "oauthCallback": {
-      "linking": "Account Linking",
-      "authorizing": "Authorization",
-      "sendingCode": "Sending code...",
-      "codeSent": "Code sent, waiting for response...",
-      "error": "An error occurred",
-      "unknownError": "Unknown error",
-      "initializing": "Initializing...",
-      "pleaseWait": "Please wait.",
-      "authFailed": "Authentication failed. Please try again.",
-      "linkFailed": "Failed to link account."
-    },
-    "logout": {
-      "title": "Logging out...",
-      "pleaseWait": "Please wait, signing out...",
-      "redirecting": "You have been logged out. Redirecting...",
-      "success": "You have been logged out successfully",
-      "successToast": "Logged out successfully",
-      "error": "Logout failed",
-      "errorDetail": "An error occurred while signing out: {{message}}",
-      "errorLocalClear": "(The server may be unavailable. Your local session will be cleared.)"
-    }
-  },
-  "meta": {
-    "login": {
-      "title": "Login - OpenPlaylist",
-      "description": "Log in to your OpenPlaylist account"
-    },
-    "register": {
-      "title": "Sign Up - OpenPlaylist",
-      "description": "Create a new OpenPlaylist account"
-    }
-  },
-  "dashboard": {
-    "eyebrow": "Your playlists",
-    "title": "Dashboard",
-    "subtitle": "Manage playlists, queue tracks, and control playback.",
-    "empty": {
-      "title": "No playlists yet",
-      "hint": "Press + to create your first playlist."
-    },
-    "tooltip": {
-      "addPlaylist": "Create playlist",
-      "playlist": "Playlist - {{playlistName}}"
-    }
-  },
-  "playlist": {
-    "log": {
-      "title": "Log",
-      "add_track": "Added track '{{title}}'",
-      "add_track_error": "Failed to add track '{{title}}' by reason: {{error}}",
-      "remove_track": "Removed track '{{title}}'",
-      "play_track": "Played track '{{title}}'",
-      "listen_track": "Listened to track '{{title}}'",
-      "skip_track": "Skipped track '{{title}}'",
-      "report_track": "Reported track '{{title}}'",
-      "no_track": "No track played",
-      "modal": {
-        "title": "Log for {{name}}",
-        "close": "Close",
-        "id": "Log ID",
-        "created_at": "Timestamp",
-        "event_type": "Event Type",
-        "platform": "Platform",
-        "initiated_by": "Initiated By",
-        "owner": "Owner",
-        "guest": "Guest",
-        "payload": "Event Data (JSON)"
-      },
-      "errors": {
-        "Playlist is not active": "Playlist is not active",
-        "Wrong donation amount": "Wrong donation amount",
-        "Wrong donation currency": "Wrong donation currency",
-        "Blacklisted user": "Blacklisted user",
-        "Blacklisted track": "Blacklisted track",
-        "Not enough views": "Not enough views",
-        "Not enough likes": "Not enough likes",
-        "Too long": "Track is too long",
-        "Playlist is full": "Playlist is full",
-        "Track cooldown": "Track cooldown",
-        "User cooldown": "User cooldown",
-        "unknown": "Неизвестная ошибка"
-      },
-      "types": {
-        "add_track": "Add Track",
-        "add_track_error": "Add Track Error",
-        "play_track": "Play Track",
-        "remove_track": "Remove Track",
-        "listen_track": "Listen Track",
-        "skip_track": "Skip Track",
-        "report_track": "Report Track",
-        "error": "System Error"
-      }
-    },
-    "stats": {
-      "mode": "Mode",
-      "minViews": "Min views",
-      "minLikes": "Min likes",
-      "maxDuration": "Max duration",
-      "trackCd": "Track CD",
-      "userCd": "User CD",
-      "maxSize": "Max size",
-      "priorityMode": "Priority mode",
-      "durationSec": "{{count}} sec",
-      "cooldownMin": "{{count}}m",
-      "maxSizeUnlimited": "∞"
-    },
-    "toast": {
-      "linkCopied": "Playlist link copied to clipboard!",
-      "created": "Playlist \"{{name}}\" created successfully",
-      "deleted": "Playlist deleted",
-      "deleteFailed": "Failed to delete playlist",
-      "updated": "Playlist updated",
-      "updateFailed": "Failed to update playlist",
-      "requestAdded": "Track added to queue",
-      "requestAddedFailed": "Failed to add track",
-      "requestRemoved": "Track removed from queue",
-      "requestRemoveFailed": "Failed to remove track",
-      "playNowSet": "Track set to play next",
-      "playNowFailed": "Failed to set track",
-      "visibilityUpdated": "Playlist visibility updated",
-      "modeUpdated": "Playlist mode updated",
-      "activeUpdated": "Playlist requests updated"
-    },
-    "status": {
-      "online": "Online",
-      "offline": "Offline"
-    },
-    "nowPlaying": {
-      "empty": "No track is currently playing."
-    },
-    "saved": {
-      "title": "Saved",
-      "empty": "No saved tracks"
-    },
-    "queue": {
-      "noMatch": "No tracks match your search.",
-      "empty": "No tracks available.",
-      "mode": {
-        "add": "Add track",
-        "search": "Search queue"
-      },
-      "placeholder": {
-        "add": "Paste YouTube URL...",
-        "search": "Search queue by title...",
-        "searchRequester": "Search queue by title or requester..."
-      },
-      "submit": "Add"
-    },
-    "addbar": {
-      "placeholder": "Place url here"
     },
     "create": {
-      "title": "New playlist",
-      "description": "Form to create a new playlist",
-      "nameLabel": "Playlist name",
-      "nameHint": "Must be unique for your account",
-      "namePlaceholder": "Type name...",
-      "descriptionLabel": "Playlist description",
-      "descriptionPlaceholder": "Type description...",
-      "showInWidget": "Show playlist activity in widget?",
-      "showInWidgetHint": "Widget for OBS and show last played track",
-      "submit": "Create",
-      "submitting": "Creating...",
-      "success": "Playlist created successfully! You can start adding tracks or configure rules.",
-      "failed": "Failed to create playlist"
+      "title": "Create subscription",
+      "submit_btn": "Subscribe"
     },
-    "trackCount_one": "{{count}} track",
-    "trackCount_other": "{{count}} tracks",
-    "report": {
-      "title": "Report",
-      "description": "Report a track or requester and optionally add them to your block lists.",
-      "blockUserLabel": "Block user: {{nickname}} ({{platform}})",
-      "blockTrackLabel": "Block track: {{id}}",
-      "reason": "Reason",
-      "reasonPlaceholder": "Describe the reason...",
-      "blockUser": "Block user",
-      "blockTrack": "Block track",
-      "submit": "Submit report",
-      "submitting": "Submitting...",
-      "cancel": "Cancel",
-      "error": {
-        "invalidId": "Invalid ID",
-        "invalidYoutubeId": "Invalid YouTube video ID.",
-        "blockFailed": "Failed to block user.",
-        "validation": "Add a reason or choose to block the user and/or track.",
-        "generic": "Failed to submit report",
-        "processFailed": "Something went wrong while processing the report."
-      },
-      "success": {
-        "userBlocked": "user blocked",
-        "trackBlocked": "track blocked",
-        "tracksRemoved": "{{count}} track removed",
-        "tracksRemoved_other": "{{count}} tracks removed",
-        "reportSubmitted": "report submitted",
-        "recorded": "Report recorded."
-      }
+    "settings": {
+      "title": "Notification Settings",
+      "target_playlist": "Playlist",
+      "target_user": "User",
+      "quick_setup": "Quick setup:",
+      "unmute_all": "Unmute all",
+      "mute_all": "Mute all"
     },
-    "track": {
-      "ejectBtn": "Eject",
-      "play": "Play next",
-      "copy": "Copy YouTube link",
-      "save": "Save track",
-      "unsave": "Remove from saved",
-      "remove": "Remove from queue",
-      "add": "Add to playlist",
-      "source": "Request source",
-      "video_id": "YouTube Video ID (Open original)",
-      "status": "Track status",
-      "duration": "Duration",
-      "date": "Date added - {{date}}",
-      "priority": "Track priority",
-      "requester": "Requested by",
-      "eject": "Show/hide technical details"
-    },
-    "tooltip": {
-      "validation": "Validation preview",
-      "logs": "Playlist action logs",
-      "share": "Share playlist link",
-      "status": "Playlist status",
-      "repeatMode": {
-        "all": "Repeat all",
-        "once": "Repeat one",
-        "none": "Repeat off"
-      },
-      "prev": "Previous track",
-      "next": "Next track",
-      "pause": "Pause",
-      "play": "Play",
-      "shuffle": "Shuffle",
-      "showSavedTracks": "Show saved tracks",
-      "hideSavedTracks": "Hide saved tracks",
-      "sync": "Player sync"
+    "manager": {
+      "confirm_unsubscribe": "Are you sure you want to unsubscribe?",
+      "error_unsubscribe": "Error unsubscribing",
+      "error_save_settings": "Error updating settings",
+      "loading": "Loading subscriptions...",
+      "title": "Manage Subscriptions",
+      "description": "Configure granular notifications for each content item or unsubscribe from updates.",
+      "empty": "You don't have any active subscriptions yet.",
+      "type_playlist": "Playlist",
+      "type_user": "User",
+      "author": "Author",
+      "status": "Active",
+      "mute_all_status": "Muted all",
+      "triggers_count_one": "{{count}} trigger",
+      "triggers_count_other": "{{count}} triggers",
+      "btn_configure": "Configure",
+      "btn_unsubscribe_title": "Unsubscribe"
     }
   },
   "playlistSettings": {
-    "title": "Playlist settings",
-    "description": "Changes are saved automatically",
-    "tabs": {
-      "basic": "Basic",
-      "validation": "Validation",
-      "donation": "Donation",
-      "chatRoles": "Chat Roles",
-      "block": "Block",
-      "delete": "Delete"
+    "block": {
+      "userId": "User ID",
+      "userName": "User Name",
+      "unblockUser": "Unblock user",
+      "unblockUserAria": "Unblock {{type}}: {{value}}",
+      "blockedVideoId": "Blocked video ID",
+      "openOnYoutube": "Open on YouTube in new tab",
+      "unblockTrack": "Unblock track",
+      "unblockTrackAria": "Unblock track {{id}}",
+      "userUnblocked": "User unblocked successfully! They can submit tracks again.",
+      "userUnblockFailed": "Failed to unblock user.",
+      "trackUnblocked": "Track unblocked successfully! It can be requested again.",
+      "title": "Block Lists",
+      "description": "Block users or tracks.",
+      "blockUser": "Block user",
+      "userBlockedSuccess": "User blocked successfully! They won't be able to submit tracks.",
+      "userBlockFailed": "Failed to block user.",
+      "validationRequired": "Nickname/ID and platform are required.",
+      "selectTriggerType": "Select trigger type",
+      "triggerUserName": "User Name",
+      "triggerUserId": "User ID",
+      "enterNicknameOrId": "Enter user nickname or ID",
+      "selectPlatform": "Select platform",
+      "emptyUsers": "No blocked users",
+      "blockTrackYoutubeLabel": "Block track (YouTube ID)",
+      "trackYoutubeRequired": "YouTube video ID is required.",
+      "trackYoutubeLength": "YouTube video ID must be 11 characters.",
+      "trackAlreadyBlocked": "This track is already blocked.",
+      "trackBlockedSuccess": "Track blocked successfully! It won't appear in requests.",
+      "emptyTracks": "No blocked tracks",
+      "blockTrack": "Block track",
+      "trackUnblockFailed": "Failed to unblock track.",
+      "blocking": "Blocking...",
+      "unblocking": "Unblocking..."
+    },
+    "chatRoles": {
+      "removeSuccess": "Chat role removed successfully",
+      "removeFailed": "Failed to remove chat role",
+      "selectRole": "Please select a role",
+      "addSuccess": "Chat role added successfully",
+      "addFailed": "Failed to add chat role",
+      "addRole": "Add role...",
+      "add": "Add",
+      "noRoles": "No roles yet",
+      "addRoleHint": "Add a role to get started",
+      "title": "Chat Roles",
+      "updateSuccess": "Chat role updated",
+      "updateFailed": "Failed to update role",
+      "saving": "Saving role...",
+      "removing": "Removing role..."
+    },
+    "donation": {
+      "saving": "Saving rule...",
+      "updateSuccess": "Donation rule updated",
+      "updateFailed": "Failed to update rule",
+      "deleteRuleConfirm": "Are you sure you want to delete this donation rule?",
+      "name": "Name",
+      "ruleName": "Rule name",
+      "slug": "Slug",
+      "ruleSlug": "rule-slug",
+      "amount": "Amount",
+      "currency": "Currency",
+      "priority": "Priority",
+      "add": "Add",
+      "noRules": "No rules yet",
+      "fillAll": "Please fill in all fields",
+      "createSuccess": "Donation rule created successfully",
+      "createFailed": "Failed to create donation rule",
+      "deleteSuccess": "Donation rule deleted successfully",
+      "deleteFailed": "Failed to delete donation rule",
+      "title": "Donation Receiving",
+      "deleteConfirm": "Delete this rule?",
+      "deleting": "Deleting rule..."
+    },
+    "validation": {
+      "tabtitle": "validation",
+      "notInitialized": "Section not initialized",
+      "minViews": "Min views",
+      "minLikes": "Min likes",
+      "minViewsDesc": "Not every video can have likes. 0 means all videos will pass likes validation.",
+      "maxDuration": "Max duration",
+      "trackCooldown": "Track cooldown",
+      "trackCooldownDesc": "The time after which a track can be added again.",
+      "userCooldown": "User cooldown",
+      "initFailed": "Failed to initialize settings",
+      "title": "Video validation",
+      "description": "Video validation settings. Can`t be negtive."
+    },
+    "details": {
+      "name": "Playlist name",
+      "nameHelp": "Shown in your dashboard and public listings.",
+      "nameTooLong": "Playlist name is too long",
+      "nameRequired": "Playlist name is required",
+      "namePlaceholder": "Enter playlist name",
+      "description": "Description",
+      "descriptionHelp": "Optional short summary for viewers.",
+      "descriptionTooLong": "Description is too long",
+      "descriptionPlaceholder": "Enter playlist description"
     },
     "toast": {
       "settingsSaved": "Settings saved successfully",
@@ -461,6 +626,7 @@
       "playlistSaved": "Playlist saved successfully",
       "playlistFailed": "Failed to save playlist",
       "playlistDeleted": "Playlist \"{{name}}\" deleted",
+      "visibilityUpdated": "Playlist visibility updated",
       "detailsUpdated": "Playlist details updated",
       "detailsUpdateFailed": "Failed to update details",
       "modeChanged": "Playlist mode updated",
@@ -472,24 +638,47 @@
       "validationRulesLoaded": "Loading validation settings...",
       "validationRulesLoadFailed": "Failed to load validation settings"
     },
+    "title": "Playlist settings",
+    "description": "Changes are saved automatically",
+    "tabs": {
+      "basic": "Basic",
+      "validation": "Validation",
+      "donation": "Donation",
+      "chatRoles": "Chat Roles",
+      "block": "Block",
+      "delete": "Delete"
+    },
     "delete": {
       "title": "Delete playlist",
-      "button": "Delete",
-      "deleted": "Deleted"
-    },
-    "details": {
-      "name": "Playlist name",
-      "nameHelp": "Shown in your dashboard and public listings.",
-      "description": "Description",
-      "descriptionHelp": "Optional short summary for viewers.",
-      "namePlaceholder": "Enter playlist name",
-      "descriptionPlaceholder": "Enter playlist description",
-      "nameRequired": "Playlist name is required",
-      "nameTooLong": "Playlist name is too long",
-      "descriptionTooLong": "Description is too long"
+      "deleted": "Deleted",
+      "button": "Delete"
     },
     "basic": {
       "modeTitle": "Playlist mode",
+      "privacy": "Privacy",
+      "public": "PUBLIC",
+      "private": "PRIVATE",
+      "publicHelp": "PUBLIC — the playlist is visible to anyone who has the link or finds it via search.",
+      "privateHelp": "PRIVATE — the playlist is visible only to you.",
+      "breakPoint": "Priority Break",
+      "breakPointHelp": "Tracks with a priority equal to or higher than are considered VIP. They can interrupt regular and background tracks",
+      "breakPointDisabled": "Disabled",
+      "breakPointEnabled": "Enabled",
+      "backgroundTracks": "Background Tracks",
+      "backgroundTracksHelp": "Tracks that play in the background when no other tracks are playing.",
+      "backgroundTracksEmpty": "No background tracks added.",
+      "priorityMode": "Priority mode",
+      "priorityModeMax": "MAX",
+      "priorityModeAdd": "ADD",
+      "priorityModeAddHelp": "ADD — priorities are summed up.",
+      "priorityModeMaxHelp": "MAX — the highest priority is used.",
+      "showInWidget": "Show playlist activity in widget?",
+      "showInWidgetNo": "No",
+      "showInWidgetYes": "Yes",
+      "externalSources": "External content sources",
+      "externalSourcesHelp": "Allow adding tracks from external sources considering specific accounts.",
+      "integrationsLoading": "Loading integrations...",
+      "integrationsEmpty": "Connect integrations in account settings",
       "mode": {
         "flow": "FLOW",
         "static": "STATIC",
@@ -500,376 +689,36 @@
         "static": "Static — normal playlist.",
         "stream": "Stream — backgroud track with viewer requests"
       },
-      "privacy": "Privacy",
-      "public": "PUBLIC",
-      "private": "PRIVATE",
-      "externalSources": "External content sources",
-      "integrationsLoading": "Loading integrations...",
-      "integrationsEmpty": "Connect integrations in account settings",
       "addHelp": "ADD — priorities are summed up.",
       "maxHelp": "MAX — the highest priority is used.",
-      "priorityMode": "Priority mode",
-      "priorityModeHelp": "Priority mode determines how the priorities of roles and donations are combined for a track.",
-      "priorityModeAdd": "ADD",
-      "priorityModeMax": "MAX",
-      "priorityModeAddHelp": "ADD — priorities are summed up.",
-      "priorityModeMaxHelp": "MAX — the highest priority is used.",
-      "publicHelp": "PUBLIC — the playlist is visible to anyone who has the link or finds it via search.",
-      "privateHelp": "PRIVATE — the playlist is visible only to you.",
-      "externalSourcesHelp": "Allow adding tracks from external sources considering specific accounts.",
-      "showInWidget": "Show playlist activity in widget?",
-      "showInWidgetYes": "Yes",
-      "showInWidgetNo": "No",
-      "breakPoint": "Priority Break",
-      "breakPointHelp": "Tracks with a priority equal to or higher than are considered VIP. They can interrupt regular and background tracks",
-      "breakPointDisabled": "Disabled",
-      "breakPointEnabled": "Enabled"
-    },
-    "validation": {
-      "title": "Video validation",
-      "description": "Video validation settings. Can`t be negtive.",
-      "notInitialized": "Section not initialized",
-      "minViews": "Min views",
-      "minViewsDesc": "Not every video can have likes. 0 means all videos will pass likes validation.",
-      "minLikes": "Min likes",
-      "maxDuration": "Max duration",
-      "trackCooldown": "Track cooldown",
-      "trackCooldownDesc": "The time after which a track can be added again.",
-      "userCooldown": "User cooldown",
-      "initFailed": "Failed to initialize settings",
-      "tabtitle": "validation"
-    },
-    "donation": {
-      "title": "Donation Receiving",
-      "name": "Name",
-      "slug": "Slug",
-      "amount": "Amount",
-      "currency": "Currency",
-      "priority": "Priority",
-      "add": "Add",
-      "ruleName": "Rule name",
-      "ruleSlug": "rule-slug",
-      "noRules": "No rules yet",
-      "fillAll": "Please fill in all fields",
-      "createSuccess": "Donation rule created successfully",
-      "createFailed": "Failed to create donation rule",
-      "deleteConfirm": "Delete this rule?",
-      "deleteRuleConfirm": "Are you sure you want to delete this donation rule?",
-      "deleteSuccess": "Donation rule deleted successfully",
-      "deleteFailed": "Failed to delete donation rule",
-      "updateSuccess": "Donation rule updated",
-      "updateFailed": "Failed to update rule",
-      "saving": "Saving rule...",
-      "deleting": "Deleting rule..."
-    },
-    "block": {
-      "title": "Block Lists",
-      "description": "Block users or tracks.",
-      "selectTriggerType": "Select trigger type",
-      "selectPlatform": "Select platform",
-      "enterNicknameOrId": "Enter user nickname or ID",
-      "userBlockedSuccess": "User blocked successfully! They won't be able to submit tracks.",
-      "userBlockFailed": "Failed to block user.",
-      "validationRequired": "Nickname/ID and platform are required.",
-      "trackYoutubeRequired": "YouTube video ID is required.",
-      "trackYoutubeLength": "YouTube video ID must be 11 characters.",
-      "trackAlreadyBlocked": "This track is already blocked.",
-      "trackBlockedSuccess": "Track blocked successfully! It won't appear in requests.",
-      "blockTrackYoutubeLabel": "Block track (YouTube ID)",
-      "triggerUserName": "User Name",
-      "triggerUserId": "User ID",
-      "blockUser": "Block user",
-      "blockTrack": "Block track",
-      "userId": "User ID",
-      "userName": "User Name",
-      "blockedVideoId": "Blocked video ID",
-      "openOnYoutube": "Open on YouTube in new tab",
-      "unblockUser": "Unblock user",
-      "unblockTrack": "Unblock track",
-      "unblockUserAria": "Unblock {{type}}: {{value}}",
-      "unblockTrackAria": "Unblock track {{id}}",
-      "userUnblocked": "User unblocked successfully! They can submit tracks again.",
-      "userUnblockFailed": "Failed to unblock user.",
-      "trackUnblocked": "Track unblocked successfully! It can be requested again.",
-      "trackUnblockFailed": "Failed to unblock track.",
-      "emptyUsers": "No blocked users",
-      "emptyTracks": "No blocked tracks",
-      "blocking": "Blocking...",
-      "unblocking": "Unblocking..."
-    },
-    "chatRoles": {
-      "title": "Chat Roles",
-      "addRoleHint": "Add a role to get started",
-      "selectRole": "Please select a role",
-      "addRole": "Add role...",
-      "add": "Add",
-      "noRoles": "No roles yet",
-      "addSuccess": "Chat role added successfully",
-      "addFailed": "Failed to add chat role",
-      "removeSuccess": "Chat role removed successfully",
-      "removeFailed": "Failed to remove chat role",
-      "updateSuccess": "Chat role updated",
-      "updateFailed": "Failed to update role",
-      "saving": "Saving role...",
-      "removing": "Removing role..."
+      "priorityModeHelp": "Priority mode determines how the priorities of roles and donations are combined for a track."
     },
     "priority": {
       "title": "Priority",
-      "costMode": "Cost mode",
       "costHelp": "Set priority score for types of users. Can be negative.",
-      "costHelpMax": "MAX — set max role score to the track.",
-      "costHelpAdd": "ADD — accumulate score by all user roles.",
+      "costMode": "Cost mode",
       "add": "ADD",
       "max": "MAX",
-      "addHelp": "ADD — priorities stack.",
-      "maxHelp": "MAX — highest priority wins.",
+      "costHelpMax": "MAX — set max role score to the track.",
+      "costHelpAdd": "ADD — accumulate score by all user roles.",
       "twitch": "Twitch",
       "donations": "Donations",
-      "donater": "Donater"
-    }
-  },
-  "settings": {
-    "eyebrow": "Account",
-    "title": "Settings",
-    "subtitle": "Manage your account and integrations",
-    "unauth": {
-      "title": "Settings",
-      "message": "You need to log in first to manage your account.",
-      "cta": "Go to Login"
-    },
-    "tabs": {
-      "profile": "Profile",
-      "account": "Account",
-      "integrations": "Integrations",
-      "widget": "OBS Widget"
-    },
-    "emailNotConfirmed": {
-      "title": "Email is not confirmed",
-      "body": "Confirm {{email}} to keep classic login and account recovery fully available.",
-      "defaultEmail": "your email"
-    },
-    "account": {
-      "profileData": "Profile Data",
-      "avatar": "Avatar",
-      "password": "Password",
-      "saveProfile": "Save Profile",
-      "saveAvatar": "Save Avatar",
-      "changePassword": "Change Password",
-      "profileUpdated": "Profile updated successfully",
-      "avatarUpdated": "Avatar updated successfully",
-      "passwordChanged": "Password changed successfully",
-      "profileUpdateFailed": "Failed to update profile",
-      "avatarUpdateFailed": "Failed to update avatar",
-      "passwordChangeFailed": "Failed to change password",
-      "nickname": "Nickname",
-      "email": "Email",
-      "avatarUrl": "Avatar URL",
-      "currentPassword": "Current Password",
-      "newPassword": "New Password",
-      "confirmPassword": "Confirm New Password",
-      "nicknamePlaceholder": "Your nickname",
-      "nicknameHelp": "Shown on playlists and public activity.",
-      "emailHelp": "Used for classic login and account notices.",
-      "avatarHelp": "URL to your profile image.",
-      "passwordHelp": "Use at least 8 characters.",
-      "currentPasswordPlaceholder": "Current password",
-      "newPasswordPlaceholder": "New password",
-      "confirmPasswordPlaceholder": "Repeat new password",
-      "updateFailed": "Settings update failed",
-      "saving": "Saving...",
-      "validation": {
-        "nicknameRequired": "Nickname is required",
-        "nicknameShort": "Nickname must be at least 3 characters",
-        "emailRequired": "Email is required",
-        "emailInvalid": "Enter a valid email address",
-        "avatarRequired": "Avatar URL is required",
-        "urlInvalid": "Enter a valid URL",
-        "passwordFillAll": "Fill all password fields",
-        "passwordShort": "New password must be at least 8 characters",
-        "passwordMismatch": "Passwords do not match",
-        "passwordSame": "New password must be different from current password"
-      }
-    },
-    "profile": {
-      "overview": "Profile Overview",
-      "noEmail": "No email set",
-      "noSocialLinks": "No social links connected",
-      "noSocialLinksYet": "No social links added yet",
-      "platformPlaceholder": "e.g., Twitch, GitHub, LinkedIn",
-      "removePlatform": "Remove {{platform}}",
-      "deletePlatformAria": "Delete {{platform}} social link",
-      "confirmDeleteBody": "Are you sure you want to delete {{platform}}? This action cannot be undone.",
-      "deleting": "Deleting...",
-      "delete": "Delete",
-      "linkDeleted": "Social link removed successfully",
-      "linkDeleteFailed": "Failed to delete social link",
-      "linkAddedSuccess": "Social link added successfully",
-      "linkAddFailed": "Failed to add social link",
-      "duplicatePlatform": "{{platform}} is already added",
-      "validation": {
-        "platformRequired": "Platform name is required",
-        "platformMin": "Platform name must be at least {{min}} characters",
-        "platformMax": "Platform name must not exceed {{max}} characters",
-        "platformChars": "Platform name can only contain letters, numbers, spaces, hyphens, and underscores",
-        "urlRequired": "URL is required",
-        "urlMin": "URL must be at least {{min}} characters",
-        "urlProtocol": "URL must start with http:// or https://",
-        "urlInvalid": "Enter a valid URL"
-      },
-      "addSocialLinks": "Add Social Links",
-      "platform": "Platform",
-      "url": "URL",
-      "urlPlaceholder": "https://...",
-      "addLink": "+ Add Link",
-      "adding": "Adding...",
-      "linkAdded": "Link added",
-      "linkFailed": "Failed to add link",
-      "confirmDeletion": "Confirm Deletion",
-      "deleteLink": "Delete link",
-      "killUserProfile": {
-        "title": "Profile Deletion",
-        "btnText": "Delete Profile",
-        "body": "Are you sure you want to delete your profile? This action cannot be undone.",
-        "deleting": "Deleting...",
-        "deleted": "Profile deleted successfully",
-        "deleteFailed": "Failed to delete profile"
-      }
-    },
-    "integrations": {
-      "connectedAccounts": "Connected Accounts",
-      "empty": "No connected accounts yet",
-      "emptyHintLong": "Connect your streaming and donation platforms to manage your playlists",
-      "addAccounts": "Add Accounts",
-      "connectHint": "Connect your account to get started",
-      "connectAccount": "+ Connect Account",
-      "botConnected": "Bot Connected",
-      "connectBot": "Connect Bot",
-      "connecting": "⟳ Connecting...",
-      "connected": "Account connected successfully",
-      "addAnother": "Add another account",
-      "alreadyConnected": "One account already connected",
-      "connectFailed": "Failed to connect account",
-      "disconnect": "Disconnect",
-      "removing": "⟳ Removing...",
-      "disconnected": "Account disconnected successfully",
-      "disconnectFailed": "Failed to disconnect account",
-      "disconnectBot": "Disconnect Bot",
-      "botConnecting": "Connecting bot...",
-      "botConnectFailed": "Failed to connect bot",
-      "botDisconnecting": "Disconnecting bot...",
-      "botDisconnected": "Bot disconnected successfully",
-      "deadBanner": "Token expired or connection lost. Please reconnect your account.",
-      "reconnect": "Reconnect account",
-      "tokenExpired": "Token expired."
-    },
-    "widget": {
-      "linkTitle": "Widget link",
-      "copyLink": "Copy",
-      "generate": "Generate",
-      "regenerate": "Regenerate",
-      "generateConfirm": "This creates a new widget link, shown only once. Save it now — continue?",
-      "regenerateConfirm": "This invalidates the current link and shows the new one only once. Update OBS afterwards. Continue?",
-      "regenerated": "Widget link generated — copy and save it now, it won't be shown again",
-      "regenerateFailed": "Failed to generate widget link",
-      "noTokenWarning": "No widget link saved in this browser. Click \"Generate\" — the link is shown only once and stored only on this device.",
-      "noTokenPlaceholder": "No link yet — click Generate",
-      "linkHint": "Add this URL as a Browser Source in OBS. It's stored only in this browser — clearing site data or opening this page on another device means generating a new one (which breaks the old OBS source until you update it).",
-      "appearanceTitle": "Appearance",
-      "showIcon": "Show disc icon",
-      "textColor": "Text color",
-      "bgColor": "Background color",
-      "bgOpacity": "Background opacity",
-      "fontSize": "Font size",
-      "previewTitle": "Preview",
-      "demoTrack": "Imagine Dragons – Believer",
-      "cssTitle": "OBS Custom CSS",
-      "cssCopy": "Copy CSS",
-      "cssCopied": "CSS copied — paste it into OBS Browser Source → Custom CSS",
-      "cssHint": "In OBS: select the widget Browser Source → Properties → paste into the \"Custom CSS\" field → OK."
-    }
-  },
-  "botSettings": {
-    "title": "Bot Settings",
-    "save": "Save",
-    "saved": "Settings saved successfully",
-    "cancel": "Cancel",
-    "twitch": {
-      "prefix": {
-        "label": "Command prefix",
-        "placeholder": "Enter command prefix",
-        "hint": "The character(s) that will prefix bot commands in Twitch chat. For example, if you set it to '!', viewers would use '!mr' to submit a track."
-      }
-    }
-  },
-  "publicSearch": {
-    "title": "Find a public playlist",
-    "subtitle": "By playlist name, author nickname, or description",
-    "placeholder": "Playlist name, author, or description text...",
-    "searching": "Searching playlists...",
-    "searchFailed": "Search failed. Please try again.",
-    "notFound": "No playlists found",
-    "notFoundHint": "Try a different query",
-    "notFoundHintFull": "Try another term or check that the playlist is open for public viewing.",
-    "noDescription": "No description",
-    "openPlaylist": "Open playlist",
-    "initialHint": "Enter a search query",
-    "initialHintFull": "Enter a query and press Search to see public playlists.",
-    "submit": "Search",
-    "searchPlaceholder": "Search…"
-  },
-  "publicView": {
-    "eyebrow": "Public playlists",
-    "searchTitle": "Search and browse",
-    "searchSubtitle": "Find a playlist and submit a track to the queue",
-    "browseSubtitle": "Find a streamer's public playlist and follow the queue in real time",
-    "notFound": "Playlist not found",
-    "notFoundUnavailable": "Playlist not found or unavailable",
-    "notFoundCheckLink": "Check the link or find another playlist below.",
-    "anotherPlaylist": "Another playlist",
-    "searchPublic": "Search public playlists",
-    "resetSearch": "Reset search",
-    "resetSearchAgain": "Reset and search again",
-    "playlist": "Playlist",
-    "queue": "Track queue",
-    "queueEmpty": "Queue is empty",
-    "queueEmptyHint": "Be the first — add a track!",
-    "queueEmptyPlaylist": "No tracks in the playlist yet",
-    "queueEmptyWaiting": "Requests will appear here when viewers submit music.",
-    "modeFlow": "Flow mode",
-    "modeStatic": "Static mode",
-    "nowPlayingHint": "A track will appear here when the streamer starts playback",
-    "trackCount_one": "{{count}} track",
-    "trackCount_other": "{{count}} tracks",
-    "requestsOpen": "Viewer requests are open",
-    "requestsClosed": "External requests are closed",
-    "noDescription": "No description provided.",
-    "playlistSettings": "Playlist settings",
-    "addTrack": "Add track",
-    "nowPlaying": "Now playing",
-    "nowPlayingEmpty": "Nothing playing right now",
-    "syncBtn": "Sync",
-    "desyncBtn": "Desync",
-    "syncOff": "Sync Off",
-    "syncOn": "Sync On",
-    "toast": {
-      "trackAdded": "Your track has been added to the queue!",
-      "trackAddFailed": "Failed to add track. Try again or check the playlist rules.",
-      "trackRateLimited": "You're submitting too many tracks. Please wait a moment.",
-      "searching": "Searching for track...",
-      "playlistLoadFailed": "Failed to load playlist. The link may be invalid or the playlist is no longer public."
+      "donater": "Donater",
+      "addHelp": "ADD — priorities stack.",
+      "maxHelp": "MAX — highest priority wins."
     }
   },
   "platform": {
-    "twitch": "Twitch",
-    "discord": "Discord",
     "youtube": "YouTube",
+    "twitch": "Twitch",
     "donationalerts": "Donation Alerts",
-    "x": "X",
     "google": "Google",
+    "donatex": "DonateX",
+    "discord": "Discord",
+    "x": "X",
     "github": "GitHub",
     "spotify": "Spotify",
     "da": "Donation Alerts",
-    "donatex": "DonateX",
     "donatepay": "DonatePay"
   },
   "twitch": {
@@ -883,23 +732,7 @@
       "follower": "Follower"
     }
   },
-  "oauth": {
-    "platform": {
-      "twitch": "Twitch",
-      "da": "Donation Alerts",
-      "google": "Google"
-    }
-  },
-  "placeholder": {
-    "history": "Hello \"/history\"!",
-    "statistic": "Hello \"/statistic\"!"
-  },
   "sort": {
-    "tabs": {
-      "vip": "VIP",
-      "regular": "Tracks",
-      "background": "Back"
-    },
     "mode": {
       "auto": "Auto",
       "random": "Random",
@@ -907,15 +740,290 @@
       "randomHint": "Tracks are shuffled randomly",
       "freeHint": "Drag tracks to reorder manually"
     },
-    "date": {
-      "title": "Date sorting",
-      "olderFirst": "Older first",
-      "newerFirst": "Newer first"
-    },
     "priority": {
-      "title": "Priority sorting",
+      "lowFirst": "Low priority first",
       "highFirst": "High priority first",
-      "lowFirst": "Low priority first"
+      "title": "Priority sorting"
+    },
+    "date": {
+      "olderFirst": "Older first",
+      "newerFirst": "Newer first",
+      "title": "Date sorting"
+    },
+    "tabs": {
+      "vip": "VIP",
+      "regular": "Tracks",
+      "background": "Back"
+    }
+  },
+  "view": {
+    "track": {
+      "dd": {
+        "label": "Quick copy",
+        "noplaylists": "No playlists available",
+        "add": "Add"
+      }
+    }
+  },
+  "publicSearch": {
+    "title": "Find a public playlist",
+    "subtitle": "By playlist name, author nickname, or description",
+    "placeholder": "Playlist name, author, or description text...",
+    "searching": "Searching playlists...",
+    "notFound": "No playlists found",
+    "notFoundHintFull": "Try another term or check that the playlist is open for public viewing.",
+    "noDescription": "No description",
+    "openPlaylist": "Open playlist",
+    "initialHintFull": "Enter a query and press Search to see public playlists.",
+    "searchPlaceholder": "Search…",
+    "submit": "Search",
+    "searchFailed": "Search failed. Please try again.",
+    "notFoundHint": "Try a different query",
+    "initialHint": "Enter a search query"
+  },
+  "publicView": {
+    "sort": {
+      "host": "Host like"
+    },
+    "requestsOpen": "Viewer requests are open",
+    "requestsClosed": "External requests are closed",
+    "modeFlow": "Flow mode",
+    "modeStatic": "Static mode",
+    "noDescription": "No description provided.",
+    "playlistSettings": "Playlist settings",
+    "addTrack": "Add track",
+    "nowPlaying": "Now playing",
+    "nowPlayingEmpty": "Nothing playing right now",
+    "nowPlayingHint": "A track will appear here when the streamer starts playback",
+    "eyebrow": "Public playlists",
+    "searchTitle": "Search and browse",
+    "browseSubtitle": "Find a streamer's public playlist and follow the queue in real time",
+    "notFoundUnavailable": "Playlist not found or unavailable",
+    "notFoundCheckLink": "Check the link or find another playlist below.",
+    "anotherPlaylist": "Another playlist",
+    "searchPublic": "Search public playlists",
+    "resetSearchAgain": "Reset and search again",
+    "playlist": "Playlist",
+    "queue": "Track queue",
+    "trackCount_one": "{{count}} track",
+    "trackCount_other": "{{count}} tracks",
+    "queueEmptyPlaylist": "No tracks in the playlist yet",
+    "queueEmptyWaiting": "Requests will appear here when viewers submit music.",
+    "syncOn": "Sync On",
+    "syncOff": "Sync Off",
+    "desync": "Desync",
+    "syncBtn": "Sync",
+    "searchSubtitle": "Find a playlist and submit a track to the queue",
+    "notFound": "Playlist not found",
+    "resetSearch": "Reset search",
+    "queueEmpty": "Queue is empty",
+    "queueEmptyHint": "Be the first — add a track!",
+    "desyncBtn": "Desync",
+    "toast": {
+      "trackAdded": "Your track has been added to the queue!",
+      "trackAddFailed": "Failed to add track. Try again or check the playlist rules.",
+      "trackRateLimited": "You're submitting too many tracks. Please wait a moment.",
+      "searching": "Searching for track...",
+      "playlistLoadFailed": "Failed to load playlist. The link may be invalid or the playlist is no longer public."
+    }
+  },
+  "settings": {
+    "account": {
+      "profileData": "Profile Data",
+      "saveProfile": "Save Profile",
+      "profileUpdated": "Profile updated successfully",
+      "nickname": "Nickname",
+      "nicknamePlaceholder": "Your nickname",
+      "nicknameHelp": "Shown on playlists and public activity.",
+      "email": "Email",
+      "emailHelp": "Used for classic login and account notices.",
+      "validation": {
+        "nicknameRequired": "Nickname is required",
+        "nicknameShort": "Nickname must be at least 3 characters",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Enter a valid email address",
+        "avatarRequired": "Avatar URL is required",
+        "urlInvalid": "Enter a valid URL",
+        "passwordFillAll": "Fill all password fields",
+        "passwordShort": "New password must be at least 8 characters",
+        "passwordMismatch": "Passwords do not match",
+        "passwordSame": "New password must be different from current password"
+      },
+      "avatar": "Avatar",
+      "saveAvatar": "Save Avatar",
+      "avatarUpdated": "Avatar updated successfully",
+      "avatarUrl": "Avatar URL",
+      "avatarHelp": "URL to your profile image.",
+      "password": "Password",
+      "changePassword": "Change Password",
+      "passwordChanged": "Password changed successfully",
+      "currentPassword": "Current Password",
+      "currentPasswordPlaceholder": "Current password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "New password",
+      "passwordHelp": "Use at least 8 characters.",
+      "confirmPassword": "Confirm New Password",
+      "confirmPasswordPlaceholder": "Repeat new password",
+      "updateFailed": "Settings update failed",
+      "saving": "Saving...",
+      "profileUpdateFailed": "Failed to update profile",
+      "avatarUpdateFailed": "Failed to update avatar",
+      "passwordChangeFailed": "Failed to change password"
+    },
+    "integrations": {
+      "botConnected": "Bot Connected",
+      "connecting": "⟳ Connecting...",
+      "connectFailed": "Failed to connect account",
+      "botDisconnected": "Bot disconnected successfully",
+      "disconnectFailed": "Failed to disconnect account",
+      "disconnected": "Account disconnected successfully",
+      "deadBanner_one": "Token expired or connection lost. Please reconnect your account.",
+      "deadBanner_other": "Tokens expired or connections lost. Please reconnect your accounts.",
+      "connectedAccounts": "Connected Accounts",
+      "empty": "No connected accounts yet",
+      "emptyHintLong": "Connect your streaming and donation platforms to manage your playlists",
+      "addAccounts": "Add Accounts",
+      "alreadyConnected": "One account already connected",
+      "connectHint": "Connect your account to get started",
+      "addAnother": "Add another account",
+      "connectAccount": "+ Connect Account",
+      "tokenExpired": "Token expired.",
+      "reconnect": "Reconnect account",
+      "removing": "⟳ Removing...",
+      "disconnect": "Disconnect",
+      "disconnectBot": "Disconnect Bot",
+      "connectBot": "Connect Bot",
+      "connected": "Account connected successfully",
+      "botConnecting": "Connecting bot...",
+      "botConnectFailed": "Failed to connect bot",
+      "botDisconnecting": "Disconnecting bot...",
+      "deadBanner": "Token expired or connection lost. Please reconnect your account."
+    },
+    "profile": {
+      "validation": {
+        "platformRequired": "Platform name is required",
+        "platformMin": "Platform name must be at least {{min}} characters",
+        "platformMax": "Platform name must not exceed {{max}} characters",
+        "platformChars": "Platform name can only contain letters, numbers, spaces, hyphens, and underscores",
+        "urlRequired": "URL is required",
+        "urlMin": "URL must be at least {{min}} characters",
+        "urlProtocol": "URL must start with http:// or https://",
+        "urlInvalid": "Enter a valid URL"
+      },
+      "duplicatePlatform": "{{platform}} is already added",
+      "adding": "Adding...",
+      "linkAddedSuccess": "Social link added successfully",
+      "linkAddFailed": "Failed to add social link",
+      "deleting": "Deleting...",
+      "linkDeleted": "Social link removed successfully",
+      "linkDeleteFailed": "Failed to delete social link",
+      "killUserProfile": {
+        "confirmation": "Are you sure you want to delete your profile? This action cannot be undone.",
+        "deleting": "Deleting...",
+        "deleted": "Profile deleted successfully",
+        "deleteFailed": "Failed to delete profile",
+        "title": "Profile Deletion",
+        "body": "Are you sure you want to delete your profile? This action cannot be undone.",
+        "btnText": "Delete Profile"
+      },
+      "overview": "Profile Overview",
+      "noEmail": "No email set",
+      "removePlatform": "Remove {{platform}}",
+      "deletePlatformAria": "Delete {{platform}} social link",
+      "noSocialLinksYet": "No social links added yet",
+      "addSocialLinks": "Add Social Links",
+      "platform": "Platform",
+      "platformPlaceholder": "e.g., Twitch, GitHub, LinkedIn",
+      "url": "URL",
+      "urlPlaceholder": "https://...",
+      "addLink": "+ Add Link",
+      "confirmDeletion": "Confirm Deletion",
+      "confirmDeleteBody": "Are you sure you want to delete {{platform}}? This action cannot be undone.",
+      "delete": "Delete",
+      "noSocialLinks": "No social links connected",
+      "linkAdded": "Link added",
+      "linkFailed": "Failed to add link",
+      "deleteLink": "Delete link"
+    },
+    "tabs": {
+      "profile": "Profile",
+      "account": "Account",
+      "integrations": "Integrations",
+      "subscriptions": "Subscriptions",
+      "widget": "OBS Widget"
+    },
+    "eyebrow": "Account",
+    "title": "Settings",
+    "subtitle": "Manage your account and integrations",
+    "emailNotConfirmed": {
+      "title": "Email is not confirmed",
+      "body": "Confirm {{email}} to keep classic login and account recovery fully available.",
+      "defaultEmail": "your email"
+    },
+    "widget": {
+      "demoTrack": "Imagine Dragons – Believer",
+      "regenerateConfirm": "This invalidates the current link and shows the new one only once. Update OBS afterwards. Continue?",
+      "generateConfirm": "This creates a new widget link, shown only once. Save it now — continue?",
+      "regenerated": "Widget link generated — copy and save it now, it won't be shown again",
+      "regenerateFailed": "Failed to generate widget link",
+      "linkTitle": "Widget link",
+      "noTokenWarning": "No widget link saved in this browser. Click \"Generate\" — the link is shown only once and stored only on this device.",
+      "noTokenPlaceholder": "No link yet — click Generate",
+      "copyLink": "Copy",
+      "regenerate": "Regenerate",
+      "generate": "Generate",
+      "linkHint": "Add this URL as a Browser Source in OBS. It's stored only in this browser — clearing site data or opening this page on another device means generating a new one (which breaks the old OBS source until you update it).",
+      "appearanceTitle": "Appearance",
+      "showIcon": "Show disc icon",
+      "textColor": "Text color",
+      "bgColor": "Background color",
+      "bgOpacity": "Background opacity",
+      "fontSize": "Font size",
+      "previewTitle": "Preview",
+      "cssTitle": "OBS Custom CSS",
+      "cssCopy": "Copy CSS",
+      "cssHint": "In OBS: select the widget Browser Source → Properties → paste into the \"Custom CSS\" field → OK.",
+      "cssCopied": "CSS copied — paste it into OBS Browser Source → Custom CSS"
+    },
+    "unauth": {
+      "title": "Settings",
+      "message": "You need to log in first to manage your account.",
+      "cta": "Go to Login"
+    }
+  },
+  "botSettings": {
+    "saved": "Settings saved successfully",
+    "saveFailed": "Failed to save settings",
+    "title": "Bot Settings",
+    "save": "Save",
+    "cancel": "Cancel",
+    "twitch": {
+      "prefix": {
+        "label": "Command prefix",
+        "placeholder": "Enter command prefix",
+        "hint": "The character(s) that will prefix bot commands in Twitch chat. For example, if you set it to '!', viewers would use '!mr' to submit a track."
+      }
+    }
+  },
+  "placeholder": {
+    "history": "Hello \"/history\"!",
+    "statistic": "Hello \"/statistic\"!"
+  },
+  "meta": {
+    "login": {
+      "title": "Login - OpenPlaylist",
+      "description": "Log in to your OpenPlaylist account"
+    },
+    "register": {
+      "title": "Sign Up - OpenPlaylist",
+      "description": "Create a new OpenPlaylist account"
+    }
+  },
+  "oauth": {
+    "platform": {
+      "twitch": "Twitch",
+      "da": "Donation Alerts",
+      "google": "Google"
     }
   }
 }

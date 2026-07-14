@@ -8,10 +8,10 @@ from uuid import UUID
 import aiohttp
 from signalrcore.aio.aio_hub_connection_builder import AIOHubConnectionBuilder
 
-from src.adapters._rabbit.dto import DonateXTokenRefreshed
+from src.adapters._rabbit.bots.dto import DonateXTokenRefreshed
 from src._types import Handler, IDonateXListener
 from src.settings import settings
-from src.adapters._rabbit.handlers import (
+from src.adapters._rabbit.bots import (
     rabbit_broker,
     main_exchange,
     auth_user_donatex_tokens_refreshed,

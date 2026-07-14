@@ -1,0 +1,16 @@
+FROM python:3.13.6-alpine3.22
+
+WORKDIR /app
+
+# Устанавливаем uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+COPY pyproject.toml uv.lock ./
+
+RUN uv sync --frozen --no-cache --no-dev
+
+COPY . .
+
+WORKDIR /app
+
+CMD ["uv", "run", "--no-dev", "faststream", "run", "rabbit_workers:app", "--workers", "3"]

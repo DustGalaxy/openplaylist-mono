@@ -6,14 +6,16 @@ from pytubefix import YouTube
 import requests
 
 from src.dal._redis.broker import get_broker
-from src.dto.order import WebNewOrder, TTVNewOrder, YTNewOrder, DANewOrder
+from src.dto.order import WebNewOrder, POSSIBLE_ORDER_TYPE
 from src.models.order import OrderCreate, STRATEGIES
 
 from src.utils import extract_youtube_video_id, parse_ISO_8601
 from src.settings import settings
 from src.exceptions import NotEmbeddable
 
-VideoInfo = TypedDict("VideoInfo", {"title": str, "author": str, "embeddable": bool, "views": int, "likes": int, "length": int})
+VideoInfo = TypedDict(
+    "VideoInfo", {"title": str, "author": str, "embeddable": bool, "views": int, "likes": int, "length": int}
+)
 
 
 class OrderService:
@@ -23,11 +25,11 @@ class OrderService:
             first_part = yt.initial_data["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][0]
             second_part = first_part.get("videoPrimaryInfoRenderer") or first_part.get("videoSecondaryInfoRenderer")
 
-            likes = second_part["videoActions"]["menuRenderer"]["topLevelButtons"][0]["segmentedLikeDislikeButtonViewModel"][
-                "likeButtonViewModel"
-            ]["likeButtonViewModel"]["toggleButtonViewModel"]["toggleButtonViewModel"]["defaultButtonViewModel"][
-                "buttonViewModel"
-            ]["accessibilityText"]
+            likes = second_part["videoActions"]["menuRenderer"]["topLevelButtons"][0][
+                "segmentedLikeDislikeButtonViewModel"
+            ]["likeButtonViewModel"]["likeButtonViewModel"]["toggleButtonViewModel"]["toggleButtonViewModel"][
+                "defaultButtonViewModel"
+            ]["buttonViewModel"]["accessibilityText"]
 
             likes_text = likes
             like_template = r"like this video along with (.*?) other people"
@@ -86,9 +88,10 @@ class OrderService:
     def save_to_cache(self, video_id: str, data: VideoInfo):
         return get_broker().set(video_id, json.dumps(data), ex=60 * 60 * 24 * 3)
 
-    async def init_order(
-        self, order: WebNewOrder | TTVNewOrder | YTNewOrder | DANewOrder, from_owner: bool = False
-    ) -> OrderCreate:
+    def extract_extra_data(self, order: POSSIBLE_ORDER_TYPE):
+        return STRATEGIES[order.source].model_validate(order, from_attributes=True)
+
+    async def init_order(self, order: POSSIBLE_ORDER_TYPE, from_owner: bool) -> OrderCreate:
         yt_video_id = extract_youtube_video_id(order.yt_video_url)
         if not yt_video_id:
             raise ValueError("Invalid YouTube video URL")
@@ -107,8 +110,7 @@ class OrderService:
 
             self.save_to_cache(yt_video_id, data)
 
-        print(f"Получен заказ: {order}")
-        extra_data = STRATEGIES[order.source].model_validate(order, from_attributes=True)
+        extra_data = self.extract_extra_data(order)
 
         return OrderCreate(
             owner_id=order.owner_id,

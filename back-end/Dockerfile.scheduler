@@ -13,4 +13,4 @@ COPY . .
 
 WORKDIR /app
 
-CMD ["uv", "run", "--no-dev", "taskiq", "scheduler","taskiq_broker:scheduler", "src.tasks.tokens"]
+CMD ["uv", "run", "--no-dev", "taskiq", "scheduler", "taskiq_broker:scheduler", "src.tasks.tokens", "src.tasks.notifications"]

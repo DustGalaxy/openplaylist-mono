@@ -20,7 +20,7 @@ from src.dto.internal.auth import (
     AuthFlow,
     RefreshTokenStrategy,
 )
-from src.adapters._rabbit.event_broker import bot_da_connect_request
+from src.adapters._rabbit.queues import bot_da_connect_request
 from src._types import PlatformCap
 
 logger = logging.getLogger(__name__)
