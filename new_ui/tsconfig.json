@@ -5,9 +5,17 @@
     "eslint.config.js",
     "prettier.config.js",
     "vite.config.js",
-    "src/components/settingsModalWidget/tabBasic.tsx"
-, "src/routes/da-callback.tsx.depricated"  ],
+    "src/components/settingsModalWidget/tabBasic.tsx",
+    "src/routes/da-callback.tsx.depricated"
+  ],
 
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src — копия",
+    "src/components/icons/",
+    "src/stores/musicStore/"
+  ],
   "compilerOptions": {
     "target": "ES2022",
     "jsx": "react-jsx",
@@ -25,7 +33,7 @@
     "skipLibCheck": true,
     "strict": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 

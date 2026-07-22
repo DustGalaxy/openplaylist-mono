@@ -1,0 +1,1 @@
+import{jt as e}from"./index-VRz4oZ16.js";import{t}from"./vendor-socket-CifktxuX.js";var n,r=()=>(n||=t(e().WS_API_URL+`/plst_upds`,{withCredentials:!0,path:e().SOCKET_PATH,transports:[`websocket`]}),n),i,a=()=>(i||=t(e().WS_API_URL,{withCredentials:!0,path:e().SOCKET_PATH,transports:[`websocket`]}),i);export{r as n,a as t};

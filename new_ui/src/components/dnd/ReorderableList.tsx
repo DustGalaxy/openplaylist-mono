@@ -29,7 +29,9 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
  * скроллить viewport" (autoScroll ниже, слушает позицию указателя, а не
  * transform элемента).
  */
-function useClampToListModifier(containerRef: React.RefObject<HTMLElement | null>): Modifier {
+function useClampToListModifier(
+  containerRef: React.RefObject<HTMLElement | null>,
+): Modifier {
   return ({ transform, draggingNodeRect }) => {
     const container = containerRef.current
     if (!container || !draggingNodeRect) return transform
@@ -61,7 +63,12 @@ export function ReorderableList<T extends { id: string }>({
   mode: ReorderMode
   onReorder: (nextIds: Array<string>) => void
   onStep: (id: string, dir: 'up' | 'down') => void
-  renderItem: (item: T, isFirst: boolean, isLast: boolean, isDragging: boolean) => React.ReactNode
+  renderItem: (
+    item: T,
+    isFirst: boolean,
+    isLast: boolean,
+    isDragging: boolean,
+  ) => React.ReactNode
   renderGhost: (item: T) => React.ReactNode
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -70,7 +77,9 @@ export function ReorderableList<T extends { id: string }>({
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   )
 
   const activeItem = items.find((i) => i.id === activeId)
@@ -109,25 +118,38 @@ export function ReorderableList<T extends { id: string }>({
         // Порог 0.2 от высоты вьюпорта считается "зоной скролла" у верхнего
         // и нижнего края экрана; acceleration/interval подобраны чтобы на
         // среднем телефоне скролл не дёргался рывками при касании края.
-        autoScroll={{ threshold: { x: 0, y: 0.2 }, acceleration: 12, interval: 5 }}
+        autoScroll={{
+          threshold: { x: 0, y: 0.3 },
+          acceleration: 12,
+          interval: 5,
+        }}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <SortableContext items={orderedIds} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col gap-y-1 sm:gap-y-2">
+        <SortableContext
+          items={orderedIds}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="flex flex-col gap-y-1 sm:gap-y-1">
             {items.map((item, i) =>
               React.Children.only(
                 <React.Fragment key={item.id}>
-                  {renderItem(item, i === 0, i === items.length - 1, item.id === activeId)}
+                  {renderItem(
+                    item,
+                    i === 0,
+                    i === items.length - 1,
+                    item.id === activeId,
+                  )}
                 </React.Fragment>,
               ),
             )}
           </div>
-
         </SortableContext>
 
-        <DragOverlay dropAnimation={{ duration: 80, easing: 'cubic-bezier(0.2,0,0,1)' }}>
+        <DragOverlay
+          dropAnimation={{ duration: 80, easing: 'cubic-bezier(0.2,0,0,1)' }}
+        >
           {activeItem ? renderGhost(activeItem) : null}
         </DragOverlay>
       </DndContext>

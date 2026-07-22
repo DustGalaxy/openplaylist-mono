@@ -13,6 +13,9 @@ import './i18n'
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
 import ErrorComponent from './components/layout/RootError.tsx'
+import { usePlaylistStore } from './stores/playlistStore/index.tsx'
+import { getPlsUpdsSocket } from './api/io-sockets.ts'
+import { useAuthStore } from './stores/authStore.tsx'
 
 declare global {
   interface Window {
@@ -84,6 +87,12 @@ window.appConfig = {
 }
 
 registerAuthStrategies()
+
+usePlaylistStore.getState().setSocket(getPlsUpdsSocket())
+
+useAuthStore.subscribe((state) => {
+  usePlaylistStore.getState().setUserId(state.user?.id ?? null)
+})
 
 // Create a new router instance
 export const router = createRouter({

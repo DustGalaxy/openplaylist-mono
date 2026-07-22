@@ -11,7 +11,7 @@ type YoutubePlayerProps = {
   nowPlay: string | undefined
   pause: boolean
   volume: number
-  setIsPaused: (val: boolean, pos: number) => void
+  setIsPaused: (val: boolean) => void
   playOnReady?: boolean
   className?: string
 }
@@ -48,6 +48,22 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
   const lastSampledPosRef = useRef<number>(0)
   const lastSampledAtRef = useRef<number>(Date.now())
 
+  const isTabHiddenRef = useRef(false)
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      isTabHiddenRef.current = document.hidden
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () =>
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
+
+  useEffect(() => {
+    setGetPlayerPosition(() => playerRef.current?.currentTime ?? 0)
+    return () => setGetPlayerPosition(null)
+  }, [setGetPlayerPosition])
+
   const savePosition = () => {
     const track = currentTrackRef.current
     const seconds = playerRef.current?.currentTime
@@ -61,23 +77,6 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
       })
       .catch(() => {})
   }
-
-  const isTabHiddenRef = useRef(false)
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      isTabHiddenRef.current = document.hidden
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () =>
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-  }, [])
-
-  useEffect(() => {
-    setGetPlayerPosition(() => playerRef.current?.currentTime ?? 0)
-    return () => setGetPlayerPosition(null)
-  }, [setGetPlayerPosition])
 
   useEffect(() => {
     const heartbeat = window.setInterval(() => {
@@ -96,7 +95,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
   const setPlayerRef = useCallback((player: HTMLVideoElement) => {
     if (!player) return
     playerRef.current = player
-    playerRef.current.volume = 1
+    playerRef.current.volume = volume
   }, [])
 
   useEffect(() => {
@@ -110,9 +109,15 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
     return () => window.clearInterval(id)
   }, [])
 
+  useEffect(() => {
+    isReadyRef.current = false
+  }, [nowPlay])
+
+  // ---- handlers for ReactPlayer events ----
+
   const handlePlay = () => {
     if (!pause || !playerRef.current?.currentTime) return
-    setIsPaused(false, playerRef.current.currentTime)
+    setIsPaused(false)
     savePosition()
   }
 
@@ -122,7 +127,8 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
       return
     }
     if (pause || !playerRef.current?.currentTime) return
-    setIsPaused(true, playerRef.current.currentTime)
+
+    setIsPaused(true)
     savePosition()
   }
 
@@ -138,7 +144,12 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
   }
 
   const runSeek = async (event: { time: number | undefined }) => {
-    if (!nowPlay || event?.time === undefined) return
+    if (
+      !nowPlay ||
+      event?.time === undefined ||
+      !playlist.settings.sync_playback_position
+    )
+      return
 
     const expectedElapsed = pauseRef.current
       ? 0
@@ -146,9 +157,6 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
     const expectedPos = lastSampledPosRef.current + expectedElapsed
     const drift = Math.abs(event.time - expectedPos)
 
-    // Естественный дрейф между сэмплами — максимум пара секунд.
-    // Большой скачок = реальный юзер-сик, маленький = ложное срабатывание
-    // внутреннего load()-таймера react-player.
     if (drift < 2) return
 
     await requestSeekState(playlist.id, event.time, playlist.now_playing?.id)
@@ -178,10 +186,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
     playerRef.current.currentTime = pos
   }
 
-  // Сброс флага готовности при смене трека
-  useEffect(() => {
-    isReadyRef.current = false
-  }, [nowPlay])
+  // --- render ---
 
   const videoUrl = nowPlay
     ? `https://www.youtube.com/watch?v=${nowPlay}`
@@ -199,6 +204,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
         style={playerStyle}
         src={videoUrl}
         playing={!pause}
+        autoPlay={playOnReady}
         controls={true}
         volume={volume}
         config={{
@@ -209,7 +215,7 @@ const YoutubePlayer: React.FC<YoutubePlayerProps> = ({
         onSeeked={handleSeek}
         onReady={handleReady}
         onPlay={handlePlay}
-        onPause={handlePause}
+        onPause={() => {}}
         onEnded={handleEnded}
       />
     </div>

@@ -2,6 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import { Plus } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import Btn from '@/components/ui/my-btn'
 
@@ -17,11 +18,15 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { createNewPlaylist } from '@/api/api-playlist'
-import useMusicStore from '@/stores/musicStore'
-import { Plus } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
+import { cn } from '@/lib/utils'
+import { useUserPlaylistRecordsStore } from '@/stores/userPlaylistInfoStore'
 
-export default function AddPlaylistModal() {
+export default function AddPlaylistModal({
+  className,
+}: {
+  className?: string
+}) {
   const { t } = useTranslation()
 
   const [name, setName] = React.useState('')
@@ -31,7 +36,7 @@ export default function AddPlaylistModal() {
   const [isLoading, setIsLoading] = React.useState(false)
   const [open, setOpen] = React.useState(false)
 
-  const { addPlaylist } = useMusicStore()
+  const { add } = useUserPlaylistRecordsStore()
 
   const handleCreatePlaylist = async () => {
     if (!name.trim()) {
@@ -46,7 +51,7 @@ export default function AddPlaylistModal() {
       const newPlst = await createNewPlaylist(name, showInWidget, description)
 
       if (newPlst) {
-        addPlaylist(newPlst)
+        add(newPlst)
         toast.dismiss(loadingToast)
         toast.success(
           t('playlist.create.success', {
@@ -71,9 +76,9 @@ export default function AddPlaylistModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild className="m-1.5">
-        <Btn className="flex p-1 bg-level-2 mr-1">
-          <Plus size={26} />
+      <DialogTrigger asChild>
+        <Btn className={cn('flex p-1 bg-level-2  rounded-md ', className)}>
+          <Plus className="size-5" />
         </Btn>
       </DialogTrigger>
       <DialogContent className="sm:max-w-106.25 bg-level-2 border-level-3 text-text-main ">

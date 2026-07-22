@@ -21,14 +21,15 @@ from src.utils import kick, find
 from src._types import DeleteStatus, UserEventType
 from taskiq_broker import task_broker as task_broker
 
-from src.adapters._rabbit.queues import fanout_exchange
-from src.adapters._rabbit.broker import get_broker
+from src.adapters._rabbit.queues import playlist_fanout_exchange
+from src.adapters._rabbit.broker import get_broker, main_publisher
 from src.adapters._fastapi.dependencies import (
     CURR_USER,
     DB_SESSION,
     PLST_SERVICE,
     PLST_LOG_SERVICE,
     SETTINGS_SERVICE as SE,
+    USER_ID_OR_NONE,
 )
 
 router = APIRouter(prefix="/playlist")
@@ -71,9 +72,18 @@ async def create_playlist(
 
     result = created_playlist.model_dump()
     result["settings"] = settings.model_dump()
-    await notification_engine.add_event(
-        BaseEvent(target_id=created_playlist.id, target_type="user", event_type=UserEventType.PLAYLIST_CREATE),
-        extra_data={"playlist_name": created_playlist.name, "username": current_user.username},
+    await main_publisher.publish(
+        InternalPlaylistEvent(
+            event_id=uuid4(),
+            event_type=InternalPlaylistEventType.PLAYLIST_CREATED,
+            playlist_id=created_playlist.id,
+            playlist_name=created_playlist.name,
+            playlist_is_public=created_playlist.is_public,
+            show_in_widget=created_playlist.show_in_widget,
+            user_id=current_user.id,
+            user_name=current_user.username,
+        ),
+        exchange=playlist_fanout_exchange,
     )
     return ReadPlaylist.model_validate(result)
 
@@ -86,8 +96,32 @@ async def patch_playlist(
     patch_schema: PlaylistPatch,
     playlist_id: UUID,
 ) -> ReadPlaylist:
-    plst = await service.patch_playlist(db_session, patch_schema, playlist_id, current_user)
-    return ReadPlaylist.model_validate(plst)
+    plst = await service.get(db_session, playlist_id, current_user)
+
+    new_plst = await service.patch_playlist(db_session, patch_schema, playlist_id)
+
+    events = service.get_events_between_states(plst, new_plst)
+
+    for e in events:
+        await main_publisher.publish(
+            InternalPlaylistEvent(
+                event_id=uuid4(),
+                event_type=e,
+                playlist_id=playlist_id,
+                playlist_name=plst.name,
+                playlist_is_public=plst.is_public,
+                show_in_widget=plst.show_in_widget,
+                user_id=current_user.id,
+                user_name=current_user.username,
+                renamed_data={"before": plst.name, "after": new_plst.name} if e == "playlist.renamed" else None,
+                visiability_data={"before": plst.is_public, "after": new_plst.is_public}
+                if e == "playlist.visialbility_changed"
+                else None,
+            ),
+            exchange=playlist_fanout_exchange,
+        )
+
+    return ReadPlaylist.model_validate(new_plst)
 
 
 @router.delete("/{playlist_id}", status_code=204)
@@ -99,9 +133,18 @@ async def delete_playlist(
 ):
     try:
         plst = await service.get(db_session, playlist_id, current_user)
-        await notification_engine.add_event(
-            BaseEvent(target_id=plst.id, target_type="user", event_type=UserEventType.PLAYLIST_DELETE),
-            extra_data={"playlist_name": plst.name, "username": current_user.username},
+        await main_publisher.publish(
+            InternalPlaylistEvent(
+                event_id=uuid4(),
+                event_type=InternalPlaylistEventType.PLAYLIST_DELETED,
+                playlist_id=playlist_id,
+                playlist_name=plst.name,
+                playlist_is_public=plst.is_public,
+                show_in_widget=plst.show_in_widget,
+                user_id=current_user.id,
+                user_name=current_user.username,
+            ),
+            exchange=playlist_fanout_exchange,
         )
         await service.delete_playlist(db_session, playlist_id)
     except NotFoundException:
@@ -175,9 +218,11 @@ async def get_public_playlist(
     db_session: DB_SESSION,
     service: PLST_SERVICE,
     playlist_id: UUID,
+    user_id_or_none: USER_ID_OR_NONE,
     settings_service: SE,
 ) -> ReadPlaylist:
-    plst = await service.get_public_playlist(db_session, playlist_id)
+    print("hello from @router.get('/{playlist_id}/public') ")
+    plst = await service.get_public_playlist(db_session, playlist_id, user_id_or_none)
     settings = await settings_service.get_by_plst(db_session, plst.id, plst.owner_id)
     res = plst.model_dump()
     res["settings"] = settings.model_dump()
@@ -249,7 +294,7 @@ async def set_play_now_for_playlist(
                 user_name=current_user.username,
                 track=order,
             ),
-            exchange=fanout_exchange,
+            exchange=playlist_fanout_exchange,
         )
         # await kick("playlist.track.playnow", task_broker, playnow)
 
@@ -286,8 +331,8 @@ async def delete_track_from_playlist(
                 user_name=current_user.username,
                 track=order_to_delete,
             ),
-            exchange=fanout_exchange,
+            exchange=playlist_fanout_exchange,
         )
-        await kick("playlist.track.deleted", task_broker, {"track_id": track_id, "playlist_id": str(playlist_id)})
+        # await kick("playlist.track.deleted", task_broker, {"track_id": track_id, "playlist_id": str(playlist_id)})
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")

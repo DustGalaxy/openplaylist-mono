@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Annotated
-from uuid import UUID
+from uuid import UUID, uuid4
 import uuid
 
 import jwt
@@ -11,12 +11,11 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from simple_repository.exceptions import NotFoundException
 
+from src.dto.internal.domain_events import InternalUserEvent, InternalUserEventType
 from src.tasks.email import send_email
 
-from src.adapters._rabbit.queues import (
-    main_exchange,
-)
-from src.adapters._rabbit.broker import broker
+from src.adapters._rabbit.queues import main_exchange, user_fanout_exchange
+from src.adapters._rabbit.broker import broker, main_publisher
 from src.dal._redis.broker import get_broker
 from src.dal.postgres.token import TokenVaultRepository
 from src.dal.postgres.linked_account import LinkedAccountsRepository
@@ -38,7 +37,7 @@ from src.exceptions import NeedConfirmationException
 
 from src.utils import find
 
-security_scheme = APIKeyCookie(name=settings.COOKIE_NAME)
+security_scheme = APIKeyCookie(name=settings.COOKIE_NAME, auto_error=False)
 
 
 class AuthService:
@@ -306,6 +305,21 @@ class AuthService:
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
             raise HTTPException(status_code=401, detail="Not authenticated")
 
+    async def get_current_user_id_or_none(
+        self,
+        token: str | None = Depends(security_scheme),
+    ) -> UUID | None:
+        print("enter in get_current_user_id_or_none")
+        if token:
+            try:
+                print("get_current_user_id_or_none")
+                return await self.get_current_user_id(token)
+            except HTTPException:
+                print("catch HTTPException in get_current_user_id_or_none")
+                return None
+        else:
+            return None
+
     async def get_current_user(
         self,
         db_session: Annotated[AsyncSession, Depends(get_async_session)],
@@ -324,7 +338,18 @@ class AuthService:
         return user
 
     async def create_user(self, db_session: AsyncSession, user: AuthUserCreate) -> AuthUserSchema:
-        return await self.user_repo.create(db_session, user)
+        new_user = await self.user_repo.create(db_session, user)
+        await main_publisher.publish(
+            InternalUserEvent(
+                event_id=uuid4(),
+                event_type=InternalUserEventType.USER_CREATED,
+                user_id=new_user.id,
+                user_name=new_user.username,
+            ),
+            exchange=user_fanout_exchange,
+        )
+
+        return new_user
 
     async def create_link(self, db_session: AsyncSession, link: LinkedAccountsCreate) -> LinkedAccountsDomain:
         return await self.link_repo.create(db_session, link)
@@ -560,7 +585,7 @@ class AuthService:
         db_session: AsyncSession,
         platform: IntegrationPlatform,
         platform_user_id: str,
-    ) -> None:
+    ) -> LinkedAccountsDomain:
         link = await self.link_repo.get_by_id_platform(
             db_session,
             platform=platform,
@@ -572,6 +597,8 @@ class AuthService:
         link.bot_connection = False
         link.is_dead = True
         await self.link_repo.update(db_session, link)
+
+        return link
 
     async def delete_user(self, db_session: AsyncSession, user_id: UUID) -> None:
         await playlist_repository.remove_many(db_session, [user_id], column="owner_id")

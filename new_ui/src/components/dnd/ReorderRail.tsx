@@ -19,12 +19,18 @@ export function ReorderRail({
   mode: ReorderMode
   isFirst: boolean
   isLast: boolean
-  isActive: boolean,
+  isActive: boolean
   onMove: (dir: 'up' | 'down') => void
   children: (isDragging: boolean) => React.ReactNode
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id, disabled: mode !== 'dnd' })
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id, disabled: mode !== 'dnd' })
 
   return (
     <div
@@ -35,13 +41,13 @@ export function ReorderRail({
         // Плейсхолдер вместо летающей копии — реальный визуал в DragOverlay
         opacity: isDragging ? 0 : 1,
       }}
-
-      className="flex items-stretch gap-3 min-h-22"
+      className="flex items-stretch gap-3 "
     >
       <div className="flex-1 min-w-0">{children(isDragging)}</div>
       <div
-        className={`flex flex-col items-center  justify-center w-6 shrink-0 cursor-grab active:cursor-grabbing rounded-sm bg-level-2  border border-level-3/15 ${mode === 'arrows' ? '' : ''
-          } ${isActive ? 'block' : 'hidden'}`}
+        className={`flex flex-col items-center  justify-center w-6 shrink-0 cursor-grab active:cursor-grabbing rounded-sm bg-level-2  border border-level-3/15 ${
+          mode === 'arrows' ? '' : ''
+        } ${isActive ? 'block' : 'hidden'}`}
         {...attributes}
         {...listeners}
       >
@@ -59,7 +65,7 @@ export function ReorderRail({
               disabled={isFirst}
               onClick={() => onMove('up')}
               aria-label="Move up"
-              className="flex-1 min-h-11 w-full flex items-center justify-center disabled:opacity-20 text-text-placeholder hover:text-level-3 active:bg-level-1/40"
+              className="flex-1  w-full flex items-center justify-center disabled:opacity-20 text-text-placeholder hover:text-level-3 active:bg-level-1/40"
             >
               <ChevronUp className="h-3.5 w-3.5" />
             </button>
@@ -68,14 +74,13 @@ export function ReorderRail({
               disabled={isLast}
               onClick={() => onMove('down')}
               aria-label="Move down"
-              className="flex-1 min-h-11 w-full flex items-center justify-center disabled:opacity-20 text-text-placeholder hover:text-level-3 active:bg-level-1/40"
+              className="flex-1  w-full flex items-center justify-center disabled:opacity-20 text-text-placeholder hover:text-level-3 active:bg-level-1/40"
             >
               <ChevronDown className="h-3.5 w-3.5" />
             </button>
           </>
         )}
       </div>
-
     </div>
   )
 }

@@ -32,7 +32,6 @@ async def test(target_key: str):
 
     event_type = PlaylistEventType(event_type)
     payload = get_event_payload_type(target_type, event_type)  # type: ignore
-    payload.update(**data)
 
     async with async_session_maker() as session:
         await _notification_service.create_event_notification(
@@ -41,6 +40,6 @@ async def test(target_key: str):
                 target_id=UUID(target_id),
                 target_type=target_type,
                 event_type=event_type,
-                event_data=payload,
+                event_data=payload.model_validate(data),
             ),
         )

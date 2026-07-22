@@ -32,21 +32,39 @@ export type StoreState = {
   addPlaylist: (pls: ClientPlaylist) => void
   deletePlaylist: (playlistId: string) => void
 
-  requestAddTrack: (playlistId: string, yt_video_id: string, ownerId?: string) => Promise<void>
+  requestAddTrack: (
+    playlistId: string,
+    yt_video_id: string,
+    ownerId?: string,
+  ) => Promise<void>
   syncAddTrack: (playlistId: string, track: Track) => void
 
-  requestPlayNow: (playlistId: string, track_id: string | undefined) => Promise<void>
+  requestPlayNow: (
+    playlistId: string,
+    track_id: string | undefined,
+  ) => Promise<void>
   syncPlayNow: (playlistId: string, track: Track | undefined) => void
 
-  requestRemoveTrack: (playlistId: string, orderId: string, reason?: string) => Promise<void>
+  requestRemoveTrack: (
+    playlistId: string,
+    orderId: string,
+    reason?: string,
+  ) => Promise<void>
   syncRemoveTrack: (playlistId: string, orderId: string) => void
 
-  playNext: (pl: ClientPlaylist, reason?: string, forceNextTrack?: Track) => void
+  playNext: (
+    pl: ClientPlaylist,
+    reason?: string,
+    forceNextTrack?: Track,
+  ) => boolean
   playPrev: (playlistId: string) => void
 
   clearPausedBackground: (playlistId: string) => void
 
-  requestPlSettings: (playlist_id: string, settings: Partial<PlaylistSettings>) => Promise<void>
+  requestPlSettings: (
+    playlist_id: string,
+    settings: Partial<PlaylistSettings>,
+  ) => Promise<void>
   syncPlSettings: (playlistId: string, settings: PlaylistSettings) => void
 
   requestPlaylistPatch: (id: string, plst: PlaylistPatch) => Promise<void>
@@ -70,9 +88,21 @@ export type StoreState = {
   subscribePlaylist: (playlistId: string) => void
   unsubscribePlaylist: (playlistId: string) => void
 
-  requestPlaybackState: (playlistId: string, is_paused: boolean, position: number, track_id: string | undefined) => Promise<void>
-  requestSeekState: (playlistId: string, position: number, track_id: string | undefined) => Promise<void>
-  requestPositionState: (playlistId: string, position: number) => Promise<void>
+  requestPlaybackState: (
+    playlistId: string,
+    is_paused: boolean,
+    position: number,
+    track_id: string | undefined,
+  ) => Promise<void> | void
+  requestSeekState: (
+    playlistId: string,
+    position: number,
+    track_id: string | undefined,
+  ) => Promise<void> | void
+  requestPositionState: (
+    playlistId: string,
+    position: number,
+  ) => Promise<void> | void
 }
 
 /** Общие типы set/get — каждый файл слайса типизируется через них, не завися

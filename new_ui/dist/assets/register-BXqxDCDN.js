@@ -1,1 +1,0 @@
-import{X as e}from"./vendor-radix-cl372R77.js";import"./index-Ci8SE9Hq.js";import{t}from"./auth-awauGoNN.js";var n=e(),r=function(){return(0,n.jsx)(`div`,{className:`min-h-screen flex items-center justify-center bg-level-1 px-4`,children:(0,n.jsx)(t,{})})};export{r as component};

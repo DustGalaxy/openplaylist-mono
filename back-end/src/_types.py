@@ -30,46 +30,48 @@ class UserEventType(StrEnum):
 # ==========================================
 
 
-class PlaylistBasePayload(TypedDict):
+class PlaylistBasePayload(BaseModel):
     playlist_name: str
     owner_name: str
 
 
 # Специфичные payload для каждого ивента плейлиста
 class TrackAddedPayload(PlaylistBasePayload):
-    count: int
+    counter: int
 
 
 class TrackRemovedPayload(PlaylistBasePayload):
-    count: int
+    counter: int
 
 
 class BasicNamePayload(PlaylistBasePayload):
-    old_name: str
-    new_name: str
+    before: str
+    after: str
 
 
 class BasicVisibilityPayload(PlaylistBasePayload):
-    is_public: bool
+    before: bool
+    after: bool
 
 
-class RealtimeSyncPayload(PlaylistBasePayload):
-    is_sync_on: bool
+# class RealtimeSyncPayload(PlaylistBasePayload):
+#     before: bool
+#     after: bool
 
 
-class RulesModePayload(PlaylistBasePayload):
-    mode: str
+# class RulesModePayload(PlaylistBasePayload):
+#     mode: str
 
 
-class RulesValidationPayload(PlaylistBasePayload):
-    count: int
+# class RulesValidationPayload(PlaylistBasePayload):
+#     counter: int
 
 
-class RulesPrioritiesPayload(PlaylistBasePayload):
-    count: int
+# class RulesPrioritiesPayload(PlaylistBasePayload):
+#     counter: int
 
 
-class UserBasePayload(TypedDict):
+class UserBasePayload(BaseModel):
     username: str
 
 
@@ -94,10 +96,10 @@ PlaylistTypes = (
     | TrackRemovedPayload
     | BasicNamePayload
     | BasicVisibilityPayload
-    | RealtimeSyncPayload
-    | RulesModePayload
-    | RulesValidationPayload
-    | RulesPrioritiesPayload
+    # | RealtimeSyncPayload
+    # | RulesModePayload
+    # | RulesValidationPayload
+    # | RulesPrioritiesPayload
 )
 
 EVENTS_MAP = {
@@ -106,10 +108,10 @@ EVENTS_MAP = {
         PlaylistEventType.TRACK_REMOVED: TrackRemovedPayload,
         PlaylistEventType.BASIC_NAME: BasicNamePayload,
         PlaylistEventType.BASIC_VISIBILITY: BasicVisibilityPayload,
-        PlaylistEventType.REALTIME_SYNC: RealtimeSyncPayload,
-        PlaylistEventType.RULES_MODE: RulesModePayload,
-        PlaylistEventType.RULES_VALIDATION: RulesValidationPayload,
-        PlaylistEventType.RULES_PRIORITIES: RulesPrioritiesPayload,
+        # PlaylistEventType.REALTIME_SYNC: RealtimeSyncPayload,
+        # PlaylistEventType.RULES_MODE: RulesModePayload,
+        # PlaylistEventType.RULES_VALIDATION: RulesValidationPayload,
+        # PlaylistEventType.RULES_PRIORITIES: RulesPrioritiesPayload,
     },
     "user": {
         UserEventType.PLAYLIST_CREATE: UserPlaylistCreatePayload,
@@ -133,6 +135,7 @@ class NotificationType(StrEnum):
     SYSTEM = "system"
     LIKE = "like"
     NEW_FOLLOWER = "new_follower"
+    INTEGRATION_DIED = "integration_died"
 
 
 class PlaylistLogsEventTypes(StrEnum):

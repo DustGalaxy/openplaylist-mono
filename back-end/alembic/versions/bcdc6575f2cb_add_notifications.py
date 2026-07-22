@@ -28,7 +28,7 @@ def upgrade() -> None:
         sa.Column("target_type", sa.String(), nullable=False),
         sa.Column(
             "event_type",
-            sa.Enum("SYSTEM", "LIKE", "NEW_FOLLOWER", name="notificationtype", native_enum=False),
+            sa.String(),
             nullable=False,
         ),
         sa.Column("event_data", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
@@ -45,7 +45,7 @@ def upgrade() -> None:
         sa.Column("user_id", sa.UUID(), nullable=False),
         sa.Column(
             "notification_type",
-            sa.Enum("SYSTEM", "LIKE", "NEW_FOLLOWER", name="notificationtype", native_enum=False),
+            sa.String(),
             nullable=False,
         ),
         sa.Column("notification_data", postgresql.JSONB(astext_type=sa.Text()), nullable=True),

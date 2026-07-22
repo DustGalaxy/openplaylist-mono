@@ -2,7 +2,9 @@ from faststream.rabbit import  RabbitExchange, RabbitQueue, ExchangeType
 
 main_exchange = RabbitExchange("main_exchange", type=ExchangeType.DIRECT, durable=True)
 topic_exchange = RabbitExchange("topic_exchange", type=ExchangeType.TOPIC, durable=True)
-fanout_exchange = RabbitExchange("fanout_exchange", type=ExchangeType.FANOUT, durable=True)
+
+playlist_fanout_exchange = RabbitExchange("playlist_fanout_exchange", type=ExchangeType.FANOUT, durable=True)
+user_fanout_exchange = RabbitExchange("user_fanout_exchange", type=ExchangeType.FANOUT, durable=True)
 
 
 # --- donation alerts

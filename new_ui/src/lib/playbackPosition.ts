@@ -9,6 +9,7 @@ const STORAGE_PREFIX = 'playbackPosition:'
  * по всему остальному коду.
  */
 export type PlaybackPositionStore = {
+  id: string
   save: (playlistId: string, pos: PlaybackPosition) => Promise<void>
   load: (playlistId: string) => Promise<PlaybackPosition | null>
   clear: (playlistId: string) => Promise<void>
@@ -19,6 +20,7 @@ function storageKey(playlistId: string) {
 }
 
 export const localPlaybackPositionStore: PlaybackPositionStore = {
+  id: 'local',
   async save(playlistId, pos) {
     try {
       window.localStorage.setItem(storageKey(playlistId), JSON.stringify(pos))
@@ -55,6 +57,7 @@ export const localPlaybackPositionStore: PlaybackPositionStore = {
  * молчаливым fallback-ом на пустоту.
  */
 export const backendPlaybackPositionStore: PlaybackPositionStore = {
+  id: 'backend',
   async save(playlistId, pos) {
     await postPositionState(playlistId, pos.position)
   },
@@ -74,6 +77,8 @@ export const backendPlaybackPositionStore: PlaybackPositionStore = {
 }
 
 /** Выбирает реализацию по флагу пользовательской настройки "синхронизировать тайминг". */
-export function getPlaybackPositionStore(syncEnabled: boolean): PlaybackPositionStore {
+export function getPlaybackPositionStore(
+  syncEnabled: boolean,
+): PlaybackPositionStore {
   return syncEnabled ? backendPlaybackPositionStore : localPlaybackPositionStore
 }

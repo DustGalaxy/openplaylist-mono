@@ -18,6 +18,7 @@ from src.models.settings import (
 from src.adapters._fastapi.dependencies import SETTINGS, DB_SESSION, SETTINGS_SERVICE
 from src.exceptions import NotAuthorizedException
 
+
 router = APIRouter(prefix="/settings")
 
 
@@ -32,7 +33,7 @@ async def get_playlist_settings(
 
 
 # --- PATCH ENDPOINTS ---
-    
+
 
 @router.patch("/{playlist_id}")
 async def patch_playlist_settings(
@@ -41,8 +42,10 @@ async def patch_playlist_settings(
     patch_schema: SettingsPatch,
     settings: SETTINGS,
 ):
-    settings = await service.patch(db_session, patch_schema, settings.id)
-    return settings
+
+    new_settings = await service.patch(db_session, patch_schema, settings.id)
+
+    return new_settings
 
 
 @router.patch("/{playlist_id}/content/{item_id}")

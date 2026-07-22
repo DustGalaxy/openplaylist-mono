@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Protocol, Any
 from uuid import UUID
 
+from src.dto.internal.domain_events import InternalPlaylistEventType
 from src.dal.abstract import IAsyncCrud, IPlaylistSettingsRepository
 from src.dal.postgres.playlist_settings import (
     playlist_settings_repository,
@@ -27,7 +28,7 @@ from src.models.settings import (
     BlockListCreate,
     BlockListPatch,
 )
-from src.models.order import OrderCreate, DAExtraData, OrderDomain
+from src.models.order import OrderCreate, OrderDomain
 from src.models.playlist import PlaylistSchema
 from src.models.auth_user import AuthUserSchema
 from src.exceptions import NotAuthorizedException
@@ -59,7 +60,9 @@ class StrategyManager:
         else:
             strategy = self._registry.get(type(obj))
         if strategy is None:
-            raise NotImplementedError(f"Strategy for {type(obj) if not isinstance(obj, str) else obj} is not implemented")
+            raise NotImplementedError(
+                f"Strategy for {type(obj) if not isinstance(obj, str) else obj} is not implemented"
+            )
         return strategy
 
 
@@ -291,6 +294,14 @@ class SettingsLowService:
         id: UUID,
     ):
         return await self.repository.patch(session, data, id)
+
+    def get_events_between_states(self, old_settings: SettingsSchema, new_settings: SettingsSchema):
+        events = []
+
+        if old_settings.sync_playback_position != new_settings.sync_playback_position:
+            events.append(InternalPlaylistEventType.PLAYLIST_SYNC_CHANGED)
+
+        return events
 
     async def patch_sub_item(
         self,

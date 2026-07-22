@@ -16,7 +16,8 @@ export function cn(...inputs: Array<ClassValue>) {
 
 export const formatTime = (time: number): string => {
   const minutes = Math.floor(time / 60)
-  const seconds = time % 60 < 10 ? `0${time % 60}` : time % 60
+  const seconds =
+    time % 60 < 10 ? `0${Math.floor(time % 60)}` : Math.floor(time % 60)
 
   return `${minutes}:${seconds}`
 }
@@ -121,7 +122,7 @@ export function removeNullAndUndefined<T extends Record<string, any>>(
 
   for (const [key, value] of Object.entries(obj)) {
     if (value !== null && value !== undefined) {
-      ; (result as any)[key] = value
+      ;(result as any)[key] = value
     }
   }
 

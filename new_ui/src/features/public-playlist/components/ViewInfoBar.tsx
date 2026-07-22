@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Calendar, Music2 } from 'lucide-react'
 
 import ViewPlayNowCard from './view-track-card'
+import type { ClientPlaylist } from '@/types/playlist'
 import AddBar from '@/features/public-playlist/components/addbar'
 import {
   filterTabActiveClass,
@@ -11,10 +12,7 @@ import {
   gradientTextClass,
   innerPanelClass,
   sectionTitleClass,
-  statusClosedClass,
-  statusOpenClass,
 } from '@/features/landing/styles'
-import type { ClientPlaylist } from '@/types/playlist'
 import { useAuthStore } from '@/stores/authStore'
 import { InfoCardGroup } from '@/components/ui/info-card-group'
 import {
@@ -38,35 +36,9 @@ const ViewInfoBar = ({ playlist }: { playlist: ClientPlaylist }) => {
     { day: 'numeric', month: 'long', year: 'numeric' },
   )
 
-  const requestsOpen = playlist.is_allow_external_requests
-
   return (
     <div className="flex flex-col gap-2 sm:gap-4">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between ">
-        <div className="flex flex-wrap items-center gap-2">
-          <span
-            className={`
-              inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium
-              border transition-colors
-              ${requestsOpen ? statusOpenClass : statusClosedClass}
-            `}
-          >
-            <span
-              className={`h-1.5 w-1.5 rounded-full ${requestsOpen ? 'bg-emerald-400' : 'bg-text-placeholder'}`}
-              aria-hidden
-            />
-            {requestsOpen
-              ? t('publicView.requestsOpen')
-              : t('publicView.requestsClosed')}
-          </span>
-          <span
-            className={`inline-flex rounded-full px-3 py-1 text-xs font-medium border border-level-3/20 bg-level-1/50 text-text-secondary`}
-          >
-            {playlist.settings.mode === 'flow'
-              ? t('publicView.modeFlow')
-              : t('publicView.modeStatic')}
-          </span>
-        </div>
         <time
           dateTime={playlist.updated_at}
           className="inline-flex items-center gap-1.5 text-sm text-text-placeholder shrink-0"

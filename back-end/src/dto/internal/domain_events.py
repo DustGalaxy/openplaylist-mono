@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from src._types import IntegrationPlatform
 from src.models.order import OrderCreate, OrderDomain
 
 
@@ -33,8 +34,25 @@ class InternalPlaylistEvent(BaseModel):
     user_id: UUID
     user_name: str
 
-    track: OrderDomain  | OrderCreate | None = None
+    track: OrderDomain | OrderCreate | None = None
     renamed_data: dict[str, str] | None = None
-    visiability_data: dict[str, str] | None = None
+    visiability_data: dict[str, str | bool] | None = None
     sync_data: dict[str, str] | None = None
     error_list: list[str] | None = None
+
+
+class InternalUserEventType(StrEnum):
+    USER_CREATED = "user.created"
+    INTEGRATION_DIED = "integration.died"
+
+
+class InternalUserEvent(BaseModel):
+    event_id: UUID
+    event_type: InternalUserEventType
+
+    user_id: UUID
+    user_name: str
+
+    died_integration: IntegrationPlatform | None = None
+    
+

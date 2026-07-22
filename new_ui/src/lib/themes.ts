@@ -31,7 +31,7 @@ export interface Theme {
 
 // ─── Built-in presets ────────────────────────────────────────────────────────
 
-export const PRESET_THEMES: Theme[] = [
+export const PRESET_THEMES: Array<Theme> = [
   {
     id: 'default',
     name: 'Оранжевый огонь',
@@ -174,17 +174,17 @@ export function saveActiveThemeId(id: string): void {
   }
 }
 
-export function loadCustomThemes(): Theme[] {
+export function loadCustomThemes(): Array<Theme> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_CUSTOM)
     if (!raw) return []
-    return JSON.parse(raw) as Theme[]
+    return JSON.parse(raw) as Array<Theme>
   } catch {
     return []
   }
 }
 
-export function saveCustomThemes(themes: Theme[]): void {
+export function saveCustomThemes(themes: Array<Theme>): void {
   try {
     localStorage.setItem(STORAGE_KEY_CUSTOM, JSON.stringify(themes))
   } catch {
@@ -192,7 +192,7 @@ export function saveCustomThemes(themes: Theme[]): void {
   }
 }
 
-export function getAllThemes(): Theme[] {
+export function getAllThemes(): Array<Theme> {
   return [...PRESET_THEMES, ...loadCustomThemes()]
 }
 

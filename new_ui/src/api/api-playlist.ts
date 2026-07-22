@@ -19,8 +19,25 @@ export const fetchPlaylistPublic = async (
     config.PLST_API_URL + `/${playlist_id}/public`,
     {
       method: 'GET',
+      withCredentials: true,
     },
   ).catch((error) => {
+    if (error.response.status === 403) {
+      return null
+    }
+  })
+  if (!response) return null
+  return response.data
+}
+
+export const fetchPlaylist = async (
+  playlist_id: string,
+): Promise<InputPlaylist | null> => {
+  const config = getConfig()
+  const response = await apiClient(config.PLST_API_URL + `/${playlist_id}`, {
+    method: 'GET',
+    withCredentials: true,
+  }).catch((error) => {
     if (error.response.status === 403) {
       return null
     }

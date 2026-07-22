@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from uuid import UUID
 
 from simple_repository import crud_factory
@@ -144,8 +145,8 @@ class NotificationRepository:
             NotificationSettingsORM.user_id == user_id
         )
         settings_result = await session.execute(settings_stmt)
-        last_read_ts = settings_result.scalar_one()
-
+        
+        last_read_ts = settings_result.scalar_one_or_none() or datetime(1970, 1, 1)
         # 2. Считаем непрочитанные Директ-уведомления (где is_read == False)
         direct_unread = (
             select(DirectNotificationORM.id.label("id"))
@@ -180,7 +181,7 @@ class NotificationRepository:
         final_query = select(func.count()).select_from(union_all(direct_unread, subs_unread).subquery())
 
         result = await session.execute(final_query)
-        return result.scalar_one() or 0
+        return result.scalar_one_or_none() or 0
 
     async def mark_direct_as_read(self, session: AsyncSession, user_id: UUID, notification_id: UUID):
         stmt = (

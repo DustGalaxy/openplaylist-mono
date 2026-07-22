@@ -1,22 +1,25 @@
 from datetime import datetime
+from uuid import uuid4
 
 from faststream.rabbit import RabbitRouter
 from simple_repository.exceptions import NotFoundException
 
+from src.adapters._rabbit.broker import get_broker
 from src.adapters._rabbit.queues import (
+    user_fanout_exchange,
     main_exchange,
     auth_user_twitch_all_request,
     bot_twitch_order_new,
     auth_user_twitch_tokens_refreshed,
 )
-from src.dto.order import TTVNewOrder
+from src.dto.internal.domain_events import InternalUserEvent, InternalUserEventType
+from src.dto.order import NewOrderPayload, TTVNewOrder
 from src.adapters._rabbit.bots.dto import Tokens, TwitchTokenRefreshed
 
 from src.dal.postgres.token import token_vault_repository
 from src.dal.postgres.linked_account import linked_accounts_repository
 from src._types import IntegrationPlatform
 from src.database import async_session_maker
-from src.utils import kick
 
 router = RabbitRouter()
 
@@ -24,14 +27,10 @@ router = RabbitRouter()
 @router.subscriber(bot_twitch_order_new, exchange=main_exchange)
 async def order_new_from_twitch(event: TTVNewOrder):
 
-    from taskiq_broker import task_broker as taskiq_broker
-
-    await kick(
-        "order.new",
-        taskiq_broker,
-        event,
-        event.owner_platform_id == event.requester_id,
-        labels={"user_id": str(event.owner_id)},
+    await get_broker().publish(
+        NewOrderPayload(order=event, from_owner=event.owner_platform_id == event.requester_id),
+        "order.proccess",
+        main_exchange,
     )
 
 
@@ -85,4 +84,17 @@ async def user_token_died(
     async with async_session_maker() as session:
         from src.services.auth.auth_service import auth_service
 
-        await auth_service.bot_was_disconnected(session, IntegrationPlatform.TWITCH, event["platform_user_id"])
+        link = await auth_service.bot_was_disconnected(session, IntegrationPlatform.TWITCH, event["platform_user_id"])
+
+        user = await auth_service.user_repo.get_one(session, link.user_id)
+
+        await get_broker().publish(
+            InternalUserEvent(
+                event_id=uuid4(),
+                event_type=InternalUserEventType.INTEGRATION_DIED,
+                user_id=user.id,
+                user_name=user.username,
+                died_integration=IntegrationPlatform.TWITCH,
+            ),
+            exchange=user_fanout_exchange,
+        )

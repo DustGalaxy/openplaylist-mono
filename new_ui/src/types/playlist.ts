@@ -124,7 +124,7 @@ export enum PlaylistMode {
   Stream = 'stream',
 }
 
-export type OrderMode = 'auto' | 'random' | 'free'
+export type OrderMode = 'auto' | 'random' | 'free' | 'host'
 
 export type SortSettings = {
   order_mode: OrderMode
@@ -142,10 +142,10 @@ export type ModeSettings = {
 }
 
 export type ModeSettingsMap = {
-  [PlaylistMode.Flow]: ModeSettings;
-  [PlaylistMode.Static]: ModeSettings;
-  [PlaylistMode.Stream]: ModeSettings;
-};
+  [PlaylistMode.Flow]: ModeSettings
+  [PlaylistMode.Static]: ModeSettings
+  [PlaylistMode.Stream]: ModeSettings
+}
 
 export type PlaylistSettings = {
   id: string
@@ -200,7 +200,7 @@ export type PlaylistPatch = {
   allow_sources?: Array<AllowSources>
   is_public?: boolean
   is_favorite?: boolean
-  show_in_widget: boolean
+  show_in_widget?: boolean
   is_allow_external_requests?: boolean
 }
 

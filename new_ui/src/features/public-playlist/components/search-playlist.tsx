@@ -4,10 +4,7 @@ import { Link } from '@tanstack/react-router'
 import { ListMusic, Loader2, SearchX, User } from 'lucide-react'
 
 import { getPublicPlaylists } from '@/api/api-playlist'
-import {
-  gradientTextClass,
-  panelClass,
-} from '@/features/landing/styles'
+import { gradientTextClass, panelClass } from '@/features/landing/styles'
 import SearchBar from './searchbar'
 
 export type PublicPlaylistResult = {
@@ -88,8 +85,13 @@ const SearchPlaylist = ({
         <div
           className={`mt-8 flex flex-col items-center gap-3 text-center py-10 ${panelClass} border-dashed`}
         >
-          <SearchX className="h-10 w-10 text-text-placeholder" strokeWidth={1.5} />
-          <p className="text-text-main font-medium">{t('publicSearch.notFound')}</p>
+          <SearchX
+            className="h-10 w-10 text-text-placeholder"
+            strokeWidth={1.5}
+          />
+          <p className="text-text-main font-medium">
+            {t('publicSearch.notFound')}
+          </p>
           <p className="text-sm text-text-secondary max-w-sm">
             {t('publicSearch.notFoundHintFull')}
           </p>
@@ -101,8 +103,7 @@ const SearchPlaylist = ({
           {playlists.map((playlist) => (
             <Link
               key={playlist.id}
-              to="/view"
-              search={{ p: playlist.id }}
+              to={`/playlists/${playlist.id}`}
               className={`
                 group text-left flex flex-col gap-3 p-5 ${panelClass}
                 border-level-3/50 transition-all duration-200

@@ -7,14 +7,13 @@ import { splitQueue } from '@/stores/musicStore/helpers'
 const DRIFT_THRESHOLD_SEC = 3
 
 const DEFAULT_SORT: SortSettings = {
-  order_mode: "host",
-  date: "desc",
-  priority: "none",
-  manual_order_ids: []
+  order_mode: 'host',
+  date: 'desc',
+  priority: 'none',
+  manual_order_ids: [],
 }
 
 function sortTracks(tracks: Array<Track>, s: SortSettings): Array<Track> {
-
   if (s.order_mode === 'free') {
     const order = new Map(s.manual_order_ids.map((id, i) => [id, i]))
     return [...tracks].sort((a, b) => {
@@ -58,25 +57,26 @@ export function useViewerPlayback(playlist: ClientPlaylist | null) {
   modeRef.current = mode
   const getPositionRef = useRef<() => number>(() => 0)
 
-  const orderedTracks = useMemo(
-    () => {
-      if (!playlist) return []
-      if (sort.order_mode === "host") {
-        const { vip, regular, background } = splitQueue(playlist)
-        return [...vip, ...regular, ...background]
-      }
-      return sortTracks(playlist.track_data, sort)
-    },
-    [playlist, sort],
-  )
+  const orderedTracks = useMemo(() => {
+    if (!playlist) return []
+    if (sort.order_mode === 'host') {
+      const { vip, regular, background } = splitQueue(playlist)
+      return [...vip, ...regular, ...background]
+    }
+    return sortTracks(playlist.track_data, sort)
+  }, [playlist, sort])
 
-  const seek = useCallback((position: number) => setSeekSignal({ position, token: Date.now() }), [])
+  const seek = useCallback(
+    (position: number) => setSeekSignal({ position, token: Date.now() }),
+    [],
+  )
 
   const playTrack = useCallback(
     (track: Track, position = 0) => {
       if (modeRef.current === 'synced') return
       setCurrentTrack((prev) => {
-        if (prev && prev.id !== track.id) setHistory((h) => [...h, prev.id].slice(-50))
+        if (prev && prev.id !== track.id)
+          setHistory((h) => [...h, prev.id].slice(-50))
         return track
       })
       setIsPlaying(true)
@@ -96,29 +96,39 @@ export function useViewerPlayback(playlist: ClientPlaylist | null) {
   }, [])
 
   const next = useCallback(() => {
-    if (modeRef.current === 'synced' || orderedTracks.length === 0) return
+    if (modeRef.current === 'synced' || orderedTracks.length === 0) return true
+    seek(0)
+
     if (!currentTrack) {
       playTrack(orderedTracks[0])
-      return
+      return true
     }
+
     if (shuffle) {
       const pool = orderedTracks.filter((t) => t.id !== currentTrack.id)
-      if (pool.length > 0) playTrack(pool[Math.floor(Math.random() * pool.length)])
-      return
+      if (pool.length > 0) {
+        playTrack(pool[Math.floor(Math.random() * pool.length)])
+        return true
+      }
+      return false
     }
+
     const idx = orderedTracks.findIndex((t) => t.id === currentTrack.id)
     const nextTrack = idx === -1 ? orderedTracks[0] : orderedTracks[idx + 1]
+
     if (nextTrack) {
       playTrack(nextTrack)
     } else if (repeatMode === 'all') {
       playTrack(orderedTracks[0])
-    } else {
-      setIsPlaying(false)
     }
+
+    return nextTrack ? true : false
   }, [orderedTracks, currentTrack, shuffle, repeatMode, playTrack])
 
   const prev = useCallback(() => {
-    if (modeRef.current === 'synced' || history.length === 0 || !playlist) return
+    if (modeRef.current === 'synced' || history.length === 0 || !playlist)
+      return
+
     const prevId = history[history.length - 1]
     const track = playlist.track_data.find((t) => t.id === prevId)
     setHistory((h) => h.slice(0, -1))
@@ -136,7 +146,7 @@ export function useViewerPlayback(playlist: ClientPlaylist | null) {
       setIsPlaying(true)
       return
     }
-    next()
+    if (next()) setIsPlaying(true)
   }, [repeatMode, seek, next])
 
   function safeEmit(s: SocketLike | undefined, event: string, payload: any) {
@@ -151,11 +161,16 @@ export function useViewerPlayback(playlist: ClientPlaylist | null) {
     try {
       const state = await getPlaybackState(playlist.id)
       if (!state) return
-      const track = playlist.track_data.find((t) => t.id === state.track_id) ?? playlist.now_playing
+      const track =
+        playlist.track_data.find((t) => t.id === state.track_id) ??
+        playlist.now_playing
       if (!track) return
       const paused = String(state.is_paused).toLowerCase() === 'true'
       const basePos = state.position ? parseFloat(state.position) : 0
-      const drift = paused || !state.updated_at ? 0 : (Date.now() - Date.parse(state.updated_at)) / 1000
+      const drift =
+        paused || !state.updated_at
+          ? 0
+          : (Date.now() - Date.parse(state.updated_at)) / 1000
       setMode('synced')
       setCurrentTrack(track)
       setIsPlaying(!paused)
@@ -175,15 +190,18 @@ export function useViewerPlayback(playlist: ClientPlaylist | null) {
       if (!p || typeof p.is_paused !== 'boolean') return
       setIsPlaying(!p.is_paused)
       if (p.position === undefined) {
-        const drift = p.is_paused ? 0 : (Date.now() - Date.parse(p.updated_at)) / 1000
+        const drift = p.is_paused
+          ? 0
+          : (Date.now() - Date.parse(p.updated_at)) / 1000
         const expected = p.position + drift
-        if (Math.abs(expected - getPositionRef.current()) > DRIFT_THRESHOLD_SEC) {
+        if (
+          Math.abs(expected - getPositionRef.current()) > DRIFT_THRESHOLD_SEC
+        ) {
           seek(expected)
         }
         return
       }
       seek(p.position)
-
     }
 
     const seekStateHandler = (payload: any) => {
@@ -201,13 +219,13 @@ export function useViewerPlayback(playlist: ClientPlaylist | null) {
       seek(0)
     }
 
-    safeEmit(socket, "playback_subscribe", { playlist_id: playlist.id })
+    safeEmit(socket, 'playback_subscribe', { playlist_id: playlist.id })
 
     socket.on('playback_pause:' + playlist.id, pauseStateHandler)
     socket.on('playback_seek:' + playlist.id, seekStateHandler)
     socket.on('playnow:' + playlist.id, handlePlayNow)
     return () => {
-      safeEmit(socket, "playback_unsubscribe", { playlist_id: playlist.id })
+      safeEmit(socket, 'playback_unsubscribe', { playlist_id: playlist.id })
       socket.off('playback_pause:' + playlist.id, pauseStateHandler)
       socket.off('playback_seek:' + playlist.id, seekStateHandler)
       socket.off('playnow:' + playlist.id, handlePlayNow)
@@ -218,6 +236,7 @@ export function useViewerPlayback(playlist: ClientPlaylist | null) {
     mode,
     currentTrack,
     isPlaying,
+    seek,
     seekSignal,
     syncing,
     canSync: Boolean(playlist?.settings.sync_playback_position),

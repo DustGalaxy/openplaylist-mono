@@ -7,6 +7,7 @@ from src.adapters._rabbit.worker.logs_handler import router as log_router
 from src.adapters._rabbit.worker.notification_handler import router as notify_touter
 from src.adapters._rabbit.worker.widget_handler import router as widget_router
 from src.adapters._rabbit.worker.order_proccess_handler import router as order_router
+from src.adapters._rabbit.worker.post_callbacks import router as post_callback_router
 
 from src.dal._redis.broker import get_broker
 
@@ -17,6 +18,7 @@ broker.include_routers(
     notify_touter,
     widget_router,
     order_router,
+    post_callback_router,
 )
 
 

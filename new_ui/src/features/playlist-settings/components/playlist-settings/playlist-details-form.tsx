@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { DialogDescription } from '@/components/ui/dialog'
 import type { ClientPlaylist } from '@/types/playlist'
+import type { Playlist } from '@/stores/playlistStore/types'
 
 const MAX_NAME_LENGTH = 100
 const MAX_DESCRIPTION_LENGTH = 500
@@ -15,21 +16,23 @@ export default function PlaylistDetailsForm({
   setPlst,
   canPatchPlaylist,
 }: {
-  playlist: ClientPlaylist
-  setPlst: React.Dispatch<
-    React.SetStateAction<ClientPlaylist | undefined>
-  >
+  playlist: Playlist
+  setPlst: React.Dispatch<React.SetStateAction<Playlist | undefined>>
   canPatchPlaylist: React.RefObject<boolean>
 }) {
   const { t } = useTranslation()
   const [name, setName] = React.useState(playlist.name)
-  const [description, setDescription] = React.useState(playlist.description ?? '')
+  const [description, setDescription] = React.useState(
+    playlist.description ?? '',
+  )
 
   return (
     <div className="grid gap-3 mb-6">
       <div>
         <Label className="text-lg">{t('playlistSettings.details.name')}</Label>
-        <DialogDescription>{t('playlistSettings.details.nameHelp')}</DialogDescription>
+        <DialogDescription>
+          {t('playlistSettings.details.nameHelp')}
+        </DialogDescription>
         <Input
           type="text"
           name="name"
@@ -58,7 +61,9 @@ export default function PlaylistDetailsForm({
       </div>
 
       <div>
-        <Label className="text-lg">{t('playlistSettings.details.description')}</Label>
+        <Label className="text-lg">
+          {t('playlistSettings.details.description')}
+        </Label>
         <DialogDescription>
           {t('playlistSettings.details.descriptionHelp')}
         </DialogDescription>

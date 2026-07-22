@@ -6,7 +6,10 @@ import { getAppSettingsStore } from '@/lib/appSettings'
 type AppSettingsState = {
   settings: AppSettings
   isLoaded: boolean
-  setSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void
+  setSetting: <K extends keyof AppSettings>(
+    key: K,
+    value: AppSettings[K],
+  ) => void
   loadSettings: () => Promise<void>
 }
 

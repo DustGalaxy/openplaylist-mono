@@ -1,7 +1,7 @@
 from faststream.rabbit import RabbitRouter
 
 from src.adapters._rabbit.queues import (
-    fanout_exchange,
+    playlist_fanout_exchange,
 )
 
 from src.models.order import OrderDomain
@@ -11,7 +11,7 @@ from src.dto.events import PlayNow, Deleted
 
 router = RabbitRouter()
 
-@router.subscriber("internal.playlist.callback", fanout_exchange)
+@router.subscriber("internal.playlist.callback", playlist_fanout_exchange)
 async def _(event: InternalPlaylistEvent):
     match event.event_type:
         case InternalPlaylistEventType.TRACK_ADDED:

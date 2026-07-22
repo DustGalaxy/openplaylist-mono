@@ -1,7 +1,7 @@
 from faststream.rabbit import RabbitRouter
 
 from src.adapters._rabbit.queues import (
-    fanout_exchange,
+    playlist_fanout_exchange,
 )
 
 from src.services.realtime.sio_widget import sio_widget_service
@@ -10,7 +10,7 @@ from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlayli
 router = RabbitRouter()
 
 
-@router.subscriber("internal.playlist.widget", fanout_exchange)
+@router.subscriber("internal.playlist.widget", playlist_fanout_exchange)
 async def _(event: InternalPlaylistEvent):
     if not event.show_in_widget:
         return

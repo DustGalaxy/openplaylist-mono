@@ -1,6 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
+from simple_repository.exceptions import NotFoundException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.notification import (
@@ -8,6 +9,7 @@ from src.models.notification import (
     EventNotificationCreate,
     SubscriptionCreate,
     NotificationSettingsPatch,
+    NotificationSettingsCreate,
     SubscriptionPatch,
 )
 
@@ -51,10 +53,12 @@ class NotificationService:
 
     async def get_feed(self, session: AsyncSession, user_id: UUID):
         feed = await self.repo.get_full_notification_feed(session, user_id)
-
-        settings = await self.settings_repo.get_one(session, user_id, column="user_id")
-        settings.last_notification_read_ts = datetime.now()
-        await self.settings_repo.update(session, settings)
+        try:
+            settings = await self.settings_repo.get_one(session, user_id, column="user_id")
+            settings.last_notification_read_ts = datetime.now()
+            await self.settings_repo.update(session, settings)
+        except NotFoundException:
+            await self.settings_repo.create(session, NotificationSettingsCreate(user_id=user_id))
 
         return feed
 
@@ -63,6 +67,9 @@ class NotificationService:
 
     async def patch_settings(self, session: AsyncSession, user_id: UUID, patch: NotificationSettingsPatch):
         return await self.settings_repo.patch(session, patch, user_id, column="user_id")
+
+    async def init_settings(self, session: AsyncSession, user_id: UUID):
+        return await self.settings_repo.create(session, NotificationSettingsCreate(user_id=user_id))
 
     async def settings(self, session: AsyncSession, user_id: UUID):
         return await self.settings_repo.get_one(session, user_id, column="user_id")

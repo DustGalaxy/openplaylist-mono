@@ -1,9 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 
-import { PlaylistMode, type OrderMode, type Track } from '@/types/playlist'
-import { postPauseState, postPlayNow, postPositionState, postSeekState } from '@/api/api-playlist'
-import { isBackgroundTrack, isLastInGroup, pickNextFromGroup, getActiveModeSettings, isVipTrack, splitQueue } from './helpers'
+import {
+  getActiveModeSettings,
+  isBackgroundTrack,
+  isLastInGroup,
+  isVipTrack,
+  pickNextFromGroup,
+  splitQueue,
+} from './helpers'
 import type { GetFn, SetFn, StoreState } from './types'
+import type { OrderMode, Track } from '@/types/playlist'
+import { PlaylistMode } from '@/types/playlist'
+import {
+  postPauseState,
+  postPlayNow,
+  postPositionState,
+  postSeekState,
+} from '@/api/api-playlist'
 
 export function createPlaybackSlice(
   set: SetFn,
@@ -30,31 +43,28 @@ export function createPlaybackSlice(
       set(() => ({ getPlayerPosition: getter }))
     },
 
-    async requestPlaybackState(playlistId, is_paused, position, track_id) {
+    requestPlaybackState(playlistId, is_paused, position, track_id) {
       set((state) => ({
         playlists: state.playlists.map((p) =>
           p.id === playlistId ? { ...p, is_paused } : p,
         ),
       }))
-      postPauseState(playlistId, is_paused, position, track_id).catch(() => {
-        // ponytail: команда важнее подтверждения, ответ не смотрим
-      })
+      postPauseState(playlistId, is_paused, position, track_id).catch(() => {})
     },
 
-    async requestSeekState(playlistId, position, track_id) {
-      postSeekState(playlistId, position, track_id).catch(() => {
-        // ponytail: команда важнее подтверждения, ответ не смотрим
-      })
+    requestSeekState(playlistId, position, track_id) {
+      if (
+        get().playlists.find((p) => p.id === playlistId)?.settings
+          .sync_playback_position
+      ) {
+        postSeekState(playlistId, position, track_id).catch(() => {})
+      }
     },
 
     async requestPositionState(playlistId, position) {
-      // Fire-and-forget, как requestPlaybackState — тайминг не критичен
-      // для локального состояния, поэтому нет optimistic-поля и rollback.
       try {
         await postPositionState(playlistId, position)
-      } catch {
-        // Бэкенд ещё может быть не готов — не роняем воспроизведение из-за этого.
-      }
+      } catch {}
     },
 
     async requestPlayNow(playlistId, track_id) {
@@ -72,11 +82,15 @@ export function createPlaybackSlice(
         playlists: state.playlists.map((p) => {
           if (p.id === playlistId) {
             const track = p.track_data.find((t) => t.id === track_id)
-            const prevNowPlaying = p.settings.mode === 'flow' ? p.now_playing : undefined
+            const prevNowPlaying =
+              p.settings.mode === 'flow' ? p.now_playing : undefined
             return {
               ...p,
               track_data: prevNowPlaying
-                ? [prevNowPlaying, ...p.track_data.filter((t) => t.id !== prevNowPlaying.id)]
+                ? [
+                    prevNowPlaying,
+                    ...p.track_data.filter((t) => t.id !== prevNowPlaying.id),
+                  ]
                 : p.track_data,
               now_playing: track,
             }
@@ -124,17 +138,23 @@ export function createPlaybackSlice(
           return { pendingPlays }
         })
       } else {
-        const prevNowPlaying = pl.settings.mode === 'flow' ? pl.now_playing : undefined
+        const prevNowPlaying =
+          pl.settings.mode === 'flow' ? pl.now_playing : undefined
         set((state) => ({
           playlists: state.playlists.map((p) =>
             p.id === playlistId
               ? {
-                ...p,
-                track_data: prevNowPlaying
-                  ? [prevNowPlaying, ...p.track_data.filter((t) => t.id !== prevNowPlaying.id)]
-                  : p.track_data,
-                now_playing: track,
-              }
+                  ...p,
+                  track_data: prevNowPlaying
+                    ? [
+                        prevNowPlaying,
+                        ...p.track_data.filter(
+                          (t) => t.id !== prevNowPlaying.id,
+                        ),
+                      ]
+                    : p.track_data,
+                  now_playing: track,
+                }
               : p,
           ),
         }))
@@ -148,27 +168,32 @@ export function createPlaybackSlice(
         playlists: state.playlists.map((p) =>
           p.id === pl.id
             ? {
-              ...p,
-              history: pl.now_playing ? [...p.history, pl.now_playing].slice(-99) : p.history,
-            }
+                ...p,
+                history: pl.now_playing
+                  ? [...p.history, pl.now_playing].slice(-99)
+                  : p.history,
+              }
             : p,
         ),
       }))
 
       if (forceNextTrack) {
         get().requestPlayNow(pl.id, forceNextTrack.id)
-        return
+        return true
       }
 
       const modeSettings = getActiveModeSettings(pl)
       const { vip, regular, background } = splitQueue(pl)
 
-      const currentWasVip = pl.now_playing !== undefined && isVipTrack(pl.now_playing, modeSettings)
+      const currentWasVip =
+        pl.now_playing !== undefined && isVipTrack(pl.now_playing, modeSettings)
       const remainingVip = pl.now_playing
         ? vip.filter((t) => t.id !== pl.now_playing?.id)
         : vip
 
-      const vipOrderMode: OrderMode = pl.settings.shuffle ? 'random' : modeSettings.sort_settings_vip.order_mode
+      const vipOrderMode: OrderMode = pl.settings.shuffle
+        ? 'random'
+        : modeSettings.sort_settings_vip.order_mode
       const regularOrderMode: OrderMode = pl.settings.shuffle
         ? 'random'
         : modeSettings.sort_settings_regular.order_mode
@@ -196,7 +221,7 @@ export function createPlaybackSlice(
         } else if (currentWasVip && pl.paused_background) {
           // vip-группа отыграна ПОЛНОСТЬЮ — только теперь возвращаемся в фон
           get().requestPlayNow(pl.id, pl.paused_background.track_id)
-          return
+          return true
         } else if (currentWasVip) {
           nextTrack = regular[0] ?? (repeatAll ? vip[0] : undefined)
         } else {
@@ -204,42 +229,65 @@ export function createPlaybackSlice(
         }
 
         get().requestPlayNow(pl.id, nextTrack?.id || undefined)
-        return
+        return nextTrack ? true : false
       }
 
       // flow/stream — vip реально удаляется после отыгрыша (см. ветки ниже),
       // remainingVip тут корректно отражает то, что ещё не сыграно.
       if (remainingVip.length > 0) {
-        const next = pickNextFromGroup(remainingVip, undefined, vipOrderMode, false)
+        const next = pickNextFromGroup(
+          remainingVip,
+          undefined,
+          vipOrderMode,
+          false,
+        )
         get().requestPlayNow(pl.id, next?.id)
-        return
+        return next ? true : false
       }
 
       if (currentWasVip && pl.paused_background) {
         get().requestPlayNow(pl.id, pl.paused_background.track_id)
-        return
+        return true
       }
 
       const wasBackgroundTrack =
-        pl.now_playing !== undefined && isBackgroundTrack(pl.settings.mode, modeSettings, pl.now_playing.id)
+        pl.now_playing !== undefined &&
+        isBackgroundTrack(pl.settings.mode, modeSettings, pl.now_playing.id)
 
       let nextTrack: Track | undefined
 
       if (pl.now_playing === undefined) {
         nextTrack = regular[0] ?? background[0] ?? undefined
       } else if (pl.settings.mode === 'flow') {
-        nextTrack = pickNextFromGroup(regular, pl.now_playing.id, regularOrderMode, false)
+        nextTrack = pickNextFromGroup(
+          regular,
+          pl.now_playing.id,
+          regularOrderMode,
+          false,
+        )
         get().requestRemoveTrack(pl.id, pl.now_playing.id, reason)
       } else if (pl.settings.mode === 'stream' && wasBackgroundTrack) {
         const bgOrderMode: OrderMode = pl.settings.shuffle ? 'random' : 'auto'
-        nextTrack = pickNextFromGroup(background, pl.now_playing.id, bgOrderMode, true)
+        nextTrack = pickNextFromGroup(
+          background,
+          pl.now_playing.id,
+          bgOrderMode,
+          true,
+        )
       } else {
         // stream: доиграла обычная заявка
         get().requestRemoveTrack(pl.id, pl.now_playing.id, reason)
-        nextTrack = pickNextFromGroup(regular, pl.now_playing.id, regularOrderMode, false) ?? background[0]
+        nextTrack =
+          pickNextFromGroup(
+            regular,
+            pl.now_playing.id,
+            regularOrderMode,
+            false,
+          ) ?? background[0]
       }
 
       get().requestPlayNow(pl.id, nextTrack?.id || undefined)
+      return nextTrack ? true : false
     },
 
     playPrev(playlistId) {
@@ -247,6 +295,7 @@ export function createPlaybackSlice(
       if (!pl || pl.history.length === 0) return
 
       const prevTrack = pl.history[pl.history.length - 1]
+      console.log(prevTrack)
 
       // Снимаем трек с вершины истории ДО requestPlayNow — иначе повторный
       // клик "назад" во время pending-запроса схватит тот же самый трек.
@@ -262,7 +311,7 @@ export function createPlaybackSlice(
     clearPausedBackground(playlistId) {
       set((state) => ({
         playlists: state.playlists.map((p) =>
-          p.id === playlistId ? { ...p, paused_background: null } : p
+          p.id === playlistId ? { ...p, paused_background: null } : p,
         ),
       }))
     },

@@ -2,23 +2,19 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import { Settings } from 'lucide-react'
+import TabValidation from './tabValidation'
+import TabBasic from './tabBasic.tsx'
+import TabChatPlatformRoles from './tabChatPlatformRoles.tsx'
+import TabBlock from './tabBlock'
+import TabDonation from './tabDonation.tsx'
+import type { PlaylistPatch, PlaylistSettings } from '@/types/playlist'
+import type { Playlist } from '@/stores/playlistStore/types'
 import { Label } from '@/components/ui/label'
 import Btn from '@/components/ui/my-btn'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import TabValidation from './tabValidation'
-import TabBasic from './tabBasic.tsx'
-import ChatRoles from './tabChatRoles.tsx'
-import TabChatPlatformRoles from './tabChatPlatformRoles.tsx'
-import TabBlock from './tabBlock'
 
-import TabDonation from './tabDonation.tsx'
-import type {
-  ClientPlaylist,
-  PlaylistPatch,
-  PlaylistSettings,
-} from '@/types/playlist'
-import { usePlaylist } from '@/features/playlist/context/playlist-context'
 import {
   Dialog,
   DialogContent,
@@ -29,14 +25,14 @@ import {
 } from '@/components/ui/dialog'
 import useMusicStore from '@/stores/musicStore'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
-import { deletePlaylist } from '@/api/api-playlist'
-import { Settings } from 'lucide-react'
+import { usePlaylistView } from '@/features/united-playlist/context/playlist-view-context.tsx'
+import { useUserPlaylistRecordsStore } from '@/stores/userPlaylistInfoStore.ts'
 
 export default function SettingsModal() {
   const { t } = useTranslation()
-  const playlist = usePlaylist()
+  const { playlist } = usePlaylistView()
   const [settings, setSettings] = React.useState<PlaylistSettings>()
-  const [plst, setPlst] = React.useState<ClientPlaylist>(playlist)
+  const [plst, setPlst] = React.useState<Playlist | undefined>(playlist)
 
   const [countToDelete, setCountToDelete] = React.useState(3)
   const [deleteTimeout, setDeleteTimeout] = React.useState(false)
@@ -44,6 +40,7 @@ export default function SettingsModal() {
   const { requestPlSettings, requestPlaylistPatch } = useMusicStore()
 
   React.useEffect(() => {
+    if (!playlist) return
     setSettings(playlist.settings)
     setPlst(playlist)
   }, [playlist])
@@ -52,7 +49,7 @@ export default function SettingsModal() {
   useDebouncedEffect(
     settings,
     async () => {
-      if (!canPatchSettings.current || !settings) return
+      if (!canPatchSettings.current || !settings || !playlist) return
       canPatchSettings.current = false
       try {
         await requestPlSettings(playlist.id, settings)
@@ -114,16 +111,19 @@ export default function SettingsModal() {
     sm:data-[state=active]:translate-y-[5px]
     data-[state=active]:shadow-[0_0px_0_0_var(--color-level-3),0_0px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)]
   `
+  if (!plst) {
+    return
+  }
 
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Btn
           title={t('playlistSettings.title')}
-          className="flex px-2 bg-level-2"
+          className=" p-1 bg-level-2 size-8 rounded-sm"
           onClick={() => setCountToDelete(3)}
         >
-          <Settings />
+          <Settings className="size-5" />
         </Btn>
       </DialogTrigger>
       <DialogContent
@@ -219,14 +219,14 @@ export default function SettingsModal() {
                         setDeleteTimeout(false)
                       }, 1000)
                     } else if (countToDelete === 1) {
-                      await deletePlaylist(playlist.id)
-                      useMusicStore.getState().deletePlaylist(playlist.id)
+                      useUserPlaylistRecordsStore().remove(plst.id)
+
                       setCountToDelete(
                         t('playlistSettings.delete.deleted') as any,
                       )
                       toast.success(
                         t('playlistSettings.toast.playlistDeleted', {
-                          name: playlist.name,
+                          name: playlist?.name,
                         }),
                       )
                     } else {

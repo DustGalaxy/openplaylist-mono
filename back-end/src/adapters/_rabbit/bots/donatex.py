@@ -1,24 +1,27 @@
 import json
+from uuid import uuid4
 
 from faststream import Context
 from faststream.rabbit import RabbitRouter
 from faststream.rabbit.message import RabbitMessage
 from simple_repository.exceptions import NotFoundException
 
+from src.adapters._rabbit.broker import get_broker
 from src.adapters._rabbit.queues import (
+    user_fanout_exchange,
     main_exchange,
     bot_donatex_order_new,
     auth_user_donatex_all_request,
     auth_user_donatex_tokens_refreshed,
 )
-from src.dto.order import DonatexNewOrder
+from src.dto.internal.domain_events import InternalUserEvent, InternalUserEventType
+from src.dto.order import DonatexNewOrder, NewOrderPayload
 from src.adapters._rabbit.bots.dto import Tokens, DonateXTokenRefreshed
 
 from src.dal.postgres.token import token_vault_repository
 from src.dal.postgres.linked_account import linked_accounts_repository
 from src._types import IntegrationPlatform
 from src.database import async_session_maker
-from src.utils import kick
 
 router = RabbitRouter()
 
@@ -30,9 +33,7 @@ async def order_new_from_donatex(
     await message.ack()
     event: DonatexNewOrder = DonatexNewOrder.model_validate_json(message.body)
 
-    from taskiq_broker import task_broker as taskiq_broker
-
-    await kick("order.new", taskiq_broker, event, False, labels={"user_id": str(event.owner_id)})
+    await get_broker().publish(NewOrderPayload(order=event, from_owner=False), "order.proccess", main_exchange)
 
 
 @router.subscriber(auth_user_donatex_all_request, exchange=main_exchange)
@@ -91,4 +92,17 @@ async def user_token_died(
     async with async_session_maker() as session:
         from src.services.auth.auth_service import auth_service
 
-        await auth_service.bot_was_disconnected(session, IntegrationPlatform.DONATEX, event["platform_user_id"])
+        link = await auth_service.bot_was_disconnected(session, IntegrationPlatform.DONATEX, event["platform_user_id"])
+
+        user = await auth_service.user_repo.get_one(session, link.user_id)
+
+        await get_broker().publish(
+            InternalUserEvent(
+                event_id=uuid4(),
+                event_type=InternalUserEventType.INTEGRATION_DIED,
+                user_id=user.id,
+                user_name=user.username,
+                died_integration=IntegrationPlatform.DONATEX,
+            ),
+            exchange=user_fanout_exchange,
+        )

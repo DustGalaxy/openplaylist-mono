@@ -21,6 +21,8 @@ import { Route as HistoryRouteImport } from './routes/history'
 import { Route as EmailConfirmRouteImport } from './routes/email-confirm'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlaylistsIndexRouteImport } from './routes/playlists.index'
+import { Route as PlaylistsPlaylistIdRouteImport } from './routes/playlists.$playlistId'
 
 const ViewRoute = ViewRouteImport.update({
   id: '/view',
@@ -82,6 +84,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlaylistsIndexRoute = PlaylistsIndexRouteImport.update({
+  id: '/playlists/',
+  path: '/playlists/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlaylistsPlaylistIdRoute = PlaylistsPlaylistIdRouteImport.update({
+  id: '/playlists/$playlistId',
+  path: '/playlists/$playlistId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +108,8 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
   '/view': typeof ViewRoute
+  '/playlists/$playlistId': typeof PlaylistsPlaylistIdRoute
+  '/playlists': typeof PlaylistsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +124,8 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
   '/view': typeof ViewRoute
+  '/playlists/$playlistId': typeof PlaylistsPlaylistIdRoute
+  '/playlists': typeof PlaylistsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +141,8 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
   '/view': typeof ViewRoute
+  '/playlists/$playlistId': typeof PlaylistsPlaylistIdRoute
+  '/playlists/': typeof PlaylistsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +159,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/statistic'
     | '/view'
+    | '/playlists/$playlistId'
+    | '/playlists'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +175,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/statistic'
     | '/view'
+    | '/playlists/$playlistId'
+    | '/playlists'
   id:
     | '__root__'
     | '/'
@@ -169,6 +191,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/statistic'
     | '/view'
+    | '/playlists/$playlistId'
+    | '/playlists/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +208,8 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StatisticRoute: typeof StatisticRoute
   ViewRoute: typeof ViewRoute
+  PlaylistsPlaylistIdRoute: typeof PlaylistsPlaylistIdRoute
+  PlaylistsIndexRoute: typeof PlaylistsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -272,6 +298,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/playlists/': {
+      id: '/playlists/'
+      path: '/playlists'
+      fullPath: '/playlists'
+      preLoaderRoute: typeof PlaylistsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/playlists/$playlistId': {
+      id: '/playlists/$playlistId'
+      path: '/playlists/$playlistId'
+      fullPath: '/playlists/$playlistId'
+      preLoaderRoute: typeof PlaylistsPlaylistIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -288,6 +328,8 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StatisticRoute: StatisticRoute,
   ViewRoute: ViewRoute,
+  PlaylistsPlaylistIdRoute: PlaylistsPlaylistIdRoute,
+  PlaylistsIndexRoute: PlaylistsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

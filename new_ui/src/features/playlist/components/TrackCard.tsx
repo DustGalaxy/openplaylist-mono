@@ -19,6 +19,7 @@ import { formatTime } from '@/lib/utils'
 import useMusicStore from '@/stores/musicStore'
 import { useSavedStore } from '@/stores/savedStore'
 import Person from '@/components/icons/icon-person'
+import { usePlaybackStore } from '@/stores/playbackStore'
 
 export type TrackCardType = 'playlist' | 'non-playlist' | 'now-playing'
 
@@ -54,6 +55,11 @@ function TrackCardImpl({
         duration: track.duration,
       })
     }
+  }
+
+  const onPlay = () => {
+    useMusicStore.getState().requestPlayNow(playlist.id, track.id)
+    usePlaybackStore.getState().setActivePlayback(playlist.id, 'owner')
   }
 
   // Общая функция для копирования ссылки
@@ -113,7 +119,7 @@ function TrackCardImpl({
       return [
         {
           icon: <Play />,
-          on_click: () => playNext(playlist, undefined, track),
+          on_click: onPlay,
           className: 'px-1 bg-level-2',
           tooltip: t('playlist.track.play'),
         },

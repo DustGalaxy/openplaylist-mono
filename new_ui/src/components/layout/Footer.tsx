@@ -1,34 +1,33 @@
+import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { useTranslation, Trans } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import { MessageSquare, Bug, Users, Heart } from 'lucide-react'
 import Disc from '@/components/icons/icon-disc'
 import { useAuthStore } from '@/stores/authStore'
-import React from 'react'
+import FeedbackModal from '@/features/feedback/FeedbackModal'
+import ContributorsModal from '@/features/feedback/ContributorsModal'
+import SupportModal from '@/features/feedback/SupportModal'
 
 const productLinkKeys = [
-  { to: '/view' as const, labelKey: 'footer.searchPlaylists' },
-  { to: '/login' as const, labelKey: 'footer.login' },
-  { to: '/register' as const, labelKey: 'footer.register' },
-] as const
-
-const featureHighlightKeys = [
-  'footer.highlights.realtimeQueue',
-  'footer.highlights.rulesAndBlocks',
-  'footer.highlights.donationPriority',
-  'footer.highlights.integrations',
+  {
+    to: '/view' as const,
+    labelKey: 'footer.searchPlaylists',
+    fallback: 'Search playlists',
+  },
+  { to: '/login' as const, labelKey: 'footer.login', fallback: 'Log in' },
+  {
+    to: '/register' as const,
+    labelKey: 'footer.register',
+    fallback: 'Sign up',
+  },
 ] as const
 
 export default function Footer() {
   const { t } = useTranslation()
   const { isAuthenticated } = useAuthStore()
-  const year = new Date().getFullYear()
-  const [inFocus, setInFocus] = React.useState(false)
-  const windowWidth = window.innerWidth
 
   return (
-    <footer
-      className="w-full flex justify-center px-4 pb-6 pt-10 mt-auto"
-      onClick={() => setInFocus(!inFocus)}
-    >
+    <footer className="w-full flex justify-center px-4 pb-6 pt-6 mt-auto">
       <div
         className="
           w-full max-w-5xl rounded-(--rounded-std) border-2 border-level-3 bg-level-2
@@ -36,88 +35,49 @@ export default function Footer() {
           overflow-hidden text-text-main
         "
       >
-        {/* <div
-          className=" h-1 w-full bg-linear-to-r from-(--color-accent-2) via-(--color-accent-3) to-(--color-accent-1) bg-size-[200%_auto] animate-bg-move"
-          aria-hidden
-        /> */}
-
-        <div
-          className="px-6 py-8 sm:px-10 sm:py-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]"
-          hidden={!inFocus && windowWidth < 600}
-        >
-          <div className="flex flex-col gap-4 text-left">
-            <Link to="/" className="inline-flex items-center gap-2 w-fit group">
-              <Disc />
-              <span className="text-lg font-bold text-transparent bg-linear-to-r from-(--color-accent-2) via-(--color-accent-3) to-(--color-accent-1) bg-clip-text bg-size-[200%_auto] animate-bg-move">
-                {t('brand.name')}
-              </span>
-            </Link>
-            <p className="text-text-secondary text-sm leading-relaxed max-w-sm">
-              {t('footer.description')}
-            </p>
-            <span className="inline-flex w-fit items-center rounded-full border border-level-3/60 bg-level-1 px-3 py-1 text-xs text-text-placeholder">
-              {t('brand.version')}
+        <div className="px-5 py-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 shrink-0 group"
+          >
+            <Disc />
+            <span className="text-base font-bold text-transparent bg-linear-to-r from-(--color-accent-2) via-(--color-accent-3) to-(--color-accent-1) bg-clip-text bg-size-[200%_auto] animate-bg-move">
+              {t('brand.name', 'OpenPlaylist')}
             </span>
-          </div>
+          </Link>
 
-          <div className="text-left">
-            <h3 className="text-sm font-semibold text-text-main uppercase tracking-wide mb-4">
-              {t('footer.navigation')}
-            </h3>
-            <ul className="flex flex-col gap-2.5">
-              {isAuthenticated && (
-                <li>
-                  <Link
-                    to="/dashboard"
-                    className="text-sm text-text-secondary hover:text-text-main transition-colors"
-                  >
-                    {t('nav.myPlaylists')}
-                  </Link>
-                </li>
-              )}
-              {productLinkKeys.map(({ to, labelKey }) => (
-                <li key={to}>
-                  <Link
-                    to={to}
-                    className="text-sm text-text-secondary hover:text-text-main transition-colors"
-                  >
-                    {t(labelKey)}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="text-left">
-            <h3 className="text-sm font-semibold text-text-main uppercase tracking-wide mb-4">
-              {t('footer.features')}
-            </h3>
-            <ul className="flex flex-col gap-2.5">
-              {featureHighlightKeys.map((key) => (
-                <li
-                  key={key}
-                  className="text-sm text-text-secondary flex items-start gap-2"
-                >
-                  <span
-                    className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-linear-to-r from-(--color-accent-2) to-(--color-accent-3)"
-                    aria-hidden
-                  />
-                  {t(key)}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <nav className="flex items-center gap-4 text-sm text-text-secondary">
+            {isAuthenticated && (
+              <Link
+                to="/dashboard"
+                className="hover:text-text-main transition-colors"
+              >
+                {t('nav.myPlaylists', 'My playlists')}
+              </Link>
+            )}
+            {productLinkKeys.map(({ to, labelKey, fallback }) => (
+              <Link
+                key={to}
+                to={to}
+                className="hover:text-text-main transition-colors"
+              >
+                {t(labelKey, fallback)}
+              </Link>
+            ))}
+          </nav>
         </div>
 
-        <div className="border-t border-level-3/40 px-6 py-4 sm:px-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-text-secondary">
+        <div className="border-t border-level-3/40 px-5 py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-xs text-text-secondary">
           <span>
-            {t('footer.copyright.start', { year: 2026 })}
-            <a href="https://github.com/DustGalaxy" className='underline'>
-              {t('footer.copyright.link')}
+            {t('footer.copyright.start', 'Made in {{year}} by ', {
+              year: 2026,
+            })}
+            <a href="https://github.com/DustGalaxy" className="underline">
+              {t('footer.copyright.link', 'DustGalaxy')}
             </a>
-            {t('footer.copyright.end')}
+            {t('footer.copyright.end', '. All rights reserved.')}
           </span>
-          <p className="text-text-secondary">{t('footer.techStack')}</p>
+          <p>{t('footer.techStack', 'Built with React & TypeScript')}</p>
         </div>
       </div>
     </footer>

@@ -5,6 +5,7 @@ from fastapi import HTTPException, status
 from simple_repository.exceptions import NotFoundException
 
 from src.dto.internal.notifications import BaseEvent
+from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType
 from src.dal.abstract import IPlaylistRepository
 from src.dal.postgres.playlist import playlist_repository
 
@@ -45,11 +46,12 @@ class PlaylistLowService:
     async def get_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistSchema:
         return await self._playlist_repository.get_user_playlist_by_name(session, owner_id, name)
 
-    async def get_public_playlist(self, session: AsyncSession, playlist_id: UUID) -> PlaylistSchema:
+    async def get_public_playlist(self, session: AsyncSession, playlist_id: UUID, user_id: UUID | None = None) -> PlaylistSchema:
         plst = await self._playlist_repository.get_one(session, playlist_id)
-        if not plst.is_public:
+        if not plst.is_public and (not user_id or plst.owner_id != user_id):
             raise HTTPException(status_code=404, detail="Playlist not found")
         return plst
+
 
     async def get_basic_info(self, session: AsyncSession, playlist_id: UUID) -> PlaylistBaseinfo:
         plst = await self._playlist_repository.get_one(session, playlist_id)
@@ -81,26 +83,30 @@ class PlaylistLowService:
         created_playlist = await self._playlist_repository.create_with_settings(session, new_playlist)
         return created_playlist
 
-    # async def get_events_from_patch(self, patch: PlaylistPatch):
-    #     events = []
+    def get_events_from_patch(self, patch: PlaylistPatch):
+        events = []
 
-    #     if patch.is_public:
-    #         events.append(PlaylistEventType.BASIC_VISIBILITY)
-    #     if patch.name
+        if patch.is_public:
+            events.append(InternalPlaylistEventType.PLAYLIST_VISIABILITY_CHANGED)
+        if patch.name:
+            events.append(InternalPlaylistEventType.PLAYLIST_RENAMED)
+
+        return events
+
+    def get_events_between_states(self, old: PlaylistSchema, new: PlaylistSchema) -> list[InternalPlaylistEventType]:
+        events = []
+        if old.is_public != new.is_public:
+            events.append(InternalPlaylistEventType.PLAYLIST_VISIABILITY_CHANGED)
+        if old.name != new.name:
+            events.append(InternalPlaylistEventType.PLAYLIST_RENAMED)
+        return events
 
     async def patch_playlist(
         self,
         session: AsyncSession,
         data: PlaylistPatch,
         playlist_id: UUID,
-        user: User,
     ) -> PlaylistSchema:
-        plst = await self._playlist_repository.get_one(session, playlist_id)
-        if user.id != plst.owner_id:
-            raise NotAuthorizedException()
-
-        # await event_engine.send_event(BaseEvent(target_id=playlist_id, target_type="playlist", event_type=))
-
         return await self._playlist_repository.patch(session, data, playlist_id)
 
     async def delete_playlist(self, session: AsyncSession, playlist_id: UUID) -> int:

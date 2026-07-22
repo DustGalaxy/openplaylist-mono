@@ -1,31 +1,24 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   CloudSync,
   Music2,
   PanelLeftClose,
   PanelLeftOpen,
-  Pause,
-  Play,
-  Repeat,
-  Repeat1,
-  RepeatOff,
+  RadioTower,
   Share2 as ShareIcon,
   Shield,
-  Shuffle,
-  SkipBack,
-  SkipForward,
   Terminal,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import OrderMiniCard from './order-mini-card'
-import YoutubePlayer from './YoutubePlayer'
 import Counter from './order-counter'
 import { PlaylistQueueInput } from './bar'
 import SavedList from './saved-list'
 import SortPanel from './sortPanel'
 import LogPanel from './LogPanel'
 import TrackCard from './TrackCard'
+import PlayerBase from './PlayerControls'
 import type { ClientPlaylist } from '@/types/playlist'
 import Btn from '@/components/ui/my-btn'
 
@@ -38,7 +31,6 @@ import {
   filterTabBaseClass,
   filterTabInactiveClass,
   innerPanelClass,
-  panelClass,
   statusClosedClass,
   statusOpenClass,
 } from '@/features/landing/styles'
@@ -53,7 +45,6 @@ import { ReorderableList } from '@/components/dnd/ReorderableList'
 import { ReorderRail } from '@/components/dnd/ReorderRail'
 import { MiniCardDragGhost } from '@/components/dnd/DragGhost'
 import { splitQueue } from '@/stores/musicStore/helpers'
-import { Slider } from '@/components/ui/slider'
 
 export default function Playlist({ playlist }: { playlist: ClientPlaylist }) {
   return (
@@ -71,27 +62,9 @@ function PlaylistView() {
   const [activePlst, setActivePlst] = React.useState(
     playlist.is_allow_external_requests,
   )
-  const [nowPlaying, setNowPlaying] = React.useState<string | undefined>(
-    playlist.now_playing?.yt_video_id,
-  )
-
-  const [repeatMode, setRepeatMode] = React.useState(
-    playlist.settings.repeat_mode,
-  )
-
   const [queueSearch, setQueueSearch] = React.useState('')
-
-  const isPaused = playlist.is_paused ?? true
-  const [volume, setVolume] = React.useState<number>(0.5)
-  const {
-    playNext,
-    requestPlSettings,
-    playPrev,
-    requestReorder,
-    requestReorderStep,
-    requestPlaybackState,
-    getPlayerPosition,
-  } = useMusicStore()
+  const { requestPlSettings, requestReorder, requestReorderStep } =
+    useMusicStore()
 
   const visibleTracks = React.useMemo(() => {
     const q = queueSearch.trim().toLowerCase()
@@ -135,167 +108,16 @@ function PlaylistView() {
   const contentSettings =
     playlist.settings.content_settings[selectedContentSettingIndex]
 
+  const controBtnStyle = 'p-1 rounded-sm size-8'
+
   return (
-    <div className="w-full flex flex-col gap-3">
+    <div className=" flex flex-col gap-3 ">
       <div className="w-full flex flex-col gap-4  items-end ">
-        <div
-          className={`flex flex-col gap-4  px-3 pt-3 pb-4 ${panelClass} w-full`}
-        >
-          <div className="grid grid-cols-2 gap-2 sm:gap-3  z-1">
-            <div>
-              {' '}
-              <YoutubePlayer
-                playOnReady={true}
-                volume={volume}
-                pause={isPaused}
-                setIsPaused={(val: boolean, pos: number) => {
-                  requestPlaybackState(
-                    playlist.id,
-                    val,
-                    pos,
-                    playlist.now_playing?.id,
-                  )
-                }}
-                nowPlay={nowPlaying}
-                className={`sm:row-span-2 ${showConsole || showContentSettings ? '' : 'col-span-2'} flex items-center justify-center`}
-              />
-              <Slider
-                defaultValue={[0.75]}
-                onValueChange={(value) => {
-                  setVolume(value[0])
-                }}
-                max={1}
-                step={0.01}
-                className="mx-auto w-full"
-              />
-            </div>
-
-            {showConsole && <LogPanel />}
-
-            {showContentSettings && (
-              <div className="flex flex-col gap-2 sm:gap-3">
-                <div className={`flex items-center justify-between`}>
-                  <div className="flex gap-2 flex-wrap">
-                    {playlist.settings.content_settings.map(
-                      (setting, index) => (
-                        <button
-                          key={setting.platform}
-                          type="button"
-                          onClick={() => setSelectedContentSettingIndex(index)}
-                          className={`${filterTabBaseClass} ${
-                            selectedContentSettingIndex === index
-                              ? filterTabActiveClass
-                              : filterTabInactiveClass
-                          }`}
-                        >
-                          {setting.platform === Platform.General
-                            ? t('common.general')
-                            : setting.platform}
-                        </button>
-                      ),
-                    )}
-                  </div>
-                </div>
-
-                <InfoCardGroup
-                  mode={playlist.settings.mode}
-                  min_views={contentSettings.min_views}
-                  min_likes={contentSettings.min_likes}
-                  max_duration={contentSettings.max_duration}
-                  track_cooldown={contentSettings.track_cooldown}
-                  user_cooldown={contentSettings.user_cooldown}
-                  max_playlist_size={playlist.settings.max_playlist_size}
-                  priorityMode={playlist.settings.cost_mode}
-                  className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-px sm:gap-0.5"
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="  grid  sm:grid-cols-2 w-full gap-2">
-            <div className="w-full gap-2 grid grid-cols-5  ">
-              <Btn
-                title={t(`playlist.tooltip.repeatMode.${repeatMode}`)}
-                className="px-2 bg-level-2"
-                onClick={() => {
-                  if (repeatMode === 'all') {
-                    setRepeatMode('once')
-                    requestPlSettings(playlist.id, { repeat_mode: 'once' })
-                  } else if (repeatMode === 'once') {
-                    setRepeatMode('none')
-                    requestPlSettings(playlist.id, { repeat_mode: 'none' })
-                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                  } else if (repeatMode === 'none') {
-                    setRepeatMode('all')
-                    requestPlSettings(playlist.id, { repeat_mode: 'all' })
-                  }
-                }}
-              >
-                {repeatMode === 'all' ? (
-                  <Repeat />
-                ) : repeatMode === 'once' ? (
-                  <Repeat1 />
-                ) : (
-                  <RepeatOff />
-                )}
-              </Btn>
-
-              <Btn
-                title={t(`playlist.tooltip.prev`)}
-                disabled={playlist.settings.mode !== 'static'}
-                className={`px-2 bg-level-2 `}
-                onClick={() => {
-                  playPrev(playlist.id)
-                }}
-              >
-                <SkipBack />
-              </Btn>
-
-              <Btn
-                title={t(`playlist.tooltip.${isPaused ? 'play' : 'pause'}`)}
-                className="px-2 bg-level-2"
-                onClick={() => {
-                  if (!getPlayerPosition) return
-                  let pos = getPlayerPosition()
-                  if (!pos) pos = 0.0
-                  requestPlaybackState(
-                    playlist.id,
-                    !isPaused,
-                    pos,
-                    playlist.now_playing.id,
-                  )
-                }}
-              >
-                {isPaused ? <Play /> : <Pause />}
-              </Btn>
-              <Btn
-                title={t(`playlist.tooltip.next`)}
-                className="px-2 bg-level-2"
-                onClick={() => {
-                  playNext(playlist, 'skipped')
-                }}
-              >
-                <SkipForward />
-              </Btn>
-
-              <Btn
-                title={t(`playlist.tooltip.shuffle`)}
-                isActive={playlist.settings.shuffle}
-                onClick={() =>
-                  requestPlSettings(playlist.id, {
-                    shuffle: !playlist.settings.shuffle,
-                  })
-                }
-                className="px-2"
-              >
-                <Shuffle />
-              </Btn>
-            </div>
-
-            <div className="flex gap-1 sm:gap-2  justify-between ">
-              <div className="hidden sm:block w-px h-[70%] self-center bg-text-secondary" />
-              <div className="flex w-full gap-1 sm:gap-2 justify-between ">
-                <div className="flex gap-1 sm:gap-2 justify-between w-full ">
+        <div className={`flex flex-col gap-4 pt-3 pb-4 w-full rounded-md`}>
+          <div className="flex flex-col gap-2 sm:gap-3  z-1">
+            <div className="flex w-full gap-1 sm:gap-2 justify-between ">
+              <div className="flex gap-1 sm:gap-2 justify-between w-full ">
+                <div className="flex gap-1 sm:gap-2">
                   <Btn
                     title={t('playlist.tooltip.status')}
                     onClick={() => {
@@ -303,7 +125,7 @@ function PlaylistView() {
                       changePlaylistActive(playlist.id, activePlst)
                     }}
                     className={cn(
-                      'inline-flex items-center gap-1.5 px-1.5 py-1 sm:px-3 sm:py-1.5 text-sm font-mono',
+                      'inline-flex items-center gap-1.5 px-1.5 py-1 sm:px-3 sm:py-1.5 text-sm font-mono rounded-sm',
                       activePlst ? statusOpenClass : statusClosedClass,
                     )}
                   >
@@ -327,59 +149,107 @@ function PlaylistView() {
                           !playlist.settings.sync_playback_position,
                       })
                     }}
-                    className="px-2 bg-level-2"
+                    className="size-8 rounded-sm"
                   >
-                    <CloudSync />
+                    <RadioTower className="size-5" />
                   </Btn>
-                  <div className="flex gap-2">
-                    <Btn
-                      title={t('playlist.tooltip.share')}
-                      className="px-2 bg-level-2"
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          window.location.origin + '/view?p=' + playlist.id,
-                        )
-                        toast.success(t('playlist.toast.linkCopied'))
-                      }}
-                    >
-                      <ShareIcon />
-                    </Btn>
-                    <Btn
-                      title={t('playlist.tooltip.logs')}
-                      className="px-2 bg-level-2 font-bold font-mono"
-                      onClick={() => {
-                        if (showContentSettings) {
-                          setShowContentSettings(false)
-                        }
-                        setShowConsole(!showConsole)
-                      }}
-                    >
-                      <Terminal />
-                    </Btn>
-                    <Btn
-                      title={t('playlist.tooltip.validation')}
-                      className="px-2 bg-level-2"
-                      onClick={() => {
-                        if (showConsole) {
-                          setShowConsole(false)
-                        }
-                        setShowContentSettings(!showContentSettings)
-                      }}
-                    >
-                      <Shield />
-                    </Btn>
-                  </div>
                 </div>
-                <div className="flex gap-1 sm:gap-2">
-                  <div className="w-px h-[70%] self-center bg-text-secondary" />
-                  <SettingsModal />
+
+                <div className="flex gap-2">
+                  <Btn
+                    title={t('playlist.tooltip.share')}
+                    className="p-1 bg-level-2 size-8 rounded-sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        window.location.origin + '/view?p=' + playlist.id,
+                      )
+                      toast.success(t('playlist.toast.linkCopied'))
+                    }}
+                  >
+                    <ShareIcon className="size-5" />
+                  </Btn>
+                  <Btn
+                    title={t('playlist.tooltip.logs')}
+                    className="p-1 bg-level-2 size-8 rounded-sm"
+                    onClick={() => {
+                      if (showContentSettings) {
+                        setShowContentSettings(false)
+                      }
+                      setShowConsole(!showConsole)
+                    }}
+                  >
+                    <Terminal className="size-5" />
+                  </Btn>
+                  <Btn
+                    title={t('playlist.tooltip.validation')}
+                    className="p-1 bg-level-2 size-8 rounded-sm"
+                    onClick={() => {
+                      if (showConsole) {
+                        setShowConsole(false)
+                      }
+                      setShowContentSettings(!showContentSettings)
+                    }}
+                  >
+                    <Shield className="size-5" />
+                  </Btn>
                 </div>
               </div>
+              <div className="flex gap-1 sm:gap-2">
+                <div className="w-px h-[70%] self-center bg-text-secondary" />
+                <SettingsModal />
+              </div>
             </div>
+
+            {(showConsole || showContentSettings) && (
+              <div className={`h-full ring-1 ring-level-3 p-1 rounded-md`}>
+                {showConsole && <LogPanel />}
+
+                {showContentSettings && (
+                  <div className="flex flex-col gap-2 sm:gap-3">
+                    <div className={`flex items-center justify-between`}>
+                      <div className="flex gap-2 flex-wrap">
+                        {playlist.settings.content_settings.map(
+                          (setting, index) => (
+                            <button
+                              key={setting.platform}
+                              type="button"
+                              onClick={() =>
+                                setSelectedContentSettingIndex(index)
+                              }
+                              className={`${filterTabBaseClass} ${
+                                selectedContentSettingIndex === index
+                                  ? filterTabActiveClass
+                                  : filterTabInactiveClass
+                              }`}
+                            >
+                              {setting.platform === Platform.General
+                                ? t('common.general')
+                                : setting.platform}
+                            </button>
+                          ),
+                        )}
+                      </div>
+                    </div>
+
+                    <InfoCardGroup
+                      mode={playlist.settings.mode}
+                      min_views={contentSettings.min_views}
+                      min_likes={contentSettings.min_likes}
+                      max_duration={contentSettings.max_duration}
+                      track_cooldown={contentSettings.track_cooldown}
+                      user_cooldown={contentSettings.user_cooldown}
+                      max_playlist_size={playlist.settings.max_playlist_size}
+                      priorityMode={playlist.settings.cost_mode}
+                      className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-px sm:gap-0.5"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center  justify-center w-full mb-1 z-0">
+        {/* <div className="flex items-center  justify-center w-full mb-1 z-0">
           {playlist.now_playing?.yt_video_id ? (
             <TrackCard track={playlist.now_playing} type="now-playing" />
           ) : (
@@ -392,7 +262,7 @@ function PlaylistView() {
               </p>
             </div>
           )}
-        </div>
+        </div> */}
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
@@ -655,4 +525,7 @@ function PlaylistView() {
       </div>
     </div>
   )
+}
+function setNowPlaying(yt_video_id: string) {
+  throw new Error('Function not implemented.')
 }

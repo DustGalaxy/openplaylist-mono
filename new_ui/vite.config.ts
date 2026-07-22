@@ -90,6 +90,9 @@ export default defineConfig({
       },
     },
   },
+  rules: {
+    '@typescript-eslint/no-unnecessary-condition': 'none',
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),

@@ -14,7 +14,6 @@ from src.services.stream_service import get_stream_service, StreamService
 from src.services.notification.notification_service import get_notification_service, NotificationService
 from src.services.auth.auth_service import auth_service
 from src.orm.playlist import Playlist
-from src.orm.settings import Settings
 
 from src.database import AsyncSession, get_async_session
 from src.exceptions import NotAuthorizedException
@@ -29,13 +28,12 @@ NOTIFY_SERVICE = Annotated[NotificationService, Depends(get_notification_service
 DB_SESSION = Annotated[AsyncSession, Depends(get_async_session)]
 CURR_USER = Annotated[User, Depends(auth_service.get_current_user)]
 USER_ID = Annotated[UUID, Depends(auth_service.get_current_user_id)]
-
+USER_ID_OR_NONE = Annotated[UUID | None, Depends(auth_service.get_current_user_id_or_none)]
 
 async def get_current_settings(playlist_id: UUID, current_user: CURR_USER, session: DB_SESSION):
     stmt = (
-        select(Settings)
-        .join(Playlist, Settings.playlist_id == Playlist.id)
-        .where(Settings.playlist_id == playlist_id, Playlist.owner_id == current_user.id)
+        select(Playlist.)
+        .where(Playlist.id == playlist_id, Playlist.owner_id == current_user.id)
     )
     result = await session.execute(stmt)
     settings = result.scalar()

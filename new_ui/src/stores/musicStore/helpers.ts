@@ -1,6 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 
-import type { ClientPlaylist, ModeSettings, OrderMode, PlaylistMode, SocketLike, SortSettings, Track } from '@/types/playlist'
+import type {
+  ClientPlaylist,
+  ModeSettings,
+  OrderMode,
+  PlaylistMode,
+  SocketLike,
+  SortSettings,
+  Track,
+} from '@/types/playlist'
 import type { SplitQueue } from './types'
 
 /**
@@ -11,7 +19,10 @@ import type { SplitQueue } from './types'
  * repeatAll: если true и дошли до конца списка — начинаем сначала (для static
  *   repeat_mode='all' и для background-репита, который крутится всегда по кругу).
  */
-export function isLastInGroup(list: Array<Track>, currentId: string | undefined): boolean {
+export function isLastInGroup(
+  list: Array<Track>,
+  currentId: string | undefined,
+): boolean {
   if (currentId === undefined || list.length === 0) return true
   const idx = list.findIndex((t) => t.id === currentId)
   return idx === -1 || idx === list.length - 1
@@ -43,11 +54,17 @@ export function isBackgroundTrack(
   modeSettings: ModeSettings,
   trackId: string,
 ): boolean {
-  return mode === 'stream' && modeSettings.background_track_ids.includes(trackId)
+  return (
+    mode === 'stream' && modeSettings.background_track_ids.includes(trackId)
+  )
 }
 
 /** Safe emit — socket may be undefined or not yet support emit. */
-export function safeEmit(s: SocketLike | undefined, event: string, payload: any) {
+export function safeEmit(
+  s: SocketLike | undefined,
+  event: string,
+  payload: any,
+) {
   if (s !== undefined && s.emit) s.emit(event, payload)
 }
 
@@ -94,6 +111,54 @@ export function isVipTrack(track: Track, modeSettings: ModeSettings): boolean {
   )
 }
 
+export function reorderStep(
+  playlist: ClientPlaylist,
+  trackId: string,
+  group: string,
+  dir: 'up' | 'down',
+): Array<string> | void {
+  const mode = playlist.settings.mode
+  const modeSettings = playlist.settings.mode_settings[mode]
+  let currentIds: Array<string>
+
+  if (group === 'background') {
+    if (mode !== 'stream') {
+      console.error('Background group reorder only valid in stream mode')
+      return
+    }
+    currentIds = modeSettings.background_track_ids
+  } else {
+    const settings =
+      group === 'vip'
+        ? modeSettings.sort_settings_vip
+        : modeSettings.sort_settings_regular
+    const { vip, regular } = splitQueue(playlist)
+    const visibleGroup = group === 'vip' ? vip : regular
+    const visibleIds = visibleGroup.map((t) => t.id)
+    const visibleIdSet = new Set(visibleIds)
+
+    const reconciled = settings.manual_order_ids.filter((id) =>
+      visibleIdSet.has(id),
+    )
+    const knownIds = new Set(reconciled)
+    const newIds = visibleIds.filter((id) => !knownIds.has(id))
+
+    currentIds =
+      settings.manual_order_ids.length > 0
+        ? [...reconciled, ...newIds]
+        : visibleIds
+  }
+
+  const idx = currentIds.indexOf(trackId)
+  if (idx === -1) return
+
+  const swapWith = dir === 'up' ? idx - 1 : idx + 1
+  if (swapWith < 0 || swapWith >= currentIds.length) return
+
+  const next = [...currentIds]
+  ;[next[idx], next[swapWith]] = [next[swapWith], next[idx]]
+  return next
+}
 
 export function getActiveModeSettings(playlist: ClientPlaylist): ModeSettings {
   return playlist.settings.mode_settings[playlist.settings.mode]
@@ -105,15 +170,15 @@ export function splitQueue(playlist: ClientPlaylist): SplitQueue {
   const pool =
     playlist.settings.mode === 'stream'
       ? playlist.track_data.filter(
-        (t) => !modeSettings.background_track_ids.includes(t.id),
-      )
+          (t) => !modeSettings.background_track_ids.includes(t.id),
+        )
       : playlist.track_data
 
   const background: Array<Track> =
     playlist.settings.mode === 'stream'
       ? modeSettings.background_track_ids
-        .map((id) => playlist.track_data.find((t) => t.id === id))
-        .filter((t): t is Track => t !== undefined)
+          .map((id) => playlist.track_data.find((t) => t.id === id))
+          .filter((t): t is Track => t !== undefined)
       : []
 
   if (modeSettings.priority_break_point <= 0) {

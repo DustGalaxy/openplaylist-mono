@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Bell, BellOff, Loader2, Plus } from 'lucide-react'
 import { NOTIFICATION_EVENTS_MAP } from '../types'
@@ -31,7 +31,7 @@ export const SubscriptionCreateModal: React.FC<
   const { t } = useTranslation()
   const [isSaving, setIsSaving] = useState(false)
 
-  const availableSwitches = NOTIFICATION_EVENTS_MAP[targetType]
+  const availableSwitches = useRef(NOTIFICATION_EVENTS_MAP[targetType])
 
   // По дефолту при создании включаем все доступные ивенты для максимального охвата
   // Инициализируем пустым массивом
@@ -42,7 +42,7 @@ export const SubscriptionCreateModal: React.FC<
   // Сбрасываем и заполняем стейт только при изменении флага открытия или типа
   useEffect(() => {
     if (isOpen) {
-      setAllowedEvents(availableSwitches.map((s) => s.id))
+      setAllowedEvents(availableSwitches.current.map((s) => s.id))
     }
   }, [isOpen, targetType])
 
@@ -56,7 +56,7 @@ export const SubscriptionCreateModal: React.FC<
 
   const handleMuteAll = () => setAllowedEvents([])
   const handleUnmuteAll = () =>
-    setAllowedEvents(availableSwitches.map((s) => s.id))
+    setAllowedEvents(availableSwitches.current.map((s) => s.id))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -123,7 +123,7 @@ export const SubscriptionCreateModal: React.FC<
         {/* Форма со свичами */}
         <form onSubmit={handleSubmit}>
           <div className="p-6 max-h-87.5 overflow-y-auto space-y-4 divide-y divide-text-secondary/45">
-            {availableSwitches.map((item, index) => {
+            {availableSwitches.current.map((item, index) => {
               const isChecked = allowedEvents.includes(item.id)
               return (
                 <div

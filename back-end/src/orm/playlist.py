@@ -1,11 +1,13 @@
+import enum
+from typing import Literal
 from uuid import UUID
-from sqlalchemy import Enum, String, ForeignKey
+from sqlalchemy import Enum, Index, Integer, String, ForeignKey
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ARRAY, UUID as PGUUID, JSONB
 
 from src.database import Base, UUIDMixin, TimestampMixin
-from src._types import Status, Platform
+from src._types import BlockListScope, ChatRuleScope, ContentSettingScope, DonationRuleScope, Status, Platform
 
 
 class Order(Base, UUIDMixin, TimestampMixin):
@@ -27,35 +29,120 @@ class Order(Base, UUIDMixin, TimestampMixin):
     owner_platform_id: Mapped[str]
     from_owner: Mapped[bool]
 
-    source: Mapped[Platform] = mapped_column(Enum(Platform,native_enum=False), nullable=False)
+    source: Mapped[Platform] = mapped_column(Enum(Platform, native_enum=False), nullable=False)
 
     extra_data: Mapped[dict] = mapped_column(JSONB, nullable=True)
 
-    
     playlist_associations: Mapped[list["OrderPlaylistStatus"]] = relationship(back_populates="order")
 
 
 class Playlist(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "playlists"
 
-    owner_id: Mapped[UUID] = mapped_column(PGUUID, nullable=False)
+    # Основные атрибуты
+    owner_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
     owner_nickname: Mapped[str]
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(String(255), nullable=True)
 
+    # Флаги видимости
     is_public: Mapped[bool] = mapped_column(default=False, nullable=False)
     is_favorite: Mapped[bool] = mapped_column(default=False, nullable=False)
-    tags: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True, default=list)
-
-    allow_sources: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, default=list, server_default='[]')
+    show_in_widget: Mapped[bool] = mapped_column(default=False, nullable=False)
     is_allow_external_requests: Mapped[bool] = mapped_column(default=False, nullable=False)
 
-    show_in_widget: Mapped[bool] = mapped_column(default=False, nullable=False)
-
+    # Параметры проигрывания и ограничения
     now_playing: Mapped[str] = mapped_column(String, nullable=True)
+    max_playlist_size: Mapped[int] = mapped_column(default=0, nullable=False)
+    sync_playback_position: Mapped[bool] = mapped_column(default=False, nullable=False)
 
-    order_associations: Mapped[list["OrderPlaylistStatus"]] = relationship(back_populates="playlist", lazy="selectin", cascade="all, delete-orphan")
+    mode: Mapped[Literal["flow", "static", "stream"]] = mapped_column(default="static", nullable=False)
+    repeat_mode: Mapped[Literal["all", "once", "none"]] = mapped_column(default="none", nullable=False)
+    shuffle: Mapped[bool] = mapped_column(default=False, nullable=False)
+    cost_mode: Mapped[Literal["add", "max"]] = mapped_column(default="max", nullable=False)
 
+    # JSONB конфиги
+    allow_sources: Mapped[list[dict]] = mapped_column(JSONB, nullable=False, server_default="[]")
+    mode_settings: Mapped[dict] = mapped_column(
+        JSONB,
+        nullable=False,
+        default_factory=lambda: {
+            "flow": {
+                "priority_break_point": 0,
+                "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+                "sort_settings_regular": {
+                    "date": "desc",
+                    "priority": "none",
+                    "order_mode": "auto",
+                    "manual_order_ids": [],
+                },
+                "sort_settings_background": {
+                    "date": "desc",
+                    "priority": "none",
+                    "order_mode": "auto",
+                    "manual_order_ids": [],
+                },
+                "background_track_ids": [],
+            },
+            "static": {
+                "priority_break_point": 0,
+                "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+                "sort_settings_regular": {
+                    "date": "desc",
+                    "priority": "none",
+                    "order_mode": "auto",
+                    "manual_order_ids": [],
+                },
+                "sort_settings_background": {
+                    "date": "desc",
+                    "priority": "none",
+                    "order_mode": "auto",
+                    "manual_order_ids": [],
+                },
+                "background_track_ids": [],
+            },
+            "stream": {
+                "priority_break_point": 0,
+                "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+                "sort_settings_regular": {
+                    "date": "desc",
+                    "priority": "none",
+                    "order_mode": "auto",
+                    "manual_order_ids": [],
+                },
+                "sort_settings_background": {
+                    "date": "desc",
+                    "priority": "none",
+                    "order_mode": "auto",
+                    "manual_order_ids": [],
+                },
+                "background_track_ids": [],
+            },
+        },
+    )
+
+    # Массивы
+    tags: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False, default=list)
+    track_black_list: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False, default=list)
+
+    # Связи с дочерними правилами (теперь привязаны напрямую к Playlist)
+    content_settings: Mapped[list["ContentSettings"]] = relationship(
+        back_populates="playlist", cascade="all, delete-orphan", lazy="selectin"
+    )
+    chat_rules: Mapped[list["ChatRules"]] = relationship(
+        back_populates="playlist", cascade="all, delete-orphan", lazy="selectin"
+    )
+    donation_rules: Mapped[list["DonationRules"]] = relationship(
+        back_populates="playlist", cascade="all, delete-orphan", lazy="selectin"
+    )
+    block_list: Mapped[list["BlockList"]] = relationship(
+        back_populates="playlist", cascade="all, delete-orphan", lazy="selectin"
+    )
+
+    # Связи заказов
+    order_associations: Mapped[list["OrderPlaylistStatus"]] = relationship(
+        back_populates="playlist", lazy="selectin", cascade="all, delete-orphan"
+    )
     active_order_associations: Mapped[list["OrderPlaylistStatus"]] = relationship(
         primaryjoin="and_(Playlist.id == OrderPlaylistStatus.playlist_id, OrderPlaylistStatus.status == 'in playlist')",
         viewonly=True,
@@ -69,9 +156,6 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
         target_collection="active_order_associations", attr="order"
     )
 
-    def __repr__(self):
-        return f"<Playlist(id={self.id}, name='{self.name}', owner_id={self.owner_id} )>"
-
 
 class OrderPlaylistStatus(Base, TimestampMixin):
     __tablename__ = "order_playlist_status"
@@ -80,5 +164,104 @@ class OrderPlaylistStatus(Base, TimestampMixin):
     playlist_id: Mapped[UUID] = mapped_column(PGUUID, ForeignKey("playlists.id", ondelete="CASCADE"), primary_key=True)
     status: Mapped[Status] = mapped_column(default="in playlist")
 
-    order: Mapped["Order"] = relationship(back_populates="playlist_associations", lazy="selectin", cascade="all, delete")
+    order: Mapped["Order"] = relationship(
+        back_populates="playlist_associations", lazy="selectin", cascade="all, delete"
+    )
     playlist: Mapped["Playlist"] = relationship(back_populates="order_associations")
+
+
+
+class ContentSettings(Base, UUIDMixin, TimestampMixin):
+    __tablename__ = "content_settings"
+
+    playlist_id: Mapped[UUID] = mapped_column(ForeignKey("playlist.id", ondelete="CASCADE"))
+    playlist: Mapped["Playlist"] = relationship(
+        back_populates="chat_rules",
+        lazy="selectin",
+    )
+    platform: Mapped[ContentSettingScope] = mapped_column(Enum(ContentSettingScope, native_enum=False), nullable=False)
+
+    min_views: Mapped[int | None] = mapped_column(default=10_000, nullable=False)
+    min_likes: Mapped[int] = mapped_column(default=500, nullable=False)
+    max_duration: Mapped[int] = mapped_column(default=600, nullable=False)
+    track_cooldown: Mapped[int] = mapped_column(default=0, nullable=False)
+    user_cooldown: Mapped[int] = mapped_column(default=2, nullable=False)
+
+
+class BlockTrigger(enum.Enum):
+    USER_ID = "USER_ID"
+    USER_NAME = "USER_NAME"
+
+
+class BlockList(Base, UUIDMixin, TimestampMixin):
+    __tablename__ = "block_list"
+
+    playlist_id: Mapped[UUID] = mapped_column(ForeignKey("playlist.id", ondelete="CASCADE"))
+    playlist: Mapped["Playlist"] = relationship(
+        back_populates="chat_rules",
+        lazy="selectin",
+    )
+
+    trigger_type: Mapped[BlockTrigger] = mapped_column(Enum(BlockTrigger, native_enum=False))
+    trigger_value: Mapped[str] = mapped_column(String(255))
+
+    platform: Mapped[BlockListScope] = mapped_column(Enum(BlockListScope, native_enum=False), nullable=False)
+
+
+class DonationRules(Base, UUIDMixin, TimestampMixin):
+    __tablename__ = "donation_rules"
+
+    playlist_id: Mapped[UUID] = mapped_column(ForeignKey("playlist.id", ondelete="CASCADE"))
+    playlist: Mapped["Playlist"] = relationship(
+        back_populates="chat_rules",
+        lazy="selectin",
+    )
+    platform: Mapped[DonationRuleScope] = mapped_column(Enum(DonationRuleScope, native_enum=False), nullable=False)
+
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    slug: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    currency: Mapped[str] = mapped_column(String(3), default="USD")
+    amount: Mapped[float] = mapped_column(default=5.0, nullable=False)
+
+    priority: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    content_settings: Mapped[dict] = mapped_column(JSONB, nullable=True)
+
+    __table_args__ = (
+        Index(
+            "ix_donation_rules_unique_trigger",
+            "settings_id",
+            "platform",
+            "currency",
+            "amount",
+            unique=True,
+        ),
+    )
+
+
+class ChatRules(Base, UUIDMixin, TimestampMixin):
+    __tablename__ = "chat_rules"
+
+    playlist_id: Mapped[UUID] = mapped_column(ForeignKey("playlist.id", ondelete="CASCADE"))
+    playlist: Mapped["Playlist"] = relationship(
+        back_populates="chat_rules",
+        lazy="selectin",
+    )
+    platform: Mapped[ChatRuleScope] = mapped_column(Enum(ChatRuleScope, native_enum=False), nullable=False)
+
+    key: Mapped[str] = mapped_column(String(255), nullable=False)
+    priority: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    content_settings: Mapped[dict] = mapped_column(JSONB, nullable=True)
+    overrive_order: Mapped[int] = mapped_column(Integer, nullable=True)
+
+    __table_args__ = (
+        Index(
+            "ix_chat_rules_unique_trigger",
+            "playlist_id",
+            "platform",
+            "key",
+            unique=True,
+        ),
+    )

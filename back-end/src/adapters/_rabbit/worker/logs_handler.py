@@ -3,7 +3,7 @@ from faststream.rabbit import RabbitRouter
 
 from src._types import PlaylistLogsEventTypes
 from src.adapters._rabbit.queues import (
-    fanout_exchange,
+    playlist_fanout_exchange,
 )
 
 from src.services.playlist_log import playlist_log_service
@@ -13,7 +13,7 @@ from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlayli
 router = RabbitRouter()
 
 
-@router.subscriber("internal.playlist.log", fanout_exchange)
+@router.subscriber("internal.playlist.log", playlist_fanout_exchange)
 async def _(event: InternalPlaylistEvent):
     async with async_session_maker() as db_session:
         match event.event_type:

@@ -14,6 +14,7 @@ from src.adapters._fastapi.settings_routes import router as settings_router
 from src.adapters._fastapi.stream_routes import router as stream_router
 from src.adapters._fastapi.playback_routes import router as playback_router
 from src.adapters._fastapi.notifications import router as notificattions_router
+from src.adapters._fastapi.feedback_routes import router as feedback_router
 
 from src.adapters._sio.init import sio
 from src.adapters._rabbit.broker import get_broker as get_rabbit_broker
@@ -71,15 +72,17 @@ api_route.include_router(settings_router)
 api_route.include_router(stream_router)
 api_route.include_router(playback_router)
 api_route.include_router(notificattions_router)
+api_route.include_router(feedback_router)
 # app.add_route("/api/socket.io/", route=sio_asgi_app, methods=["GET", "POST"])
 # app.add_api_websocket_route("/api/socket.io/", sio_asgi_app)
 
-app.include_router(api_route)
 
-
-@app.post("/api/logout")
+@api_route.post("/logout")
 async def logout(response: Response):
     response.delete_cookie(settings.COOKIE_NAME)
+
+
+app.include_router(api_route)
 
 
 @app.get("/health")

@@ -13,4 +13,4 @@ COPY . .
 
 WORKDIR /app
 
-CMD ["uv", "run", "--no-dev", "faststream", "run", "rabbit_workers:app", "--workers", "3"]
+CMD ["uv", "run", "--no-dev", "faststream", "run", "rabbit_workers:app", "--workers", "1"]

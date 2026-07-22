@@ -33,6 +33,7 @@ import {
   innerPanelClass,
 } from '@/features/landing/styles'
 import { cn } from '@/lib/utils'
+import type { Playlist } from '@/stores/playlistStore/types'
 
 const TabBasic = ({
   playlist,
@@ -42,8 +43,8 @@ const TabBasic = ({
   setSettings,
   canPatchSettings,
 }: {
-  playlist: ClientPlaylist
-  setPlst: React.Dispatch<React.SetStateAction<ClientPlaylist | undefined>>
+  playlist: Playlist
+  setPlst: React.Dispatch<React.SetStateAction<Playlist | undefined>>
   canPatchPlaylist: React.RefObject<boolean>
   setSettings: React.Dispatch<React.SetStateAction<PlaylistSettings>>
   canPatchSettings: React.RefObject<boolean>

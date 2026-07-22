@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { UserStar } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import ViewerTrackCard from './ViewerTrackCard'
@@ -16,6 +16,8 @@ import {
   filterTabBaseClass,
   filterTabInactiveClass,
 } from '@/features/landing/styles'
+import { useAppSettingsStore } from '@/stores/appSettingsStore'
+import { reorderStep } from '@/stores/musicStore/helpers'
 
 export default function ViewerQueuePanel({
   tracks,
@@ -32,11 +34,10 @@ export default function ViewerQueuePanel({
   isPlaying: boolean
   onPlay: (track: Track) => void
 }) {
-  const orderedIds = tracks.map((t) => t.id)
   const updateSort = (patch: Partial<SortSettings>) =>
     onSortChange({ ...sort, ...patch })
   const { t } = useTranslation()
-
+  const moveMethod = useAppSettingsStore((s) => s.settings.moveMethod)
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap gap-2 items-center">
@@ -71,20 +72,38 @@ export default function ViewerQueuePanel({
           а не смена mode между dnd/arrows (в этом и была причина сломанной сортировки) */}
       <ReorderableList
         items={tracks}
-        orderedIds={orderedIds}
-        mode="dnd"
-        onReorder={(ids) =>
-          onSortChange({ ...sort, order_mode: 'free', manual_order_ids: ids })
-        }
+        orderedIds={tracks.map((t) => t.id)}
+        mode={moveMethod}
+        onReorder={(ids) => updateSort({ manual_order_ids: ids })}
         onStep={() => {}}
         renderItem={(track, isFirst, isLast, isDragging) => (
           <ReorderRail
             id={track.id}
-            mode="dnd"
+            mode={moveMethod}
             isFirst={isFirst}
             isLast={isLast}
             isActive={sort.order_mode === 'free'}
-            onMove={() => {}}
+            onMove={(dir: 'up' | 'down') => {
+              const orderedIds = tracks.map((t) => t.id)
+              const idx = orderedIds.indexOf(track.id)
+              console.log('idx = ', idx)
+
+              if (idx === -1) return
+
+              const swapWith = dir === 'up' ? idx - 1 : idx + 1
+              if (swapWith < 0 || swapWith >= orderedIds.length) return
+              console.log('swapWith = ', swapWith)
+
+              const next = [...orderedIds]
+
+              ;[next[idx], next[swapWith]] = [next[swapWith], next[idx]]
+
+              console.log('next = ', next)
+
+              updateSort({
+                manual_order_ids: next,
+              })
+            }}
           >
             {() => (
               <ViewerTrackCard
