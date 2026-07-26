@@ -1,9 +1,10 @@
 // src/features/playlist/components/TrackCard.tsx
-import { Crown, Layers } from 'lucide-react'
-import type { Track } from '@/stores/playlistStore/types'
+import { ArrowUpRight, Calendar, Crown, Layers } from 'lucide-react'
+import type { Track } from '@/types/playlist'
 import type { TrackCardAction } from '../lib/trackActions'
-import { cn } from '@/lib/utils'
+import { cn, formatTime } from '@/lib/utils'
 import Btn from '@/components/ui/my-btn'
+import { useTranslation } from 'react-i18next'
 
 export default function TrackCard({
   track,
@@ -18,6 +19,25 @@ export default function TrackCard({
   isDragging?: boolean
   isNowPlaying?: boolean
 }) {
+  const { t, i18n } = useTranslation()
+  const formattedDate = track.created_at
+    ? new Date(track.created_at).toLocaleDateString(i18n.language, {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : 'Н/Д'
+
+  const longFormatDate = track.created_at
+    ? new Date(track.created_at).toLocaleDateString(i18n.language, {
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+      })
+    : 'Н/Д'
   return (
     <div
       className={cn(
@@ -26,14 +46,22 @@ export default function TrackCard({
         isNowPlaying && 'ring-1 ring-level-3',
       )}
     >
-      <img
-        src={`https://img.youtube.com/vi/${track.yt_video_id}/mqdefault.jpg`}
-        alt=""
-        className="h-10 aspect-video rounded-xs object-cover shrink-0 cursor-pointer"
-        onClick={() =>
-          actions.filter((a) => a.key === 'play')[0].onClick(track)
-        }
-      />
+      <div className=" relative">
+        <img
+          src={`https://img.youtube.com/vi/${track.yt_video_id}/mqdefault.jpg`}
+          alt=""
+          className="h-10 aspect-video rounded-xs object-cover shrink-0 cursor-pointer"
+          onClick={() =>
+            actions.filter((a) => a.key === 'play')[0].onClick?.(track)
+          }
+        />
+        <div
+          title={t('playlist.track.duration')}
+          className="absolute text-[10px] bottom-0.5 right-0.5 px-1 py-0.25 rounded-md font-mono bg-[#000000a7] text-white cursor-help"
+        >
+          {track.duration}
+        </div>
+      </div>
 
       <div className="min-w-0 flex-1 flex flex-col">
         <div className="flex items-center gap-1.5 min-w-0">
@@ -56,18 +84,50 @@ export default function TrackCard({
           {track.requester_nickname}
         </span>
       </div>
-
-      <div className="flex items-center gap-1 shrink-0">
-        {actions.map((a) => (
-          <Btn
-            key={a.key}
-            title={a.label}
-            onClick={() => a.onClick(track)}
-            className="p-1 size-7 rounded-sm"
+      <div className="flex flex-row gap-2">
+        <div className="flex gap-2 text-xs items-start  font-mono">
+          {/* Дата */}
+          <div
+            title={t('playlist.track.date', { date: longFormatDate })}
+            className="flex items-center gap-1 px-2 py-1 rounded-md bg-level-1/40 border border-white/5 text-text-placeholder shadow-inner cursor-help"
           >
-            <a.icon className="size-4" />
-          </Btn>
-        ))}
+            <Calendar className="w-3.5 h-3.5 text-level-3/70" />
+            <span>{formattedDate}</span>
+          </div>
+
+          {/* Приоритет */}
+          <div
+            title={t('playlist.track.priority')}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-level-1/60 border border-white/5 shadow-inner  justify-start cursor-help"
+          >
+            <ArrowUpRight
+              className={`w-3.5 h-3.5 ${+track.priority > 0 ? 'text-level-3 animate-pulse' : 'text-text-placeholder'}`}
+            />
+            <span
+              className={`font-bold ${+track.priority > 0 ? 'text-text-main' : 'text-text-placeholder'}`}
+            >
+              {track.priority}
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          {actions.map((action) => {
+            if (action.component) {
+              return action.component(track)
+            }
+
+            const Icon = action.icon!
+            return (
+              <Btn
+                key={action.key}
+                onClick={() => action.onClick?.(track)}
+                className="px-1 bg-level-2 rounded-sm size-7"
+              >
+                <Icon className="size-4" />
+              </Btn>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

@@ -5,11 +5,9 @@ import { getConfig, removeNullAndUndefined } from '@/lib/utils'
 
 export const initPlatformContent = async ({
   playlist_id,
-  settings_id,
   platform,
 }: {
   playlist_id: string
-  settings_id: string
   platform: Platform
 }) => {
   const config = getConfig()
@@ -18,7 +16,7 @@ export const initPlatformContent = async ({
     {
       method: 'POST',
       data: {
-        settings_id,
+        playlist_id,
         platform,
       },
       withCredentials: true,

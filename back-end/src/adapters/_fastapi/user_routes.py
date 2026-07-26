@@ -1,18 +1,17 @@
 from datetime import datetime
+from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Response
 
-from src.dto.token import OAuthBody, UserKeyBody
-from src.dto.bots import BotConnectBody, UpdateBotSettingsBody
-from src.dto.user import IntegrationRead, UserPatch, UserRead
-
-from src.services.auth.auth_service import auth_service
-from src.models.auth_user import AuthUserUpdate
-from src.adapters._fastapi.dependencies import DB_SESSION, CURR_USER
 from src._types import AuthFlow, IntegrationPlatform
-from src.settings import settings
+from src.adapters._fastapi.dependencies import CURR_USER, DB_SESSION
+from src.dto.bots import BotConnectBody, UpdateBotSettingsBody
+from src.dto.token import OAuthBody, UserKeyBody
+from src.dto.user import IntegrationRead, PublicUserRead, UserPatch, UserRead
+from src.models.auth_user import AuthUserUpdate
+from src.services.auth.auth_service import auth_service
 from src.services.auth.strategy_manager import manager
-
+from src.settings import settings
 from src.utils import find
 
 router = APIRouter(prefix="/user")
@@ -29,12 +28,15 @@ async def me(
         "user": UserRead(
             id=curr_user.id,
             username=curr_user.username,
+            bio=curr_user.bio,
             email=curr_user.email,
             email_confirmed=curr_user.email_confirmed,
             avatar_url=curr_user.avatar_url or "",
             social_links=curr_user.social_links,
+            is_public=curr_user.is_public,
+            roles=curr_user.roles,
         ),
-        "expired_at": settings.SESSION_LIVE_TIME + int(datetime.now().timestamp()),
+        "expired_at": settings.SESSION_LIVE_TIME + int(datetime.now().timestamp()),  # noqa: DTZ005
     }
 
 
@@ -49,14 +51,10 @@ async def patch_me(
     return UserRead.model_validate(upd_user)
 
 
-# @router.get("/update_data")
-# async def upd_data(
-#     db_session: Annotated[AsyncSession, Depends(get_async_session)],
-#     curr_user: Annotated[AuthUserDomain, Depends(auth_service.get_current_user)],
-# ):
-#     await auth_service.refresh_account_tokens(db_session, curr_user)
-#     upd_user = await auth_service.upd_data(db_session, curr_user)
-#     return UserRead.model_validate(upd_user)
+@router.get("/{user_id}")
+async def user(db_session: DB_SESSION, user_id: UUID):
+    public_user = await auth_service.get_public_user(db_session, user_id)
+    return PublicUserRead.model_validate(public_user)
 
 
 @router.post("/bots/{platform}/connect")

@@ -1,28 +1,14 @@
 from uuid import UUID
 
-
+from src.dal._redis.broker import get_broker
 from src.database import async_session_maker
-from taskiq_broker import task_broker as taskiq_broker
-
-from src.dto.internal.notifications import BaseEvent
 from src.dto.events import Deleted, Moved, PlayNow, Private
 from src.dto.settings import ReadPlaylistSettings
-from src.services.playlist_service import add_to_playlist
-from src.services_low.playlist import playlist_service
+from src.models.order import OrderDomain
+from src.services.playlists.basic_service import playlist_service
 from src.services.realtime.sio_playlist import sio_playlist_service
-from src.services.notification.notifications_engine import notification_engine
-from src.models.order import OrderCreate, OrderDomain
-from src.services.playlist_log import playlist_log_service
-from src.dal._redis.broker import get_broker
-from src.dal.postgres.user import user_repository
-from src.dal.postgres.playlist_settings import playlist_settings_repository
-
-from src._types import (
-    NotificationType,
-    PlaylistEventType,
-    PlaylistLogsEventTypes,
-)
-from src.utils import kick, conditional_trace
+from src.utils import conditional_trace
+from taskiq_broker import task_broker as taskiq_broker
 
 
 @taskiq_broker.task(task_name="playlist.track.playnow")
@@ -57,17 +43,17 @@ async def playlist_settings_changed_handler(event: ReadPlaylistSettings):
     await sio_playlist_service.settings_changed(event)
 
 
-# ОДУМАЙСЯ
-@taskiq_broker.task(task_name="playlist.settings.request")
-async def handle_settings_request(
-    event: dict,
-):
-    event_name, payload = event
-    plst_name = payload["playlist_name"]
-    user_id = payload["user_id"]
+# # ОДУМАЙСЯ
+# @taskiq_broker.task(task_name="playlist.settings.request")
+# async def handle_settings_request(
+#     event: dict,
+# ):
+#     event_name, payload = event
+#     plst_name = payload["playlist_name"]
+#     user_id = payload["user_id"]
 
-    async with async_session_maker() as db_session:
-        plst = await playlist_service.get_by_name(db_session, user_id, plst_name)
-        settings = await playlist_settings_repository.get_one(db_session, plst.id, column="playlist_id")
-        get_broker().set(f"{user_id}:{plst.name}:settings", settings.model_dump_json())
-        return plst
+#     async with async_session_maker() as db_session:
+#         plst = await playlist_service.get_by_name(db_session, user_id, plst_name)
+#         settings = await playlist_settings_repository.get_one(db_session, plst.id, column="playlist_id")
+#         get_broker().set(f"{user_id}:{plst.name}:settings", settings.model_dump_json())
+#         return plst

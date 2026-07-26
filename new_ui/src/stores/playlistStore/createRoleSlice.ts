@@ -5,7 +5,7 @@ import type {
   SlotId,
   StoreState,
   TrackAction,
-} from './types'
+} from '@/types/playlist'
 
 export interface RoleSlice {
   getRole: (

@@ -37,7 +37,6 @@ class ReadDonationRules(BaseModel):
 
     platform: DonationRuleScope
     name: str
-    slug: str
     currency: str = Field("USD", min_length=3, max_length=3)
     amount: float = Field(5.0, ge=0.0)
     priority: int

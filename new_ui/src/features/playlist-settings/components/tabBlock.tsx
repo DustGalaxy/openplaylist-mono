@@ -1,11 +1,11 @@
+// src/features/playlist-settings/components/playlist-settings/tabBlock.tsx
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
+import { Plus } from 'lucide-react'
 import BlockList from './block-list'
-import type { ClientPlaylist } from '@/types/playlist'
 import { RequestPlatform } from '@/types/playlist'
 import { Label } from '@/components/ui/label'
 import { DialogDescription } from '@/components/ui/dialog'
-import { Plus } from 'lucide-react'
-import { blockUser } from '@/api/api-playlist'
 import {
   Select,
   SelectContent,
@@ -14,18 +14,20 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import Btn from '@/components/ui/my-btn'
-import { toast } from 'sonner'
-import { useMusicStore } from '@/stores/musicStore'
+import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context'
+import { usePlaylistStore } from '@/stores/playlistStore'
 
 const YT_VIDEO_ID_REGEX = /^[a-zA-Z0-9_-]{11}$/
 
-const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
+const TabBlock = () => {
   const { t } = useTranslation()
-  const { requestPlSettings, syncPlSettings } = useMusicStore()
+  const { playlist } = usePlaylistViewLoaded()
+  const { blockUserRule, patchNow } = usePlaylistStore()
+
   return (
     <div>
       <div>
-        <div className="">
+        <div>
           <Label className=" text-xl">
             {t('playlistSettings.block.title')}
           </Label>
@@ -33,6 +35,7 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
             <p>{t('playlistSettings.block.description')}</p>
           </DialogDescription>
         </div>
+
         <div>
           <Label className=" text-lg">
             {t('playlistSettings.block.blockUser')}
@@ -47,26 +50,23 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
               const platform = formData.get('platform') as string
               const trigger_type = formData.get('trigger_type') as string
               const trigger_value = formData.get('trigger_value') as string
-              if (trigger_value && platform) {
-                const res = await blockUser(
-                  playlist.id,
-                  playlist.settings.id,
-                  trigger_type,
-                  trigger_value,
-                  platform,
-                )
 
-                if (res) {
-                  toast.success(t('playlistSettings.block.userBlockedSuccess'))
-                  const settings = playlist.settings
-                  settings.block_list.push(res)
-                  syncPlSettings(playlist.id, settings)
-                } else {
-                  toast.error(t('playlistSettings.block.userBlockFailed'))
-                }
+              if (!trigger_value || !platform) {
+                toast.error(t('playlistSettings.block.validationRequired'))
+                return
+              }
+
+              const success = await blockUserRule(
+                playlist.id,
+                trigger_type,
+                trigger_value,
+                platform,
+              )
+              if (success) {
+                toast.success(t('playlistSettings.block.userBlockedSuccess'))
                 form.reset()
               } else {
-                toast.error(t('playlistSettings.block.validationRequired'))
+                toast.error(t('playlistSettings.block.userBlockFailed'))
               }
             }}
           >
@@ -74,7 +74,7 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
               <Plus className="text-text-main size-5" />
             </Btn>
             <Select name="trigger_type">
-              <SelectTrigger className="w-fit bg-level-2 ">
+              <SelectTrigger className="w-fit bg-level-2">
                 <SelectValue
                   placeholder={t('playlistSettings.block.selectTriggerType')}
                 />
@@ -111,13 +111,10 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
             </Select>
           </form>
         </div>
+
         <div className="flex flex-col gap-2 mt-2 w-full">
-          {playlist.settings.block_list.length > 0 ? (
-            <BlockList
-              list={playlist.settings.block_list}
-              type="user"
-              playlist={playlist}
-            />
+          {playlist.block_list.length > 0 ? (
+            <BlockList list={playlist.block_list} type="user" />
           ) : (
             <div className="flex text-text-secondary text-sm justify-center w-full">
               <p>{t('playlistSettings.block.emptyUsers')}</p>
@@ -141,31 +138,29 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
                 toast.error(t('playlistSettings.block.trackYoutubeRequired'))
                 return
               }
-
               if (!YT_VIDEO_ID_REGEX.test(ytVideoId)) {
                 toast.error(t('playlistSettings.block.trackYoutubeLength'))
                 return
               }
-
-              if (playlist.settings.track_black_list.includes(ytVideoId)) {
+              if (playlist.track_black_list.includes(ytVideoId)) {
                 toast.error(t('playlistSettings.block.trackAlreadyBlocked'))
                 return
               }
 
-              await requestPlSettings(playlist.id, {
-                track_black_list: [
-                  ...playlist.settings.track_black_list,
-                  ytVideoId,
-                ],
-              })
-              toast.success(t('playlistSettings.block.trackBlockedSuccess'))
-              form.reset()
+              try {
+                await patchNow(playlist.id, {
+                  track_black_list: [...playlist.track_black_list, ytVideoId],
+                })
+                toast.success(t('playlistSettings.block.trackBlockedSuccess'))
+                form.reset()
+              } catch {
+                toast.error(t('playlistSettings.block.trackBlockFailed'))
+              }
             }}
           >
             <Btn className="cursor-pointer px-2 bg-level-2" type="submit">
               <Plus className="text-text-main size-5" />
             </Btn>
-
             <input
               type="text"
               name="yt_video_id"
@@ -174,12 +169,8 @@ const TabBlock = ({ playlist }: { playlist: ClientPlaylist }) => {
             />
           </form>
 
-          {playlist.settings.track_black_list.length > 0 ? (
-            <BlockList
-              list={playlist.settings.track_black_list}
-              type="track"
-              playlist={playlist}
-            />
+          {playlist.track_black_list.length > 0 ? (
+            <BlockList list={playlist.track_black_list} type="track" />
           ) : (
             <div className="flex text-text-secondary text-sm justify-center w-full">
               <p>{t('playlistSettings.block.emptyTracks')}</p>

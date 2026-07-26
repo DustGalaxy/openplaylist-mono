@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import type { UserProfile } from '@/types/user'
-import { patchSocialLink } from '@/api/api-user'
+import { patchSocialLink, updateUserProfile } from '@/api/api-user'
 import { SocialLinkHint } from '@/lib/constants/social_names'
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
@@ -15,6 +15,8 @@ import {
 } from '@/features/landing/styles'
 import { deleteUser } from '@/api/api-user'
 import { useNavigate } from '@tanstack/react-router'
+import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 
 interface ProfileTabProps {
   user: UserProfile | null
@@ -133,6 +135,29 @@ export function ProfileTab({ user }: ProfileTabProps) {
     [newSocialLink.platform, socialLinks],
   )
 
+  const [bio, setBio] = useState(user?.bio ?? '')
+  const [isPublic, setIsPublic] = useState(user?.is_public ?? false)
+  const [profileSaving, setProfileSaving] = useState(false)
+
+  const bioDirty = bio !== (user?.bio ?? '')
+  const isPublicDirty = isPublic !== (user?.is_public ?? false)
+  const profileDirty = bioDirty || isPublicDirty
+
+  const handleSaveProfile = useCallback(async () => {
+    setProfileSaving(true)
+    const loadingToast = toast.loading(t('settings.profile.saving'))
+    try {
+      await updateUserProfile({ bio, is_public: isPublic })
+      toast.dismiss(loadingToast)
+      toast.success(t('settings.profile.saved'))
+    } catch (error) {
+      toast.dismiss(loadingToast)
+      toast.error(getApiErrorMessage(error, t('settings.profile.saveFailed')))
+    } finally {
+      setProfileSaving(false)
+    }
+  }, [bio, isPublic])
+
   const handlePlatformChange = useCallback((value: string) => {
     setNewSocialLink((prev) => ({ ...prev, platform: value }))
     setUIState((prev) => {
@@ -203,7 +228,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
 
     try {
       const updatedSocials = {
-        ...user?.social_links,
+        ...socialLinks,
         [newSocialLink.platform.trim()]: newSocialLink.url.trim(),
       }
       await patchSocialLink(updatedSocials)
@@ -342,7 +367,56 @@ export function ProfileTab({ user }: ProfileTabProps) {
             <p className="mb-4 text-black bg-black hover:text-text-secondary hover:bg-level-2 px-2 py-1 rounded-full">
               {user?.email ? user.email : t('settings.profile.noEmail')}
             </p>
+            <div className={``}>
+              <h3
+                className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}
+              >
+                {t('settings.profile.editProfile')}
+              </h3>
 
+              <div className="flex flex-col gap-4">
+                <div>
+                  <Label htmlFor="profile-bio" className="text-text-main">
+                    {t('settings.profile.bio')}
+                  </Label>
+                  <Textarea
+                    id="profile-bio"
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    maxLength={500}
+                    placeholder={t('settings.profile.bioPlaceholder')}
+                    className="mt-2 border-level-4 text-text-main bg-level-1 resize-none min-h-24"
+                  />
+                  <p className="mt-1 text-xs text-text-placeholder text-right">
+                    {bio.length}/500
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between rounded-lg border border-level-4 px-4 py-3">
+                  <div className="pr-4">
+                    <p className="text-sm font-medium text-text-main">
+                      {t('settings.profile.isPublic')}
+                    </p>
+                    <p className="text-xs text-text-secondary">
+                      {t('settings.profile.isPublicHint')}
+                    </p>
+                  </div>
+                  <Switch checked={isPublic} onCheckedChange={setIsPublic} />
+                </div>
+
+                <div className="flex justify-end">
+                  <Btn
+                    onClick={handleSaveProfile}
+                    disabled={!profileDirty || profileSaving}
+                    className="px-4 py-3 text-base font-semibold w-full sm:w-auto"
+                  >
+                    {profileSaving
+                      ? t('settings.profile.saving')
+                      : t('settings.profile.save')}
+                  </Btn>
+                </div>
+              </div>
+            </div>
             {/* Social Links */}
             <div className="flex flex-wrap gap-2">
               {Object.keys(socialLinks).length > 0 ? (

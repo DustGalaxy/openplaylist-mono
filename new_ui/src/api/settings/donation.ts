@@ -67,7 +67,7 @@ export const createDonationRule = async ({
   playlist_id: string
   data: {
     platform: DonationPlatform
-    settings_id: string
+    playlist_id: string
   }
 }) => {
   const config = getConfig()

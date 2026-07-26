@@ -1,6 +1,6 @@
 import { resolveNextTrack } from './helpers'
 import type { StateCreator } from 'zustand'
-import type { PlaybackOpsSlice, StoreState } from './types'
+import type { PlaybackOpsSlice, StoreState } from '@/types/playlist'
 import { postPlayNow } from '@/api/api-playlist'
 
 export const createPlaybackOpsSlice: StateCreator<

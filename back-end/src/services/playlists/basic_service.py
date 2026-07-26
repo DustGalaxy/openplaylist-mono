@@ -1,22 +1,22 @@
+from datetime import datetime
 from uuid import UUID
 
 from fastapi import HTTPException, status
 
 from simple_repository.exceptions import NotFoundException
 
-from src.dto.internal.notifications import BaseEvent
-from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType
+
+from src.dto.internal.domain_events import InternalPlaylistEventType
 from src.dal.abstract import IPlaylistRepository
 from src.dal.postgres.playlist import playlist_repository
 
 from src.dto.playlist import NewPlaylist, PlaylistBaseinfo
 from src.models.auth_user import AuthUserSchema as User
-from src.models.order import OrderDomain
+from src.models.order import OrderCreate, OrderDomain
 from src.exceptions import NotAuthorizedException
 from src.models.playlist import PlaylistCreate, PlaylistSchema, PlaylistPatch
-from src.services.notification.notifications_engine import notification_engine
-from src._types import AsyncSession, DeleteStatus, PlaylistEventType
-from src.utils import find
+from src.services.playlists.validation_engine import ValidationEngine
+from src._types import AsyncSession, DeleteStatus
 
 
 class PlaylistLowService:
@@ -32,6 +32,9 @@ class PlaylistLowService:
             raise NotAuthorizedException()
         return plst
 
+    async def is_your_playlist_id(self, session: AsyncSession, playlist_id: UUID, user_id: UUID):
+        return await self._playlist_repository.get_id_by_user_id_and_playlist_id(session, user_id, playlist_id)
+
     async def get_by_owner(
         self,
         session: AsyncSession,
@@ -46,12 +49,13 @@ class PlaylistLowService:
     async def get_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistSchema:
         return await self._playlist_repository.get_user_playlist_by_name(session, owner_id, name)
 
-    async def get_public_playlist(self, session: AsyncSession, playlist_id: UUID, user_id: UUID | None = None) -> PlaylistSchema:
+    async def get_public_playlist(
+        self, session: AsyncSession, playlist_id: UUID, user_id: UUID | None = None
+    ) -> PlaylistSchema:
         plst = await self._playlist_repository.get_one(session, playlist_id)
         if not plst.is_public and (not user_id or plst.owner_id != user_id):
             raise HTTPException(status_code=404, detail="Playlist not found")
         return plst
-
 
     async def get_basic_info(self, session: AsyncSession, playlist_id: UUID) -> PlaylistBaseinfo:
         plst = await self._playlist_repository.get_one(session, playlist_id)
@@ -130,6 +134,18 @@ class PlaylistLowService:
     ) -> None:
 
         await self._playlist_repository.remove_order_from_playlist(session, playlist_id, track_id, reason)
+
+    async def validate_track(
+        self,
+        playlsit: PlaylistSchema,
+        new_track: OrderCreate,
+        user: User,
+    ) -> list[str]:
+
+        is_vip: bool = bool(user.vip_expires_at and user.vip_expires_at > datetime.now()) or False
+
+        validation_engine = ValidationEngine(owner_is_vip=is_vip)
+        return validation_engine.validate_track(new_track, playlsit)
 
 
 playlist_service = PlaylistLowService(playlist_repository)

@@ -9,6 +9,16 @@ import type {
 import apiClient from '@/lib/axios'
 import { getConfig } from '@/lib/utils'
 
+export const fetchUserPublic = async (userId: string) => {
+  const config = getConfig()
+  const response = await apiClient(config.AUTH_API_URL + `/user/${userId}`, {
+    method: 'GET',
+  }).catch(() => {
+    return null
+  })
+  return response ? response.data : response
+}
+
 export const getUserIntegrations = async () => {
   const config = getConfig()
   const response = await apiClient(config.AUTH_API_URL + '/user/integration', {

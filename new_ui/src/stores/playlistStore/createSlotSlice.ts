@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-import type { SlotId, SlotState, StoreState } from './types'
+import type { SlotId, SlotState, StoreState } from '@/types/playlist'
 import { savePlayerSession } from '@/lib/playerSessionPersistence'
 
 export interface SlotSlice {

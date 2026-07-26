@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException, status
 from uuid import UUID
-from .dependencies import USER_ID, DB_SESSION, NOTIFY_SERVICE
+
+from fastapi import APIRouter, HTTPException, status
+
+from src.dto.notifications import ChangeSettingsSubscription, NewSubscription
 from src.models.notification import (
     NotificationSettings,
     NotificationSettingsPatch,
@@ -8,7 +10,8 @@ from src.models.notification import (
     SubscriptionCreate,
     SubscriptionPatch,
 )
-from src.dto.notifications import NewSubscription, ChangeSettingsSubscription
+
+from .dependencies import DB_SESSION, NOTIFY_SERVICE, USER_ID
 
 router = APIRouter(prefix="/notifications")
 

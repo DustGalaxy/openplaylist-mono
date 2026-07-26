@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import {
   Bug,
+  Disc3,
   Heart,
   MessageSquare,
   Search,
@@ -68,17 +69,17 @@ export default function Header() {
   return (
     <div className="w-full flex sticky top-0 z-50 justify-center">
       <header
-        className="px-1 py-2 flex 
+        className="pr-2 py-2 flex 
       w-full bg-level-2 
       text-text-main text-2xl justify-between
       border-b-1 border-level-3/40
       "
       >
-        <nav className="flex flex-row justify-between w-full @container  gap-2  items-center">
-          <div className="flex gap-2">
+        <nav className="flex flex-row justify-between w-full @container pl-1  gap-2  items-center">
+          <div className="flex gap-1">
             <div className="px-2 ">
               <Link to="/" className="flex gap-2 items-center">
-                <Disc />
+                <Disc3 className="size-6" />
                 <h1
                   className="hidden @[400px]:block text-lg sm:text-xl font-bold text-center h-full text-transparent  relative drop-shadow-2xl
                   bg-linear-to-r from-(--color-accent-2) via-(--color-accent-3) to-(--color-accent-1)  
@@ -89,7 +90,7 @@ export default function Header() {
                 </h1>
               </Link>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 hidden">
               {actionButtons.map(
                 ({ modal, icon: Icon, color, labelKey, fallback }) => (
                   <button
@@ -111,9 +112,9 @@ export default function Header() {
                 ),
               )}
             </div>
-            <div className="px-2 flex place-content-center ">
+            <div className="px-2 flex place-content-center hidden">
               <Link
-                to="/view"
+                to="/playlists"
                 className="flex items-center"
                 search={{ p: undefined }}
               >

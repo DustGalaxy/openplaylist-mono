@@ -1,13 +1,71 @@
 import enum
 from typing import Literal
 from uuid import UUID
-from sqlalchemy import Enum, Index, Integer, String, ForeignKey
+
+from sqlalchemy import Enum, ForeignKey, Index, Integer, String
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import ARRAY, UUID as PGUUID, JSONB
 
-from src.database import Base, UUIDMixin, TimestampMixin
-from src._types import BlockListScope, ChatRuleScope, ContentSettingScope, DonationRuleScope, Status, Platform
+from src._types import BlockListScope, ChatRuleScope, ContentSettingScope, DonationRuleScope, Platform, Status
+from src.database import Base, TimestampMixin, UUIDMixin
+
+
+def generic_mode_settings():
+    return {
+        "flow": {
+            "priority_break_point": 0,
+            "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+            "sort_settings_regular": {
+                "date": "desc",
+                "priority": "none",
+                "order_mode": "auto",
+                "manual_order_ids": [],
+            },
+            "sort_settings_background": {
+                "date": "desc",
+                "priority": "none",
+                "order_mode": "auto",
+                "manual_order_ids": [],
+            },
+            "background_track_ids": [],
+        },
+        "static": {
+            "priority_break_point": 0,
+            "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+            "sort_settings_regular": {
+                "date": "desc",
+                "priority": "none",
+                "order_mode": "auto",
+                "manual_order_ids": [],
+            },
+            "sort_settings_background": {
+                "date": "desc",
+                "priority": "none",
+                "order_mode": "auto",
+                "manual_order_ids": [],
+            },
+            "background_track_ids": [],
+        },
+        "stream": {
+            "priority_break_point": 0,
+            "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
+            "sort_settings_regular": {
+                "date": "desc",
+                "priority": "none",
+                "order_mode": "auto",
+                "manual_order_ids": [],
+            },
+            "sort_settings_background": {
+                "date": "desc",
+                "priority": "none",
+                "order_mode": "auto",
+                "manual_order_ids": [],
+            },
+            "background_track_ids": [],
+        },
+    }
 
 
 class Order(Base, UUIDMixin, TimestampMixin):
@@ -66,59 +124,8 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
     mode_settings: Mapped[dict] = mapped_column(
         JSONB,
         nullable=False,
-        default_factory=lambda: {
-            "flow": {
-                "priority_break_point": 0,
-                "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
-                "sort_settings_regular": {
-                    "date": "desc",
-                    "priority": "none",
-                    "order_mode": "auto",
-                    "manual_order_ids": [],
-                },
-                "sort_settings_background": {
-                    "date": "desc",
-                    "priority": "none",
-                    "order_mode": "auto",
-                    "manual_order_ids": [],
-                },
-                "background_track_ids": [],
-            },
-            "static": {
-                "priority_break_point": 0,
-                "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
-                "sort_settings_regular": {
-                    "date": "desc",
-                    "priority": "none",
-                    "order_mode": "auto",
-                    "manual_order_ids": [],
-                },
-                "sort_settings_background": {
-                    "date": "desc",
-                    "priority": "none",
-                    "order_mode": "auto",
-                    "manual_order_ids": [],
-                },
-                "background_track_ids": [],
-            },
-            "stream": {
-                "priority_break_point": 0,
-                "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
-                "sort_settings_regular": {
-                    "date": "desc",
-                    "priority": "none",
-                    "order_mode": "auto",
-                    "manual_order_ids": [],
-                },
-                "sort_settings_background": {
-                    "date": "desc",
-                    "priority": "none",
-                    "order_mode": "auto",
-                    "manual_order_ids": [],
-                },
-                "background_track_ids": [],
-            },
-        },
+        default=generic_mode_settings(),
+        server_default="{}",
     )
 
     # Массивы
@@ -170,13 +177,12 @@ class OrderPlaylistStatus(Base, TimestampMixin):
     playlist: Mapped["Playlist"] = relationship(back_populates="order_associations")
 
 
-
 class ContentSettings(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "content_settings"
 
-    playlist_id: Mapped[UUID] = mapped_column(ForeignKey("playlist.id", ondelete="CASCADE"))
+    playlist_id: Mapped[UUID] = mapped_column(ForeignKey("playlists.id", ondelete="CASCADE"))
     playlist: Mapped["Playlist"] = relationship(
-        back_populates="chat_rules",
+        back_populates="content_settings",
         lazy="selectin",
     )
     platform: Mapped[ContentSettingScope] = mapped_column(Enum(ContentSettingScope, native_enum=False), nullable=False)
@@ -196,9 +202,9 @@ class BlockTrigger(enum.Enum):
 class BlockList(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "block_list"
 
-    playlist_id: Mapped[UUID] = mapped_column(ForeignKey("playlist.id", ondelete="CASCADE"))
+    playlist_id: Mapped[UUID] = mapped_column(ForeignKey("playlists.id", ondelete="CASCADE"))
     playlist: Mapped["Playlist"] = relationship(
-        back_populates="chat_rules",
+        back_populates="block_list",
         lazy="selectin",
     )
 
@@ -211,15 +217,14 @@ class BlockList(Base, UUIDMixin, TimestampMixin):
 class DonationRules(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "donation_rules"
 
-    playlist_id: Mapped[UUID] = mapped_column(ForeignKey("playlist.id", ondelete="CASCADE"))
+    playlist_id: Mapped[UUID] = mapped_column(ForeignKey("playlists.id", ondelete="CASCADE"))
     playlist: Mapped["Playlist"] = relationship(
-        back_populates="chat_rules",
+        back_populates="donation_rules",
         lazy="selectin",
     )
     platform: Mapped[DonationRuleScope] = mapped_column(Enum(DonationRuleScope, native_enum=False), nullable=False)
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    slug: Mapped[str] = mapped_column(String(255), nullable=False)
 
     currency: Mapped[str] = mapped_column(String(3), default="USD")
     amount: Mapped[float] = mapped_column(default=5.0, nullable=False)
@@ -231,7 +236,7 @@ class DonationRules(Base, UUIDMixin, TimestampMixin):
     __table_args__ = (
         Index(
             "ix_donation_rules_unique_trigger",
-            "settings_id",
+            "playlist_id",
             "platform",
             "currency",
             "amount",
@@ -243,7 +248,7 @@ class DonationRules(Base, UUIDMixin, TimestampMixin):
 class ChatRules(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "chat_rules"
 
-    playlist_id: Mapped[UUID] = mapped_column(ForeignKey("playlist.id", ondelete="CASCADE"))
+    playlist_id: Mapped[UUID] = mapped_column(ForeignKey("playlists.id", ondelete="CASCADE"))
     playlist: Mapped["Playlist"] = relationship(
         back_populates="chat_rules",
         lazy="selectin",

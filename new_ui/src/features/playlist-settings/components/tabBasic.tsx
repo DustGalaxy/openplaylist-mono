@@ -4,26 +4,22 @@ import { toast } from 'sonner'
 import {
   Discord,
   Github,
+  Google,
   Spotify,
   Twitch,
   XFormerlyTwitter,
   Youtube,
-  Google,
 } from '@thesvg/react'
-import DonationAlerts from '@/components/icons/icon-da'
-import {
-  ExternalContentPlatform,
-  type ClientPlaylist,
-  type Platform,
-  type PlaylistMode,
-  type PlaylistSettings,
-} from '@/types/playlist'
+import PlaylistDetailsForm from './playlist-details-form'
 import type { Integration } from '@/types/user'
+import type { Playlist } from '@/stores/playlistStore/types'
+import type { Platform, PlaylistMode } from '@/types/playlist'
+import DonationAlerts from '@/components/icons/icon-da'
+import { ExternalContentPlatform } from '@/types/playlist'
 import { Label } from '@/components/ui/label'
 import { DialogDescription } from '@/components/ui/dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { getUserIntegrations } from '@/api/api-user'
-import PlaylistDetailsForm from './playlist-details-form'
 import ContentSwitch from '@/components/ui/content-switch'
 import { Switch } from '@/components/ui/switch'
 import {
@@ -33,29 +29,17 @@ import {
   innerPanelClass,
 } from '@/features/landing/styles'
 import { cn } from '@/lib/utils'
-import type { Playlist } from '@/stores/playlistStore/types'
+import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context'
+import { usePlaylistStore } from '@/stores/playlistStore'
 
-const TabBasic = ({
-  playlist,
-  setPlst,
-  canPatchPlaylist,
-  settings,
-  setSettings,
-  canPatchSettings,
-}: {
-  playlist: Playlist
-  setPlst: React.Dispatch<React.SetStateAction<Playlist | undefined>>
-  canPatchPlaylist: React.RefObject<boolean>
-  setSettings: React.Dispatch<React.SetStateAction<PlaylistSettings>>
-  canPatchSettings: React.RefObject<boolean>
-  settings: PlaylistSettings
-}) => {
+const TabBasic = () => {
   const { t } = useTranslation()
-  const [plstMode, setPlstMode] = React.useState(playlist.settings.mode)
+  const { playlist } = usePlaylistViewLoaded()
+  const { patchNow, patchDebounced } = usePlaylistStore()
+  const [plstMode, setPlstMode] = React.useState(playlist.mode)
   const [isPublic, setIsPublic] = React.useState(playlist.is_public)
-  const [priorityMode, setPriorityMode] = React.useState(
-    playlist.settings.cost_mode,
-  )
+  // const [breakPoint, setBreakPoint] = React.useState(playlist.priority_breakpoint)
+  const [priorityMode, setPriorityMode] = React.useState(playlist.cost_mode)
   const [showInWidget, setShowInWinget] = React.useState(
     playlist.show_in_widget,
   )
@@ -65,7 +49,7 @@ const TabBasic = ({
   // Настройки VIP-прерывания для режима, выбранного сейчас в табах выше
   // (не обязательно совпадает с playlist.settings.mode, если переключение
   // ещё не долетело до сервера — источник правды тут settings, не playlist).
-  const activeModeSettings = settings.mode_settings[plstMode]
+  const activeModeSettings = playlist.mode_settings[plstMode]
 
   useEffect(() => {
     const fetchIntegrations = async () => {
@@ -122,7 +106,7 @@ const TabBasic = ({
 
   const isSourceSelected = (platform: string, platformUserId: string) => {
     return playlist.allow_sources.some(
-      (source) =>
+      (source: { platform: string; platform_user_id: string }) =>
         source.platform === platform &&
         source.platform_user_id === platformUserId,
     )
@@ -133,37 +117,32 @@ const TabBasic = ({
 
     if (isCurrentlySelected) {
       // Remove the source
-      setPlst({
-        ...playlist,
+      patchDebounced(playlist.id, {
         allow_sources: playlist.allow_sources.filter(
-          (source) =>
+          (source: { platform: string; platform_user_id: string }) =>
             !(
               source.platform === platform &&
               source.platform_user_id === platformUserId
             ),
         ),
       })
+
       toast.success(t('playlistSettings.toast.visibilityUpdated'))
     } else {
       // Add the source
-      setPlst({
-        ...playlist,
+      patchDebounced(playlist.id, {
         allow_sources: [
           ...playlist.allow_sources,
           { platform: platform as Platform, platform_user_id: platformUserId },
         ],
       })
+
       toast.success(t('playlistSettings.toast.visibilityUpdated'))
     }
-    canPatchPlaylist.current = true
   }
   return (
     <div className="flex flex-col gap-4">
-      <PlaylistDetailsForm
-        playlist={playlist}
-        setPlst={setPlst}
-        canPatchPlaylist={canPatchPlaylist}
-      />
+      <PlaylistDetailsForm />
 
       <div className="grid gap-4">
         <div className="grid grid-cols-[auto_1fr] gap-2 items-center">
@@ -177,14 +156,13 @@ const TabBasic = ({
                 key={m}
                 type="button"
                 onClick={() => {
+                  patchNow(playlist.id, { mode: m })
                   setPlstMode(m)
-                  setSettings({ ...settings, mode: m })
-                  canPatchSettings.current = true
                 }}
                 className={cn(
                   filterTabBaseClass,
                   'px-4 text-sm',
-                  plstMode === m
+                  playlist.mode === m
                     ? filterTabActiveClass
                     : filterTabInactiveClass,
                 )}
@@ -197,7 +175,7 @@ const TabBasic = ({
       </div>
       <DialogDescription>
         <div className="py-1">
-          {t(`playlistSettings.basic.modeHelp.${plstMode}`)}
+          {t(`playlistSettings.basic.modeHelp.${playlist.mode}`)}
         </div>
       </DialogDescription>
       <div className="grid grid-cols-[auto_1fr] gap-2">
@@ -229,21 +207,10 @@ const TabBasic = ({
               </Label>
             }
             onChange={(value) => {
-              if (value === 'right') {
-                setIsPublic(false)
-                setPlst({
-                  ...playlist,
-                  is_public: false,
-                })
-                canPatchPlaylist.current = true
-              } else {
-                setIsPublic(true)
-                setPlst({
-                  ...playlist,
-                  is_public: true,
-                })
-                canPatchPlaylist.current = true
-              }
+              patchNow(playlist.id, {
+                is_public: value !== 'right',
+              })
+              setIsPublic(value !== 'right')
             }}
             defaultValue={isPublic ? 'left' : 'right'}
           />
@@ -270,17 +237,15 @@ const TabBasic = ({
           value={activeModeSettings.priority_break_point}
           onChange={(e) => {
             const value = Math.max(0, Number(e.target.value) || 0)
-            setSettings({
-              ...settings,
+            patchDebounced(playlist.id, {
               mode_settings: {
-                ...settings.mode_settings,
+                ...playlist.mode_settings,
                 [plstMode]: {
                   ...activeModeSettings,
                   priority_break_point: value,
                 },
               },
             })
-            canPatchSettings.current = true
           }}
           className="w-full h-11 px-3 mt-2 rounded-(--rounded-std) bg-level-1 border border-level-3/30 text-text-main"
         />
@@ -318,23 +283,22 @@ const TabBasic = ({
                       onClick={() => {
                         const nextIds = isBackground
                           ? activeModeSettings.background_track_ids.filter(
-                              (id) => id !== track.id,
+                              (id: string) => id !== track.id,
                             )
                           : [
                               ...activeModeSettings.background_track_ids,
                               track.id,
                             ]
-                        setSettings({
-                          ...settings,
+
+                        patchDebounced(playlist.id, {
                           mode_settings: {
-                            ...settings.mode_settings,
+                            ...playlist.mode_settings,
                             stream: {
                               ...activeModeSettings,
                               background_track_ids: nextIds,
                             },
                           },
                         })
-                        canPatchSettings.current = true
                       }}
                     >
                       <Checkbox
@@ -381,17 +345,12 @@ const TabBasic = ({
               </Label>
             }
             onChange={(value) => {
-              if (value === 'right') {
-                setPriorityMode('add')
-                setSettings({ ...settings, cost_mode: 'add' })
-                canPatchSettings.current = true
-              } else {
-                setPriorityMode('max')
-                setSettings({ ...settings, cost_mode: 'max' })
-                canPatchSettings.current = true
-              }
+              patchDebounced(playlist.id, {
+                cost_mode: value === 'right' ? 'add' : 'max',
+              })
+              setPriorityMode(value === 'right' ? 'add' : 'max')
             }}
-            defaultValue={priorityMode === 'max' ? 'left' : 'right'}
+            defaultValue={playlist.cost_mode === 'max' ? 'left' : 'right'}
           />
         </div>
         <DialogDescription>
@@ -432,11 +391,12 @@ const TabBasic = ({
               </Label>
             }
             onChange={(value) => {
+              patchDebounced(playlist.id, {
+                show_in_widget: value === 'right',
+              })
               setShowInWinget(value === 'right')
-              setPlst({ ...playlist, show_in_widget: value === 'right' })
-              canPatchPlaylist.current = true
             }}
-            defaultValue={showInWidget ? 'right' : 'left'}
+            defaultValue={playlist.show_in_widget ? 'right' : 'left'}
           />
         </div>
 

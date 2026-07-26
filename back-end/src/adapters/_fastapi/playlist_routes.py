@@ -3,8 +3,17 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, HTTPException, status
 from simple_repository.exceptions import NotFoundException
 
+from src._types import DeleteStatus
+from src.adapters._fastapi.dependencies import (
+    CURR_USER,
+    DB_SESSION,
+    PLST_LOG_SERVICE,
+    PLST_SERVICE,
+    USER_ID_OR_NONE,
+)
+from src.adapters._rabbit.broker import get_broker, main_publisher
+from src.adapters._rabbit.queues import playlist_fanout_exchange
 from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType
-from src.dto.internal.notifications import BaseEvent
 from src.dto.playlist import (
     NewPlaylist,
     PlaylistBaseinfo,
@@ -13,24 +22,9 @@ from src.dto.playlist import (
     ReadPlaylistPreview,
 )
 from src.dto.playlist_log import ReadPlaylistLog
-from src.models.playlist import PlaylistPatch, PlaylistSchema
-from src.models.settings import SettingsSchema
-from src.services.notification.notifications_engine import notification_engine
-
-from src.utils import kick, find
-from src._types import DeleteStatus, UserEventType
-from taskiq_broker import task_broker as task_broker
-
-from src.adapters._rabbit.queues import playlist_fanout_exchange
-from src.adapters._rabbit.broker import get_broker, main_publisher
-from src.adapters._fastapi.dependencies import (
-    CURR_USER,
-    DB_SESSION,
-    PLST_SERVICE,
-    PLST_LOG_SERVICE,
-    SETTINGS_SERVICE as SE,
-    USER_ID_OR_NONE,
-)
+from src.models.playlist import PlaylistPatch
+from src.services.auth.auth_service import auth_service
+from src.utils import find
 
 router = APIRouter(prefix="/playlist")
 
@@ -45,17 +39,21 @@ async def get_playlists(
     service: PLST_SERVICE,
 ) -> list[ReadPlaylistPreview]:
     res = await service.search_playlist(db_session, query)
-    data = [
-        ReadPlaylistPreview(
+
+    data = []
+
+    for p in res:
+        user = await auth_service.user_repo.get_one(db_session, p.owner_id)
+        intance = ReadPlaylistPreview(
             id=p.id,
-            owner_nickname=p.owner_nickname,
+            owner_nickname=p.owner_nickname if user.is_public else "Anon",
             name=p.name,
             description=p.description,
             created_at=p.created_at,
             updated_at=p.updated_at,
         )
-        for p in res
-    ]
+        data.append(intance)
+
     return data
 
 
@@ -63,15 +61,11 @@ async def get_playlists(
 async def create_playlist(
     db_session: DB_SESSION,
     service: PLST_SERVICE,
-    settings_service: SE,
     current_user: CURR_USER,
     data: NewPlaylist,
 ) -> ReadPlaylist:
     created_playlist = await service.new_playlist(db_session, data, current_user)
-    settings = await settings_service.get_by_plst(db_session, created_playlist.id, current_user.id)
 
-    result = created_playlist.model_dump()
-    result["settings"] = settings.model_dump()
     await main_publisher.publish(
         InternalPlaylistEvent(
             event_id=uuid4(),
@@ -85,7 +79,7 @@ async def create_playlist(
         ),
         exchange=playlist_fanout_exchange,
     )
-    return ReadPlaylist.model_validate(result)
+    return ReadPlaylist.model_validate(created_playlist)
 
 
 @router.patch("/{playlist_id}")
@@ -157,7 +151,6 @@ async def get_my_playlists(
     db_session: DB_SESSION,
     service: PLST_SERVICE,
     current_user: CURR_USER,
-    settings_service: SE,
     preview: bool = False,
 ) -> list[ReadPlaylistPreview] | list[ReadPlaylist]:
     playlists = await service.get_by_owner(db_session, current_user.id)
@@ -174,40 +167,22 @@ async def get_my_playlists(
             for p in playlists
         ]
     else:
-        ids = [p.id for p in playlists]
-        settings = await settings_service.repository.get_many(db_session, ids, "playlist_id")  # type: ignore
-        my_zip: list[tuple[PlaylistSchema, SettingsSchema]] = []
-        for id in ids:
-            s = find(settings, lambda x: x.playlist_id == id)
-            p = find(playlists, lambda x: x.id == id)
-            if s is not None and p is not None:
-                my_zip.append((p, s))
-
-        result = []
-        for p, s in my_zip:
-            result.append(p.model_dump())
-            result[-1]["settings"] = s.model_dump()
-
-        return [ReadPlaylist.model_validate(p) for p in result]
+        return [ReadPlaylist.model_validate(p) for p in playlists]
 
 
 @router.get("/{playlist_id}")
 async def get_playlist_data(
     db_session: DB_SESSION,
     service: PLST_SERVICE,
-    settings_service: SE,
     current_user: CURR_USER,
     playlist_id: UUID,
 ) -> ReadPlaylist:
     try:
         plst = await service.get(db_session, playlist_id, current_user)
-        settings = await settings_service.get_by_plst(db_session, plst.id, current_user.id)
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")
-    result = plst.model_dump()
-    result["settings"] = settings.model_dump()
 
-    return ReadPlaylist.model_validate(result)
+    return ReadPlaylist.model_validate(plst)
 
 
 # --- public playlist operations ---
@@ -219,15 +194,9 @@ async def get_public_playlist(
     service: PLST_SERVICE,
     playlist_id: UUID,
     user_id_or_none: USER_ID_OR_NONE,
-    settings_service: SE,
 ) -> ReadPlaylist:
-    print("hello from @router.get('/{playlist_id}/public') ")
     plst = await service.get_public_playlist(db_session, playlist_id, user_id_or_none)
-    settings = await settings_service.get_by_plst(db_session, plst.id, plst.owner_id)
-    res = plst.model_dump()
-    res["settings"] = settings.model_dump()
-
-    return ReadPlaylist.model_validate(res)
+    return ReadPlaylist.model_validate(plst)
 
 
 @router.get("/{playlist_id}/logs")

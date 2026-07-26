@@ -8,12 +8,9 @@ import {
   Shield,
   Trash,
 } from 'lucide-react'
+import WarningModal from '../components/warningModal'
 import type { LucideIcon } from 'lucide-react'
-import type {
-  DeleteStatus,
-  PlaylistRole,
-  Track,
-} from '@/stores/playlistStore/types'
+import type { DeleteStatus, PlaylistRole, Track } from '@/types/playlist'
 
 export interface TrackCardAction {
   key:
@@ -24,9 +21,10 @@ export interface TrackCardAction {
     | 'copyLink'
     | 'report'
     | 'block'
-  icon: LucideIcon
+  icon?: LucideIcon
   label: string
-  onClick: (track: Track) => void
+  onClick?: (track: Track) => void
+  component?: (track: Track) => React.ReactNode
 }
 
 export interface TrackActionsContext {
@@ -69,7 +67,7 @@ export function resolveTrackActions(
         key: 'block',
         icon: Shield,
         label: 'blockRequester',
-        onClick: (t) => ctx.block(t),
+        component: (track) => <WarningModal key="block" track={track} />,
       },
     )
   }

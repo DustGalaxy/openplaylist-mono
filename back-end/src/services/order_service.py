@@ -20,7 +20,7 @@ VideoInfo = TypedDict(
 
 class OrderService:
     def get_data_from_pytube(self, url: str) -> VideoInfo:
-        yt = YouTube(url)
+        yt = YouTube(url, "WEB")
         try:
             first_part = yt.initial_data["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][0]
             second_part = first_part.get("videoPrimaryInfoRenderer") or first_part.get("videoSecondaryInfoRenderer")

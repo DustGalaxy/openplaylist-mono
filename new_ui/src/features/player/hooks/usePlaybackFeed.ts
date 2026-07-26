@@ -5,7 +5,7 @@ import type {
   RepeatMode,
   SeekSignal,
 } from '@/features/player/types'
-import type { SlotId } from '@/stores/playlistStore/types'
+import type { SlotId } from '@/types/playlist'
 import { usePlaylistStore } from '@/stores/playlistStore'
 import { getPlaybackPositionStore } from '@/lib/playbackPosition'
 import {
@@ -14,6 +14,7 @@ import {
   postPositionState,
   postSeekState,
 } from '@/api/api-playlist'
+import { usePlaybackStore } from '@/stores/playbackStore'
 
 const EMPTY_CAPABILITIES = {
   canSkip: false,
@@ -28,13 +29,17 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     playlistId ? s.cache[playlistId]?.data : undefined,
   )
   const currentTrackId = usePlaylistStore((s) => s.slots[slot].currentTrackId)
-  const nowPlayingTrack = playlist?.track_data.find(
-    (t) => t.id === currentTrackId,
+
+  const nowPlayingTrack = useMemo(
+    () => playlist?.track_data.find((track) => track.id === currentTrackId),
+    [playlist?.track_data, currentTrackId],
   )
+
   const local = usePlaylistStore((s) =>
     playlistId ? s.cache[playlistId]?.local : undefined,
   )
   const role = usePlaylistStore((s) => s.getSlotRole(slot))
+  const { setActivePlayback, clearActivePlayback } = usePlaybackStore()
   const canControlPlayback = usePlaylistStore((s) =>
     s.canActInSlot(slot, 'setNowPlaying'),
   )
@@ -54,11 +59,21 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
   const seekTokenRef = useRef(0)
   const positionGetterRef = useRef<() => number>(() => 0)
   const resumedTrackIdRef = useRef<string | undefined>(undefined)
-  const isFirstRenderRef = useRef(true)
+  // ponytail: ref mirrors `playing` so the heartbeat interval reads it fresh without being
+  // in that effect's deps — kills the whole stale-closure bug class instead of patching it
+  const playingRef = useRef(playing)
+  playingRef.current = playing
 
-  // reload-resume: viewer always local, owner/operator follow playlist setting (viewer only locally, per memory)
+  const sessionRestored = usePlaylistStore((s) => s.playerSessionRestored)
+
+  // show_in_widget is a broadcast too (OBS widget), independent of the viewer-sync toggle
+  const shouldBroadcast =
+    canControlPlayback &&
+    !!(playlist?.sync_playback_position || playlist?.show_in_widget)
+
   const useBackendPositionStore =
-    role !== 'viewer' && !!playlist?.settings.sync_playback_position
+    role !== 'viewer' && !!playlist?.sync_playback_position
+
   const playbackStore = useMemo(
     () => (playlist ? getPlaybackPositionStore(useBackendPositionStore) : null),
     [playlist?.id, useBackendPositionStore],
@@ -69,17 +84,11 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     setSeekSignal({ position: seconds, token: seekTokenRef.current })
   }
 
-  // autoplay whenever the local track changes (click, next/prev, auto-advance) —
-  // the sync-consume effect below runs after this one and can override with an explicit paused=true
-  const sessionRestored = usePlaylistStore((s) => s.playerSessionRestored)
-
   useEffect(() => {
     if (!sessionRestored || !nowPlayingTrack) return
     setPlaying(true)
   }, [nowPlayingTrack?.id, sessionRestored])
 
-  // resume once per track: pendingResume (VIP-interrupt, set by playNext) takes priority over
-  // reload-resume from playbackStore
   useEffect(() => {
     if (!nowPlayingTrack || resumedTrackIdRef.current === nowPlayingTrack.id)
       return
@@ -92,6 +101,8 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
       return
     }
 
+    setActivePlayback(playlist!.id, role === 'viewer' ? 'viewer' : 'owner')
+
     if (!playbackStore) return
     playbackStore
       .load(playlist!.id)
@@ -101,14 +112,10 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
       .catch(() => {})
   }, [nowPlayingTrack?.id])
 
-  // viewer sync consume: apply incoming owner broadcast (seek/pause), only if opted in.
-  // Declared after the autoplay effect so an explicit incoming pause=true wins over the generic autoplay default.
   useEffect(() => {
     if (role !== 'viewer' || !local?.acceptSync || !playlist) return
-
     const incomingSeek = local.syncSeek
     if (incomingSeek) {
-      console.log(incomingSeek)
       if (incomingSeek.track_id !== currentTrackId)
         playTrack(incomingSeek.track_id)
       seek(incomingSeek.position)
@@ -116,7 +123,6 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     }
     const incomingPause = local.syncPause
     if (incomingPause) {
-      console.log(incomingPause)
       if (incomingPause.track_id !== currentTrackId)
         playTrack(incomingPause.track_id)
       seek(incomingPause.position)
@@ -125,21 +131,25 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     }
   }, [local?.syncSeek, local?.syncPause, role])
 
-  const savePosition = () => {
-    if (!nowPlayingTrack || !playbackStore) return
-    playbackStore
-      .save(playlist!.id, {
-        track_id: nowPlayingTrack.id,
-        position: positionGetterRef.current(),
-        updated_at: new Date().toISOString(),
-      })
-      .catch(() => {})
-  }
-
+  // ponytail: single source of truth is store.getState(), read fresh on every tick/unmount —
+  // nothing closed over, so no dependency array can ever go stale
   useEffect(() => {
-    if (!playlist) return
+    if (!playbackStore || !playlistId) return
+
+    const savePosition = () => {
+      const trackId = usePlaylistStore.getState().slots[slot].currentTrackId
+      if (!trackId) return
+      playbackStore
+        .save(playlistId, {
+          track_id: trackId,
+          position: positionGetterRef.current(),
+          updated_at: new Date().toISOString(),
+        })
+        .catch(() => {})
+    }
+
     const heartbeat = window.setInterval(() => {
-      if (playing) savePosition()
+      if (playingRef.current) savePosition()
     }, 10000)
     window.addEventListener('beforeunload', savePosition)
     return () => {
@@ -147,30 +157,31 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
       window.removeEventListener('beforeunload', savePosition)
       savePosition()
     }
-  }, [playlist?.id, playing])
+  }, [playbackStore, playlistId, slot])
 
-  // owner broadcast heartbeat: sends current position periodically while broadcasting is on,
-  // independent of reload-resume savePosition above — this is the sync-consumer's data source
   useEffect(() => {
-    if (
-      !local?.broadcasting ||
-      !nowPlayingTrack ||
-      !canControlPlayback ||
-      !playlist
-    )
-      return
+    const pending = local?.pendingInterrupt
+    if (!pending || !playlist) return
+    if (pending.fromTrackId !== currentTrackId) return
+    updateLocal(playlist.id, {
+      pendingInterrupt: null,
+      paused_background: {
+        track_id: pending.fromTrackId,
+        position_seconds: positionGetterRef.current(),
+      },
+    })
+    playTrack(pending.toTrackId)
+  }, [local?.pendingInterrupt])
+
+  useEffect(() => {
+    if (!shouldBroadcast || !nowPlayingTrack || !playlist) return
     const interval = window.setInterval(() => {
       postPositionState(playlist.id, positionGetterRef.current()).catch(
         () => {},
       )
     }, 5000)
     return () => window.clearInterval(interval)
-  }, [
-    local?.broadcasting,
-    nowPlayingTrack?.id,
-    canControlPlayback,
-    playlist?.id,
-  ])
+  }, [shouldBroadcast, nowPlayingTrack?.id, playlist?.id])
 
   const onEnded = () => {
     if (repeatMode === 'once') {
@@ -179,7 +190,6 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
       return
     }
     playNext('listened')
-    // autoplay effect above handles setPlaying(true) once nowPlayingTrack changes
   }
 
   if (!playlist) {
@@ -215,8 +225,7 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     onPlayerStateChange: (p) => {
       if (p === playing) return
       setPlaying(p)
-      if (p) savePosition()
-      if (local?.broadcasting && canControlPlayback && nowPlayingTrack) {
+      if (shouldBroadcast && nowPlayingTrack) {
         postPauseState(
           playlist.id,
           !p,
@@ -240,7 +249,7 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     },
     seek: (seconds) => {
       seek(seconds)
-      if (canControlPlayback && local?.broadcasting && nowPlayingTrack) {
+      if (shouldBroadcast && nowPlayingTrack) {
         postSeekState(playlist.id, seconds, nowPlayingTrack.id).catch((e) =>
           console.error('[feed] postSeekState failed', e),
         )
@@ -248,7 +257,7 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     },
     stop: canControlPlayback
       ? () => {
-          if (local?.broadcasting && nowPlayingTrack) {
+          if (shouldBroadcast && nowPlayingTrack) {
             postPauseState(
               playlist.id,
               true,
@@ -256,6 +265,7 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
               nowPlayingTrack.id,
             ).catch(() => {})
           }
+          clearActivePlayback()
           setPlaying(false)
           stopPlayback()
         }
@@ -269,7 +279,6 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
             const trackId = state.track_id
             const position = Number(state.position ?? 0)
             const paused = state.is_paused === 'true'
-
             if (trackId && trackId !== currentTrackId) playTrack(trackId)
             seek(position)
             setPlaying(!paused)

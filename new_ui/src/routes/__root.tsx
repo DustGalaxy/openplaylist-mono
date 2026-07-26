@@ -9,6 +9,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { usePlaylistsLifecycle } from '@/hooks/usePlaylistsLifecycle'
 import { useLayoutStore } from '@/stores/layoutStore'
 import { usePlayerSessionRestore } from '@/features/player/hooks/usePlayerSessionRestore'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -49,26 +50,28 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
     return (
       <QueryClientProvider client={queryClient}>
-        <AppProviders>
-          <div className="bg-level-1 min-w-90 h-screen flex flex-col p-2  ">
-            <div className="flex flex-col min-h-full min-w-full rounded-md overflow-clip">
-              <Toaster richColors />
-              <Header />
+        <TooltipProvider>
+          <AppProviders>
+            <div className="bg-level-1 min-w-90 h-screen flex flex-col p-2  ">
+              <div className="flex flex-col min-h-full min-w-full rounded-md overflow-clip">
+                <Toaster richColors />
+                <Header />
 
-              <div className="flex-1 flex min-h-0 ">
-                <Sidebar />
-                <main
-                  ref={setContentAreaEl}
-                  className="flex-1 min-w-0 overflow-y-auto relative p-1"
-                >
-                  <Outlet />
-                </main>
+                <div className="flex-1 flex min-h-0 ">
+                  <Sidebar />
+                  <main
+                    ref={setContentAreaEl}
+                    className="flex-1 min-w-0 overflow-y-auto relative p-1"
+                  >
+                    <Outlet />
+                  </main>
+                </div>
+
+                <PlayerBar />
               </div>
-
-              <PlayerBar />
             </div>
-          </div>
-        </AppProviders>
+          </AppProviders>
+        </TooltipProvider>
       </QueryClientProvider>
     )
   },

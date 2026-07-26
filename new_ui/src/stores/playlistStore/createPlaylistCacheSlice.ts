@@ -1,25 +1,33 @@
 import {
+  getActiveModeSettings,
+  isBackgroundTrack,
+  isVipTrack,
   mergeNowPlaying,
+  mergeRulesPatch,
   mergeSettingsChanged,
   mergeTrackAdded,
   mergeTrackRemoved,
   safeEmit,
   toPlaylist,
+  toTrack,
 } from './helpers'
-import { DEFAULT_SORT } from './types'
-import type {
-  Playlist,
-  PlaylistCacheEntry,
-  StoreState,
-  SyncPausePayload,
-  SyncSeekPayload,
-  WireTrack,
-} from './types'
+
 import type { StateCreator } from 'zustand'
 
 import type { Socket } from 'socket.io-client'
-import type { PlaylistSettings, Track } from '@/types/playlist'
+import type {
+  Playlist,
+  PlaylistCacheEntry,
+  RulesPatch,
+  StoreState,
+  WireTrack,
+} from '@/types/playlist'
+import type { PublicUser } from '@/types/user'
+import { DEFAULT_SORT } from '@/types/playlist'
+
 import { fetchPlaylistPublic } from '@/api/api-playlist'
+import { computePriority } from '@/lib/utils'
+import { fetchUserPublic } from '@/api/api-user'
 
 export interface CacheSlice {
   cache: Record<string, PlaylistCacheEntry>
@@ -46,8 +54,51 @@ const emptyLocal = (): PlaylistCacheEntry['local'] => ({
   pendingResume: null,
   acceptSync: false,
   broadcasting: false,
+  pendingInterrupt: null,
 })
+
 const pendingFetches: Record<string, Promise<void> | undefined> = {}
+
+function checkVipInterrupt(
+  get: () => StoreState,
+  playlistId: string,
+  newTrackId: string,
+) {
+  const s = get()
+  if (s.slots.player.playlistId !== playlistId) return
+
+  const entry = s.cache[playlistId]
+  const pl = entry?.data
+  if (!pl) return
+
+  const newTrack = pl.track_data.find((t) => t.id === newTrackId)
+  if (!newTrack) return
+
+  const currentTrackId = s.slots.player.currentTrackId
+  if (!currentTrackId) return
+
+  const modeSettings = getActiveModeSettings(pl)
+  const currentTrack = pl.track_data.find((t) => t.id === currentTrackId)
+  if (!currentTrack) return
+
+  const newIsVip = isVipTrack(newTrack, modeSettings)
+  const currentIsVip = isVipTrack(currentTrack, modeSettings)
+  const currentIsBg = isBackgroundTrack(pl.mode, modeSettings, currentTrackId)
+  const currentIsRegular = !currentIsVip && !currentIsBg
+
+  // 1. VIP прерывает Regular и Background
+  const vipInterrupts = newIsVip && (currentIsRegular || currentIsBg)
+
+  // 2. Regular прерывает Background
+  const regularInterrupts = !newIsVip && currentIsBg
+
+  if (!vipInterrupts && !regularInterrupts) return
+
+  get().updateLocal(playlistId, {
+    pendingInterrupt: { fromTrackId: currentTrackId, toTrackId: newTrackId },
+  })
+}
+
 export const createPlaylistCacheSlice: StateCreator<
   StoreState,
   [],
@@ -80,6 +131,7 @@ export const createPlaylistCacheSlice: StateCreator<
         ...s.cache,
         [playlistId]: {
           data: null as unknown as Playlist,
+          owner: null as unknown as PublicUser,
           refCount: 1,
           local: emptyLocal(),
         },
@@ -91,6 +143,17 @@ export const createPlaylistCacheSlice: StateCreator<
       if (input) {
         const playlist = toPlaylist(input)
         get().updatePlaylistData(playlistId, () => playlist)
+        const owner = await fetchUserPublic(playlist.owner_id)
+
+        set((s) => ({
+          cache: {
+            ...s.cache,
+            [playlistId]: {
+              ...s.cache[playlistId],
+              owner: owner,
+            },
+          },
+        }))
       }
     })()
 
@@ -180,41 +243,40 @@ function bindPlaylistEvents(playlistId: string, get: () => StoreState) {
   if (!socket) return
 
   socket.on(`add_track:${playlistId}`, (wire: WireTrack) => {
-    console.log('wire = ', wire)
-
     get().updatePlaylistData(playlistId, (p) => mergeTrackAdded(p, wire))
+    checkVipInterrupt(get, playlistId, wire.id)
   })
 
-  socket.on(`delete_track:${playlistId}`, (trackId: string) =>
-    get().updatePlaylistData(playlistId, (p) => mergeTrackRemoved(p, trackId)),
-  )
-
-  socket.on(`playnow:${playlistId}`, (trackData: string) => {
-    const payload = JSON.parse(trackData)
+  socket.on(`delete_track:${playlistId}`, (trackId: { track_id: string }) => {
     get().updatePlaylistData(playlistId, (p) =>
-      mergeNowPlaying(p, payload.track_id),
+      mergeTrackRemoved(p, trackId.track_id),
     )
   })
 
-  socket.on(`settings_changed:${playlistId}`, (settings: PlaylistSettings) =>
+  socket.on(`playnow:${playlistId}`, (trackData: { track_id: string }) => {
     get().updatePlaylistData(playlistId, (p) =>
-      mergeSettingsChanged(p, settings),
-    ),
-  )
-
-  socket.on(`playback_pause:${playlistId}`, (event: string) => {
-    if (!get().cache[playlistId]?.local.acceptSync) return
-    const payload = JSON.parse(event)
-    console.log(`playback_pause:${playlistId} incoming = `, payload)
-
-    get().updateLocal(playlistId, { syncPause: payload })
+      mergeNowPlaying(p, trackData.track_id),
+    )
   })
 
-  socket.on(`playback_seek:${playlistId}`, (event: string) => {
+  socket.on(`settings_changed:${playlistId}`, (event: Partial<Playlist>) => {
+    get().updatePlaylistData(playlistId, (p) => mergeSettingsChanged(p, event))
+  })
+
+  socket.on(`rules_changed:${playlistId}`, (event: string) => {
+    const payload: RulesPatch = JSON.parse(event)
+    get().updatePlaylistData(playlistId, (p) => mergeRulesPatch(p, payload))
+  })
+
+  socket.on(`playback_pause:${playlistId}`, (event: SyncPausePayload) => {
     if (!get().cache[playlistId]?.local.acceptSync) return
-    const payload = JSON.parse(event)
-    console.log(`playback_seek:${playlistId} incoming = `, payload)
-    get().updateLocal(playlistId, { syncSeek: payload })
+
+    get().updateLocal(playlistId, { syncPause: event })
+  })
+
+  socket.on(`playback_seek:${playlistId}`, (event: SyncSeekPayload) => {
+    if (!get().cache[playlistId]?.local.acceptSync) return
+    get().updateLocal(playlistId, { syncSeek: event })
   })
 }
 
@@ -226,5 +288,6 @@ function unbindPlaylistEvents(playlistId: string, socket: Socket) {
     'settings_changed',
     'playback_pause',
     'playback_seek',
+    'rules_changed',
   ].forEach((ev) => socket.off(`${ev}:${playlistId}`))
 }

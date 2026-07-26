@@ -1,5 +1,5 @@
 // src/features/playlist/components/PlaylistViewContent.tsx
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
@@ -22,11 +22,12 @@ import SortPanel from './sortPanel'
 import QueueList from './QueueList'
 import SavedList from './saved-list'
 import LogPanel from './LogPanel'
-import type { SlotId } from '@/stores/playlistStore/types'
+import { PlaylistQueueInput } from './bar'
+import type { SlotId } from '@/types/playlist'
 import { usePlaylistStore } from '@/stores/playlistStore'
 import { cn } from '@/lib/utils'
 import Btn from '@/components/ui/my-btn'
-import SettingsModal from '@/features/playlist-settings/components/playlist-settings/settingsModal'
+import SettingsModal from '@/features/playlist-settings/components/settingsModal'
 import { SubscriptionCreateModal } from '@/features/notifications/components/SubscriptionCreateModal'
 import SearchPlaylist from '@/features/public-playlist/components/search-playlist'
 import { InfoCardGroup } from '@/components/ui/info-card-group'
@@ -40,7 +41,7 @@ import {
   statusClosedClass,
   statusOpenClass,
 } from '@/features/landing/styles'
-import { PlaylistQueueInput } from './bar'
+import UserPopover from '@/features/user-profile/components/UserPopover'
 
 export default function PlaylistViewContent({ slot }: { slot: SlotId }) {
   return (
@@ -52,12 +53,11 @@ export default function PlaylistViewContent({ slot }: { slot: SlotId }) {
 
 function PlaylistViewInner() {
   const { t } = useTranslation()
-  const { slot, playlist, playlistId, role, isLoading } = usePlaylistView()
+  const { slot, playlist, playlistId, role, isLoading, owner } =
+    usePlaylistView()
   const { toggleExternalRequests, toggleBroadcast, setAcceptSync } =
     usePlaylistStore()
-  const broadcasting = usePlaylistStore((s) =>
-    playlistId ? s.cache[playlistId]?.local.broadcasting : false,
-  )
+
   const acceptSync = usePlaylistStore((s) =>
     playlistId ? s.cache[playlistId]?.local.acceptSync : false,
   )
@@ -89,12 +89,11 @@ function PlaylistViewInner() {
 
   const isOwnerLike = role === 'owner' || role === 'operator'
   const isViewerLike = role === 'viewer'
-  const contentSettings =
-    playlist.settings.content_settings[selectedContentSettingIndex]
+  const contentSettings = playlist.content_settings[selectedContentSettingIndex]
 
   const copyLink = () => {
     navigator.clipboard.writeText(
-      `${window.location.origin}/view?p=${playlist.id}`,
+      `${window.location.origin}/playlists/${playlist.id}`,
     )
     toast.success(t('playlist.toast.linkCopied'))
   }
@@ -107,8 +106,8 @@ function PlaylistViewInner() {
   return (
     <div className="flex flex-col gap-3">
       {/* header actions */}
-      <div className="flex flex-col gap-4 pt-3 pb-4 w-full rounded-md">
-        <div className="flex w-full gap-1 sm:gap-2 justify-between">
+      <div className="flex flex-col gap-4 w-full rounded-md">
+        <div className="flex w-full gap-1 sm:gap-2 justify-between items-center">
           <div className="flex gap-1 sm:gap-2">
             {isOwnerLike && (
               <>
@@ -121,10 +120,10 @@ function PlaylistViewInner() {
                     )
                   }
                   className={cn(
-                    'inline-flex items-center gap-1.5 px-1.5 py-1 sm:px-3 sm:py-1.5 text-sm font-mono rounded-sm',
+                    'inline-flex items-center gap-1.5 px-1.5 py-1 sm:px-3 sm:py-1.5 text-sm font-mono rounded-sm bg-level-2 ',
                     playlist.is_allow_external_requests
-                      ? statusOpenClass
-                      : statusClosedClass,
+                      ? ' text-emerald-500'
+                      : ' text-text-secondary',
                   )}
                 >
                   <span
@@ -136,8 +135,13 @@ function PlaylistViewInner() {
                 </Btn>
                 <Btn
                   title={t('playlist.tooltip.sync')}
-                  isActive={broadcasting}
-                  onClick={() => toggleBroadcast(playlist.id, !broadcasting)}
+                  isActive={playlist.sync_playback_position}
+                  onClick={() =>
+                    toggleBroadcast(
+                      playlist.id,
+                      !playlist.sync_playback_position,
+                    )
+                  }
                   className="size-8 rounded-sm"
                 >
                   <RadioTower className="size-5" />
@@ -145,15 +149,15 @@ function PlaylistViewInner() {
               </>
             )}
             {isViewerLike && (
-              <div className="flex flex-col">
-                <div className="text-text-main">{playlist.name}</div>
+              <div className="flex flex-col ">
+                <div className="text-text-main ">{playlist.name}</div>
                 <div className="text-text-secondary text-xs">
                   {playlist.description || 'No discription'}
                 </div>
               </div>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <Btn
               title={t('playlist.tooltip.share')}
               className="p-1 bg-level-2 size-8 rounded-sm"
@@ -161,7 +165,7 @@ function PlaylistViewInner() {
             >
               <Share2 className="size-5" />
             </Btn>
-            {role === 'viewer' && (
+            {isViewerLike && (
               <>
                 <Btn
                   title={t('publicView.subscribe')}
@@ -208,6 +212,11 @@ function PlaylistViewInner() {
                 <SettingsModal />
               </>
             )}
+            {isViewerLike && (
+              <div className="-mt-0.5">
+                <UserPopover user={owner}></UserPopover>
+              </div>
+            )}
           </div>
         </div>
 
@@ -217,7 +226,7 @@ function PlaylistViewInner() {
             {showContentSettings && (
               <div className="flex flex-col gap-2 sm:gap-3">
                 <div className="flex gap-2 flex-wrap">
-                  {playlist.settings.content_settings.map((setting, index) => (
+                  {playlist.content_settings.map((setting, index) => (
                     <button
                       key={setting.platform}
                       type="button"
@@ -237,14 +246,14 @@ function PlaylistViewInner() {
                 </div>
                 {contentSettings && (
                   <InfoCardGroup
-                    mode={playlist.settings.mode}
+                    mode={playlist.mode}
                     min_views={contentSettings.min_views}
                     min_likes={contentSettings.min_likes}
                     max_duration={contentSettings.max_duration}
                     track_cooldown={contentSettings.track_cooldown}
                     user_cooldown={contentSettings.user_cooldown}
-                    max_playlist_size={playlist.settings.max_playlist_size}
-                    priorityMode={playlist.settings.cost_mode}
+                    max_playlist_size={playlist.max_playlist_size}
+                    priorityMode={playlist.cost_mode}
                     className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-px sm:gap-0.5"
                   />
                 )}

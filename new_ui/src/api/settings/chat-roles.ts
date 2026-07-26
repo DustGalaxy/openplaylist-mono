@@ -28,7 +28,7 @@ export const createChatRole = async ({
   playlist_id: string
   data: {
     platform: ChatPlatform
-    settings_id: string
+    playlist_id: string
     key: string
     priority: number
   }

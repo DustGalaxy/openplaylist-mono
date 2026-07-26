@@ -1,19 +1,14 @@
 from uuid import UUID
 
 from simple_repository import crud_factory
-from simple_repository.exceptions import IntegrityConflictException, RepositoryException, NotFoundException
+from simple_repository.exceptions import IntegrityConflictException, RepositoryException
 
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-from src.orm.playlist import Playlist
 
-from src.models.settings import (
-    SettingsSchema,
-    SettingsPatch,
-    SettingsCreate,
+from src.models.playlist import (
     ContentSettingsCreate,
     ContentSettingsPatch,
     ContentSettingsSchema,
@@ -27,10 +22,7 @@ from src.models.settings import (
     BlockListCreate,
     BlockListPatch,
 )
-from src.orm.settings import Settings, ContentSettings, DonationRules, ChatRules, BlockList
-
-
-from src.dal.abstract import IPlaylistSettingsRepository
+from src.orm.playlist import ContentSettings, DonationRules, ChatRules, BlockList
 
 
 class ContentSettingsRepository(
@@ -57,7 +49,7 @@ class ChatRulesRepository(
 
     async def reorder(self, session: AsyncSession, id_list: list[UUID], settings_id: UUID):
         try:
-            stmt = select(ChatRules).where(ChatRules.settings_id == settings_id, ChatRules.id.in_(id_list))
+            stmt = select(ChatRules).where(ChatRules.playlist_id == settings_id, ChatRules.id.in_(id_list))
             result = await session.execute(stmt)
             result = result.unique().scalars().all()
 
@@ -104,48 +96,3 @@ class BlockListRepository(
 
 
 user_black_list_repository = BlockListRepository()
-
-
-class PlaylistSettingsRepository(
-    crud_factory(Settings, SettingsSchema, SettingsCreate, SettingsPatch),
-    IPlaylistSettingsRepository,
-):
-    def to_inner(self, data: SettingsCreate | SettingsSchema | SettingsPatch) -> dict:
-        return data.model_dump(exclude_unset=True)
-
-    def to_repr(self, object: Settings) -> SettingsSchema:
-        return self.domain_model.model_validate(object)
-
-    async def get_by_plst(self, session: AsyncSession, playlist_id: UUID, user_id: UUID) -> SettingsSchema:
-        stmt = (
-            select(Settings)
-            .join(Playlist, Settings.playlist_id == Playlist.id)
-            .where(Settings.playlist_id == playlist_id, Playlist.owner_id == user_id)
-        )
-        result = await session.execute(stmt)
-        result = result.unique().scalar_one_or_none()
-        if not result:
-            raise NotFoundException()
-        return SettingsSchema.model_validate(result)
-
-    async def get_merged(self, session: AsyncSession, settings_id: UUID) -> SettingsSchema:
-
-        stmt = (
-            select(Settings)
-            .options(
-                selectinload(Settings.content_settings),
-                selectinload(Settings.donation_rules),
-                selectinload(Settings.chat_rules),
-                selectinload(Settings.block_list),
-            )
-            .where(Settings.id == settings_id)
-        )
-
-        result = await session.execute(stmt)
-        result = result.unique().scalar_one_or_none()
-        if not result:
-            raise NotFoundException()
-        return SettingsSchema.model_validate(result)
-
-
-playlist_settings_repository = PlaylistSettingsRepository()

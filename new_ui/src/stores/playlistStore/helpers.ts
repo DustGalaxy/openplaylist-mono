@@ -1,32 +1,38 @@
 import type {
+  FeedTrack,
   InputPlaylist,
   ModeSettings,
   OrderMode,
-  PlaylistMode,
-  PlaylistSettings,
-  SocketLike,
-  SortSettings,
-  Track,
-} from '@/types/playlist'
-import type {
-  FeedTrack,
   PausedBackground,
   Playlist,
   PlaylistCacheEntry,
+  PlaylistMode,
   PlaylistRole,
+  RuleType,
+  RulesPatch,
+  SocketLike,
+  SortSettings,
   SplitQueue,
+  Track,
   TrackAction,
   WireTrack,
-} from './types'
+} from '@/types/playlist'
 import type { Socket } from 'socket.io-client'
 import { computePriority, formatTime } from '@/lib/utils'
 
 // ─── wire ↔ cache conversion ──────────────────────────────────────
 export function toPlaylist(input: InputPlaylist): Playlist {
   const now_playing = input.now_playing
-    ? input.track_data.find((t) => t.id === input.now_playing)
+    ? toTrack(
+        input.track_data.find((t) => t.id === input.now_playing),
+        input.id,
+        input,
+      )
     : undefined
-  return { ...input, now_playing }
+  const track_data = input.track_data.map((track) =>
+    toTrack(track, input.id, input),
+  )
+  return { ...input, now_playing, track_data }
 }
 
 // ─── socket ────────────────────────────────────────────────────────
@@ -73,7 +79,7 @@ export function buildViewerFeed(
 export function toTrack(
   wire: WireTrack,
   playlistId: string,
-  settings: PlaylistSettings,
+  playlist: Playlist,
 ): Track {
   const withLabelPriority: Track = {
     id: wire.id,
@@ -90,12 +96,12 @@ export function toTrack(
   }
   return {
     ...withLabelPriority,
-    priority: computePriority(withLabelPriority, settings),
+    priority: computePriority(withLabelPriority, playlist),
   }
 }
 
 export function mergeTrackAdded(playlist: Playlist, wire: WireTrack): Playlist {
-  const track = toTrack(wire, playlist.id, playlist.settings)
+  const track = toTrack(wire, playlist.id, playlist)
   return { ...playlist, track_data: [...playlist.track_data, track] }
 }
 
@@ -118,9 +124,98 @@ export function mergeNowPlaying(playlist: Playlist, trackId: string): Playlist {
 
 export function mergeSettingsChanged(
   playlist: Playlist,
-  settings: PlaylistSettings,
+  patch: Partial<Playlist>,
 ): Playlist {
-  return { ...playlist, settings }
+  return { ...playlist, ...patch }
+}
+
+interface RuleItem {
+  id: string
+}
+
+function applyRulesDelta<T extends RuleItem>(
+  list: Array<T>,
+  patch: { added: Array<T>; changed: Array<T>; removed: Array<T> },
+): Array<T> {
+  const removedIds = new Set(patch.removed.map((r) => r.id))
+  const addedIds = new Set(patch.added.map((a) => a.id))
+  const changedMap = new Map(patch.changed.map((c) => [c.id, c]))
+
+  // drop anything removed, and drop anything that's about to be re-added (avoids duplicates
+  // if this same item already exists locally from our own optimistic update)
+  const base = list.filter(
+    (item) => !removedIds.has(item.id) && !addedIds.has(item.id),
+  )
+  const updated = base.map((item) => changedMap.get(item.id) ?? item)
+
+  return [...updated, ...patch.added]
+}
+
+const RULE_FIELD_MAP: Record<RuleType, keyof Playlist> = {
+  content: 'content_settings',
+  donation: 'donation_rules',
+  chat: 'chat_rules',
+  block: 'block_list',
+}
+
+export function mergeRulesPatch(
+  playlist: Playlist,
+  payload: RulesPatch,
+): Playlist {
+  const field = RULE_FIELD_MAP[payload.type]
+  return {
+    ...playlist,
+    [field]: applyRulesDelta(playlist[field] as Array<RuleItem>, payload),
+  } as Playlist
+}
+
+export function reorderStep(
+  playlist: Playlist,
+  trackId: string,
+  group: string,
+  dir: 'up' | 'down',
+): Array<string> | void {
+  const mode = playlist.mode
+  const modeSettings = playlist.mode_settings[mode]
+  let currentIds: Array<string>
+
+  if (group === 'background') {
+    if (mode !== 'stream') {
+      console.error('Background group reorder only valid in stream mode')
+      return
+    }
+    currentIds = modeSettings.background_track_ids
+  } else {
+    const settings =
+      group === 'vip'
+        ? modeSettings.sort_settings_vip
+        : modeSettings.sort_settings_regular
+    const { vip, regular } = splitQueue(playlist)
+    const visibleGroup = group === 'vip' ? vip : regular
+    const visibleIds = visibleGroup.map((t) => t.id)
+    const visibleIdSet = new Set(visibleIds)
+
+    const reconciled = settings.manual_order_ids.filter((id) =>
+      visibleIdSet.has(id),
+    )
+    const knownIds = new Set(reconciled)
+    const newIds = visibleIds.filter((id) => !knownIds.has(id))
+
+    currentIds =
+      settings.manual_order_ids.length > 0
+        ? [...reconciled, ...newIds]
+        : visibleIds
+  }
+
+  const idx = currentIds.indexOf(trackId)
+  if (idx === -1) return
+
+  const swapWith = dir === 'up' ? idx - 1 : idx + 1
+  if (swapWith < 0 || swapWith >= currentIds.length) return
+
+  const next = [...currentIds]
+  ;[next[idx], next[swapWith]] = [next[swapWith], next[idx]]
+  return next
 }
 
 // ─── role / permissions (role slice) ──────────────────────────────
@@ -161,25 +256,9 @@ export function canAct(
 }
 
 // ─── queue splitting / sorting (feed building blocks) ─────────────
-export function isVipTrack(track: Track, modeSettings: ModeSettings): boolean {
-  return (
-    modeSettings.priority_break_point > 0 &&
-    track.priority >= modeSettings.priority_break_point
-  )
-}
-
-export function isBackgroundTrack(
-  mode: PlaylistMode,
-  modeSettings: ModeSettings,
-  trackId: string,
-): boolean {
-  return (
-    mode === 'stream' && modeSettings.background_track_ids.includes(trackId)
-  )
-}
 
 export function getActiveModeSettings(playlist: Playlist): ModeSettings {
-  return playlist.settings.mode_settings[playlist.settings.mode]
+  return playlist.mode_settings[playlist.mode]
 }
 
 export function sortByRules(
@@ -219,18 +298,35 @@ export function sortByRules(
   })
 }
 
+export function isVipTrack(track: Track, modeSettings: ModeSettings): boolean {
+  return (
+    modeSettings.priority_break_point > 0 &&
+    track.priority >= modeSettings.priority_break_point
+  )
+}
+
+export function isBackgroundTrack(
+  mode: PlaylistMode,
+  modeSettings: ModeSettings,
+  trackId: string,
+): boolean {
+  return (
+    mode === 'stream' && modeSettings.background_track_ids.includes(trackId)
+  )
+}
+
 export function splitQueue(playlist: Playlist): SplitQueue {
   const modeSettings = getActiveModeSettings(playlist)
 
   const pool =
-    playlist.settings.mode === 'stream'
+    playlist.mode === 'stream'
       ? playlist.track_data.filter(
           (t) => !modeSettings.background_track_ids.includes(t.id),
         )
       : playlist.track_data
 
   const background: Array<Track> =
-    playlist.settings.mode === 'stream'
+    playlist.mode === 'stream'
       ? modeSettings.background_track_ids
           .map((id) => playlist.track_data.find((t) => t.id === id))
           .filter((t): t is Track => t !== undefined)
@@ -283,55 +379,6 @@ export function pickNextFromGroup(
   return repeatAll ? list[0] : undefined
 }
 
-export function reorderStep(
-  playlist: Playlist,
-  trackId: string,
-  group: string,
-  dir: 'up' | 'down',
-): Array<string> | void {
-  const mode = playlist.settings.mode
-  const modeSettings = playlist.settings.mode_settings[mode]
-  let currentIds: Array<string>
-
-  if (group === 'background') {
-    if (mode !== 'stream') {
-      console.error('Background group reorder only valid in stream mode')
-      return
-    }
-    currentIds = modeSettings.background_track_ids
-  } else {
-    const settings =
-      group === 'vip'
-        ? modeSettings.sort_settings_vip
-        : modeSettings.sort_settings_regular
-    const { vip, regular } = splitQueue(playlist)
-    const visibleGroup = group === 'vip' ? vip : regular
-    const visibleIds = visibleGroup.map((t) => t.id)
-    const visibleIdSet = new Set(visibleIds)
-
-    const reconciled = settings.manual_order_ids.filter((id) =>
-      visibleIdSet.has(id),
-    )
-    const knownIds = new Set(reconciled)
-    const newIds = visibleIds.filter((id) => !knownIds.has(id))
-
-    currentIds =
-      settings.manual_order_ids.length > 0
-        ? [...reconciled, ...newIds]
-        : visibleIds
-  }
-
-  const idx = currentIds.indexOf(trackId)
-  if (idx === -1) return
-
-  const swapWith = dir === 'up' ? idx - 1 : idx + 1
-  if (swapWith < 0 || swapWith >= currentIds.length) return
-
-  const next = [...currentIds]
-  ;[next[idx], next[swapWith]] = [next[swapWith], next[idx]]
-  return next
-}
-
 // ─── next-track resolution (playback ops) ──────────────────────────
 export interface NextTrackDecision {
   nextTrackId: string | undefined
@@ -352,11 +399,11 @@ export function resolveNextTrack(
   const { vip, regular, background } = splitQueue(pl)
   const currentWasVip =
     currentTrack !== undefined && isVipTrack(currentTrack, modeSettings)
-  const repeatAll = pl.settings.repeat_mode === 'all'
-  const vipOrder = pl.settings.shuffle
+  const repeatAll = pl.repeat_mode === 'all'
+  const vipOrder = pl.shuffle
     ? 'random'
     : modeSettings.sort_settings_vip.order_mode
-  const regularOrder = pl.settings.shuffle
+  const regularOrder = pl.shuffle
     ? 'random'
     : modeSettings.sort_settings_regular.order_mode
 
@@ -365,7 +412,7 @@ export function resolveNextTrack(
       ? entry.local.paused_background
       : undefined
 
-  if (pl.settings.mode === 'static') {
+  if (pl.mode === 'static') {
     const { trackId, resumePositionSeconds, consumedPausedBackground } =
       resolveStaticNext(
         currentTrack,
@@ -453,57 +500,83 @@ function resolveFlowStreamNext(
   regularOrder: OrderMode,
   resumeFromPausedBackground: () => PausedBackground | undefined,
 ): NextTrackDecision {
-  const remainingVip = currentTrack
+  // Определяем, относится ли ТЕКУЩИЙ трек к VIP или Regular
+  const currentWasVip =
+    currentTrack !== undefined && isVipTrack(currentTrack, modeSettings)
+  const currentWasBackground = currentTrack
+    ? isBackgroundTrack(pl.mode, modeSettings, currentTrack.id)
+    : false
+  const currentWasRegular =
+    currentTrack !== undefined && !currentWasVip && !currentWasBackground
+
+  // 1. ПРИОРИТЕТ 1: VIP ТРЕКИ
+  // Если текущий был VIP, он уходит из очереди. Для всех остальных случаев берём весь список vip.
+  const remainingVip = currentWasVip
     ? vip.filter((t) => t.id !== currentTrack.id)
     : vip
+
   if (remainingVip.length > 0) {
+    // Вся группа VIP еще не отиграла -> берем самый верхний доступный трек
+    const nextVip = pickNextFromGroup(remainingVip, undefined, vipOrder, false)
     return {
-      nextTrackId: pickNextFromGroup(remainingVip, undefined, vipOrder, false)
-        ?.id,
-      removeCurrentId: undefined,
+      nextTrackId: nextVip?.id,
+      removeCurrentId: currentWasVip ? currentTrack.id : undefined,
       resumePositionSeconds: undefined,
       consumedPausedBackground: false,
     }
   }
+
+  // 2. ПРИОРИТЕТ 2: REGULAR ТРЕКИ
+  // VIP пуст. Если текущий трек был Regular, он завершился и должен быть удален.
+  const remainingRegular = currentWasRegular
+    ? regular.filter((t) => t.id !== currentTrack.id)
+    : regular
+
+  if (remainingRegular.length > 0) {
+    // Берём самый верхний трек из Regular
+    const nextRegular = pickNextFromGroup(
+      remainingRegular,
+      undefined,
+      regularOrder,
+      false,
+    )
+    return {
+      nextTrackId: nextRegular?.id,
+      // Удаляем либо завершившийся VIP (который только что доиграл), либо завершившийся Regular
+      removeCurrentId:
+        currentWasVip || currentWasRegular ? currentTrack.id : undefined,
+      resumePositionSeconds: undefined,
+      consumedPausedBackground: false,
+    }
+  }
+
+  // 3. ПРИОРИТЕТ 3: ВОЗВРАТ ИЗ ПАУЗЫ (BACKGROUND)
+  // И VIP, и Regular полностью пусты -> проверяем, не прерывали ли мы фоновый трек ранее
   const resumed = resumeFromPausedBackground()
-  if (resumed)
+  if (resumed) {
     return {
       nextTrackId: resumed.track_id,
-      removeCurrentId: undefined,
+      removeCurrentId:
+        currentWasVip || currentWasRegular ? currentTrack.id : undefined,
       resumePositionSeconds: resumed.position_seconds,
       consumedPausedBackground: true,
     }
-
-  if (currentTrack === undefined) {
-    return {
-      nextTrackId: regular[0]?.id ?? background[0]?.id,
-      removeCurrentId: undefined,
-      resumePositionSeconds: undefined,
-      consumedPausedBackground: false,
-    }
   }
 
-  const wasBackgroundTrack = isBackgroundTrack(
-    pl.settings.mode,
-    modeSettings,
-    currentTrack.id,
+  // 4. ПРИОРИТЕТ 4: ФОНОВЫЕ ТРЕКИ (BACKGROUND)
+  // Если стартанули с нуля (нет текущего) или доиграл фоновый трек — крутим фоновую очередь по кругу
+  const bgOrder = pl.shuffle ? 'random' : 'auto'
+  const nextBg = pickNextFromGroup(
+    background,
+    currentWasBackground ? currentTrack.id : undefined,
+    bgOrder,
+    true,
   )
-  if (pl.settings.mode === 'stream' && wasBackgroundTrack) {
-    const bgOrder = pl.settings.shuffle ? 'random' : 'auto'
-    return {
-      nextTrackId: pickNextFromGroup(background, currentTrack.id, bgOrder, true)
-        ?.id,
-      removeCurrentId: undefined,
-      resumePositionSeconds: undefined,
-      consumedPausedBackground: false,
-    }
-  }
 
   return {
-    nextTrackId:
-      pickNextFromGroup(regular, currentTrack.id, regularOrder, false)?.id ??
-      background[0]?.id,
-    removeCurrentId: currentTrack.id,
+    nextTrackId: nextBg?.id,
+    removeCurrentId:
+      currentWasVip || currentWasRegular ? currentTrack.id : undefined,
     resumePositionSeconds: undefined,
     consumedPausedBackground: false,
   }

@@ -48,7 +48,6 @@ class BlockListSchema(SubSchema):
 class DonationRulesSchema(SubSchema):
     platform: DonationRuleScope
     name: str
-    slug: str
     currency: str
     amount: float
     priority: int
@@ -87,7 +86,6 @@ class DonationRulesPatch(BaseModel):
 
     platform: Optional[DonationRuleScope] = None
     name: Optional[str] = None
-    slug: Optional[str] = None
     currency: Optional[str] = None
     amount: Optional[float] = None
     priority: Optional[int] = None
@@ -164,6 +162,17 @@ class PlaylistPatch(BaseModel):
     is_favorite: bool | None = None
     is_allow_external_requests: bool | None = None
     show_in_widget: bool | None = None
+    max_playlist_size: int | None = None
+    mode: Literal["flow", "stream", "static"] | None = None
+    repeat_mode: Literal["all", "once", "none"] | None = None
+    mode_settings: Dict[str, Any] | None = None
+    sync_playback_position: bool | None = None
+    shuffle: bool | None = None
+    cost_mode: Literal["add", "max"] | None = None
+
+    track_black_list: List[str] | None = None
+
+
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -185,10 +194,9 @@ class PlaylistCreate(BaseModel):
 class DonationRulesCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    settings_id: UUID
+    playlist_id: UUID
     platform: DonationRuleScope
     name: str = "Donation"
-    slug: str = "donation"
     currency: str = Field("USD", min_length=3, max_length=3)
     amount: float = 5.0
     priority: int = 0
@@ -198,7 +206,7 @@ class DonationRulesCreate(BaseModel):
 class ChatRulesCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    settings_id: UUID
+    playlist_id: UUID
     platform: ChatRuleScope
     key: str = Field(..., max_length=255)
     priority: int
@@ -210,7 +218,7 @@ class ContentSettingsCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     platform: ContentSettingScope
-    settings_id: UUID
+    playlist_id: UUID
     min_views: int = 10_000
     min_likes: int = 500
     max_duration: int = 600
@@ -221,7 +229,7 @@ class ContentSettingsCreate(BaseModel):
 class BlockListCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    settings_id: UUID
+    playlist_id: UUID
     trigger_type: BlockTrigger
     trigger_value: str = Field(..., max_length=255)
     platform: BlockListScope

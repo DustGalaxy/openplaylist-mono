@@ -5,22 +5,16 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { DialogDescription } from '@/components/ui/dialog'
-import type { ClientPlaylist } from '@/types/playlist'
-import type { Playlist } from '@/stores/playlistStore/types'
+import { usePlaylistStore } from '@/stores/playlistStore'
+import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context'
 
 const MAX_NAME_LENGTH = 100
 const MAX_DESCRIPTION_LENGTH = 500
 
-export default function PlaylistDetailsForm({
-  playlist,
-  setPlst,
-  canPatchPlaylist,
-}: {
-  playlist: Playlist
-  setPlst: React.Dispatch<React.SetStateAction<Playlist | undefined>>
-  canPatchPlaylist: React.RefObject<boolean>
-}) {
+export default function PlaylistDetailsForm() {
   const { t } = useTranslation()
+  const { playlist } = usePlaylistViewLoaded()
+  const { patchNow, patchDebounced } = usePlaylistStore()
   const [name, setName] = React.useState(playlist.name)
   const [description, setDescription] = React.useState(
     playlist.description ?? '',
@@ -45,14 +39,10 @@ export default function PlaylistDetailsForm({
             }
             if (!value.trim()) {
               toast.error(t('playlistSettings.details.nameRequired'))
-              setName(value)
-              setPlst({ ...playlist, name: value })
-              canPatchPlaylist.current = true
               return
             }
             setName(value)
-            setPlst({ ...playlist, name: value })
-            canPatchPlaylist.current = true
+            patchDebounced(playlist, { name: value })
           }}
           placeholder={t('playlistSettings.details.namePlaceholder')}
           maxLength={MAX_NAME_LENGTH}
@@ -77,13 +67,12 @@ export default function PlaylistDetailsForm({
               return
             }
             setDescription(value)
-            setPlst({ ...playlist, description: value })
-            canPatchPlaylist.current = true
+            patchDebounced(playlist, { description: value })
           }}
           placeholder={t('playlistSettings.details.descriptionPlaceholder')}
           maxLength={MAX_DESCRIPTION_LENGTH}
           rows={3}
-          className="mt-2 border-level-3 border-1 w-full bg-level-2 resize-none"
+          className="mt-2 border-level-3 border w-full bg-level-2 resize-none"
         />
       </div>
     </div>

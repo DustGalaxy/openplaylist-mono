@@ -6,22 +6,13 @@ from simple_repository.abctract import IAsyncCrud
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.order import OrderCreate, OrderDomain
-from src.models.settings import SettingsSchema, SettingsPatch, SettingsCreate
+
 from src.models.playlist import PlaylistSchema, PlaylistCreate, PlaylistPatch
 
 from src.orm.playlist import Playlist
-from src.orm.settings import Settings
+
 
 from src._types import DeleteStatus, TrackSource
-
-
-class IPlaylistSettingsRepository(IAsyncCrud[Settings, SettingsSchema, SettingsCreate, SettingsPatch]):
-    @abstractmethod
-    async def get_merged(self, session: AsyncSession, settings_id: UUID) -> SettingsSchema: ...
-
-    @abstractmethod
-    async def get_by_plst(self, session: AsyncSession, playlist_id: UUID, user_id: UUID) -> SettingsSchema: ...
-
 
 class IPlaylistRepository(IAsyncCrud[Playlist, PlaylistSchema, PlaylistCreate, PlaylistPatch]):
     @abstractmethod
@@ -29,6 +20,11 @@ class IPlaylistRepository(IAsyncCrud[Playlist, PlaylistSchema, PlaylistCreate, P
 
     @abstractmethod
     async def get_user_playlist_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistSchema: ...
+
+    @abstractmethod
+    async def get_id_by_user_id_and_playlist_id(
+        self, session: AsyncSession, user_id: UUID, playlist_id: UUID
+    ) -> UUID | None: ...
 
     @abstractmethod
     async def get_by_string(self, session: AsyncSession, query: str) -> list[PlaylistSchema]: ...

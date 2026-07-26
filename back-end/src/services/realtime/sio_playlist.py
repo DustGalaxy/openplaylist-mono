@@ -33,15 +33,15 @@ class SioPlaylistUpdateService:
 
     async def log(self, log: PlaylistLogSchema):
         owner_sid = self.sid_from_uid(log.user_id)
-        await self.sio.emit(f"log:{log.playlist_id}", log.model_dump_json(), to=owner_sid, namespace=self.namespace)
+        await self.sio.emit(f"log:{log.playlist_id}", log.model_dump(), to=owner_sid, namespace=self.namespace)
 
     async def set_playnow(self, data: PlayNow):
         sids = room_manager.get_sids(data.playlist_id, self.namespace)
-        await self.sio.emit(f"playnow:{data.playlist_id}", data.model_dump_json(), to=[*sids], namespace=self.namespace)
+        await self.sio.emit(f"playnow:{data.playlist_id}", data.model_dump(), to=[*sids], namespace=self.namespace)
 
     async def add_track(self, data: OrderDomain, playlist_id: UUID):
         sids = room_manager.get_sids(str(playlist_id), self.namespace)
-        await self.sio.emit(f"add_track:{playlist_id}", data.model_dump_json(), to=[*sids], namespace=self.namespace)
+        await self.sio.emit(f"add_track:{playlist_id}", data.model_dump(), to=[*sids], namespace=self.namespace)
 
     async def delete_track(self, data: Deleted):
         sids = room_manager.get_sids(data.playlist_id, self.namespace)
@@ -56,7 +56,7 @@ class SioPlaylistUpdateService:
         sids = room_manager.get_sids(f"playback:{str(playlist_id)}", self.namespace)
         await self.sio.emit(
             f"playback_pause:{str(playlist_id)}",
-            data.model_dump_json(),
+            data.model_dump(),
             to=[*sids],
             namespace=self.namespace,
         )
@@ -65,7 +65,7 @@ class SioPlaylistUpdateService:
         sids = room_manager.get_sids(f"playback:{str(playlist_id)}", self.namespace)
         await self.sio.emit(
             f"playback_seek:{str(playlist_id)}",
-            data.model_dump_json(),
+            data.model_dump(),
             to=[*sids],
             namespace=self.namespace,
         )
@@ -78,7 +78,7 @@ class SioPlaylistUpdateService:
         sids = room_manager.get_sids(str(data.playlist_id), self.namespace)
         await self.sio.emit(
             f"settings_changed:{str(data.playlist_id)}",
-            data.model_dump_json(),
+            data.model_dump(),
             to=[*sids],
             namespace=self.namespace,
         )

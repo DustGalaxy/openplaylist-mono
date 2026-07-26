@@ -1,5 +1,5 @@
-import { deletePlaylist } from '@/api/api-playlist'
 import { create } from 'zustand'
+import { deletePlaylist } from '@/api/api-playlist'
 
 type PlaylistBaseInfo = {
   id: string

@@ -1,9 +1,14 @@
 import { v4 as uuidv4 } from 'uuid'
 
 import { useAuthStore } from '../authStore'
-import type { Order } from '@/types/playlist'
 import type { StateCreator } from 'zustand'
-import type { DeleteStatus, SlotId, StoreState, TrackInput } from './types'
+import type {
+  DeleteStatus,
+  Order,
+  SlotId,
+  StoreState,
+  TrackInput,
+} from '@/types/playlist'
 import { addTrackToPlaylist, removeTrackFromPlaylist } from '@/api/api-playlist'
 
 export interface TrackOpsSlice {
@@ -40,7 +45,11 @@ export const createTrackOpsSlice: StateCreator<
       requester_nickname: user.username,
       playlist_id: playlistId,
       yt_video_url: input.yt_video_url,
-      priority: role === 'owner' || role === 'operator' ? 'playlist_owner' : '',
+      priority: input.priority
+        ? input.priority
+        : role === 'owner' || role === 'operator'
+          ? 'playlist_owner'
+          : '',
       source: 'web',
     }
 

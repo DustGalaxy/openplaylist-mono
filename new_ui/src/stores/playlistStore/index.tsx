@@ -6,7 +6,8 @@ import { createPlaybackOpsSlice } from './createPlaybackOpsSlice'
 import { createSyncSlice } from './createSyncSlice'
 import { createRoleSlice } from './createRoleSlice'
 import { createPlaylistSettingsSlice } from './createPlaylistSettingsSlice'
-import type { StoreState } from './types'
+import { createPlaylistRulesSlice } from './createPlaylistRulesSlice'
+import type { StoreState } from '@/types/playlist'
 
 export const usePlaylistStore = create<StoreState>()((set, get, ...rest) => ({
   userId: null,
@@ -24,4 +25,5 @@ export const usePlaylistStore = create<StoreState>()((set, get, ...rest) => ({
   ...createPlaylistSettingsSlice(set, get, ...rest),
   ...createPlaybackOpsSlice(set, get, ...rest),
   ...createSyncSlice(set, get, ...rest),
+  ...createPlaylistRulesSlice(set, get, ...rest),
 }))

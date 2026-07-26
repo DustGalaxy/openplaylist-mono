@@ -236,7 +236,6 @@ export const getPublicPlaylists = async (query: string) => {
 
 export const blockUser = async (
   playlist_id: string,
-  settings_id: string,
   trigger_type: string,
   trigger_value: string,
   platform: string,
@@ -250,7 +249,7 @@ export const blockUser = async (
       data: {
         trigger_type: trigger_type,
         trigger_value: trigger_value,
-        settings_id,
+        playlist_id,
         platform,
       },
     },

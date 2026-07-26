@@ -2,25 +2,18 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import select
-
-from src.models.auth_user import AuthUserSchema as User
-from src.models.settings import SettingsSchema
-
-from src.services_low.settings import get_settings_service, SettingsLowService
-from src.services_low.playlist import get_playlist_service, PlaylistLowService
-from src.services.playlist_log import get_playlist_log_service, PlaylistLogService
-from src.services.stream_service import get_stream_service, StreamService
-from src.services.notification.notification_service import get_notification_service, NotificationService
-from src.services.auth.auth_service import auth_service
-from src.orm.playlist import Playlist
 
 from src.database import AsyncSession, get_async_session
-from src.exceptions import NotAuthorizedException
+from src.models.auth_user import AuthUserSchema as User
+from src.services.auth.auth_service import auth_service
+from src.services.notification.notification_service import NotificationService, get_notification_service
+from src.services.playlist_log import PlaylistLogService, get_playlist_log_service
+from src.services.playlists.basic_service import PlaylistLowService, get_playlist_service, playlist_service
+from src.services.playlists.rules_service import RulesService, get_rules_service
+from src.services.stream_service import StreamService, get_stream_service
 
-
-SETTINGS_SERVICE = Annotated[SettingsLowService, Depends(get_settings_service)]
 PLST_SERVICE = Annotated[PlaylistLowService, Depends(get_playlist_service)]
+RULES_SERVICE = Annotated[RulesService, Depends(get_rules_service)]
 PLST_LOG_SERVICE = Annotated[PlaylistLogService, Depends(get_playlist_log_service)]
 STREAM_SERVICE = Annotated[StreamService, Depends(get_stream_service)]
 NOTIFY_SERVICE = Annotated[NotificationService, Depends(get_notification_service)]
@@ -30,17 +23,9 @@ CURR_USER = Annotated[User, Depends(auth_service.get_current_user)]
 USER_ID = Annotated[UUID, Depends(auth_service.get_current_user_id)]
 USER_ID_OR_NONE = Annotated[UUID | None, Depends(auth_service.get_current_user_id_or_none)]
 
-async def get_current_settings(playlist_id: UUID, current_user: CURR_USER, session: DB_SESSION):
-    stmt = (
-        select(Playlist.)
-        .where(Playlist.id == playlist_id, Playlist.owner_id == current_user.id)
-    )
-    result = await session.execute(stmt)
-    settings = result.scalar()
-    if not settings:
-        raise NotAuthorizedException
 
-    return SettingsSchema.model_validate(settings)
+async def beb(db_session: DB_SESSION, playlist_id: UUID, user_id: USER_ID):
+    return await playlist_service.is_your_playlist_id(db_session, playlist_id, user_id)
 
 
-SETTINGS = Annotated[SettingsSchema, Depends(get_current_settings)]
+PLST_ID = Annotated[UUID | None, Depends(beb)]

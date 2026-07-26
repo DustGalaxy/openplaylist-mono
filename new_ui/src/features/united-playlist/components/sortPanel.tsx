@@ -221,7 +221,7 @@ export default function SortPanel() {
     )
   }
 
-  const { mode, mode_settings } = playlist.settings
+  const { mode, mode_settings } = playlist
   const activeModeSettings = mode_settings[mode]
   const hasVipQueue = activeModeSettings.priority_break_point > 0
   const hasBackgroundQueue = mode === 'stream'

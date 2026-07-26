@@ -6,12 +6,14 @@ import type {
   SlotId,
 } from '@/stores/playlistStore/types'
 import { usePlaylistStore } from '@/stores/playlistStore'
+import type { PublicUser } from '@/types/user'
 
 interface PlaylistViewContextValue {
   slot: SlotId
   playlistId: string | null
   playlist: Playlist | undefined
   role: PlaylistRole
+  owner: PublicUser | undefined
   isLoading: boolean // attached but data not yet arrived (fetch in flight)
 }
 
@@ -29,6 +31,9 @@ export function PlaylistViewProvider({
   const playlist = usePlaylistStore((s) =>
     playlistId ? s.cache[playlistId]?.data : undefined,
   )
+  const owner = usePlaylistStore((s) =>
+    playlistId ? s.cache[playlistId]?.owner : undefined,
+  )
   const role = usePlaylistStore((s) => s.getSlotRole(slot))
   const attached = usePlaylistStore((s) =>
     playlistId ? !!s.cache[playlistId] : false,
@@ -39,6 +44,7 @@ export function PlaylistViewProvider({
     playlistId,
     playlist,
     role,
+    owner,
     isLoading: attached && !playlist,
   }
 

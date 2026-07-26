@@ -1,13 +1,12 @@
+// src/features/playlist-settings/components/playlist-settings/block-list.tsx
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
+import type { ReadBlockList } from '@/types/playlist'
 import Trash from '@/components/icons/icon-trash'
 import Btn from '@/components/ui/my-btn'
-import type { ClientPlaylist } from '@/types/playlist'
-import { useMusicStore } from '@/stores/musicStore'
-import type { ReadBlockList } from '@/types/playlist'
-
 import socialIcons from '@/lib/constants/social_names'
-import { unBlockUser } from '@/api/api-playlist'
-import { toast } from 'sonner'
+import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context'
+import { usePlaylistStore } from '@/stores/playlistStore'
 
 const BLOCK_ITEM_ROW =
   'flex items-center gap-2 justify-between border-1 rounded-(--rounded-std) border-level-3 bg-level-1/40 px-2 h-14 min-h-14'
@@ -39,7 +38,6 @@ const UserBlockItem = ({
     ) : (
       <div className="ml-1 w-5 h-5">{socialMeta?.icon}</div>
     )
-
   const triggerTypeLabel =
     item.trigger_type === 'USER_ID'
       ? t('playlistSettings.block.userId')
@@ -52,7 +50,6 @@ const UserBlockItem = ({
           {icon}
           {platformName}
         </span>
-
         <div className={BLOCK_ITEM_CONTENT}>
           <p className="text-xs text-text-secondary">{triggerTypeLabel}</p>
           <p className="text-sm text-text-main break-all font-mono">
@@ -60,7 +57,6 @@ const UserBlockItem = ({
           </p>
         </div>
       </div>
-
       <Btn
         onClick={async () => {
           await unBlockCallback(item)
@@ -131,42 +127,38 @@ const TrackBlockItem = ({
 export default function BlockList({
   list,
   type,
-  playlist,
 }: {
   list: Array<ReadBlockList | string>
   type: 'user' | 'track'
-  playlist: ClientPlaylist
 }) {
   const { t } = useTranslation()
-  const { requestPlSettings, syncPlSettings } = useMusicStore()
+  const { playlist } = usePlaylistViewLoaded()
+  const { unblockUserRule, patchNow } = usePlaylistStore()
 
   const handleUnblock = async (item: ReadBlockList | string) => {
     if (type === 'user' && typeof item !== 'string') {
-      const success = await unBlockUser(playlist.id, item.id)
-      if (success) {
-        const settings = playlist.settings
-        settings.block_list = settings.block_list.filter(
-          (block) => block.id.toString() !== item.id.toString(),
-        )
-        syncPlSettings(playlist.id, settings)
-        toast.success(t('playlistSettings.block.userUnblocked'))
-      } else {
-        toast.error(t('playlistSettings.block.userUnblockFailed'))
-      }
-    } else {
-      await requestPlSettings(playlist.id, {
-        track_black_list: playlist.settings.track_black_list.filter(
+      const success = await unblockUserRule(playlist.id, item.id)
+      if (success) toast.success(t('playlistSettings.block.userUnblocked'))
+      else toast.error(t('playlistSettings.block.userUnblockFailed'))
+      return
+    }
+
+    try {
+      await patchNow(playlist.id, {
+        track_black_list: playlist.track_black_list.filter(
           (track) => track.toString() !== item.toString(),
         ),
       })
       toast.success(t('playlistSettings.block.trackUnblocked'))
+    } catch {
+      toast.error(t('playlistSettings.block.trackUnblockFailed'))
     }
   }
 
   return (
-    <div className="flex flex-col gap-2 ">
-      {list.map((item, index) => {
-        return type === 'user' ? (
+    <div className="flex flex-col gap-2">
+      {list.map((item, index) =>
+        type === 'user' ? (
           <UserBlockItem
             key={index}
             item={item as ReadBlockList}
@@ -178,8 +170,8 @@ export default function BlockList({
             item={item as string}
             unBlockCallback={handleUnblock}
           />
-        )
-      })}
+        ),
+      )}
     </div>
   )
 }

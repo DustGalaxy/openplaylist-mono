@@ -1,20 +1,17 @@
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, status, Body
+from fastapi import APIRouter, Body, HTTPException, status
 from simple_repository.exceptions import NotFoundException
-
-from src.services.playback_service import seek, pause, set_position_state, get_state as get_playback_state
-
-from src.utils import kick
-from taskiq_broker import task_broker as task_broker
 
 from src.adapters._fastapi.dependencies import (
     DB_SESSION,
     USER_ID,
 )
-
 from src.dto.playback import Pause, Seek
-
+from src.services.playback_service import get_state as get_playback_state
+from src.services.playback_service import pause, seek, set_position_state
+from src.utils import kick
+from taskiq_broker import task_broker as task_broker
 
 router = APIRouter(prefix="/playback")
 

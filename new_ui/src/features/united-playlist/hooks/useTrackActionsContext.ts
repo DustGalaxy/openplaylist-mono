@@ -1,12 +1,14 @@
 // src/features/playlist/hooks/useTrackActionsContext.ts
-import { usePlaylistStore } from '@/stores/playlistStore'
-import { usePlaylistView } from '../context/playlist-view-context'
-import { submitPlaylistReport, blockUser } from '@/api/api-playlist'
 import { toast } from 'sonner'
-import type { Track } from '@/stores/playlistStore/types'
+import { usePlaylistView } from '../context/playlist-view-context'
+import type { Track } from '@/types/playlist'
 import type { TrackActionsContext } from '../lib/trackActions'
+import { blockUser, submitPlaylistReport } from '@/api/api-playlist'
+import { usePlaylistStore } from '@/stores/playlistStore'
 
-export function useTrackActionsContext(): TrackActionsContext {
+export function useTrackActionsContext(
+  onOpenReportModal?: (track: Track) => void,
+): TrackActionsContext {
   const { slot, playlistId } = usePlaylistView()
   const { startTrack, removeTrack, reorderStepTrack } = usePlaylistStore()
 
@@ -24,15 +26,14 @@ export function useTrackActionsContext(): TrackActionsContext {
       )
     },
     copyLink: (track: Track) => {
-      navigator.clipboard.writeText(
-        `${window.location.origin}/view?p=${playlistId}&t=${track.id}`,
-      )
+      navigator.clipboard.writeText(`https://song.link/y/${track.yt_video_id}`)
       toast.success('Link copied')
     },
     report: async (track: Track) => {
       if (!playlistId) return
       // console.debug: exact PlaylistReportPayload fields (settings_id, platform, reason) need real values,
       // not derivable purely from track — wiring a report modal is a separate UI task, this is the action stub
+
       console.debug(
         '[trackActions] report — needs report modal for reason/platform input',
         track.id,
@@ -40,6 +41,7 @@ export function useTrackActionsContext(): TrackActionsContext {
     },
     block: async (track: Track) => {
       if (!playlistId) return
+      if (onOpenReportModal) onOpenReportModal(track)
       console.debug(
         '[trackActions] block — needs settings_id + trigger_type/value from context',
         track.id,

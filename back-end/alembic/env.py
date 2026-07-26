@@ -10,15 +10,14 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from src.orm.auth_user import User  # noqa: F401
 from src.orm.linked_accounts import LinkedAccounts  # noqa: F401
 from src.orm.token_vault import TokenVault  # noqa: F401
-from src.orm.playlist import Playlist, Order, OrderPlaylistStatus  # noqa: F401
-from src.orm.settings import Settings, BlockList, ContentSettings, DonationRules, ChatRules, Base as SettingsBase  # noqa: F401
+from src.orm.playlist import Playlist, BlockList, ContentSettings, DonationRules, ChatRules, Order, OrderPlaylistStatus   # noqa: F401
+# from src.orm.settings import Settings,  Base as SettingsBase  # noqa: F401
 from src.orm.playlist_logs import PlaylistLog  # noqa: F401
 from src.orm.stream_token import StreamToken # noqa: F401
 from src.orm.notification import *  # noqa: F403
 
 from src.database import Base
 
-print(Base is SettingsBase)
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

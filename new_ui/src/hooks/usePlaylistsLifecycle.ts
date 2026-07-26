@@ -2,15 +2,8 @@
 import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
-import { useMusicStore } from '@/stores/musicStore'
-import { getPlsUpdsSocket } from '@/api/io-sockets'
-import {
-  addTrackToPlaylist,
-  fetchUserPlaylistData,
-  postPlayNow,
-  removeTrackFromPlaylist,
-} from '@/api/api-playlist'
-import { useUserPlaylistInfoStore } from '@/stores/userPlaylistInfoStore'
+import { fetchUserPlaylistData } from '@/api/api-playlist'
+import { useUserPlaylistRecordsStore } from '@/stores/userPlaylistInfoStore'
 
 export function usePlaylistsLifecycle() {
   const { isAuthenticated } = useAuthStore()
@@ -29,6 +22,6 @@ export function usePlaylistsLifecycle() {
     const info = playlistsData.map((p) => {
       return { id: p.id, name: p.name }
     })
-    useUserPlaylistInfoStore.getState().set(info)
+    useUserPlaylistRecordsStore.getState().set(info)
   }, [isAuthenticated, isLoading, playlistsData])
 }

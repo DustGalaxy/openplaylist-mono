@@ -1,7 +1,8 @@
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import type { ClassValue } from 'clsx'
-import { Platform, type PlaylistSettings, type Track } from '@/types/playlist'
+import type { Playlist, PlaylistSettings, Track } from '@/types/playlist'
+import { Platform } from '@/types/playlist'
 
 export class NotImplementedError extends Error {
   constructor(message: string) {
@@ -42,25 +43,31 @@ export const OAUTH_STATE_KEY = 'oauth_twitch_state'
 
 export const REDIRECT_AFTER_LOGIN_KEY = 'redirect_after_login_path'
 
-export function computePriority(
-  track: Track,
-  settings: PlaylistSettings,
-): number {
+function hasSubstring(arr: string[], substring: string): boolean {
+  return arr.some((item) => item.includes(substring))
+}
+
+export function computePriority(track: Track, playlist: Playlist): number {
   if (typeof track.priority === 'number') return track.priority
-  const labels = (track.priority || '').split(':')
+  const labels: Array<string> = (track.priority || '').split(':')
   if (labels.length === 0) return 0
-  var vals: number[] = []
-  var rules = []
+  let vals: Array<number> = []
+  let rules = []
   if (labels.length === 1 && labels[0].includes('donation')) {
-    rules = settings.donation_rules.filter(
+    rules = playlist.donation_rules.filter(
       (r) =>
         ((r.platform as string) === track.source ||
           (r.platform as string) === Platform.General) &&
         r.currency === track.extra_data.donation_currency &&
         r.amount === track.extra_data.donation_amount,
     )
+  } else if (hasSubstring(labels, 'custom-')) {
+    const custom_labels = labels.filter((item) => item.includes('custom-'))
+    rules = custom_labels.map((item) => {
+      return { priority: +(item.split('-').pop() || 0) }
+    })
   } else {
-    rules = settings.chat_rules.filter(
+    rules = playlist.chat_rules.filter(
       (r) => (r.platform as string) === track.source && labels.includes(r.key),
     )
   }
@@ -69,7 +76,7 @@ export function computePriority(
 
   vals = rules.map((r) => r.priority)
 
-  return settings.cost_mode === 'max'
+  return playlist.cost_mode === 'max'
     ? Math.max(...vals)
     : vals.reduce((a, b) => a + b, 0)
 }

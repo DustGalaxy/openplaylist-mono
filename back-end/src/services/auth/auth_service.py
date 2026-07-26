@@ -309,13 +309,10 @@ class AuthService:
         self,
         token: str | None = Depends(security_scheme),
     ) -> UUID | None:
-        print("enter in get_current_user_id_or_none")
         if token:
             try:
-                print("get_current_user_id_or_none")
                 return await self.get_current_user_id(token)
             except HTTPException:
-                print("catch HTTPException in get_current_user_id_or_none")
                 return None
         else:
             return None
@@ -334,6 +331,17 @@ class AuthService:
 
         except NotFoundException:
             raise HTTPException(status_code=404, detail="User not found")
+
+        return user
+
+    async def get_public_user(
+        self,
+        db_session: AsyncSession,
+        user_id: UUID
+    ): 
+        user = await self.user_repo.get_one(db_session, user_id)
+        if not user.is_public:
+            raise HTTPException(403)
 
         return user
 

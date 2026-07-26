@@ -9,14 +9,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 
-from src.models.playlist import PlaylistSchema, PlaylistCreate, PlaylistPatch
-from src.orm.playlist import OrderPlaylistStatus, Playlist, Order
-from src.models.order import OrderCreate, OrderDomain
-from src.models.settings import (
+from src.models.playlist import (
     ContentSettingsCreate,
     DonationRulesCreate,
+    PlaylistSchema,
+    PlaylistCreate,
+    PlaylistPatch,
 )
-from src.orm.settings import Settings, ContentSettings, DonationRules
+from src.orm.playlist import ContentSettings, DonationRules, OrderPlaylistStatus, Playlist, Order
+from src.models.order import OrderCreate, OrderDomain
 from src.dal.abstract import IPlaylistRepository
 from src.exceptions import NotActivePlaylist
 
@@ -42,6 +43,14 @@ class PlaylistRepository(
             return None
 
         return OrderDomain.model_validate(result)
+
+    async def get_id_by_user_id_and_playlist_id(
+        self, session: AsyncSession, user_id: UUID, playlist_id: UUID
+    ) -> UUID | None:
+        stmt = select(Playlist.id).where(Playlist.id == playlist_id, Playlist.owner_id == user_id)
+        result = await session.execute(stmt)
+        result = result.unique().scalar_one_or_none()
+        return result
 
     async def get_user_playlist_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistSchema:
         stmt = select(Playlist).where(Playlist.owner_id == owner_id).where(Playlist.name == name)
@@ -101,12 +110,8 @@ class PlaylistRepository(
             session.add(new_playlist)
             await session.flush()
 
-            new_settings = Settings(playlist_id=new_playlist.id)
-            session.add(new_settings)
-            await session.flush()
-
             general_content_settings = ContentSettingsCreate(
-                settings_id=new_settings.id,
+                playlist_id=new_playlist.id,
                 platform=ContentSettingScope.GENERAL,
                 min_views=10_000,
                 min_likes=500,
@@ -115,10 +120,9 @@ class PlaylistRepository(
                 user_cooldown=2,
             )
             general_donation_rule = DonationRulesCreate(
-                settings_id=new_settings.id,
+                playlist_id=new_playlist.id,
                 platform=DonationRuleScope.GENERAL,
                 name="General",
-                slug="general",
                 currency="USD",
                 amount=5.0,
                 priority=0,
@@ -131,7 +135,6 @@ class PlaylistRepository(
             )
 
             await session.commit()
-            await session.refresh(new_settings)
             await session.refresh(new_playlist)
 
             return self.domain_model.model_validate(new_playlist)

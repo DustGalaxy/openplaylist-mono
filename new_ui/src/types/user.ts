@@ -14,7 +14,8 @@ export interface Integration {
 
 export interface UserProfile {
   id: string
-  curr_platform: string
+  bio: string
+  is_public: boolean
   username: string
   email?: string
   email_confirmed: boolean
@@ -24,6 +25,8 @@ export interface UserProfile {
 
 export interface UserProfileUpdatePayload {
   username?: string
+  bio?: string
+  is_public?: boolean
   email?: string
   profile_image_url?: string
 }
@@ -31,4 +34,22 @@ export interface UserProfileUpdatePayload {
 export interface UserPasswordUpdatePayload {
   current_password: string
   new_password: string
+}
+
+export type PublicUser = {
+  id: string
+  username: string
+  bio: string
+  avatar_url: string
+  social_links: Record<string, string> | null
+  roles: Array<PublicRole>
+}
+
+export type PublicRole = {
+  id: string
+  user_id: string
+
+  tier: number
+
+  start_date: string
 }

@@ -1,16 +1,10 @@
-import {
-  useState,
-  type ChangeEvent,
-  type FormEvent,
-  type ReactNode,
-} from 'react'
+import { useRef, useState } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import type { ChangeEvent, FormEvent, ReactNode } from 'react'
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
-import useMusicStore from '@/stores/musicStore'
-import { usePlaylist } from '@/features/playlist/context/playlist-context'
 import {
   filterTabActiveClass,
   filterTabBaseClass,
@@ -18,6 +12,8 @@ import {
 } from '@/features/landing/styles'
 import { cn } from '@/lib/utils'
 import { usePlaylistStore } from '@/stores/playlistStore'
+import UpDownBtn from '@/components/ui/funny-btn'
+import { usePlaylistView } from '../context/playlist-view-context'
 
 type InputMode = 'add' | 'search'
 
@@ -58,8 +54,12 @@ export function PlaylistQueueInput({
 
   const [mode, setMode] = useState<InputMode>('add')
   const [value, setValue] = useState('')
-  const { addTrack } = usePlaylistStore()
+  const [customPriority, setCustomPriority] = useState(0)
 
+  const priorityInpuRef = useRef<HTMLInputElement>(null)
+
+  const { addTrack } = usePlaylistStore()
+  const { role } = usePlaylistView()
   const switchMode = (next: InputMode) => {
     setMode(next)
     setValue('')
@@ -76,11 +76,19 @@ export function PlaylistQueueInput({
     }
   }
 
+  const handleCustomPriority = (e: ChangeEvent<HTMLInputElement>) => {
+    const next = e.target.value
+    setCustomPriority(next)
+  }
+
   const submitAdd = async () => {
     if (mode !== 'add' || !value.trim()) return
     const loadingToast = toast.loading(t('common.toast.loading'))
     try {
-      const result = await addTrack('page', { yt_video_url: value.trim() })
+      const result = await addTrack('page', {
+        yt_video_url: value.trim(),
+        priority: `custom-${customPriority}`,
+      })
 
       toast.dismiss(loadingToast)
 
@@ -148,13 +156,29 @@ export function PlaylistQueueInput({
       </div>
 
       {mode === 'add' && (
-        <Btn
-          disabled={!value.trim()}
-          type="submit"
-          className="h-11 shrink-0 px-2 sm:px-4 bg-level-2 text-xs sm:text-sm font-semibold text-text-main "
-        >
-          {t('playlist.queue.submit')}
-        </Btn>
+        <div className="flex gap-2 ">
+          {role !== 'viewer' && (
+            <div className="flex rounded-(--rounded-std) items-center gap-0 overflow-hidden text-text-main">
+              <Input
+                type="number"
+                ref={priorityInpuRef}
+                value={customPriority}
+                // dir="rtl"
+                className="border-0 bg-level-2 w-14 focus-visible:ring-0 rounded-r-none [appearance:textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+                onChange={handleCustomPriority}
+              />
+              <UpDownBtn inputRef={priorityInpuRef} />
+            </div>
+          )}
+
+          <Btn
+            disabled={!value.trim()}
+            type="submit"
+            className="h-11 shrink-0 px-2 sm:px-4 bg-level-2 text-xs sm:text-sm font-semibold text-text-main "
+          >
+            {t('playlist.queue.submit')}
+          </Btn>
+        </div>
       )}
     </form>
   )

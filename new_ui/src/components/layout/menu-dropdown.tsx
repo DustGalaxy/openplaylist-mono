@@ -272,7 +272,8 @@ export default function MenuDropdown() {
           {/* <div className="hidden sm:block text-lg font-medium text-text-main">
             {user.username}
           </div> */}
-          <div className="rounded-full w-8.5 bg-level-3  hover:ring-level-3 hover:ring-2 transition-all">
+          {/* hover:ring-level-3 hover:ring-2 transition-all */}
+          <div className="rounded-full w-10 bg-level-3 -mr-1 ">
             <img src={user.avatar_url} className="rounded-full" alt="" />
           </div>
         </div>

@@ -1,35 +1,44 @@
-import React from 'react'
 import { cn } from '@/lib/utils'
+import type { RefObject } from 'react'
 
-const UpDownBtn = ({
-  upOnClick = () => console.log('Up'),
-  downOnClick = () => console.log('Down'),
-  getInputRef = () => null,
-  className = '',
-}: {
+interface UpDownBtnProps {
   upOnClick?: () => void
   downOnClick?: () => void
-  getInputRef?: () => HTMLInputElement | null
+  inputRef?: RefObject<HTMLInputElement | null>
   className?: string
-}) => {
+}
+
+const UpDownBtn = ({
+  upOnClick,
+  downOnClick,
+  inputRef,
+  className = '',
+}: UpDownBtnProps) => {
   const containerStyle = cn(
-    '  rounded-(--rounded-std) flex flex-row items-center justify-center h-9',
+    'flex flex-row items-center justify-center h-9 rounded-(--rounded-std)',
     className,
   )
 
   const handleAction = (type: 'up' | 'down') => {
-    const inputElement = getInputRef()
-    if (inputElement) {
-      // Используем нативные методы для type="number"
+    const inputElement = inputRef?.current
 
+    if (inputElement) {
+      // 1. Делаем шаг через нативный API инпута
       if (type === 'up') inputElement.stepUp()
       else inputElement.stepDown()
 
-      // Генерируем событие 'input', чтобы React увидел изменение значения
+      // 2. Уведомляем React State Manager через вызов нативного сеттера
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        'value',
+      )?.set
+
+      nativeInputValueSetter?.call(inputElement, inputElement.value)
+
+      // 3. Генерируем событие input, чтобы сработал onChange={handleCustomPriority}
       inputElement.dispatchEvent(new Event('input', { bubbles: true }))
     }
 
-    // Вызываем коллбеки, если они переданы
     if (type === 'up') upOnClick?.()
     else downOnClick?.()
   }
@@ -37,14 +46,16 @@ const UpDownBtn = ({
   return (
     <div className={containerStyle}>
       <button
+        type="button" // ОБЯЗАТЕЛЬНО: предотвращает сабмит формы
         onClick={() => handleAction('up')}
-        className="pl-2 pr-2 h-full w-full bg-level-2 hover:bg-level-3 active:bg-level-3/50"
+        className="h-full w-full bg-level-2 pl-2 pr-2 hover:bg-level-3 active:bg-level-3/50"
       >
         ↑
       </button>
       <button
+        type="button" // ОБЯЗАТЕЛЬНО: предотвращает сабмит формы
         onClick={() => handleAction('down')}
-        className="pr-2 pl-2 h-full w-full bg-level-2 hover:bg-level-3 active:bg-level-3/50"
+        className="h-full w-full bg-level-2 pl-2 pr-2 hover:bg-level-3 active:bg-level-3/50"
       >
         ↓
       </button>

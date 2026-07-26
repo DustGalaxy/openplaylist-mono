@@ -3,17 +3,18 @@ import { Link, useLocation } from '@tanstack/react-router'
 import { AudioLines, House, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import useMusicStore from '@/stores/musicStore'
-import { usePlaybackStore } from '@/stores/playbackStore'
+import { useIsPlaybackActive, usePlaybackStore } from '@/stores/playbackStore'
 import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
 import AddPlaylistModal from '@/features/playlist/components/newPlaylistModal'
 import { usePlaylistStore } from '@/stores/playlistStore'
 import { useUserPlaylistRecordsStore } from '@/stores/userPlaylistInfoStore'
+import { useEffect } from 'react'
 
 export default function Sidebar() {
   const { t } = useTranslation()
   const playlists = useUserPlaylistRecordsStore((s) => s.playlists) // ponytail: имя поля гадаю, поправь под реальный shape
-  const { activePlaybackId, setActivePlayback } = usePlaybackStore()
+
   const { isAuthenticated } = useAuthStore()
 
   return (
@@ -33,32 +34,18 @@ export default function Sidebar() {
 
       <nav className="flex flex-col gap-0.5 px-1">
         {playlists?.map((p) => (
-          <SidebarItem
-            key={p.id}
-            id={p.id}
-            name={p.name}
-            isPlaying={p.id === activePlaybackId}
-          />
+          <SidebarItem key={p.id} id={p.id} name={p.name} />
         ))}
       </nav>
     </aside>
   )
 }
 
-function SidebarItem({
-  id,
-  name,
-  isPlaying,
-}: {
-  id: string
-  name: string
-  isPlaying: boolean
-}) {
+function SidebarItem({ id, name }: { id: string; name: string }) {
   const location = useLocation()
+  const isPlaying = useIsPlaybackActive(id, 'owner')
 
-  // Извлекаем id из хэша типа "#plst-123"
   const currentHashId = location.pathname.split('/').pop()
-
   const isOpen = currentHashId === id
 
   return (
@@ -72,7 +59,6 @@ function SidebarItem({
       )}
     >
       {isPlaying && <AudioLines size={14} className="text-level-3 shrink-0" />}
-      {isPlaying ? '1' : '2'}
       <span className="truncate">{name}</span>
     </Link>
   )
