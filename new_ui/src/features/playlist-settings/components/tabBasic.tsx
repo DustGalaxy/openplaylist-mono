@@ -274,30 +274,22 @@ const TabBasic = () => {
             ) : (
               <div className="flex flex-col gap-1.5 mt-2 max-h-60 overflow-y-auto">
                 {playlist.track_data.map((track) => {
-                  const isBackground =
-                    activeModeSettings.background_track_ids.includes(track.id)
+                  const isBackground = playlist.background_track_ids.includes(
+                    track.id,
+                  )
                   return (
                     <div
                       key={track.id}
                       className="flex items-center gap-3 px-3 py-2 rounded bg-level-2 cursor-pointer"
                       onClick={() => {
                         const nextIds = isBackground
-                          ? activeModeSettings.background_track_ids.filter(
+                          ? playlist.background_track_ids.filter(
                               (id: string) => id !== track.id,
                             )
-                          : [
-                              ...activeModeSettings.background_track_ids,
-                              track.id,
-                            ]
+                          : [...playlist.background_track_ids, track.id]
 
                         patchDebounced(playlist.id, {
-                          mode_settings: {
-                            ...playlist.mode_settings,
-                            stream: {
-                              ...activeModeSettings,
-                              background_track_ids: nextIds,
-                            },
-                          },
+                          background_track_ids: nextIds,
                         })
                       }}
                     >

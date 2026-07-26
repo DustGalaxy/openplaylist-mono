@@ -84,11 +84,10 @@ class ReadPlaylist(BaseModel):
     repeat_mode: Literal["all", "once", "none"]
     mode_settings: Dict[str, Any]
     sync_playback_position: bool
-    shuffle: bool
     cost_mode: Literal["add", "max"]
 
     track_black_list: list[str] = Field(default_factory=list)
-
+    background_track_ids: list[str] = []
     content_settings: list[ReadContentSettings] = Field(default_factory=list)
     block_list: list[ReadBlockList] = Field(default_factory=list)
     donation_rules: list[ReadDonationRules] = Field(default_factory=list)

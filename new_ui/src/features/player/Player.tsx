@@ -165,6 +165,7 @@ export default function Player({
                 width: '860px',
                 height: (860 / 16) * 9,
               }}
+              // loop={feed.repeatMode === 'once'}
               playing={feed.playing}
               volume={liveVolume ?? volume}
               muted={volume === 0}

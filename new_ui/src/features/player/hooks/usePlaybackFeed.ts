@@ -50,12 +50,12 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     stopPlayback,
     updateLocal,
     setAcceptSync,
+    patchNow,
   } = usePlaylistStore()
 
   const [playing, setPlaying] = useState(false)
   const [seekSignal, setSeekSignal] = useState<SeekSignal>(null)
-  const [repeatMode, setRepeatMode] = useState<RepeatMode>('none')
-
+  // const [repeatMode, setRepeatMode] = useState<RepeatMode>('none')
   const seekTokenRef = useRef(0)
   const positionGetterRef = useRef<() => number>(() => 0)
   const resumedTrackIdRef = useRef<string | undefined>(undefined)
@@ -134,14 +134,12 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
   // ponytail: single source of truth is store.getState(), read fresh on every tick/unmount —
   // nothing closed over, so no dependency array can ever go stale
   useEffect(() => {
-    if (!playbackStore || !playlistId) return
-
+    if (!playbackStore || !playlistId || !currentTrackId) return
+    const activeTrackId = currentTrackId
     const savePosition = () => {
-      const trackId = usePlaylistStore.getState().slots[slot].currentTrackId
-      if (!trackId) return
       playbackStore
         .save(playlistId, {
-          track_id: trackId,
+          track_id: activeTrackId,
           position: positionGetterRef.current(),
           updated_at: new Date().toISOString(),
         })
@@ -157,19 +155,30 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
       window.removeEventListener('beforeunload', savePosition)
       savePosition()
     }
-  }, [playbackStore, playlistId, slot])
+  }, [playbackStore, playlistId, slot, currentTrackId])
 
   useEffect(() => {
     const pending = local?.pendingInterrupt
     if (!pending || !playlist) return
     if (pending.fromTrackId !== currentTrackId) return
-    updateLocal(playlist.id, {
-      pendingInterrupt: null,
-      paused_background: {
-        track_id: pending.fromTrackId,
-        position_seconds: positionGetterRef.current(),
-      },
-    })
+
+    if (pending.groupWasInterrupt === 'background')
+      updateLocal(playlist.id, {
+        pendingInterrupt: null,
+        paused_background: {
+          track_id: pending.fromTrackId,
+          position_seconds: positionGetterRef.current(),
+        },
+      })
+    else if (pending.groupWasInterrupt === 'regular')
+      updateLocal(playlist.id, {
+        pendingInterrupt: null,
+        paused_regular: {
+          track_id: pending.fromTrackId,
+          position_seconds: positionGetterRef.current(),
+        },
+      })
+
     playTrack(pending.toTrackId)
   }, [local?.pendingInterrupt])
 
@@ -184,12 +193,23 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
   }, [shouldBroadcast, nowPlayingTrack?.id, playlist?.id])
 
   const onEnded = () => {
-    if (repeatMode === 'once') {
-      seek(0)
+    if (local?.repeatMode !== 'once') {
+      if (!playNext('listened')) {
+        clearActivePlayback()
+        setPlaying(false)
+        stopPlayback()
+      } else setPlaying(true)
+    } else {
       setPlaying(true)
-      return
     }
-    playNext('listened')
+  }
+
+  const setRepeatMode = (repeatMode: RepeatMode) => {
+    if (!playlistId) return
+    if (role !== 'viewer') {
+      patchNow(playlistId, { repeat_mode: repeatMode })
+    }
+    updateLocal(playlistId, { repeatMode })
   }
 
   if (!playlist) {
@@ -198,7 +218,7 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
       nowPlayingTrack: undefined,
       playing: false,
       seekSignal: null,
-      repeatMode,
+      repeatMode: local?.repeatMode || 'none',
       capabilities: EMPTY_CAPABILITIES,
       onPlayerStateChange: () => {},
       onEnded: () => {},
@@ -215,7 +235,7 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     nowPlayingTrack,
     playing,
     seekSignal,
-    repeatMode,
+    repeatMode: local?.repeatMode || 'none',
     capabilities: {
       canSkip: true,
       canSeekArbitrary: true,
@@ -240,8 +260,14 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     },
     setRepeatMode,
     next: () => {
+      if (!playNext('skipped')) {
+        clearActivePlayback()
+        setPlaying(false)
+        stopPlayback()
+        return false
+      }
       seek(0)
-      return playNext('skipped')
+      return true
     },
     prev: () => {
       seek(0)

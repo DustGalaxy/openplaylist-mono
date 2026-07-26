@@ -47,13 +47,17 @@ export interface CacheSlice {
 const emptyLocal = (): PlaylistCacheEntry['local'] => ({
   history: [],
   sortOverride: DEFAULT_SORT,
+  repeatMode: 'none',
+  shuffle: false,
+
   paused_background: null,
-  playbackPosition: null,
+  paused_regular: null,
+
   syncSeek: null,
   syncPause: null,
-  pendingResume: null,
   acceptSync: false,
-  broadcasting: false,
+
+  pendingResume: null,
   pendingInterrupt: null,
 })
 
@@ -83,7 +87,11 @@ function checkVipInterrupt(
 
   const newIsVip = isVipTrack(newTrack, modeSettings)
   const currentIsVip = isVipTrack(currentTrack, modeSettings)
-  const currentIsBg = isBackgroundTrack(pl.mode, modeSettings, currentTrackId)
+  const currentIsBg = isBackgroundTrack(
+    pl.mode,
+    pl.background_track_ids,
+    currentTrackId,
+  )
   const currentIsRegular = !currentIsVip && !currentIsBg
 
   // 1. VIP прерывает Regular и Background
@@ -92,10 +100,17 @@ function checkVipInterrupt(
   // 2. Regular прерывает Background
   const regularInterrupts = !newIsVip && currentIsBg
 
+  console.log('vipInterrupts = ', vipInterrupts)
+  console.log('regularInterrupts = ', regularInterrupts)
+
   if (!vipInterrupts && !regularInterrupts) return
 
   get().updateLocal(playlistId, {
-    pendingInterrupt: { fromTrackId: currentTrackId, toTrackId: newTrackId },
+    pendingInterrupt: {
+      fromTrackId: currentTrackId,
+      toTrackId: newTrackId,
+      groupWasInterrupt: vipInterrupts ? 'regular' : 'background',
+    },
   })
 }
 

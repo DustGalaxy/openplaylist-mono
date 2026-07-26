@@ -66,7 +66,6 @@ export type Order = {
   priority: string
   source: 'web'
 }
-
 export interface Track {
   id: string // orderId (уникальный для записи в плейлисте)
   playlist_id: string
@@ -174,7 +173,7 @@ export interface RulesPatch {
 
 // ─── Playlist Configuration & Sorting ───────────────────────────────
 
-export type OrderMode = 'auto' | 'random' | 'free' | 'host'
+export type OrderMode = 'auto' | 'free' | 'host'
 
 export type SortSettings = {
   order_mode: OrderMode
@@ -194,8 +193,6 @@ export type ModeSettings = {
   priority_break_point: number
   sort_settings_vip: SortSettings
   sort_settings_regular: SortSettings
-  sort_settings_background: SortSettings
-  background_track_ids: Array<string>
 }
 
 export type ModeSettingsMap = {
@@ -220,12 +217,12 @@ export type InputPlaylist = {
   show_in_widget: boolean
   now_playing?: string
   track_data: Array<WireTrack>
+  background_track_ids: Array<string>
   max_playlist_size: number
   mode: PlaylistMode
   repeat_mode: 'all' | 'once' | 'none'
   mode_settings: ModeSettingsMap
   sync_playback_position: boolean
-  shuffle: boolean
   cost_mode: 'add' | 'max'
   track_black_list: Array<string>
   content_settings: Array<ContentSettings>
@@ -238,6 +235,7 @@ export type InputPlaylist = {
 
 export type Playlist = Omit<InputPlaylist, 'now_playing'> & {
   now_playing: Track | undefined
+  track_data: Array<Track>
 }
 
 export type PlaylistPatch = {
@@ -254,7 +252,6 @@ export type PlaylistPatch = {
   repeat_mode?: 'all' | 'once' | 'none'
   mode_settings?: ModeSettingsMap
   sync_playback_position?: boolean
-  shuffle?: boolean
   cost_mode?: 'add' | 'max'
   track_black_list?: Array<string>
 }
@@ -316,6 +313,7 @@ export interface SplitQueue {
 export interface PendingInterrupt {
   fromTrackId: string
   toTrackId: string
+  groupWasInterrupt: 'vip' | 'regular' | 'background'
 }
 // ─── Roles & Permissions ─────────────────────────────────────────────
 
@@ -342,13 +340,18 @@ export interface PlaylistCacheEntry {
   local: {
     history: Array<string>
     sortOverride: SortSettings
+    repeatMode: RepeatMode
+    shuffle: boolean
+
     paused_background: PausedBackground | null
-    playbackPosition: PlaybackPosition | null
+    paused_regular: PausedBackground | null
+
     syncSeek: SyncSeekPayload | null
     syncPause: SyncPausePayload | null
-    pendingResume: PendingResume | null
     acceptSync: boolean
+
     pendingInterrupt: PendingInterrupt | null
+    pendingResume: PendingResume | null
   }
 }
 

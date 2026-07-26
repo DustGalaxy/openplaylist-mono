@@ -17,53 +17,17 @@ def generic_mode_settings():
         "flow": {
             "priority_break_point": 0,
             "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
-            "sort_settings_regular": {
-                "date": "desc",
-                "priority": "none",
-                "order_mode": "auto",
-                "manual_order_ids": [],
-            },
-            "sort_settings_background": {
-                "date": "desc",
-                "priority": "none",
-                "order_mode": "auto",
-                "manual_order_ids": [],
-            },
-            "background_track_ids": [],
+            "sort_settings_regular": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
         },
         "static": {
             "priority_break_point": 0,
             "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
-            "sort_settings_regular": {
-                "date": "desc",
-                "priority": "none",
-                "order_mode": "auto",
-                "manual_order_ids": [],
-            },
-            "sort_settings_background": {
-                "date": "desc",
-                "priority": "none",
-                "order_mode": "auto",
-                "manual_order_ids": [],
-            },
-            "background_track_ids": [],
+            "sort_settings_regular": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
         },
         "stream": {
             "priority_break_point": 0,
             "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
-            "sort_settings_regular": {
-                "date": "desc",
-                "priority": "none",
-                "order_mode": "auto",
-                "manual_order_ids": [],
-            },
-            "sort_settings_background": {
-                "date": "desc",
-                "priority": "none",
-                "order_mode": "auto",
-                "manual_order_ids": [],
-            },
-            "background_track_ids": [],
+            "sort_settings_regular": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
         },
     }
 
@@ -116,7 +80,6 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
 
     mode: Mapped[Literal["flow", "static", "stream"]] = mapped_column(default="static", nullable=False)
     repeat_mode: Mapped[Literal["all", "once", "none"]] = mapped_column(default="none", nullable=False)
-    shuffle: Mapped[bool] = mapped_column(default=False, nullable=False)
     cost_mode: Mapped[Literal["add", "max"]] = mapped_column(default="max", nullable=False)
 
     # JSONB конфиги
@@ -131,7 +94,7 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
     # Массивы
     tags: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False, default=list)
     track_black_list: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False, default=list)
-
+    background_track_ids: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False, default=list)
     # Связи с дочерними правилами (теперь привязаны напрямую к Playlist)
     content_settings: Mapped[list["ContentSettings"]] = relationship(
         back_populates="playlist", cascade="all, delete-orphan", lazy="selectin"

@@ -19,7 +19,6 @@ interface UserPopoverProps {
 }
 
 export const UserPopover: React.FC<UserPopoverProps> = ({ user }) => {
-  // Данные по умолчанию (заглушка)
   const userData = user
 
   const MOCK_ROLES: Array<PublicRole> = [
@@ -55,36 +54,9 @@ export const UserPopover: React.FC<UserPopoverProps> = ({ user }) => {
     }, // Supporter, active
   ]
 
-  // ?? {
-  //   name: 'DustGalaxy',
-  //   bio: 'Backend & Full-stack dev. Streamer & Music enthusiast.',
-  //   roles: [
-  //     {
-  //       id: 'vip',
-  //       label: '💎 VIP',
-  //       tier: 0,
-  //       startDate: new Date(),
-  //       expiresAt: '',
-  //       // discription: '6 месяцев',
-  //       colorClass: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-  //     },
-  //     {
-  //       id: 'supporter',
-  //       label: '⭐ Supporter',
-  //       discription: 'поддержал проект',
-  //       colorClass: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-  //     },
-  //   ],
-  //   nowPlaying: {
-  //     track: 'Tanger - BIKE',
-  //     artist: 'Tanger',
-  //   },
-  //   joinedAt: 'zydfh, 2026',
-  // }
-
   return (
     <Popover>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild hidden={!!!user}>
         <div className="flex gap-1 items-center ">
           <div className="text-text-main -mt-1">{userData?.username}</div>
           <button
@@ -153,12 +125,9 @@ export const UserPopover: React.FC<UserPopoverProps> = ({ user }) => {
           )}
           <RoleBadgeList roles={MOCK_ROLES} />
           {/* 5. Био */}
-          {userData?.bio && (
-            <p className="text-xs text-text-secondary mt-2 leading-relaxed">
-              {userData.bio}
-            </p>
-          )}
-
+          <p className="text-xs text-text-secondary mt-2 leading-relaxed">
+            {userData?.bio ? userData.bio : '👀 No bio.'}
+          </p>
           {/* 6. Карточка "Сейчас слушает" */}
           {/* {userData.nowPlaying && (
             <div className="mt-4 p-2.5 rounded-lg bg-level-2/70 border border-level-3/60 flex items-center gap-3">

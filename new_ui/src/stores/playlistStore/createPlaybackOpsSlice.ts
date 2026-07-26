@@ -1,4 +1,4 @@
-import { resolveNextTrack } from './helpers'
+import { pickNext } from './helpers'
 import type { StateCreator } from 'zustand'
 import type { PlaybackOpsSlice, StoreState } from '@/types/playlist'
 import { postPlayNow } from '@/api/api-playlist'
@@ -51,17 +51,17 @@ export const createPlaybackOpsSlice: StateCreator<
       removeCurrentId,
       resumePositionSeconds,
       consumedPausedBackground,
-    } = resolveNextTrack(
-      pl,
-      currentTrackId ?? undefined,
-      get().cache[playlistId],
-    )
+      consumedPausedRegular,
+    } = pickNext(pl, currentTrackId ?? undefined, get().cache[playlistId])
 
     if (removeCurrentId)
       get().removeTrack('player', removeCurrentId, reason ?? 'listened')
     if (consumedPausedBackground)
       get().updateLocal(playlistId, { paused_background: null })
+    if (consumedPausedRegular)
+      get().updateLocal(playlistId, { paused_regular: null })
     if (nextTrackId) get().playTrack(nextTrackId, resumePositionSeconds ?? 0)
+    console.log('playNext nextTrackId = ', nextTrackId)
 
     return !!nextTrackId
   },

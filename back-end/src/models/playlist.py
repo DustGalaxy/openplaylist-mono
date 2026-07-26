@@ -58,14 +58,14 @@ class ChatRulesSchema(SubSchema):
     platform: ChatRuleScope
     key: str
     priority: int
-    content_settings: Optional[dict] = None
-    overrive_order: Optional[int] = None
+    content_settings: dict | None = None
+    overrive_order: int | None = None
 
 
 class ContentSettingsPatch(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    platform: Optional[ContentSettingScope] = None
+    platform: ContentSettingScope | None = None
     min_views: Optional[int] = None
     min_likes: Optional[int] = None
     max_duration: Optional[int] = None
@@ -131,16 +131,15 @@ class PlaylistSchema(BaseModel):
     repeat_mode: Literal["all", "once", "none"]
     mode_settings: Dict[str, Any]
     sync_playback_position: bool
-    shuffle: bool
     cost_mode: Literal["add", "max"]
 
     track_black_list: List[str] = []
-
+    background_track_ids: List[str] = []
     # Relationships
     content_settings: List[ContentSettingsSchema] = []
     block_list: List[BlockListSchema] = []
-    donation_rules: List[DonationRulesSchema] = []
-    chat_rules: List[ChatRulesSchema] = []
+    donation_rules: list[DonationRulesSchema] = []
+    chat_rules: list[ChatRulesSchema] = []
 
     created_at: datetime
     updated_at: datetime
@@ -165,14 +164,12 @@ class PlaylistPatch(BaseModel):
     max_playlist_size: int | None = None
     mode: Literal["flow", "stream", "static"] | None = None
     repeat_mode: Literal["all", "once", "none"] | None = None
-    mode_settings: Dict[str, Any] | None = None
+    mode_settings: dict[str, Any] | None = None
     sync_playback_position: bool | None = None
-    shuffle: bool | None = None
     cost_mode: Literal["add", "max"] | None = None
 
-    track_black_list: List[str] | None = None
-
-
+    track_black_list: list[str] | None = None
+    background_track_ids: list[str] | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -37,9 +37,6 @@ import {
   filterTabActiveClass,
   filterTabBaseClass,
   filterTabInactiveClass,
-  innerPanelClass,
-  statusClosedClass,
-  statusOpenClass,
 } from '@/features/landing/styles'
 import UserPopover from '@/features/user-profile/components/UserPopover'
 
@@ -178,6 +175,7 @@ function PlaylistViewInner() {
                   onClick={() => setAcceptSync(playlist.id, !acceptSync)}
                   className="p-1 bg-level-2 size-8 rounded-sm relative"
                   title={t('publicView.sync')}
+                  disabled={!playlist.sync_playback_position}
                 >
                   {acceptSync ? (
                     <RadioOff className="size-5" />
@@ -292,7 +290,7 @@ function PlaylistViewInner() {
         </div>
       </div>
 
-      {role === 'viewer' && (
+      {isViewerLike && (
         <SubscriptionCreateModal
           isOpen={openNewSubModal}
           targetName={playlist.name}
