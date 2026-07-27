@@ -11,7 +11,7 @@ export const PlaylistVariant: React.FC<VariantProps> = ({
   eventType,
   data,
 }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation('notifications')
   const playlistName = data.playlist_name
 
   switch (eventType) {

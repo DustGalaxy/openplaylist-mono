@@ -1,8 +1,7 @@
 // features/playlist/components/dnd/ReorderRail.tsx
-import { GripVertical, ChevronUp, ChevronDown } from 'lucide-react'
+import { ChevronDown, ChevronUp, GripVertical } from 'lucide-react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { usePlaylist } from '@/features/playlist/context/playlist-context'
 
 export type ReorderMode = 'dnd' | 'arrows'
 

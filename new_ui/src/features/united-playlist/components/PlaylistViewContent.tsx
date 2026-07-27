@@ -29,7 +29,7 @@ import { cn } from '@/lib/utils'
 import Btn from '@/components/ui/my-btn'
 import SettingsModal from '@/features/playlist-settings/components/settingsModal'
 import { SubscriptionCreateModal } from '@/features/notifications/components/SubscriptionCreateModal'
-import SearchPlaylist from '@/features/public-playlist/components/search-playlist'
+import SearchPlaylist from '@/features/united-playlist/components/search-playlist'
 import { InfoCardGroup } from '@/components/ui/info-card-group'
 import { Platform } from '@/types/playlist'
 import { createSubscription } from '@/api/api-user'
@@ -39,6 +39,7 @@ import {
   filterTabInactiveClass,
 } from '@/features/landing/styles'
 import UserPopover from '@/features/user-profile/components/UserPopover'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 export default function PlaylistViewContent({ slot }: { slot: SlotId }) {
   return (
@@ -49,7 +50,8 @@ export default function PlaylistViewContent({ slot }: { slot: SlotId }) {
 }
 
 function PlaylistViewInner() {
-  const { t } = useTranslation()
+  const { t: tc } = useTranslation()
+  const { t } = useFeatureTranslation()
   const { slot, playlist, playlistId, role, isLoading, owner } =
     usePlaylistView()
   const { toggleExternalRequests, toggleBroadcast, setAcceptSync } =
@@ -79,7 +81,7 @@ function PlaylistViewInner() {
   if (isLoading || !playlist) {
     return (
       <div className="py-12 text-center text-text-secondary">
-        {t('common.loading')}
+        {tc('common.loading')}
       </div>
     )
   }
@@ -237,7 +239,7 @@ function PlaylistViewInner() {
                       )}
                     >
                       {setting.platform === Platform.General
-                        ? t('common.general')
+                        ? tc('common.general')
                         : setting.platform}
                     </button>
                   ))}

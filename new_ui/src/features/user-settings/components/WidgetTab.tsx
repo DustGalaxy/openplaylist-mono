@@ -9,6 +9,7 @@ import {
   sectionTitleClass,
 } from '@/features/landing/styles'
 import { getWidgetToken as regenerateWidgetToken } from '@/api/api-user'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 const STORAGE_KEY = 'widgetAppearance'
 const TOKEN_STORAGE_KEY = 'widgetToken'
@@ -92,7 +93,8 @@ function buildPreviewSrcDoc(a: WidgetAppearance, demoTitle: string) {
 }
 
 export function WidgetTab() {
-  const { t, i18n } = useTranslation()
+  const { t, i18n } = useFeatureTranslation()
+  const { t: tc } = useTranslation()
   const [token, setToken] = useState<string | null>(() =>
     window.localStorage.getItem(TOKEN_STORAGE_KEY),
   )
@@ -103,7 +105,9 @@ export function WidgetTab() {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(appearance))
   }, [appearance])
 
-  const widgetUrl = token ? `${window.location.origin}/widget.html?token=${token}&lang=${i18n.language}` : ''
+  const widgetUrl = token
+    ? `${window.location.origin}/widget.html?token=${token}&lang=${i18n.language}`
+    : ''
   const cssPatch = useMemo(() => buildCssPatch(appearance), [appearance])
   const previewSrcDoc = useMemo(
     () => buildPreviewSrcDoc(appearance, t('settings.widget.demoTrack')),
@@ -112,7 +116,7 @@ export function WidgetTab() {
 
   function copy(text: string, doneKey: string) {
     navigator.clipboard.writeText(text)
-    toast.success(t(doneKey))
+    toast.success(tc(doneKey))
   }
 
   async function handleRegenerate() {
@@ -156,7 +160,9 @@ export function WidgetTab() {
         {!token && (
           <div className="flex items-start gap-3 px-4 py-3 mb-3 rounded-(--rounded-std) border border-amber-500/30 bg-amber-500/8 text-amber-200">
             <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-amber-400" />
-            <p className="text-sm leading-snug">{t('settings.widget.noTokenWarning')}</p>
+            <p className="text-sm leading-snug">
+              {t('settings.widget.noTokenWarning')}
+            </p>
           </div>
         )}
 
@@ -178,8 +184,12 @@ export function WidgetTab() {
             disabled={regenerating}
             className="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-(--rounded-std) border border-danger/30 bg-danger/8 text-danger text-sm font-semibold hover:bg-danger/15 hover:border-danger/50 disabled:opacity-40 disabled:pointer-events-none transition-colors"
           >
-            <RefreshCw className={`h-4 w-4 ${regenerating ? 'animate-spin' : ''}`} />
-            {token ? t('settings.widget.regenerate') : t('settings.widget.generate')}
+            <RefreshCw
+              className={`h-4 w-4 ${regenerating ? 'animate-spin' : ''}`}
+            />
+            {token
+              ? t('settings.widget.regenerate')
+              : t('settings.widget.generate')}
           </button>
         </div>
         <p className="text-xs text-text-placeholder mt-2">
@@ -188,7 +198,9 @@ export function WidgetTab() {
       </div>
 
       {/* Appearance + preview */}
-      <div className={`p-4 sm:p-6 ${panelClass} grid grid-cols-1 lg:grid-cols-2 gap-6`}>
+      <div
+        className={`p-4 sm:p-6 ${panelClass} grid grid-cols-1 lg:grid-cols-2 gap-6`}
+      >
         <div>
           <h3
             className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}
@@ -196,7 +208,9 @@ export function WidgetTab() {
             {t('settings.widget.appearanceTitle')}
           </h3>
 
-          <div className={`flex items-center justify-between p-3 mb-3 ${innerPanelClass}`}>
+          <div
+            className={`flex items-center justify-between p-3 mb-3 ${innerPanelClass}`}
+          >
             <span className="text-sm text-text-main flex items-center gap-2">
               <Disc3 className="h-4 w-4 text-level-3" />
               {t('settings.widget.showIcon')}
@@ -207,7 +221,9 @@ export function WidgetTab() {
             />
           </div>
 
-          <div className={`flex items-center justify-between p-3 mb-3 ${innerPanelClass}`}>
+          <div
+            className={`flex items-center justify-between p-3 mb-3 ${innerPanelClass}`}
+          >
             <label htmlFor="w-text-color" className="text-sm text-text-main">
               {t('settings.widget.textColor')}
             </label>
@@ -220,7 +236,9 @@ export function WidgetTab() {
             />
           </div>
 
-          <div className={`flex items-center justify-between p-3 mb-3 ${innerPanelClass}`}>
+          <div
+            className={`flex items-center justify-between p-3 mb-3 ${innerPanelClass}`}
+          >
             <label htmlFor="w-bg-color" className="text-sm text-text-main">
               {t('settings.widget.bgColor')}
             </label>

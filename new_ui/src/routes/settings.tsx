@@ -11,6 +11,7 @@ import {
   pageWrapClass,
   panelClass,
 } from '@/features/landing/styles'
+import { FeatureI18nProvider } from '@/lib/i18n/featureTranslation'
 
 export const Route = createFileRoute('/settings')({
   component: RouteComponent,
@@ -25,7 +26,7 @@ export const Route = createFileRoute('/settings')({
 })
 
 function RouteComponent() {
-  const { t } = useTranslation()
+  const { t } = useTranslation('userSettings')
   const navigate = useNavigate()
   const { isAuthenticated, user, expired_at, setUser } = useAuthStore()
   const { integrations } = Route.useLoaderData()
@@ -78,11 +79,13 @@ function RouteComponent() {
   }
 
   return (
-    <UserSettingsPage
-      user={user}
-      expired_at={expired_at}
-      integrations={integrations}
-      onUserUpdate={handleUserUpdate}
-    />
+    <FeatureI18nProvider ns="userSettings">
+      <UserSettingsPage
+        user={user}
+        expired_at={expired_at}
+        integrations={integrations}
+        onUserUpdate={handleUserUpdate}
+      />
+    </FeatureI18nProvider>
   )
 }

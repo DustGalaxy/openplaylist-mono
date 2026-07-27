@@ -4,26 +4,6 @@
     "version": "2026.2 beta",
     "nameWithVersion": "OpenPlaylist v2026.2beta"
   },
-  "footer": {
-    "description": "Интерактивная музыка для всех. Создавайте свои плейлисты, делитесь любимыми треками или заказывайте музыку на стримах любимых авторов.",
-    "navigation": "Навигация",
-    "features": "Возможности",
-    "copyright": {
-      "start": "© {{year}} OpenPlaylist. Закодил ",
-      "link": "DustGalaxy",
-      "end": " с ❤️ для авторов и слушателей."
-    },
-    "techStack": "Socket.IO · React · FastAPI · И много чая 🍵",
-    "searchPlaylists": "Поиск плейлистов",
-    "login": "Войти",
-    "register": "Создать аккаунт",
-    "highlights": {
-      "realtimeQueue": "Живая очередь треков",
-      "rulesAndBlocks": "Умная модерация и блок-листы",
-      "donationPriority": "Приоритет для платных заказов",
-      "integrations": "Синхронизация со стриминг и донат платформами"
-    }
-  },
   "nav": {
     "myPlaylists": "Мои плейлисты",
     "login": "Вход",
@@ -41,6 +21,26 @@
     "moveMethod.dnd": "Перетаскивание",
     "moveMethod.arrows": "Стрелки"
   },
+  "footer": {
+    "copyright": {
+      "start": "© {{year}} OpenPlaylist. Закодил ",
+      "link": "DustGalaxy",
+      "end": " с ❤️ для авторов и слушателей."
+    },
+    "techStack": "Socket.IO · React · FastAPI · И много чая 🍵",
+    "description": "Интерактивная музыка для всех. Создавайте свои плейлисты, делитесь любимыми треками или заказывайте музыку на стримах любимых авторов.",
+    "navigation": "Навигация",
+    "features": "Возможности",
+    "searchPlaylists": "Поиск плейлистов",
+    "login": "Войти",
+    "register": "Создать аккаунт",
+    "highlights": {
+      "realtimeQueue": "Живая очередь треков",
+      "rulesAndBlocks": "Умная модерация и блок-листы",
+      "donationPriority": "Приоритет для платных заказов",
+      "integrations": "Синхронизация со стриминг и донат платформами"
+    }
+  },
   "errorPage": {
     "eyebrow": "Упс! Что-то сломалось",
     "title": "Произошла ошибка",
@@ -48,6 +48,22 @@
     "unknownError": "Неизвестная системная ошибка",
     "retryBtn": "Попробовать снова",
     "homeBtn": "На главную"
+  },
+  "sidebar": {
+    "Home": ""
+  },
+  "dashboard": {
+    "tooltip": {
+      "addPlaylist": "Создать плейлист",
+      "playlist": "Плейлист - {{playlistName}}"
+    },
+    "eyebrow": "Ваши плейлисты",
+    "title": "Дашборд",
+    "subtitle": "Управляйте плейлистами, очередью и воспроизведением.",
+    "empty": {
+      "title": "Плейлистов пока нет",
+      "hint": "Нажмите +, чтобы создать первый плейлист."
+    }
   },
   "playlist": {
     "stats": {
@@ -183,12 +199,30 @@
       "status": "Статус трека",
       "requester": "Кто заказал трек",
       "eject": "Показать/скрыть техническую информацию",
-      "ejectBtn": "Извлечь"
+      "ejectBtn": "Извлечь",
+      "report": {
+        "reasons": {
+          "inappropriate": "Inappropriate content",
+          "spam": "Spam",
+          "wrong_track": "Wrong track",
+          "other": "Other"
+        },
+        "success": "Report sent",
+        "error": "Failed to send report",
+        "title": "Report track",
+        "commentPlaceholder": "Comment (optional)",
+        "cancel": "Cancel",
+        "submit": "Submit"
+      },
+      "actions": {
+        "play": "Play",
+        "copyLink": "Copy link",
+        "remove": "Remove",
+        "blockRequester": "Block requester",
+        "report": "Report"
+      }
     },
     "tooltip": {
-      "prev": "Предыдущий трек",
-      "next": "Следующий трек",
-      "shuffle": "Случайная очередь",
       "status": "Статус плейлиста",
       "sync": "Синхронизация плеера",
       "share": "Поделиться ссылкой на плейлист",
@@ -196,6 +230,9 @@
       "validation": "Предпросмотр правил",
       "hideSavedTracks": "Скрыть сохранённые треки",
       "showSavedTracks": "Показать сохранённые треки",
+      "prev": "Предыдущий трек",
+      "next": "Следующий трек",
+      "shuffle": "Случайная очередь",
       "repeatMode": {
         "all": "Повторять все",
         "once": "Повторять один",
@@ -207,9 +244,6 @@
     "status": {
       "online": "Онлайн",
       "offline": "Офлайн"
-    },
-    "nowPlaying": {
-      "empty": "Сейчас ничего не играет."
     },
     "saved": {
       "title": "Сохранённые",
@@ -251,6 +285,9 @@
       "submit": "Добавить",
       "toggle": "Переключить",
       "placeholder": "Вставьте URL сюда"
+    },
+    "nowPlaying": {
+      "empty": "Сейчас ничего не играет."
     }
   },
   "auth": {
@@ -373,11 +410,11 @@
   },
   "common": {
     "or": "или",
+    "loading": "Loading notifications...",
     "cancel": "Отмена",
     "save": "Сохранить",
     "web": "Веб",
-    "general2": "Общая",
-    "general": "Общие",
+    "delete": "",
     "toast": {
       "loading": "Загрузка...",
       "saving": "Сохраняется...",
@@ -387,20 +424,33 @@
       "saveFailed": "Ошибка сохранения",
       "success": "Готово!",
       "error": "Что-то пошло не так"
-    }
+    },
+    "general": "Общие",
+    "general2": "Общая"
   },
-  "dashboard": {
-    "tooltip": {
-      "addPlaylist": "Создать плейлист",
-      "playlist": "Плейлист - {{playlistName}}"
-    },
-    "empty": {
-      "title": "Плейлистов пока нет",
-      "hint": "Нажмите +, чтобы создать первый плейлист."
-    },
-    "eyebrow": "Ваши плейлисты",
-    "title": "Дашборд",
-    "subtitle": "Управляйте плейлистами, очередью и воспроизведением."
+  "contributorsModal": {
+    "title": "Contributors",
+    "wantToHelp": "Want to help? Reach out through the feedback form."
+  },
+  "feedbackModal": {
+    "sent": "Thanks! Your message has been sent.",
+    "sendError": "Failed to send, please try again later.",
+    "bugTitle": "Report a bug",
+    "feedbackTitle": "Send feedback",
+    "bugPlaceholder": "What went wrong? Steps to reproduce help a lot.",
+    "feedbackPlaceholder": "What do you think? Ideas, complaints, praise — all welcome.",
+    "name": "Name",
+    "namePlaceholder": "Your name (optional)",
+    "contact": "Contact",
+    "contactPlaceholder": "Email or Telegram (optional)",
+    "rating": "Rating",
+    "text": "Message",
+    "submit": "Send"
+  },
+  "supportModal": {
+    "title": "Support the project",
+    "text": "Right now the best support is to tell your friends, try the app out, and leave feedback.",
+    "feedbackCta": "Leave feedback"
   },
   "landing": {
     "eyebrow": "Плейлисты для стримов и сообществ",
@@ -454,7 +504,32 @@
     }
   },
   "notifications": {
+    "feed": {
+      "title": "Notifications",
+      "empty": "No notifications yet"
+    },
     "events": {
+      "unknown": "Новое уведомление",
+      "someone": "Кто-то",
+      "tracks_added_plural_one": "добавил {{count}} треков",
+      "tracks_added_plural_few": "добавил {{count}} треков",
+      "tracks_added_plural_many": "добавил {{count}} треков",
+      "tracks_added_plural_other": "добавил {{count}} треков",
+      "in_playlist": " в плейлист",
+      "tracks_removed_plural_one": "Из плейлиста {{playlistName}} удалено {{count}} треков",
+      "tracks_removed_plural_few": "Из плейлиста {{playlistName}} удалено {{count}} треков",
+      "tracks_removed_plural_many": "Из плейлиста {{playlistName}} удалено {{count}} треков",
+      "tracks_removed_plural_other": "Из плейлиста {{playlistName}} удалено {{count}} треков",
+      "track_removed_single": "Трек",
+      "removed_from": "был удален из плейлиста",
+      "name_changed": "Плейлист переименован",
+      "visibility_changed": "Плейлист",
+      "became_public": "стал публичным",
+      "became_private": "стал приватным",
+      "playlist_activity": "Обновление плейлиста",
+      "playlist_created": "Пользователь {{username}} создал новый плейлист",
+      "playlist_deleted": "Пользователь {{username}} удалил плейлист",
+      "user_activity": "Активность аккаунта",
       "track.added": {
         "label": "Добавление треков",
         "description": "Когда в плейлист добавляются новые композиции"
@@ -496,18 +571,23 @@
         "description": "Когда пользователь удаляет свои плейлисты"
       }
     },
+    "actions": {
+      "mark_read": "Отметить прочитанным",
+      "delete": "Удалить"
+    },
     "create": {
       "title": "Оформление подписки",
       "submit_btn": "Подписаться"
     },
     "settings": {
-      "title": "Настройки уведомлений",
       "target_playlist": "Плейлист",
       "target_user": "Пользователь",
       "quick_setup": "Быстрые настройки:",
       "unmute_all": "Включить все",
-      "mute_all": "Глушить всё"
+      "mute_all": "Глушить всё",
+      "title": "Настройки уведомлений"
     },
+    "subscribed": "Subscribed!",
     "manager": {
       "confirm_unsubscribe": "Вы уверены, что хотите отписаться?",
       "error_unsubscribe": "Ошибка при отписке",
@@ -542,12 +622,13 @@
       "userUnblocked": "Пользователь разблокирован!",
       "userUnblockFailed": "Не удалось разблокировать пользователя.",
       "trackUnblocked": "Трек разблокирован!",
+      "trackUnblockFailed": "",
       "title": "Блок-листы",
       "description": "Блокировка пользователей и треков.",
       "blockUser": "Заблокировать пользователя",
+      "validationRequired": "Укажите ник/ID и платформу.",
       "userBlockedSuccess": "Пользователь заблокирован!",
       "userBlockFailed": "Не удалось заблокировать пользователя.",
-      "validationRequired": "Укажите ник/ID и платформу.",
       "selectTriggerType": "Тип идентификатора",
       "triggerUserName": "Имя пользователя",
       "triggerUserId": "ID пользователя",
@@ -559,45 +640,25 @@
       "trackYoutubeLength": "ID видео YouTube — 11 символов.",
       "trackAlreadyBlocked": "Трек уже в блок-листе.",
       "trackBlockedSuccess": "Трек заблокирован!",
+      "trackBlockFailed": "",
       "emptyTracks": "Заблокированных треков нет",
       "blockTrack": "Заблокировать трек"
     },
     "chatRoles": {
-      "removeSuccess": "Роль удалена",
-      "removeFailed": "Не удалось удалить роль",
       "selectRole": "Выберите роль",
       "addSuccess": "Роль добавлена",
       "addFailed": "Не удалось добавить роль",
+      "removeSuccess": "Роль удалена",
+      "removeFailed": "Не удалось удалить роль",
+      "title": "Роли чата",
+      "subtitle": "",
       "addRole": "Добавить роль…",
       "add": "Добавить",
       "noRoles": "Ролей пока нет",
-      "addRoleHint": "Добавьте роль, чтобы начать",
-      "title": "Роли чата"
-    },
-    "donation": {
-      "saving": "Сохранение правила…",
-      "updateSuccess": "Правило обновлено",
-      "updateFailed": "Не удалось обновить правило",
-      "deleteRuleConfirm": "Удалить это правило доната?",
-      "name": "Название",
-      "ruleName": "Название правила",
-      "slug": "Slug",
-      "ruleSlug": "rule-slug",
-      "amount": "Сумма",
-      "currency": "Валюта",
-      "priority": "Приоритет",
-      "add": "Добавить",
-      "noRules": "Правил пока нет",
-      "fillAll": "Заполните все поля",
-      "createSuccess": "Правило создано",
-      "createFailed": "Не удалось создать правило",
-      "deleteSuccess": "Правило удалено",
-      "deleteFailed": "Не удалось удалить правило",
-      "title": "Приём донатов",
-      "deleteConfirm": "Удалить это правило?",
-      "deleting": "Удаление правила…"
+      "addRoleHint": "Добавьте роль, чтобы начать"
     },
     "validation": {
+      "initFailed": "Не удалось инициализировать настройки",
       "tabtitle": "валидация",
       "notInitialized": "Раздел не инициализирован",
       "minViews": "Мин. просмотры",
@@ -607,9 +668,32 @@
       "trackCooldown": "Кулдаун трека",
       "trackCooldownDesc": "Время после которого трек может быть добавлен ещё раз.",
       "userCooldown": "Кулдаун пользователя",
-      "initFailed": "Не удалось инициализировать настройки",
       "title": "Валидация видео",
       "description": "Настройки валидации видео. Значения не могут быть отрицательными."
+    },
+    "donation": {
+      "deleteRuleConfirm": "Удалить это правило доната?",
+      "name": "Название",
+      "ruleName": "Название правила",
+      "amount": "Сумма",
+      "currency": "Валюта",
+      "priority": "Приоритет",
+      "fillAll": "Заполните все поля",
+      "createSuccess": "Правило создано",
+      "createFailed": "Не удалось создать правило",
+      "deleteSuccess": "Правило удалено",
+      "deleteFailed": "Не удалось удалить правило",
+      "title": "Приём донатов",
+      "subtitle": "",
+      "add": "Добавить",
+      "noRules": "Правил пока нет",
+      "saving": "Сохранение правила…",
+      "updateSuccess": "Правило обновлено",
+      "updateFailed": "Не удалось обновить правило",
+      "slug": "Slug",
+      "ruleSlug": "rule-slug",
+      "deleteConfirm": "Удалить это правило?",
+      "deleting": "Удаление правила…"
     },
     "details": {
       "name": "Название плейлиста",
@@ -622,13 +706,29 @@
       "descriptionTooLong": "Описание слишком длинное",
       "descriptionPlaceholder": "Введите описание плейлиста"
     },
+    "title": "Настройки плейлиста",
+    "description": "Изменения сохраняются автоматически",
+    "tabs": {
+      "basic": "Основные",
+      "platforms": "",
+      "block": "Блок-лист",
+      "delete": "Удалить",
+      "validation": "Валидация",
+      "donation": "Донаты",
+      "chatRoles": "Роли чата"
+    },
+    "delete": {
+      "title": "Удалить плейлист",
+      "button": "Удалить",
+      "deleted": "Удалено"
+    },
     "toast": {
+      "playlistDeleted": "Плейлист \"{{name}}\" удалён",
+      "visibilityUpdated": "Доступность плейлиста обновлена",
       "settingsSaved": "Настройки сохранены успешно",
       "settingsFailed": "Не удалось сохранить настройки",
       "playlistSaved": "Плейлист сохранён успешно",
       "playlistFailed": "Не удалось сохранить плейлист",
-      "playlistDeleted": "Плейлист \"{{name}}\" удалён",
-      "visibilityUpdated": "Доступность плейлиста обновлена",
       "detailsUpdated": "Данные плейлиста обновлены",
       "detailsUpdateFailed": "Не удалось обновить данные",
       "modeChanged": "Режим плейлиста изменён",
@@ -639,21 +739,6 @@
       "validationRulesFailed": "Не удалось сохранить правила",
       "validationRulesLoaded": "Загрузка настроек…",
       "validationRulesLoadFailed": "Не удалось загрузить настройки"
-    },
-    "title": "Настройки плейлиста",
-    "description": "Изменения сохраняются автоматически",
-    "tabs": {
-      "basic": "Основные",
-      "validation": "Валидация",
-      "donation": "Донаты",
-      "chatRoles": "Роли чата",
-      "block": "Блок-лист",
-      "delete": "Удалить"
-    },
-    "delete": {
-      "title": "Удалить плейлист",
-      "deleted": "Удалено",
-      "button": "Удалить"
     },
     "basic": {
       "modeTitle": "Режим плейлиста",
@@ -724,24 +809,15 @@
     "da": "Donation Alerts",
     "donatepay": "DonatePay"
   },
-  "twitch": {
-    "role": {
-      "broadcaster": "Ведущий",
-      "moderator": "Модератор",
-      "vip": "VIP",
-      "subscriber": "Подписчик",
-      "Turbo": "Turbo",
-      "artist": "Артист",
-      "follower": "Фолловер"
-    }
-  },
   "sort": {
     "mode": {
       "auto": "Авто",
       "random": "Шафл",
       "free": "Свой",
       "randomHint": "Треки воспроизводятся в случайном порядке",
-      "freeHint": "Перетаскивайте треки вручную для изменения порядка"
+      "freeHint": "Перетаскивайте треки вручную для изменения порядка",
+      "host": "",
+      "hostHint": ""
     },
     "priority": {
       "lowFirst": "Сначала с низким приоритетом",
@@ -754,9 +830,9 @@
       "title": "Сортировка по дате"
     },
     "tabs": {
+      "background": "Фон",
       "vip": "VIP",
-      "regular": "Треки",
-      "background": "Фон"
+      "regular": "Треки"
     }
   },
   "view": {
@@ -768,35 +844,7 @@
       }
     }
   },
-  "publicSearch": {
-    "title": "Найти публичный плейлист",
-    "subtitle": "По имени плейлиста, нику автора или фрагменту описания",
-    "placeholder": "Имя плейлиста, ник автора или текст в описании…",
-    "searching": "Ищем плейлисты…",
-    "notFound": "Плейлисты не найдены",
-    "notFoundHintFull": "Попробуйте другое слово или проверьте, что плейлист открыт для публичного просмотра.",
-    "noDescription": "Нет описания",
-    "openPlaylist": "Открыть плейлист",
-    "initialHintFull": "Введите запрос и нажмите «Найти», чтобы увидеть публичные плейлисты.",
-    "searchPlaceholder": "Поиск…",
-    "submit": "Найти",
-    "notFoundHint": "Попробуйте другой запрос",
-    "initialHint": "Введите запрос для поиска"
-  },
   "publicView": {
-    "sort": {
-      "host": "Как у хоста"
-    },
-    "requestsOpen": "Заявки от зрителей открыты",
-    "requestsClosed": "Внешние заявки закрыты",
-    "modeFlow": "Режим flow",
-    "modeStatic": "Режим static",
-    "noDescription": "Описание не указано.",
-    "playlistSettings": "Настройки плейлиста",
-    "addTrack": "Добавить трек",
-    "nowPlaying": "Сейчас играет",
-    "nowPlayingEmpty": "Сейчас ничего не играет",
-    "nowPlayingHint": "Трек появится здесь, когда стример запустит воспроизведение",
     "eyebrow": "Публичные плейлисты",
     "searchTitle": "Поиск и просмотр",
     "browseSubtitle": "Найдите открытый плейлист стримера и следите за очередью в реальном времени",
@@ -805,7 +853,12 @@
     "anotherPlaylist": "Другой плейлист",
     "searchPublic": "Поиск публичных плейлистов",
     "resetSearchAgain": "Сбросить и искать заново",
-    "playlist": "Плейлист",
+    "copyLink": "",
+    "subscribe": "",
+    "requestsOpen": "Заявки от зрителей открыты",
+    "requestsClosed": "Внешние заявки закрыты",
+    "modeFlow": "Режим flow",
+    "modeStatic": "Режим static",
     "queue": "Очередь треков",
     "trackCount_one": "{{count}} трек",
     "trackCount_few": "{{count}} трека",
@@ -813,6 +866,17 @@
     "trackCount_other": "{{count}} треков",
     "queueEmptyPlaylist": "В плейлисте пока нет треков",
     "queueEmptyWaiting": "Заявки появятся здесь, когда зрители отправят музыку.",
+    "sort": {
+      "host": "Как у хоста"
+    },
+    "noDescription": "Описание не указано.",
+    "playlistSettings": "Настройки плейлиста",
+    "addTrack": "Добавить трек",
+    "nowPlaying": "Сейчас играет",
+    "nowPlayingEmpty": "Сейчас ничего не играет",
+    "nowPlayingHint": "Трек появится здесь, когда стример запустит воспроизведение",
+    "sync": "",
+    "playlist": "Плейлист",
     "syncOn": "Синхронизация включена",
     "syncOff": "Синхронизация выключена",
     "desync": "Выключить",
@@ -829,6 +893,21 @@
       "searching": "Поиск трека...",
       "playlistLoadFailed": "Не удалось загрузить плейлист. Ссылка может быть недействительной или плейлист больше не является общедоступным."
     }
+  },
+  "publicSearch": {
+    "title": "Найти публичный плейлист",
+    "subtitle": "По имени плейлиста, нику автора или фрагменту описания",
+    "placeholder": "Имя плейлиста, ник автора или текст в описании…",
+    "searching": "Ищем плейлисты…",
+    "notFound": "Плейлисты не найдены",
+    "notFoundHintFull": "Попробуйте другое слово или проверьте, что плейлист открыт для публичного просмотра.",
+    "noDescription": "Нет описания",
+    "openPlaylist": "Открыть плейлист",
+    "initialHintFull": "Введите запрос и нажмите «Найти», чтобы увидеть публичные плейлисты.",
+    "searchPlaceholder": "Поиск…",
+    "submit": "Найти",
+    "notFoundHint": "Попробуйте другой запрос",
+    "initialHint": "Введите запрос для поиска"
   },
   "settings": {
     "account": {
@@ -912,6 +991,9 @@
         "urlProtocol": "URL должен начинаться с http:// или https://",
         "urlInvalid": "Введите корректный URL"
       },
+      "saving": "",
+      "saved": "",
+      "saveFailed": "",
       "duplicatePlatform": "{{platform}} уже добавлена",
       "adding": "Добавление…",
       "linkAddedSuccess": "Ссылка успешно добавлена",
@@ -930,6 +1012,12 @@
       },
       "overview": "Обзор профиля",
       "noEmail": "Email не указан",
+      "editProfile": "",
+      "bio": "",
+      "bioPlaceholder": "",
+      "isPublic": "",
+      "isPublicHint": "",
+      "save": "",
       "removePlatform": "Удалить {{platform}}",
       "deletePlatformAria": "Удалить ссылку {{platform}}",
       "noSocialLinksYet": "Ссылки на соцсети ещё не добавлены",
@@ -1019,6 +1107,17 @@
     "register": {
       "title": "Регистрация — OpenPlaylist",
       "description": "Создайте аккаунт OpenPlaylist"
+    }
+  },
+  "twitch": {
+    "role": {
+      "broadcaster": "Ведущий",
+      "moderator": "Модератор",
+      "vip": "VIP",
+      "subscriber": "Подписчик",
+      "Turbo": "Turbo",
+      "artist": "Артист",
+      "follower": "Фолловер"
     }
   },
   "oauth": {

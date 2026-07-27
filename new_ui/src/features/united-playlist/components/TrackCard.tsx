@@ -1,25 +1,31 @@
 // src/features/playlist/components/TrackCard.tsx
 import { ArrowUpRight, Calendar, Crown, Layers } from 'lucide-react'
-import type { Track } from '@/types/playlist'
-import type { TrackCardAction } from '../lib/trackActions'
-import { cn, formatTime } from '@/lib/utils'
-import Btn from '@/components/ui/my-btn'
+
 import { useTranslation } from 'react-i18next'
+import TrackActions from './trackParts/TrackActions'
+import { useTrackActions } from './trackParts/useTrackActions'
+import WarningModal from './modals/warningModal'
+import ReportModal from './modals/ReportModal'
+import type { Track } from '@/types/playlist'
+import { cn } from '@/lib/utils'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 export default function TrackCard({
   track,
   group,
-  actions,
   isDragging,
   isNowPlaying,
 }: {
   track: Track
   group?: 'vip' | 'regular' | 'background'
-  actions: Array<TrackCardAction>
   isDragging?: boolean
   isNowPlaying?: boolean
 }) {
-  const { t, i18n } = useTranslation()
+  const { t, i18n } = useFeatureTranslation()
+  const { primary, secondary, play, openModal, closeModal } = useTrackActions(
+    track,
+    group,
+  )
   const formattedDate = track.created_at
     ? new Date(track.created_at).toLocaleDateString(i18n.language, {
         day: 'numeric',
@@ -51,9 +57,7 @@ export default function TrackCard({
           src={`https://img.youtube.com/vi/${track.yt_video_id}/mqdefault.jpg`}
           alt=""
           className="h-10 aspect-video rounded-xs object-cover shrink-0 cursor-pointer"
-          onClick={() =>
-            actions.filter((a) => a.key === 'play')[0].onClick?.(track)
-          }
+          onClick={play}
         />
         <div
           title={t('playlist.track.duration')}
@@ -73,9 +77,7 @@ export default function TrackCard({
           )}
           <span
             className="truncate text-sm text-text-main cursor-pointer"
-            onClick={() =>
-              actions.filter((a) => a.key === 'play')[0].onClick(track)
-            }
+            onClick={play}
           >
             {track.title}
           </span>
@@ -110,24 +112,13 @@ export default function TrackCard({
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-1 shrink-0">
-          {actions.map((action) => {
-            if (action.component) {
-              return action.component(track)
-            }
-
-            const Icon = action.icon!
-            return (
-              <Btn
-                key={action.key}
-                onClick={() => action.onClick?.(track)}
-                className="px-1 bg-level-2 rounded-sm size-7"
-              >
-                <Icon className="size-4" />
-              </Btn>
-            )
-          })}
-        </div>
+        <TrackActions primary={primary} secondary={secondary} />
+        {openModal === 'block' && (
+          <WarningModal track={track} open onOpenChange={closeModal} />
+        )}
+        {openModal === 'report' && (
+          <ReportModal track={track} open onOpenChange={closeModal} />
+        )}
       </div>
     </div>
   )

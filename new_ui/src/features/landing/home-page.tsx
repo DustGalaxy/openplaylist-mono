@@ -11,7 +11,7 @@ import {
   Zap,
 } from 'lucide-react'
 import Btn from '@/components/ui/my-btn'
-import SearchPlaylist from '@/features/public-playlist/components/search-playlist'
+import SearchPlaylist from '@/features/united-playlist/components/search-playlist'
 import { gradientTextClass, panelClass } from '@/features/landing/styles'
 import { useAuthStore } from '@/stores/authStore'
 

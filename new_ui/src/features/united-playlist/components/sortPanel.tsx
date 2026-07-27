@@ -28,6 +28,7 @@ import {
   filterTabInactiveClass,
 } from '@/features/landing/styles'
 import { cn } from '@/lib/utils'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 type SortDirection = 'none' | 'asc' | 'desc'
 type QueueGroup = 'vip' | 'regular'
@@ -64,7 +65,7 @@ function OrderModeToggle({
   onChange: (m: OrderMode) => void
   showHost?: boolean
 }) {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const modes: Array<{
     key: OrderMode
     label: string
@@ -108,7 +109,7 @@ function SortButtons({
   sortSettings: SortSettings
   onChange: (next: Partial<SortSettings>) => void
 }) {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
 
   if (sortSettings.order_mode === 'host') {
     return (
@@ -188,7 +189,7 @@ function SortButtons({
 }
 
 export default function SortPanel() {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const { slot, role, playlistId } = usePlaylistView()
   const { playlist } = usePlaylistViewLoaded()
   const setSort = usePlaylistStore((s) => s.setSort)

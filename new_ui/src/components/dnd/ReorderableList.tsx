@@ -3,23 +3,21 @@ import React, { useRef, useState } from 'react'
 import {
   DndContext,
   DragOverlay,
-  closestCenter,
-  PointerSensor,
   KeyboardSensor,
   MeasuringStrategy,
+  PointerSensor,
+  closestCenter,
   useSensor,
   useSensors,
-  type DragStartEvent,
-  type DragEndEvent,
-  type Modifier,
 } from '@dnd-kit/core'
 import {
   SortableContext,
-  verticalListSortingStrategy,
   arrayMove,
   sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import type { DragEndEvent, DragStartEvent, Modifier } from '@dnd-kit/core'
 
 /**
  * Клэмпит перетаскиваемый элемент по вертикали строго в пределах границ

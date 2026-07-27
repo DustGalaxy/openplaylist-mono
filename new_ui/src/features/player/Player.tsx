@@ -109,8 +109,10 @@ export default function Player({
     if (isReadyRef.current || !feed.nowPlayingTrack || !playerRef.current)
       return
     isReadyRef.current = true
-    if (feed.seekSignal)
+    if (feed.seekSignal && feed.seekSignal.token !== lastSeekTokenRef.current) {
+      lastSeekTokenRef.current = feed.seekSignal.token
       playerRef.current.currentTime = feed.seekSignal.position
+    }
   }
 
   const handlePause = () => {

@@ -1,0 +1,26 @@
+{
+  "contributorsModal": {
+    "title": "Contributors",
+    "wantToHelp": "Want to help? Reach out through the feedback form."
+  },
+  "feedbackModal": {
+    "sent": "Thanks! Your message has been sent.",
+    "sendError": "Failed to send, please try again later.",
+    "bugTitle": "Report a bug",
+    "feedbackTitle": "Send feedback",
+    "bugPlaceholder": "What went wrong? Steps to reproduce help a lot.",
+    "feedbackPlaceholder": "What do you think? Ideas, complaints, praise — all welcome.",
+    "name": "Name",
+    "namePlaceholder": "Your name (optional)",
+    "contact": "Contact",
+    "contactPlaceholder": "Email or Telegram (optional)",
+    "rating": "Rating",
+    "text": "Message",
+    "submit": "Send"
+  },
+  "supportModal": {
+    "title": "Support the project",
+    "text": "Right now the best support is to tell your friends, try the app out, and leave feedback.",
+    "feedbackCta": "Leave feedback"
+  }
+}

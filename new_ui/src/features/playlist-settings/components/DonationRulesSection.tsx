@@ -12,13 +12,14 @@ import Btn from '@/components/ui/my-btn'
 import { CurrencySelect } from '@/components/ui/currency-selector'
 import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context'
 import { usePlaylistStore } from '@/stores/playlistStore'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 export default function DonationRulesSection({
   platform,
 }: {
   platform: DonationPlatform
 }) {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const { playlist } = usePlaylistViewLoaded()
   const { addDonationRule, updateDonationRule, removeDonationRule } =
     usePlaylistStore()

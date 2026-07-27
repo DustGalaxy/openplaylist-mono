@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { usePlaylistView } from '../context/playlist-view-context'
 import type { ChangeEvent, FormEvent, ReactNode } from 'react'
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
@@ -13,7 +14,7 @@ import {
 import { cn } from '@/lib/utils'
 import { usePlaylistStore } from '@/stores/playlistStore'
 import UpDownBtn from '@/components/ui/funny-btn'
-import { usePlaylistView } from '../context/playlist-view-context'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 type InputMode = 'add' | 'search'
 
@@ -50,7 +51,7 @@ export function PlaylistQueueInput({
 }: {
   onSearchQueryChange?: (query?: string) => void
 }) {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
 
   const [mode, setMode] = useState<InputMode>('add')
   const [value, setValue] = useState('')

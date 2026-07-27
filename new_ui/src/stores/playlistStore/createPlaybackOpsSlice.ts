@@ -61,7 +61,6 @@ export const createPlaybackOpsSlice: StateCreator<
     if (consumedPausedRegular)
       get().updateLocal(playlistId, { paused_regular: null })
     if (nextTrackId) get().playTrack(nextTrackId, resumePositionSeconds ?? 0)
-    console.log('playNext nextTrackId = ', nextTrackId)
 
     return !!nextTrackId
   },

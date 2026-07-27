@@ -22,7 +22,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   onDelete,
   children,
 }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation('notifications')
 
   return (
     <div

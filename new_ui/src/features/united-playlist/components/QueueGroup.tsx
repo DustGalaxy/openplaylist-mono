@@ -1,7 +1,4 @@
-import { useTranslation } from 'react-i18next'
 import { usePlaylistView } from '../context/playlist-view-context'
-import { useTrackActionsContext } from '../hooks/useTrackActionsContext'
-import { resolveTrackActions } from '../lib/trackActions'
 import TrackCard from './TrackCard'
 import type { FeedTrack, SortSettings } from '@/types/playlist'
 import { usePlaylistStore } from '@/stores/playlistStore'
@@ -20,7 +17,7 @@ export default function QueueGroup({
 }: {
   reorderKey: 'vip' | 'regular' | 'background' | 'main'
   items: Array<FeedTrack>
-  sortSettings: SortSettings
+  sortSettings?: SortSettings
   showDivider?: boolean
   dividerLabel?: string
   isNowPlaying: (trackId: string) => boolean
@@ -33,13 +30,12 @@ export default function QueueGroup({
     reorderLocalTrack,
     reorderLocalStepTrack,
   } = usePlaylistStore()
-  const baseCtx = useTrackActionsContext()
 
   if (items.length === 0) return null
 
   const isOwnerLike = role === 'owner' || role === 'operator'
   const isActive =
-    sortSettings.order_mode === 'free' ||
+    (sortSettings && sortSettings.order_mode === 'free') ||
     (isOwnerLike && reorderKey === 'background')
 
   const onReorder = (ids: Array<string>) => {
@@ -59,7 +55,6 @@ export default function QueueGroup({
     else reorderLocalStepTrack(slot, trackId, dir)
   }
 
-  const actions = resolveTrackActions(role, baseCtx)
   const tracks = items.map((i) => i.track)
 
   return (
@@ -94,7 +89,6 @@ export default function QueueGroup({
                 <TrackCard
                   track={track}
                   group={feedItem.group}
-                  actions={actions}
                   isDragging={isDragging}
                   isNowPlaying={isNowPlaying(track.id)}
                 />

@@ -17,6 +17,7 @@ import {
 import Btn from '@/components/ui/my-btn'
 import { updateBotSettings } from '@/api/api-user'
 import { getBotSettingsConfig } from '@/features/user-settings/botSettings/registry'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 interface BotSettingsModalProps {
   integration: Integration
@@ -31,7 +32,7 @@ export function BotSettingsModal({
   platformIcon,
   onSaved,
 }: BotSettingsModalProps) {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const config = getBotSettingsConfig(integration.platform)
   const [values, setValues] = useState<Record<string, unknown>>(
     integration.bot_settings ?? {},

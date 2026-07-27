@@ -8,7 +8,7 @@ interface VariantProps {
 }
 
 export const UserVariant: React.FC<VariantProps> = ({ eventType, data }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation('notifications')
 
   switch (eventType) {
     case 'playlist.create':

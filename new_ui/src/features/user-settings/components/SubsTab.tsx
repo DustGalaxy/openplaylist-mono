@@ -23,7 +23,7 @@ import {
 } from '@/api/api-user'
 
 export const SubsTab: React.FC = () => {
-  const { t } = useTranslation()
+  const { t } = useTranslation('notifications')
   const [subscriptions, setSubscriptions] = useState<Array<SubscriptionItem>>(
     [],
   )

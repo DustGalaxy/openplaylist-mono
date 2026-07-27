@@ -1,0 +1,53 @@
+{
+  "landing": {
+    "eyebrow": "Playlists for streams and communities",
+    "title": "OPEN PLAYLIST",
+    "heroBody": "<0>OpenPlaylist</0> is a shared queue, not a personal playlist. Viewers suggest music, filters validate requests, and you manage the stream in one click.",
+    "goToPlaylists": "To Playlists",
+    "loginAndStart": "Log In & Start",
+    "findPlaylist": "Find Playlist",
+    "audienceTitle": "Who is it for?",
+    "audienceSubtitle": "Streamers · Viewers · Music Lovers",
+    "featuresTitle": "Features",
+    "featuresSubtitle": "From viewer request to playback — everything is connected via settings, real-time updates, and an intuitive dashboard.",
+    "howItWorksTitle": "How it works",
+    "audienceBullets": {
+      "sharedQueue": "Shared queue with priorities and donations",
+      "validation": "YouTube track validation based on your settings",
+      "publicPrivate": "Public and private playlists",
+      "sync": "Real-time dashboard and viewer page sync"
+    },
+    "features": {
+      "liveQueue": {
+        "title": "Live Queue",
+        "description": "Viewer requests instantly hit the playlist. All connected users see updates in real time."
+      },
+      "smartRules": {
+        "title": "Smart Rules",
+        "description": "Set limits for duration, views, cooldowns, and blocklists — you decide what goes on stream."
+      },
+      "donations": {
+        "title": "Donations & Priority",
+        "description": "Set priorities for donations and Twitch chat roles — the queue adapts to your audience's input."
+      },
+      "publicAccess": {
+        "title": "Public Access",
+        "description": "Public playlists can be found by name or creator. Viewers submit tracks instantly."
+      }
+    },
+    "steps": {
+      "create": {
+        "title": "Create Playlist",
+        "text": "Log in via Twitch or email, configure flow/static mode, and set content rules."
+      },
+      "share": {
+        "title": "Share Access",
+        "text": "Share the playlist link so viewers can search and submit tracks, or connect a profile bot."
+      },
+      "stream": {
+        "title": "Go Live",
+        "text": "Manage playback directly from your dashboard: play, skip, reorder, and view logs."
+      }
+    }
+  }
+}

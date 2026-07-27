@@ -7,12 +7,13 @@ import { Label } from '@/components/ui/label'
 import { DialogDescription } from '@/components/ui/dialog'
 import { usePlaylistStore } from '@/stores/playlistStore'
 import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 const MAX_NAME_LENGTH = 100
 const MAX_DESCRIPTION_LENGTH = 500
 
 export default function PlaylistDetailsForm() {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const { playlist } = usePlaylistViewLoaded()
   const { patchNow, patchDebounced } = usePlaylistStore()
   const [name, setName] = React.useState(playlist.name)

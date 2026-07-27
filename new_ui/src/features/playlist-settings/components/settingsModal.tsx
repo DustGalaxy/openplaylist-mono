@@ -18,9 +18,21 @@ import {
 } from '@/components/ui/dialog'
 import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context.tsx'
 import { useUserPlaylistRecordsStore } from '@/stores/userPlaylistInfoStore.ts'
+import {
+  FeatureI18nProvider,
+  useFeatureTranslation,
+} from '@/lib/i18n/featureTranslation.tsx'
 
 export default function SettingsModal() {
-  const { t } = useTranslation()
+  return (
+    <FeatureI18nProvider ns="playlistSettings">
+      <SettingsModalInner />
+    </FeatureI18nProvider>
+  )
+}
+
+export function SettingsModalInner() {
+  const { t } = useFeatureTranslation()
   const { playlist } = usePlaylistViewLoaded()
   const [countToDelete, setCountToDelete] = React.useState(3)
   const [deleteTimeout, setDeleteTimeout] = React.useState(false)

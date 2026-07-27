@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import UpDownBtn from '@/components/ui/funny-btn'
 import { Input } from '@/components/ui/input'
 import { CurrencySelect } from '@/components/ui/currency-selector'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 interface DonationItemProps {
   rule: ReadDonationRules
@@ -13,7 +14,7 @@ interface DonationItemProps {
 }
 
 const DonationItem = ({ rule, onUpdate, onDelete }: DonationItemProps) => {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
   const priorityInputRef = useRef<HTMLInputElement>(null)
 

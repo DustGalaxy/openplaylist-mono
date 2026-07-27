@@ -19,7 +19,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { usePlaylistView } from '../context/playlist-view-context'
 import type { PlaylistLog } from '@/types/playlistLog'
 import { getPlsUpdsSocket } from '@/api/io-sockets'
-import { usePlaylist } from '@/features/playlist/context/playlist-context'
+
 import { TimeAgo } from '@/components/ui/TimeAgo'
 import Warning from '@/components/icons/icon-warning'
 import {
@@ -34,6 +34,7 @@ import {
 import { EventType } from '@/types/playlistLog'
 
 import { fetchPlaylistLogs } from '@/api/api-playlist'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 // Функция для получения иконки и цвета в зависимости от типа события
 function getEventMeta(type: EventType) {
@@ -57,7 +58,7 @@ function LogModal({
   data: PlaylistLog
   children: React.ReactNode
 }) {
-  const { t, i18n } = useTranslation()
+  const { t, i18n } = useFeatureTranslation()
   const { icon: EventIcon, color: eventColor } = getEventMeta(data.event_type)
 
   const { playlist } = usePlaylistView()
@@ -176,7 +177,7 @@ function LogModal({
 }
 
 export default function LogPanel() {
-  const { t, i18n } = useTranslation()
+  const { t, i18n } = useFeatureTranslation()
   const { playlistId: Pid } = usePlaylistView()
   const queryClient = useQueryClient()
   const scrollContainerRef = React.useRef<HTMLDivElement>(null)

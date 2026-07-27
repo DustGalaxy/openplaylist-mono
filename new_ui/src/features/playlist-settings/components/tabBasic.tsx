@@ -31,9 +31,10 @@ import {
 import { cn } from '@/lib/utils'
 import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context'
 import { usePlaylistStore } from '@/stores/playlistStore'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 const TabBasic = () => {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const { playlist } = usePlaylistViewLoaded()
   const { patchNow, patchDebounced } = usePlaylistStore()
   const [plstMode, setPlstMode] = React.useState(playlist.mode)

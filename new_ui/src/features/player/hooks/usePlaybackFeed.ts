@@ -131,31 +131,43 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     }
   }, [local?.syncSeek, local?.syncPause, role])
 
-  // ponytail: single source of truth is store.getState(), read fresh on every tick/unmount —
-  // nothing closed over, so no dependency array can ever go stale
-  useEffect(() => {
-    if (!playbackStore || !playlistId || !currentTrackId) return
-    const activeTrackId = currentTrackId
-    const savePosition = () => {
-      playbackStore
-        .save(playlistId, {
-          track_id: activeTrackId,
-          position: positionGetterRef.current(),
-          updated_at: new Date().toISOString(),
-        })
-        .catch(() => {})
-    }
+  const activeTrackIdRef = useRef(currentTrackId)
+  activeTrackIdRef.current = currentTrackId
 
-    const heartbeat = window.setInterval(() => {
-      if (playingRef.current) savePosition()
-    }, 10000)
-    window.addEventListener('beforeunload', savePosition)
+  const savePositionNow = (trackId: string | undefined, position: number) => {
+    if (!playbackStore || !playlistId || !trackId) return
+    console.log('savePositionNow = ', playlistId, {
+      track_id: trackId,
+      position,
+      updated_at: new Date().toISOString(),
+    })
+
+    playbackStore
+      .save(playlistId, {
+        track_id: trackId,
+        position,
+        updated_at: new Date().toISOString(),
+      })
+      .catch(() => {})
+  }
+
+  useEffect(() => {
+    if (!playbackStore || !playlistId) return
+    const tick = () => {
+      console.log('playingRef.current = ', playingRef.current)
+
+      if (playingRef.current) {
+        savePositionNow(activeTrackIdRef.current, positionGetterRef.current())
+      }
+    }
+    const heartbeat = window.setInterval(tick, 10000)
+    window.addEventListener('beforeunload', tick)
     return () => {
       window.clearInterval(heartbeat)
-      window.removeEventListener('beforeunload', savePosition)
-      savePosition()
+      window.removeEventListener('beforeunload', tick)
+      tick()
     }
-  }, [playbackStore, playlistId, slot, currentTrackId])
+  }, [playbackStore, playlistId])
 
   useEffect(() => {
     const pending = local?.pendingInterrupt
@@ -185,14 +197,16 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
   useEffect(() => {
     if (!shouldBroadcast || !nowPlayingTrack || !playlist) return
     const interval = window.setInterval(() => {
-      postPositionState(playlist.id, positionGetterRef.current()).catch(
-        () => {},
-      )
+      if (playingRef.current)
+        postPositionState(playlist.id, positionGetterRef.current()).catch(
+          () => {},
+        )
     }, 5000)
     return () => window.clearInterval(interval)
   }, [shouldBroadcast, nowPlayingTrack?.id, playlist?.id])
 
   const onEnded = () => {
+    savePositionNow(currentTrackId, positionGetterRef.current())
     if (local?.repeatMode !== 'once') {
       if (!playNext('listened')) {
         clearActivePlayback()
@@ -260,6 +274,7 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     },
     setRepeatMode,
     next: () => {
+      savePositionNow(currentTrackId, positionGetterRef.current())
       if (!playNext('skipped')) {
         clearActivePlayback()
         setPlaying(false)
@@ -270,6 +285,7 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
       return true
     },
     prev: () => {
+      savePositionNow(currentTrackId, positionGetterRef.current())
       seek(0)
       playPrev()
     },

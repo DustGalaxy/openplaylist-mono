@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import SearchPlaylist from '@/features/public-playlist/components/search-playlist'
+import SearchPlaylist from '@/features/united-playlist/components/search-playlist'
 
 export const Route = createFileRoute('/playlists/')({
   component: RouteComponent,

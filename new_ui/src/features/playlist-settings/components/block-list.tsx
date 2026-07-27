@@ -7,6 +7,7 @@ import Btn from '@/components/ui/my-btn'
 import socialIcons from '@/lib/constants/social_names'
 import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context'
 import { usePlaylistStore } from '@/stores/playlistStore'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 const BLOCK_ITEM_ROW =
   'flex items-center gap-2 justify-between border-1 rounded-(--rounded-std) border-level-3 bg-level-1/40 px-2 h-14 min-h-14'
@@ -23,7 +24,7 @@ const UserBlockItem = ({
   item: ReadBlockList
   unBlockCallback: (item: ReadBlockList) => Promise<void>
 }) => {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const socialMeta =
     item.platform && item.platform in socialIcons
       ? socialIcons[item.platform as keyof typeof socialIcons]

@@ -1,0 +1,319 @@
+{
+  "playlist": {
+    "stats": {
+      "mode": "Mode",
+      "minViews": "Min views",
+      "minLikes": "Min likes",
+      "maxDuration": "Max duration",
+      "durationSec_one": "{{count}} sec",
+      "durationSec_other": "{{count}} secs",
+      "trackCd": "Track CD",
+      "cooldownMin_one": "{{count}}m",
+      "cooldownMin_other": "{{count}}m",
+      "userCd": "User CD",
+      "maxSize": "Max size",
+      "maxSizeUnlimited": "∞",
+      "priorityMode": "Priority mode",
+      "durationSec": "{{count}} sec",
+      "cooldownMin": "{{count}}m"
+    },
+    "toast": {
+      "requestAdded": "Track added to queue",
+      "requestAddedFailed": "Failed to add track",
+      "created": "Playlist \"{{name}}\" created successfully",
+      "linkCopied": "Playlist link copied to clipboard!",
+      "deleted": "Playlist deleted",
+      "deleteFailed": "Failed to delete playlist",
+      "updated": "Playlist updated",
+      "updateFailed": "Failed to update playlist",
+      "requestRemoved": "Track removed from queue",
+      "requestRemoveFailed": "Failed to remove track",
+      "playNowSet": "Track set to play next",
+      "playNowFailed": "Failed to set track",
+      "visibilityUpdated": "Playlist visibility updated",
+      "modeUpdated": "Playlist mode updated",
+      "activeUpdated": "Playlist requests updated"
+    },
+    "queue": {
+      "placeholder": {
+        "add": "Paste YouTube URL...",
+        "searchRequester": "Search queue by title or requester...",
+        "search": "Search queue by title..."
+      },
+      "mode": {
+        "add": "Add track",
+        "search": "Search queue"
+      },
+      "submit": "Add",
+      "noMatch": "No tracks match your search.",
+      "empty": "No tracks available."
+    },
+    "log": {
+      "modal": {
+        "title": "Log for {{name}}",
+        "created_at": "Timestamp",
+        "event_type": "Event Type",
+        "platform": "Platform",
+        "initiated_by": "Initiated By",
+        "owner": "Owner",
+        "guest": "Guest",
+        "payload": "Event Data (JSON)",
+        "close": "Close",
+        "id": "Log ID"
+      },
+      "types": {
+        "add_track_error": "Add Track Error",
+        "error": "System Error",
+        "add_track": "Add Track",
+        "play_track": "Play Track",
+        "remove_track": "Remove Track",
+        "listen_track": "Listen Track",
+        "skip_track": "Skip Track",
+        "report_track": "Report Track"
+      },
+      "errors": {
+        "unknown": "Неизвестная ошибка",
+        "Playlist is not active": "Playlist is not active",
+        "Wrong donation amount": "Wrong donation amount",
+        "Wrong donation currency": "Wrong donation currency",
+        "Blacklisted user": "Blacklisted user",
+        "Blacklisted track": "Blacklisted track",
+        "Not enough views": "Not enough views",
+        "Not enough likes": "Not enough likes",
+        "Too long": "Track is too long",
+        "Playlist is full": "Playlist is full",
+        "Track cooldown": "Track cooldown",
+        "User cooldown": "User cooldown"
+      },
+      "add_track": "Added track '{{title}}'",
+      "add_track_error": "Failed to add track '{{title}}' by reason: {{error}}",
+      "play_track": "Played track '{{title}}'",
+      "no_track": "No track played",
+      "remove_track": "Removed track '{{title}}'",
+      "listen_track": "Listened to track '{{title}}'",
+      "skip_track": "Skipped track '{{title}}'",
+      "report_track": "Reported track '{{title}}'",
+      "title": "Log"
+    },
+    "create": {
+      "submitting": "Creating...",
+      "success": "Playlist created successfully! You can start adding tracks or configure rules.",
+      "failed": "Failed to create playlist",
+      "title": "New playlist",
+      "description": "Form to create a new playlist",
+      "nameLabel": "Playlist name",
+      "nameHint": "Must be unique for your account",
+      "namePlaceholder": "Type name...",
+      "descriptionLabel": "Playlist description",
+      "descriptionPlaceholder": "Type description...",
+      "showInWidget": "Show playlist activity in widget?",
+      "showInWidgetHint": "Widget for OBS and show last played track",
+      "submit": "Create"
+    },
+    "trackCount_one": "{{count}} track",
+    "trackCount_other": "{{count}} tracks",
+    "track": {
+      "copy": "Copy YouTube link",
+      "save": "Save track",
+      "play": "Play next",
+      "remove": "Remove from queue",
+      "add": "Add to playlist",
+      "duration": "Duration",
+      "date": "Date added - {{date}}",
+      "priority": "Track priority",
+      "unsave": "Remove from saved",
+      "source": "Request source",
+      "video_id": "YouTube Video ID (Open original)",
+      "status": "Track status",
+      "requester": "Requested by",
+      "eject": "Show/hide technical details",
+      "ejectBtn": "Eject",
+      "report": {
+        "reasons": {
+          "inappropriate": "Inappropriate content",
+          "spam": "Spam",
+          "wrong_track": "Wrong track",
+          "other": "Other"
+        },
+        "success": "Report sent",
+        "error": "Failed to send report",
+        "title": "Report track",
+        "commentPlaceholder": "Comment (optional)",
+        "cancel": "Cancel",
+        "submit": "Submit"
+      },
+      "actions": {
+        "play": "Play",
+        "copyLink": "Copy link",
+        "remove": "Remove",
+        "blockRequester": "Block requester",
+        "report": "Report"
+      }
+    },
+    "tooltip": {
+      "status": "Playlist status",
+      "sync": "Player sync",
+      "share": "Share playlist link",
+      "logs": "Playlist action logs",
+      "validation": "Validation preview",
+      "hideSavedTracks": "Hide saved tracks",
+      "showSavedTracks": "Show saved tracks",
+      "prev": "Previous track",
+      "next": "Next track",
+      "shuffle": "Shuffle",
+      "repeatMode": {
+        "all": "Repeat all",
+        "once": "Repeat one",
+        "none": "Repeat off"
+      },
+      "pause": "Pause",
+      "play": "Play"
+    },
+    "status": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "saved": {
+      "title": "Saved",
+      "empty": "No saved tracks"
+    },
+    "report": {
+      "error": {
+        "invalidYoutubeId": "Invalid YouTube video ID.",
+        "blockFailed": "Failed to block user.",
+        "validation": "Add a reason or choose to block the user and/or track.",
+        "processFailed": "Something went wrong while processing the report.",
+        "invalidId": "Invalid ID",
+        "generic": "Failed to submit report"
+      },
+      "success": {
+        "userBlocked": "user blocked",
+        "trackBlocked": "track blocked",
+        "tracksRemoved_one": "{{count}} track removed",
+        "tracksRemoved_other": "{{count}} tracks removed",
+        "reportSubmitted": "report submitted",
+        "recorded": "Report recorded.",
+        "tracksRemoved": "{{count}} track removed"
+      },
+      "title": "Report",
+      "description": "Report a track or requester and optionally add them to your block lists.",
+      "reason": "Reason",
+      "reasonPlaceholder": "Describe the reason...",
+      "blockUserLabel": "Block user: {{nickname}} ({{platform}})",
+      "blockTrackLabel": "Block track: {{id}}",
+      "submitting": "Submitting...",
+      "submit": "Submit report",
+      "cancel": "Cancel",
+      "blockUser": "Block user",
+      "blockTrack": "Block track"
+    },
+    "addbar": {
+      "submit": "Add Track",
+      "toggle": "Toggle Add Track",
+      "placeholder": "Place url here"
+    },
+    "nowPlaying": {
+      "empty": "No track is currently playing."
+    }
+  },
+  "sort": {
+    "mode": {
+      "auto": "Auto",
+      "random": "Random",
+      "free": "Free",
+      "randomHint": "Tracks are shuffled randomly",
+      "freeHint": "Drag tracks to reorder manually",
+      "host": "",
+      "hostHint": ""
+    },
+    "priority": {
+      "lowFirst": "Low priority first",
+      "highFirst": "High priority first",
+      "title": "Priority sorting"
+    },
+    "date": {
+      "olderFirst": "Older first",
+      "newerFirst": "Newer first",
+      "title": "Date sorting"
+    },
+    "tabs": {
+      "background": "Back",
+      "vip": "VIP",
+      "regular": "Tracks"
+    }
+  },
+  "view": {
+    "track": {
+      "dd": {
+        "label": "Quick copy",
+        "noplaylists": "No playlists available",
+        "add": "Add"
+      }
+    }
+  },
+  "publicView": {
+    "eyebrow": "Public playlists",
+    "searchTitle": "Search and browse",
+    "browseSubtitle": "Find a streamer's public playlist and follow the queue in real time",
+    "notFoundUnavailable": "Playlist not found or unavailable",
+    "notFoundCheckLink": "Check the link or find another playlist below.",
+    "anotherPlaylist": "Another playlist",
+    "searchPublic": "Search public playlists",
+    "resetSearchAgain": "Reset and search again",
+    "copyLink": "",
+    "subscribe": "",
+    "requestsOpen": "Viewer requests are open",
+    "requestsClosed": "External requests are closed",
+    "modeFlow": "Flow mode",
+    "modeStatic": "Static mode",
+    "queue": "Track queue",
+    "trackCount_one": "{{count}} track",
+    "trackCount_other": "{{count}} tracks",
+    "queueEmptyPlaylist": "No tracks in the playlist yet",
+    "queueEmptyWaiting": "Requests will appear here when viewers submit music.",
+    "sort": {
+      "host": "Host like"
+    },
+    "noDescription": "No description provided.",
+    "playlistSettings": "Playlist settings",
+    "addTrack": "Add track",
+    "nowPlaying": "Now playing",
+    "nowPlayingEmpty": "Nothing playing right now",
+    "nowPlayingHint": "A track will appear here when the streamer starts playback",
+    "sync": "",
+    "playlist": "Playlist",
+    "syncOn": "Sync On",
+    "syncOff": "Sync Off",
+    "desync": "Desync",
+    "syncBtn": "Sync",
+    "searchSubtitle": "Find a playlist and submit a track to the queue",
+    "notFound": "Playlist not found",
+    "resetSearch": "Reset search",
+    "queueEmpty": "Queue is empty",
+    "queueEmptyHint": "Be the first — add a track!",
+    "desyncBtn": "Desync",
+    "toast": {
+      "trackAdded": "Your track has been added to the queue!",
+      "trackAddFailed": "Failed to add track. Try again or check the playlist rules.",
+      "trackRateLimited": "You're submitting too many tracks. Please wait a moment.",
+      "searching": "Searching for track...",
+      "playlistLoadFailed": "Failed to load playlist. The link may be invalid or the playlist is no longer public."
+    }
+  },
+  "publicSearch": {
+    "title": "Find a public playlist",
+    "subtitle": "By playlist name, author nickname, or description",
+    "placeholder": "Playlist name, author, or description text...",
+    "searching": "Searching playlists...",
+    "notFound": "No playlists found",
+    "notFoundHintFull": "Try another term or check that the playlist is open for public viewing.",
+    "noDescription": "No description",
+    "openPlaylist": "Open playlist",
+    "initialHintFull": "Enter a query and press Search to see public playlists.",
+    "searchPlaceholder": "Search…",
+    "submit": "Search",
+    "searchFailed": "Search failed. Please try again.",
+    "notFoundHint": "Try a different query",
+    "initialHint": "Enter a search query"
+  }
+}

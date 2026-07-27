@@ -8,8 +8,9 @@ import {
   ThumbsUp,
   User,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import InfoCard from './info-card'
-import useTranslation from 'i18next'
+
 import { cn } from '@/lib/utils'
 
 interface ContentSettings {
@@ -39,7 +40,7 @@ export const InfoCardGroup = ({
   priorityMode,
   className,
 }: ContentSettings) => {
-  const { t } = useTranslation
+  const { t } = useTranslation('playlist')
   return (
     <div
       className={cn(

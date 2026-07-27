@@ -10,13 +10,14 @@ import UpDownBtn from '@/components/ui/funny-btn'
 import Btn from '@/components/ui/my-btn'
 import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context'
 import { usePlaylistStore } from '@/stores/playlistStore'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 export default function ContentSettingsSection({
   platform,
 }: {
   platform: Platform
 }) {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const { playlist } = usePlaylistViewLoaded()
   const { initContentSettings, updateContentSettings } = usePlaylistStore()
   const controlsRef = React.useRef<Record<string, HTMLInputElement | null>>({})

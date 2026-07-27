@@ -28,7 +28,9 @@ const buttonStyle =
 const DDNotificationList = () => {
   const [notifications, setNotifications] = React.useState<Array<any>>([])
   const navigate = useNavigate()
-  const { t } = useTranslation()
+
+  const { t } = useTranslation('notifications')
+  const { t: tc } = useTranslation()
 
   const { data: notificationsCount, isLoading } = useQuery({
     queryKey: ['notificationsCount'],
@@ -41,7 +43,7 @@ const DDNotificationList = () => {
   const [hideRead, setHideRead] = React.useState(false)
 
   if (isLoading) {
-    return <div>{t('common.loading', 'Loading notifications...')}</div>
+    return <div>{tc('common.loading', 'Loading notifications...')}</div>
   }
 
   const handleMarkAllAsRead = async () => {

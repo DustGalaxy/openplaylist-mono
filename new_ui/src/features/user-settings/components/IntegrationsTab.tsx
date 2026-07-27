@@ -20,6 +20,7 @@ import {
   statusOpenClass,
 } from '@/features/landing/styles'
 import { BotSettingsModal } from './BotSettingsModal'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 interface IntegrationsTabProps {
   initialIntegrations: Array<Integration>
@@ -36,7 +37,8 @@ export function IntegrationsTab({
   initialIntegrations,
   platformConfigs,
 }: IntegrationsTabProps) {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
+  const { t: tc } = useTranslation()
   const [integrations, setIntegrations] =
     useState<Array<Integration>>(initialIntegrations)
   const [loading, setLoading] = useState<Record<string, boolean>>({})
@@ -116,7 +118,7 @@ export function IntegrationsTab({
       ...prev,
       [`${platform}-${platformUserId}-bot-delete`]: true,
     }))
-    const loadingToast = toast.loading(t('common.toast.confirming'))
+    const loadingToast = toast.loading(tc('common.toast.confirming'))
 
     try {
       await disconnectBot(platform, platformUserId)
@@ -146,7 +148,7 @@ export function IntegrationsTab({
       ...prev,
       [`${platform}-${platformUserId}-delete`]: true,
     }))
-    const loadingToast = toast.loading(t('common.toast.confirming'))
+    const loadingToast = toast.loading(tc('common.toast.confirming'))
 
     try {
       await deleteIntegration(platform, platformUserId)
@@ -323,7 +325,7 @@ function IntegrationCard({
   onReconnect,
   loading,
 }: IntegrationCardProps) {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const [intgr, setIntgr] = useState(integration)
 
   // Sync when parent updates the integration object (e.g. bot_connection: true after socket ack)

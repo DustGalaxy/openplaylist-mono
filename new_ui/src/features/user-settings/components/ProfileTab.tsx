@@ -17,6 +17,7 @@ import { deleteUser } from '@/api/api-user'
 import { useNavigate } from '@tanstack/react-router'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 interface ProfileTabProps {
   user: UserProfile | null
@@ -108,7 +109,7 @@ const validateUrl = (
 }
 
 export function ProfileTab({ user }: ProfileTabProps) {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const navigate = useNavigate()
   const [socialLinks, setSocialLinks] = useState<Record<string, string>>(
     user?.social_links ?? {},

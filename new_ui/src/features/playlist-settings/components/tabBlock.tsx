@@ -16,11 +16,12 @@ import {
 import Btn from '@/components/ui/my-btn'
 import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context'
 import { usePlaylistStore } from '@/stores/playlistStore'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 const YT_VIDEO_ID_REGEX = /^[a-zA-Z0-9_-]{11}$/
 
 const TabBlock = () => {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const { playlist } = usePlaylistViewLoaded()
   const { blockUserRule, patchNow } = usePlaylistStore()
 

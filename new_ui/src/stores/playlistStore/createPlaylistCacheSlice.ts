@@ -100,9 +100,6 @@ function checkVipInterrupt(
   // 2. Regular прерывает Background
   const regularInterrupts = !newIsVip && currentIsBg
 
-  console.log('vipInterrupts = ', vipInterrupts)
-  console.log('regularInterrupts = ', regularInterrupts)
-
   if (!vipInterrupts && !regularInterrupts) return
 
   get().updateLocal(playlistId, {

@@ -1,0 +1,102 @@
+{
+  "notifications": {
+    "feed": {
+      "title": "Notifications",
+      "empty": "No notifications yet"
+    },
+    "events": {
+      "unknown": "New notification",
+      "someone": "Someone",
+      "tracks_added_one": "added {{count}} track",
+      "tracks_added_other": "added {{count}} tracks",
+      "in_playlist": " to playlist",
+      "tracks_removed_one": "{{count}} track removed from playlist {{playlistName}}",
+      "tracks_removed_other": "{{count}} tracks removed from playlist {{playlistName}}",
+      "track_removed_single": "Track",
+      "removed_from": "was removed from playlist",
+      "name_changed": "Playlist renamed",
+      "visibility_changed": "Playlist",
+      "became_public": "became public",
+      "became_private": "became private",
+      "playlist_activity": "Playlist update",
+      "playlist_created": "User {{username}} created a new playlist",
+      "playlist_deleted": "User {{username}} deleted a playlist",
+      "user_activity": "Account activity",
+      "track.added": {
+        "label": "Track Addition",
+        "description": "When new songs are added to the playlist"
+      },
+      "track.removed": {
+        "label": "Track Removal",
+        "description": "When tracks are removed from the playlist"
+      },
+      "basic.name": {
+        "label": "Renaming",
+        "description": "Changes to the playlist name or cover art"
+      },
+      "basic.visibility": {
+        "label": "Privacy Status",
+        "description": "Changing privacy status (public/private)"
+      },
+      "realtime.sync": {
+        "label": "Synchronization",
+        "description": "Enabling/disabling live synchronization"
+      },
+      "rules.mode": {
+        "label": "Filtering Mode",
+        "description": "Changes to the global track filtering mode"
+      },
+      "rules.validation": {
+        "label": "Validation Rules",
+        "description": "Updates to track verification rules"
+      },
+      "rules.priorities": {
+        "label": "Sorting Priorities",
+        "description": "Changes to sorting trigger priorities"
+      },
+      "playlist.create": {
+        "label": "Playlist Creation",
+        "description": "When the user creates a new public playlist"
+      },
+      "playlist.delete": {
+        "label": "Playlist Deletion",
+        "description": "When the user deletes their playlists"
+      }
+    },
+    "actions": {
+      "mark_read": "Mark as read",
+      "delete": "Delete"
+    },
+    "create": {
+      "title": "Create subscription",
+      "submit_btn": "Subscribe"
+    },
+    "settings": {
+      "target_playlist": "Playlist",
+      "target_user": "User",
+      "quick_setup": "Quick setup:",
+      "unmute_all": "Unmute all",
+      "mute_all": "Mute all",
+      "title": "Notification Settings"
+    },
+    "subscribed": "Subscribed!",
+    "manager": {
+      "confirm_unsubscribe": "Are you sure you want to unsubscribe?",
+      "error_unsubscribe": "Error unsubscribing",
+      "error_save_settings": "Error updating settings",
+      "loading": "Loading subscriptions...",
+      "title": "Manage Subscriptions",
+      "description": "Configure granular notifications for each content item or unsubscribe from updates.",
+      "empty": "You don't have any active subscriptions yet.",
+      "type_playlist": "Playlist",
+      "type_user": "User",
+      "author": "Author",
+      "status": "Active",
+      "mute_all_status": "Muted all",
+      "triggers_count_one": "{{count}} trigger",
+      "triggers_count_other": "{{count}} triggers",
+      "btn_configure": "Configure",
+      "btn_unsubscribe_title": "Unsubscribe"
+    }
+  }
+}

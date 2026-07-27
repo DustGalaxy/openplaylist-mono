@@ -28,7 +28,7 @@ interface SubscriptionCreateModalProps {
 export const SubscriptionCreateModal: React.FC<
   SubscriptionCreateModalProps
 > = ({ isOpen, targetType, targetName, onCreate, onClose }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation('notifications')
   const [isSaving, setIsSaving] = useState(false)
 
   const availableSwitches = useRef(NOTIFICATION_EVENTS_MAP[targetType])

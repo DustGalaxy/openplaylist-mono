@@ -11,9 +11,10 @@ import {
   getActiveModeSettings,
   splitQueue,
 } from '@/stores/playlistStore/helpers'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 export default function QueueList() {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const { role, playlistId } = usePlaylistView()
   const { playlist } = usePlaylistViewLoaded()
   const sortOverride = usePlaylistStore((s) =>
@@ -61,7 +62,6 @@ export default function QueueList() {
             track: t,
             group: 'background' as const,
           }))}
-          sortSettings={modeSettings.sort_settings_background}
           showDivider
           dividerLabel={t('sort.tabs.background')}
           isNowPlaying={isNowPlaying}

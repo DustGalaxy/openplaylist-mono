@@ -51,10 +51,7 @@ async def patch_me(
     return UserRead.model_validate(upd_user)
 
 
-@router.get("/{user_id}")
-async def user(db_session: DB_SESSION, user_id: UUID):
-    public_user = await auth_service.get_public_user(db_session, user_id)
-    return PublicUserRead.model_validate(public_user)
+
 
 
 @router.post("/bots/{platform}/connect")
@@ -161,3 +158,8 @@ async def delete_me(
 ):
     await auth_service.delete_user(db_session, curr_user.id)
     return {"message": "User deleted"}
+
+@router.get("/{user_id}")
+async def user(db_session: DB_SESSION, user_id: UUID):
+    public_user = await auth_service.get_public_user(db_session, user_id)
+    return PublicUserRead.model_validate(public_user)

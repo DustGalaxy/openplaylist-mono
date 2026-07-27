@@ -1,0 +1,133 @@
+{
+  "brand": {
+    "name": "OpenPlaylist",
+    "version": "2026.2 beta",
+    "nameWithVersion": "OpenPlaylist v2026.2beta"
+  },
+  "nav": {
+    "myPlaylists": "My playlists",
+    "login": "Login",
+    "theme": "Theme",
+    "moveMethod": {
+      "title": "Move method",
+      "dnd": "Drag & Drop",
+      "arrows": "Arrows"
+    },
+    "statistic": "Statistic",
+    "history": "History",
+    "settings": "Settings",
+    "logout": "Logout",
+    "signUp": "Sign Up",
+    "moveMethod.dnd": "Drag",
+    "moveMethod.arrows": "Arrows"
+  },
+  "footer": {
+    "copyright": {
+      "start": "© {{year}} OpenPlaylist. Crafted by ",
+      "link": "DustGalaxy",
+      "end": " with ❤️ for creators and listeners."
+    },
+    "techStack": "Powered by Socket.IO · React · FastAPI · & lots of tea 🍵",
+    "description": "Interactive music for everyone. Create your own playlists, share your favorite tracks, or request music on your favorite creators' streams.",
+    "navigation": "Navigation",
+    "features": "Features",
+    "searchPlaylists": "Search playlists",
+    "login": "Log in",
+    "register": "Join now",
+    "highlights": {
+      "realtimeQueue": "Live track queue",
+      "rulesAndBlocks": "Smart filters & blocklists",
+      "donationPriority": "Donation priority bumps",
+      "integrations": "Streaming and donation platform sync"
+    }
+  },
+  "errorPage": {
+    "eyebrow": "Wow! Something went wrong",
+    "title": "Something went wrong",
+    "logLabel": "Error log:",
+    "unknownError": "Unknown system error",
+    "retryBtn": "Try again",
+    "homeBtn": "Go home"
+  },
+  "sidebar": {
+    "Home": ""
+  },
+  "dashboard": {
+    "tooltip": {
+      "addPlaylist": "Create playlist",
+      "playlist": "Playlist - {{playlistName}}"
+    },
+    "eyebrow": "Your playlists",
+    "title": "Dashboard",
+    "subtitle": "Manage playlists, queue tracks, and control playback.",
+    "empty": {
+      "title": "No playlists yet",
+      "hint": "Press + to create your first playlist."
+    }
+  },
+  "common": {
+    "or": "or",
+    "loading": "Loading notifications...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "web": "Web",
+    "delete": "Delete",
+    "toast": {
+      "loading": "Loading...",
+      "saving": "Saving...",
+      "copied": "Copied to clipboard!",
+      "confirming": "Processing...",
+      "saved": "Saved successfully",
+      "saveFailed": "Failed to save",
+      "success": "Done!",
+      "error": "Something went wrong"
+    },
+    "general": "General",
+    "general2": "General"
+  },
+  "placeholder": {
+    "history": "Hello \"/history\"!",
+    "statistic": "Hello \"/statistic\"!"
+  },
+  "meta": {
+    "login": {
+      "title": "Login - OpenPlaylist",
+      "description": "Log in to your OpenPlaylist account"
+    },
+    "register": {
+      "title": "Sign Up - OpenPlaylist",
+      "description": "Create a new OpenPlaylist account"
+    }
+  },
+  "platform": {
+    "youtube": "YouTube",
+    "twitch": "Twitch",
+    "donationalerts": "Donation Alerts",
+    "google": "Google",
+    "donatex": "DonateX",
+    "discord": "Discord",
+    "x": "X",
+    "github": "GitHub",
+    "spotify": "Spotify",
+    "da": "Donation Alerts",
+    "donatepay": "DonatePay"
+  },
+  "twitch": {
+    "role": {
+      "broadcaster": "Broadcaster",
+      "moderator": "Moderator",
+      "vip": "VIP",
+      "subscriber": "Subscriber",
+      "Turbo": "Turbo",
+      "artist": "Artist",
+      "follower": "Follower"
+    }
+  },
+  "oauth": {
+    "platform": {
+      "twitch": "Twitch",
+      "da": "Donation Alerts",
+      "google": "Google"
+    }
+  }
+}

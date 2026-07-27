@@ -7,7 +7,7 @@ interface VariantProps {
 }
 
 export const FallbackVariant: React.FC<VariantProps> = ({ data }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation('notifications')
 
   return (
     <div>

@@ -15,6 +15,7 @@ import {
   sectionTitleClass,
 } from '@/features/landing/styles'
 import { cn } from '@/lib/utils'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 interface AccountTabProps {
   user: UserProfile | null
@@ -234,7 +235,7 @@ const createSettingsSections = (
 ]
 
 export function AccountTab({ user, onUserUpdate }: AccountTabProps) {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const [formState, setFormState] = useState<AccountFormState>(() =>
     getInitialFormState(user),
   )

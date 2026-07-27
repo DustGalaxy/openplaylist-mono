@@ -5,10 +5,11 @@ import PlatformSettingsPanel from './PlatformSettingsPanel'
 import { Platform } from '@/types/playlist'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 export default function TabPlatforms() {
-  const { t } = useTranslation()
-
+  const { t } = useFeatureTranslation()
+  const { t: tc } = useTranslation()
   return (
     <div>
       <Tabs
@@ -27,7 +28,7 @@ export default function TabPlatforms() {
                 <div className="w-full flex items-center gap-2 text-left cursor-pointer">
                   {caps.icon}
                   <Label className="text-sm md:text-base cursor-pointer whitespace-nowrap">
-                    {t(caps.labelKey)}
+                    {tc(caps.labelKey)}
                   </Label>
                 </div>
               </TabsTrigger>

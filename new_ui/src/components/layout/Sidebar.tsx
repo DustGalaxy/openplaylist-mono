@@ -1,15 +1,12 @@
 // src/components/layout/Sidebar.tsx
 import { Link, useLocation } from '@tanstack/react-router'
-import { AudioLines, House, Plus } from 'lucide-react'
+import { AudioLines, House } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import useMusicStore from '@/stores/musicStore'
-import { useIsPlaybackActive, usePlaybackStore } from '@/stores/playbackStore'
+import { useIsPlaybackActive } from '@/stores/playbackStore'
 import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
-import AddPlaylistModal from '@/features/playlist/components/newPlaylistModal'
-import { usePlaylistStore } from '@/stores/playlistStore'
+import AddPlaylistModal from '@/features/united-playlist/components/newPlaylistModal'
 import { useUserPlaylistRecordsStore } from '@/stores/userPlaylistInfoStore'
-import { useEffect } from 'react'
 
 export default function Sidebar() {
   const { t } = useTranslation()

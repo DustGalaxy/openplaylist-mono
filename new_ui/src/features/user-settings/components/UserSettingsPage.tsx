@@ -18,6 +18,7 @@ import {
 } from '@/features/landing/styles'
 import Twitch from '@/components/icons/icon-twtich'
 import DonationAlerts from '@/components/icons/icon-da'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 // ─── Hash helpers ──────────────────────────────────────────────────────────────
 
@@ -71,7 +72,8 @@ export function UserSettingsPage({
   integrations,
   onUserUpdate,
 }: UserSettingsPageProps) {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
+  const { t: tc } = useTranslation()
   const [activeTab, setActiveTab] = useState<TabId>(() => getHashTabId())
 
   // Синхронизация с браузерными кнопками назад/вперёд
@@ -102,7 +104,7 @@ export function UserSettingsPage({
 
   const platformConfigs = {
     twitch: {
-      name: t('platform.twitch'),
+      name: tc('platform.twitch'),
       icon: (
         <Twitch
           className="w-full h-full bg-accent-1 rounded-lg"
@@ -116,21 +118,21 @@ export function UserSettingsPage({
       },
     },
     donationalerts: {
-      name: t('platform.donationalerts'),
+      name: tc('platform.donationalerts'),
       icon: <DonationAlerts width={45} height={45} />,
       loginHandler: async () => {
         await handleOAuthRedirect('donationalerts', true)
       },
     },
     google: {
-      name: t('platform.google'),
+      name: tc('platform.google'),
       icon: <Google width={45} height={45} />,
       loginHandler: async () => {
         await handleOAuthRedirect('google', true)
       },
     },
     donatex: {
-      name: t('platform.donatex'),
+      name: tc('platform.donatex'),
       icon: <img src="/donatex-icon.png" width={45} height={45} />,
       loginHandler: async () => {
         await handleOAuthRedirect('donatex', true)

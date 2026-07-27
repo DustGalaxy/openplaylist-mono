@@ -29,7 +29,8 @@ interface SubscriptionSettingsModalProps {
 export const SubscriptionSettingsModal: React.FC<
   SubscriptionSettingsModalProps
 > = ({ isOpen, targetType, targetName, initialSettings, onSave, onClose }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation('notifications')
+  const { t: tc } = useTranslation()
   const [allowedEvents, setAllowedEvents] = useState<
     Array<AnyNotificationEventType>
   >(initialSettings.allowed_event_types)
@@ -166,7 +167,7 @@ export const SubscriptionSettingsModal: React.FC<
               type="button"
               className="px-4 py-2 text-sm font-medium"
             >
-              {t('common.cancel', 'Отмена')}
+              {tc('common.cancel', 'Отмена')}
             </Btn>
             <Btn
               disabled={isSaving}
@@ -178,7 +179,7 @@ export const SubscriptionSettingsModal: React.FC<
               ) : (
                 <Save className="w-4 h-4" />
               )}
-              {t('common.save', 'Сохранить')}
+              {tc('common.save', 'Сохранить')}
             </Btn>
           </DialogFooter>
         </form>
