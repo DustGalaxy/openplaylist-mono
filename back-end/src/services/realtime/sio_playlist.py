@@ -3,20 +3,21 @@ from uuid import UUID
 
 import socketio
 
-from src.dto.events import (
-    PlayNow,
-    Deleted,
-    Moved,
-    Private,
-)
-from src.dto.settings import ReadPlaylistSettings
-from src.dto.playback import Pause, Seek
 from src.adapters._sio.init import sio
 from src.dal._redis.broker import get_broker
 from src.dal.postgres.playlist import playlist_repository
-from src.models.playlist_logs import PlaylistLogSchema
-from src.models.order import OrderDomain
 from src.database import async_session_maker
+from src.dto.events import (
+    Deleted,
+    Moved,
+    PlayNow,
+    Private,
+)
+from src.dto.internal.domain_events import PlaylistSettings
+from src.dto.playback import Pause, Seek
+from src.models.order import OrderDomain
+from src.models.playlist_logs import PlaylistLogSchema
+
 from .sio_room_manager import room_manager
 
 
@@ -74,10 +75,10 @@ class SioPlaylistUpdateService:
         sids = room_manager.get_sids(data.playlist_id, self.namespace)
         await self.sio.emit("move_track", data, to=[*sids], namespace=self.namespace)
 
-    async def settings_changed(self, data: ReadPlaylistSettings):
-        sids = room_manager.get_sids(str(data.playlist_id), self.namespace)
+    async def settings_changed(self, data: PlaylistSettings):
+        sids = room_manager.get_sids(str(data.id), self.namespace)
         await self.sio.emit(
-            f"settings_changed:{str(data.playlist_id)}",
+            f"settings_changed:{str(data.id)}",
             data.model_dump(),
             to=[*sids],
             namespace=self.namespace,

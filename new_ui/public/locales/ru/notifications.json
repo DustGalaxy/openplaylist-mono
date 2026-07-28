@@ -1,0 +1,102 @@
+{
+  "notifications": {
+    "feed": {
+      "title": "Уведомления",
+      "empty": "Уведомлений пока нет"
+    },
+    "events": {
+      "unknown": "Новое уведомление",
+      "someone": "Кто-то",
+      "tracks_added_one": "добавил(а) {{count}} трек",
+      "tracks_added_other": "добавил(а) {{count}} трека(ов)",
+      "in_playlist": " в плейлист",
+      "tracks_removed_one": "{{count}} трек удален из плейлиста {{playlistName}}",
+      "tracks_removed_other": "{{count}} трека(ов) удалено из плейлиста {{playlistName}}",
+      "track_removed_single": "Трек",
+      "removed_from": "был удален из плейлиста",
+      "name_changed": "Плейлист переименован",
+      "visibility_changed": "Плейлист",
+      "became_public": "стал публичным",
+      "became_private": "стал приватным",
+      "playlist_activity": "Обновление плейлиста",
+      "playlist_created": "Пользователь {{username}} создал(а) новый плейлист",
+      "playlist_deleted": "Пользователь {{username}} удалил(а) плейлист",
+      "user_activity": "Активность аккаунта",
+      "track.added": {
+        "label": "Добавление трека",
+        "description": "При добавлении новых песен в плейлист"
+      },
+      "track.removed": {
+        "label": "Удаление трека",
+        "description": "При удалении треков из плейлиста"
+      },
+      "basic.name": {
+        "label": "Переименование",
+        "description": "Изменение названия плейлиста или обложки"
+      },
+      "basic.visibility": {
+        "label": "Статус приватности",
+        "description": "Изменение статуса приватности (публичный/приватный)"
+      },
+      "realtime.sync": {
+        "label": "Синхронизация",
+        "description": "Включение/отключение синхронизации в реальном времени"
+      },
+      "rules.mode": {
+        "label": "Режим фильтрации",
+        "description": "Изменение глобального режима фильтрации треков"
+      },
+      "rules.validation": {
+        "label": "Правила проверки",
+        "description": "Обновление правил проверки треков"
+      },
+      "rules.priorities": {
+        "label": "Приоритеты сортировки",
+        "description": "Изменение приоритетов триггеров сортировки"
+      },
+      "playlist.create": {
+        "label": "Создание плейлиста",
+        "description": "При создании пользователем нового публичного плейлиста"
+      },
+      "playlist.delete": {
+        "label": "Удаление плейлиста",
+        "description": "При удалении пользователем своих плейлистов"
+      }
+    },
+    "actions": {
+      "mark_read": "Отметить как прочитанное",
+      "delete": "Удалить"
+    },
+    "create": {
+      "title": "Создать подписку",
+      "submit_btn": "Подписаться"
+    },
+    "settings": {
+      "target_playlist": "Плейлист",
+      "target_user": "Пользователь",
+      "quick_setup": "Быстрая настройка:",
+      "unmute_all": "Включить все",
+      "mute_all": "Отключить все",
+      "title": "Настройки уведомлений"
+    },
+    "subscribed": "Вы подписались!",
+    "manager": {
+      "confirm_unsubscribe": "Вы уверены, что хотите отписаться?",
+      "error_unsubscribe": "Ошибка при отписке",
+      "error_save_settings": "Ошибка при обновлении настроек",
+      "loading": "Загрузка подписок...",
+      "title": "Управление подписками",
+      "description": "Настройте детальные уведомления для каждого элемента или отпишитесь от обновлений.",
+      "empty": "У вас пока нет активных подписок.",
+      "type_playlist": "Плейлист",
+      "type_user": "Пользователь",
+      "author": "Автор",
+      "status": "Активно",
+      "mute_all_status": "Все отключены",
+      "triggers_count_one": "{{count}} триггер",
+      "triggers_count_other": "{{count}} триггера(ов)",
+      "btn_configure": "Настроить",
+      "btn_unsubscribe_title": "Отписаться"
+    }
+  }
+}

@@ -5,6 +5,7 @@ import {
   Bug,
   Disc3,
   Heart,
+  Menu,
   MessageSquare,
   Search,
   Turntable,
@@ -18,47 +19,15 @@ import DDNotificationList from '@/features/notifications/components/DDNotificati
 import FeedbackModal from '@/features/feedback/FeedbackModal'
 import ContributorsModal from '@/features/feedback/ContributorsModal'
 import SupportModal from '@/features/feedback/SupportModal'
-
-type ActiveModal = 'feedback' | 'bug' | 'contributors' | 'support' | null
-
-const actionButtons = [
-  {
-    modal: 'feedback' as const,
-    icon: MessageSquare,
-    color: 'blue-500',
-    labelKey: 'footer.feedback',
-    fallback: 'Feedback',
-  },
-  {
-    modal: 'bug' as const,
-    icon: Bug,
-    color: 'rose-500',
-    labelKey: 'footer.bugReport',
-    fallback: 'Bug report',
-  },
-  {
-    modal: 'contributors' as const,
-    icon: Users,
-    color: 'green-500',
-    labelKey: 'footer.contributors',
-    fallback: 'Contributors',
-  },
-  {
-    modal: 'support' as const,
-    icon: Heart,
-    color: 'red-500',
-    labelKey: 'footer.support',
-    fallback: 'Support',
-  },
-] as const
+import { useMobileSidebarStore } from '@/stores/mobileSidebarStore'
+import Btn from '../ui/my-btn'
 
 export default function Header() {
   const { t, i18n } = useTranslation()
   const { isAuthenticated } = useAuthStore()
   const navigate = useNavigate()
 
-  const [activeModal, setActiveModal] = useState<ActiveModal>(null)
-
+  const toggleMobileSidebar = useMobileSidebarStore((s) => s.toggle)
   const windowWidth = window.innerWidth
   useState(() => {
     const storedLanguage = window.localStorage.getItem('Lng')
@@ -76,8 +45,16 @@ export default function Header() {
       "
       >
         <nav className="flex flex-row justify-between w-full @container pl-1  gap-2  items-center">
-          <div className="flex gap-1">
-            <div className="px-2 ">
+          <div className="flex gap-1 items-center">
+            {isAuthenticated && (
+              <Btn
+                onClick={toggleMobileSidebar}
+                className="sm:hidden px-1 bg-level-2 rounded-sm size-8"
+              >
+                <Menu className="size-5" />
+              </Btn>
+            )}
+            <div className="px-2 h-full">
               <Link to="/" className="flex gap-2 items-center">
                 <Disc3 className="size-6" />
                 <h1
@@ -90,29 +67,8 @@ export default function Header() {
                 </h1>
               </Link>
             </div>
-            <div className="flex items-center gap-1 hidden">
-              {actionButtons.map(
-                ({ modal, icon: Icon, color, labelKey, fallback }) => (
-                  <button
-                    key={modal}
-                    type="button"
-                    onClick={() => setActiveModal(modal)}
-                    title={t(labelKey, fallback)}
-                    className="
-                  inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5
-                  text-xs text-text-secondary hover:text-text-main hover:bg-level-1
-                  transition-colors 
-                "
-                  >
-                    <Icon size={14} className={` text-${color} `} />
-                    <span className="hidden sm:inline">
-                      {t(labelKey, fallback)}
-                    </span>
-                  </button>
-                ),
-              )}
-            </div>
-            <div className="px-2 flex place-content-center hidden">
+
+            <div className="px-2 flex place-content-center">
               <Link
                 to="/playlists"
                 className="flex items-center"
@@ -136,6 +92,7 @@ export default function Header() {
                 >
                   <option value="ru">Русский</option>
                   <option value="en">English</option>
+                  <option value="ua">Українська</option>
                 </select>
 
                 <button
@@ -156,23 +113,6 @@ export default function Header() {
           </div>
         </nav>
       </header>
-
-      <FeedbackModal
-        open={activeModal === 'feedback' || activeModal === 'bug'}
-        onOpenChange={(open) => setActiveModal(open ? activeModal : null)}
-        type={activeModal === 'bug' ? 'bug' : 'feedback'}
-      />
-
-      <ContributorsModal
-        open={activeModal === 'contributors'}
-        onOpenChange={(open) => setActiveModal(open ? 'contributors' : null)}
-      />
-
-      <SupportModal
-        open={activeModal === 'support'}
-        onOpenChange={(open) => setActiveModal(open ? 'support' : null)}
-        onFeedbackClick={() => setActiveModal('feedback')}
-      />
     </div>
   )
 }

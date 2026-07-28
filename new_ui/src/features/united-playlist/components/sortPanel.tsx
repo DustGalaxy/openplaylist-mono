@@ -210,7 +210,7 @@ export default function SortPanel() {
           showHost
         />
         <div
-          className={`w-px h-6 bg-text-main ${sortOverride.order_mode === 'auto' ? 'block' : 'hidden sm:block'}`}
+          className={`w-px h-6 bg-text-placeholder ${sortOverride.order_mode === 'auto' ? 'block' : 'hidden sm:block'}`}
         />
         <SortButtons
           sortSettings={sortOverride}
@@ -263,7 +263,7 @@ export default function SortPanel() {
         </div>
       )}
       <div
-        className={`w-px h-6 bg-text-main ${showTabs ? 'block' : 'hidden'}`}
+        className={`w-px h-6 bg-text-placeholder ${showTabs ? 'block' : 'hidden'}`}
       />
 
       <OrderModeToggle
@@ -271,7 +271,7 @@ export default function SortPanel() {
         onChange={(order_mode) => setSort(slot, tab, { order_mode })}
       />
       <div
-        className={`w-px h-6 bg-text-main ${activeModeSettings[settingsKey].order_mode === 'auto' ? 'block' : 'hidden sm:block'}`}
+        className={`w-px h-6 bg-text-placeholder ${activeModeSettings[settingsKey].order_mode === 'auto' ? 'block' : 'hidden sm:block'}`}
       />
       <SortButtons
         sortSettings={activeModeSettings[settingsKey]}

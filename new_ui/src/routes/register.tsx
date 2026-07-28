@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import i18n from '@/i18n'
 import { RegisterForm } from '@/features/auth'
+import { FeatureI18nProvider } from '@/lib/i18n/featureTranslation'
 
 export const Route = createFileRoute('/register')({
   component: RegisterPage,
@@ -13,7 +14,9 @@ export const Route = createFileRoute('/register')({
 function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-level-1 px-4">
-      <RegisterForm />
+      <FeatureI18nProvider ns="auth">
+        <RegisterForm />
+      </FeatureI18nProvider>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Bell, BellOff, Loader2, Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { NOTIFICATION_EVENTS_MAP } from '../types'
 import type {
   AnyNotificationEventType,

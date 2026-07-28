@@ -13,7 +13,7 @@ from src.adapters._fastapi.dependencies import (
 )
 from src.adapters._rabbit.broker import get_broker, main_publisher
 from src.adapters._rabbit.queues import playlist_fanout_exchange
-from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType
+from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType, PlaylistSettings
 from src.dto.playlist import (
     NewPlaylist,
     PlaylistBaseinfo,
@@ -94,26 +94,21 @@ async def patch_playlist(
 
     new_plst = await service.patch_playlist(db_session, patch_schema, playlist_id)
 
-    events = service.get_events_between_states(plst, new_plst)
-
-    for e in events:
-        await main_publisher.publish(
-            InternalPlaylistEvent(
-                event_id=uuid4(),
-                event_type=e,
-                playlist_id=playlist_id,
-                playlist_name=plst.name,
-                playlist_is_public=plst.is_public,
-                show_in_widget=plst.show_in_widget,
-                user_id=current_user.id,
-                user_name=current_user.username,
-                renamed_data={"before": plst.name, "after": new_plst.name} if e == "playlist.renamed" else None,
-                visiability_data={"before": plst.is_public, "after": new_plst.is_public}
-                if e == "playlist.visialbility_changed"
-                else None,
-            ),
-            exchange=playlist_fanout_exchange,
-        )
+    await main_publisher.publish(
+        InternalPlaylistEvent(
+            event_id=uuid4(),
+            event_type=InternalPlaylistEventType.PLAYLIST_SETTINGS_CHANGED,
+            playlist_id=playlist_id,
+            playlist_name=plst.name,
+            playlist_is_public=plst.is_public,
+            show_in_widget=plst.show_in_widget,
+            user_id=current_user.id,
+            user_name=current_user.username,
+            playlist_data=PlaylistSettings.model_validate(new_plst)
+            
+        ),
+        exchange=playlist_fanout_exchange,
+    )
 
     return ReadPlaylist.model_validate(new_plst)
 

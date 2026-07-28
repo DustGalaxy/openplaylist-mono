@@ -1,12 +1,16 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import {
+  Bug,
   ChartColumnIncreasing,
+  Heart,
   History,
   Languages,
   LogOut,
+  MessageSquare,
   Palette,
   Settings,
+  Users,
 } from 'lucide-react'
 import { useCallback, useState, useMemo } from 'react'
 import type { Theme } from '@/lib/themes'
@@ -38,6 +42,9 @@ import {
   loadCustomThemes,
   saveActiveThemeId,
 } from '@/lib/themes'
+import FeedbackModal from '@/features/feedback/FeedbackModal'
+import ContributorsModal from '@/features/feedback/ContributorsModal'
+import SupportModal from '@/features/feedback/SupportModal'
 
 // ─── ThemePicker ──────────────────────────────────────────────────────────────
 
@@ -83,6 +90,7 @@ function generateTheme(
 }
 
 function ThemePicker() {
+  const { t } = useTranslation()
   const [activeId, setActiveId] = useState<string>(loadActiveThemeId)
 
   // Состояние для кастомного пикера
@@ -97,26 +105,52 @@ function ThemePicker() {
 
   // Генерируем текущую кастомную тему на лету при изменении Hue или Mode
   const generatedTheme = useMemo(() => {
-    return generateTheme(customHue, customMode)
-  }, [customHue, customMode])
+    const modeLabel =
+      customMode === 'light'
+        ? t('theme.light', 'Light')
+        : t('theme.dark', 'Dark')
+    const theme = generateTheme(customHue, customMode)
+    theme.name = t('theme.custom', {
+      mode: modeLabel,
+      hue: customHue,
+      defaultValue: `Custom: ${modeLabel} (${customHue}°)`,
+    })
+    return theme
+  }, [customHue, customMode, t])
 
   // Переключатель режима для кастомной темы с автоматическим аплайем
   const handleModeToggle = useCallback(() => {
     const nextMode = customMode === 'light' ? 'dark' : 'light'
     setCustomMode(nextMode)
+    const modeLabel =
+      nextMode === 'light' ? t('theme.light', 'Light') : t('theme.dark', 'Dark')
     const nextTheme = generateTheme(customHue, nextMode)
+    nextTheme.name = t('theme.custom', {
+      mode: modeLabel,
+      hue: customHue,
+      defaultValue: `Custom: ${modeLabel} (${customHue}°)`,
+    })
     handleSelect(nextTheme)
-  }, [customHue, customMode, handleSelect])
+  }, [customHue, customMode, handleSelect, t])
 
   // Изменение Hue в инпуте с автоматическим аплайем
   const handleHueChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const val = Math.max(0, Math.min(360, Number(e.target.value) || 0))
       setCustomHue(val)
+      const modeLabel =
+        customMode === 'light'
+          ? t('theme.light', 'Light')
+          : t('theme.dark', 'Dark')
       const nextTheme = generateTheme(val, customMode)
+      nextTheme.name = t('theme.custom', {
+        mode: modeLabel,
+        hue: val,
+        defaultValue: `Custom: ${modeLabel} (${val}°)`,
+      })
       handleSelect(nextTheme)
     },
-    [customMode, handleSelect],
+    [customMode, handleSelect, t],
   )
 
   const customThemes = loadCustomThemes()
@@ -195,13 +229,15 @@ function ThemePicker() {
       <div className="border-t border-white/8 pt-2.5 px-1 flex flex-col gap-2">
         <div className="flex items-center justify-between gap-2">
           <label className="text-[11px] text-text-secondary font-medium uppercase tracking-wider">
-            Тест палитры
+            {t('theme.paletteTest', 'Palette Test')}
           </label>
           <button
             onClick={handleModeToggle}
             className="text-[10px] px-1.5 py-0.5 rounded bg-level-1 border border-white/8 hover:border-white/14 text-text-main transition-colors"
           >
-            {customMode === 'light' ? '☀️ Light' : '🌙 Dark'}
+            {customMode === 'light'
+              ? `☀️ ${t('theme.light', 'Light')}`
+              : `🌙 ${t('theme.dark', 'Dark')}`}
           </button>
         </div>
 
@@ -234,19 +270,52 @@ function ThemePicker() {
 
 // ─── MenuDropdown ─────────────────────────────────────────────────────────────
 
+const actionButtons = [
+  {
+    modal: 'feedback' as const,
+    icon: MessageSquare,
+    color: 'blue-500',
+    labelKey: 'footer.feedback',
+    fallback: 'Feedback',
+  },
+  {
+    modal: 'bug' as const,
+    icon: Bug,
+    color: 'rose-500',
+    labelKey: 'footer.bugReport',
+    fallback: 'Bug report',
+  },
+  {
+    modal: 'contributors' as const,
+    icon: Users,
+    color: 'green-500',
+    labelKey: 'footer.contributors',
+    fallback: 'Contributors',
+  },
+  {
+    modal: 'support' as const,
+    icon: Heart,
+    color: 'red-500',
+    labelKey: 'footer.support',
+    fallback: 'Support',
+  },
+] as const
+
+type ActiveModal = 'feedback' | 'bug' | 'contributors' | 'support' | null
 export default function MenuDropdown() {
   const { t, i18n } = useTranslation()
   const { user } = useAuthStore()
   const navigate = useNavigate()
   if (!user) return null
   const { settings, setSetting, loadSettings } = useAppSettingsStore()
-
+  const [activeModal, setActiveModal] = useState<ActiveModal>(null)
   useEffect(() => {
     void loadSettings()
   }, [loadSettings])
   const languages = [
     { code: 'ru', label: 'Русский' },
     { code: 'en', label: 'English' },
+    { code: 'ua', label: 'Українська' },
   ]
 
   useState(() => {
@@ -292,7 +361,29 @@ export default function MenuDropdown() {
           {user.username}
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-level-3" />
-
+        <div className="flex items-center gap-1">
+          {actionButtons.map(
+            ({ modal, icon: Icon, color, labelKey, fallback }) => (
+              <button
+                key={modal}
+                type="button"
+                onClick={() => setActiveModal(modal)}
+                title={t(labelKey, fallback)}
+                className="
+                  inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5
+                  text-xs text-text-secondary hover:text-text-main hover:bg-level-1
+                  transition-colors 
+                "
+              >
+                <Icon size={14} className={` text-${color} `} />
+                <span className="hidden sm:inline">
+                  {t(labelKey, fallback)}
+                </span>
+              </button>
+            ),
+          )}
+        </div>
+        <DropdownMenuSeparator className="bg-level-3" />
         {/* Language picker */}
         <DropdownMenuSub>
           <DropdownMenuGroup>
@@ -315,7 +406,7 @@ export default function MenuDropdown() {
                     <DropdownMenuRadioItem
                       key={language.code}
                       value={language.code}
-                      className="text-text-main focus:bg-level-3 bg-level-2"
+                      className="text-text-main focus:text-text-main  focus:bg-level-1 bg-level-2"
                     >
                       {language.label}
                     </DropdownMenuRadioItem>
@@ -369,13 +460,13 @@ export default function MenuDropdown() {
                 >
                   <DropdownMenuRadioItem
                     value="dnd"
-                    className="text-text-main focus:bg-level-3 bg-level-2"
+                    className="text-text-main focus:text-text-main  focus:bg-level-1 bg-level-2"
                   >
                     {t('nav.moveMethod.dnd')}
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem
                     value="arrows"
-                    className="text-text-main focus:bg-level-3 bg-level-2"
+                    className="text-text-main focus:text-text-main  focus:bg-level-1 bg-level-2"
                   >
                     {t('nav.moveMethod.arrows')}
                   </DropdownMenuRadioItem>
@@ -407,6 +498,22 @@ export default function MenuDropdown() {
           {t('nav.logout')}
         </DropdownMenuItem>
       </DropdownMenuContent>
+      <FeedbackModal
+        open={activeModal === 'feedback' || activeModal === 'bug'}
+        onOpenChange={(open) => setActiveModal(open ? activeModal : null)}
+        type={activeModal === 'bug' ? 'bug' : 'feedback'}
+      />
+
+      <ContributorsModal
+        open={activeModal === 'contributors'}
+        onOpenChange={(open) => setActiveModal(open ? 'contributors' : null)}
+      />
+
+      <SupportModal
+        open={activeModal === 'support'}
+        onOpenChange={(open) => setActiveModal(open ? 'support' : null)}
+        onFeedbackClick={() => setActiveModal('feedback')}
+      />
     </DropdownMenu>
   )
 }

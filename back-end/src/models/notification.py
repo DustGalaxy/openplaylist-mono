@@ -122,6 +122,7 @@ class Subscription(BaseModel):
 
     target_id: UUID
     target_type: str
+    target_name: str
 
     settings: SubscriptionSettings
 
@@ -134,6 +135,7 @@ class SubscriptionCreate(BaseModel):
     user_id: UUID
     target_id: UUID
     target_type: TargetType
+    target_name: str
     settings: SubscriptionSettings | None = None
 
     # @model_validator(mode="after")
@@ -151,6 +153,7 @@ class SubscriptionCreate(BaseModel):
 class SubscriptionPatch(BaseModel):
     tagret_id: UUID | None = None
     target_type: TargetType | None = None
+    target_name: str | None = None
     settings: SubscriptionSettings | None = None
 
     # @model_validator(mode="after")

@@ -1,5 +1,5 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 import { Circle, Trash2 } from 'lucide-react'
 import { TimeAgo } from '@/components/ui/TimeAgo'
 
@@ -22,7 +22,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   onDelete,
   children,
 }) => {
-  const { t } = useTranslation('notifications')
+  const { t } = useFeatureTranslation()
 
   return (
     <div

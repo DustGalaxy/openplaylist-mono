@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import ReactPlayer from 'react-player'
+import { useTranslation } from 'react-i18next'
 import {
   MonitorPlay,
   Pause,
@@ -38,6 +39,7 @@ export default function Player({
   feed: PlaybackFeed
   className?: string
 }) {
+  const { t } = useTranslation('player')
   const playerRef = useRef<HTMLVideoElement | null>(null)
   const isReadyRef = useRef(false)
   const lastSeekTokenRef = useRef<number | null>(null)
@@ -228,7 +230,7 @@ export default function Player({
         <div className="flex items-center justify-center gap-2 flex-wrap">
           <Btn
             onClick={cycleRepeat}
-            aria-label={`repeat: ${feed.repeatMode}`}
+            aria-label={t('controls.repeat', { mode: feed.repeatMode, defaultValue: `Repeat: ${feed.repeatMode}` })}
             className={controBtnStyle}
           >
             {feed.repeatMode === 'all' ? (
@@ -244,7 +246,7 @@ export default function Player({
             <>
               <Btn
                 onClick={feed.prev}
-                aria-label="prev"
+                aria-label={t('controls.prev', 'Previous track')}
                 className={controBtnStyle}
               >
                 <SkipBack className="size-4" />
@@ -254,7 +256,7 @@ export default function Player({
 
           <Btn
             onClick={() => feed.onPlayerStateChange(!feed.playing)}
-            aria-label={feed.playing ? 'pause' : 'play'}
+            aria-label={feed.playing ? t('controls.pause', 'Pause') : t('controls.play', 'Play')}
             className={cn(controBtnStyle, 'size-12')}
           >
             {feed.playing ? (
@@ -267,7 +269,7 @@ export default function Player({
           {feed.capabilities.canSkip && (
             <Btn
               onClick={feed.next}
-              aria-label="next"
+              aria-label={t('controls.next', 'Next track')}
               className={controBtnStyle}
             >
               <SkipForward className="size-4" />
@@ -285,7 +287,7 @@ export default function Player({
                 onMouseDown={() => {
                   if (volume !== 0) setMutedVolume(volume)
                 }}
-                aria-label={volume === 0 ? 'unmute' : 'mute'}
+                aria-label={volume === 0 ? t('controls.unmute', 'Unmute audio') : t('controls.mute', 'Mute audio')}
                 className={controBtnStyle}
               >
                 {liveVolume === 0 || volume === 0 ? (
@@ -329,7 +331,7 @@ export default function Player({
           {feed.capabilities.canStop && feed.stop && (
             <Btn
               onClick={feed.stop}
-              aria-label="stop"
+              aria-label={t('controls.stop', 'Stop playback')}
               className={controBtnStyle}
             >
               <Square className="size-4" />
@@ -339,7 +341,7 @@ export default function Player({
           {feed.capabilities.canRequestSync && feed.requestSync && (
             <Btn
               onClick={feed.requestSync}
-              aria-label="sync"
+              aria-label={t('controls.sync', 'Request player sync')}
               className={controBtnStyle}
             >
               <RefreshCw className="size-4" />
@@ -348,7 +350,7 @@ export default function Player({
 
           <Btn
             onClick={() => setHidden(!hidden)}
-            aria-label="toggle video"
+            aria-label={t('controls.toggleVideo', 'Toggle video player display')}
             className={controBtnStyle}
           >
             <MonitorPlay className="size-4" />

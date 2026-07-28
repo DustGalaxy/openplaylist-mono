@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from '@tanstack/react-router'
 import axios from 'axios'
-import { useTranslation } from 'react-i18next'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
@@ -17,7 +17,7 @@ export interface RegisterFormProps {
 }
 
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
-  const { t } = useTranslation()
+  const { t, tc } = useFeatureTranslation()
   const navigate = useNavigate()
   const handleOAuthRedirect = useOAuthUrl()
 
@@ -81,7 +81,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
       if (response.status === 201) {
         onSuccess?.()
-        navigate({ to: '/dashboard' })
+        navigate({ to: '/playlists' })
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -138,7 +138,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-level-1 text-text-secondary">
-                {t('common.or')}
+                {tc('common.or')}
               </span>
             </div>
           </div>

@@ -98,16 +98,16 @@ function PlaylistViewInner() {
   }
 
   const handleCreateSubscription = async (settings: any) => {
-    await createSubscription(playlist.id, 'playlist', settings)
+    await createSubscription(playlist.id, 'playlist', playlist.name, settings)
     setOpenNewSubModal(false)
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 mt-2">
       {/* header actions */}
       <div className="flex flex-col gap-4 w-full rounded-md">
         <div className="flex w-full gap-1 sm:gap-2 justify-between items-center">
-          <div className="flex gap-1 sm:gap-2">
+          <div className="flex gap-2">
             {isOwnerLike && (
               <>
                 <Btn

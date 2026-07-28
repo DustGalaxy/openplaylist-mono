@@ -36,6 +36,9 @@
       "blocking": "Blocking...",
       "unblocking": "Unblocking..."
     },
+    "platforms": {
+      "title": "Platform"
+    },
     "chatRoles": {
       "selectRole": "Please select a role",
       "addSuccess": "Chat role added successfully",
@@ -65,7 +68,7 @@
       "trackCooldownDesc": "The time after which a track can be added again.",
       "userCooldown": "User cooldown",
       "title": "Video validation",
-      "description": "Video validation settings. Can`t be negtive."
+      "description": "Video validation settings. Cannot be negative."
     },
     "donation": {
       "deleteRuleConfirm": "Are you sure you want to delete this donation rule?",
@@ -106,7 +109,7 @@
     "description": "Changes are saved automatically",
     "tabs": {
       "basic": "Basic",
-      "platforms": "",
+      "platforms": "Platforms",
       "block": "Block",
       "delete": "Delete",
       "validation": "Validation",
@@ -170,7 +173,7 @@
       "modeHelp": {
         "flow": "Flow — viewer request queue.",
         "static": "Static — normal playlist.",
-        "stream": "Stream — backgroud track with viewer requests"
+        "stream": "Stream — background track with viewer requests"
       },
       "addHelp": "ADD — priorities are summed up.",
       "maxHelp": "MAX — the highest priority is used.",

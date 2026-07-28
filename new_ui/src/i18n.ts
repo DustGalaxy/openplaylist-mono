@@ -5,6 +5,7 @@ import Backend from 'i18next-http-backend'
 export const NAMESPACES = [
   'common',
   'auth',
+  'saves',
   'feedback',
   'landing',
   'notifications',

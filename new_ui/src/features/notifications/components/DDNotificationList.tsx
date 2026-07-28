@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Bell, CheckCheck, Eye, EyeOff, Settings2 } from 'lucide-react'
 import React from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { useTranslation } from 'react-i18next'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 import {
   fetchFeed,
   markAllAsRead,
@@ -29,8 +29,7 @@ const DDNotificationList = () => {
   const [notifications, setNotifications] = React.useState<Array<any>>([])
   const navigate = useNavigate()
 
-  const { t } = useTranslation('notifications')
-  const { t: tc } = useTranslation()
+  const { t, tc } = useFeatureTranslation()
 
   const { data: notificationsCount, isLoading } = useQuery({
     queryKey: ['notificationsCount'],

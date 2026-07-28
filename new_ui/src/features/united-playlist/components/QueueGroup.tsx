@@ -1,5 +1,5 @@
 import { usePlaylistView } from '../context/playlist-view-context'
-import TrackCard from './TrackCard'
+import ResponsiveTrackCard from './trackParts/ResponsiveTrackCard'
 import type { FeedTrack, SortSettings } from '@/types/playlist'
 import { usePlaylistStore } from '@/stores/playlistStore'
 import { useAppSettingsStore } from '@/stores/appSettingsStore'
@@ -61,8 +61,8 @@ export default function QueueGroup({
     <div>
       {showDivider && (
         <div className="flex flex-col gap-4 relative w-full h-4">
-          <div className="absolute left-0 right-0 h-px bg-text-secondary" />
-          <div className="absolute left-1/2 transform -translate-x-1/2 text-text-secondary font-mono -translate-y-1/2 bg-level-1 px-4 rounded-full">
+          <div className="absolute left-0 right-0 h-px bg-text-placeholder" />
+          <div className="absolute left-1/2 transform -translate-x-1/2 text-text-placeholder font-mono -translate-y-1/2 bg-level-1 px-4 rounded-full">
             {dividerLabel}
           </div>
         </div>
@@ -86,7 +86,7 @@ export default function QueueGroup({
               onMove={(dir) => onMove(track.id, dir)}
             >
               {() => (
-                <TrackCard
+                <ResponsiveTrackCard
                   track={track}
                   group={feedItem.group}
                   isDragging={isDragging}

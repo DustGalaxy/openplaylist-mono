@@ -1,20 +1,17 @@
-from datetime import datetime
 from typing import Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
-from pydantic.fields import Field
+from pydantic import BaseModel
 from pydantic.functional_validators import model_validator
 
+from src._types import NOTIFICATION_EVENT_TYPES_MAP, TargetType
 from src.models.notification import SubscriptionSettings
-from src._types import NOTIFICATION_EVENT_TYPES_MAP, NotificationType, PlaylistEventType, TargetType, UserEventType
-
-
 
 
 class NewSubscription(BaseModel):
     target_id: UUID
     target_type: TargetType
+    target_name: str
     settings: SubscriptionSettings | None = None
 
     @model_validator(mode="after")

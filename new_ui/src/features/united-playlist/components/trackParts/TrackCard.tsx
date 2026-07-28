@@ -1,11 +1,10 @@
 // src/features/playlist/components/TrackCard.tsx
 import { ArrowUpRight, Calendar, Crown, Layers } from 'lucide-react'
 
-import { useTranslation } from 'react-i18next'
-import TrackActions from './trackParts/TrackActions'
-import { useTrackActions } from './trackParts/useTrackActions'
-import WarningModal from './modals/warningModal'
-import ReportModal from './modals/ReportModal'
+import WarningModal from '../modals/warningModal'
+import ReportModal from '../modals/ReportModal'
+import TrackActions from './TrackActions'
+import { useTrackActions } from './useTrackActions'
 import type { Track } from '@/types/playlist'
 import { cn } from '@/lib/utils'
 import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
@@ -26,23 +25,31 @@ export default function TrackCard({
     track,
     group,
   )
+  console.log(i18n.language)
+
   const formattedDate = track.created_at
-    ? new Date(track.created_at).toLocaleDateString(i18n.language, {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      })
+    ? new Date(track.created_at).toLocaleDateString(
+        i18n.language === 'ua' ? 'uk-UA' : i18n.language,
+        {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        },
+      )
     : 'Н/Д'
 
   const longFormatDate = track.created_at
-    ? new Date(track.created_at).toLocaleDateString(i18n.language, {
-        day: 'numeric',
-        month: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-      })
+    ? new Date(track.created_at).toLocaleDateString(
+        i18n.language === 'ua' ? 'uk-UA' : i18n.language,
+        {
+          day: 'numeric',
+          month: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          second: 'numeric',
+        },
+      )
     : 'Н/Д'
   return (
     <div
@@ -61,7 +68,7 @@ export default function TrackCard({
         />
         <div
           title={t('playlist.track.duration')}
-          className="absolute text-[10px] bottom-0.5 right-0.5 px-1 py-0.25 rounded-md font-mono bg-[#000000a7] text-white cursor-help"
+          className="absolute text-[10px] bottom-0.5 right-0.5 px-1 py-px rounded-md font-mono bg-[#000000a7] text-white cursor-help"
         >
           {track.duration}
         </div>
@@ -112,7 +119,7 @@ export default function TrackCard({
             </span>
           </div>
         </div>
-        <TrackActions primary={primary} secondary={secondary} />
+        <TrackActions primary={primary} secondary={secondary} track={track} />
         {openModal === 'block' && (
           <WarningModal track={track} open onOpenChange={closeModal} />
         )}

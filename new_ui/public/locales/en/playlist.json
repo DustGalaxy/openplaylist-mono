@@ -72,7 +72,7 @@
         "report_track": "Report Track"
       },
       "errors": {
-        "unknown": "Неизвестная ошибка",
+        "unknown": "Unknown error",
         "Playlist is not active": "Playlist is not active",
         "Wrong donation amount": "Wrong donation amount",
         "Wrong donation currency": "Wrong donation currency",
@@ -223,8 +223,8 @@
       "free": "Free",
       "randomHint": "Tracks are shuffled randomly",
       "freeHint": "Drag tracks to reorder manually",
-      "host": "",
-      "hostHint": ""
+      "host": "Host",
+      "hostHint": "Host like sorting method"
     },
     "priority": {
       "lowFirst": "Low priority first",

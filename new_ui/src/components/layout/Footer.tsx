@@ -49,7 +49,7 @@ export default function Footer() {
           <nav className="flex items-center gap-4 text-sm text-text-secondary">
             {isAuthenticated && (
               <Link
-                to="/dashboard"
+                to="/playlists"
                 className="hover:text-text-main transition-colors"
               >
                 {t('nav.myPlaylists', 'My playlists')}

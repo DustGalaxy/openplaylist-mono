@@ -166,6 +166,7 @@ export const getWidgetToken = async () => {
 export const createSubscription = async (
   target_id: string,
   target_type: string,
+  target_name: string,
   settings?: SubscriptionSettings,
 ) => {
   const config = getConfig()
@@ -174,7 +175,7 @@ export const createSubscription = async (
     {
       method: 'POST',
       withCredentials: true,
-      data: { target_id, target_type, settings },
+      data: { target_id, target_type, target_name, settings },
     },
   )
   return response.data

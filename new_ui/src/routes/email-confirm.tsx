@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import axios, { AxiosError } from 'axios'
-import { useTranslation } from 'react-i18next'
+import { FeatureI18nProvider, useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 import { useAuthStore } from '@/stores/authStore'
 import { getConfig } from '@/lib/utils'
@@ -16,7 +16,7 @@ interface SearchParams {
 }
 
 const EmailConfirmPage = () => {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const navigate = useNavigate()
   const search = useSearch({ from: '/email-confirm' }) as SearchParams
   const queryClient = useQueryClient()
@@ -206,6 +206,10 @@ const EmailConfirmPage = () => {
   )
 }
 export const Route = createFileRoute('/email-confirm')({
-  component: EmailConfirmPage,
+  component: () => (
+    <FeatureI18nProvider ns="auth">
+      <EmailConfirmPage />
+    </FeatureI18nProvider>
+  ),
 })
 export default EmailConfirmPage

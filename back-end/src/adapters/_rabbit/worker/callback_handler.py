@@ -3,11 +3,10 @@ from faststream.rabbit import RabbitRouter
 from src.adapters._rabbit.queues import (
     playlist_fanout_exchange,
 )
-
+from src.dto.events import Deleted, PlayNow
+from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType
 from src.models.order import OrderDomain
 from src.services.realtime.sio_playlist import sio_playlist_service
-from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType
-from src.dto.events import PlayNow, Deleted
 
 router = RabbitRouter()
 
@@ -37,3 +36,8 @@ async def _(event: InternalPlaylistEvent):
             await sio_playlist_service.delete_track(
                 Deleted(track_id=str(event.track.id), playlist_id=str(event.playlist_id))
             )
+
+        case InternalPlaylistEventType.PLAYLIST_SETTINGS_CHANGED:
+            if not  event.playlist_data:
+                return 
+            await sio_playlist_service.settings_changed(event.playlist_data)

@@ -268,6 +268,13 @@ export default function WarningModal({
         <DialogFooter>
           <div className="flex justify-between w-full">
             <Btn
+              className="bg-level-2 px-2"
+              disabled={submitting}
+              onClick={() => handleOpenChange(false)}
+            >
+              {t('playlist.report.cancel')}
+            </Btn>
+            <Btn
               className="w-full bg-level-2 sm:w-auto px-2"
               disabled={submitting}
               onClick={() => void handleSubmit()}
@@ -275,13 +282,6 @@ export default function WarningModal({
               {submitting
                 ? t('playlist.report.submitting')
                 : t('playlist.report.submit')}
-            </Btn>
-            <Btn
-              className="bg-level-2 px-2"
-              disabled={submitting}
-              onClick={() => handleOpenChange(false)}
-            >
-              {t('playlist.report.cancel')}
             </Btn>
           </div>
         </DialogFooter>

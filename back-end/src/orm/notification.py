@@ -59,6 +59,7 @@ class SubscriptionORM(Base, UUIDMixin):
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     target_id: Mapped[UUID] = mapped_column(nullable=False)
     target_type: Mapped[str] = mapped_column(nullable=False)
+    target_name: Mapped[str] = mapped_column(nullable=False)
     settings: Mapped[dict] = mapped_column(
         JSONB,
         nullable=False,

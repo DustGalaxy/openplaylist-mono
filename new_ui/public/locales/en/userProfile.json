@@ -1,1 +1,8 @@
-{}
+{
+  "userProfile": {
+    "noBio": "👀 No bio.",
+    "nowListening": "Now listening",
+    "roles": "Roles",
+    "viewProfile": "View Profile"
+  }
+}

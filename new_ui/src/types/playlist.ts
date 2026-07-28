@@ -370,7 +370,7 @@ export interface BaseState {
   playerSessionRestored: boolean
   setUserId: (userId: string | null) => void
   setSocket: (socket: Socket | null) => void
-  setPlayerSessionRestored: () => void
+  setPlayerSessionRestored: (value: boolean) => void
 }
 
 export interface CacheSlice {

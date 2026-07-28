@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ViewRouteImport } from './routes/view'
 import { Route as StatisticRouteImport } from './routes/statistic'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as RegisterRouteImport } from './routes/register'
@@ -19,16 +18,11 @@ import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as EmailConfirmRouteImport } from './routes/email-confirm'
-import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SavesIndexRouteImport } from './routes/saves.index'
 import { Route as PlaylistsIndexRouteImport } from './routes/playlists.index'
 import { Route as PlaylistsPlaylistIdRouteImport } from './routes/playlists.$playlistId'
 
-const ViewRoute = ViewRouteImport.update({
-  id: '/view',
-  path: '/view',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const StatisticRoute = StatisticRouteImport.update({
   id: '/statistic',
   path: '/statistic',
@@ -74,14 +68,14 @@ const EmailConfirmRoute = EmailConfirmRouteImport.update({
   path: '/email-confirm',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/dashboard.lazy').then((d) => d.Route))
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SavesIndexRoute = SavesIndexRouteImport.update({
+  id: '/saves/',
+  path: '/saves/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlaylistsIndexRoute = PlaylistsIndexRouteImport.update({
@@ -97,7 +91,6 @@ const PlaylistsPlaylistIdRoute = PlaylistsPlaylistIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/email-confirm': typeof EmailConfirmRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
@@ -107,13 +100,12 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
-  '/view': typeof ViewRoute
   '/playlists/$playlistId': typeof PlaylistsPlaylistIdRoute
   '/playlists': typeof PlaylistsIndexRoute
+  '/saves': typeof SavesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/email-confirm': typeof EmailConfirmRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
@@ -123,14 +115,13 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
-  '/view': typeof ViewRoute
   '/playlists/$playlistId': typeof PlaylistsPlaylistIdRoute
   '/playlists': typeof PlaylistsIndexRoute
+  '/saves': typeof SavesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/email-confirm': typeof EmailConfirmRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
@@ -140,15 +131,14 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/settings': typeof SettingsRoute
   '/statistic': typeof StatisticRoute
-  '/view': typeof ViewRoute
   '/playlists/$playlistId': typeof PlaylistsPlaylistIdRoute
   '/playlists/': typeof PlaylistsIndexRoute
+  '/saves/': typeof SavesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard'
     | '/email-confirm'
     | '/history'
     | '/login'
@@ -158,13 +148,12 @@ export interface FileRouteTypes {
     | '/register'
     | '/settings'
     | '/statistic'
-    | '/view'
     | '/playlists/$playlistId'
     | '/playlists'
+    | '/saves'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/dashboard'
     | '/email-confirm'
     | '/history'
     | '/login'
@@ -174,13 +163,12 @@ export interface FileRouteTypes {
     | '/register'
     | '/settings'
     | '/statistic'
-    | '/view'
     | '/playlists/$playlistId'
     | '/playlists'
+    | '/saves'
   id:
     | '__root__'
     | '/'
-    | '/dashboard'
     | '/email-confirm'
     | '/history'
     | '/login'
@@ -190,14 +178,13 @@ export interface FileRouteTypes {
     | '/register'
     | '/settings'
     | '/statistic'
-    | '/view'
     | '/playlists/$playlistId'
     | '/playlists/'
+    | '/saves/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
   EmailConfirmRoute: typeof EmailConfirmRoute
   HistoryRoute: typeof HistoryRoute
   LoginRoute: typeof LoginRoute
@@ -207,20 +194,13 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SettingsRoute: typeof SettingsRoute
   StatisticRoute: typeof StatisticRoute
-  ViewRoute: typeof ViewRoute
   PlaylistsPlaylistIdRoute: typeof PlaylistsPlaylistIdRoute
   PlaylistsIndexRoute: typeof PlaylistsIndexRoute
+  SavesIndexRoute: typeof SavesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/view': {
-      id: '/view'
-      path: '/view'
-      fullPath: '/view'
-      preLoaderRoute: typeof ViewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/statistic': {
       id: '/statistic'
       path: '/statistic'
@@ -284,18 +264,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmailConfirmRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/saves/': {
+      id: '/saves/'
+      path: '/saves'
+      fullPath: '/saves'
+      preLoaderRoute: typeof SavesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/playlists/': {
@@ -317,7 +297,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
   EmailConfirmRoute: EmailConfirmRoute,
   HistoryRoute: HistoryRoute,
   LoginRoute: LoginRoute,
@@ -327,9 +306,9 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SettingsRoute: SettingsRoute,
   StatisticRoute: StatisticRoute,
-  ViewRoute: ViewRoute,
   PlaylistsPlaylistIdRoute: PlaylistsPlaylistIdRoute,
   PlaylistsIndexRoute: PlaylistsIndexRoute,
+  SavesIndexRoute: SavesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

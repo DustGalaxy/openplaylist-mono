@@ -314,7 +314,7 @@ export const useAuthLogin = (
 
             localStorage.removeItem(OAUTH_STATE_KEY)
 
-            navigate({ to: '/dashboard' })
+            navigate({ to: '/playlists' })
           } else {
             console.error(
               'Backend exchange successful, but /api/me returned no user data.',

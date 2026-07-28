@@ -34,6 +34,10 @@
     "searchPlaylists": "Search playlists",
     "login": "Log in",
     "register": "Join now",
+    "feedback": "Feedback",
+    "bugReport": "Bug report",
+    "contributors": "Contributors",
+    "support": "Support",
     "highlights": {
       "realtimeQueue": "Live track queue",
       "rulesAndBlocks": "Smart filters & blocklists",
@@ -50,7 +54,19 @@
     "homeBtn": "Go home"
   },
   "sidebar": {
-    "Home": ""
+    "Home": "Home",
+    "Saves": "Saves"
+  },
+  "theme": {
+    "paletteTest": "Palette Test",
+    "custom": "Custom: {{mode}} ({{hue}}°)",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "languages": {
+    "ru": "Русский",
+    "en": "English",
+    "ua": "Українська"
   },
   "dashboard": {
     "tooltip": {

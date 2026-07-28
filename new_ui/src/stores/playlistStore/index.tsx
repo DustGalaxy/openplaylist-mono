@@ -16,7 +16,7 @@ export const usePlaylistStore = create<StoreState>()((set, get, ...rest) => ({
   setSocket: (socket) => set({ socket }),
   playerSessionRestored: false,
 
-  setPlayerSessionRestored: () => set({ playerSessionRestored: true }),
+  setPlayerSessionRestored: (value) => set({ playerSessionRestored: value }),
 
   ...createPlaylistCacheSlice(set, get, ...rest),
   ...createSlotSlice(set, get, ...rest),

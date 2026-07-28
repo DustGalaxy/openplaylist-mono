@@ -352,7 +352,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
 
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           {/* Avatar */}
-          <div className="rounded-full w-[100px] h-[100px] bg-gradient-to-br from-accent-1 to-accent-2 p-1 flex-shrink-0 shadow-lg">
+          <div className="rounded-full w-25 h-25 bg-linear-to-br from-accent-1 to-accent-2 p-1 shrink-0 shadow-lg">
             <div className="w-full h-full rounded-full bg-level-2 overflow-hidden">
               <img
                 src={user?.avatar_url || ''}

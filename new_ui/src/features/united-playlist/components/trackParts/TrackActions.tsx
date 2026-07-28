@@ -5,14 +5,15 @@ import Btn from '@/components/ui/my-btn'
 export default function TrackActions({
   primary,
   secondary,
+  track,
 }: {
   primary: Array<TrackCardAction>
   secondary: Array<TrackCardAction>
+  track: { yt_video_id: string }
 }) {
   return (
     <div className="flex items-center gap-1 shrink-0">
       {primary.map((a) => {
-        if (a.component) return <div key={a.key}>{a.component()}</div>
         const Icon = a.icon!
         return (
           <Btn
@@ -25,7 +26,7 @@ export default function TrackActions({
           </Btn>
         )
       })}
-      {secondary.length > 0 && <DropDownActions actions={secondary} />}
+      <DropDownActions actions={secondary} track={track} />
     </div>
   )
 }

@@ -52,8 +52,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <AppProviders>
-            <div className="bg-level-1 min-w-90 h-screen flex flex-col p-2  ">
-              <div className="flex flex-col min-h-full min-w-full rounded-md overflow-clip">
+            <div className="bg-level-1 min-w-90 h-screen flex flex-col md:p-2  ">
+              <div className="flex flex-col min-h-full min-w-full md:rounded-md overflow-clip">
                 <Toaster richColors />
                 <Header />
 

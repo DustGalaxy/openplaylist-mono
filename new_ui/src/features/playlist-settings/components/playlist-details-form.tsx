@@ -43,7 +43,7 @@ export default function PlaylistDetailsForm() {
               return
             }
             setName(value)
-            patchDebounced(playlist, { name: value })
+            patchDebounced(playlist.id, { name: value })
           }}
           placeholder={t('playlistSettings.details.namePlaceholder')}
           maxLength={MAX_NAME_LENGTH}
@@ -68,7 +68,7 @@ export default function PlaylistDetailsForm() {
               return
             }
             setDescription(value)
-            patchDebounced(playlist, { description: value })
+            patchDebounced(playlist.id, { description: value })
           }}
           placeholder={t('playlistSettings.details.descriptionPlaceholder')}
           maxLength={MAX_DESCRIPTION_LENGTH}

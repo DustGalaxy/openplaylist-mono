@@ -38,10 +38,10 @@ export function registerAuthStrategies(): void {
   const donateXStrategy = new DonateXIntegrayionStrategy()
   authStrategyManager.registerIntegrationStrategy('donatex', donateXStrategy)
 
-  console.log(
-    'Auth strategies registered:',
-    authStrategyManager.getRegisteredPlatforms(),
-  )
+  // console.log(
+  //   'Auth strategies registered:',
+  //   authStrategyManager.getRegisteredPlatforms(),
+  // )
 }
 
 /**

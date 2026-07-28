@@ -64,7 +64,7 @@ export default function ReportModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-sm text-text-main bg-level-2 border-level-3">
         <DialogTitle>
           {t('playlist.track.report.title', 'Report track')}
         </DialogTitle>
@@ -96,12 +96,14 @@ export default function ReportModal({
         </div>
 
         <DialogFooter>
-          <Btn onClick={() => onOpenChange(false)}>
-            {t('playlist.track.report.cancel', 'Cancel')}
-          </Btn>
-          <Btn onClick={submit} disabled={submitting}>
-            {t('playlist.track.report.submit', 'Submit')}
-          </Btn>
+          <div className="flex justify-between w-full">
+            <Btn onClick={() => onOpenChange(false)} className="px-2">
+              {t('playlist.track.report.cancel', 'Cancel')}
+            </Btn>
+            <Btn onClick={submit} disabled={submitting} className="px-2">
+              {t('playlist.track.report.submit', 'Submit')}
+            </Btn>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

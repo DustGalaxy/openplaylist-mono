@@ -1,0 +1,149 @@
+{
+  "brand": {
+    "name": "OpenPlaylist",
+    "version": "2026.2 beta",
+    "nameWithVersion": "OpenPlaylist v2026.2beta"
+  },
+  "nav": {
+    "myPlaylists": "Мої плейлисти",
+    "login": "Увійти",
+    "theme": "Тема",
+    "moveMethod": {
+      "title": "Спосіб переміщення",
+      "dnd": "Drag & Drop",
+      "arrows": "Стрілки"
+    },
+    "statistic": "Статистика",
+    "history": "Історія",
+    "settings": "Налаштування",
+    "logout": "Вийти",
+    "signUp": "Реєстрація",
+    "moveMethod.dnd": "Перетягування",
+    "moveMethod.arrows": "Стрілки"
+  },
+  "footer": {
+    "copyright": {
+      "start": "© {{year}} OpenPlaylist. Створено ",
+      "link": "DustGalaxy",
+      "end": " з ❤️ для авторів та слухачів."
+    },
+    "techStack": "Працює на Socket.IO · React · FastAPI · та купі чаю 🍵",
+    "description": "Інтерактивна музика для кожного. Створюйте власні плейлисти, діліться улюбленими треками або замовляйте музику на стрімах улюблених авторів.",
+    "navigation": "Навігація",
+    "features": "Можливості",
+    "searchPlaylists": "Пошук плейлистів",
+    "login": "Увійти",
+    "register": "Приєднатися",
+    "feedback": "Зворотний зв'язок",
+    "bugReport": "Повідомити про помилку",
+    "contributors": "Розробники",
+    "support": "Підтримка",
+    "highlights": {
+      "realtimeQueue": "Черга треків у реальному часі",
+      "rulesAndBlocks": "Розумні фільтри та чорні списки",
+      "donationPriority": "Пріоритет за донати",
+      "integrations": "Синхронізація зі стрімінговими та донат-платформами"
+    }
+  },
+  "errorPage": {
+    "eyebrow": "Ого! Щось пішло не так",
+    "title": "Щось пішло не так",
+    "logLabel": "Лог помилки:",
+    "unknownError": "Невідома системна помилка",
+    "retryBtn": "Спробувати знову",
+    "homeBtn": "На головну"
+  },
+  "sidebar": {
+    "Home": "Головна",
+    "Saves": "Збережені"
+  },
+  "theme": {
+    "paletteTest": "Тест палітри",
+    "custom": "Кастомна: {{mode}} ({{hue}}°)",
+    "light": "Світла",
+    "dark": "Темна"
+  },
+  "languages": {
+    "ru": "Русский",
+    "en": "English",
+    "ua": "Українська"
+  },
+  "dashboard": {
+    "tooltip": {
+      "addPlaylist": "Створити плейлист",
+      "playlist": "Плейлист - {{playlistName}}"
+    },
+    "eyebrow": "Ваші плейлисти",
+    "title": "Панель керування",
+    "subtitle": "Керуйте плейлистами, чергою треків та відтворенням.",
+    "empty": {
+      "title": "Плейлистів поки немає",
+      "hint": "Натисніть +, щоб створити свій перший плейлист."
+    }
+  },
+  "common": {
+    "or": "або",
+    "loading": "Завантаження сповіщень...",
+    "cancel": "Скасувати",
+    "save": "Зберегти",
+    "web": "Веб",
+    "delete": "Видалити",
+    "toast": {
+      "loading": "Завантаження...",
+      "saving": "Збереження...",
+      "copied": "Скопійовано в буфер обміну!",
+      "confirming": "Обробка...",
+      "saved": "Успішно збережено",
+      "saveFailed": "Не вдалося зберегти",
+      "success": "Готово!",
+      "error": "Щось пішло не так"
+    },
+    "general": "Загальні",
+    "general2": "Загальні"
+  },
+  "placeholder": {
+    "history": "Привіт \"/history\"!",
+    "statistic": "Привіт \"/statistic\"!"
+  },
+  "meta": {
+    "login": {
+      "title": "Вхід - OpenPlaylist",
+      "description": "Увійдіть у свій акаунт OpenPlaylist"
+    },
+    "register": {
+      "title": "Реєстрація - OpenPlaylist",
+      "description": "Створити новий акаунт OpenPlaylist"
+    }
+  },
+  "platform": {
+    "youtube": "YouTube",
+    "twitch": "Twitch",
+    "donationalerts": "Donation Alerts",
+    "google": "Google",
+    "donatex": "DonateX",
+    "discord": "Discord",
+    "x": "X",
+    "github": "GitHub",
+    "spotify": "Spotify",
+    "da": "Donation Alerts",
+    "donatepay": "DonatePay"
+  },
+  "twitch": {
+    "role": {
+      "broadcaster": "Стрімер",
+      "moderator": "Модератор",
+      "vip": "VIP",
+      "subscriber": "Підписник",
+      "Turbo": "Turbo",
+      "artist": "Художник",
+      "follower": "Фоловер"
+    }
+  },
+  "oauth": {
+    "platform": {
+      "twitch": "Twitch",
+      "da": "Donation Alerts",
+      "google": "Google"
+    }
+  }
+}

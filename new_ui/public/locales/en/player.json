@@ -1,1 +1,24 @@
-{}
+{
+  "controls": {
+    "play": "Play",
+    "pause": "Pause",
+    "prev": "Previous track",
+    "next": "Next track",
+    "repeat": "Repeat mode: {{mode}}",
+    "mute": "Mute audio",
+    "unmute": "Unmute audio",
+    "stop": "Stop playback",
+    "sync": "Request player sync",
+    "toggleVideo": "Toggle video player display"
+  },
+  "repeatMode": {
+    "all": "All tracks",
+    "once": "Single track",
+    "none": "Off"
+  },
+  "status": {
+    "playing": "Playing",
+    "paused": "Paused",
+    "buffering": "Buffering"
+  }
+}

@@ -14,11 +14,14 @@ import {
 import { RoleBadgeList } from '@/components/ui/role-badge'
 import { SocialLinksRow } from '@/components/ui/social-links-row'
 
+import { useTranslation } from 'react-i18next'
+
 interface UserPopoverProps {
   user?: PublicUser
 }
 
 export const UserPopover: React.FC<UserPopoverProps> = ({ user }) => {
+  const { t } = useTranslation('userProfile')
   const userData = user
 
   const MOCK_ROLES: Array<PublicRole> = [
@@ -126,7 +129,7 @@ export const UserPopover: React.FC<UserPopoverProps> = ({ user }) => {
           <RoleBadgeList roles={MOCK_ROLES} />
           {/* 5. Био */}
           <p className="text-xs text-text-secondary mt-2 leading-relaxed">
-            {userData?.bio ? userData.bio : '👀 No bio.'}
+            {userData?.bio ? userData.bio : t('userProfile.noBio', '👀 No bio.')}
           </p>
           {/* 6. Карточка "Сейчас слушает" */}
           {/* {userData.nowPlaying && (

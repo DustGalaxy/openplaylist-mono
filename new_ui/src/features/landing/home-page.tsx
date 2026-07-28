@@ -1,5 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
-import { Trans, useTranslation } from 'react-i18next'
+import { Trans } from 'react-i18next'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 import {
   ListMusic,
   Radio,
@@ -65,7 +66,7 @@ function FeatureCard({
 }
 
 export default function HomePage() {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const { isAuthenticated } = useAuthStore()
   const navigate = useNavigate()
 
@@ -116,7 +117,7 @@ export default function HomePage() {
                 {isAuthenticated ? (
                   <Btn
                     className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-55"
-                    onClick={() => navigate({ to: '/dashboard' })}
+                    onClick={() => navigate({ to: '/playlists' })}
                   >
                     <div className="flex items-center gap-2">
                       <Turntable />
@@ -133,9 +134,8 @@ export default function HomePage() {
                 )}
                 <Btn
                   className="px-6 h-14 text-lg font-bold bg-level-2 text-text-main min-w-50"
-                  onClick={() => navigate({ to: '/view' })}
+                  onClick={() => navigate({ to: '/playlists' })}
                 >
-                  {' '}
                   <div className="flex items-center gap-2">
                     <Search className="size-8" />
                     {t('landing.findPlaylist')}

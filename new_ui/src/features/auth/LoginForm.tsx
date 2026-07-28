@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
-import { useTranslation } from 'react-i18next'
+import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 import { SocialAuthButtons } from './SocialAuthButtons'
 import type { BackendUserProfileResponse } from '@/hooks/useAuth'
@@ -21,7 +21,7 @@ export interface LoginFormProps {
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
-  const { t } = useTranslation()
+  const { t, tc } = useFeatureTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const handleOAuthRedirect = useOAuthUrl()
@@ -84,7 +84,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           onSuccess?.()
 
           const redirectToPath =
-            localStorage.getItem(REDIRECT_AFTER_LOGIN_KEY) || '/dashboard'
+            localStorage.getItem(REDIRECT_AFTER_LOGIN_KEY) || '/playlists'
           localStorage.removeItem(REDIRECT_AFTER_LOGIN_KEY)
           navigate({ to: redirectToPath })
         } else {
@@ -144,7 +144,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-level-1 text-text-main">
-                {t('common.or')}
+                {tc('common.or')}
               </span>
             </div>
           </div>

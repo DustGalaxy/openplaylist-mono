@@ -1,0 +1,102 @@
+{
+  "notifications": {
+    "feed": {
+      "title": "Сповіщення",
+      "empty": "Сповіщень поки немає"
+    },
+    "events": {
+      "unknown": "Нове сповіщення",
+      "someone": "Хтось",
+      "tracks_added_one": "додав {{count}} трек",
+      "tracks_added_other": "додав {{count}} треки(ів)",
+      "in_playlist": " до плейлиста",
+      "tracks_removed_one": "{{count}} трек видалено з плейлиста {{playlistName}}",
+      "tracks_removed_other": "{{count}} треки(ів) видалено з плейлиста {{playlistName}}",
+      "track_removed_single": "Трек",
+      "removed_from": "було видалено з плейлиста",
+      "name_changed": "Плейлист перейменовано",
+      "visibility_changed": "Плейлист",
+      "became_public": "став публічним",
+      "became_private": "став приватним",
+      "playlist_activity": "Оновлення плейлиста",
+      "playlist_created": "Користувач {{username}} створив новий плейлист",
+      "playlist_deleted": "Користувач {{username}} видалив плейлист",
+      "user_activity": "Активність акаунту",
+      "track.added": {
+        "label": "Додавання треку",
+        "description": "Коли нові пісні додаються до плейлиста"
+      },
+      "track.removed": {
+        "label": "Видалення треку",
+        "description": "Коли треки видаляються з плейлиста"
+      },
+      "basic.name": {
+        "label": "Перейменування",
+        "description": "Зміни назви плейлиста або обкладинки"
+      },
+      "basic.visibility": {
+        "label": "Статус приватності",
+        "description": "Зміна статусу приватності (публічний/приватний)"
+      },
+      "realtime.sync": {
+        "label": "Синхронізація",
+        "description": "Увімкнення/вимкнення синхронізації в реальному часі"
+      },
+      "rules.mode": {
+        "label": "Режим фільтрації",
+        "description": "Зміни глобального режиму фільтрації треків"
+      },
+      "rules.validation": {
+        "label": "Правила перевірки",
+        "description": "Оновлення правил верифікації треків"
+      },
+      "rules.priorities": {
+        "label": "Пріоритети сортування",
+        "description": "Зміни пріоритетів тригерів сортування"
+      },
+      "playlist.create": {
+        "label": "Створення плейлиста",
+        "description": "Коли користувач створює новий публічний плейлист"
+      },
+      "playlist.delete": {
+        "label": "Видалення плейлиста",
+        "description": "Коли користувач видаляє свої плейлисти"
+      }
+    },
+    "actions": {
+      "mark_read": "Позначити як прочитане",
+      "delete": "Видалити"
+    },
+    "create": {
+      "title": "Створити підписку",
+      "submit_btn": "Підписатися"
+    },
+    "settings": {
+      "target_playlist": "Плейлист",
+      "target_user": "Користувач",
+      "quick_setup": "Швидке налаштування:",
+      "unmute_all": "Увімкнути звук для всіх",
+      "mute_all": "Вимкнути звук для всіх",
+      "title": "Налаштування сповіщень"
+    },
+    "subscribed": "Підписано!",
+    "manager": {
+      "confirm_unsubscribe": "Ви дійсно бажаєте скасувати підписку?",
+      "error_unsubscribe": "Помилка скасування підписки",
+      "error_save_settings": "Помилка оновлення налаштувань",
+      "loading": "Завантаження підписок...",
+      "title": "Керування підписками",
+      "description": "Налаштуйте детальні сповіщення для кожного елемента контенту або скасуйте підписку на оновлення.",
+      "empty": "У вас поки немає активних підписок.",
+      "type_playlist": "Плейлист",
+      "type_user": "Користувач",
+      "author": "Автор",
+      "status": "Активно",
+      "mute_all_status": "Звук вимкнено для всіх",
+      "triggers_count_one": "{{count}} тригер",
+      "triggers_count_other": "{{count}} тригери(ів)",
+      "btn_configure": "Налаштувати",
+      "btn_unsubscribe_title": "Скасувати підписку"
+    }
+  }
+}

@@ -272,6 +272,8 @@ function bindPlaylistEvents(playlistId: string, get: () => StoreState) {
   })
 
   socket.on(`settings_changed:${playlistId}`, (event: Partial<Playlist>) => {
+    console.log('settings_changed = ', event)
+
     get().updatePlaylistData(playlistId, (p) => mergeSettingsChanged(p, event))
   })
 

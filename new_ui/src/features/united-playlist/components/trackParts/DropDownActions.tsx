@@ -1,18 +1,22 @@
+import { useState } from 'react'
 import { MoreVertical } from 'lucide-react'
 import type { TrackCardAction } from './types'
+import AddToPlaylistSubmenu from './AddToPlaylistSubmenu'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import Btn from '@/components/ui/my-btn'
-import { useState } from 'react'
 
 export default function DropDownActions({
   actions,
+  track,
 }: {
   actions: Array<TrackCardAction>
+  track: { yt_video_id: string }
 }) {
   const [isOpen, setIsOpen] = useState(false)
   return (
@@ -22,9 +26,13 @@ export default function DropDownActions({
           <MoreVertical className="size-4" />
         </Btn>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-level-2 text-text-main">
+      <DropdownMenuContent className="bg-level-2 text-text-main  border-level-3">
+        {/* Захардкожено напрямую, не через data-driven actions —
+            component-в-actions ломал границу React Refresh и изоляцию хуков */}
+        <AddToPlaylistSubmenu track={track} />
+        {actions.length > 0 && <DropdownMenuSeparator className="bg-level-3" />}
+
         {actions.map((a) => {
-          if (a.component) return <div key={a.key}>{a.component()}</div>
           const Icon = a.icon
           return (
             <DropdownMenuItem

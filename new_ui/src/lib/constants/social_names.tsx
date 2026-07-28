@@ -17,7 +17,10 @@ const socialIcons = {
   donationalerts: { icon: <DonationAlerts />, key: 'platform.donationalerts' },
   X: { icon: <XFormerlyTwitter />, key: 'platform.x' },
   google: { icon: <Google />, key: 'platform.google' },
-  github: { icon: <Github />, key: 'platform.github' },
+  github: {
+    icon: <Github className=" bg-white rounded-2xl ring-1 ring-white" />,
+    key: 'platform.github',
+  },
   spotify: { icon: <Spotify />, key: 'platform.spotify' },
 } as const
 
