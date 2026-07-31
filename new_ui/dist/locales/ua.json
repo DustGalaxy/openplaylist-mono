@@ -3,17 +3,6 @@
     "name": "",
     "version": ""
   },
-  "footer": {
-    "description": "",
-    "navigation": "",
-    "features": "",
-    "copyright": {
-      "start": "",
-      "link": "",
-      "end": ""
-    },
-    "techStack": ""
-  },
   "nav": {
     "myPlaylists": "",
     "login": "",
@@ -28,6 +17,17 @@
     "settings": "",
     "logout": ""
   },
+  "footer": {
+    "copyright": {
+      "start": "",
+      "link": "",
+      "end": ""
+    },
+    "techStack": "",
+    "description": "",
+    "navigation": "",
+    "features": ""
+  },
   "errorPage": {
     "eyebrow": "",
     "title": "",
@@ -35,6 +35,22 @@
     "unknownError": "",
     "retryBtn": "",
     "homeBtn": ""
+  },
+  "sidebar": {
+    "Home": ""
+  },
+  "dashboard": {
+    "tooltip": {
+      "addPlaylist": "",
+      "playlist": ""
+    },
+    "eyebrow": "",
+    "title": "",
+    "subtitle": "",
+    "empty": {
+      "title": "",
+      "hint": ""
+    }
   },
   "playlist": {
     "stats": {
@@ -136,26 +152,44 @@
       "status": "",
       "requester": "",
       "eject": "",
-      "ejectBtn": ""
+      "ejectBtn": "",
+      "report": {
+        "reasons": {
+          "inappropriate": "Inappropriate content",
+          "spam": "Spam",
+          "wrong_track": "Wrong track",
+          "other": "Other"
+        },
+        "success": "Report sent",
+        "error": "Failed to send report",
+        "title": "Report track",
+        "commentPlaceholder": "Comment (optional)",
+        "cancel": "Cancel",
+        "submit": "Submit"
+      },
+      "actions": {
+        "play": "Play",
+        "copyLink": "Copy link",
+        "remove": "Remove",
+        "blockRequester": "Block requester",
+        "report": "Report"
+      }
     },
     "tooltip": {
-      "prev": "",
-      "next": "",
-      "shuffle": "",
       "status": "",
       "sync": "",
       "share": "",
       "logs": "",
       "validation": "",
       "hideSavedTracks": "",
-      "showSavedTracks": ""
+      "showSavedTracks": "",
+      "prev": "",
+      "next": "",
+      "shuffle": ""
     },
     "status": {
       "online": "",
       "offline": ""
-    },
-    "nowPlaying": {
-      "empty": ""
     },
     "saved": {
       "title": "",
@@ -192,6 +226,9 @@
       "submit": "",
       "toggle": "",
       "placeholder": ""
+    },
+    "nowPlaying": {
+      "empty": ""
     }
   },
   "auth": {
@@ -311,30 +348,43 @@
   },
   "common": {
     "or": "",
+    "loading": "Loading notifications...",
     "cancel": "Отмена",
     "save": "Сохранить",
     "web": "",
-    "general2": "",
-    "general": "",
+    "delete": "",
     "toast": {
       "loading": "",
       "saving": "",
       "copied": "",
       "confirming": ""
-    }
+    },
+    "general": "",
+    "general2": ""
   },
-  "dashboard": {
-    "tooltip": {
-      "addPlaylist": "",
-      "playlist": ""
-    },
-    "empty": {
-      "title": "",
-      "hint": ""
-    },
-    "eyebrow": "",
-    "title": "",
-    "subtitle": ""
+  "contributorsModal": {
+    "title": "Contributors",
+    "wantToHelp": "Want to help? Reach out through the feedback form."
+  },
+  "feedbackModal": {
+    "sent": "Thanks! Your message has been sent.",
+    "sendError": "Failed to send, please try again later.",
+    "bugTitle": "Report a bug",
+    "feedbackTitle": "Send feedback",
+    "bugPlaceholder": "What went wrong? Steps to reproduce help a lot.",
+    "feedbackPlaceholder": "What do you think? Ideas, complaints, praise — all welcome.",
+    "name": "Name",
+    "namePlaceholder": "Your name (optional)",
+    "contact": "Contact",
+    "contactPlaceholder": "Email or Telegram (optional)",
+    "rating": "Rating",
+    "text": "Message",
+    "submit": "Send"
+  },
+  "supportModal": {
+    "title": "Support the project",
+    "text": "Right now the best support is to tell your friends, try the app out, and leave feedback.",
+    "feedbackCta": "Leave feedback"
   },
   "landing": {
     "eyebrow": "",
@@ -350,14 +400,50 @@
     "howItWorksTitle": ""
   },
   "notifications": {
+    "feed": {
+      "title": "Notifications",
+      "empty": "No notifications yet"
+    },
+    "events": {
+      "unknown": "Новое уведомление",
+      "someone": "Кто-то",
+      "tracks_added_plural_one": "добавил {{count}} треков",
+      "tracks_added_plural_few": "добавил {{count}} треков",
+      "tracks_added_plural_many": "добавил {{count}} треков",
+      "tracks_added_plural_other": "добавил {{count}} треков",
+      "in_playlist": " в плейлист",
+      "tracks_removed_plural_one": "Из плейлиста {{playlistName}} удалено {{count}} треков",
+      "tracks_removed_plural_few": "Из плейлиста {{playlistName}} удалено {{count}} треков",
+      "tracks_removed_plural_many": "Из плейлиста {{playlistName}} удалено {{count}} треков",
+      "tracks_removed_plural_other": "Из плейлиста {{playlistName}} удалено {{count}} треков",
+      "track_removed_single": "Трек",
+      "removed_from": "был удален из плейлиста",
+      "name_changed": "Плейлист переименован",
+      "visibility_changed": "Плейлист",
+      "became_public": "стал публичным",
+      "became_private": "стал приватным",
+      "playlist_activity": "Обновление плейлиста",
+      "playlist_created": "Пользователь {{username}} создал новый плейлист",
+      "playlist_deleted": "Пользователь {{username}} удалил плейлист",
+      "user_activity": "Активность аккаунта"
+    },
+    "actions": {
+      "mark_read": "Отметить прочитанным",
+      "delete": "Удалить"
+    },
+    "create": {
+      "title": "Оформить подписку",
+      "submit_btn": "Подписаться"
+    },
     "settings": {
-      "title": "Настройки уведомлений",
       "target_playlist": "Плейлист",
       "target_user": "Пользователь",
       "quick_setup": "Быстрые настройки:",
       "unmute_all": "Включить все",
-      "mute_all": "Глушить всё"
+      "mute_all": "Глушить всё",
+      "title": "Настройки уведомлений"
     },
+    "subscribed": "Subscribed!",
     "manager": {
       "confirm_unsubscribe": "Вы уверены, что хотите отписаться?",
       "error_unsubscribe": "Ошибка при отписке",
@@ -392,12 +478,13 @@
       "userUnblocked": "",
       "userUnblockFailed": "",
       "trackUnblocked": "",
+      "trackUnblockFailed": "",
       "title": "",
       "description": "",
       "blockUser": "",
+      "validationRequired": "",
       "userBlockedSuccess": "",
       "userBlockFailed": "",
-      "validationRequired": "",
       "selectTriggerType": "",
       "triggerUserName": "",
       "triggerUserId": "",
@@ -409,42 +496,24 @@
       "trackYoutubeLength": "",
       "trackAlreadyBlocked": "",
       "trackBlockedSuccess": "",
+      "trackBlockFailed": "",
       "emptyTracks": ""
     },
     "chatRoles": {
-      "removeSuccess": "",
-      "removeFailed": "",
       "selectRole": "",
       "addSuccess": "",
       "addFailed": "",
+      "removeSuccess": "",
+      "removeFailed": "",
+      "title": "",
+      "subtitle": "",
       "addRole": "",
       "add": "",
       "noRoles": "",
-      "addRoleHint": "",
-      "title": ""
-    },
-    "donation": {
-      "saving": "",
-      "updateSuccess": "",
-      "updateFailed": "",
-      "deleteRuleConfirm": "",
-      "name": "",
-      "ruleName": "",
-      "slug": "",
-      "ruleSlug": "",
-      "amount": "",
-      "currency": "",
-      "priority": "",
-      "add": "",
-      "noRules": "",
-      "fillAll": "",
-      "createSuccess": "",
-      "createFailed": "",
-      "deleteSuccess": "",
-      "deleteFailed": "",
-      "title": ""
+      "addRoleHint": ""
     },
     "validation": {
+      "initFailed": "",
       "tabtitle": "",
       "notInitialized": "",
       "minViews": "",
@@ -454,9 +523,30 @@
       "trackCooldown": "",
       "trackCooldownDesc": "",
       "userCooldown": "",
-      "initFailed": "",
       "title": "",
       "description": ""
+    },
+    "donation": {
+      "deleteRuleConfirm": "",
+      "name": "",
+      "ruleName": "",
+      "amount": "",
+      "currency": "",
+      "priority": "",
+      "fillAll": "",
+      "createSuccess": "",
+      "createFailed": "",
+      "deleteSuccess": "",
+      "deleteFailed": "",
+      "title": "",
+      "subtitle": "",
+      "add": "",
+      "noRules": "",
+      "saving": "",
+      "updateSuccess": "",
+      "updateFailed": "",
+      "slug": "",
+      "ruleSlug": ""
     },
     "details": {
       "name": "",
@@ -469,28 +559,29 @@
       "descriptionTooLong": "",
       "descriptionPlaceholder": ""
     },
-    "toast": {
-      "settingsSaved": "",
-      "settingsFailed": "",
-      "playlistSaved": "",
-      "playlistFailed": "",
-      "playlistDeleted": "",
-      "visibilityUpdated": ""
-    },
     "title": "",
     "description": "",
     "tabs": {
       "basic": "",
+      "platforms": "",
+      "block": "",
+      "delete": "",
       "validation": "",
       "donation": "",
-      "chatRoles": "",
-      "block": "",
-      "delete": ""
+      "chatRoles": ""
     },
     "delete": {
       "title": "",
-      "deleted": "",
-      "button": ""
+      "button": "",
+      "deleted": ""
+    },
+    "toast": {
+      "playlistDeleted": "",
+      "visibilityUpdated": "",
+      "settingsSaved": "",
+      "settingsFailed": "",
+      "playlistSaved": "",
+      "playlistFailed": ""
     },
     "basic": {
       "modeTitle": "",
@@ -539,24 +630,15 @@
     "google": "",
     "donatex": ""
   },
-  "twitch": {
-    "role": {
-      "broadcaster": "",
-      "moderator": "",
-      "vip": "",
-      "subscriber": "",
-      "Turbo": "",
-      "artist": "",
-      "follower": ""
-    }
-  },
   "sort": {
     "mode": {
       "auto": "",
       "random": "",
       "free": "",
       "randomHint": "",
-      "freeHint": ""
+      "freeHint": "",
+      "host": "",
+      "hostHint": ""
     },
     "priority": {
       "lowFirst": "",
@@ -567,6 +649,9 @@
       "olderFirst": "",
       "newerFirst": "",
       "title": ""
+    },
+    "tabs": {
+      "background": ""
     }
   },
   "view": {
@@ -577,6 +662,44 @@
         "add": ""
       }
     }
+  },
+  "publicView": {
+    "eyebrow": "",
+    "searchTitle": "",
+    "browseSubtitle": "",
+    "notFoundUnavailable": "",
+    "notFoundCheckLink": "",
+    "anotherPlaylist": "",
+    "searchPublic": "",
+    "resetSearchAgain": "",
+    "copyLink": "",
+    "subscribe": "",
+    "requestsOpen": "",
+    "requestsClosed": "",
+    "modeFlow": "",
+    "modeStatic": "",
+    "queue": "",
+    "trackCount_one": "",
+    "trackCount_few": "",
+    "trackCount_many": "",
+    "trackCount_other": "",
+    "queueEmptyPlaylist": "",
+    "queueEmptyWaiting": "",
+    "sort": {
+      "host": "Host like"
+    },
+    "noDescription": "",
+    "playlistSettings": "",
+    "addTrack": "",
+    "nowPlaying": "",
+    "nowPlayingEmpty": "",
+    "nowPlayingHint": "",
+    "sync": "",
+    "playlist": "",
+    "syncOn": "",
+    "syncOff": "",
+    "desync": "",
+    "syncBtn": ""
   },
   "publicSearch": {
     "title": "",
@@ -590,38 +713,6 @@
     "initialHintFull": "",
     "searchPlaceholder": "",
     "submit": ""
-  },
-  "publicView": {
-    "requestsOpen": "",
-    "requestsClosed": "",
-    "modeFlow": "",
-    "modeStatic": "",
-    "noDescription": "",
-    "playlistSettings": "",
-    "addTrack": "",
-    "nowPlaying": "",
-    "nowPlayingEmpty": "",
-    "nowPlayingHint": "",
-    "eyebrow": "",
-    "searchTitle": "",
-    "browseSubtitle": "",
-    "notFoundUnavailable": "",
-    "notFoundCheckLink": "",
-    "anotherPlaylist": "",
-    "searchPublic": "",
-    "resetSearchAgain": "",
-    "playlist": "",
-    "queue": "",
-    "trackCount_one": "",
-    "trackCount_few": "",
-    "trackCount_many": "",
-    "trackCount_other": "",
-    "queueEmptyPlaylist": "",
-    "queueEmptyWaiting": "",
-    "syncOn": "",
-    "syncOff": "",
-    "desync": "",
-    "syncBtn": ""
   },
   "settings": {
     "account": {
@@ -700,6 +791,9 @@
         "urlProtocol": "",
         "urlInvalid": ""
       },
+      "saving": "",
+      "saved": "",
+      "saveFailed": "",
       "duplicatePlatform": "",
       "adding": "",
       "linkAddedSuccess": "",
@@ -718,6 +812,12 @@
       },
       "overview": "",
       "noEmail": "",
+      "editProfile": "",
+      "bio": "",
+      "bioPlaceholder": "",
+      "isPublic": "",
+      "isPublicHint": "",
+      "save": "",
       "removePlatform": "",
       "deletePlatformAria": "",
       "noSocialLinksYet": "",
@@ -794,6 +894,17 @@
     "register": {
       "title": "",
       "description": ""
+    }
+  },
+  "twitch": {
+    "role": {
+      "broadcaster": "",
+      "moderator": "",
+      "vip": "",
+      "subscriber": "",
+      "Turbo": "",
+      "artist": "",
+      "follower": ""
     }
   }
 }

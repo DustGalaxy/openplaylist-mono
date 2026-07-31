@@ -1,6 +1,9 @@
 import { useNavigate } from '@tanstack/react-router'
 import { Trans } from 'react-i18next'
-import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
+import {
+  FeatureI18nProvider,
+  useFeatureTranslation,
+} from '@/lib/i18n/featureTranslation'
 import {
   ListMusic,
   Radio,
@@ -102,15 +105,7 @@ export default function HomePage() {
               </h1>
 
               <p className="text-lg sm:text-xl text-text-secondary leading-relaxed max-w-xl mb-8">
-                <Trans
-                  i18nKey="landing.heroBody"
-                  components={[
-                    <span
-                      key="0"
-                      className={`font-semibold ${gradientTextClass}`}
-                    />,
-                  ]}
-                />
+                {t('landing.heroBody')}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -178,6 +173,10 @@ export default function HomePage() {
 
       <section className="px-4 py-16 sm:py-20 bg-level-2/40 border-y border-level-3/30">
         <div className="mx-auto max-w-5xl">
+          <section className="w-full flex flex-col  justify-center mb-16 text-center text-3xl sm:text-4xl font-bold text-text-main">
+            <div className="pb-4">{t('landing.preview', 'Preview')}</div>
+            <img src="preview-guide.gif" alt="" />
+          </section>
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-text-main mb-3">
               {t('landing.featuresTitle')}
@@ -230,7 +229,9 @@ export default function HomePage() {
       <section className="px-4 pb-20 sm:pb-28">
         <div className="mx-auto max-w-5xl">
           <div className={`p-6 sm:p-10 ${panelClass}`}>
-            <SearchPlaylist showHeader />
+            <FeatureI18nProvider ns={'playlist'}>
+              <SearchPlaylist showHeader />
+            </FeatureI18nProvider>
           </div>
         </div>
       </section>

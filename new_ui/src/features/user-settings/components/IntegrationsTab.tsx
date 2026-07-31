@@ -7,18 +7,15 @@ import {
   BotOff,
   Link2,
   Link2Off,
+  Plus,
   RefreshCw,
 } from 'lucide-react'
 import type { Integration } from '@/types/user'
 import { connectBot, deleteIntegration, disconnectBot } from '@/api/api-user'
 import { getGlobalSocket } from '@/api/io-sockets'
 import Btn from '@/components/ui/my-btn'
-import {
-  innerPanelClass,
-  panelClass,
-  sectionTitleClass,
-  statusOpenClass,
-} from '@/features/landing/styles'
+import { Label } from '@/components/ui/label'
+import { DialogDescription } from '@/components/ui/dialog'
 import { BotSettingsModal } from './BotSettingsModal'
 import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
@@ -50,7 +47,7 @@ export function IntegrationsTab({
       setIntegrations((prevItems) =>
         prevItems.map((item) =>
           item.platform === platform &&
-          item.platform_user_id == platform_user_id
+          item.platform_user_id === platform_user_id
             ? { ...item, bot_connection: true }
             : item,
         ),
@@ -59,7 +56,7 @@ export function IntegrationsTab({
         ...prev,
         [`${platform}-${platform_user_id}-bot`]: false,
       }))
-      toast.success(t('settings.integrations.botConnected'))
+      toast.success(t('settings.integrations.botConnected', 'Bot connected'))
     }
 
     Object.keys(platformConfigs).forEach((platform) => {
@@ -75,7 +72,7 @@ export function IntegrationsTab({
         global_socket.off(`ack_bot_connected:${platform}`)
       })
     }
-  }, [])
+  }, [platformConfigs, t])
 
   const handleConnectBot = async (
     platform: string,
@@ -85,7 +82,7 @@ export function IntegrationsTab({
       ...prev,
       [`${platform}-${platform_user_id}-bot`]: true,
     }))
-    const loadingToast = toast.loading(t('settings.integrations.connecting'))
+    const loadingToast = toast.loading(t('settings.integrations.connecting', 'Connecting bot...'))
 
     try {
       if (await connectBot(platform, platform_user_id)) {
@@ -102,7 +99,7 @@ export function IntegrationsTab({
     } catch (error) {
       console.error(`Failed to connect bot for ${platform}:`, error)
       toast.dismiss(loadingToast)
-      toast.error(t('settings.integrations.connectFailed'))
+      toast.error(t('settings.integrations.connectFailed', 'Failed to connect bot'))
       setLoading((prev) => ({
         ...prev,
         [`${platform}-${platform_user_id}-bot`]: false,
@@ -118,7 +115,7 @@ export function IntegrationsTab({
       ...prev,
       [`${platform}-${platformUserId}-bot-delete`]: true,
     }))
-    const loadingToast = toast.loading(tc('common.toast.confirming'))
+    const loadingToast = toast.loading(tc('common.toast.confirming', 'Confirming...'))
 
     try {
       await disconnectBot(platform, platformUserId)
@@ -130,11 +127,11 @@ export function IntegrationsTab({
         ),
       )
       toast.dismiss(loadingToast)
-      toast.success(t('settings.integrations.botDisconnected'))
+      toast.success(t('settings.integrations.botDisconnected', 'Bot disconnected'))
     } catch (error) {
       console.error(`Failed to disconnect bot for ${platform}:`, error)
       toast.dismiss(loadingToast)
-      toast.error(t('settings.integrations.disconnectFailed'))
+      toast.error(t('settings.integrations.disconnectFailed', 'Failed to disconnect bot'))
     } finally {
       setLoading((prev) => ({
         ...prev,
@@ -148,7 +145,7 @@ export function IntegrationsTab({
       ...prev,
       [`${platform}-${platformUserId}-delete`]: true,
     }))
-    const loadingToast = toast.loading(tc('common.toast.confirming'))
+    const loadingToast = toast.loading(tc('common.toast.confirming', 'Confirming...'))
 
     try {
       await deleteIntegration(platform, platformUserId)
@@ -159,11 +156,11 @@ export function IntegrationsTab({
         ),
       )
       toast.dismiss(loadingToast)
-      toast.success(t('settings.integrations.disconnected'))
+      toast.success(t('settings.integrations.disconnected', 'Account disconnected'))
     } catch (error) {
       console.error(`Failed to disconnect ${platform}:`, error)
       toast.dismiss(loadingToast)
-      toast.error(t('settings.integrations.disconnectFailed'))
+      toast.error(t('settings.integrations.disconnectFailed', 'Failed to disconnect account'))
     } finally {
       setLoading((prev) => ({
         ...prev,
@@ -181,33 +178,50 @@ export function IntegrationsTab({
   const connectedPlatforms = new Set(integrations.map((i) => i.platform))
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Dead integrations banner — shown only when relevant */}
+    <div className="space-y-4">
+      {/* Title Header */}
+      <div className="flex items-start gap-2.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+          <Link2 className="size-5" />
+        </div>
+        <div>
+          <Label className="text-base font-bold text-text-main">
+            {t('settings.integrations.connectedAccounts', 'Integrations & Bots')}
+          </Label>
+          <DialogDescription className="text-xs text-text-secondary mt-0.5">
+            {t('settings.integrations.subtitle', 'Connect streaming platforms, chat bots, and external accounts.')}
+          </DialogDescription>
+        </div>
+      </div>
+
+      {/* Dead integrations banner */}
       {deadCount > 0 && (
-        <div className="flex items-start gap-3 px-4 py-3 rounded-(--rounded-std) border border-amber-500/30 bg-amber-500/8 text-amber-200">
-          <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-amber-400" />
-          <p className="text-sm leading-snug">
-            {t('settings.integrations.deadBanner', { count: deadCount })}
+        <div className="flex items-start gap-2.5 p-3 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-200 text-xs">
+          <AlertTriangle className="size-4 shrink-0 text-amber-400 mt-0.5" />
+          <p className="leading-snug">
+            {t('settings.integrations.deadBanner', {
+              count: deadCount,
+              defaultValue: 'Some account tokens have expired. Please reconnect them.',
+            })}
           </p>
         </div>
       )}
 
-      {/* Connected Accounts */}
-      <div className={`p-2 sm:p-4 ${panelClass}`}>
-        <div className="flex items-center justify-between mb-4">
-          <h3
-            className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main`}
-          >
-            {t('settings.integrations.connectedAccounts')}
-          </h3>
+      {/* Card 1: Connected Accounts */}
+      <div className="p-3 sm:p-4 border border-level-3/60 rounded-md bg-level-1 space-y-3 shadow-xs">
+        <div className="flex items-center justify-between pb-1 border-b border-level-3/40">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main">
+            <Link2 className="size-4 text-level-3" />
+            <span>{t('settings.integrations.connectedAccounts', 'Connected Accounts')}</span>
+          </div>
           {integrations.length > 0 && (
-            <span className="text-xs text-text-placeholder tabular-nums">
+            <span className="text-[10px] text-text-placeholder font-mono px-2 py-0.5 rounded-full bg-level-2 border border-level-3/40">
               {integrations.length}
             </span>
           )}
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="space-y-2">
           {integrations.length > 0 ? (
             integrations.map((integration) => (
               <IntegrationCard
@@ -241,56 +255,54 @@ export function IntegrationsTab({
               />
             ))
           ) : (
-            <div className="text-center py-10 px-4">
-              <div className="mx-auto mb-3 h-10 w-10 rounded-(--rounded-std) bg-level-1 border border-level-3/30 flex items-center justify-center">
-                <Link2 className="h-5 w-5 text-text-placeholder" />
-              </div>
-              <p className="text-text-main font-medium text-sm">
-                {t('settings.integrations.empty')}
+            <div className="p-6 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center space-y-1">
+              <Link2 className="size-6 text-text-placeholder mx-auto" />
+              <p className="text-xs font-semibold text-text-main">
+                {t('settings.integrations.empty', 'No connected accounts yet')}
               </p>
-              <p className="text-xs text-text-secondary mt-1 max-w-xs mx-auto">
-                {t('settings.integrations.emptyHintLong')}
+              <p className="text-[11px] text-text-secondary max-w-xs mx-auto">
+                {t('settings.integrations.emptyHintLong', 'Connect your streaming and donation platforms below.')}
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Available Platforms */}
-      <div className={`p-2 sm:p-4 ${panelClass}`}>
-        <h3
-          className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}
-        >
-          {t('settings.integrations.addAccounts')}
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {/* Card 2: Available Platforms */}
+      <div className="p-3 sm:p-4 border border-level-3/60 rounded-md bg-level-1 space-y-3 shadow-xs">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-level-3/40">
+          <Plus className="size-4 text-level-3" />
+          <span>{t('settings.integrations.addAccounts', 'Available Platforms')}</span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {Object.entries(platformConfigs).map(([platform, config]) => {
             const isConnected = connectedPlatforms.has(platform)
             return (
               <div
                 key={platform}
-                className={`flex items-center gap-4 p-4 ${innerPanelClass} transition-all hover:border-level-3/30'`}
+                className="flex items-center gap-3 p-2.5 rounded-md bg-level-2/70 border border-level-3/40 hover:border-level-3 transition-colors"
               >
-                <div className="w-12 h-12 shrink-0 flex p-1 items-center justify-center rounded-(--rounded-std) bg-level-2 ">
+                <div className="size-9 shrink-0 flex items-center justify-center rounded-md bg-level-1 border border-level-3/40">
                   {config.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm text-text-main truncate">
+                  <p className="font-semibold text-xs text-text-main truncate">
                     {config.name}
                   </p>
-                  <p className="text-xs text-text-placeholder mt-0.5">
+                  <p className="text-[10px] text-text-secondary truncate mt-0.5">
                     {isConnected
-                      ? t('settings.integrations.alreadyConnected')
-                      : t('settings.integrations.connectHint')}
+                      ? t('settings.integrations.alreadyConnected', 'Connected')
+                      : t('settings.integrations.connectHint', 'Click to connect')}
                   </p>
                 </div>
                 <Btn
                   onClick={() => handleConnectPlatform(platform)}
-                  className="shrink-0 px-3 py-2 text-xs font-mono"
+                  className="h-7 px-2.5 bg-level-1 text-xs font-semibold text-text-main shrink-0 hover:bg-level-3 transition-colors"
                 >
                   {isConnected
-                    ? t('settings.integrations.addAnother')
-                    : t('settings.integrations.connectAccount')}
+                    ? t('settings.integrations.addAnother', '+ Add another')
+                    : t('settings.integrations.connectAccount', 'Connect')}
                 </Btn>
               </div>
             )
@@ -300,8 +312,6 @@ export function IntegrationsTab({
     </div>
   )
 }
-
-// ─── IntegrationCard ────────────────────────────────────────────────────────
 
 interface IntegrationCardProps {
   integration: Integration
@@ -328,7 +338,6 @@ function IntegrationCard({
   const { t } = useFeatureTranslation()
   const [intgr, setIntgr] = useState(integration)
 
-  // Sync when parent updates the integration object (e.g. bot_connection: true after socket ack)
   useEffect(() => {
     setIntgr(integration)
   }, [integration])
@@ -347,106 +356,106 @@ function IntegrationCard({
 
   return (
     <div
-      className={[
-        'flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 transition-all',
-        innerPanelClass,
+      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-md border text-xs transition-colors ${
         isDead
-          ? 'border-amber-500/30 bg-amber-500/5'
-          : 'hover:border-level-3/30',
-      ].join(' ')}
+          ? 'border-amber-500/40 bg-amber-500/10'
+          : 'border-level-3/40 bg-level-2/80 hover:border-level-3'
+      }`}
     >
-      {/* Left: icon + info */}
-      <div className="flex items-center gap-4 flex-1 min-w-0">
+      {/* Left: Icon & Details */}
+      <div className="flex items-center gap-3 min-w-0 flex-1">
         <div
-          className={`w-14 h-14 shrink-0 flex items-center p-1 justify-center rounded-(--rounded-std) border ${
+          className={`size-10 shrink-0 flex items-center justify-center rounded-md border ${
             isDead
-              ? 'bg-amber-500/10 border-amber-500/30'
-              : 'bg-level-2 border-level-3/20'
+              ? 'bg-amber-500/15 border-amber-500/40'
+              : 'bg-level-1 border-level-3/40'
           }`}
         >
-          {config.icon}
+          {config?.icon}
         </div>
 
-        <div className="flex flex-col gap-0.5 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-semibold text-text-main">
-              {config.name}
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="font-semibold text-text-main truncate">
+              {config?.name || intgr.platform}
             </span>
             {isDead && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-medium">
-                <AlertTriangle className="h-3 w-3" />
-                {t('settings.integrations.tokenExpired')}
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border border-amber-500/50 bg-amber-500/15 text-amber-300 text-[10px] font-medium">
+                <AlertTriangle className="size-3" />
+                {t('settings.integrations.tokenExpired', 'Expired')}
               </span>
             )}
             {intgr.bot_connection && !isDead && (
-              <span
-                className={`inline-flex items-center gap-1 font-mono px-2 py-0.5 rounded-full border text-xs font-medium ${statusOpenClass}`}
-              >
-                <Bot className="h-3 w-3" />
-                {t('settings.integrations.botConnected')}
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-[10px] font-medium">
+                <Bot className="size-3" />
+                {t('settings.integrations.botConnected', 'Bot Active')}
               </span>
             )}
           </div>
-          <div className="text-xs text-text-secondary truncate">
+          <span className="text-[11px] text-text-secondary truncate mt-0.5">
             @{intgr.platform_username}
-          </div>
+          </span>
         </div>
       </div>
 
-      {/* Right: actions */}
-      <div className="flex flex-row flex-wrap sm:flex-nowrap items-center gap-2 shrink-0">
+      {/* Right: Actions */}
+      <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
         {isDead ? (
-          /* Dead state: reconnect CTA is primary, disconnect is secondary */
           <>
             <button
+              type="button"
               onClick={onReconnect}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-(--rounded-std) border border-amber-500/50 bg-amber-500/10 text-amber-200 text-xs font-mono hover:bg-amber-500/20 hover:border-amber-500/70 transition-colors"
+              className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md border border-amber-500/50 bg-amber-500/15 text-amber-200 text-xs font-medium hover:bg-amber-500/25 transition-colors cursor-pointer"
             >
-              <RefreshCw className="h-3.5 w-3.5" />
-              {t('settings.integrations.reconnect')}
+              <RefreshCw className="size-3" />
+              <span>{t('settings.integrations.reconnect', 'Reconnect')}</span>
             </button>
             <DisconnectButton
               loading={isDeleteLoading}
               onClick={onDisconnect}
               label={
                 isDeleteLoading
-                  ? t('settings.integrations.removing')
-                  : t('settings.integrations.disconnect')
+                  ? t('settings.integrations.removing', 'Removing...')
+                  : t('settings.integrations.disconnect', 'Disconnect')
               }
             />
           </>
         ) : (
-          /* Healthy state */
           <>
             {intgr.bot_connection ? (
               <>
                 <BotSettingsModal
                   integration={intgr}
-                  platformName={config.name}
-                  platformIcon={config.icon}
+                  platformName={config?.name || intgr.platform}
+                  platformIcon={config?.icon}
                   onSaved={onSettingsUpdated}
                 />
                 <button
+                  type="button"
                   onClick={onDisconnectBot}
                   disabled={isBotDeleteLoading}
-                  title={t('settings.integrations.disconnectBot')}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-(--rounded-std) border border-white/10 bg-level-1/50 text-text-secondary text-sm font-mono hover:border-danger/40 hover:text-danger hover:bg-danger/8 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                  title={t('settings.integrations.disconnectBot', 'Disconnect bot')}
+                  className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md border border-level-3/40 bg-level-1 hover:border-red-500/40 hover:text-red-400 transition-colors text-xs text-text-secondary disabled:opacity-50 cursor-pointer"
                 >
-                  <BotOff className="h-3.5 w-3.5" />
-                  {isBotDeleteLoading
-                    ? t('settings.integrations.removing')
-                    : t('settings.integrations.disconnectBot')}
+                  <BotOff className="size-3" />
+                  <span>
+                    {isBotDeleteLoading
+                      ? t('settings.integrations.removing', 'Removing...')
+                      : t('settings.integrations.disconnectBot', 'Disable Bot')}
+                  </span>
                 </button>
               </>
             ) : (
               <Btn
                 onClick={onConnectBot}
                 disabled={isBotLoading}
-                className="px-3 py-2 text-xs font-mono"
+                className="h-7 px-2.5 bg-level-1 text-xs font-semibold text-text-main hover:bg-level-3 transition-colors"
               >
-                {isBotLoading
-                  ? t('settings.integrations.connecting')
-                  : t('settings.integrations.connectBot')}
+                <span>
+                  {isBotLoading
+                    ? t('settings.integrations.connecting', 'Connecting...')
+                    : t('settings.integrations.connectBot', 'Connect Bot')}
+                </span>
               </Btn>
             )}
             <DisconnectButton
@@ -454,8 +463,8 @@ function IntegrationCard({
               onClick={onDisconnect}
               label={
                 isDeleteLoading
-                  ? t('settings.integrations.removing')
-                  : t('settings.integrations.disconnect')
+                  ? t('settings.integrations.removing', 'Removing...')
+                  : t('settings.integrations.disconnect', 'Disconnect')
               }
             />
           </>
@@ -464,8 +473,6 @@ function IntegrationCard({
     </div>
   )
 }
-
-// ─── DisconnectButton ────────────────────────────────────────────────────────
 
 function DisconnectButton({
   loading,
@@ -478,12 +485,13 @@ function DisconnectButton({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={loading}
-      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-(--rounded-std) border border-danger/30 bg-danger/8 text-danger text-sm font-mono hover:bg-danger/15 hover:border-danger/50 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+      className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-medium transition-colors disabled:opacity-50 cursor-pointer"
     >
-      <Link2Off className="h-3.5 w-3.5" />
-      {label}
+      <Link2Off className="size-3" />
+      <span>{label}</span>
     </button>
   )
 }

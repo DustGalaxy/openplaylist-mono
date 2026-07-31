@@ -6,6 +6,9 @@ from pydantic import BaseModel, ConfigDict, Field
 from src.models.linked_accounts import LinkedAccountsDomain
 
 
+
+
+
 class Role(BaseModel):
     id: str
     user_id: UUID
@@ -13,6 +16,7 @@ class Role(BaseModel):
     tier: int
     start_date: datetime
     expires_at: datetime | None
+    is_active: bool
 
     model_config = ConfigDict(from_attributes=True)
 

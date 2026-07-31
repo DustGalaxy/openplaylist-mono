@@ -3,9 +3,8 @@ from faststream.rabbit import RabbitRouter
 from src.adapters._rabbit.queues import (
     playlist_fanout_exchange,
 )
-
-from src.services.realtime.sio_widget import sio_widget_service
 from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType
+from src.services.realtime.sio_widget import sio_widget_service
 
 router = RabbitRouter()
 

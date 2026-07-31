@@ -18,6 +18,7 @@ export type PlaybackFeed = {
   playing: boolean
   seekSignal: SeekSignal
   repeatMode: RepeatMode
+  shuffle: boolean
   capabilities: PlaybackFeedCapabilities
 
   onPlayerStateChange: (playing: boolean) => void
@@ -25,6 +26,7 @@ export type PlaybackFeed = {
   registerPositionGetter: (getter: () => number) => void
 
   setRepeatMode: (mode: RepeatMode) => void
+  setShuffle: (shuffle: boolean) => void
   next: () => boolean
   prev: () => void
   seek: (seconds: number) => void

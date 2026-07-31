@@ -2,32 +2,27 @@ from uuid import UUID
 
 from simple_repository import crud_factory
 from simple_repository.abctract import IdValue
-from simple_repository.exceptions import IntegrityConflictException, RepositoryException, NotFoundException
-
-from sqlalchemy import func, literal, or_, select, update, cast
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError
+from simple_repository.exceptions import IntegrityConflictException, NotFoundException, RepositoryException
+from sqlalchemy import cast, func, literal, or_, select, update
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from src._types import ContentSettingScope, DeleteStatus, DonationRuleScope, TrackSource
+from src.exceptions import NotActivePlaylist
+from src.models.order import OrderCreate, OrderDomain
 from src.models.playlist import (
     ContentSettingsCreate,
     DonationRulesCreate,
-    PlaylistSchema,
     PlaylistCreate,
     PlaylistPatch,
+    PlaylistSchema,
 )
-from src.orm.playlist import ContentSettings, DonationRules, OrderPlaylistStatus, Playlist, Order
-from src.models.order import OrderCreate, OrderDomain
-from src.dal.abstract import IPlaylistRepository
-from src.exceptions import NotActivePlaylist
-
-
-from src._types import DonationRuleScope, TrackSource, DeleteStatus, ContentSettingScope
+from src.orm.playlist import ContentSettings, DonationRules, Order, OrderPlaylistStatus, Playlist
 
 
 class PlaylistRepository(
     crud_factory(Playlist, PlaylistSchema, PlaylistCreate, PlaylistPatch),
-    IPlaylistRepository,
 ):
     def to_repr(self, object: Playlist) -> PlaylistSchema:
         return self.domain_model.model_validate(object)
@@ -195,6 +190,48 @@ class PlaylistRepository(
             orm_order.status = reason
             await session.commit()
             return
+        except IntegrityError as e:
+            await session.rollback()
+            raise IntegrityConflictException(
+                f"{self.sqla_model.__tablename__} conflicts with existing data: {e}",
+            ) from e
+        except Exception as e:
+            await session.rollback()
+            raise RepositoryException(f"Unexpected error in model {self.sqla_model.__tablename__}: {e}") from e
+
+    async def remove_orders_from_playlist(
+        self, session: AsyncSession, playlist_id: UUID, order_ids: list[UUID], reason: DeleteStatus
+    ) -> list[UUID]:
+        try:
+            orm_orders = (
+                (
+                    await session.execute(
+                        select(OrderPlaylistStatus).where(
+                            OrderPlaylistStatus.order_id.in_(order_ids),
+                            OrderPlaylistStatus.playlist_id == playlist_id,
+                        )
+                    )
+                )
+                .unique()
+                .scalars()
+                .all()
+            )
+
+            if not orm_orders:
+                raise NotFoundException()
+
+            if len(orm_orders) != len(order_ids):
+                ...
+
+            touch_ids: list[UUID] = []
+
+            for order in orm_orders:
+                order.status = reason
+                touch_ids.append(order.order_id)
+
+            await session.commit()
+            return touch_ids
+
         except IntegrityError as e:
             await session.rollback()
             raise IntegrityConflictException(

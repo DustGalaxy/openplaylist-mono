@@ -226,6 +226,11 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     updateLocal(playlistId, { repeatMode })
   }
 
+  const setShuffle = (shuffle: boolean) => {
+    if (!playlistId) return
+    updateLocal(playlistId, { shuffle })
+  }
+
   if (!playlist) {
     return {
       feedId: `${slot}:empty`,
@@ -233,11 +238,13 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
       playing: false,
       seekSignal: null,
       repeatMode: local?.repeatMode || 'none',
+      shuffle: local?.shuffle || false,
       capabilities: EMPTY_CAPABILITIES,
       onPlayerStateChange: () => {},
       onEnded: () => {},
       registerPositionGetter: () => {},
       setRepeatMode,
+      setShuffle,
       next: () => false,
       prev: () => {},
       seek: () => {},
@@ -250,6 +257,7 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     playing,
     seekSignal,
     repeatMode: local?.repeatMode || 'none',
+    shuffle: local?.shuffle || false,
     capabilities: {
       canSkip: true,
       canSeekArbitrary: true,
@@ -273,6 +281,7 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
       positionGetterRef.current = getter
     },
     setRepeatMode,
+    setShuffle,
     next: () => {
       savePositionNow(currentTrackId, positionGetterRef.current())
       if (!playNext('skipped')) {

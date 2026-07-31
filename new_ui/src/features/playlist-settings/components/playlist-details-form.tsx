@@ -1,5 +1,5 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { FileText, PencilLine } from 'lucide-react'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -15,19 +15,33 @@ const MAX_DESCRIPTION_LENGTH = 500
 export default function PlaylistDetailsForm() {
   const { t } = useFeatureTranslation()
   const { playlist } = usePlaylistViewLoaded()
-  const { patchNow, patchDebounced } = usePlaylistStore()
+  const { patchDebounced } = usePlaylistStore()
   const [name, setName] = React.useState(playlist.name)
   const [description, setDescription] = React.useState(
     playlist.description ?? '',
   )
 
   return (
-    <div className="grid gap-3 mb-6">
-      <div>
-        <Label className="text-lg">{t('playlistSettings.details.name')}</Label>
-        <DialogDescription>
-          {t('playlistSettings.details.nameHelp')}
-        </DialogDescription>
+    <div className="p-3 border border-level-3/60 rounded-md bg-level-1 space-y-3.5 shadow-xs">
+      <div className="flex items-center gap-2">
+        <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-level-2 border border-level-3/40 text-level-3">
+          <PencilLine className="size-4" />
+        </div>
+        <Label className="text-sm font-bold text-text-main">
+          {t('playlistSettings.details.title', 'Playlist Details')}
+        </Label>
+      </div>
+
+      {/* Name Input */}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs font-semibold text-text-main">
+            {t('playlistSettings.details.name')}
+          </Label>
+          <span className="text-[10px] text-text-placeholder">
+            {name.length}/{MAX_NAME_LENGTH}
+          </span>
+        </div>
         <Input
           type="text"
           name="name"
@@ -47,17 +61,23 @@ export default function PlaylistDetailsForm() {
           }}
           placeholder={t('playlistSettings.details.namePlaceholder')}
           maxLength={MAX_NAME_LENGTH}
-          className="mt-2 border-level-3 border-1 w-full bg-level-2"
+          className="bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50"
         />
+        <DialogDescription className="text-[11px] text-text-secondary mt-0.5">
+          {t('playlistSettings.details.nameHelp')}
+        </DialogDescription>
       </div>
 
-      <div>
-        <Label className="text-lg">
-          {t('playlistSettings.details.description')}
-        </Label>
-        <DialogDescription>
-          {t('playlistSettings.details.descriptionHelp')}
-        </DialogDescription>
+      {/* Description Textarea */}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs font-semibold text-text-main">
+            {t('playlistSettings.details.description')}
+          </Label>
+          <span className="text-[10px] text-text-placeholder">
+            {description.length}/{MAX_DESCRIPTION_LENGTH}
+          </span>
+        </div>
         <Textarea
           name="description"
           value={description ?? ''}
@@ -72,9 +92,12 @@ export default function PlaylistDetailsForm() {
           }}
           placeholder={t('playlistSettings.details.descriptionPlaceholder')}
           maxLength={MAX_DESCRIPTION_LENGTH}
-          rows={3}
-          className="mt-2 border-level-3 border w-full bg-level-2 resize-none"
+          rows={2}
+          className="bg-level-2 border-0 p-2 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50 resize-none min-h-[60px]"
         />
+        <DialogDescription className="text-[11px] text-text-secondary mt-0.5">
+          {t('playlistSettings.details.descriptionHelp')}
+        </DialogDescription>
       </div>
     </div>
   )

@@ -4,26 +4,6 @@
     "version": "2026.2 beta",
     "nameWithVersion": "OpenPlaylist v2026.2beta"
   },
-  "footer": {
-    "description": "Interactive music for everyone. Create your own playlists, share your favorite tracks, or request music on your favorite creators' streams.",
-    "navigation": "Navigation",
-    "features": "Features",
-    "copyright": {
-      "start": "© {{year}} OpenPlaylist. Crafted by ",
-      "link": "DustGalaxy",
-      "end": " with ❤️ for creators and listeners."
-    },
-    "techStack": "Powered by Socket.IO · React · FastAPI · & lots of tea 🍵",
-    "searchPlaylists": "Search playlists",
-    "login": "Log in",
-    "register": "Join now",
-    "highlights": {
-      "realtimeQueue": "Live track queue",
-      "rulesAndBlocks": "Smart filters & blocklists",
-      "donationPriority": "Donation priority bumps",
-      "integrations": "Streaming and donation platform sync"
-    }
-  },
   "nav": {
     "myPlaylists": "My playlists",
     "login": "Login",
@@ -41,6 +21,26 @@
     "moveMethod.dnd": "Drag",
     "moveMethod.arrows": "Arrows"
   },
+  "footer": {
+    "copyright": {
+      "start": "© {{year}} OpenPlaylist. Crafted by ",
+      "link": "DustGalaxy",
+      "end": " with ❤️ for creators and listeners."
+    },
+    "techStack": "Powered by Socket.IO · React · FastAPI · & lots of tea 🍵",
+    "description": "Interactive music for everyone. Create your own playlists, share your favorite tracks, or request music on your favorite creators' streams.",
+    "navigation": "Navigation",
+    "features": "Features",
+    "searchPlaylists": "Search playlists",
+    "login": "Log in",
+    "register": "Join now",
+    "highlights": {
+      "realtimeQueue": "Live track queue",
+      "rulesAndBlocks": "Smart filters & blocklists",
+      "donationPriority": "Donation priority bumps",
+      "integrations": "Streaming and donation platform sync"
+    }
+  },
   "errorPage": {
     "eyebrow": "Wow! Something went wrong",
     "title": "Something went wrong",
@@ -48,6 +48,22 @@
     "unknownError": "Unknown system error",
     "retryBtn": "Try again",
     "homeBtn": "Go home"
+  },
+  "sidebar": {
+    "Home": ""
+  },
+  "dashboard": {
+    "tooltip": {
+      "addPlaylist": "Create playlist",
+      "playlist": "Playlist - {{playlistName}}"
+    },
+    "eyebrow": "Your playlists",
+    "title": "Dashboard",
+    "subtitle": "Manage playlists, queue tracks, and control playback.",
+    "empty": {
+      "title": "No playlists yet",
+      "hint": "Press + to create your first playlist."
+    }
   },
   "playlist": {
     "stats": {
@@ -177,12 +193,30 @@
       "status": "Track status",
       "requester": "Requested by",
       "eject": "Show/hide technical details",
-      "ejectBtn": "Eject"
+      "ejectBtn": "Eject",
+      "report": {
+        "reasons": {
+          "inappropriate": "Inappropriate content",
+          "spam": "Spam",
+          "wrong_track": "Wrong track",
+          "other": "Other"
+        },
+        "success": "Report sent",
+        "error": "Failed to send report",
+        "title": "Report track",
+        "commentPlaceholder": "Comment (optional)",
+        "cancel": "Cancel",
+        "submit": "Submit"
+      },
+      "actions": {
+        "play": "Play",
+        "copyLink": "Copy link",
+        "remove": "Remove",
+        "blockRequester": "Block requester",
+        "report": "Report"
+      }
     },
     "tooltip": {
-      "prev": "Previous track",
-      "next": "Next track",
-      "shuffle": "Shuffle",
       "status": "Playlist status",
       "sync": "Player sync",
       "share": "Share playlist link",
@@ -190,6 +224,9 @@
       "validation": "Validation preview",
       "hideSavedTracks": "Hide saved tracks",
       "showSavedTracks": "Show saved tracks",
+      "prev": "Previous track",
+      "next": "Next track",
+      "shuffle": "Shuffle",
       "repeatMode": {
         "all": "Repeat all",
         "once": "Repeat one",
@@ -201,9 +238,6 @@
     "status": {
       "online": "Online",
       "offline": "Offline"
-    },
-    "nowPlaying": {
-      "empty": "No track is currently playing."
     },
     "saved": {
       "title": "Saved",
@@ -243,6 +277,9 @@
       "submit": "Add Track",
       "toggle": "Toggle Add Track",
       "placeholder": "Place url here"
+    },
+    "nowPlaying": {
+      "empty": "No track is currently playing."
     }
   },
   "auth": {
@@ -366,11 +403,11 @@
   },
   "common": {
     "or": "or",
+    "loading": "Loading notifications...",
     "cancel": "Cancel",
     "save": "Сохранить",
     "web": "Web",
-    "general2": "General",
-    "general": "General",
+    "delete": "",
     "toast": {
       "loading": "Loading...",
       "saving": "Saving...",
@@ -380,20 +417,33 @@
       "saveFailed": "Failed to save",
       "success": "Done!",
       "error": "Something went wrong"
-    }
+    },
+    "general": "General",
+    "general2": "General"
   },
-  "dashboard": {
-    "tooltip": {
-      "addPlaylist": "Create playlist",
-      "playlist": "Playlist - {{playlistName}}"
-    },
-    "empty": {
-      "title": "No playlists yet",
-      "hint": "Press + to create your first playlist."
-    },
-    "eyebrow": "Your playlists",
-    "title": "Dashboard",
-    "subtitle": "Manage playlists, queue tracks, and control playback."
+  "contributorsModal": {
+    "title": "Contributors",
+    "wantToHelp": "Want to help? Reach out through the feedback form."
+  },
+  "feedbackModal": {
+    "sent": "Thanks! Your message has been sent.",
+    "sendError": "Failed to send, please try again later.",
+    "bugTitle": "Report a bug",
+    "feedbackTitle": "Send feedback",
+    "bugPlaceholder": "What went wrong? Steps to reproduce help a lot.",
+    "feedbackPlaceholder": "What do you think? Ideas, complaints, praise — all welcome.",
+    "name": "Name",
+    "namePlaceholder": "Your name (optional)",
+    "contact": "Contact",
+    "contactPlaceholder": "Email or Telegram (optional)",
+    "rating": "Rating",
+    "text": "Message",
+    "submit": "Send"
+  },
+  "supportModal": {
+    "title": "Support the project",
+    "text": "Right now the best support is to tell your friends, try the app out, and leave feedback.",
+    "feedbackCta": "Leave feedback"
   },
   "landing": {
     "eyebrow": "Playlists for streams and communities",
@@ -447,7 +497,28 @@
     }
   },
   "notifications": {
+    "feed": {
+      "title": "Notifications",
+      "empty": "No notifications yet"
+    },
     "events": {
+      "unknown": "Новое уведомление",
+      "someone": "Кто-то",
+      "tracks_added_plural_one": "добавил {{count}} треков",
+      "tracks_added_plural_other": "добавил {{count}} треков",
+      "in_playlist": " в плейлист",
+      "tracks_removed_plural_one": "Из плейлиста {{playlistName}} удалено {{count}} треков",
+      "tracks_removed_plural_other": "Из плейлиста {{playlistName}} удалено {{count}} треков",
+      "track_removed_single": "Трек",
+      "removed_from": "был удален из плейлиста",
+      "name_changed": "Плейлист переименован",
+      "visibility_changed": "Плейлист",
+      "became_public": "стал публичным",
+      "became_private": "стал приватным",
+      "playlist_activity": "Обновление плейлиста",
+      "playlist_created": "Пользователь {{username}} создал новый плейлист",
+      "playlist_deleted": "Пользователь {{username}} удалил плейлист",
+      "user_activity": "Активность аккаунта",
       "track.added": {
         "label": "Track Addition",
         "description": "When new songs are added to the playlist"
@@ -489,18 +560,23 @@
         "description": "When the user deletes their playlists"
       }
     },
+    "actions": {
+      "mark_read": "Отметить прочитанным",
+      "delete": "Удалить"
+    },
     "create": {
       "title": "Create subscription",
       "submit_btn": "Subscribe"
     },
     "settings": {
-      "title": "Notification Settings",
       "target_playlist": "Playlist",
       "target_user": "User",
       "quick_setup": "Quick setup:",
       "unmute_all": "Unmute all",
-      "mute_all": "Mute all"
+      "mute_all": "Mute all",
+      "title": "Notification Settings"
     },
+    "subscribed": "Subscribed!",
     "manager": {
       "confirm_unsubscribe": "Are you sure you want to unsubscribe?",
       "error_unsubscribe": "Error unsubscribing",
@@ -533,12 +609,13 @@
       "userUnblocked": "User unblocked successfully! They can submit tracks again.",
       "userUnblockFailed": "Failed to unblock user.",
       "trackUnblocked": "Track unblocked successfully! It can be requested again.",
+      "trackUnblockFailed": "Failed to unblock track.",
       "title": "Block Lists",
       "description": "Block users or tracks.",
       "blockUser": "Block user",
+      "validationRequired": "Nickname/ID and platform are required.",
       "userBlockedSuccess": "User blocked successfully! They won't be able to submit tracks.",
       "userBlockFailed": "Failed to block user.",
-      "validationRequired": "Nickname/ID and platform are required.",
       "selectTriggerType": "Select trigger type",
       "triggerUserName": "User Name",
       "triggerUserId": "User ID",
@@ -550,52 +627,31 @@
       "trackYoutubeLength": "YouTube video ID must be 11 characters.",
       "trackAlreadyBlocked": "This track is already blocked.",
       "trackBlockedSuccess": "Track blocked successfully! It won't appear in requests.",
+      "trackBlockFailed": "",
       "emptyTracks": "No blocked tracks",
       "blockTrack": "Block track",
-      "trackUnblockFailed": "Failed to unblock track.",
       "blocking": "Blocking...",
       "unblocking": "Unblocking..."
     },
     "chatRoles": {
-      "removeSuccess": "Chat role removed successfully",
-      "removeFailed": "Failed to remove chat role",
       "selectRole": "Please select a role",
       "addSuccess": "Chat role added successfully",
       "addFailed": "Failed to add chat role",
+      "removeSuccess": "Chat role removed successfully",
+      "removeFailed": "Failed to remove chat role",
+      "title": "Chat Roles",
+      "subtitle": "",
       "addRole": "Add role...",
       "add": "Add",
       "noRoles": "No roles yet",
       "addRoleHint": "Add a role to get started",
-      "title": "Chat Roles",
       "updateSuccess": "Chat role updated",
       "updateFailed": "Failed to update role",
       "saving": "Saving role...",
       "removing": "Removing role..."
     },
-    "donation": {
-      "saving": "Saving rule...",
-      "updateSuccess": "Donation rule updated",
-      "updateFailed": "Failed to update rule",
-      "deleteRuleConfirm": "Are you sure you want to delete this donation rule?",
-      "name": "Name",
-      "ruleName": "Rule name",
-      "slug": "Slug",
-      "ruleSlug": "rule-slug",
-      "amount": "Amount",
-      "currency": "Currency",
-      "priority": "Priority",
-      "add": "Add",
-      "noRules": "No rules yet",
-      "fillAll": "Please fill in all fields",
-      "createSuccess": "Donation rule created successfully",
-      "createFailed": "Failed to create donation rule",
-      "deleteSuccess": "Donation rule deleted successfully",
-      "deleteFailed": "Failed to delete donation rule",
-      "title": "Donation Receiving",
-      "deleteConfirm": "Delete this rule?",
-      "deleting": "Deleting rule..."
-    },
     "validation": {
+      "initFailed": "Failed to initialize settings",
       "tabtitle": "validation",
       "notInitialized": "Section not initialized",
       "minViews": "Min views",
@@ -605,9 +661,32 @@
       "trackCooldown": "Track cooldown",
       "trackCooldownDesc": "The time after which a track can be added again.",
       "userCooldown": "User cooldown",
-      "initFailed": "Failed to initialize settings",
       "title": "Video validation",
       "description": "Video validation settings. Can`t be negtive."
+    },
+    "donation": {
+      "deleteRuleConfirm": "Are you sure you want to delete this donation rule?",
+      "name": "Name",
+      "ruleName": "Rule name",
+      "amount": "Amount",
+      "currency": "Currency",
+      "priority": "Priority",
+      "fillAll": "Please fill in all fields",
+      "createSuccess": "Donation rule created successfully",
+      "createFailed": "Failed to create donation rule",
+      "deleteSuccess": "Donation rule deleted successfully",
+      "deleteFailed": "Failed to delete donation rule",
+      "title": "Donation Receiving",
+      "subtitle": "",
+      "add": "Add",
+      "noRules": "No rules yet",
+      "saving": "Saving rule...",
+      "updateSuccess": "Donation rule updated",
+      "updateFailed": "Failed to update rule",
+      "slug": "Slug",
+      "ruleSlug": "rule-slug",
+      "deleteConfirm": "Delete this rule?",
+      "deleting": "Deleting rule..."
     },
     "details": {
       "name": "Playlist name",
@@ -620,13 +699,29 @@
       "descriptionTooLong": "Description is too long",
       "descriptionPlaceholder": "Enter playlist description"
     },
+    "title": "Playlist settings",
+    "description": "Changes are saved automatically",
+    "tabs": {
+      "basic": "Basic",
+      "platforms": "",
+      "block": "Block",
+      "delete": "Delete",
+      "validation": "Validation",
+      "donation": "Donation",
+      "chatRoles": "Chat Roles"
+    },
+    "delete": {
+      "title": "Delete playlist",
+      "button": "Delete",
+      "deleted": "Deleted"
+    },
     "toast": {
+      "playlistDeleted": "Playlist \"{{name}}\" deleted",
+      "visibilityUpdated": "Playlist visibility updated",
       "settingsSaved": "Settings saved successfully",
       "settingsFailed": "Failed to save settings",
       "playlistSaved": "Playlist saved successfully",
       "playlistFailed": "Failed to save playlist",
-      "playlistDeleted": "Playlist \"{{name}}\" deleted",
-      "visibilityUpdated": "Playlist visibility updated",
       "detailsUpdated": "Playlist details updated",
       "detailsUpdateFailed": "Failed to update details",
       "modeChanged": "Playlist mode updated",
@@ -637,21 +732,6 @@
       "validationRulesFailed": "Failed to save validation rules",
       "validationRulesLoaded": "Loading validation settings...",
       "validationRulesLoadFailed": "Failed to load validation settings"
-    },
-    "title": "Playlist settings",
-    "description": "Changes are saved automatically",
-    "tabs": {
-      "basic": "Basic",
-      "validation": "Validation",
-      "donation": "Donation",
-      "chatRoles": "Chat Roles",
-      "block": "Block",
-      "delete": "Delete"
-    },
-    "delete": {
-      "title": "Delete playlist",
-      "deleted": "Deleted",
-      "button": "Delete"
     },
     "basic": {
       "modeTitle": "Playlist mode",
@@ -721,24 +801,15 @@
     "da": "Donation Alerts",
     "donatepay": "DonatePay"
   },
-  "twitch": {
-    "role": {
-      "broadcaster": "Broadcaster",
-      "moderator": "Moderator",
-      "vip": "VIP",
-      "subscriber": "Subscriber",
-      "Turbo": "Turbo",
-      "artist": "Artist",
-      "follower": "Follower"
-    }
-  },
   "sort": {
     "mode": {
       "auto": "Auto",
       "random": "Random",
       "free": "Free",
       "randomHint": "Tracks are shuffled randomly",
-      "freeHint": "Drag tracks to reorder manually"
+      "freeHint": "Drag tracks to reorder manually",
+      "host": "",
+      "hostHint": ""
     },
     "priority": {
       "lowFirst": "Low priority first",
@@ -751,9 +822,9 @@
       "title": "Date sorting"
     },
     "tabs": {
+      "background": "Back",
       "vip": "VIP",
-      "regular": "Tracks",
-      "background": "Back"
+      "regular": "Tracks"
     }
   },
   "view": {
@@ -765,36 +836,7 @@
       }
     }
   },
-  "publicSearch": {
-    "title": "Find a public playlist",
-    "subtitle": "By playlist name, author nickname, or description",
-    "placeholder": "Playlist name, author, or description text...",
-    "searching": "Searching playlists...",
-    "notFound": "No playlists found",
-    "notFoundHintFull": "Try another term or check that the playlist is open for public viewing.",
-    "noDescription": "No description",
-    "openPlaylist": "Open playlist",
-    "initialHintFull": "Enter a query and press Search to see public playlists.",
-    "searchPlaceholder": "Search…",
-    "submit": "Search",
-    "searchFailed": "Search failed. Please try again.",
-    "notFoundHint": "Try a different query",
-    "initialHint": "Enter a search query"
-  },
   "publicView": {
-    "sort": {
-      "host": "Host like"
-    },
-    "requestsOpen": "Viewer requests are open",
-    "requestsClosed": "External requests are closed",
-    "modeFlow": "Flow mode",
-    "modeStatic": "Static mode",
-    "noDescription": "No description provided.",
-    "playlistSettings": "Playlist settings",
-    "addTrack": "Add track",
-    "nowPlaying": "Now playing",
-    "nowPlayingEmpty": "Nothing playing right now",
-    "nowPlayingHint": "A track will appear here when the streamer starts playback",
     "eyebrow": "Public playlists",
     "searchTitle": "Search and browse",
     "browseSubtitle": "Find a streamer's public playlist and follow the queue in real time",
@@ -803,12 +845,28 @@
     "anotherPlaylist": "Another playlist",
     "searchPublic": "Search public playlists",
     "resetSearchAgain": "Reset and search again",
-    "playlist": "Playlist",
+    "copyLink": "",
+    "subscribe": "",
+    "requestsOpen": "Viewer requests are open",
+    "requestsClosed": "External requests are closed",
+    "modeFlow": "Flow mode",
+    "modeStatic": "Static mode",
     "queue": "Track queue",
     "trackCount_one": "{{count}} track",
     "trackCount_other": "{{count}} tracks",
     "queueEmptyPlaylist": "No tracks in the playlist yet",
     "queueEmptyWaiting": "Requests will appear here when viewers submit music.",
+    "sort": {
+      "host": "Host like"
+    },
+    "noDescription": "No description provided.",
+    "playlistSettings": "Playlist settings",
+    "addTrack": "Add track",
+    "nowPlaying": "Now playing",
+    "nowPlayingEmpty": "Nothing playing right now",
+    "nowPlayingHint": "A track will appear here when the streamer starts playback",
+    "sync": "",
+    "playlist": "Playlist",
     "syncOn": "Sync On",
     "syncOff": "Sync Off",
     "desync": "Desync",
@@ -826,6 +884,22 @@
       "searching": "Searching for track...",
       "playlistLoadFailed": "Failed to load playlist. The link may be invalid or the playlist is no longer public."
     }
+  },
+  "publicSearch": {
+    "title": "Find a public playlist",
+    "subtitle": "By playlist name, author nickname, or description",
+    "placeholder": "Playlist name, author, or description text...",
+    "searching": "Searching playlists...",
+    "notFound": "No playlists found",
+    "notFoundHintFull": "Try another term or check that the playlist is open for public viewing.",
+    "noDescription": "No description",
+    "openPlaylist": "Open playlist",
+    "initialHintFull": "Enter a query and press Search to see public playlists.",
+    "searchPlaceholder": "Search…",
+    "submit": "Search",
+    "searchFailed": "Search failed. Please try again.",
+    "notFoundHint": "Try a different query",
+    "initialHint": "Enter a search query"
   },
   "settings": {
     "account": {
@@ -910,6 +984,9 @@
         "urlProtocol": "URL must start with http:// or https://",
         "urlInvalid": "Enter a valid URL"
       },
+      "saving": "",
+      "saved": "",
+      "saveFailed": "",
       "duplicatePlatform": "{{platform}} is already added",
       "adding": "Adding...",
       "linkAddedSuccess": "Social link added successfully",
@@ -928,6 +1005,12 @@
       },
       "overview": "Profile Overview",
       "noEmail": "No email set",
+      "editProfile": "",
+      "bio": "",
+      "bioPlaceholder": "",
+      "isPublic": "",
+      "isPublicHint": "",
+      "save": "",
       "removePlatform": "Remove {{platform}}",
       "deletePlatformAria": "Delete {{platform}} social link",
       "noSocialLinksYet": "No social links added yet",
@@ -1017,6 +1100,17 @@
     "register": {
       "title": "Sign Up - OpenPlaylist",
       "description": "Create a new OpenPlaylist account"
+    }
+  },
+  "twitch": {
+    "role": {
+      "broadcaster": "Broadcaster",
+      "moderator": "Moderator",
+      "vip": "VIP",
+      "subscriber": "Subscriber",
+      "Turbo": "Turbo",
+      "artist": "Artist",
+      "follower": "Follower"
     }
   },
   "oauth": {

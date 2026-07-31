@@ -65,6 +65,19 @@ async def _(event: InternalPlaylistEvent):
                 await playlist_log_service.log_and_emit(
                     db_session, event.user_id, event.playlist_id, PlaylistLogsEventTypes.PLAY_TRACK, data
                 )
+            case InternalPlaylistEventType.TRACK_ADDED_BULK:
+                if not event.bulk_ids:
+                    return
+                await playlist_log_service.log_and_emit(
+                    db_session,
+                    event.user_id,
+                    event.playlist_id,
+                    PlaylistLogsEventTypes.BULK_ADD_TRACK,
+                    {
+                        "playlist_name": event.playlist_name,
+                        "counter": len(event.bulk_ids),
+                    },
+                )
             case InternalPlaylistEventType.TRACK_REMOVED:
                 if not event.track:
                     return
@@ -81,6 +94,22 @@ async def _(event: InternalPlaylistEvent):
                         "platform": event.track.source,
                         "playlist_name": event.playlist_name,
                         "requester_nickname": event.track.requester_nickname,
+                        "reason": PlaylistLogsEventTypes.REMOVE_TRACK,
+                    },
+                )
+
+            case InternalPlaylistEventType.TRACK_REMOVED_BULK:
+                if not event.bulk_ids:
+                    return
+
+                await playlist_log_service.log_and_emit(
+                    db_session,
+                    event.user_id,
+                    event.playlist_id,
+                    PlaylistLogsEventTypes.BULK_REMOVE_TRACK,
+                    {
+                        "playlist_name": event.playlist_name,
+                        "counter": len(event.bulk_ids),
                         "reason": PlaylistLogsEventTypes.REMOVE_TRACK,
                     },
                 )

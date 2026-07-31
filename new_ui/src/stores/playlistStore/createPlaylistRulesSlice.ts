@@ -34,7 +34,7 @@ export const createPlaylistRulesSlice: StateCreator<
   addChatRole: async (playlistId, data) => {
     const role = await createChatRole({
       playlist_id: playlistId,
-      data: { ...data, settings_id: playlistId },
+      data: { ...data, playlist_id: playlistId },
     })
     if (role)
       get().updatePlaylistData(playlistId, (p) => ({

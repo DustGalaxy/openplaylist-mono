@@ -264,7 +264,19 @@ function bindPlaylistEvents(playlistId: string, get: () => StoreState) {
       mergeTrackRemoved(p, trackId.track_id),
     )
   })
+  socket.on(
+    `bulk_delete_tracks:${playlistId}`,
+    (data: { ids: Array<string> }) => {
+      console.log(data.ids)
 
+      get().updatePlaylistData(playlistId, (p) => {
+        for (const element of data.ids) {
+          p = mergeTrackRemoved(p, element)
+        }
+        return p
+      })
+    },
+  )
   socket.on(`playnow:${playlistId}`, (trackData: { track_id: string }) => {
     get().updatePlaylistData(playlistId, (p) =>
       mergeNowPlaying(p, trackData.track_id),

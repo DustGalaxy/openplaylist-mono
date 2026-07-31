@@ -24,7 +24,7 @@ export default {
   output: 'public/locales/$LOCALE/$NAMESPACE.json', // Путь к JSON-файлам относительно корня
   defaultNamespace: 'common',
   namespaceSeparator: false,
-  keepRemoved: false,
+  keepRemoved: true,
   sort: true,
   createOldCatalogs: false,
   input: [

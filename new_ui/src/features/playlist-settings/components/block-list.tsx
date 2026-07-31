@@ -1,21 +1,19 @@
 // src/features/playlist-settings/components/playlist-settings/block-list.tsx
+import React from 'react'
+import { ExternalLink, Globe, Trash2, Video } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import type { ReadBlockList } from '@/types/playlist'
-import Trash from '@/components/icons/icon-trash'
 import Btn from '@/components/ui/my-btn'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import socialIcons from '@/lib/constants/social_names'
 import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context'
 import { usePlaylistStore } from '@/stores/playlistStore'
 import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
-
-const BLOCK_ITEM_ROW =
-  'flex items-center gap-2 justify-between border-1 rounded-(--rounded-std) border-level-3 bg-level-1/40 px-2 h-14 min-h-14'
-const BLOCK_ITEM_BADGE =
-  'text-xs px-2 h-7 rounded-(--rounded-std) whitespace-nowrap flex items-center gap-1 shrink-0'
-const BLOCK_ITEM_CONTENT = 'min-w-0 flex flex-col justify-center leading-tight'
-const BLOCK_ITEM_UNBLOCK_BTN =
-  'px-2 bg-level-2 min-w-[44px] shrink-0 self-center'
 
 const UserBlockItem = ({
   item,
@@ -35,44 +33,51 @@ const UserBlockItem = ({
       : item.platform || t('common.web')
   const icon =
     platformName === t('common.web') ? (
-      <div>🌐</div>
+      <Globe className="size-3.5" />
     ) : (
-      <div className="ml-1 w-5 h-5">{socialMeta?.icon}</div>
+      <div className="w-3.5 h-3.5 flex items-center justify-center">
+        {socialMeta?.icon}
+      </div>
     )
   const triggerTypeLabel =
     item.trigger_type === 'USER_ID'
-      ? t('playlistSettings.block.userId')
-      : t('playlistSettings.block.userName')
+      ? t('playlistSettings.block.userId', 'User ID')
+      : t('playlistSettings.block.userName', 'Username')
 
   return (
-    <div className={BLOCK_ITEM_ROW}>
-      <div className="min-w-0 flex items-center gap-2">
-        <span className={`${BLOCK_ITEM_BADGE} bg-blue-500/20 text-blue-300`}>
+    <div className="border border-level-3/60 rounded-md p-2 sm:p-2.5 bg-level-1 hover:border-level-3/80 transition-all flex items-center justify-between gap-3 shadow-xs">
+      <div className="min-w-0 flex items-center gap-2.5 flex-1">
+        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 whitespace-nowrap flex items-center gap-1.5 shrink-0">
           {icon}
           {platformName}
         </span>
-        <div className={BLOCK_ITEM_CONTENT}>
-          <p className="text-xs text-text-secondary">{triggerTypeLabel}</p>
-          <p className="text-sm text-text-main break-all font-mono">
+        <div className="min-w-0 flex flex-col justify-center leading-tight">
+          <p className="text-[10px] text-text-secondary">{triggerTypeLabel}</p>
+          <p className="text-xs sm:text-sm text-text-main break-all font-mono font-medium">
             {item.trigger_value}
           </p>
         </div>
       </div>
-      <Btn
-        onClick={async () => {
-          await unBlockCallback(item)
-        }}
-        className={BLOCK_ITEM_UNBLOCK_BTN}
-        props={{
-          title: t('playlistSettings.block.unblockUser'),
-          'aria-label': t('playlistSettings.block.unblockUserAria', {
-            type: triggerTypeLabel,
-            value: item.trigger_value,
-          }),
-        }}
-      >
-        <Trash className="size-5" />
-      </Btn>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Btn
+            onClick={async () => {
+              await unBlockCallback(item)
+            }}
+            type="button"
+            aria-label={t('playlistSettings.block.unblockUser', 'Unblock user')}
+            className="p-1.5 text-text-placeholder hover:text-red-400 hover:bg-red-500/10 transition-colors rounded-sm h-8 w-8 flex items-center justify-center shrink-0"
+          >
+            <Trash2 className="size-4" />
+          </Btn>
+        </TooltipTrigger>
+        <TooltipContent
+          side="top"
+          className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+        >
+          <p>{t('playlistSettings.block.unblockUser', 'Unblock user')}</p>
+        </TooltipContent>
+      </Tooltip>
     </div>
   )
 }
@@ -84,43 +89,52 @@ const TrackBlockItem = ({
   item: string
   unBlockCallback: (item: string) => Promise<void>
 }) => {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const ytUrl = `https://www.youtube.com/watch?v=${item}`
 
   return (
-    <div className={BLOCK_ITEM_ROW}>
-      <div className="min-w-0 flex items-center gap-2">
-        <span className={`${BLOCK_ITEM_BADGE} bg-red-500/20 text-red-300`}>
-          {t('platform.youtube')}
+    <div className="border border-level-3/60 rounded-md p-2 sm:p-2.5 bg-level-1 hover:border-level-3/80 transition-all flex items-center justify-between gap-3 shadow-xs">
+      <div className="min-w-0 flex items-center gap-2.5 flex-1">
+        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 whitespace-nowrap flex items-center gap-1.5 shrink-0">
+          <Video className="size-3.5" />
+          {t('platform.youtube', 'YouTube')}
         </span>
-        <div className={BLOCK_ITEM_CONTENT}>
-          <p className="text-xs text-text-secondary">
-            {t('playlistSettings.block.blockedVideoId')}
+        <div className="min-w-0 flex flex-col justify-center leading-tight">
+          <p className="text-[10px] text-text-secondary">
+            {t('playlistSettings.block.blockedVideoId', 'YouTube Video ID')}
           </p>
           <a
             href={ytUrl}
             target="_blank"
             rel="noreferrer"
-            className="font-mono text-sm text-text-main underline-offset-2 hover:underline break-all"
-            title={t('playlistSettings.block.openOnYoutube')}
+            className="font-mono text-xs sm:text-sm text-text-main underline-offset-2 hover:underline break-all flex items-center gap-1 group font-medium"
+            title={t('playlistSettings.block.openOnYoutube', 'Open on YouTube')}
           >
-            {item}
+            <span>{item}</span>
+            <ExternalLink className="size-3 text-text-placeholder group-hover:text-text-main transition-colors" />
           </a>
         </div>
       </div>
-      <Btn
-        onClick={async () => {
-          await unBlockCallback(item)
-        }}
-        className={BLOCK_ITEM_UNBLOCK_BTN}
-        text={<Trash width={20} height={20} />}
-        props={{
-          title: t('playlistSettings.block.unblockTrack'),
-          'aria-label': t('playlistSettings.block.unblockTrackAria', {
-            id: item,
-          }),
-        }}
-      />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Btn
+            onClick={async () => {
+              await unBlockCallback(item)
+            }}
+            type="button"
+            aria-label={t('playlistSettings.block.unblockTrack', 'Unblock track')}
+            className="p-1.5 text-text-placeholder hover:text-red-400 hover:bg-red-500/10 transition-colors rounded-sm h-8 w-8 flex items-center justify-center shrink-0"
+          >
+            <Trash2 className="size-4" />
+          </Btn>
+        </TooltipTrigger>
+        <TooltipContent
+          side="top"
+          className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+        >
+          <p>{t('playlistSettings.block.unblockTrack', 'Unblock track')}</p>
+        </TooltipContent>
+      </Tooltip>
     </div>
   )
 }
@@ -132,7 +146,7 @@ export default function BlockList({
   list: Array<ReadBlockList | string>
   type: 'user' | 'track'
 }) {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
   const { playlist } = usePlaylistViewLoaded()
   const { unblockUserRule, patchNow } = usePlaylistStore()
 

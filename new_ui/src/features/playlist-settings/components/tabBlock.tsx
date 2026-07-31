@@ -1,11 +1,12 @@
 // src/features/playlist-settings/components/playlist-settings/tabBlock.tsx
-import { useTranslation } from 'react-i18next'
+import React from 'react'
+import { Ban, Plus, UserX, Video } from 'lucide-react'
 import { toast } from 'sonner'
-import { Plus } from 'lucide-react'
 import BlockList from './block-list'
 import { RequestPlatform } from '@/types/playlist'
 import { Label } from '@/components/ui/label'
 import { DialogDescription } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -26,23 +27,35 @@ const TabBlock = () => {
   const { blockUserRule, patchNow } = usePlaylistStore()
 
   return (
-    <div>
-      <div>
+    <div className="space-y-5">
+      {/* Title Header */}
+      <div className="flex items-start gap-2.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+          <Ban className="size-5" />
+        </div>
         <div>
-          <Label className=" text-xl">
-            {t('playlistSettings.block.title')}
+          <Label className="text-base font-bold text-text-main">
+            {t('playlistSettings.block.title', 'Blacklists & Blocking')}
           </Label>
-          <DialogDescription>
-            <p>{t('playlistSettings.block.description')}</p>
+          <DialogDescription className="text-xs text-text-secondary mt-0.5">
+            {t(
+              'playlistSettings.block.description',
+              'Block specific users or YouTube video IDs from requesting tracks.',
+            )}
           </DialogDescription>
         </div>
+      </div>
 
-        <div>
-          <Label className=" text-lg">
-            {t('playlistSettings.block.blockUser')}
-          </Label>
+      {/* Block User Section */}
+      <div className="space-y-3">
+        <div className="p-2.5 sm:p-3 border border-level-3/60 rounded-md bg-level-1 space-y-2.5 shadow-xs">
+          <div className="text-xs font-semibold text-text-main flex items-center gap-1.5">
+            <UserX className="size-4 text-level-3" />
+            <span>{t('playlistSettings.block.blockUser', 'Block User')}</span>
+          </div>
+
           <form
-            className="flex items-center gap-2 mt-2 w-full"
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full"
             onSubmit={async (e) => {
               e.preventDefault()
               const form = e.currentTarget
@@ -50,7 +63,9 @@ const TabBlock = () => {
 
               const platform = formData.get('platform') as string
               const trigger_type = formData.get('trigger_type') as string
-              const trigger_value = formData.get('trigger_value') as string
+              const trigger_value = (
+                formData.get('trigger_value') as string
+              )?.trim()
 
               if (!trigger_value || !platform) {
                 toast.error(t('playlistSettings.block.validationRequired'))
@@ -71,38 +86,31 @@ const TabBlock = () => {
               }
             }}
           >
-            <Btn className="cursor-pointer px-2 bg-level-2" type="submit">
-              <Plus className="text-text-main size-5" />
-            </Btn>
-            <Select name="trigger_type">
-              <SelectTrigger className="w-fit bg-level-2">
+            {/* Trigger Type Select */}
+            <Select name="trigger_type" defaultValue="USER_NAME">
+              <SelectTrigger className="w-full sm:w-32 bg-level-2 border-0 h-8 text-xs sm:text-sm">
                 <SelectValue
                   placeholder={t('playlistSettings.block.selectTriggerType')}
                 />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-level-2 border-level-3/40 text-xs">
                 <SelectItem value="USER_NAME">
-                  {t('playlistSettings.block.triggerUserName')}
+                  {t('playlistSettings.block.triggerUserName', 'Username')}
                 </SelectItem>
                 <SelectItem value="USER_ID">
-                  {t('playlistSettings.block.triggerUserId')}
+                  {t('playlistSettings.block.triggerUserId', 'User ID')}
                 </SelectItem>
               </SelectContent>
             </Select>
 
-            <input
-              type="text"
-              name="trigger_value"
-              placeholder={t('playlistSettings.block.enterNicknameOrId')}
-              className="w-full rounded-md border border-input bg-level-2 px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-            />
-            <Select name="platform">
-              <SelectTrigger className="w-full bg-level-2">
+            {/* Platform Select */}
+            <Select name="platform" defaultValue={RequestPlatform.ALL}>
+              <SelectTrigger className="w-full sm:w-28 bg-level-2 border-0 h-8 text-xs sm:text-sm">
                 <SelectValue
                   placeholder={t('playlistSettings.block.selectPlatform')}
                 />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-level-2 border-level-3/40 text-xs">
                 {Object.entries(RequestPlatform).map(([key, val]) => (
                   <SelectItem key={key} value={val}>
                     {key}
@@ -110,25 +118,56 @@ const TabBlock = () => {
                 ))}
               </SelectContent>
             </Select>
+
+            {/* Value Input */}
+            <Input
+              type="text"
+              name="trigger_value"
+              placeholder={t(
+                'playlistSettings.block.enterNicknameOrId',
+                'Enter nickname or ID...',
+              )}
+              className="flex-1 bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50"
+            />
+
+            {/* Submit Button */}
+            <Btn
+              type="submit"
+              className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main shrink-0 flex items-center justify-center gap-1 hover:bg-level-3 transition-colors"
+            >
+              <Plus className="size-3.5" />
+              <span>{t('playlistSettings.block.addBlock', 'Block')}</span>
+            </Btn>
           </form>
         </div>
 
-        <div className="flex flex-col gap-2 mt-2 w-full">
-          {playlist.block_list.length > 0 ? (
-            <BlockList list={playlist.block_list} type="user" />
-          ) : (
-            <div className="flex text-text-secondary text-sm justify-center w-full">
-              <p>{t('playlistSettings.block.emptyUsers')}</p>
-            </div>
-          )}
-        </div>
+        {/* Blocked Users List */}
+        {playlist.block_list.length > 0 ? (
+          <BlockList list={playlist.block_list} type="user" />
+        ) : (
+          <div className="p-3 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center">
+            <p className="text-xs text-text-secondary">
+              {t('playlistSettings.block.emptyUsers', 'No blocked users.')}
+            </p>
+          </div>
+        )}
+      </div>
 
-        <div className="flex flex-col gap-2 mt-2 w-full">
-          <Label className=" text-lg">
-            {t('playlistSettings.block.blockTrackYoutubeLabel')}
-          </Label>
+      {/* Block Track Section */}
+      <div className="space-y-3 pt-2 border-t border-level-3/40">
+        <div className="p-2.5 sm:p-3 border border-level-3/60 rounded-md bg-level-1 space-y-2.5 shadow-xs">
+          <div className="text-xs font-semibold text-text-main flex items-center gap-1.5">
+            <Video className="size-4 text-level-3" />
+            <span>
+              {t(
+                'playlistSettings.block.blockTrackYoutubeLabel',
+                'Block YouTube Video ID',
+              )}
+            </span>
+          </div>
+
           <form
-            className="flex items-center gap-2 mt-2 w-full"
+            className="flex items-center gap-2 w-full"
             onSubmit={async (e) => {
               e.preventDefault()
               const form = e.currentTarget
@@ -159,25 +198,38 @@ const TabBlock = () => {
               }
             }}
           >
-            <Btn className="cursor-pointer px-2 bg-level-2" type="submit">
-              <Plus className="text-text-main size-5" />
-            </Btn>
-            <input
+            <Input
               type="text"
               name="yt_video_id"
-              placeholder={t('playlistSettings.block.blockedVideoId')}
-              className="w-full rounded-md border border-input bg-level-2 px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder={t(
+                'playlistSettings.block.blockedVideoId',
+                'e.g. dQw4w9WgXcQ',
+              )}
+              className="flex-1 bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm font-mono focus-visible:ring-1 focus-visible:ring-level-3/50"
             />
+            <Btn
+              type="submit"
+              className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main shrink-0 flex items-center gap-1 hover:bg-level-3 transition-colors"
+            >
+              <Plus className="size-3.5" />
+              <span>{t('playlistSettings.block.addBlock', 'Block')}</span>
+            </Btn>
           </form>
-
-          {playlist.track_black_list.length > 0 ? (
-            <BlockList list={playlist.track_black_list} type="track" />
-          ) : (
-            <div className="flex text-text-secondary text-sm justify-center w-full">
-              <p>{t('playlistSettings.block.emptyTracks')}</p>
-            </div>
-          )}
         </div>
+
+        {/* Blocked Tracks List */}
+        {playlist.track_black_list.length > 0 ? (
+          <BlockList list={playlist.track_black_list} type="track" />
+        ) : (
+          <div className="p-3 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center">
+            <p className="text-xs text-text-secondary">
+              {t(
+                'playlistSettings.block.emptyTracks',
+                'No blocked YouTube tracks.',
+              )}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

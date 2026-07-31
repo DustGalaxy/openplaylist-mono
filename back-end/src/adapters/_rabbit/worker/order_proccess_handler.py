@@ -2,15 +2,13 @@ from uuid import uuid4
 
 from faststream.rabbit import RabbitRouter
 
-from src.adapters._rabbit.queues import main_exchange, playlist_fanout_exchange
 from src.adapters._rabbit.broker import main_publisher
-
+from src.adapters._rabbit.queues import main_exchange, playlist_fanout_exchange
+from src.dal.postgres.user import user_repository
+from src.database import async_session_maker
 from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType
 from src.dto.order import NewOrderPayload
 from src.services.order_service import order_service
-from src.dal.postgres.user import user_repository
-
-from src.database import async_session_maker
 from src.services.playlist_service import add_to_playlist
 
 router = RabbitRouter()

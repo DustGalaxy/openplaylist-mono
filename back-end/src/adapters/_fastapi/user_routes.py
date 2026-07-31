@@ -3,6 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Response
 
+from src.services.permitions.permition_service import check_feature, get_effective_tier, FEATURE_FLAGS
 from src._types import AuthFlow, IntegrationPlatform
 from src.adapters._fastapi.dependencies import CURR_USER, DB_SESSION
 from src.dto.bots import BotConnectBody, UpdateBotSettingsBody
@@ -51,7 +52,23 @@ async def patch_me(
     return UserRead.model_validate(upd_user)
 
 
+# @router.patch("/me/appearance")
+# async def update_user_appearance(curr_user: CURR_USER, data: UserAppearancePatch):
+#     check_feature(curr_user, "profile_background_upload")
 
+
+@router.get("/me/features")
+async def me_features(
+    curr_user: CURR_USER,
+):
+    tier = get_effective_tier(curr_user.roles)
+    return {
+        "tier": tier,
+        "features": [
+            {"key": flag.key, "min_tier": flag.min_tier, "unlocked": flag.is_enabled and flag.min_tier <= tier}
+            for flag in FEATURE_FLAGS.values()
+        ],
+    }
 
 
 @router.post("/bots/{platform}/connect")
@@ -158,6 +175,7 @@ async def delete_me(
 ):
     await auth_service.delete_user(db_session, curr_user.id)
     return {"message": "User deleted"}
+
 
 @router.get("/{user_id}")
 async def user(db_session: DB_SESSION, user_id: UUID):

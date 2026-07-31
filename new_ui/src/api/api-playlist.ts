@@ -1,15 +1,13 @@
-import { v4 as uuidv4 } from 'uuid'
 import type {
-  ClientPlaylist,
   InputPlaylist,
   Order,
+  Playlist,
   PlaylistPatch,
-  PlaylistSettings,
 } from '@/types/playlist'
+import type { PlaylistLog } from '@/types/playlistLog'
 import apiClient from '@/lib/axios'
 import { useAuthStore } from '@/stores/authStore'
 import { getConfig, removeNullAndUndefined } from '@/lib/utils'
-import type { PlaylistLog } from '@/types/playlistLog'
 
 export const fetchPlaylistPublic = async (
   playlist_id: string,
@@ -96,7 +94,7 @@ export const patchPlaylist = async (
     withCredentials: true,
     data: removeNullAndUndefined(data),
   })
-  return response.data as ClientPlaylist
+  return response.data as Playlist
 }
 
 export const updatePlaylistDetails = async (
@@ -156,10 +154,29 @@ export const removeTrackFromPlaylist = async (
   return response
 }
 
+export const bulkRemoveTracksFromPlaylist = async (
+  playlist_id: string,
+  track_ids: Array<string>,
+  reason?: string,
+) => {
+  const { user } = useAuthStore.getState()
+  if (!user) return
+  const config = getConfig()
+  const responce = await apiClient(
+    config.PLST_API_URL + `/${playlist_id}/track/bulk-delete`,
+    {
+      method: 'POST',
+      withCredentials: true,
+      data: { track_ids, reason },
+    },
+  )
+  return responce.data
+}
+
 export const changePlaylistSettings = async (
   playlist_id: string,
-  settings: Partial<PlaylistSettings>,
-): Promise<PlaylistSettings> => {
+  settings: Partial<Playlist>,
+): Promise<Playlist> => {
   const config = getConfig()
   const response = await apiClient(
     config.AUTH_API_URL + `/settings/${playlist_id}`,
@@ -308,7 +325,7 @@ export const submitPlaylistReport = async (
 
 export async function fetchPlaylistLogs(
   playlistId: string,
-): Promise<PlaylistLog[]> {
+): Promise<Array<PlaylistLog>> {
   const config = getConfig()
   const response = await apiClient(
     config.PLST_API_URL + `/${playlistId}/logs`,

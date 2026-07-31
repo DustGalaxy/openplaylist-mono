@@ -3,25 +3,24 @@ from uuid import UUID
 
 from simple_repository import crud_factory
 from simple_repository.exceptions import IntegrityConflictException, RepositoryException
-
-from sqlalchemy import case, func, literal_column, select, union_all, delete, update
+from sqlalchemy import case, delete, func, literal_column, select, union_all, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.notification import (
     DirectNotification,
     DirectNotificationCreate,
-    EvetnNotification,
     EventNotificationCreate,
+    EvetnNotification,
+    NotificationSettings,
+    NotificationSettingsCreate,
+    NotificationSettingsPatch,
     ReadNotification,
     Subscription,
     SubscriptionCreate,
     SubscriptionPatch,
-    NotificationSettings,
-    NotificationSettingsCreate,
-    NotificationSettingsPatch,
 )
-from src.orm.notification import EventNotificationORM, DirectNotificationORM, NotificationSettingsORM, SubscriptionORM
+from src.orm.notification import DirectNotificationORM, EventNotificationORM, NotificationSettingsORM, SubscriptionORM
 
 
 class NotificationRepository:

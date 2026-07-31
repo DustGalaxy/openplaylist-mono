@@ -9,18 +9,24 @@ export interface RoleTierDef {
 }
 
 // TODO(backend): подставить реальные tier-значения, когда пришлют полный список
-export const ROLE_TIERS: Record<number, RoleTierDef> = {
-  0: {
-    tier: 0,
+export const ROLE_TIERS: Record<string, RoleTierDef> = {
+  vip: {
+    tier: 2,
     label: 'VIP',
     icon: '💎',
     base: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
   },
-  1: {
+  supporter: {
     tier: 1,
     label: 'Supporter',
     icon: '❤️',
     base: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
+  },
+  admin: {
+    tier: 3,
+    label: 'Admin',
+    icon: '🍵',
+    base: 'bg-lime-500/10 text-lime-400 border-lime-500/30',
   },
 }
 
@@ -31,9 +37,9 @@ const FALLBACK_TIER: RoleTierDef = {
   base: 'bg-level-2 text-text-secondary border-level-3',
 }
 
-export function getTierDef(tier: number): RoleTierDef {
-  const def = ROLE_TIERS[tier]
-  if (!def) console.debug('[roles] unknown tier', tier)
+export function getTierDef(key: string): RoleTierDef {
+  const def = ROLE_TIERS[key]
+  if (!def) console.debug('[roles] unknown tier', key)
   return def ?? FALLBACK_TIER
 }
 
@@ -101,7 +107,7 @@ export interface RoleVisual {
 }
 
 export function getRoleVisual(role: PublicRole): RoleVisual {
-  const tierDef = getTierDef(role.tier)
+  const tierDef = getTierDef(role.id)
   const bucket = getDurationBucket(role.start_date)
   return {
     label: tierDef.label,

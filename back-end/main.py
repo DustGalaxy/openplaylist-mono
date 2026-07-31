@@ -1,32 +1,33 @@
 from contextlib import asynccontextmanager
 
+import socketio
 from fastapi import APIRouter, FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
-import socketio
-
 import src.models  # noqa: F401
+from src.adapters._fastapi.feedback_routes import router as feedback_router
 from src.adapters._fastapi.login_routes import router as login_router
-from src.adapters._fastapi.user_routes import router as user_router
+from src.adapters._fastapi.notifications import router as notificattions_router
 from src.adapters._fastapi.order_routes import router as order_router
+from src.adapters._fastapi.playback_routes import router as playback_router
 from src.adapters._fastapi.playlist_routes import router as playlist_router
 from src.adapters._fastapi.settings_routes import router as settings_router
 from src.adapters._fastapi.stream_routes import router as stream_router
-from src.adapters._fastapi.playback_routes import router as playback_router
-from src.adapters._fastapi.notifications import router as notificattions_router
-from src.adapters._fastapi.feedback_routes import router as feedback_router
-
-from src.adapters._sio.init import sio
+from src.adapters._fastapi.user_routes import router as user_router
 from src.adapters._rabbit.broker import get_broker as get_rabbit_broker
+from src.adapters._sio.init import sio
+from src.adapters._sio.routes import BasicNamespace, PlstUpdsNamespace, WidgetsNamespace
 from src.dal._redis.broker import get_broker
-from src.adapters._sio.routes import PlstUpdsNamespace, BasicNamespace, WidgetsNamespace
+from src.database import async_session_maker
+from src.services.permitions.permition_service import load_feature_flags
 from src.services.realtime.sio_playlist import room_manager
-
 from src.settings import settings
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    async with async_session_maker() as session:
+        await load_feature_flags(session)
 
     await get_rabbit_broker().start()
     get_broker().connect()
@@ -58,6 +59,7 @@ app.add_middleware(
         "http://127.0.0.1:8000",
         "https://127.0.0.1:8000",
         "https://openplaylist.localhost",
+        "https://theopenplaylist.com",
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],

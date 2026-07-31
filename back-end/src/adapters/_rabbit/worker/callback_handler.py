@@ -10,6 +10,7 @@ from src.services.realtime.sio_playlist import sio_playlist_service
 
 router = RabbitRouter()
 
+
 @router.subscriber("internal.playlist.callback", playlist_fanout_exchange)
 async def _(event: InternalPlaylistEvent):
     match event.event_type:
@@ -37,7 +38,13 @@ async def _(event: InternalPlaylistEvent):
                 Deleted(track_id=str(event.track.id), playlist_id=str(event.playlist_id))
             )
 
+        case InternalPlaylistEventType.TRACK_REMOVED_BULK:
+            if not event.bulk_ids:
+                return
+
+            await sio_playlist_service.bulk_delete_tracks(ids=event.bulk_ids, playlist_id=event.playlist_id)
+
         case InternalPlaylistEventType.PLAYLIST_SETTINGS_CHANGED:
-            if not  event.playlist_data:
-                return 
+            if not event.playlist_data:
+                return
             await sio_playlist_service.settings_changed(event.playlist_data)

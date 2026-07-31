@@ -40,6 +40,8 @@ import {
 } from '@/features/landing/styles'
 import UserPopover from '@/features/user-profile/components/UserPopover'
 import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
+import { FeatureLock } from '@/features/feature-gate'
+import BulkClearModal from '@/features/united-playlist/components/modals/BulkClearModal'
 
 export default function PlaylistViewContent({ slot }: { slot: SlotId }) {
   return (
@@ -132,19 +134,23 @@ function PlaylistViewInner() {
                     ? t('playlist.status.online')
                     : t('playlist.status.offline')}
                 </Btn>
-                <Btn
-                  title={t('playlist.tooltip.sync')}
-                  isActive={playlist.sync_playback_position}
-                  onClick={() =>
-                    toggleBroadcast(
-                      playlist.id,
-                      !playlist.sync_playback_position,
-                    )
-                  }
-                  className="size-8 rounded-sm"
-                >
-                  <RadioTower className="size-5" />
-                </Btn>
+                <FeatureLock featureKey="sync_playback_position">
+                  <div className="flex items-center justify-between">
+                    <Btn
+                      title={t('playlist.tooltip.sync')}
+                      isActive={playlist.sync_playback_position}
+                      onClick={() =>
+                        toggleBroadcast(
+                          playlist.id,
+                          !playlist.sync_playback_position,
+                        )
+                      }
+                      className="size-8 rounded-sm"
+                    >
+                      <RadioTower className="size-5" />
+                    </Btn>
+                  </div>
+                </FeatureLock>
               </>
             )}
             {isViewerLike && (
@@ -209,6 +215,7 @@ function PlaylistViewInner() {
                 >
                   <Terminal className="size-5" />
                 </Btn>
+                <BulkClearModal />
                 <SettingsModal />
               </>
             )}

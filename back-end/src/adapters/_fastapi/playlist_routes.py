@@ -20,10 +20,12 @@ from src.dto.playlist import (
     PlayNow,
     ReadPlaylist,
     ReadPlaylistPreview,
+    TrackDeleteBulk,
 )
 from src.dto.playlist_log import ReadPlaylistLog
 from src.models.playlist import PlaylistPatch
 from src.services.auth.auth_service import auth_service
+from src.services.permitions.permition_service import check_feature
 from src.utils import find
 
 router = APIRouter(prefix="/playlist")
@@ -91,6 +93,8 @@ async def patch_playlist(
     playlist_id: UUID,
 ) -> ReadPlaylist:
     plst = await service.get(db_session, playlist_id, current_user)
+    if patch_schema.sync_playback_position:
+        check_feature(current_user, "sync_playback_position")
 
     new_plst = await service.patch_playlist(db_session, patch_schema, playlist_id)
 
@@ -104,8 +108,7 @@ async def patch_playlist(
             show_in_widget=plst.show_in_widget,
             user_id=current_user.id,
             user_name=current_user.username,
-            playlist_data=PlaylistSettings.model_validate(new_plst)
-            
+            playlist_data=PlaylistSettings.model_validate(new_plst),
         ),
         exchange=playlist_fanout_exchange,
     )
@@ -297,6 +300,31 @@ async def delete_track_from_playlist(
             ),
             exchange=playlist_fanout_exchange,
         )
-        # await kick("playlist.track.deleted", task_broker, {"track_id": track_id, "playlist_id": str(playlist_id)})
+    except NotFoundException:
+        raise HTTPException(status_code=404, detail="Playlist not found")
+
+
+@router.post("/{playlist_id}/track/bulk-delete", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_tracks_from_playlist(
+    db_session: DB_SESSION, service: PLST_SERVICE, current_user: CURR_USER, playlist_id: UUID, data: TrackDeleteBulk
+) -> None:
+    try:
+        playlist = await service.get(db_session, playlist_id, current_user)
+        deleted = await service.delete_track_bulk(db_session, playlist_id, data.track_ids, data.reason)
+        if deleted:
+            await get_broker().publish(
+                InternalPlaylistEvent(
+                    event_id=uuid4(),
+                    event_type=InternalPlaylistEventType.TRACK_REMOVED_BULK,
+                    playlist_id=playlist_id,
+                    playlist_name=playlist.name,
+                    playlist_is_public=playlist.is_public,
+                    show_in_widget=playlist.show_in_widget,
+                    user_id=current_user.id,
+                    user_name=current_user.username,
+                    bulk_ids=deleted,
+                ),
+                exchange=playlist_fanout_exchange,
+            )
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")

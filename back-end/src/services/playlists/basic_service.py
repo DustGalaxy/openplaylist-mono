@@ -7,8 +7,7 @@ from simple_repository.exceptions import NotFoundException
 
 
 from src.dto.internal.domain_events import InternalPlaylistEventType
-from src.dal.abstract import IPlaylistRepository
-from src.dal.postgres.playlist import playlist_repository
+from src.dal.postgres.playlist import playlist_repository, PlaylistRepository
 
 from src.dto.playlist import NewPlaylist, PlaylistBaseinfo
 from src.models.auth_user import AuthUserSchema as User
@@ -22,7 +21,7 @@ from src._types import AsyncSession, DeleteStatus
 class PlaylistLowService:
     def __init__(
         self,
-        _playlist_repository: IPlaylistRepository,
+        _playlist_repository: PlaylistRepository,
     ):
         self._playlist_repository = _playlist_repository
 
@@ -87,24 +86,6 @@ class PlaylistLowService:
         created_playlist = await self._playlist_repository.create_with_settings(session, new_playlist)
         return created_playlist
 
-    def get_events_from_patch(self, patch: PlaylistPatch):
-        events = []
-
-        if patch.is_public:
-            events.append(InternalPlaylistEventType.PLAYLIST_VISIABILITY_CHANGED)
-        if patch.name:
-            events.append(InternalPlaylistEventType.PLAYLIST_RENAMED)
-
-        return events
-
-    def get_events_between_states(self, old: PlaylistSchema, new: PlaylistSchema) -> list[InternalPlaylistEventType]:
-        events = []
-        if old.is_public != new.is_public:
-            events.append(InternalPlaylistEventType.PLAYLIST_VISIABILITY_CHANGED)
-        if old.name != new.name:
-            events.append(InternalPlaylistEventType.PLAYLIST_RENAMED)
-        return events
-
     async def patch_playlist(
         self,
         session: AsyncSession,
@@ -116,6 +97,11 @@ class PlaylistLowService:
     async def delete_playlist(self, session: AsyncSession, playlist_id: UUID) -> int:
         res = await self._playlist_repository.remove(session, playlist_id, raise_not_found=True)
         return res
+
+    async def delete_track_bulk(
+        self, session: AsyncSession, playlist_id: UUID, ids: list[UUID], reason: DeleteStatus
+    ) -> list[UUID]:
+        return await self._playlist_repository.remove_orders_from_playlist(session, playlist_id, ids, reason)
 
     async def set_play_now(
         self, session: AsyncSession, playlist: PlaylistSchema, track_id: str | None, user: User

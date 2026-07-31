@@ -1,5 +1,14 @@
-import React, { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import React, { useEffect, useRef, useState } from 'react'
+import {
+  Globe,
+  Layers,
+  Music,
+  PencilLine,
+  Settings,
+  Share2,
+  Sliders,
+  Zap,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Discord,
@@ -10,46 +19,46 @@ import {
   XFormerlyTwitter,
   Youtube,
 } from '@thesvg/react'
-import PlaylistDetailsForm from './playlist-details-form'
 import type { Integration } from '@/types/user'
-import type { Playlist } from '@/stores/playlistStore/types'
 import type { Platform, PlaylistMode } from '@/types/playlist'
 import DonationAlerts from '@/components/icons/icon-da'
 import { ExternalContentPlatform } from '@/types/playlist'
 import { Label } from '@/components/ui/label'
 import { DialogDescription } from '@/components/ui/dialog'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import UpDownBtn from '@/components/ui/funny-btn'
 import { getUserIntegrations } from '@/api/api-user'
 import ContentSwitch from '@/components/ui/content-switch'
-import { Switch } from '@/components/ui/switch'
 import {
   filterTabActiveClass,
   filterTabBaseClass,
   filterTabInactiveClass,
-  innerPanelClass,
 } from '@/features/landing/styles'
 import { cn } from '@/lib/utils'
 import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context'
 import { usePlaylistStore } from '@/stores/playlistStore'
 import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
+const MAX_NAME_LENGTH = 100
+const MAX_DESCRIPTION_LENGTH = 500
+
 const TabBasic = () => {
-  const { t } = useFeatureTranslation()
+  const { t, tc } = useFeatureTranslation()
   const { playlist } = usePlaylistViewLoaded()
   const { patchNow, patchDebounced } = usePlaylistStore()
-  const [plstMode, setPlstMode] = React.useState(playlist.mode)
-  const [isPublic, setIsPublic] = React.useState(playlist.is_public)
-  // const [breakPoint, setBreakPoint] = React.useState(playlist.priority_breakpoint)
-  const [priorityMode, setPriorityMode] = React.useState(playlist.cost_mode)
-  const [showInWidget, setShowInWinget] = React.useState(
-    playlist.show_in_widget,
-  )
+
+  const [name, setName] = useState(playlist.name)
+  const [description, setDescription] = useState(playlist.description ?? '')
+  const [plstMode, setPlstMode] = useState(playlist.mode)
+  const [isPublic, setIsPublic] = useState(playlist.is_public)
+  const [priorityMode, setPriorityMode] = useState(playlist.cost_mode)
+  const [showInWidget, setShowInWidget] = useState(playlist.show_in_widget)
   const [integrations, setIntegrations] = useState<Array<Integration>>([])
   const [isLoadingIntegrations, setIsLoadingIntegrations] = useState(false)
+  const breakPointRef = useRef<HTMLInputElement>(null)
 
-  // Настройки VIP-прерывания для режима, выбранного сейчас в табах выше
-  // (не обязательно совпадает с playlist.settings.mode, если переключение
-  // ещё не долетело до сервера — источник правды тут settings, не playlist).
   const activeModeSettings = playlist.mode_settings[plstMode]
 
   useEffect(() => {
@@ -65,11 +74,11 @@ const TabBasic = () => {
         setIsLoadingIntegrations(false)
       }
     }
-    fetchIntegrations()
+    void fetchIntegrations()
   }, [])
 
   const getPlatformIcon = (platform: string) => {
-    const iconStyles = ' size-6'
+    const iconStyles = 'size-4'
     const platformIcons: Record<string, React.ReactNode> = {
       twitch: <Twitch className={iconStyles} />,
       discord: <Discord className={iconStyles} />,
@@ -80,10 +89,14 @@ const TabBasic = () => {
       spotify: <Spotify className={iconStyles} />,
       donationalerts: <DonationAlerts className={iconStyles} />,
       da: <DonationAlerts className={iconStyles} />,
-      donatex: <img src="/donatex-icon.png" width={45} height={45}></img>,
+      donatex: (
+        <img src="/donatex-icon.png" width={18} height={18} alt="donatex" />
+      ),
       google: <Google className={iconStyles} />,
     }
-    return platformIcons[platform.toLowerCase()] || null
+    return (
+      platformIcons[platform.toLowerCase()] || <Globe className={iconStyles} />
+    )
   }
 
   const getPlatformDisplayName = (platform: string) => {
@@ -102,7 +115,7 @@ const TabBasic = () => {
       donatepay: 'platform.donatepay',
     }
     const key = keyMap[normalized]
-    return key ? t(key) : platform
+    return key ? tc(key) : platform
   }
 
   const isSourceSelected = (platform: string, platformUserId: string) => {
@@ -117,7 +130,6 @@ const TabBasic = () => {
     const isCurrentlySelected = isSourceSelected(platform, platformUserId)
 
     if (isCurrentlySelected) {
-      // Remove the source
       patchDebounced(playlist.id, {
         allow_sources: playlist.allow_sources.filter(
           (source: { platform: string; platform_user_id: string }) =>
@@ -127,355 +139,432 @@ const TabBasic = () => {
             ),
         ),
       })
-
       toast.success(t('playlistSettings.toast.visibilityUpdated'))
     } else {
-      // Add the source
       patchDebounced(playlist.id, {
         allow_sources: [
           ...playlist.allow_sources,
           { platform: platform as Platform, platform_user_id: platformUserId },
         ],
       })
-
       toast.success(t('playlistSettings.toast.visibilityUpdated'))
     }
   }
+
   return (
-    <div className="flex flex-col gap-4">
-      <PlaylistDetailsForm />
-
-      <div className="grid gap-4">
-        <div className="grid grid-cols-[auto_1fr] gap-2 items-center">
-          <Label className=" text-lg">
-            {t('playlistSettings.basic.modeTitle')}
+    <div className="space-y-4">
+      {/* Main Header */}
+      <div className="flex items-start gap-2.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+          <Settings className="size-5" />
+        </div>
+        <div>
+          <Label className="text-base font-bold text-text-main">
+            {t('playlistSettings.tabs.basic', 'Basic Settings')}
           </Label>
-
-          <div className="flex gap-1.5 justify-end">
-            {(['static', 'stream'] as Array<PlaylistMode>).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => {
-                  patchNow(playlist.id, { mode: m })
-                  setPlstMode(m)
-                }}
-                className={cn(
-                  filterTabBaseClass,
-                  'px-4 text-sm',
-                  playlist.mode === m
-                    ? filterTabActiveClass
-                    : filterTabInactiveClass,
-                )}
-              >
-                {t(`playlistSettings.basic.mode.${m}`)}
-              </button>
-            ))}
-          </div>
+          <DialogDescription className="text-xs text-text-secondary mt-0.5">
+            {t(
+              'playlistSettings.basic.subtitle',
+              'Configure general details, privacy, execution mode, and integrations.',
+            )}
+          </DialogDescription>
         </div>
       </div>
-      <DialogDescription>
-        <div className="py-1">
-          {t(`playlistSettings.basic.modeHelp.${playlist.mode}`)}
-        </div>
-      </DialogDescription>
-      <div className="grid grid-cols-[auto_1fr] gap-2">
-        <Label className=" text-lg">
-          {t('playlistSettings.basic.privacy')}
-        </Label>
 
-        <div
-          className={`flex items-center  cursor-pointer  
-          py-1 pl-4 pr-0.5 rounded-l-(--rounded-std)  justify-end`}
-        >
-          <ContentSwitch
-            leftLabel={
-              <Label
-                htmlFor="public-id"
-                className={`text-shadow-md font-semibold
-                    flex cursor-pointer transition-all duration-100 text-lg`}
-              >
-                {t('playlistSettings.basic.public')}
-              </Label>
-            }
-            rightLabel={
-              <Label
-                htmlFor="private-id"
-                className={`text-shadow-md font-semibold
-                    cursor-pointer transition-all duration-100 text-lg`}
-              >
-                {t('playlistSettings.basic.private')}
-              </Label>
-            }
-            onChange={(value) => {
-              patchNow(playlist.id, {
-                is_public: value !== 'right',
-              })
-              setIsPublic(value !== 'right')
+      {/* Card 1: Details & Access */}
+      <div className="p-3 border border-level-3/60 rounded-md bg-level-1 space-y-3 shadow-xs">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-level-3/40">
+          <PencilLine className="size-4 text-level-3" />
+          <span>
+            {t('playlistSettings.details.title', 'Playlist Details & Access')}
+          </span>
+        </div>
+
+        {/* Name */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-semibold text-text-main">
+              {t('playlistSettings.details.name')}
+            </Label>
+            <span className="text-[10px] text-text-placeholder">
+              {name.length}/{MAX_NAME_LENGTH}
+            </span>
+          </div>
+          <Input
+            type="text"
+            name="name"
+            value={name}
+            onChange={(e) => {
+              const value = e.target.value
+              if (value.length > MAX_NAME_LENGTH) {
+                toast.error(t('playlistSettings.details.nameTooLong'))
+                return
+              }
+              if (!value.trim()) {
+                toast.error(t('playlistSettings.details.nameRequired'))
+                return
+              }
+              setName(value)
+              patchDebounced(playlist.id, { name: value })
             }}
-            defaultValue={isPublic ? 'left' : 'right'}
+            placeholder={t('playlistSettings.details.namePlaceholder')}
+            maxLength={MAX_NAME_LENGTH}
+            className="bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50"
           />
         </div>
-      </div>
-      <DialogDescription>
-        <div className="py-1">{t('playlistSettings.basic.publicHelp')}</div>
-        <div className="py-1">{t('playlistSettings.basic.privateHelp')}</div>
-      </DialogDescription>
 
-      <div className={``}>
-        <Label htmlFor="break-point-id" className="text-lg">
-          {t('playlistSettings.basic.breakPoint')}
-        </Label>
-        <DialogDescription>
-          <div className="py-1">
-            {t('playlistSettings.basic.breakPointHelp')}
-          </div>
-        </DialogDescription>
-        <input
-          id="break-point-id"
-          type="number"
-          min={0}
-          value={activeModeSettings.priority_break_point}
-          onChange={(e) => {
-            const value = Math.max(0, Number(e.target.value) || 0)
-            patchDebounced(playlist.id, {
-              mode_settings: {
-                ...playlist.mode_settings,
-                [plstMode]: {
-                  ...activeModeSettings,
-                  priority_break_point: value,
-                },
-              },
-            })
-          }}
-          className="w-full h-11 px-3 mt-2 rounded-(--rounded-std) bg-level-1 border border-level-3/30 text-text-main"
-        />
-        <p className="text-xs text-text-placeholder mt-1">
-          {activeModeSettings.priority_break_point === 0
-            ? t('playlistSettings.basic.breakPointDisabled')
-            : t('playlistSettings.basic.breakPointEnabled', {
-                value: activeModeSettings.priority_break_point,
-              })}
-        </p>
-
-        {plstMode === 'stream' && (
-          <div className="mt-4 pt-4 border-t border-white/5">
-            <Label className="text-base">
-              {t('playlistSettings.basic.backgroundTracks')}
+        {/* Description */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-semibold text-text-main">
+              {t('playlistSettings.details.description')}
             </Label>
-            <DialogDescription>
-              <div className="py-1">
-                {t('playlistSettings.basic.backgroundTracksHelp')}
-              </div>
-            </DialogDescription>
-            {playlist.track_data.length === 0 ? (
-              <p className="text-sm text-text-secondary py-3 text-center">
+            <span className="text-[10px] text-text-placeholder">
+              {description.length}/{MAX_DESCRIPTION_LENGTH}
+            </span>
+          </div>
+          <Textarea
+            name="description"
+            value={description}
+            onChange={(e) => {
+              const value = e.target.value
+              if (value.length > MAX_DESCRIPTION_LENGTH) {
+                toast.error(t('playlistSettings.details.descriptionTooLong'))
+                return
+              }
+              setDescription(value)
+              patchDebounced(playlist.id, { description: value })
+            }}
+            placeholder={t('playlistSettings.details.descriptionPlaceholder')}
+            maxLength={MAX_DESCRIPTION_LENGTH}
+            rows={2}
+            className="bg-level-2 border-0 p-2 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50 resize-none min-h-[55px]"
+          />
+        </div>
+
+        {/* Mode & Privacy Toggles */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+          {/* Mode Switcher */}
+          <div className="flex items-center justify-between gap-2 p-2 rounded-md bg-level-2/60">
+            <div className="min-w-0 flex-1">
+              <Label className="text-xs font-semibold text-text-main truncate block">
+                {t('playlistSettings.basic.modeTitle')}
+              </Label>
+              <span className="text-[10px] text-text-secondary truncate block">
+                {t(`playlistSettings.basic.mode.${playlist.mode}`)}
+              </span>
+            </div>
+            <div className="flex gap-1 shrink-0">
+              {(['static', 'stream'] as Array<PlaylistMode>).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => {
+                    patchNow(playlist.id, { mode: m })
+                    setPlstMode(m)
+                  }}
+                  className={cn(
+                    filterTabBaseClass,
+                    'px-2.5 py-1 text-xs font-semibold h-7',
+                    playlist.mode === m
+                      ? filterTabActiveClass
+                      : filterTabInactiveClass,
+                  )}
+                >
+                  {t(`playlistSettings.basic.mode.${m}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Privacy Switcher */}
+          <div className="flex items-center justify-between gap-2 p-2 rounded-md bg-level-2/60">
+            <div className="min-w-0 flex-1">
+              <Label className="text-xs font-semibold text-text-main truncate block">
+                {t('playlistSettings.basic.privacy')}
+              </Label>
+              <span className="text-[10px] text-text-secondary truncate block">
+                {isPublic
+                  ? t('playlistSettings.basic.public')
+                  : t('playlistSettings.basic.private')}
+              </span>
+            </div>
+            <div className="shrink-0 flex items-center">
+              <ContentSwitch
+                leftLabel={
+                  <Label
+                    htmlFor="public-id"
+                    className="cursor-pointer text-xs font-semibold"
+                  >
+                    {t('playlistSettings.basic.public')}
+                  </Label>
+                }
+                rightLabel={
+                  <Label
+                    htmlFor="private-id"
+                    className="cursor-pointer text-xs font-semibold"
+                  >
+                    {t('playlistSettings.basic.private')}
+                  </Label>
+                }
+                onChange={(value) => {
+                  patchNow(playlist.id, {
+                    is_public: value !== 'right',
+                  })
+                  setIsPublic(value !== 'right')
+                }}
+                defaultValue={isPublic ? 'left' : 'right'}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Card 2: Execution Rules, Widget & Sources */}
+      <div className="p-3 border border-level-3/60 rounded-md bg-level-1 space-y-3 shadow-xs">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-level-3/40">
+          <Sliders className="size-4 text-level-3" />
+          <span>
+            {t('playlistSettings.basic.priorityAndWidget', 'Priority & Widget')}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {/* Priority Breakpoint */}
+          <div className="flex items-center justify-between gap-2 p-2 rounded-md bg-level-2/60">
+            <div className="min-w-0 flex-1">
+              <Label className="text-xs font-semibold text-text-main truncate block">
+                {t('playlistSettings.basic.breakPoint')}
+              </Label>
+            </div>
+            <div className="flex rounded-[--rounded-std] items-center overflow-hidden h-7 shrink-0">
+              <Input
+                id="break-point-id"
+                type="number"
+                ref={breakPointRef}
+                min={0}
+                dir="rtl"
+                value={activeModeSettings.priority_break_point}
+                className="border-0 bg-level-2 focus-visible:ring-0 rounded-r-none px-1.5 text-xs h-7 w-20 [appearance:textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+                onChange={(e) => {
+                  const value = Math.max(0, Number(e.target.value) || 0)
+                  patchDebounced(playlist.id, {
+                    mode_settings: {
+                      ...playlist.mode_settings,
+                      [plstMode]: {
+                        ...activeModeSettings,
+                        priority_break_point: value,
+                      },
+                    },
+                  })
+                }}
+              />
+              <UpDownBtn
+                getInputRef={() => breakPointRef.current}
+                className="rounded-r-[--rounded-std] rounded-l-none overflow-clip h-7"
+              />
+            </div>
+          </div>
+
+          {/* Priority Calculation Mode */}
+          <div className="flex items-center justify-between gap-2 p-2 rounded-md bg-level-2/60">
+            <div className="min-w-0 flex-1">
+              <Label className="text-xs font-semibold text-text-main truncate block">
+                {t('playlistSettings.basic.priorityMode')}
+              </Label>
+            </div>
+            <div className="shrink-0 flex items-center">
+              <ContentSwitch
+                leftLabel={
+                  <Label
+                    htmlFor="max-id"
+                    className="cursor-pointer text-xs font-semibold"
+                  >
+                    {t('playlistSettings.basic.priorityModeMax')}
+                  </Label>
+                }
+                rightLabel={
+                  <Label
+                    htmlFor="add-id"
+                    className="cursor-pointer text-xs font-semibold"
+                  >
+                    {t('playlistSettings.basic.priorityModeAdd')}
+                  </Label>
+                }
+                onChange={(value) => {
+                  patchDebounced(playlist.id, {
+                    cost_mode: value === 'right' ? 'add' : 'max',
+                  })
+                  setPriorityMode(value === 'right' ? 'add' : 'max')
+                }}
+                defaultValue={playlist.cost_mode === 'max' ? 'left' : 'right'}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Show in Widget - Dedicated full-width row */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2 rounded-md bg-level-2/60">
+          <div className="min-w-0 flex-1">
+            <Label className="text-xs font-semibold text-text-main">
+              {t('playlistSettings.basic.showInWidget')}
+            </Label>
+          </div>
+          <div className="shrink-0 flex items-center self-end sm:self-auto">
+            <ContentSwitch
+              leftLabel={
+                <Label
+                  htmlFor="widget-no-id"
+                  className="cursor-pointer text-xs font-semibold"
+                >
+                  {t('playlistSettings.basic.showInWidgetNo')}
+                </Label>
+              }
+              rightLabel={
+                <Label
+                  htmlFor="widget-yes-id"
+                  className="cursor-pointer text-xs font-semibold"
+                >
+                  {t('playlistSettings.basic.showInWidgetYes')}
+                </Label>
+              }
+              onChange={(value) => {
+                patchDebounced(playlist.id, {
+                  show_in_widget: value === 'right',
+                })
+                setShowInWidget(value === 'right')
+              }}
+              defaultValue={playlist.show_in_widget ? 'right' : 'left'}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Background Tracks (Stream mode) */}
+      {plstMode === 'stream' && (
+        <div className="pt-2 border-t border-level-3/40 space-y-2">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main">
+            <Music className="size-3.5 text-level-3" />
+            <span>{t('playlistSettings.basic.backgroundTracks')}</span>
+          </div>
+          {playlist.track_data.length === 0 ? (
+            <div className="p-3 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center">
+              <p className="text-xs text-text-secondary">
                 {t('playlistSettings.basic.backgroundTracksEmpty')}
               </p>
-            ) : (
-              <div className="flex flex-col gap-1.5 mt-2 max-h-60 overflow-y-auto">
-                {playlist.track_data.map((track) => {
-                  const isBackground = playlist.background_track_ids.includes(
-                    track.id,
-                  )
-                  return (
-                    <div
-                      key={track.id}
-                      className="flex items-center gap-3 px-3 py-2 rounded bg-level-2 cursor-pointer"
-                      onClick={() => {
-                        const nextIds = isBackground
-                          ? playlist.background_track_ids.filter(
-                              (id: string) => id !== track.id,
-                            )
-                          : [...playlist.background_track_ids, track.id]
-
-                        patchDebounced(playlist.id, {
-                          background_track_ids: nextIds,
-                        })
-                      }}
-                    >
-                      <Checkbox
-                        checked={isBackground}
-                        onCheckedChange={() => {}}
-                        className="mt-0.5 shrink-0 rounded-lg border-level-3 cursor-pointer"
-                      />
-                      <span className="text-sm truncate">{track.title}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-[auto_1fr] gap-2">
-        <Label className=" text-lg">
-          {t('playlistSettings.basic.priorityMode')}
-        </Label>
-
-        <div
-          className={`flex items-center  cursor-pointer  
-          py-1 pl-4 pr-0.5 rounded-l-(--rounded-std)  justify-end`}
-        >
-          <ContentSwitch
-            leftLabel={
-              <Label
-                htmlFor="max-id"
-                className={`text-shadow-md font-semibold
-                    flex cursor-pointer transition-all duration-100 text-lg`}
-              >
-                {t('playlistSettings.basic.priorityModeMax')}
-              </Label>
-            }
-            rightLabel={
-              <Label
-                htmlFor="add-id"
-                className={`text-shadow-md font-semibold 
-                    cursor-pointer transition-all duration-100 text-lg`}
-              >
-                {t('playlistSettings.basic.priorityModeAdd')}
-              </Label>
-            }
-            onChange={(value) => {
-              patchDebounced(playlist.id, {
-                cost_mode: value === 'right' ? 'add' : 'max',
-              })
-              setPriorityMode(value === 'right' ? 'add' : 'max')
-            }}
-            defaultValue={playlist.cost_mode === 'max' ? 'left' : 'right'}
-          />
-        </div>
-        <DialogDescription>
-          <div className="py-1">
-            {t('playlistSettings.basic.priorityModeAddHelp')}
-          </div>
-          <div className="py-1">
-            {t('playlistSettings.basic.priorityModeMaxHelp')}
-          </div>
-        </DialogDescription>
-      </div>
-
-      <div className="grid grid-cols-[auto_1fr] items-center gap-2">
-        <Label className="text-lg">
-          {t('playlistSettings.basic.showInWidget')}
-        </Label>
-        <div
-          className={`flex items-center  cursor-pointer  
-          py-1 pl-4 pr-0.5 rounded-l-(--rounded-std)  justify-end`}
-        >
-          <ContentSwitch
-            leftLabel={
-              <Label
-                htmlFor="widget-no-id"
-                className={`text-shadow-md font-semibold
-                    flex cursor-pointer transition-all duration-100 text-lg`}
-              >
-                {t('playlistSettings.basic.showInWidgetNo')}
-              </Label>
-            }
-            rightLabel={
-              <Label
-                htmlFor="widget-yes-id"
-                className={`text-shadow-md font-semibold 
-                    cursor-pointer transition-all duration-100 text-lg`}
-              >
-                {t('playlistSettings.basic.showInWidgetYes')}
-              </Label>
-            }
-            onChange={(value) => {
-              patchDebounced(playlist.id, {
-                show_in_widget: value === 'right',
-              })
-              setShowInWinget(value === 'right')
-            }}
-            defaultValue={playlist.show_in_widget ? 'right' : 'left'}
-          />
-        </div>
-
-        {/* <Switch
-          checked={showInWidget}
-          onCheckedChange={(value) => {
-            setShowInWinget(value)
-            setPlst({ ...playlist, show_in_widget: value })
-            canPatchPlaylist.current = true
-          }}
-          className="justify-self-end ring-2 ring-level-3 scale-130"
-        /> */}
-      </div>
-
-      <div className="">
-        <Label className=" text-lg">
-          {t('playlistSettings.basic.externalSources')}
-        </Label>
-        <DialogDescription>
-          <div className="py-1">
-            {t('playlistSettings.basic.externalSourcesHelp')}
-          </div>
-        </DialogDescription>
-        <div className=" rounded-(--rounded-std) w-full mt-3">
-          {isLoadingIntegrations ? (
-            <div className="text-center py-4 text-sm text-gray-500">
-              {t('playlistSettings.basic.integrationsLoading')}
-            </div>
-          ) : integrations.length === 0 ? (
-            <div className="text-center py-4 text-sm text-gray-500">
-              {t('playlistSettings.basic.integrationsEmpty')}
             </div>
           ) : (
-            <div className="space-y-3">
-              {integrations.map((integration) => {
-                if (
-                  !Object.values(ExternalContentPlatform).includes(
-                    integration.platform,
-                  )
+            <div className="grid gap-1.5 max-h-40 overflow-y-auto pr-1">
+              {playlist.track_data.map((track) => {
+                const isBackground = playlist.background_track_ids.includes(
+                  track.id,
                 )
-                  return null
-
                 return (
                   <div
-                    key={`${integration.platform}-${integration.platform_user_id}`}
-                    className="flex items-center gap-3 px-3 py-2 rounded bg-level-2 transition-colors cursor-pointer"
-                    onClick={() =>
-                      handleSourceToggle(
-                        integration.platform,
-                        integration.platform_user_id,
-                      )
-                    }
+                    key={track.id}
+                    className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md bg-level-2/80 hover:bg-level-2 transition-colors cursor-pointer text-xs"
+                    onClick={() => {
+                      const nextIds = isBackground
+                        ? playlist.background_track_ids.filter(
+                            (id: string) => id !== track.id,
+                          )
+                        : [...playlist.background_track_ids, track.id]
+
+                      patchDebounced(playlist.id, {
+                        background_track_ids: nextIds,
+                      })
+                    }}
                   >
                     <Checkbox
-                      checked={isSourceSelected(
-                        integration.platform,
-                        integration.platform_user_id,
-                      )}
-                      onCheckedChange={() =>
-                        handleSourceToggle(
-                          integration.platform,
-                          integration.platform_user_id,
-                        )
-                      }
-                      className="mt-0.5 shrink-0 rounded-lg border-level-3 cursor-pointer"
+                      checked={isBackground}
+                      onCheckedChange={() => {}}
+                      className="size-4 shrink-0 rounded border-level-3 cursor-pointer"
                     />
-
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="w-6 h-6 flex items-center justify-center rounded shrink-0">
-                        {getPlatformIcon(integration.platform)}
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-medium text-sm">
-                          {getPlatformDisplayName(integration.platform)}
-                        </span>
-                        <span className="text-xs text-gray-400 truncate">
-                          @{integration.platform_username}
-                        </span>
-                      </div>
-                    </div>
+                    <span className="font-medium text-text-main truncate">
+                      {track.title}
+                    </span>
                   </div>
                 )
               })}
             </div>
           )}
         </div>
+      )}
+
+      {/* External Sources */}
+      <div className="pt-2 border-t border-level-3/40 space-y-2">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main">
+          <Share2 className="size-3.5 text-level-3" />
+          <span>{t('playlistSettings.basic.externalSources')}</span>
+        </div>
+
+        {isLoadingIntegrations ? (
+          <div className="p-3 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center">
+            <p className="text-xs text-text-secondary">
+              {t('playlistSettings.basic.integrationsLoading')}
+            </p>
+          </div>
+        ) : integrations.length === 0 ? (
+          <div className="p-3 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center">
+            <p className="text-xs text-text-secondary">
+              {t('playlistSettings.basic.integrationsEmpty')}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {integrations.map((integration) => {
+              if (
+                !Object.values(ExternalContentPlatform).includes(
+                  integration.platform,
+                )
+              )
+                return null
+
+              const selected = isSourceSelected(
+                integration.platform,
+                integration.platform_user_id,
+              )
+
+              return (
+                <div
+                  key={`${integration.platform}-${integration.platform_user_id}`}
+                  className="flex items-center gap-2.5 p-2 rounded-md bg-level-2/80 hover:bg-level-2 transition-colors cursor-pointer text-xs"
+                  onClick={() =>
+                    handleSourceToggle(
+                      integration.platform,
+                      integration.platform_user_id,
+                    )
+                  }
+                >
+                  <Checkbox
+                    checked={selected}
+                    onCheckedChange={() =>
+                      handleSourceToggle(
+                        integration.platform,
+                        integration.platform_user_id,
+                      )
+                    }
+                    className="size-4 shrink-0 rounded border-level-3 cursor-pointer"
+                  />
+
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="flex size-6 shrink-0 items-center justify-center rounded bg-level-1 text-level-3">
+                      {getPlatformIcon(integration.platform)}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-semibold text-text-main truncate">
+                        {getPlatformDisplayName(integration.platform)}
+                      </span>
+                      <span className="text-[10px] text-text-secondary truncate">
+                        @{integration.platform_username}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )

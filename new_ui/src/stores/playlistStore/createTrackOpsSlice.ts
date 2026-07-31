@@ -2,23 +2,12 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { useAuthStore } from '../authStore'
 import type { StateCreator } from 'zustand'
-import type {
-  DeleteStatus,
-  Order,
-  SlotId,
-  StoreState,
-  TrackInput,
-} from '@/types/playlist'
-import { addTrackToPlaylist, removeTrackFromPlaylist } from '@/api/api-playlist'
-
-export interface TrackOpsSlice {
-  addTrack: (slot: SlotId, track: TrackInput) => Promise<void>
-  removeTrack: (
-    slot: SlotId,
-    trackId: string,
-    reason: DeleteStatus,
-  ) => Promise<void>
-}
+import type { Order, StoreState, TrackOpsSlice } from '@/types/playlist'
+import {
+  addTrackToPlaylist,
+  bulkRemoveTracksFromPlaylist,
+  removeTrackFromPlaylist,
+} from '@/api/api-playlist'
 
 export const createTrackOpsSlice: StateCreator<
   StoreState,
@@ -61,5 +50,13 @@ export const createTrackOpsSlice: StateCreator<
     const playlistId = s.slots[slot].playlistId
     if (!playlistId || !s.canActInSlot(slot, 'remove')) return
     await removeTrackFromPlaylist(playlistId, trackId, reason)
+  },
+
+  removeTracks: async (slot, trackIds, reason) => {
+    const s = get()
+    const playlistId = s.slots[slot].playlistId
+    if (!playlistId || !s.canActInSlot(slot, 'remove') || trackIds.length === 0)
+      return
+    await bulkRemoveTracksFromPlaylist(playlistId, trackIds, reason)
   },
 })

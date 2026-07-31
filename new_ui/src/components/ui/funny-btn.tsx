@@ -5,6 +5,7 @@ interface UpDownBtnProps {
   upOnClick?: () => void
   downOnClick?: () => void
   inputRef?: RefObject<HTMLInputElement | null>
+  getInputRef?: () => HTMLInputElement | null
   className?: string
 }
 
@@ -12,6 +13,7 @@ const UpDownBtn = ({
   upOnClick,
   downOnClick,
   inputRef,
+  getInputRef,
   className = '',
 }: UpDownBtnProps) => {
   const containerStyle = cn(
@@ -20,7 +22,7 @@ const UpDownBtn = ({
   )
 
   const handleAction = (type: 'up' | 'down') => {
-    const inputElement = inputRef?.current
+    const inputElement = inputRef?.current ?? getInputRef?.() ?? null
 
     if (inputElement) {
       // 1. Делаем шаг через нативный API инпута
@@ -35,7 +37,7 @@ const UpDownBtn = ({
 
       nativeInputValueSetter?.call(inputElement, inputElement.value)
 
-      // 3. Генерируем событие input, чтобы сработал onChange={handleCustomPriority}
+      // 3. Генерируем событие input, чтобы сработал onChange
       inputElement.dispatchEvent(new Event('input', { bubbles: true }))
     }
 
@@ -48,14 +50,14 @@ const UpDownBtn = ({
       <button
         type="button" // ОБЯЗАТЕЛЬНО: предотвращает сабмит формы
         onClick={() => handleAction('up')}
-        className="h-full w-full bg-level-2 pl-2 pr-2 hover:bg-level-3 active:bg-level-3/50"
+        className="h-full w-full bg-level-2 pl-2 pr-2 hover:bg-level-3 active:bg-level-3/50 cursor-pointer flex items-center justify-center text-xs font-semibold select-none"
       >
         ↑
       </button>
       <button
         type="button" // ОБЯЗАТЕЛЬНО: предотвращает сабмит формы
         onClick={() => handleAction('down')}
-        className="h-full w-full bg-level-2 pl-2 pr-2 hover:bg-level-3 active:bg-level-3/50"
+        className="h-full w-full bg-level-2 pl-2 pr-2 hover:bg-level-3 active:bg-level-3/50 cursor-pointer flex items-center justify-center text-xs font-semibold select-none"
       >
         ↓
       </button>

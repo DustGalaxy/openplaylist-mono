@@ -1,19 +1,15 @@
 from simple_repository import crud_factory
 from simple_repository.abctract import IdValue
-from simple_repository.exceptions import IntegrityConflictException, RepositoryException, NotFoundException
-
+from simple_repository.exceptions import IntegrityConflictException, NotFoundException, RepositoryException
 from sqlalchemy import select, update
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-
-from src.models.auth_user import AuthUserSchema, AuthUserCreate, AuthUserUpdate
-from src.orm.auth_user import User
-
-from src.orm.linked_accounts import LinkedAccounts
-
-from src.orm.token_vault import TokenVault
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src._types import IntegrationPlatform
+from src.models.auth_user import AuthUserCreate, AuthUserSchema, AuthUserUpdate
+from src.orm.auth_user import User
+from src.orm.linked_accounts import LinkedAccounts
+from src.orm.token_vault import TokenVault
 
 
 class UserRepository(crud_factory(User, AuthUserSchema, AuthUserCreate, AuthUserUpdate)):

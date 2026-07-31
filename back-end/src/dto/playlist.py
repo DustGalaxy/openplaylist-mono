@@ -1,12 +1,22 @@
 from datetime import datetime
 from typing import Any, Dict, Literal, Optional
 from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict, Field
 
-from src._types import BlockListScope, ChatRuleScope, ContentSettingScope, DonationRuleScope
+from src._types import BlockListScope, ChatRuleScope, ContentSettingScope, DeleteStatus, DonationRuleScope
 from src.dto.settings import ReadPlaylistSettings
 from src.models.order import OrderDomain
 from src.models.playlist import AllowedSource
+
+
+class TrackDeleteBulk(BaseModel):
+    track_ids: list[UUID]
+    reason: DeleteStatus = "listened"
+
+# class TrackAddBulk(BaseModel):
+#     track_ids: list[UUID]
+
 
 class ReadContentSettings(BaseModel):
     id: UUID
@@ -58,6 +68,7 @@ class ReadChatRules(BaseModel):
     overrive_order: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class ReadPlaylist(BaseModel):
     id: UUID
@@ -127,7 +138,6 @@ class NewPlaylist(BaseModel):
     name: str
     description: str
     show_in_widget: bool
-
 
 
 class PlayNow(BaseModel):

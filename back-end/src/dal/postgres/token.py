@@ -3,16 +3,13 @@ from uuid import UUID
 
 from simple_repository import crud_factory
 from simple_repository.exceptions import NotFoundException
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
-from src.orm.token_vault import TokenVault
-from src.models.token_vault import TokenVaultCreate, TokenVaultUpdate, TokenVaultDomain
-from src.orm.linked_accounts import LinkedAccounts
-
 from src._types import IntegrationPlatform
+from src.models.token_vault import TokenVaultCreate, TokenVaultDomain, TokenVaultUpdate
+from src.orm.linked_accounts import LinkedAccounts
+from src.orm.token_vault import TokenVault
 
 
 class TokenVaultRepository(crud_factory(TokenVault, TokenVaultDomain, TokenVaultCreate, TokenVaultUpdate)):

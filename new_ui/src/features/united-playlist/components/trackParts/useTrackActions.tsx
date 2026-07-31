@@ -14,7 +14,7 @@ export function useTrackActions(
   track: Track,
   group: 'vip' | 'regular' | 'background',
 ) {
-  const { t } = useTranslation()
+  const { t } = useTranslation('playlist')
   const { slot, playlistId, role } = usePlaylistView()
   const { startTrack, removeTrack, reorderStepTrack } = usePlaylistStore()
   const {
@@ -32,7 +32,7 @@ export function useTrackActions(
     navigator.clipboard.writeText(
       `https://www.youtube.com/watch?v=${track.yt_video_id}`,
     )
-    toast.success('Link copied')
+    toast.success(t('playlist.toast.linkCopied', 'Link copied'))
   }
   const remove = () => removeTrack(slot, track.id, 'removed')
 

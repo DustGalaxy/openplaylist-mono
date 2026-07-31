@@ -2,27 +2,25 @@ from uuid import UUID
 
 from simple_repository import crud_factory
 from simple_repository.exceptions import IntegrityConflictException, RepositoryException
-
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.playlist import (
-    ContentSettingsCreate,
-    ContentSettingsPatch,
-    ContentSettingsSchema,
-    DonationRulesPatch,
-    DonationRulesCreate,
-    DonationRulesSchema,
+    BlockListCreate,
+    BlockListPatch,
+    BlockListSchema,
     ChatRulesCreate,
     ChatRulesPatch,
     ChatRulesSchema,
-    BlockListSchema,
-    BlockListCreate,
-    BlockListPatch,
+    ContentSettingsCreate,
+    ContentSettingsPatch,
+    ContentSettingsSchema,
+    DonationRulesCreate,
+    DonationRulesPatch,
+    DonationRulesSchema,
 )
-from src.orm.playlist import ContentSettings, DonationRules, ChatRules, BlockList
+from src.orm.playlist import BlockList, ChatRules, ContentSettings, DonationRules
 
 
 class ContentSettingsRepository(

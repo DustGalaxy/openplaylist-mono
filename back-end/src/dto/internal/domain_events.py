@@ -12,7 +12,7 @@ from src.models.playlist import AllowedSource
 
 class PlaylistSettings(BaseModel):
     id: UUID
-    
+
     owner_id: UUID
     owner_nickname: str
     name: str = Field(..., max_length=100)
@@ -41,10 +41,13 @@ class PlaylistSettings(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class InternalPlaylistEventType(StrEnum):
     TRACK_ADDED = "track.added"
+    TRACK_ADDED_BULK = "track.added.bulk"
     TRACK_REJECTED = "track.rejected"
     TRACK_REMOVED = "track.removed"
+    TRACK_REMOVED_BULK = "track.removed.bulk"
     TRACK_PLAY = "track.play"
     TRACK_LISTENED = "track.listened"
     TRACK_SKIPPED = "track.skipped"
@@ -68,6 +71,7 @@ class InternalPlaylistEvent(BaseModel):
     user_name: str
 
     track: OrderDomain | OrderCreate | None = None
+    bulk_ids: list[UUID] | None = None
     playlist_data: PlaylistSettings | None = None
     error_list: list[str] | None = None
 
@@ -85,5 +89,3 @@ class InternalUserEvent(BaseModel):
     user_name: str
 
     died_integration: IntegrationPlatform | None = None
-    
-

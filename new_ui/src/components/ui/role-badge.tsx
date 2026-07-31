@@ -53,7 +53,7 @@ function RoleOverflowChip({ hiddenRoles }: { hiddenRoles: Array<PublicRole> }) {
         </span>
       </TooltipTrigger>
       <TooltipContent side="bottom" className="bg-level-2 text-text-main">
-        {hiddenRoles.map((r) => getTierDef(r.tier).label).join(', ')}
+        {hiddenRoles.map((r) => getTierDef(r.id).label).join(', ')}
       </TooltipContent>
     </Tooltip>
   )

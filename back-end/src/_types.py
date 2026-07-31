@@ -140,11 +140,13 @@ class NotificationType(StrEnum):
 
 class PlaylistLogsEventTypes(StrEnum):
     ADD_TRACK = "add_track"
+    BULK_ADD_TRACK = "bulk_add_track"
     ADD_TRACK_ERROR = "add_track_error"
 
     PLAY_TRACK = "play_track"
 
     REMOVE_TRACK = "remove_track"
+    BULK_REMOVE_TRACK = "bulk_remove_track"
     LISTEN_TRACK = "listen_track"
     SKIP_TRACK = "skip_track"
     REPORT_TRACK = "report_track"

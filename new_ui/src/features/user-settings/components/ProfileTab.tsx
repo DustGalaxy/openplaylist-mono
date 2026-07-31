@@ -1,22 +1,29 @@
-import { useState, useCallback, useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useCallback, useMemo, useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import {
+  AlertTriangle,
+  Mail,
+  Plus,
+  Save,
+  Share2,
+  Trash2,
+  User,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import type { UserProfile } from '@/types/user'
-import { patchSocialLink, updateUserProfile } from '@/api/api-user'
+import { deleteUser, patchSocialLink, updateUserProfile } from '@/api/api-user'
 import { SocialLinkHint } from '@/lib/constants/social_names'
 import Btn from '@/components/ui/my-btn'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  feedbackErrorClass,
-  feedbackSuccessClass,
-  panelClass,
-  sectionTitleClass,
-} from '@/features/landing/styles'
-import { deleteUser } from '@/api/api-user'
-import { useNavigate } from '@tanstack/react-router'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
+import { DialogDescription } from '@/components/ui/dialog'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 interface ProfileTabProps {
@@ -30,7 +37,6 @@ interface SocialLinkData {
 
 interface UIState {
   socialLoading: Record<string, boolean>
-  socialFeedback: Record<string, { type: 'success' | 'error'; message: string }>
   deleteConfirmation: string | null
 }
 
@@ -62,7 +68,6 @@ const getApiErrorMessage = (error: unknown, fallback: string): string => {
       return String(data.detail)
     }
   }
-
   return error instanceof Error ? error.message : fallback
 }
 
@@ -71,19 +76,28 @@ const validatePlatform = (
   t: (key: string, opts?: Record<string, unknown>) => string,
 ): string | null => {
   const trimmed = platform.trim()
-  if (!trimmed) return t('settings.profile.validation.platformRequired')
+  if (!trimmed)
+    return t(
+      'settings.profile.validation.platformRequired',
+      'Platform name required',
+    )
   if (trimmed.length < MIN_PLATFORM_LENGTH) {
     return t('settings.profile.validation.platformMin', {
       min: MIN_PLATFORM_LENGTH,
+      defaultValue: `Min ${MIN_PLATFORM_LENGTH} chars`,
     })
   }
   if (trimmed.length > MAX_PLATFORM_LENGTH) {
     return t('settings.profile.validation.platformMax', {
       max: MAX_PLATFORM_LENGTH,
+      defaultValue: `Max ${MAX_PLATFORM_LENGTH} chars`,
     })
   }
   if (!/^[a-zA-Z0-9\s\-_]+$/.test(trimmed)) {
-    return t('settings.profile.validation.platformChars')
+    return t(
+      'settings.profile.validation.platformChars',
+      'Invalid characters in platform name',
+    )
   }
   return null
 }
@@ -93,18 +107,25 @@ const validateUrl = (
   t: (key: string, opts?: Record<string, unknown>) => string,
 ): string | null => {
   const trimmed = url.trim()
-  if (!trimmed) return t('settings.profile.validation.urlRequired')
+  if (!trimmed)
+    return t('settings.profile.validation.urlRequired', 'URL required')
   if (trimmed.length < MIN_URL_LENGTH) {
-    return t('settings.profile.validation.urlMin', { min: MIN_URL_LENGTH })
+    return t('settings.profile.validation.urlMin', {
+      min: MIN_URL_LENGTH,
+      defaultValue: `Min ${MIN_URL_LENGTH} chars`,
+    })
   }
   if (!URL_REGEX.test(trimmed)) {
-    return t('settings.profile.validation.urlProtocol')
+    return t(
+      'settings.profile.validation.urlProtocol',
+      'URL must start with http:// or https://',
+    )
   }
   try {
     new URL(trimmed)
     return null
   } catch {
-    return t('settings.profile.validation.urlInvalid')
+    return t('settings.profile.validation.urlInvalid', 'Invalid URL format')
   }
 }
 
@@ -120,7 +141,6 @@ export function ProfileTab({ user }: ProfileTabProps) {
   })
   const [uiState, setUIState] = useState<UIState>({
     socialLoading: {},
-    socialFeedback: {},
     deleteConfirmation: null,
   })
 
@@ -146,54 +166,43 @@ export function ProfileTab({ user }: ProfileTabProps) {
 
   const handleSaveProfile = useCallback(async () => {
     setProfileSaving(true)
-    const loadingToast = toast.loading(t('settings.profile.saving'))
+    const loadingToast = toast.loading(
+      t('settings.profile.saving', 'Saving...'),
+    )
     try {
       await updateUserProfile({ bio, is_public: isPublic })
       toast.dismiss(loadingToast)
-      toast.success(t('settings.profile.saved'))
+      toast.success(t('settings.profile.saved', 'Profile saved successfully'))
     } catch (error) {
       toast.dismiss(loadingToast)
-      toast.error(getApiErrorMessage(error, t('settings.profile.saveFailed')))
+      toast.error(
+        getApiErrorMessage(
+          error,
+          t('settings.profile.saveFailed', 'Failed to save profile'),
+        ),
+      )
     } finally {
       setProfileSaving(false)
     }
-  }, [bio, isPublic])
+  }, [bio, isPublic, t])
 
   const handlePlatformChange = useCallback((value: string) => {
     setNewSocialLink((prev) => ({ ...prev, platform: value }))
-    setUIState((prev) => {
-      const next = { ...prev }
-      delete next.socialFeedback.add
-      return next
-    })
   }, [])
 
   const handleUrlChange = useCallback((value: string) => {
     setNewSocialLink((prev) => ({ ...prev, url: value }))
-    setUIState((prev) => {
-      const next = { ...prev }
-      delete next.socialFeedback.add
-      return next
-    })
   }, [])
 
   const handleAddSocialLink = useCallback(async () => {
     const platformError = validatePlatform(newSocialLink.platform, t)
     if (platformError) {
-      setUIState((prev) => ({
-        ...prev,
-        socialFeedback: { add: { type: 'error', message: platformError } },
-      }))
       toast.error(platformError)
       return
     }
 
     const urlError = validateUrl(newSocialLink.url, t)
     if (urlError) {
-      setUIState((prev) => ({
-        ...prev,
-        socialFeedback: { add: { type: 'error', message: urlError } },
-      }))
       toast.error(urlError)
       return
     }
@@ -204,28 +213,16 @@ export function ProfileTab({ user }: ProfileTabProps) {
     if (isDuplicate) {
       const message = t('settings.profile.duplicatePlatform', {
         platform: newSocialLink.platform,
+        defaultValue: `Platform ${newSocialLink.platform} already exists`,
       })
-      setUIState((prev) => ({
-        ...prev,
-        socialFeedback: {
-          add: {
-            type: 'error',
-            message: message,
-          },
-        },
-      }))
       toast.error(message)
       return
     }
 
     setUIState((prev) => ({ ...prev, socialLoading: { add: true } }))
-    setUIState((prev) => {
-      const next = { ...prev }
-      delete next.socialFeedback.add
-      return next
-    })
-
-    const loadingToast = toast.loading(t('settings.profile.adding'))
+    const loadingToast = toast.loading(
+      t('settings.profile.adding', 'Adding link...'),
+    )
 
     try {
       const updatedSocials = {
@@ -237,202 +234,299 @@ export function ProfileTab({ user }: ProfileTabProps) {
       setNewSocialLink({ platform: '', url: '' })
 
       toast.dismiss(loadingToast)
-      toast.success(t('settings.profile.linkAddedSuccess'))
-
-      setUIState((prev) => ({
-        ...prev,
-        socialFeedback: {
-          add: {
-            type: 'success',
-            message: t('settings.profile.linkAddedSuccess'),
-          },
-        },
-      }))
+      toast.success(
+        t('settings.profile.linkAddedSuccess', 'Social link added'),
+      )
     } catch (error) {
       const errorMsg = getApiErrorMessage(
         error,
-        t('settings.profile.linkAddFailed'),
+        t('settings.profile.linkAddFailed', 'Failed to add link'),
       )
       toast.dismiss(loadingToast)
       toast.error(errorMsg)
-      setUIState((prev) => ({
-        ...prev,
-        socialFeedback: {
-          add: {
-            type: 'error',
-            message: errorMsg,
-          },
-        },
-      }))
     } finally {
       setUIState((prev) => ({
         ...prev,
         socialLoading: { add: false },
       }))
     }
-  }, [newSocialLink, socialLinks])
+  }, [newSocialLink, socialLinks, t])
 
-  const handleDeleteSocialLink = useCallback(async (platform: string) => {
-    setUIState((prev) => ({
-      ...prev,
-      deleteConfirmation: null,
-    }))
-    setUIState((prev) => ({
-      ...prev,
-      socialLoading: { [`delete-${platform}`]: true },
-    }))
-
-    const loadingToast = toast.loading(t('settings.profile.deleting'))
-
-    try {
-      const { [platform]: deleted, ...otherSocials } = user?.social_links ?? {}
-      await patchSocialLink(otherSocials)
-      setSocialLinks(otherSocials)
-
-      toast.dismiss(loadingToast)
-      toast.success(t('settings.profile.linkDeleted'))
-
+  const handleDeleteSocialLink = useCallback(
+    async (platform: string) => {
       setUIState((prev) => ({
         ...prev,
-        socialFeedback: {
-          [`delete-${platform}`]: {
-            type: 'success',
-            message: t('settings.profile.linkDeleted'),
-          },
-        },
+        deleteConfirmation: null,
+        socialLoading: { [`delete-${platform}`]: true },
       }))
-    } catch (error) {
-      const errorMsg = getApiErrorMessage(
-        error,
-        t('settings.profile.linkDeleteFailed'),
+
+      const loadingToast = toast.loading(
+        t('settings.profile.deleting', 'Deleting...'),
       )
-      toast.dismiss(loadingToast)
-      toast.error(errorMsg)
-      setUIState((prev) => ({
-        ...prev,
-        socialFeedback: {
-          [`delete-${platform}`]: {
-            type: 'error',
-            message: errorMsg,
-          },
-        },
-      }))
-    } finally {
-      setUIState((prev) => ({
-        ...prev,
-        socialLoading: { [`delete-${platform}`]: false },
-      }))
-    }
-  }, [])
+
+      try {
+        const { [platform]: deleted, ...otherSocials } = socialLinks
+        await patchSocialLink(otherSocials)
+        setSocialLinks(otherSocials)
+
+        toast.dismiss(loadingToast)
+        toast.success(t('settings.profile.linkDeleted', 'Social link deleted'))
+      } catch (error) {
+        const errorMsg = getApiErrorMessage(
+          error,
+          t('settings.profile.linkDeleteFailed', 'Failed to delete link'),
+        )
+        toast.dismiss(loadingToast)
+        toast.error(errorMsg)
+      } finally {
+        setUIState((prev) => ({
+          ...prev,
+          socialLoading: { [`delete-${platform}`]: false },
+        }))
+      }
+    },
+    [socialLinks, t],
+  )
 
   const handleKillProfile = async () => {
-    if (!confirm(t('settings.profile.killUserProfile.confirmation'))) {
+    if (
+      !confirm(
+        t(
+          'settings.profile.killUserProfile.confirmation',
+          'Are you sure you want to delete your account? This action cannot be undone.',
+        ),
+      )
+    ) {
       return
     }
-    toast.loading(t('settings.profile.killUserProfile.deleting'))
+    toast.loading(
+      t('settings.profile.killUserProfile.deleting', 'Deleting account...'),
+    )
     const res = await deleteUser()
 
     if (res) {
-      toast.success(t('settings.profile.killUserProfile.deleted'))
-      navigate({ to: '/logout' })
+      toast.success(
+        t('settings.profile.killUserProfile.deleted', 'Account deleted'),
+      )
+      void navigate({ to: '/logout' })
     } else {
-      toast.error(t('settings.profile.killUserProfile.deleteFailed'))
+      toast.error(
+        t(
+          'settings.profile.killUserProfile.deleteFailed',
+          'Failed to delete account',
+        ),
+      )
     }
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Profile Overview Card */}
-      <div className={`p-4 sm:p-6 ${panelClass}`}>
-        <h3
-          className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}
-        >
-          {t('settings.profile.overview')}
-        </h3>
+    <div className="space-y-4">
+      {/* Title Header */}
+      <div className="flex items-start gap-2.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+          <User className="size-5" />
+        </div>
+        <div>
+          <Label className="text-base font-bold text-text-main">
+            {t('settings.profile.overview', 'User Profile')}
+          </Label>
+          <DialogDescription className="text-xs text-text-secondary mt-0.5">
+            {t(
+              'settings.profile.subtitle',
+              'Manage your profile details, bio, and connected social links.',
+            )}
+          </DialogDescription>
+        </div>
+      </div>
 
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-          {/* Avatar */}
-          <div className="rounded-full w-25 h-25 bg-linear-to-br from-accent-1 to-accent-2 p-1 shrink-0 shadow-lg">
-            <div className="w-full h-full rounded-full bg-level-2 overflow-hidden">
-              <img
-                src={user?.avatar_url || ''}
-                alt={`${user?.username || 'User'} avatar`}
-                className="w-full h-full object-cover"
-              />
+      {/* Card 1: User Info & Bio */}
+      <div className="p-3 sm:p-4 border border-level-3/60 rounded-md bg-level-1 space-y-4 shadow-xs">
+        {/* User Overview Bar */}
+        <div className="flex items-center gap-3.5 pb-3 border-b border-level-3/40">
+          <div className="rounded-full size-14 bg-gradient-to-br from-[var(--color-accent-1)] to-[var(--color-accent-2)] p-0.5 shrink-0 shadow-md">
+            <div className="w-full h-full rounded-full bg-level-2 overflow-hidden flex items-center justify-center">
+              {user?.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt={`${user.username || 'User'} avatar`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <User className="size-6 text-text-secondary" />
+              )}
             </div>
           </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg font-bold text-text-main truncate">
+              {user?.username || t('settings.profile.user', 'User')}
+            </h2>
+            {user?.email && (
+              <p className="flex items-center gap-1.5 text-xs text-text-secondary mt-0.5">
+                <Mail className="size-3 shrink-0 text-text-secondary" />
+                <span
+                  title="Hover to reveal email"
+                  className="cursor-pointer bg-text-main text-text-main hover:bg-transparent hover:text-text-secondary transition-colors duration-700 rounded px-1.5 py-0.5 text-xs select-none"
+                >
+                  {user.email}
+                </span>
+              </p>
+            )}
+          </div>
+        </div>
 
-          {/* Profile Info */}
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold mb-2">{user?.username || ''}</h2>
-            <p className="mb-4 text-black bg-black hover:text-text-secondary hover:bg-level-2 px-2 py-1 rounded-full">
-              {user?.email ? user.email : t('settings.profile.noEmail')}
+        {/* Bio Input */}
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <Label
+              htmlFor="profile-bio"
+              className="text-xs font-semibold text-text-main"
+            >
+              {t('settings.profile.bio', 'Bio')}
+            </Label>
+            <span className="text-[10px] text-text-placeholder">
+              {bio.length}/500
+            </span>
+          </div>
+          <Textarea
+            id="profile-bio"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            maxLength={500}
+            rows={3}
+            placeholder={t(
+              'settings.profile.bioPlaceholder',
+              'Tell users about yourself...',
+            )}
+            className="bg-level-2 border-0 p-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50 resize-none min-h-[70px]"
+          />
+        </div>
+
+        {/* Public Profile Switch */}
+        <div className="flex items-center justify-between gap-3 p-2.5 rounded-md bg-level-2/60">
+          <div className="min-w-0 flex-1">
+            <Label className="text-xs font-semibold text-text-main block">
+              {t('settings.profile.isPublic', 'Public Profile')}
+            </Label>
+            <p className="text-[11px] text-text-secondary mt-0.5">
+              {t(
+                'settings.profile.isPublicHint',
+                'Allow other users to view your public profile page.',
+              )}
             </p>
-            <div className={``}>
-              <h3
-                className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}
-              >
-                {t('settings.profile.editProfile')}
-              </h3>
+          </div>
+          <Switch
+            checked={isPublic}
+            onCheckedChange={setIsPublic}
+            className="shrink-0"
+          />
+        </div>
 
-              <div className="flex flex-col gap-4">
-                <div>
-                  <Label htmlFor="profile-bio" className="text-text-main">
-                    {t('settings.profile.bio')}
-                  </Label>
-                  <Textarea
-                    id="profile-bio"
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    maxLength={500}
-                    placeholder={t('settings.profile.bioPlaceholder')}
-                    className="mt-2 border-level-4 text-text-main bg-level-1 resize-none min-h-24"
-                  />
-                  <p className="mt-1 text-xs text-text-placeholder text-right">
-                    {bio.length}/500
-                  </p>
-                </div>
+        {/* Save Button */}
+        <div className="flex justify-end pt-1">
+          <Btn
+            onClick={handleSaveProfile}
+            disabled={!profileDirty || profileSaving}
+            className="h-8 px-4 bg-level-2 text-xs font-semibold text-text-main hover:bg-level-3 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+          >
+            <Save className="size-3.5" />
+            <span>
+              {profileSaving
+                ? t('settings.profile.saving', 'Saving...')
+                : t('settings.profile.save', 'Save Changes')}
+            </span>
+          </Btn>
+        </div>
+      </div>
 
-                <div className="flex items-center justify-between rounded-lg border border-level-4 px-4 py-3">
-                  <div className="pr-4">
-                    <p className="text-sm font-medium text-text-main">
-                      {t('settings.profile.isPublic')}
-                    </p>
-                    <p className="text-xs text-text-secondary">
-                      {t('settings.profile.isPublicHint')}
-                    </p>
-                  </div>
-                  <Switch checked={isPublic} onCheckedChange={setIsPublic} />
-                </div>
+      {/* Card 2: Social Links */}
+      <div className="p-3 sm:p-4 border border-level-3/60 rounded-md bg-level-1 space-y-3.5 shadow-xs">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-level-3/40">
+          <Share2 className="size-4 text-level-3" />
+          <span>
+            {t('settings.profile.addSocialLinks', 'Social Media Links')}
+          </span>
+        </div>
 
-                <div className="flex justify-end">
-                  <Btn
-                    onClick={handleSaveProfile}
-                    disabled={!profileDirty || profileSaving}
-                    className="px-4 py-3 text-base font-semibold w-full sm:w-auto"
-                  >
-                    {profileSaving
-                      ? t('settings.profile.saving')
-                      : t('settings.profile.save')}
-                  </Btn>
-                </div>
-              </div>
-            </div>
-            {/* Social Links */}
-            <div className="flex flex-wrap gap-2">
-              {Object.keys(socialLinks).length > 0 ? (
-                Object.entries(socialLinks).map(([platform, url]) => (
-                  <div
+        {/* Add Social Link Form */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          {/* Platform Input + Suggestions */}
+          <div className="relative flex-1 min-w-0">
+            <Input
+              id="social-platform"
+              type="text"
+              placeholder={t(
+                'settings.profile.platformPlaceholder',
+                'Platform (e.g. Twitch, YouTube)',
+              )}
+              value={newSocialLink.platform}
+              onChange={(e) => handlePlatformChange(e.target.value)}
+              className="bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50"
+              autoComplete="off"
+            />
+            {platformSuggestions.length > 0 && newSocialLink.platform && (
+              <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-level-2 border border-level-3/50 rounded-md shadow-lg max-h-40 overflow-y-auto p-1">
+                {platformSuggestions.map((platform) => (
+                  <button
                     key={platform}
-                    className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-level-1 border border-level-4 hover:border-accent-1 transition-all"
+                    type="button"
+                    onClick={() => handlePlatformChange(platform)}
+                    className="w-full text-left px-2 py-1.5 hover:bg-level-1 rounded-xs transition-colors text-xs text-text-main flex items-center gap-2 cursor-pointer"
                   >
-                    <a href={url}>
-                      <span className="text-sm font-medium">
-                        <SocialLinkHint socialKey={platform} />
-                      </span>
-                    </a>
+                    <SocialLinkHint socialKey={platform} />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
+          {/* URL Input */}
+          <div className="flex-1 min-w-0">
+            <Input
+              id="social-url"
+              type="url"
+              placeholder={t('settings.profile.urlPlaceholder', 'https://...')}
+              value={newSocialLink.url}
+              onChange={(e) => handleUrlChange(e.target.value)}
+              className="bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50"
+            />
+          </div>
+
+          {/* Add Link Button */}
+          <Btn
+            onClick={handleAddSocialLink}
+            disabled={uiState.socialLoading.add || false}
+            className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main shrink-0 flex items-center gap-1 hover:bg-level-3 transition-colors disabled:opacity-50"
+          >
+            <Plus className="size-3.5" />
+            <span>
+              {uiState.socialLoading.add
+                ? t('settings.profile.adding', 'Adding...')
+                : t('settings.profile.addLink', 'Add Link')}
+            </span>
+          </Btn>
+        </div>
+
+        {/* Configured Social Links List */}
+        {Object.keys(socialLinks).length > 0 ? (
+          <div className="flex flex-wrap gap-2 pt-1">
+            {Object.entries(socialLinks).map(([platform, url]) => (
+              <div
+                key={platform}
+                className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-level-2/80 border border-level-3/40 hover:border-level-3 transition-all text-xs"
+              >
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-text-main hover:underline flex items-center gap-1.5"
+                >
+                  <SocialLinkHint socialKey={platform} />
+                </a>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
                     <button
+                      type="button"
                       onClick={() =>
                         setUIState((prev) => ({
                           ...prev,
@@ -442,139 +536,90 @@ export function ProfileTab({ user }: ProfileTabProps) {
                       disabled={
                         uiState.socialLoading[`delete-${platform}`] || false
                       }
-                      className="ml-1 text-text-placeholder hover:text-danger transition-colors disabled:opacity-50"
-                      title={t('settings.profile.removePlatform', { platform })}
-                      aria-label={t('settings.profile.deletePlatformAria', {
-                        platform,
-                      })}
+                      className="p-0.5 text-text-placeholder hover:text-red-400 rounded-sm transition-colors cursor-pointer"
                     >
-                      ✕
+                      <Trash2 className="size-3.5" />
                     </button>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-text-placeholder italic">
-                  {t('settings.profile.noSocialLinksYet')}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Social Links Management Card */}
-      <div className={`p-4 sm:p-6 ${panelClass}`}>
-        <h3
-          className={`${sectionTitleClass} text-base normal-case tracking-normal text-text-main mb-4`}
-        >
-          {t('settings.profile.addSocialLinks')}
-        </h3>
-
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <Label htmlFor="social-platform" className="text-text-main">
-                {t('settings.profile.platform')}
-              </Label>
-              <div className="relative">
-                <Input
-                  id="social-platform"
-                  type="text"
-                  placeholder={t('settings.profile.platformPlaceholder')}
-                  value={newSocialLink.platform}
-                  onChange={(e) => handlePlatformChange(e.target.value)}
-                  className="h-11 border-level-4 text-text-main bg-level-1 mt-2"
-                  aria-label="Social media platform name"
-                  autoComplete="off"
-                />
-                {platformSuggestions.length > 0 && newSocialLink.platform && (
-                  <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-level-1 border border-level-4 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                    {platformSuggestions.map((platform) => (
-                      <button
-                        key={platform}
-                        type="button"
-                        onClick={() => handlePlatformChange(platform)}
-                        className="w-full text-left px-3 py-2 hover:bg-level-2 transition-colors text-sm"
-                      >
-                        <SocialLinkHint socialKey={platform} />
-                      </button>
-                    ))}
-                  </div>
-                )}
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+                  >
+                    <p>
+                      {t('settings.profile.removePlatform', {
+                        platform,
+                        defaultValue: `Remove ${platform}`,
+                      })}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
-              {newSocialLink.platform.trim() && (
-                <div className="mt-2 px-3 py-2 rounded-lg bg-level-1 border border-level-4 text-xs text-text-secondary">
-                  <SocialLinkHint socialKey={newSocialLink.platform.trim()} />
-                </div>
-              )}
-            </div>
-            <div className="flex-1">
-              <Label htmlFor="social-url" className="text-text-main">
-                {t('settings.profile.url')}
-              </Label>
-              <Input
-                id="social-url"
-                type="url"
-                placeholder={t('settings.profile.urlPlaceholder')}
-                value={newSocialLink.url}
-                onChange={(e) => handleUrlChange(e.target.value)}
-                className="h-11 border-level-4 text-text-main bg-level-1 mt-2"
-                aria-label="Social media profile URL"
-              />
-            </div>
-            <div className="flex items-end">
-              <Btn
-                onClick={handleAddSocialLink}
-                disabled={uiState.socialLoading.add || false}
-                className="px-4 py-3 text-base font-semibold w-full sm:w-auto"
-              >
-                {uiState.socialLoading.add
-                  ? t('settings.profile.adding')
-                  : t('settings.profile.addLink')}
-              </Btn>
-            </div>
+            ))}
           </div>
+        ) : (
+          <div className="p-3 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center">
+            <p className="text-xs text-text-secondary">
+              {t(
+                'settings.profile.noSocialLinksYet',
+                'No social links added yet.',
+              )}
+            </p>
+          </div>
+        )}
+      </div>
 
-          {uiState.socialFeedback.add ? (
-            <div
-              className={`rounded-lg border px-4 py-3 text-sm ${
-                uiState.socialFeedback.add.type === 'success'
-                  ? feedbackSuccessClass
-                  : feedbackErrorClass
-              }`}
-              role="alert"
-            >
-              {uiState.socialFeedback.add.message}
-            </div>
-          ) : null}
+      {/* Card 3: Danger Zone */}
+      <div className="p-3 sm:p-4 border border-red-500/30 rounded-md bg-red-500/5 space-y-3 shadow-xs">
+        <div className="flex items-center gap-1.5 text-xs font-bold text-red-400">
+          <AlertTriangle className="size-4" />
+          <span>
+            {t('settings.profile.killUserProfile.title', 'Delete Account')}
+          </span>
+        </div>
+        <p className="text-xs text-text-secondary">
+          {t(
+            'settings.profile.killUserProfile.body',
+            'Permanently remove your profile, data, and settings. This action cannot be undone.',
+          )}
+        </p>
+        <div className="flex justify-end">
+          <Btn
+            onClick={handleKillProfile}
+            className="h-8 px-3.5 bg-red-500/15 border border-red-500/40 text-red-400 hover:bg-red-500/30 transition-colors text-xs font-semibold"
+          >
+            {t('settings.profile.killUserProfile.btnText', 'Delete Account')}
+          </Btn>
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Link Confirmation Dialog */}
       {uiState.deleteConfirmation && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className={`p-4 sm:p-6 max-w-sm w-full ${panelClass}`}>
-            <h3 className="text-lg font-bold mb-2">
-              {t('settings.profile.confirmDeletion')}
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="p-4 sm:p-5 max-w-sm w-full bg-level-2 border border-level-3/50 rounded-md shadow-2xl space-y-3">
+            <h3 className="text-sm font-bold text-text-main">
+              {t('settings.profile.confirmDeletion', 'Remove Social Link')}
             </h3>
-            <p className="text-text-secondary mb-6">
+            <p className="text-xs text-text-secondary">
               {t('settings.profile.confirmDeleteBody', {
                 platform: uiState.deleteConfirmation,
+                defaultValue: `Are you sure you want to remove ${uiState.deleteConfirmation}?`,
               })}
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-2 justify-end pt-1">
               <button
+                type="button"
                 onClick={() =>
                   setUIState((prev) => ({
                     ...prev,
                     deleteConfirmation: null,
                   }))
                 }
-                className="flex-1 px-4 py-2 rounded-lg border border-level-4 hover:bg-level-1 transition-colors font-medium"
+                className="h-8 px-3 rounded-md bg-level-1 hover:bg-level-3 transition-colors text-xs font-semibold text-text-main cursor-pointer"
               >
-                {t('common.cancel')}
+                {t('common.cancel', 'Cancel')}
               </button>
               <button
+                type="button"
                 onClick={() =>
                   uiState.deleteConfirmation &&
                   handleDeleteSocialLink(uiState.deleteConfirmation)
@@ -584,33 +629,16 @@ export function ProfileTab({ user }: ProfileTabProps) {
                     `delete-${uiState.deleteConfirmation}`
                   ] || false
                 }
-                className="flex-1 px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/50 hover:bg-red-500/30 transition-colors font-medium text-red-300 disabled:opacity-50"
+                className="h-8 px-3 rounded-md bg-red-500/20 border border-red-500/40 hover:bg-red-500/30 transition-colors text-xs font-semibold text-red-400 disabled:opacity-50 cursor-pointer"
               >
                 {uiState.socialLoading[`delete-${uiState.deleteConfirmation}`]
-                  ? t('settings.profile.deleting')
-                  : t('settings.profile.delete')}
+                  ? t('settings.profile.deleting', 'Deleting...')
+                  : t('settings.profile.delete', 'Delete')}
               </button>
             </div>
           </div>
         </div>
       )}
-      <div className="flex flex-row gap-4 justify-between">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-lg font-semibold">
-            {t('settings.profile.killUserProfile.title')}
-          </h2>
-          <p className="text-text-secondary text-sm">
-            {t('settings.profile.killUserProfile.body')}
-          </p>
-        </div>
-
-        <Btn
-          className="px-4 py-3 text-base font-semibold w-full sm:w-auto bg-red-500/20 border border-red-500/50 hover:bg-red-500/30 transition-colors"
-          onClick={handleKillProfile}
-        >
-          {t('settings.profile.killUserProfile.btnText')}
-        </Btn>
-      </div>
     </div>
   )
 }

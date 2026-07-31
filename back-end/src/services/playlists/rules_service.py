@@ -1,30 +1,31 @@
-from typing import Protocol, Any
+from typing import Any, Protocol
 from uuid import UUID
 
-from src.dal.abstract import IAsyncCrud
+from simple_repository.abctract import IAsyncCrud
+
+from src._types import GENERAL_SCOPE, AsyncSession, Platform
 from src.dal.postgres.playlist_settings import (
+    chat_rules_repository,
     content_settings_repository,
     donation_rules_repository,
-    chat_rules_repository,
     user_black_list_repository,
 )
+from src.exceptions import NotAuthorizedException
 from src.models.playlist import (
-    SubSchema,
-    ContentSettingsCreate,
-    ContentSettingsSchema,
-    ContentSettingsPatch,
-    DonationRulesCreate,
-    DonationRulesSchema,
-    DonationRulesPatch,
-    ChatRulesCreate,
-    ChatRulesSchema,
-    ChatRulesPatch,
-    BlockListSchema,
     BlockListCreate,
     BlockListPatch,
+    BlockListSchema,
+    ChatRulesCreate,
+    ChatRulesPatch,
+    ChatRulesSchema,
+    ContentSettingsCreate,
+    ContentSettingsPatch,
+    ContentSettingsSchema,
+    DonationRulesCreate,
+    DonationRulesPatch,
+    DonationRulesSchema,
+    SubSchema,
 )
-from src.exceptions import NotAuthorizedException
-from src._types import AsyncSession, Platform, GENERAL_SCOPE
 from src.utils import find
 
 
@@ -122,7 +123,7 @@ class RulesService:
 
     async def sub_item_access(self, session: AsyncSession, playlist_id: UUID, item_id: UUID, obj: Any) -> bool:
         item: SubSchema = await manager.get_strategy(obj).get_repo().get_one(session, item_id)
-        
+
         return item.playlist_id == playlist_id
 
     async def reorder_chat_rules(

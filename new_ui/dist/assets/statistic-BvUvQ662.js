@@ -1,1 +1,0 @@
-import{at as e}from"./vendor-radix-BRxYiqNo.js";import{n as t}from"./vendor-i18n-lG5mSrJy.js";import"./index-VRz4oZ16.js";var n=e(),r=function(){let{t:e}=t();return(0,n.jsx)(`div`,{children:e(`placeholder.statistic`)})};export{r as component};

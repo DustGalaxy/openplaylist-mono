@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import type { PublicRole, PublicUser } from '@/types/user'
 import {
   Popover,
@@ -13,8 +14,6 @@ import {
 } from '@/components/ui/avatar'
 import { RoleBadgeList } from '@/components/ui/role-badge'
 import { SocialLinksRow } from '@/components/ui/social-links-row'
-
-import { useTranslation } from 'react-i18next'
 
 interface UserPopoverProps {
   user?: PublicUser
@@ -59,7 +58,7 @@ export const UserPopover: React.FC<UserPopoverProps> = ({ user }) => {
 
   return (
     <Popover>
-      <PopoverTrigger asChild hidden={!!!user}>
+      <PopoverTrigger asChild hidden={!user}>
         <div className="flex gap-1 items-center ">
           <div className="text-text-main -mt-1">{userData?.username}</div>
           <button
@@ -124,12 +123,14 @@ export const UserPopover: React.FC<UserPopoverProps> = ({ user }) => {
 
           {/* 4. Бейджи и Роли */}
           {userData?.roles && userData.roles.length > 0 && (
-            <RoleBadgeList roles={MOCK_ROLES} />
+            <RoleBadgeList roles={userData.roles} />
           )}
-          <RoleBadgeList roles={MOCK_ROLES} />
+
           {/* 5. Био */}
           <p className="text-xs text-text-secondary mt-2 leading-relaxed">
-            {userData?.bio ? userData.bio : t('userProfile.noBio', '👀 No bio.')}
+            {userData?.bio
+              ? userData.bio
+              : t('userProfile.noBio', '👀 No bio.')}
           </p>
           {/* 6. Карточка "Сейчас слушает" */}
           {/* {userData.nowPlaying && (

@@ -11,6 +11,11 @@ export function useDebouncedEffect(
   delay: number = 3000,
 ) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const callbackRef = useRef(callback)
+
+  useEffect(() => {
+    callbackRef.current = callback
+  }, [callback])
 
   useEffect(() => {
     // сбрасываем старый таймер
@@ -20,12 +25,12 @@ export function useDebouncedEffect(
 
     // ставим новый
     timerRef.current = setTimeout(() => {
-      callback()
+      callbackRef.current()
     }, delay)
 
     // чистим при размонтировании
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [watchedValue, callback, delay])
+  }, [watchedValue, delay])
 }

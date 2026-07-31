@@ -53,19 +53,28 @@ class SioPlaylistUpdateService:
             namespace=self.namespace,
         )
 
-    async def pause(self, playlist_id: UUID, data: Pause):
-        sids = room_manager.get_sids(f"playback:{str(playlist_id)}", self.namespace)
+    async def bulk_delete_tracks(self, ids, playlist_id: UUID):
+        sids = room_manager.get_sids(str(playlist_id), self.namespace)
         await self.sio.emit(
-            f"playback_pause:{str(playlist_id)}",
+            f"bulk_delete_tracks:{playlist_id!s}",
+            {"ids": ids},
+            to=[*sids],
+            namespace=self.namespace,
+        )
+
+    async def pause(self, playlist_id: UUID, data: Pause):
+        sids = room_manager.get_sids(f"playback:{playlist_id!s}", self.namespace)
+        await self.sio.emit(
+            f"playback_pause:{playlist_id!s}",
             data.model_dump(),
             to=[*sids],
             namespace=self.namespace,
         )
 
     async def seek(self, playlist_id: UUID, data: Seek):
-        sids = room_manager.get_sids(f"playback:{str(playlist_id)}", self.namespace)
+        sids = room_manager.get_sids(f"playback:{playlist_id!s}", self.namespace)
         await self.sio.emit(
-            f"playback_seek:{str(playlist_id)}",
+            f"playback_seek:{playlist_id!s}",
             data.model_dump(),
             to=[*sids],
             namespace=self.namespace,
@@ -78,7 +87,7 @@ class SioPlaylistUpdateService:
     async def settings_changed(self, data: PlaylistSettings):
         sids = room_manager.get_sids(str(data.id), self.namespace)
         await self.sio.emit(
-            f"settings_changed:{str(data.id)}",
+            f"settings_changed:{data.id!s}",
             data.model_dump(),
             to=[*sids],
             namespace=self.namespace,
@@ -108,14 +117,14 @@ class SioPlaylistUpdateService:
         print(f"ℹ️ Пользователь {user_id} хочет войти в комнату playback:{playlist_id}, owner_id={plst.owner_id}")
         if (user_id == str(plst.owner_id)) or plst.is_public:
             await self.sio.emit("playback_subscribe_success", to=sid, namespace=self.namespace)
-            room_manager.enter_room(sid, f"playback:{str(playlist_id)}", self.namespace)
+            room_manager.enter_room(sid, f"playback:{playlist_id!s}", self.namespace)
             print(f"➡️ Пользователь {user_id} вошел в комнату {playlist_id}")
 
         else:
             await self.sio.emit("playback_subscribe_denied", {"room_id": playlist_id}, to=sid, namespace=self.namespace)
 
     async def unsub_playback(self, sid: str, playlist_id: UUID, user_id: str):
-        room_manager.leave_room(sid, f"playback:{str(playlist_id)}", namespace=self.namespace)
+        room_manager.leave_room(sid, f"playback:{playlist_id!s}", namespace=self.namespace)
         print(f"⬅️ Пользователь {user_id} вышел из комнаты playback:{playlist_id}")
 
     async def sub_plst_upds(self, sid: str, playlist_id: UUID, user_id: str):

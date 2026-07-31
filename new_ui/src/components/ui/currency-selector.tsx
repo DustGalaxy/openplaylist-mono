@@ -40,7 +40,7 @@ const CurrencySelectComponent = React.forwardRef<
       onValueChange,
       onCurrencySelect,
       name,
-      placeholder = 'Select currency',
+      placeholder = 'None',
       currencies = 'all',
       variant = 'default',
       valid = true,

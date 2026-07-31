@@ -416,6 +416,11 @@ export interface TrackOpsSlice {
     trackId: string,
     reason: DeleteStatus,
   ) => Promise<void>
+  removeTracks: (
+    slot: SlotId,
+    trackIds: Array<string>,
+    reason: DeleteStatus,
+  ) => Promise<void>
 }
 
 export interface PlaybackOpsSlice {

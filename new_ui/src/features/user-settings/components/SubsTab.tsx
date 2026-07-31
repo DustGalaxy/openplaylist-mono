@@ -8,7 +8,6 @@ import {
   Trash2,
   User,
 } from 'lucide-react'
-
 import { toast } from 'sonner'
 import type {
   SubscriptionItem,
@@ -21,6 +20,13 @@ import {
   getSubscriptions,
   patchSubscriptionSettings,
 } from '@/api/api-user'
+import { Label } from '@/components/ui/label'
+import { DialogDescription } from '@/components/ui/dialog'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 export const SubsTab: React.FC = () => {
   const { t } = useTranslation('notifications')
@@ -28,33 +34,28 @@ export const SubsTab: React.FC = () => {
     [],
   )
   const [isLoading, setIsLoading] = useState(true)
-
-  // Состояние для управления модалкой настроек конкретной подписки
   const [activeSub, setActiveSub] = useState<SubscriptionItem | null>(null)
 
-  // Имитация загрузки данных с бэкенда (FastAPI)
   useEffect(() => {
     const fetchSubscriptions = async () => {
       try {
         const data = await getSubscriptions()
-        setSubscriptions(data)
+        setSubscriptions(Array.isArray(data) ? data : [])
       } catch (err) {
-        console.error('Ошибка загрузки подписок', err)
+        console.error('Failed to fetch subscriptions', err)
       } finally {
         setIsLoading(false)
       }
     }
-
-    fetchSubscriptions()
+    void fetchSubscriptions()
   }, [])
 
-  // Удаление подписки (отписка)
   const handleUnsubscribe = async (subId: string) => {
     if (
       !confirm(
         t(
           'notifications.manager.confirm_unsubscribe',
-          'Вы уверены, что хотите отписаться?',
+          'Are you sure you want to unsubscribe?',
         ),
       )
     )
@@ -64,17 +65,17 @@ export const SubsTab: React.FC = () => {
       const success = await deleteSubscription(subId)
       if (!success) {
         toast.error(
-          t('notifications.manager.error_unsubscribe', 'Ошибка при отписке'),
+          t('notifications.manager.error_unsubscribe', 'Failed to unsubscribe'),
         )
-        throw new Error('Ошибка при отписке')
+        throw new Error('Failed to unsubscribe')
       }
       setSubscriptions((prev) => prev.filter((sub) => sub.id !== subId))
+      toast.success(t('notifications.manager.unsubscribed', 'Unsubscribed successfully'))
     } catch (err) {
-      console.error('Не удалось отписаться', err)
+      console.error('Failed to unsubscribe', err)
     }
   }
 
-  // Сохранение настроек из модалки
   const handleSaveSettings = async (newSettings: SubscriptionSettings) => {
     if (!activeSub) return
 
@@ -90,150 +91,158 @@ export const SubsTab: React.FC = () => {
         toast.error(
           t(
             'notifications.manager.error_save_settings',
-            'Ошибка при обновлении настроек',
+            'Failed to update subscription settings',
           ),
         )
-        throw new Error('Ошибка при обновлении настроек')
+        throw new Error('Failed to update subscription settings')
       }
-      // Обновляем локальный стейт
       setSubscriptions((prev) =>
         prev.map((sub) =>
           sub.id === activeSub.id ? { ...sub, settings: newSettings } : sub,
         ),
       )
+      toast.success(t('notifications.manager.settings_saved', 'Settings updated'))
     } catch (err) {
-      console.error('Не удалось сохранить настройки', err)
-      throw err // Прокидываем в модалку, чтобы она не закрылась при ошибке
+      console.error('Failed to save settings', err)
+      throw err
     }
   }
 
   if (isLoading) {
     return (
-      <div className="flex h-48 items-center justify-center text-text-placeholder">
-        <Loader2 className="w-6 h-6 animate-spin mr-2" />
+      <div className="flex h-40 items-center justify-center text-text-secondary text-xs">
+        <Loader2 className="size-5 animate-spin mr-2 text-level-3" />
         <span>
-          {t('notifications.manager.loading', 'Загрузка подписок...')}
+          {t('notifications.manager.loading', 'Loading subscriptions...')}
         </span>
       </div>
     )
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 space-y-6 text-text-main">
-      <div>
-        <h2 className="text-xl font-bold  flex items-center gap-2">
-          <div className="text-level-3 bg-level-4 rounded-lg p-2">
-            <Bell className="w-5 h-5 " />
-          </div>
-          {t('notifications.manager.title', 'Управление подписками')}
-        </h2>
-        <p className="text-sm text-text-placeholder mt-1">
-          {t(
-            'notifications.manager.description',
-            'Настройте гранулярные уведомления для каждого контента или отпишитесь от обновлений.',
-          )}
-        </p>
+    <div className="space-y-4">
+      {/* Title Header */}
+      <div className="flex items-start gap-2.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+          <Bell className="size-5" />
+        </div>
+        <div>
+          <Label className="text-base font-bold text-text-main">
+            {t('notifications.manager.title', 'Subscription Manager')}
+          </Label>
+          <DialogDescription className="text-xs text-text-secondary mt-0.5">
+            {t(
+              'notifications.manager.description',
+              'Configure granular notification triggers for playlists and creators.',
+            )}
+          </DialogDescription>
+        </div>
       </div>
 
-      {subscriptions.length === 0 ? (
-        <div className="p-8 border border-dashed border-neutral-800 rounded-xl text-center text-neutral-500">
-          {t(
-            'notifications.manager.empty',
-            'У вас пока нет активных подписок.',
+      {/* Main Card Container */}
+      <div className="p-3 sm:p-4 border border-level-3/60 rounded-md bg-level-1 space-y-3 shadow-xs">
+        <div className="flex items-center justify-between pb-1 border-b border-level-3/40">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main">
+            <Bell className="size-4 text-level-3" />
+            <span>{t('notifications.manager.subscriptions', 'Active Subscriptions')}</span>
+          </div>
+          {subscriptions.length > 0 && (
+            <span className="text-[10px] text-text-placeholder font-mono px-2 py-0.5 rounded-full bg-level-2 border border-level-3/40">
+              {subscriptions.length}
+            </span>
           )}
         </div>
-      ) : (
-        <div className="grid gap-3">
-          {subscriptions.map((sub) => (
-            <div
-              key={sub.id}
-              className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-level-1 border border-level-2 rounded-xl gap-4 transition hover:border-level-3"
-            >
-              {/* Левая часть: Инфо об объекте подписки */}
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <div className="p-3 bg-level-2 rounded-lg shrink-0">
-                  {sub.target_type === 'playlist' ? (
-                    <ListMusic className="w-5 h-5 text-emerald-400" />
-                  ) : (
-                    <User className="w-5 h-5 text-sky-400" />
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-text-main text-sm sm:text-base truncate max-w-50 sm:max-w-75">
-                      {sub.target_name}
-                    </span>
-                    <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-level-2 text-text-placeholder">
-                      {sub.target_type === 'playlist'
-                        ? t('notifications.manager.type_playlist', 'Плейлист')
-                        : t('notifications.manager.type_user', 'Юзер')}
-                    </span>
-                  </div>
-                  {sub.target_type === 'playlist' && sub.target_owner && (
-                    <p className="text-xs text-text-placeholder mt-0.5">
-                      {t('notifications.manager.author', 'Автор')}:{' '}
-                      {sub.target_owner}
-                    </p>
-                  )}
-                  <p className="text-[11px] text-text-placeholder mt-1">
-                    {t('notifications.manager.status', 'Активно')}{' '}
-                    {sub.settings.allowed_event_types.length === 0 ? (
-                      <>
-                        <span className="text-text-main">🚫</span>{' '}
-                        {t(
-                          'notifications.manager.mute_all_status',
-                          'Мут всего',
-                        )}
-                      </>
+
+        {subscriptions.length === 0 ? (
+          <div className="p-6 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center space-y-1">
+            <Bell className="size-6 text-text-placeholder mx-auto" />
+            <p className="text-xs font-semibold text-text-main">
+              {t('notifications.manager.empty', 'No active subscriptions yet')}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {subscriptions.map((sub) => (
+              <div
+                key={sub.id}
+                className="flex items-center justify-between gap-3 p-2.5 rounded-md bg-level-2/80 border border-level-3/40 hover:border-level-3 transition-colors text-xs"
+              >
+                {/* Left: Icon & Info */}
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="size-9 shrink-0 flex items-center justify-center rounded-md bg-level-1 border border-level-3/40">
+                    {sub.target_type === 'playlist' ? (
+                      <ListMusic className="size-4 text-emerald-400" />
                     ) : (
-                      <>
-                        <span className="text-text-main">🔔</span>{' '}
-                        {t(
-                          'notifications.manager.triggers_count',
-                          'триггеров: {{count}}',
-                          {
-                            count: sub.settings.allowed_event_types.length,
-                          },
-                        )}
-                      </>
+                      <User className="size-4 text-sky-400" />
                     )}
-                  </p>
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-semibold text-text-main truncate max-w-40 sm:max-w-60">
+                        {sub.target_name}
+                      </span>
+                      <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-level-1 border border-level-3/40 text-text-secondary">
+                        {sub.target_type === 'playlist'
+                          ? t('notifications.manager.type_playlist', 'Playlist')
+                          : t('notifications.manager.type_user', 'User')}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-[11px] text-text-secondary mt-0.5">
+                      {sub.target_type === 'playlist' && sub.target_owner && (
+                        <span>
+                          {t('notifications.manager.author', 'Author')}: {sub.target_owner}
+                        </span>
+                      )}
+                      <span>
+                        {sub.settings.allowed_event_types.length === 0 ? (
+                          <span className="text-amber-400 font-medium">🚫 Muted</span>
+                        ) : (
+                          <span className="text-emerald-400 font-medium">
+                            🔔 {sub.settings.allowed_event_types.length} triggers
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Actions */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setActiveSub(sub)}
+                    className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md bg-level-1 border border-level-3/40 hover:bg-level-3 transition-colors text-xs font-semibold text-text-main cursor-pointer"
+                  >
+                    <SlidersHorizontal className="size-3 text-level-3" />
+                    <span>{t('notifications.manager.btn_configure', 'Configure')}</span>
+                  </button>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => handleUnsubscribe(sub.id)}
+                        className="p-1.5 rounded-md text-text-placeholder hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+                    >
+                      <p>{t('notifications.manager.btn_unsubscribe_title', 'Unsubscribe')}</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-              {/* Правая часть: Кнопки управления действиями */}
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-neutral-800">
-                {/* Кнопка открытия шестеренки/настроек */}
-                <button
-                  type="button"
-                  onClick={() => setActiveSub(sub)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text-main bg-level-2 ring-1 ring-level-2 hover:ring-level-3 rounded-lg transition"
-                >
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span>
-                    {t('notifications.manager.btn_configure', 'Настроить')}
-                  </span>
-                </button>
-
-                {/* Кнопка отписки */}
-                <button
-                  type="button"
-                  onClick={() => handleUnsubscribe(sub.id)}
-                  className="p-1.5 text-text-placeholder hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition"
-                  title={t(
-                    'notifications.manager.btn_unsubscribe_title',
-                    'Отписаться',
-                  )}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Модалка настроек, которая рендерится только при выборе айтема */}
+      {/* Settings Modal */}
       {activeSub && (
         <SubscriptionSettingsModal
           isOpen={!!activeSub}
