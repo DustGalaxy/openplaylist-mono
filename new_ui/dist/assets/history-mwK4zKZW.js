@@ -1,0 +1,1 @@
+import{St as e}from"./vendor-misc-BS89Cd5E.js";import{n as t}from"./vendor-i18n-Ba7pusrf.js";import"./index-Clt66lYa.js";var n=e(),r=function(){let{t:e}=t();return(0,n.jsx)(`div`,{children:e(`placeholder.history`)})};export{r as component};

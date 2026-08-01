@@ -11,6 +11,11 @@ export default defineConfig({
     viteReact(),
     tailwindcss(),
   ],
+  define: {
+    'console.log': '(() => {})',
+    'console.info': '(() => {})',
+    'console.debug': '(() => {})',
+  },
   build: {
     chunkSizeWarningLimit: 1000,
     rolldownOptions: {
