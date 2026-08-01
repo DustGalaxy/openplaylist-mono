@@ -4,6 +4,8 @@
 
 {$PROJECT_DOMAIN:localhost} {
 
+    tls /etc/caddy/cert.pem /etc/caddy/key.pem
+    
     handle /api* {
         reverse_proxy backend:8000
     }

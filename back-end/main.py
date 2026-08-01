@@ -1,10 +1,9 @@
 from contextlib import asynccontextmanager
 
 import socketio
+import src.models  # noqa: F401
 from fastapi import APIRouter, FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
-
-import src.models  # noqa: F401
 from src.adapters._fastapi.feedback_routes import router as feedback_router
 from src.adapters._fastapi.login_routes import router as login_router
 from src.adapters._fastapi.notifications import router as notificattions_router
@@ -14,6 +13,9 @@ from src.adapters._fastapi.playlist_routes import router as playlist_router
 from src.adapters._fastapi.settings_routes import router as settings_router
 from src.adapters._fastapi.stream_routes import router as stream_router
 from src.adapters._fastapi.user_routes import router as user_router
+from src.adapters._rabbit.bots.da import router as rmq_da_router
+from src.adapters._rabbit.bots.donatex import router as rmq_donatex_router
+from src.adapters._rabbit.bots.twitch import router as rmq_twitch_router
 from src.adapters._rabbit.broker import get_broker as get_rabbit_broker
 from src.adapters._sio.init import sio
 from src.adapters._sio.routes import BasicNamespace, PlstUpdsNamespace, WidgetsNamespace
@@ -29,14 +31,18 @@ async def lifespan(app: FastAPI):
     async with async_session_maker() as session:
         await load_feature_flags(session)
 
-    await get_rabbit_broker().start()
+    rmq_broker = get_rabbit_broker()
+    rmq_broker.include_routers(rmq_donatex_router, rmq_twitch_router, rmq_da_router)
+    await rmq_broker.start()
+
     get_broker().connect()
 
     room_manager.start_up()
 
     yield
+
     get_broker().close()
-    await get_rabbit_broker().stop()
+    await rmq_broker.stop()
 
 
 app = FastAPI(lifespan=lifespan)

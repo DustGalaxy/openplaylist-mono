@@ -100,6 +100,8 @@ services:
       PROJECT_DOMAIN: "${PROJECT_DOMAIN:-openplaylist.localhost}"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./theopenplaylist.crt.pem:/etc/caddy/cert.pem
+      - ./theopenplaylist.key.pem:/etc/caddy/key.pem
       - caddy_data:/data
       - caddy_config:/config
     depends_on:

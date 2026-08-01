@@ -9,6 +9,7 @@ sio = socketio.AsyncServer(
     client_manager=mgr,
     json=custom_json,
     cors_allowed_origins=[
+        "https://theopenplaylist.com",
         "https://openplaylist.midnull.space",  # Твой боевой домен
         "https://openplaylist.localhost",
         "http://localhost:3000",
