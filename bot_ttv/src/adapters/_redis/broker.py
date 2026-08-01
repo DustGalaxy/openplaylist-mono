@@ -1,9 +1,8 @@
-from typing import Any
 import functools
+from typing import Any
 
 from redis import Redis
-from redis.typing import ExpiryT, AbsExpiryT, ResponseT, EncodableT
-
+from redis.typing import AbsExpiryT, EncodableT, ExpiryT, ResponseT
 from src.config import settings
 
 

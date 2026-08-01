@@ -5,23 +5,21 @@ from faststream import Context
 from faststream.rabbit import RabbitRouter
 from faststream.rabbit.message import RabbitMessage
 from simple_repository.exceptions import NotFoundException
-
+from src._types import IntegrationPlatform
+from src.adapters._rabbit.bots.dto import DonateXTokenRefreshed, Tokens
 from src.adapters._rabbit.broker import get_broker
 from src.adapters._rabbit.queues import (
-    user_fanout_exchange,
-    main_exchange,
-    bot_donatex_order_new,
     auth_user_donatex_all_request,
     auth_user_donatex_tokens_refreshed,
+    bot_donatex_order_new,
+    main_exchange,
+    user_fanout_exchange,
 )
+from src.dal.postgres.linked_account import linked_accounts_repository
+from src.dal.postgres.token import token_vault_repository
+from src.database import async_session_maker
 from src.dto.internal.domain_events import InternalUserEvent, InternalUserEventType
 from src.dto.order import DonatexNewOrder, NewOrderPayload
-from src.adapters._rabbit.bots.dto import Tokens, DonateXTokenRefreshed
-
-from src.dal.postgres.token import token_vault_repository
-from src.dal.postgres.linked_account import linked_accounts_repository
-from src._types import IntegrationPlatform
-from src.database import async_session_maker
 
 router = RabbitRouter()
 

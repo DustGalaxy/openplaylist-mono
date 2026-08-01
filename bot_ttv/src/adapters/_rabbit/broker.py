@@ -1,7 +1,5 @@
-from faststream.rabbit import RabbitBroker, RabbitExchange, ExchangeType, RabbitQueue
-
+from faststream.rabbit import ExchangeType, RabbitBroker, RabbitExchange, RabbitQueue
 from src.config import settings
-
 
 bot_order_completed = RabbitQueue("bot.order.completed", durable=True)
 bot_order_cancelled = RabbitQueue("bot.order.cancelled", durable=True)

@@ -1,6 +1,6 @@
 import json
 from adapters._rabbit.dto import DAUser
-from adapters._rabbit.handlers import auth_user_da_all_request, main_exchange, rabbit_broker
+from adapters._rabbit.broker import auth_user_da_all_request, main_exchange, rabbit_broker
 
 
 class UserACL:

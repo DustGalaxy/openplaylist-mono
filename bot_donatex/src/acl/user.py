@@ -1,8 +1,8 @@
 import json
 import logging
 
-from src.adapters._rabbit.bots.dto import ConnectionData
-from src.adapters._rabbit.bots import auth_user_donatex_all_request, main_exchange, rabbit_broker
+from src.adapters._rabbit.broker import auth_user_donatex_all_request, main_exchange, rabbit_broker
+from src.adapters._rabbit.dto import ConnectionData
 
 logger = logging.getLogger(__name__)
 

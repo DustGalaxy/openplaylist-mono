@@ -1,20 +1,20 @@
 import asyncio
-from contextlib import asynccontextmanager
 import logging
+from contextlib import asynccontextmanager
 
-
-from faststream import FastStream
 import twitchio
-
-from src.log_setup import LOGGER
-from src.adapters._rabbit.bots import broker
+from faststream import FastStream
+from src.adapters._rabbit.broker import broker
+from src.adapters._rabbit.handlers import router
 from src.adapters._redis.broker import redis_adapter
-from src.bot_setup import setup_bot, context
+from src.bot_setup import context, setup_bot
+from src.log_setup import LOGGER
 
 
 @asynccontextmanager
 async def lifespan(_app: FastStream):
     twitchio.utils.setup_logging(level=logging.INFO)
+    broker.include_routers(router)
     await broker.start()
     LOGGER.info("RabbitMQ adapter connected.")
 
@@ -30,7 +30,7 @@ async def lifespan(_app: FastStream):
     LOGGER.info("FastStream application shutting down...")
 
     if bot := context.get("bot"):
-        await bot.close() # type: ignore
+        await bot.close()  # type: ignore
         LOGGER.info("TwitchIO bot disconnected.")
 
 

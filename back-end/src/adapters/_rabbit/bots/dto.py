@@ -29,7 +29,7 @@ class DonateXTokenRefreshed(BaseModel):
 
 
 class TwitchTokenRefreshed(BaseModel):
-    twitch_id: int
+    twitch_id: str
     access_token: str
     refresh_token: str
     expires_in: int

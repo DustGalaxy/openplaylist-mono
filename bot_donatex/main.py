@@ -1,12 +1,11 @@
-from contextlib import asynccontextmanager
 import logging
+from contextlib import asynccontextmanager
 
 from faststream import FastStream
-
-from src.adapters._rabbit.bots import rabbit_broker as broker
-from src.services.manager import SignalRManager
+from src.adapters._rabbit.broker import rabbit_broker as broker
+from src.adapters._rabbit.handlers import router
 from src.app_context import context
-
+from src.services.manager import SignalRManager
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,6 +20,8 @@ async def lifespan():
     logger.info("Application startup...")
     manager: SignalRManager = SignalRManager()
     context.manager = manager  # pyright: ignore[reportArgumentType]
+
+    broker.include_routers(router)
 
     await broker.start()
     try:

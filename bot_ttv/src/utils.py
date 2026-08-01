@@ -4,24 +4,22 @@ from urllib import parse
 from uuid import UUID
 
 import asqlite
+from src.config import settings
 from twitchio import eventsub
 from twitchio.ext import commands
-
-from src.config import settings
-
 
 if TYPE_CHECKING:
     import sqlite3
 
+
 def find[T](list_to_search: list[T], condition_func: Callable[[T], bool]) -> T | None:
     return next((item for item in list_to_search if condition_func(item)), None)
+
 
 async def get_user_id(twitch_id: str) -> str:
     async with asqlite.create_pool("users.db") as udb:
         async with udb.acquire() as connection:
-            row: sqlite3.Row = await connection.fetchone(
-                """SELECT user_id FROM users WHERE twitch_id = ?""", (twitch_id,)
-            )
+            row: sqlite3.Row = await connection.fetchone("""SELECT user_id FROM users WHERE twitch_id = ?""", (twitch_id,))
 
             return row["user_id"]
 
@@ -29,17 +27,13 @@ async def get_user_id(twitch_id: str) -> str:
 async def get_twitch_id(user_id: str) -> str:
     async with asqlite.create_pool("users.db") as udb:
         async with udb.acquire() as connection:
-            row: sqlite3.Row = await connection.fetchone(
-                """SELECT twitch_id FROM users WHERE user_id = ?""", (user_id,)
-            )
+            row: sqlite3.Row = await connection.fetchone("""SELECT twitch_id FROM users WHERE user_id = ?""", (user_id,))
 
             return row["twitch_id"]
 
 
 async def setup_database(db: asqlite.Pool) -> tuple[list[tuple[str, str]], list[eventsub.SubscriptionPayload]]:
-    query = (
-        """CREATE TABLE IF NOT EXISTS tokens(user_id TEXT PRIMARY KEY, token TEXT NOT NULL, refresh TEXT NOT NULL)"""
-    )
+    query = """CREATE TABLE IF NOT EXISTS tokens(user_id TEXT PRIMARY KEY, token TEXT NOT NULL, refresh TEXT NOT NULL)"""
     async with db.acquire() as connection:
         await connection.execute(query)
 

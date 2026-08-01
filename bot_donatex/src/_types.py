@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Protocol
 from uuid import UUID
 
-from src.adapters._rabbit.bots.dto import ConnectionData
+from src.adapters._rabbit.dto import ConnectionData
 
 
 class Handler(Protocol):

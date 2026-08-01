@@ -11,23 +11,19 @@ import asyncio
 from typing import Self
 
 import asqlite
-
 import twitchio
-from twitchio import eventsub
-from twitchio.ext import commands
-from twitchio.exceptions import InvalidTokenException
-
-
-from src.adapters._rabbit.dto.user import Tokens
-from src.adapters._rabbit.broker import broker, main_exchange, auth_user_twitch_tokens_refreshed, user_token_died
 from src.acl.user import get_users
+from src.adapters._rabbit.broker import auth_user_twitch_tokens_refreshed, broker, main_exchange, user_token_died
+from src.adapters._rabbit.dto.user import Tokens
 from src.components.listners import Listner
-from src.components.music_request import MusicRequest
 from src.components.main_commands import MainCommands
-
+from src.components.music_request import MusicRequest
+from src.config import settings
 from src.log_setup import LOGGER
 from src.utils import find
-from src.config import settings
+from twitchio import eventsub
+from twitchio.exceptions import InvalidTokenException
+from twitchio.ext import commands
 
 context = {"bot": None}
 
@@ -83,21 +79,15 @@ class Bot(commands.AutoBot):
         LOGGER.info("Subscribed to channel: %s", payload.user_id)
 
     async def add_token(
-        self, token: str, refresh: str, user_id: str | None = None
+        self, token: str, refresh: str, event: Tokens | None = None
     ) -> twitchio.authentication.ValidateTokenPayload:
         # Make sure to call super() as it will add the tokens interally and return us some data...
         resp: twitchio.authentication.ValidateTokenPayload = await super().add_token(token, refresh)
 
-        # Publish an event to RabbitMQ
-        user_data = {
-            "twitch_id": resp.user_id,
-            "access_token": token,
-            "refresh_token": refresh,
-            "expires_in": resp.expires_in,
-        }
-        # TODO - add request to RabbitMQ maybe??
-
-        LOGGER.info(f"{user_data=}, {resp.client_id=}, {resp.user_id=}")
+        if event:
+            self.users = [u for u in self.users if u.platform_user_id != event.platform_user_id]
+            self.users.append(event)
+            self.prefixes[event.platform_user_id] = event.bot_settings.prefix
 
         return resp
 
@@ -125,7 +115,7 @@ async def setup_bot() -> commands.Bot:
     ttvbot = Bot(users)
     for user in users:
         try:
-            await ttvbot.add_token(user.access_token, user.refresh_token, user.platform_user_id)
+            await ttvbot.add_token(user.access_token, user.refresh_token, user)
         except InvalidTokenException:
             await broker.publish(
                 {

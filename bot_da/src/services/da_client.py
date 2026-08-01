@@ -5,17 +5,14 @@ import secrets
 import time
 from uuid import UUID
 
+import config as app_config
 import httpx
 import websockets
-from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError, InvalidStatus
-
 from _types import Handler, IDonationAlertsListener
-import config as app_config
-from token_storage import is_token_valid, needs_refresh, clear_token
-
-from adapters._rabbit.handlers import rabbit_broker
-from adapters._rabbit.broker import auth_user_da_tokens_refreshed, main_exchange
+from adapters._rabbit.broker import auth_user_da_tokens_refreshed, main_exchange, rabbit_broker
 from adapters._rabbit.dto import DATokenRefreshed
+from token_storage import clear_token, is_token_valid, needs_refresh
+from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK, InvalidStatus
 
 # --- Configuration ---
 # Load settings from the central config module
@@ -126,8 +123,8 @@ async def refresh_access_token(refresh_token: str, user_id: UUID, platform_user_
                     user_id=user_id,
                     platform_user_id=platform_user_id,
                     access_token=new_token_data["access_token"],
-                    refresh_token=new_token_data['refresh_token'],
-                    expires_at=new_token_data['expires_in'] + int(time.time()),
+                    refresh_token=new_token_data["refresh_token"],
+                    expires_at=new_token_data["expires_in"] + int(time.time()),
                 ),
                 auth_user_da_tokens_refreshed,
                 main_exchange,
@@ -308,9 +305,7 @@ class DonationAlertsListener(IDonationAlertsListener):
             logger.info(f"Requesting subscription token for channel: {channel_name}")
 
             sub_token_payload = {"client": self._client_id, "channels": [channel_name]}
-            sub_response = await _make_api_request(
-                "POST", "/centrifuge/subscribe", access_token, json=sub_token_payload
-            )
+            sub_response = await _make_api_request("POST", "/centrifuge/subscribe", access_token, json=sub_token_payload)
 
             if sub_response is None or "channels" not in sub_response or not isinstance(sub_response["channels"], list):
                 logger.error(f"Invalid or missing 'channels' in subscription token response: {sub_response}")

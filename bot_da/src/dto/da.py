@@ -38,10 +38,10 @@ class DonationData(BaseModel):
     message: str
     message_type: str
     payin_system: str | None
-    amount: int
+    amount: float
     currency: str
     is_shown: int
-    amount_in_user_currency: int
+    amount_in_user_currency: float
     recipient_name: str
     recipient: Recipient
     created_at: str

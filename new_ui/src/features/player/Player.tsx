@@ -584,20 +584,7 @@ export default function Player({
 
         {/* Right: Secondary Actions */}
         <div className="flex items-center justify-end gap-2 flex-wrap">
-          <div className="flex items-center gap-2">
-            {RATES.map((rate) => (
-              <Btn
-                key={rate}
-                isActive={playbackRate === rate}
-                onClick={() => setPlaybackRate(rate)}
-                className={cn(controBtnStyle, 'text-xs px-2')}
-              >
-                {rate}x
-              </Btn>
-            ))}
-          </div>
-
-          <HoverCard openDelay={0} closeDelay={100}>
+          <HoverCard openDelay={0} closeDelay={200}>
             <HoverCardTrigger>
               <Btn
                 onClick={() =>
@@ -623,7 +610,7 @@ export default function Player({
               </Btn>
             </HoverCardTrigger>
             <HoverCardContent
-              side="right"
+              side="left"
               className="w-fit bg-transparent h-fit p-4 ring-1 ring-level-3 border-0"
             >
               <Slider
@@ -637,6 +624,18 @@ export default function Player({
               />
             </HoverCardContent>
           </HoverCard>
+          <div className="flex items-center gap-2">
+            {RATES.map((rate) => (
+              <Btn
+                key={rate}
+                isActive={playbackRate === rate}
+                onClick={() => setPlaybackRate(rate)}
+                className={cn(controBtnStyle, 'text-xs px-2')}
+              >
+                {rate}x
+              </Btn>
+            ))}
+          </div>
 
           {feed.capabilities.canStop && feed.stop && (
             <Btn

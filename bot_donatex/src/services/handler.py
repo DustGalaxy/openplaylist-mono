@@ -1,12 +1,11 @@
 import logging
 from uuid import UUID
 
-from uuid6 import uuid7
-
+from src.adapters._rabbit.broker import main_exchange, order_new, rabbit_broker
 from src.dto.donatex import DonationData
 from src.dto.order import OrderNew
-from src.adapters._rabbit.broker import rabbit_broker, order_new, main_exchange
 from src.utils import extract_youtube_url
+from uuid6 import uuid7
 
 logger = logging.getLogger(__name__)
 

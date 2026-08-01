@@ -1,11 +1,10 @@
 import uuid
 
-from twitchio.ext import commands
-
+from src.adapters._rabbit.broker import broker, main_exchange
+from src.adapters._rabbit.dto.order import NewOrderPayload, OrderNew
 from src.log_setup import LOGGER
 from src.utils import find
-from src.adapters._rabbit.dto.order import OrderNew, NewOrderPayload
-from src.adapters._rabbit.broker import broker, main_exchange
+from twitchio.ext import commands
 
 
 class Listner(commands.Component):
@@ -14,14 +13,14 @@ class Listner(commands.Component):
 
     @commands.Component.listener()
     async def event_safe_new_order(self, payload: NewOrderPayload):
-        LOGGER.info(f"Event safe new order: {payload}")
-        LOGGER.info(f"Event users: {self.bot.users}")
+        # LOGGER.info(f"Event safe new order: {payload}")
+        # LOGGER.info(f"Event users: {self.bot.users}")
         user = find(self.bot.users, lambda x: str(x.platform_user_id) == str(payload.broadcaster_id))
 
         if not user:
             LOGGER.error(f"User not found for broadcaster_id: {payload.broadcaster_id}")
             return
-            
+
         uid = user.user_id
         event = OrderNew(
             request_id=uuid.uuid4(),

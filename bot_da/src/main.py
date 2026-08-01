@@ -7,7 +7,8 @@ import config as app_config  # Use the loaded settings directly
 
 # Import other modules
 from services.manager import Manager
-from adapters._rabbit.handlers import rabbit_broker
+from adapters._rabbit.handlers import router
+from adapters._rabbit.broker import rabbit_broker
 from adapters._redis.broker import redis_adapter
 from context import context
 
@@ -32,7 +33,9 @@ async def lifespan(app: FastAPI):
     manager: Manager = Manager()
     context.manager = manager  # pyright: ignore[reportArgumentType]
 
+    rabbit_broker.include_routers(router)
     await rabbit_broker.start()
+
     await manager.start()
     redis_adapter.connect()
 

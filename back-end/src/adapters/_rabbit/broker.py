@@ -38,5 +38,6 @@ broker = RabbitBroker(settings.RABBITMQ_URL)
 
 main_publisher = broker.publisher()
 
-def get_broker():
+
+def get_broker() -> RabbitBroker:
     return broker

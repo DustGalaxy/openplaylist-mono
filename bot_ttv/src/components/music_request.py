@@ -1,15 +1,13 @@
 from typing import Literal
 
-from twitchio import Chatter
-from twitchio.ext import commands
-
 from src.acl.playlist import PlaylistACL
-from src.adapters._rabbit.dto.settings import ReadPlaylistSettings
 from src.adapters._rabbit.dto.order import NewOrderPayload
+from src.adapters._rabbit.dto.settings import ReadPlaylistSettings
 from src.adapters._redis.broker import redis_adapter
 from src.log_setup import LOGGER
 from src.utils import is_broadcaster_or_moderator
-
+from twitchio import Chatter
+from twitchio.ext import commands
 
 # async def get_settings(user_id, playlist_name) -> ReadPlaylistSettings:
 #     # redis schema - {user_id}:{playlist_name}:settings

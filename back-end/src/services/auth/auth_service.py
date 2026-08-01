@@ -1,49 +1,41 @@
+import uuid
 from datetime import datetime
 from typing import Annotated
 from uuid import UUID, uuid4
-import uuid
 
 import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from fastapi.security import APIKeyCookie
 from fastapi import Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.security import APIKeyCookie
 from simple_repository.exceptions import NotFoundException
-
-from src.dto.internal.domain_events import InternalUserEvent, InternalUserEventType
-from src.tasks.email import send_email
-
-from src.adapters._rabbit.queues import main_exchange, user_fanout_exchange
-from src.adapters._rabbit.broker import broker, main_publisher
-from src.dal._redis.broker import get_broker
-from src.dal.postgres.token import TokenVaultRepository
-from src.dal.postgres.linked_account import LinkedAccountsRepository
-from src.dal.postgres.user import UserRepository, user_repository
-from src.dal.postgres.playlist import playlist_repository
-
-from src.models.token_vault import TokenVaultCreate, TokenVaultDomain
-from src.models.auth_user import AuthUserSchema, AuthUserCreate
-from src.models.linked_accounts import LinkedAccountsCreate, LinkedAccountsDomain
-
-from src.services.auth.strategy_manager import manager
-from src.services.tokens.token_service import token_service
-from src.services.realtime.sio_playlist import sio_playlist_service
-
+from sqlalchemy.ext.asyncio import AsyncSession
 from src._types import AuthFlow, IntegrationPlatform
+from src.adapters._rabbit.broker import broker, main_publisher
+from src.adapters._rabbit.queues import main_exchange, user_fanout_exchange
+from src.dal._redis.broker import get_broker
+from src.dal.postgres.linked_account import LinkedAccountsRepository
+from src.dal.postgres.playlist import playlist_repository
+from src.dal.postgres.token import TokenVaultRepository
+from src.dal.postgres.user import UserRepository
 from src.database import get_async_session
-from src.settings import settings
+from src.dto.internal.domain_events import InternalUserEvent, InternalUserEventType
 from src.exceptions import NeedConfirmationException
-
+from src.models.auth_user import AuthUserCreate, AuthUserSchema
+from src.models.linked_accounts import LinkedAccountsCreate, LinkedAccountsDomain
+from src.models.token_vault import TokenVaultCreate, TokenVaultDomain
+from src.services.auth.strategy_manager import manager
+from src.services.realtime.sio_playlist import sio_playlist_service
+from src.services.tokens.token_service import token_service
+from src.settings import settings
+from src.tasks.email import send_email
 from src.utils import find
 
 security_scheme = APIKeyCookie(name=settings.COOKIE_NAME, auto_error=False)
 
 
 class AuthService:
-    def __init__(
-        self, user_repo: UserRepository, link_repo: LinkedAccountsRepository, token_vault_repo: TokenVaultRepository
-    ):
+    def __init__(self, user_repo: UserRepository, link_repo: LinkedAccountsRepository, token_vault_repo: TokenVaultRepository):
         self.user_repo: UserRepository = user_repo
         self.link_repo: LinkedAccountsRepository = link_repo
         self.token_vault_repo: TokenVaultRepository = token_vault_repo
@@ -334,11 +326,7 @@ class AuthService:
 
         return user
 
-    async def get_public_user(
-        self,
-        db_session: AsyncSession,
-        user_id: UUID
-    ): 
+    async def get_public_user(self, db_session: AsyncSession, user_id: UUID):
         user = await self.user_repo.get_one(db_session, user_id)
         if not user.is_public:
             raise HTTPException(403)
@@ -452,9 +440,7 @@ class AuthService:
 
             if integration.bot_connection and (queue := manager.get(integration.platform).get_bot_disconect_queue()):
                 try:
-                    await broker.request(
-                        str(integration.platform_user_id), queue=queue, exchange=main_exchange, timeout=5
-                    )
+                    await broker.request(str(integration.platform_user_id), queue=queue, exchange=main_exchange, timeout=5)
                 except TimeoutError:
                     pass
 
@@ -535,6 +521,7 @@ class AuthService:
         tokens = await self.token_vault_repo.get_by_id_link(db_session, link.id)
         defualt_settings = manager.default_bot_settings(platform)
         try:
+            print("Attempt bot connection")
             response = await broker.request(
                 {
                     "access_token": tokens.access_token,
@@ -557,9 +544,7 @@ class AuthService:
             link.bot_settings = defualt_settings
             link.bot_connection = True
             await self.link_repo.update(db_session, link)
-            await sio_playlist_service.ack_bot_connection(
-                str(link.platform), str(link.user_id), str(link.platform_user_id)
-            )
+            await sio_playlist_service.ack_bot_connection(str(link.platform), str(link.user_id), str(link.platform_user_id))
         except TimeoutError:
             raise HTTPException(500, "Failed to connect bot. Try again later.")
 

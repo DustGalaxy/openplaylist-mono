@@ -1,9 +1,9 @@
-from contextlib import suppress
 import logging
+from contextlib import suppress
 
 from src._types import IManager
 from src.acl.user import UserACL
-from src.adapters._rabbit.bots.dto import ConnectionData
+from src.adapters._rabbit.dto import ConnectionData
 from src.services.handler import handler
 from src.services.signalr_client import SignalRListener
 

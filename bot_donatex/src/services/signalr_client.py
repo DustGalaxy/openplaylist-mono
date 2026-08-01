@@ -1,22 +1,21 @@
-import time
 import asyncio
 import logging
+import time
 from contextlib import suppress
 from urllib.error import HTTPError
 from uuid import UUID
 
 import aiohttp
 from signalrcore.aio.aio_hub_connection_builder import AIOHubConnectionBuilder
-
-from src.adapters._rabbit.bots.dto import DonateXTokenRefreshed
 from src._types import Handler, IDonateXListener
-from src.settings import settings
-from src.adapters._rabbit.bots import (
-    rabbit_broker,
-    main_exchange,
+from src.adapters._rabbit.broker import (
     auth_user_donatex_tokens_refreshed,
+    main_exchange,
+    rabbit_broker,
     user_token_died,
 )
+from src.adapters._rabbit.dto import DonateXTokenRefreshed
+from src.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -102,9 +101,7 @@ class SignalRListener(IDonateXListener):
         self._connection = (
             AIOHubConnectionBuilder()
             .with_url(f"{settings.DONATEX_API_BASE_URL}/public-donations-hub?access_token={self._access_token}")
-            .with_automatic_reconnect(
-                {"type": "raw", "keep_alive_interval": 10, "reconnect_interval": 5, "max_attempts": 5}
-            )
+            .with_automatic_reconnect({"type": "raw", "keep_alive_interval": 10, "reconnect_interval": 5, "max_attempts": 5})
             .configure_logging(logging_level=logging.INFO)
             .build()
         )
@@ -137,9 +134,7 @@ class SignalRListener(IDonateXListener):
                     logger.info(f"[{self.user_id}] Token refreshed successfully. Reconnecting...")
                     await self._build_and_connect()
                 else:
-                    logger.error(
-                        f"[{self.user_id}] Critical: Failed to refresh token after 401. Stopping connection proccess."
-                    )
+                    logger.error(f"[{self.user_id}] Critical: Failed to refresh token after 401. Stopping connection proccess.")
                     self._is_running = False
                     raise e
             else:

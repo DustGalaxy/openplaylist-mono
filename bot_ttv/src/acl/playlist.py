@@ -1,7 +1,6 @@
 import json
 
 from src.adapters._rabbit.broker import broker, main_exchange, playlist_settings_request
-
 from src.adapters._rabbit.dto.settings import ReadPlaylistSettings
 
 

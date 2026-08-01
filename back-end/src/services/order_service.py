@@ -1,3 +1,4 @@
+from urllib.error import HTTPError
 import re
 import json
 from typing import TypedDict
@@ -13,23 +14,23 @@ from src.utils import extract_youtube_video_id, parse_ISO_8601
 from src.settings import settings
 from src.exceptions import NotEmbeddable
 
-VideoInfo = TypedDict(
-    "VideoInfo", {"title": str, "author": str, "embeddable": bool, "views": int, "likes": int, "length": int}
-)
+VideoInfo = TypedDict("VideoInfo", {"title": str, "author": str, "embeddable": bool, "views": int, "likes": int, "length": int})
 
 
 class OrderService:
     def get_data_from_pytube(self, url: str) -> VideoInfo:
-        yt = YouTube(url, "WEB")
+
+        yt = YouTube(url, "ANDROID")
+
         try:
             first_part = yt.initial_data["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][0]
             second_part = first_part.get("videoPrimaryInfoRenderer") or first_part.get("videoSecondaryInfoRenderer")
 
-            likes = second_part["videoActions"]["menuRenderer"]["topLevelButtons"][0][
-                "segmentedLikeDislikeButtonViewModel"
-            ]["likeButtonViewModel"]["likeButtonViewModel"]["toggleButtonViewModel"]["toggleButtonViewModel"][
-                "defaultButtonViewModel"
-            ]["buttonViewModel"]["accessibilityText"]
+            likes = second_part["videoActions"]["menuRenderer"]["topLevelButtons"][0]["segmentedLikeDislikeButtonViewModel"][
+                "likeButtonViewModel"
+            ]["likeButtonViewModel"]["toggleButtonViewModel"]["toggleButtonViewModel"]["defaultButtonViewModel"][
+                "buttonViewModel"
+            ]["accessibilityText"]
 
             likes_text = likes
             like_template = r"like this video along with (.*?) other people"
