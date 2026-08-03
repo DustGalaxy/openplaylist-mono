@@ -127,9 +127,15 @@
     "Saves": "Сохраненное"
   },
   "supportModal": {
-    "feedbackCta": "Leave feedback",
-    "text": "Right now the best support is to tell your friends, try the app out, and leave feedback.",
-    "title": "Support the project"
+    "copyLink": "Скопировать ссылку",
+    "donateCta": "Поддержать через DeStream",
+    "donateDescription": "Вы также можете поддержать разработку проекта финансово:",
+    "feedbackCta": "Оставить отзыв",
+    "linkCopied": "Ссылка скопирована!",
+    "qrHint": "Сканируйте QR-код для перевода",
+    "text": "Сейчас лучшая поддержка — рассказать друзьям, протестировать приложение и оставить отзыв.",
+    "thankYou": "Проект живет и развивается только благодаря вашей поддержке, спасибо!",
+    "title": "Поддержать проект"
   },
   "theme": {
     "custom": "Своя: {{mode}} ({{hue}}°)",

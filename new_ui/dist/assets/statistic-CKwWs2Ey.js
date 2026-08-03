@@ -1,0 +1,1 @@
+import{Ct as e}from"./vendor-misc-CMNu0pXw.js";import{n as t}from"./vendor-i18n-Coo0LGg2.js";import"./index-CjAJ-6uH.js";var n=e(),r=function(){let{t:e}=t();return(0,n.jsx)(`div`,{children:e(`placeholder.statistic`)})};export{r as component};

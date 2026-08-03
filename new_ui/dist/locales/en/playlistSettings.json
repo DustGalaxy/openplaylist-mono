@@ -102,10 +102,10 @@
       "addSuccess": "Chat role added successfully",
       "hints": {
         "delete": "Remove role priority",
-        "priority": "Priority points added to queue for chat viewers with this role (+10, +50)"
+        "priority": "Priority points added to queue for chat viewers with this role (10, 50)"
       },
       "noRoles": "No roles yet",
-      "priorityHeader": "Priority (+)",
+      "priorityHeader": "Priority",
       "removeFailed": "Failed to remove chat role",
       "removeSuccess": "Chat role removed successfully",
       "removing": "Removing role...",
@@ -148,21 +148,19 @@
       "deleting": "Deleting rule...",
       "fillAll": "Please fill in all fields",
       "hints": {
-        "amount": "Minimum donation amount required",
+        "amount": "Donation amount required",
         "currency": "Donation currency",
         "delete": "Delete donation rule",
-        "name": "Rule name (e.g. Tier $100+)",
-        "priority": "Priority points added to queue (+10, +50)",
-        "priorityHeader": "Priority (+)"
+        "name": "Rule name (e.g. Tier $100)",
+        "priority": "Priority points added to queue (10, 50)",
+        "priorityHeader": "Priority"
       },
       "name": "Name",
       "noRules": "No rules yet",
       "priority": "Priority",
       "ruleName": "Rule name",
-      "ruleSlug": "rule-slug",
       "saving": "Saving rule...",
-      "slug": "Slug",
-      "subtitle": "Configure donation settings and minimum amounts.",
+      "subtitle": "Configure donation settings and amounts.",
       "title": "Donation Receiving",
       "updateFailed": "Failed to update rule",
       "updateSuccess": "Donation rule updated"
