@@ -19,6 +19,8 @@ from src.adapters._rabbit.bots.twitch import router as rmq_twitch_router
 from src.adapters._rabbit.broker import get_broker as get_rabbit_broker
 from src.adapters._sio.init import sio
 from src.adapters._sio.routes import BasicNamespace, PlstUpdsNamespace, WidgetsNamespace
+from src.adapters.admin.setup import setup_admin
+from src.adapters.admin.views import *  # noqa: F401, F403
 from src.dal._redis.broker import get_broker
 from src.database import async_session_maker
 from src.services.permitions.permition_service import load_feature_flags
@@ -46,6 +48,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+setup_admin(app)
+
 
 sio.register_namespace(WidgetsNamespace("/widget"))
 sio.register_namespace(PlstUpdsNamespace("/plst_upds"))

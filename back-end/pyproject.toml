@@ -30,6 +30,7 @@ dependencies = [
     "google-api-python-client>=2.197.0",
     "isodate>=0.7.2",
     "orjson>=3.11.9",
+    "sqladmin[full]>=0.30.0",
 ]
 
 [dependency-groups]

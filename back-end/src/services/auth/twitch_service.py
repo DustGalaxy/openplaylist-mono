@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import ClassVar
+from typing import Any, ClassVar
 
 import httpx
 from fastapi import HTTPException
@@ -47,7 +47,7 @@ class AuthTwitchService(IntegrationStrategy, RefreshTokenStrategy):
     def get_bot_disconect_queue(self) -> RabbitQueue | None:
         return bot_twitch_disconect
 
-    def get_token(self, code: str) -> TwitchAuthResponse:
+    def get_token(self, code: str, redirect_uri: str | None = None) -> TwitchAuthResponse:
         response = httpx.post(
             f"{settings.TWITCH_URL}/oauth2/token",
             data={
@@ -55,7 +55,7 @@ class AuthTwitchService(IntegrationStrategy, RefreshTokenStrategy):
                 "client_id": settings.TWITCH_CLIENT_ID,
                 "client_secret": settings.TWITCH_CLIENT_SECRET,
                 "grant_type": "authorization_code",
-                "redirect_uri": settings.TWITCH_REDIRECT_URI,
+                "redirect_uri": redirect_uri or settings.TWITCH_REDIRECT_URI,
             },
         )
         if response.status_code != 200:
@@ -138,6 +138,42 @@ class AuthTwitchService(IntegrationStrategy, RefreshTokenStrategy):
             token_type=token.token_type,
         )
         return PlatformAuthResult(user=user, tokens=tokens)
+
+    def get_broadcaster_subscriptions(
+        self, access_token: str, broadcaster_id: str
+    ) -> list[dict[str, Any]]:
+        """Fetch all subscribers for a Twitch channel using broadcaster OAuth token."""
+        subscribers: list[dict[str, Any]] = []
+        cursor: str | None = None
+
+        while True:
+            params: dict[str, Any] = {"broadcaster_id": broadcaster_id, "first": 100}
+            if cursor:
+                params["after"] = cursor
+
+            response = httpx.get(
+                "https://api.twitch.tv/helix/subscriptions",
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Client-ID": settings.TWITCH_CLIENT_ID,
+                },
+                params=params,
+            )
+
+            if response.status_code != 200:
+                logger.error(f"Failed to fetch subscriptions for broadcaster {broadcaster_id}: {response.text}")
+                raise HTTPException(response.status_code, f"Failed to fetch subscriptions from Twitch: {response.text}")
+
+            body = response.json()
+            data = body.get("data", [])
+            if isinstance(data, list):
+                subscribers.extend(data)
+
+            cursor = body.get("pagination", {}).get("cursor")
+            if not cursor or not data:
+                break
+
+        return subscribers
 
 
 auth_twitch_service = AuthTwitchService()

@@ -1,0 +1,150 @@
+{% extends "sqladmin/layout.html" %}
+
+{% block content %}
+<div class="container-xl">
+  <div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+      <div class="col">
+        <h2 class="page-title">
+          <i class="fa-brands fa-twitch me-2 text-purple"></i>Twitch OAuth Authorization Result
+        </h2>
+        <div class="text-muted mt-1">Callback processing status and token details.</div>
+      </div>
+      <div class="col-auto ms-auto d-print-none">
+        <a href="/admin/twitch_auth" class="btn btn-outline-secondary me-2">
+          <i class="fa-solid fa-arrow-left me-1"></i> Back to Twitch Auth
+        </a>
+        <a href="/admin" class="btn btn-primary">
+          <i class="fa-solid fa-house me-1"></i> Admin Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {% if success %}
+  <div class="alert alert-success mb-4" role="alert">
+    <div class="d-flex align-items-center">
+      <i class="fa-solid fa-circle-check fa-2x me-3"></i>
+      <div>
+        <h4 class="alert-title mb-1">Authorization Successfully Completed!</h4>
+        <div class="text-muted">Twitch OAuth token exchanged successfully.</div>
+      </div>
+    </div>
+  </div>
+
+  {% if user_info %}
+  <div class="card mb-4">
+    <div class="card-header">
+      <h3 class="card-title"><i class="fa-solid fa-user me-2"></i>Authorized Twitch User</h3>
+    </div>
+    <div class="card-body">
+      <div class="row align-items-center">
+        {% if user_info.profile_image_url %}
+        <div class="col-auto">
+          <img src="{{ user_info.profile_image_url }}" alt="Avatar" class="avatar avatar-lg rounded-circle">
+        </div>
+        {% endif %}
+        <div class="col">
+          <h3 class="mb-1">{{ user_info.display_name or user_info.login }}</h3>
+          <div class="text-muted">
+            <span class="me-3"><i class="fa-solid fa-id-badge me-1"></i> ID: <code>{{ user_info.id }}</code></span>
+            {% if user_info.email %}
+            <span><i class="fa-solid fa-envelope me-1"></i> {{ user_info.email }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card mb-4">
+    <div class="card-header">
+      <h3 class="card-title"><i class="fa-solid fa-key me-2"></i>OAuth Tokens</h3>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label font-weight-bold">Access Token</label>
+        <div class="input-group">
+          <input type="text" class="form-control font-monospace" value="{{ token.access_token }}" id="accessTokenInput" readonly>
+          <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('accessTokenInput').value)">
+            <i class="fa-solid fa-copy me-1"></i> Copy
+          </button>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label font-weight-bold">Refresh Token</label>
+        <div class="input-group">
+          <input type="text" class="form-control font-monospace" value="{{ token.refresh_token }}" id="refreshTokenInput" readonly>
+          <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('refreshTokenInput').value)">
+            <i class="fa-solid fa-copy me-1"></i> Copy
+          </button>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <label class="form-label font-weight-bold">Token Type</label>
+          <div><span class="badge bg-blue text-blue-fg p-2">{{ token.token_type }}</span></div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label font-weight-bold">Expires In</label>
+          <div><code>{{ token.expires_in }} seconds</code></div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label font-weight-bold">State</label>
+          <div><code>{{ state or "N/A" }}</code></div>
+        </div>
+      </div>
+
+      {% if token.scope %}
+      <div class="mb-3">
+        <label class="form-label font-weight-bold">Granted Scopes</label>
+        <div>
+          {% for scope_item in token.scope %}
+          <span class="badge bg-purple-lt me-1 mb-1 p-2"><code>{{ scope_item }}</code></span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% else %}
+  <div class="alert alert-danger mb-4" role="alert">
+    <div class="d-flex align-items-center">
+      <i class="fa-solid fa-triangle-exclamation fa-2x me-3"></i>
+      <div>
+        <h4 class="alert-title mb-1">Authorization Failed</h4>
+        <div class="text-muted">{{ error_message or "An error occurred during Twitch OAuth callback processing." }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      <h3 class="card-title"><i class="fa-solid fa-bug me-2"></i>Error Details</h3>
+    </div>
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label class="form-label font-weight-bold">Error Code</label>
+          <div><code>{{ error or "UNKNOWN_ERROR" }}</code></div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label font-weight-bold">State Parameter</label>
+          <div><code>{{ state or "N/A" }}</code></div>
+        </div>
+      </div>
+      {% if error_description %}
+      <div class="mb-3">
+        <label class="form-label font-weight-bold">Error Description</label>
+        <div class="p-3 bg-light rounded text-danger font-monospace">{{ error_description }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
