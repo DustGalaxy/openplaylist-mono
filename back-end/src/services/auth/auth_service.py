@@ -238,6 +238,7 @@ class AuthService:
                     "access_token": platform_tokens.access_token,
                     "refresh_token": platform_tokens.refresh_token,
                     "expires_at": platform_tokens.expires_at,
+                    "token_type": result.tokens.token_type,
                 }
             )
         except NotFoundException:
