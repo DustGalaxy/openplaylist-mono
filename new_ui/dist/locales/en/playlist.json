@@ -314,6 +314,8 @@
       "title": "Date sorting"
     },
     "mode": {
+      "host":"Host like",
+      "hostHint":"Host like" ,
       "auto": "Auto",
       "free": "Free",
       "freeHint": "Drag tracks to reorder manually",
