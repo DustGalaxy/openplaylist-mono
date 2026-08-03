@@ -4,22 +4,21 @@ from uuid import UUID
 from simple_repository.exceptions import NotFoundException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.dal.postgres.notification import (
+    NotificationRepository,
+    NotificationSettingsRepository,
+    SubscriptionsRepository,
+    get_notification_repo,
+    get_notification_settings_repo,
+    get_subs_settings_repo,
+)
 from src.models.notification import (
     DirectNotificationCreate,
     EventNotificationCreate,
-    SubscriptionCreate,
-    NotificationSettingsPatch,
     NotificationSettingsCreate,
+    NotificationSettingsPatch,
+    SubscriptionCreate,
     SubscriptionPatch,
-)
-
-from src.dal.postgres.notification import (
-    get_notification_repo,
-    NotificationRepository,
-    NotificationSettingsRepository,
-    get_notification_settings_repo,
-    SubscriptionsRepository,
-    get_subs_settings_repo,
 )
 
 

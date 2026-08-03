@@ -1,0 +1,112 @@
+{% extends "sqladmin/layout.html" %}
+
+{% block content %}
+<div class="container-xl">
+  <div class="page-header d-print-none mb-4">
+    <div class="row align-items-center">
+      <div class="col">
+        <h2 class="page-title">
+          <i class="fa-brands fa-twitch me-2 text-purple"></i>Twitch OAuth Authorization
+        </h2>
+        <div class="text-muted mt-1">Configure API scopes and initiate Twitch OAuth flow directly from the admin panel.</div>
+      </div>
+    </div>
+  </div>
+
+  {% if generated_url %}
+  <div class="alert alert-success alert-dismissible mb-4" role="alert">
+    <div class="d-flex">
+      <div>
+        <h4 class="alert-title"><i class="fa-solid fa-circle-check me-2"></i>Authorization URL Generated!</h4>
+        <div class="text-muted mb-2">You can use the button below to authorize or copy the generated link:</div>
+        <div class="input-group mb-2">
+          <input type="text" class="form-control" value="{{ generated_url }}" id="generatedUrlInput" readonly>
+          <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('generatedUrlInput').value)">
+            <i class="fa-solid fa-copy me-1"></i> Copy
+          </button>
+        </div>
+        <a href="{{ generated_url }}" class="btn btn-purple text-white" target="_blank" rel="noopener noreferrer">
+          <i class="fa-brands fa-twitch me-1"></i> Proceed to Twitch Auth
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col-12">
+      <form method="POST" class="card">
+        <div class="card-header">
+          <h3 class="card-title">OAuth Authorization Settings</h3>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label required">Twitch Client ID</label>
+              <input type="text" class="form-control" name="client_id" value="{{ client_id }}" readonly>
+              <small class="form-hint">Loaded from configuration settings (TWITCH_CLIENT_ID).</small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label required">Redirect URI</label>
+              <input type="text" class="form-control" name="redirect_uri" value="{{ redirect_uri }}">
+              <small class="form-hint">Must match redirect URI registered in Twitch Developer Console.</small>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label required">Response Type</label>
+              <input type="text" class="form-control" name="response_type" value="code" readonly>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label required">State Parameter</label>
+              <input type="text" class="form-control" name="state" value="{{ state }}" placeholder="Security state token">
+              <small class="form-hint">Opaque value used to prevent CSRF attacks.</small>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Select Twitch Scopes</label>
+            <div class="row g-2">
+              {% for scope in available_scopes %}
+              <div class="col-md-6 col-lg-4">
+                <label class="form-selectgroup-item flex-fill">
+                  <input type="checkbox" name="scopes" value="{{ scope.name }}" class="form-selectgroup-input" {% if scope.name in selected_scopes %}checked{% endif %}>
+                  <div class="form-selectgroup-label d-flex align-items-center p-3">
+                    <div class="me-3">
+                      <span class="form-selectgroup-check"></span>
+                    </div>
+                    <div class="form-selectgroup-label-content">
+                      <div class="font-weight-medium mb-1">
+                        <code>{{ scope.name }}</code>
+                        <span class="badge bg-purple-lt ms-1">{{ scope.category }}</span>
+                      </div>
+                      <div class="text-muted small">{{ scope.description }}</div>
+                    </div>
+                  </div>
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Additional Custom Scopes (space-separated)</label>
+            <input type="text" class="form-control" name="custom_scopes" value="{{ custom_scopes }}" placeholder="e.g. analytics:read:extensions user:edit">
+            <small class="form-hint">Enter extra scope strings separated by space if not listed above.</small>
+          </div>
+        </div>
+
+        <div class="card-footer d-flex align-items-center justify-content-between">
+          <button type="submit" name="action" value="preview" class="btn btn-outline-primary">
+            <i class="fa-solid fa-link me-1"></i> Generate Authorization URL
+          </button>
+          <button type="submit" name="action" value="authorize" class="btn btn-purple text-white">
+            <i class="fa-brands fa-twitch me-1"></i> Authorize via Twitch
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

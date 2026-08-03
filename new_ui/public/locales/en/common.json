@@ -127,8 +127,14 @@
     "Saves": "Saves"
   },
   "supportModal": {
+    "copyLink": "Copy link",
+    "donateCta": "Donate via DeStream",
+    "donateDescription": "You can also financially support the project development:",
     "feedbackCta": "Leave feedback",
+    "linkCopied": "Donation link copied!",
+    "qrHint": "Scan QR code to donate",
     "text": "Right now the best support is to tell your friends, try the app out, and leave feedback.",
+    "thankYou": "The project lives and grows only by your support, thanks!",
     "title": "Support the project"
   },
   "theme": {

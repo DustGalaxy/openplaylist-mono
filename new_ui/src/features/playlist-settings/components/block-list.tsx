@@ -22,17 +22,17 @@ const UserBlockItem = ({
   item: ReadBlockList
   unBlockCallback: (item: ReadBlockList) => Promise<void>
 }) => {
-  const { t } = useFeatureTranslation()
+  const { t, tc } = useFeatureTranslation()
   const socialMeta =
     item.platform && item.platform in socialIcons
       ? socialIcons[item.platform as keyof typeof socialIcons]
       : undefined
   const platformName: string =
     item.platform && socialMeta
-      ? t(socialMeta.key)
-      : item.platform || t('common.web')
+      ? tc(socialMeta.key)
+      : item.platform || tc('common.web')
   const icon =
-    platformName === t('common.web') ? (
+    platformName === tc('common.web') ? (
       <Globe className="size-3.5" />
     ) : (
       <div className="w-3.5 h-3.5 flex items-center justify-center">
@@ -122,7 +122,10 @@ const TrackBlockItem = ({
               await unBlockCallback(item)
             }}
             type="button"
-            aria-label={t('playlistSettings.block.unblockTrack', 'Unblock track')}
+            aria-label={t(
+              'playlistSettings.block.unblockTrack',
+              'Unblock track',
+            )}
             className="p-1.5 text-text-placeholder hover:text-red-400 hover:bg-red-500/10 transition-colors rounded-sm h-8 w-8 flex items-center justify-center shrink-0"
           >
             <Trash2 className="size-4" />

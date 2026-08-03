@@ -110,7 +110,6 @@ export const createPlaylistRulesSlice: StateCreator<
   initContentSettings: async (playlistId, platform) => {
     const settings = await initPlatformContent({
       playlist_id: playlistId,
-      settings_id: playlistId,
       platform,
     })
     if (settings)
@@ -134,13 +133,7 @@ export const createPlaylistRulesSlice: StateCreator<
   },
 
   blockUserRule: async (playlistId, triggerType, triggerValue, platform) => {
-    const res = await blockUser(
-      playlistId,
-      playlistId,
-      triggerType,
-      triggerValue,
-      platform,
-    )
+    const res = await blockUser(playlistId, triggerType, triggerValue, platform)
     if (res)
       get().updatePlaylistData(playlistId, (p) => ({
         ...p,

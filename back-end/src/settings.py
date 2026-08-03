@@ -17,9 +17,17 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = Field(alias="JWT_ALGORITHM", default="RS256")
     JWT_ISSUER: str = Field(alias="JWT_ISSUER", default="ravlik")
 
+    ADMIN_PASSWORD_HASH: str = Field(alias="ADMIN_PASSWORD_HASH", default="")
+
     TWITCH_CLIENT_ID: str = Field(alias="TWITCH_CLIENT_ID", default="vsil95c2am4rgvbgdax1o4a1u003mx")
     TWITCH_CLIENT_SECRET: str = Field(alias="TWITCH_CLIENT_SECRET")
     TWITCH_REDIRECT_URI: str = ""  # Вычисляется динамически
+    TWITCH_ADMIN_REDIRECT_URI: str = ""  # Вычисляется динамически для админки
+    TWITCH_ADMIN_DEFAULT_SCOPES: str = Field(
+        alias="TWITCH_ADMIN_DEFAULT_SCOPES",
+        default="user:read:email channel:read:subscriptions chat:read chat:edit",
+    )
+    TWITCH_ADMIN_STATE: str = Field(alias="TWITCH_ADMIN_STATE", default="admin_oauth_state")
     TWITCH_URL: str = Field(default="https://id.twitch.tv")
     TWITCH_SCOPES: str = Field(default="user:read:email")
 
@@ -72,6 +80,8 @@ class Settings(BaseSettings):
         # Формируем зависимые ссылки
         self.EMAIL_COMFIRM_ADRESS = f"{self.PROJECT_DOMAIN}/email-confirm"
         self.TWITCH_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
+        if not self.TWITCH_ADMIN_REDIRECT_URI:
+            self.TWITCH_ADMIN_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/admin/twitch-callback"
         self.DA_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
         self.GOOGLE_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
         self.DONATEX_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"

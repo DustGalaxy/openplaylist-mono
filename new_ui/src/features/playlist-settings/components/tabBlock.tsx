@@ -93,26 +93,36 @@ const TabBlock = () => {
                   placeholder={t('playlistSettings.block.selectTriggerType')}
                 />
               </SelectTrigger>
-              <SelectContent className="bg-level-2 border-level-3/40 text-xs">
-                <SelectItem value="USER_NAME">
+              <SelectContent className="bg-level-2  text-text-main border-level-3/40 text-xs">
+                <SelectItem
+                  value="USER_NAME"
+                  className="focus:bg-level-1 text-text-main focus:text-text-main"
+                >
                   {t('playlistSettings.block.triggerUserName', 'Username')}
                 </SelectItem>
-                <SelectItem value="USER_ID">
+                <SelectItem
+                  value="USER_ID"
+                  className="focus:bg-level-1 text-text-main focus:text-text-main"
+                >
                   {t('playlistSettings.block.triggerUserId', 'User ID')}
                 </SelectItem>
               </SelectContent>
             </Select>
 
             {/* Platform Select */}
-            <Select name="platform" defaultValue={RequestPlatform.ALL}>
-              <SelectTrigger className="w-full sm:w-28 bg-level-2 border-0 h-8 text-xs sm:text-sm">
+            <Select name="platform">
+              <SelectTrigger className="w-full sm:w-28 bg-level-2 border-0 h-8 text-text-main text-xs sm:text-sm">
                 <SelectValue
                   placeholder={t('playlistSettings.block.selectPlatform')}
                 />
               </SelectTrigger>
-              <SelectContent className="bg-level-2 border-level-3/40 text-xs">
+              <SelectContent className="bg-level-2 border-level-3/40  text-text-main text-xs">
                 {Object.entries(RequestPlatform).map(([key, val]) => (
-                  <SelectItem key={key} value={val}>
+                  <SelectItem
+                    key={key}
+                    value={val}
+                    className="focus:bg-level-1 text-text-main focus:text-text-main"
+                  >
                     {key}
                   </SelectItem>
                 ))}
@@ -133,7 +143,7 @@ const TabBlock = () => {
             {/* Submit Button */}
             <Btn
               type="submit"
-              className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main shrink-0 flex items-center justify-center gap-1 hover:bg-level-3 transition-colors"
+              className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main shrink-0 flex items-center justify-center gap-1 transition-colors"
             >
               <Plus className="size-3.5" />
               <span>{t('playlistSettings.block.addBlock', 'Block')}</span>
@@ -209,7 +219,7 @@ const TabBlock = () => {
             />
             <Btn
               type="submit"
-              className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main shrink-0 flex items-center gap-1 hover:bg-level-3 transition-colors"
+              className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main shrink-0 flex items-center gap-1 transition-colors"
             >
               <Plus className="size-3.5" />
               <span>{t('playlistSettings.block.addBlock', 'Block')}</span>

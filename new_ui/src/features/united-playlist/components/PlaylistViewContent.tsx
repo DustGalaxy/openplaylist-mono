@@ -134,23 +134,22 @@ function PlaylistViewInner() {
                     ? t('playlist.status.online')
                     : t('playlist.status.offline')}
                 </Btn>
-                <FeatureLock featureKey="sync_playback_position">
-                  <div className="flex items-center justify-between">
-                    <Btn
-                      title={t('playlist.tooltip.sync')}
-                      isActive={playlist.sync_playback_position}
-                      onClick={() =>
-                        toggleBroadcast(
-                          playlist.id,
-                          !playlist.sync_playback_position,
-                        )
-                      }
-                      className="size-8 rounded-sm"
-                    >
-                      <RadioTower className="size-5" />
-                    </Btn>
-                  </div>
-                </FeatureLock>
+
+                <div className="flex items-center justify-between">
+                  <Btn
+                    title={t('playlist.tooltip.sync')}
+                    isActive={playlist.sync_playback_position}
+                    onClick={() =>
+                      toggleBroadcast(
+                        playlist.id,
+                        !playlist.sync_playback_position,
+                      )
+                    }
+                    className="size-8 rounded-sm"
+                  >
+                    <RadioTower className="size-5" />
+                  </Btn>
+                </div>
               </>
             )}
             {isViewerLike && (
