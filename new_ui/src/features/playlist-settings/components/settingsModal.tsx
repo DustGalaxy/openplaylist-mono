@@ -70,7 +70,7 @@ export function SettingsModalInner() {
         className="fixed 
       top-10! bottom-10! left-0! right-0! translate-x-0! translate-y-0! w-screen max-w-full px-1 sm:px-4 h-screen max-h-[90vh] 
       sm:top-[50%]! sm:left-[50%]! sm:-translate-x-1/2! sm:-translate-y-1/2! 
-      sm:max-w-6xl sm:h-[80vh] rounded-t-xl sm:rounded-xl bg-level-1 border-level-3 text-text-main flex flex-col overflow-auto"
+      sm:max-w-6xl sm:h-[80vh] rounded-t-xl sm:rounded-xl bg-level-1 border-level-3 text-text-main flex flex-col overflow-scroll"
       >
         <Tabs className="min-w-full flex justify-start" defaultValue="general">
           <DialogHeader>
