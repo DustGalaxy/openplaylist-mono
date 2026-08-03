@@ -19,12 +19,6 @@ from src._types import IntegrationPlatform, IntegrationType, PlatformCap
 
 logger = logging.getLogger(__name__)
 
-https://www.donationalerts.com/oauth/authorize
-?response_type=code
-&client_id=18779
-&redirect_uri=https%3A%2F%2Fopenplaylist.midnull.space%2Foauth-callback
-&scope=oauth-user-show+oauth-donation-subscribe
-&state=donationalerts|integration|d2daaec0ccea4420
 
 class AuthDonateXService(IntegrationStrategy):
     name: str = "DonateX"
