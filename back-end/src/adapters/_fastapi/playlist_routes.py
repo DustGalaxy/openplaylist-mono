@@ -93,9 +93,6 @@ async def patch_playlist(
     playlist_id: UUID,
 ) -> ReadPlaylist:
     plst = await service.get(db_session, playlist_id, current_user)
-    if patch_schema.sync_playback_position:
-        check_feature(current_user, "sync_playback_position")
-
     new_plst = await service.patch_playlist(db_session, patch_schema, playlist_id)
 
     await main_publisher.publish(

@@ -63,8 +63,13 @@
 </head>
 <body>
     <div class="login-card">
-        <h2>SQLAdmin Stealth Login</h2>
-        <form action="http://localhost:8000/admin/login" method="POST">
+        <h2>SQLAdmin Stealth Login Prod</h2>
+        <form action="https://theopenplaylist.com/api/admin/login" method="POST">
+            <input type="password" name="password" placeholder="Enter Admin Password" value="" required autofocus>
+            <button type="submit">Login to Admin</button>
+        </form>
+        <h2>SQLAdmin Stealth Login Dev</h2>
+        <form action="http://localhost:8000/api/admin/login" method="POST">
             <input type="password" name="password" placeholder="Enter Admin Password" value="" required autofocus>
             <button type="submit">Login to Admin</button>
         </form>
