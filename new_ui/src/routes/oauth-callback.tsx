@@ -2,10 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuthLogin, useIntegration } from '@/hooks/useAuth'
-import {
-  OAUTH_STATE_KEY,
-  REDIRECT_AFTER_LOGIN_KEY,
-} from '@/lib/utils'
+import { OAUTH_STATE_KEY, REDIRECT_AFTER_LOGIN_KEY } from '@/lib/utils'
 import { deserializeOAuthState } from '@/hooks/useAuthUrl'
 
 export const Route = createFileRoute('/oauth-callback')({
@@ -13,7 +10,7 @@ export const Route = createFileRoute('/oauth-callback')({
 })
 
 function UnifiedOAuthCallbackPage() {
-  const { t } = useTranslation()
+  const { t } = useTranslation('auth')
   const navigate = useNavigate()
   const hasProcessedUrlRef = useRef(false)
 
@@ -35,7 +32,9 @@ function UnifiedOAuthCallbackPage() {
   })
 
   const mutation =
-    detectedOperationType === 'integration' ? integrationMutation : loginMutation
+    detectedOperationType === 'integration'
+      ? integrationMutation
+      : loginMutation
 
   useEffect(() => {
     if (hasProcessedUrlRef.current) {
@@ -69,7 +68,8 @@ function UnifiedOAuthCallbackPage() {
       return
     }
 
-    const { platform: statePlatform, operationType: stateOperationType } = oauthState
+    const { platform: statePlatform, operationType: stateOperationType } =
+      oauthState
     const storedState = localStorage.getItem(OAUTH_STATE_KEY)
 
     if (!stateFromUrl || !storedState || stateFromUrl !== storedState) {
@@ -85,7 +85,9 @@ function UnifiedOAuthCallbackPage() {
     }
 
     if (!code) {
-      console.error(`No authorization code found in URL for platform: ${statePlatform}`)
+      console.error(
+        `No authorization code found in URL for platform: ${statePlatform}`,
+      )
       alert(t('auth.oauthCallback.authFailed'))
       localStorage.removeItem(OAUTH_STATE_KEY)
       localStorage.removeItem(REDIRECT_AFTER_LOGIN_KEY)
@@ -111,7 +113,9 @@ function UnifiedOAuthCallbackPage() {
     <div className="text-center text-text-main p-[20px]">
       <h1>
         {platformName.charAt(0).toUpperCase() + platformName.slice(1)}{' '}
-        {isLinking ? t('auth.oauthCallback.linking') : t('auth.oauthCallback.authorizing')}
+        {isLinking
+          ? t('auth.oauthCallback.linking')
+          : t('auth.oauthCallback.authorizing')}
       </h1>
 
       {mutation.isPending && <p>{t('auth.oauthCallback.sendingCode')}</p>}

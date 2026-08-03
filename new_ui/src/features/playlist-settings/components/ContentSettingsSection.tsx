@@ -92,7 +92,7 @@ export default function ContentSettingsSection({
           </div>
           <Btn
             onClick={handleInit}
-            className="h-9 px-4 bg-level-2 text-xs font-semibold text-text-main hover:bg-level-3 transition-colors"
+            className="h-9 px-4 bg-level-2 text-xs font-semibold text-text-main transition-colors"
           >
             {t(
               'playlistSettings.validation.initRules',
@@ -133,13 +133,13 @@ export default function ContentSettingsSection({
       labelKey: 'playlistSettings.validation.trackCooldown',
       descKey: 'playlistSettings.validation.trackCooldownDesc',
       icon: Timer,
-      unit: 'sec',
+      unit: 'min',
     },
     {
       field: 'user_cooldown',
       labelKey: 'playlistSettings.validation.userCooldown',
       icon: UserCheck,
-      unit: 'sec',
+      unit: 'min',
     },
   ]
 

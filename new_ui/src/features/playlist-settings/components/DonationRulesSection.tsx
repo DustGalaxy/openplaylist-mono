@@ -266,7 +266,7 @@ export default function DonationRulesSection({
             {/* Add Button */}
             <Btn
               onClick={handleAdd}
-              className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main shrink-0 flex items-center gap-1 hover:bg-level-3 transition-colors"
+              className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main shrink-0 flex items-center gap-1 transition-colors"
             >
               <Plus className="size-3.5" />
               <span>{t('playlistSettings.donation.add', 'Add')}</span>

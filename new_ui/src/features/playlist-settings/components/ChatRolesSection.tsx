@@ -248,7 +248,7 @@ export default function ChatRolesSection({
               <Btn
                 onClick={handleAddRole}
                 disabled={!selectedRole || isCreating}
-                className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main shrink-0 flex items-center gap-1 hover:bg-level-3 transition-colors disabled:opacity-50"
+                className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main shrink-0 flex items-center gap-1 transition-colors disabled:opacity-50"
               >
                 <Plus className="size-3.5" />
                 <span>{t('playlistSettings.chatRoles.add', 'Add')}</span>
@@ -271,7 +271,9 @@ export default function ChatRolesSection({
           >
             <div className="space-y-2 pt-1">
               <div className="hidden sm:flex items-center gap-2 px-2 text-[11px] font-semibold text-text-secondary">
-                <div className="flex-1">{t('playlistSettings.chatRoles.role', 'Role')}</div>
+                <div className="flex-1">
+                  {t('playlistSettings.chatRoles.role', 'Role')}
+                </div>
                 <div className="w-24 text-right">
                   {t(
                     'playlistSettings.chatRoles.priorityHeader',

@@ -12,6 +12,10 @@ from typing import Self
 
 import asqlite
 import twitchio
+from twitchio import eventsub
+from twitchio.exceptions import InvalidTokenException
+from twitchio.ext import commands
+
 from src.acl.user import get_users
 from src.adapters._rabbit.broker import auth_user_twitch_tokens_refreshed, broker, main_exchange, user_token_died
 from src.adapters._rabbit.dto.user import Tokens
@@ -21,9 +25,6 @@ from src.components.music_request import MusicRequest
 from src.config import settings
 from src.log_setup import LOGGER
 from src.utils import find
-from twitchio import eventsub
-from twitchio.exceptions import InvalidTokenException
-from twitchio.ext import commands
 
 context = {"bot": None}
 
