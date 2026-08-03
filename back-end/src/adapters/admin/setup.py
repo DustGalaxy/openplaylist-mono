@@ -13,6 +13,7 @@ from src.adapters.admin.views import (
     BanlistAdmin,
     FeatureFlagAdmin,
     LinkedAccountsAdmin,
+    TokenVaultAdmin,
     TwitchAdminTokenAdmin,
     UserAdmin,
     UserRoleAdmin,
@@ -65,6 +66,7 @@ def setup_admin(app: FastAPI) -> Admin:
     admin.add_view(UserRoleAdmin)
     admin.add_view(BanlistAdmin)
     admin.add_view(LinkedAccountsAdmin)
+    admin.add_view(TokenVaultAdmin)
     admin.add_view(FeatureFlagAdmin)
     admin.add_view(TwitchAdminTokenAdmin)
     admin.add_view(TwitchAuthAdmin)
