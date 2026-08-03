@@ -25,6 +25,7 @@ TEMPLATES_DIR = Path(__file__).parent / "templates"
 def setup_admin(app: FastAPI) -> Admin:
     admin = Admin(
         app=app,
+        base_url="/api/admin",
         engine=engine,
         authentication_backend=authentication_backend,
         templates_dir=str(TEMPLATES_DIR),

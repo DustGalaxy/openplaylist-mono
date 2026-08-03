@@ -141,8 +141,8 @@ class TwitchAuthAdmin(BaseView):
             error_message = "No authorization code received in query parameters."
         else:
             try:
-                # redirect_uri = settings.TWITCH_ADMIN_REDIRECT_URI or settings.TWITCH_REDIRECT_URI
-                redirect_uri = "http://localhost:8000/admin/twitch-callback"
+                redirect_uri = settings.TWITCH_ADMIN_REDIRECT_URI or settings.TWITCH_REDIRECT_URI
+                # redirect_uri = "http://localhost:8000/admin/twitch-callback"
                 token = auth_twitch_service.get_token(code=code, redirect_uri=redirect_uri)
                 success = True
 

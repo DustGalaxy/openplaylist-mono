@@ -75,13 +75,18 @@ class Settings(BaseSettings):
     def compute_urls(self) -> "Settings":
         # Если в .env написано MODE=prod, меняем домен (или подтягиваем из другой переменной PROD_PROJECT_DOMAIN)
         if self.MODE == "prod":
-            self.PROJECT_DOMAIN = "https://openplaylist.midnull.space"
+            self.PROJECT_DOMAIN = "https://theopenplaylist.com"
 
         # Формируем зависимые ссылки
         self.EMAIL_COMFIRM_ADRESS = f"{self.PROJECT_DOMAIN}/email-confirm"
         self.TWITCH_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
-        if not self.TWITCH_ADMIN_REDIRECT_URI:
-            self.TWITCH_ADMIN_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/admin/twitch-callback"
+
+        if self.MODE == "prod":
+            if not self.TWITCH_ADMIN_REDIRECT_URI:
+                self.TWITCH_ADMIN_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/api/admin/twitch-callback"
+        else:
+            self.TWITCH_ADMIN_REDIRECT_URI = "http://localhost:8000/api/admin/twitch-callback"
+
         self.DA_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
         self.GOOGLE_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
         self.DONATEX_REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
