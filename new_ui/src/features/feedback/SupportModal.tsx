@@ -58,7 +58,7 @@ export default function SupportModal({
         </p>
 
         {/* Donation Section */}
-        <div className="flex flex-col items-center gap-3 p-4 rounded-xl bg-level-1 border border-level-3/50 text-center">
+        <div className="flex flex-col items-center gap-3 p-4 rounded-xl bg-level-1 border border-level-3/50 text-center hidden">
           <p className="text-xs font-medium text-text-main/90">
             {t(
               'supportModal.thankYou',
