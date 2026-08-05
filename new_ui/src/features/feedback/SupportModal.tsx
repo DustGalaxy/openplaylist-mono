@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Copy, ExternalLink, Heart } from 'lucide-react'
+import { Check, Copy, ExternalLink, Heart, Link } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { toast } from 'sonner'
 import {
@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 
-const DONATE_URL = 'https://destream.net/live/dustgalaxy/donate'
+const DONATE_URL = 'https://patreon.com/DustGalaxy'
 
 type SupportModalProps = {
   open: boolean
@@ -58,7 +58,7 @@ export default function SupportModal({
         </p>
 
         {/* Donation Section */}
-        <div className="flex flex-col items-center gap-3 p-4 rounded-xl bg-level-1 border border-accent/50 text-center hidden">
+        <div className="flex flex-col items-center gap-3 p-4 rounded-xl bg-level-1 border border-accent/50 text-center">
           <p className="text-xs font-medium text-text-main/90">
             {t(
               'supportModal.thankYou',
@@ -77,19 +77,17 @@ export default function SupportModal({
 
           {/* Action Buttons for Link */}
           <div className="flex flex-col sm:flex-row gap-2 w-full pt-1">
-            <Button
-              asChild
-              className="flex-1 gap-2 bg-(--color-accent-2) hover:bg-(--color-accent-2)/90 text-white"
+            <a
+              href={DONATE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-(--color-accent-2) hover:bg-accent-2/90 flex gap-2 place-content-center text-white w-full rounded-sm px-3 py-1.5"
             >
-              <a href={DONATE_URL} target="_blank" rel="noopener noreferrer">
-                {t('supportModal.donateCta', 'Donate via DeStream')}
-                <ExternalLink size={16} />
-              </a>
-            </Button>
+              {t('supportModal.donateCta', 'Support on Patreon')}
+              <ExternalLink size={16} className="text-white " color="white" />
+            </a>
 
             <Button
-              variant="outline"
-              size="icon"
               onClick={handleCopy}
               title={t('supportModal.copyLink', 'Copy link')}
               className="shrink-0 border-accent hover:bg-level-2 text-text-main"
@@ -97,14 +95,13 @@ export default function SupportModal({
               {copied ? (
                 <Check size={16} className="text-green-500" />
               ) : (
-                <Copy size={16} />
+                <Link size={16} />
               )}
             </Button>
           </div>
         </div>
 
         <Button
-          variant="outline"
           onClick={() => {
             onOpenChange(false)
             onFeedbackClick()

@@ -478,7 +478,7 @@ export default function MenuDropdown() {
         <DropdownMenuItem onClick={() => navigate({ to: '/statistic' })}>
           <ChartColumnIncreasing /> {t('nav.statistic')}
         </DropdownMenuItem>
-        <DropdownMenuItem disabled onClick={() => navigate({ to: '/history' })}>
+        <DropdownMenuItem onClick={() => navigate({ to: '/history' })}>
           <History /> {t('nav.history')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate({ to: '/settings' })}>

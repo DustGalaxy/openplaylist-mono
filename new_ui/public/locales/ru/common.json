@@ -106,7 +106,13 @@
   },
   "placeholder": {
     "history": "Привет, \"/history\"!",
-    "statistic": "Привет, \"/statistic\"!"
+    "statistic": "Привет, \"/statistic\"!",
+    "badge": "Скоро появится",
+    "defaultTitle": "Функция в разработке",
+    "defaultDescription": "Мы активно работаем над этой функцией. Она станет доступна в ближайших обновлениях!",
+    "featureDescription": "Мы активно работаем над разделом «{{name}}». Он станет доступен в ближайших обновлениях!",
+    "comingSoonTag": "Скоро появится",
+    "highlightsTitle": "Что будет добавлено:"
   },
   "platform": {
     "da": "Donation Alerts",
@@ -239,7 +245,7 @@
   },
   "supportModal": {
     "copyLink": "Скопировать ссылку",
-    "donateCta": "Поддержать через DeStream",
+    "donateCta": "Поддержать на Patreon",
     "donateDescription": "Вы также можете поддержать разработку проекта финансово:",
     "feedbackCta": "Оставить отзыв",
     "linkCopied": "Ссылка скопирована!",

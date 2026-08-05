@@ -43,7 +43,7 @@ export default function Header() {
             <Link to="/" className="flex items-center gap-1.5 shrink-0 px-1">
               <Disc3 className="size-5 sm:size-6 text-accent" />
               <h1 className="hidden sm:block text-base sm:text-lg font-bold text-transparent bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)] bg-clip-text leading-normal">
-                {t('brand.name')} {t('brand.version')}
+                {t('brand.name')}
               </h1>
             </Link>
 
