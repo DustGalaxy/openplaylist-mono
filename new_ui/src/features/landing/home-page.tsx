@@ -56,6 +56,12 @@ const audienceBulletKeys = [
   'publicPrivate',
   'sync',
 ] as const
+const highlightKeys = [
+  { icon: Zap, key: 'instantSync' },
+  { icon: Shield, key: 'antiSpam' },
+  { icon: Radio, key: 'wideIntegration' },
+  { icon: Users, key: 'openAccess' },
+] as const
 
 function FeatureCard({
   icon: Icon,
@@ -73,7 +79,7 @@ function FeatureCard({
   return (
     <article className="group text-left rounded-xl border border-accent/40 bg-level-2/90 p-6 transition-all duration-300 hover:border-accent/80 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:-translate-y-0.5 flex flex-col justify-between relative overflow-hidden">
       <div
-        className={`absolute top-0 right-0 size-32 bg-gradient-to-br ${color} rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+        className={`absolute top-0 right-0 size-32 bg-linear-to-br ${color} rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
       />
 
       <div className="relative z-10">
@@ -82,7 +88,7 @@ function FeatureCard({
         >
           <Icon className="h-6 w-6" strokeWidth={2} />
         </div>
-        <h3 className="text-lg font-bold text-text-main mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-[var(--color-accent-2)] group-hover:to-[var(--color-accent-3)] transition-all">
+        <h3 className="text-lg font-bold text-text-main mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r group-hover:from-(--color-accent-2) group-hover:to-(--color-accent-3) transition-all">
           {title}
         </h3>
         <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
@@ -140,7 +146,7 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 {isAuthenticated ? (
                   <Btn
-                    className="px-6 h-13 text-base font-bold bg-gradient-to-r from-level-2 to-level-1 text-text-main border border-accent/60 hover:border-accent transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                    className="px-6 h-13 text-base font-bold bg-linear-to-r from-level-2 to-level-1 text-text-main border border-accent/60 hover:border-accent transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]"
                     onClick={() => navigate({ to: '/playlists' })}
                   >
                     <div className="flex items-center gap-2.5">
@@ -151,7 +157,7 @@ export default function HomePage() {
                   </Btn>
                 ) : (
                   <Btn
-                    className="px-6 h-13 text-base font-bold bg-gradient-to-r from-level-2 to-level-1 text-text-main border border-accent/60 hover:border-accent transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                    className="px-6 h-13 text-base font-bold bg-linear-to-r from-level-2 to-level-1 text-text-main border border-accent/60 hover:border-accent transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]"
                     onClick={() => navigate({ to: '/login' })}
                   >
                     <div className="flex items-center gap-2">
@@ -215,37 +221,20 @@ export default function HomePage() {
       {/* QUICK HIGHLIGHTS TICKER */}
       <section className="px-4">
         <div className="mx-auto max-w-5xl grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            {
-              icon: Zap,
-              label: 'Instant Sync',
-              sub: 'Low latency socket queue',
-            },
-            { icon: Shield, label: 'Anti-Spam', sub: 'Smart filters & rules' },
-            {
-              icon: Radio,
-              label: 'Multi-Platform',
-              sub: 'Twitch, YouTube, Web',
-            },
-            {
-              icon: Users,
-              label: 'Open Access',
-              sub: 'Public & private queues',
-            },
-          ].map((item, i) => (
+          {highlightKeys.map(({ icon: Icon, key }) => (
             <div
-              key={i}
+              key={key}
               className="p-3.5 rounded-xl bg-level-2/80 border border-accent/40 flex items-center gap-3 shadow-xs hover:border-accent/60 transition-all"
             >
               <div className="p-2 rounded-lg bg-level-1 text-accent border border-accent/30 shrink-0">
-                <item.icon className="size-4" />
+                <Icon className="size-4" />
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-bold text-text-main truncate">
-                  {item.label}
+                  {t(`landing.highlights.${key}.label`)}
                 </div>
                 <div className="text-[10px] text-text-secondary truncate">
-                  {item.sub}
+                  {t(`landing.highlights.${key}.sub`)}
                 </div>
               </div>
             </div>

@@ -29,6 +29,24 @@
     },
     "featuresSubtitle": "From viewer request to playback — everything is connected via settings, real-time updates, and an intuitive dashboard.",
     "featuresTitle": "Features",
+    "highlights": {
+      "instantSync": {
+        "label": "Instant Sync",
+        "sub": "Low latency socket queue"
+      },
+      "antiSpam": {
+        "label": "Anti-Spam",
+        "sub": "Smart filters & rules"
+      },
+      "wideIntegration": {
+        "label": "Wide Integration",
+        "sub": "Wide platform integration"
+      },
+      "openAccess": {
+        "label": "Open Access",
+        "sub": "Public & private queues"
+      }
+    },
     "findPlaylist": "Find Playlist",
     "goToPlaylists": "To Playlists",
     "heroBody": "OpenPlaylist is a shared queue, not a personal playlist. Viewers suggest music, filters validate requests, and you manage the stream in one click.",
