@@ -14,6 +14,7 @@ export const NAMESPACES = [
   'playlist',
   'userProfile',
   'userSettings',
+  'placeholder',
 ] as const
 
 i18n
