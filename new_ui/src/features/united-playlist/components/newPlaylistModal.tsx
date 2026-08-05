@@ -28,7 +28,8 @@ export default function AddPlaylistModal({
 }: {
   className?: string
 }) {
-  const { t } = useFeatureTranslation()
+  const { t } = useTranslation('playlist')
+  const { t: ts } = useTranslation('playlistSetings')
 
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
@@ -41,7 +42,7 @@ export default function AddPlaylistModal({
 
   const handleCreatePlaylist = async () => {
     if (!name.trim()) {
-      toast.error(t('playlistSettings.details.nameRequired'))
+      toast.error(ts('playlistSettings.details.nameRequired'))
       return
     }
 
