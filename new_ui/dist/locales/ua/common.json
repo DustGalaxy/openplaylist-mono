@@ -1,8 +1,8 @@
 {
   "brand": {
     "name": "OpenPlaylist",
-    "nameWithVersion": "OpenPlaylist v2026.2beta",
-    "version": "2026.2 beta"
+    "nameWithVersion": "OpenPlaylist v2026.5",
+    "version": "2026.5"
   },
   "common": {
     "cancel": "Скасувати",
@@ -106,7 +106,13 @@
   },
   "placeholder": {
     "history": "Привіт \"/history\"!",
-    "statistic": "Привіт \"/statistic\"!"
+    "statistic": "Привіт \"/statistic\"!",
+    "badge": "Скоро з'явиться",
+    "defaultTitle": "Функція в розробці",
+    "defaultDescription": "Ми активно працюємо над цією функцією. Вона стане доступна у найближчих оновленнях!",
+    "featureDescription": "Ми активно працюємо над розділом \"{{name}}\". Він стане доступний у найближчих оновленнях!",
+    "comingSoonTag": "Скоро з'явиться",
+    "highlightsTitle": "Що буде додано:"
   },
   "platform": {
     "da": "Donation Alerts",
@@ -239,7 +245,7 @@
   },
   "supportModal": {
     "copyLink": "Скопіювати посилання",
-    "donateCta": "Підтримати через DeStream",
+    "donateCta": "Підтримати на Patreon",
     "donateDescription": "Ви також можете фінансово підтримати розробку проєкту:",
     "feedbackCta": "Залишити відгук",
     "linkCopied": "Посилання скопійовано!",

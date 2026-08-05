@@ -13,6 +13,7 @@
       "currentPasswordPlaceholder": "Current password",
       "email": "Email",
       "emailHelp": "Used for classic login and account notices.",
+      "eyebrow": "Account Settings",
       "newPassword": "New Password",
       "newPasswordPlaceholder": "New password",
       "nickname": "Nickname",
@@ -28,6 +29,7 @@
       "saveAvatar": "Save Avatar",
       "saveProfile": "Save Profile",
       "saving": "Saving...",
+      "subtitle": "Manage your credentials, email, nickname, and security settings.",
       "updateFailed": "Settings update failed",
       "validation": {
         "avatarRequired": "Avatar URL is required",
@@ -77,6 +79,8 @@
       "emptyHintLong": "Connect your streaming and donation platforms to manage your playlists",
       "reconnect": "Reconnect account",
       "removing": "⟳ Removing...",
+      "subtitle": "Connect streaming platforms, chat bots, and external accounts.",
+      "title": "Integrations & Bots",
       "tokenExpired": "Token expired."
     },
     "profile": {
@@ -113,7 +117,7 @@
       "noEmail": "No email set",
       "noSocialLinks": "No social links connected",
       "noSocialLinksYet": "No social links added yet",
-      "overview": "Profile Overview",
+      "overview": "User Profile",
       "platform": "Platform",
       "platformPlaceholder": "e.g., Twitch, GitHub, LinkedIn",
       "removePlatform": "Remove {{platform}}",
@@ -121,6 +125,7 @@
       "saveFailed": "Save failed",
       "saved": "Saved",
       "saving": "Saving...",
+      "subtitle": "Manage your profile details, bio, and connected social links.",
       "url": "URL",
       "urlPlaceholder": "https://...",
       "validation": {
@@ -171,7 +176,9 @@
       "regenerateFailed": "Failed to generate widget link",
       "regenerated": "Widget link generated — copy and save it now, it won't be shown again",
       "showIcon": "Show disc icon",
-      "textColor": "Text color"
+      "subtitle": "Configure live track overlays for OBS Studio and broadcasting software.",
+      "textColor": "Text color",
+      "title": "OBS Overlay Widget"
     }
   }
 }

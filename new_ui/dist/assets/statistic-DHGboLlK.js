@@ -1,1 +1,0 @@
-import"./index-DDCEpaYc.js";import{r as e}from"./stats-GlLdkFeX.js";var t=e;export{t as component};
