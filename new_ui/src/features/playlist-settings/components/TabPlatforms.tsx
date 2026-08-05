@@ -23,7 +23,7 @@ export default function TabPlatforms() {
               <TabsTrigger
                 key={platform}
                 value={platform}
-                className="w-auto md:w-full shrink-0 ring-0 data-[state=active]:ring-2 data-[state=active]:bg-level-2 ring-level-3"
+                className="w-auto md:w-full shrink-0 ring-0 data-[state=active]:ring-2 data-[state=active]:bg-level-2 ring-accent"
               >
                 <div className="w-full flex items-center gap-2 text-left cursor-pointer">
                   {caps.icon}

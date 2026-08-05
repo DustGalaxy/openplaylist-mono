@@ -89,7 +89,7 @@ const TabValidation = ({
               <TabsTrigger
                 key={key}
                 value={val}
-                className="w-full ring-0 data-[state=active]:ring-2 data-[state=active]:bg-level-2 ring-level-3"
+                className="w-full ring-0 data-[state=active]:ring-2 data-[state=active]:bg-level-2 ring-accent"
               >
                 <Label className="w-full text-base text-left cursor-pointer">
                   {key === 'General' ? t(`common.general`) : key}{' '}

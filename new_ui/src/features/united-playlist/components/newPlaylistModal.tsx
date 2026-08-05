@@ -82,7 +82,7 @@ export default function AddPlaylistModal({
           <Plus className="size-5" />
         </Btn>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-106.25 bg-level-2 border-level-3 text-text-main ">
+      <DialogContent className="sm:max-w-106.25 bg-level-2 border-accent text-text-main ">
         <DialogHeader>
           <DialogTitle className="text-xl text-text-main font-bold">
             {t('playlist.create.title')}
@@ -96,7 +96,7 @@ export default function AddPlaylistModal({
         <Input
           type="text"
           placeholder={t('playlist.create.namePlaceholder')}
-          className="border-level-3 border w-full mb-4"
+          className="border-accent border w-full mb-4"
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={isLoading}
@@ -108,7 +108,7 @@ export default function AddPlaylistModal({
         <Input
           type="text"
           placeholder={t('playlist.create.descriptionPlaceholder')}
-          className="border-level-3 border w-full mb-4"
+          className="border-accent border w-full mb-4"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           disabled={isLoading}
@@ -118,7 +118,7 @@ export default function AddPlaylistModal({
           <Switch
             checked={showInWidget}
             onCheckedChange={(v) => setShowInWinget(v)}
-            className="ring-1 ring-level-3"
+            className="ring-1 ring-accent"
           />
         </div>
 

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -37,6 +38,7 @@ class AuthUserSchema(BaseModel):
 
     linked_accounts: list[LinkedAccountsDomain] = Field(default_factory=list)
     social_links: dict[str, str] | None = None
+    stats_visibility: dict[str, Any] | None = None
     roles: list[Role] = Field(default_factory=list)
 
     last_login: datetime
@@ -65,5 +67,6 @@ class AuthUserUpdate(BaseModel):
     avatar_url: str | None = None
     is_public: bool | None = None
     social_links: dict[str, str] | None = None
+    stats_visibility: dict[str, Any] | None = None
 
     model_config = ConfigDict(from_attributes=True)

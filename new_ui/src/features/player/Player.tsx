@@ -170,10 +170,10 @@ export default function Player({
               'transition-[height,padding,border,opacity] duration-300 ease-in-out',
               hidden
                 ? 'h-0 py-0 opacity-0 pointer-events-none'
-                : 'h-full border-t border-level-3/40 opacity-100',
+                : 'h-full border-t border-accent/40 opacity-100',
             )}
           >
-            <div className="relative w-full h-full max-w-5xl max-h-[calc(100vh-120px)] aspect-video rounded-(--rounded-std) overflow-hidden shadow-2xl border border-level-3/40 bg-black flex items-center justify-center">
+            <div className="relative w-full h-full max-w-5xl max-h-[calc(100vh-120px)] aspect-video rounded-(--rounded-std) overflow-hidden shadow-2xl border border-accent/40 bg-black flex items-center justify-center">
               <Btn
                 onClick={() => setHidden(true)}
                 aria-label={t('controls.closeVideo', 'Close video player')}
@@ -216,13 +216,13 @@ export default function Player({
               'bg-level-1/80 backdrop-blur-md',
               'transition-[height,padding,border,opacity] duration-300 ease-in-out',
               showExtraControls
-                ? 'h-full border-t border-level-3/40 opacity-100'
+                ? 'h-full border-t border-accent/40 opacity-100'
                 : 'h-0 py-0 opacity-0 pointer-events-none',
             )}
           >
-            <div className="relative w-full max-w-lg bg-level-2/95 border border-level-3/50 rounded-2xl p-4 shadow-2xl flex flex-col gap-4 mb-2">
+            <div className="relative w-full max-w-lg bg-level-2/95 border border-accent/50 rounded-2xl p-4 shadow-2xl flex flex-col gap-4 mb-2">
               {/* Header with Track Info */}
-              <div className="flex items-center justify-between gap-3 pb-3 border-b border-level-3/30">
+              <div className="flex items-center justify-between gap-3 pb-3 border-b border-accent/30">
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   {track && (
                     <img
@@ -243,7 +243,7 @@ export default function Player({
                 <Btn
                   onClick={() => setShowExtraControls(false)}
                   aria-label={t('controls.close', 'Close')}
-                  className="p-1 rounded-sm size-8 bg-level-2 hover:bg-level-3 shrink-0"
+                  className="p-1 rounded-sm size-8 bg-level-2 hover:bg-accent shrink-0"
                 >
                   <X className="size-4" />
                 </Btn>
@@ -273,7 +273,7 @@ export default function Player({
                 <span className="text-xs text-text-secondary font-medium">
                   {t('controls.volume', 'Volume')}
                 </span>
-                <div className="flex items-center gap-3 bg-level-1/60 p-2.5 rounded-xl border border-level-3/30">
+                <div className="flex items-center gap-3 bg-level-1/60 p-2.5 rounded-xl border border-accent/30">
                   <Btn
                     onClick={() =>
                       setVolume(
@@ -311,7 +311,7 @@ export default function Player({
               </div>
 
               {/* Quick Actions (Stop, Sync, Toggle Video) */}
-              <div className="flex items-center justify-around gap-2 pt-1 border-t border-level-3/30">
+              <div className="flex items-center justify-around gap-2 pt-1 border-t border-accent/30">
                 {feed.capabilities.canStop && feed.stop && (
                   <Btn
                     onClick={feed.stop}
@@ -504,11 +504,18 @@ export default function Player({
             />
           )}
           <div className="min-w-0 flex flex-col flex-1">
-            <span className="text-sm text-text-main truncate font-medium">
-              {track?.title}
-            </span>
+            <div className="flex items-center gap-1.5 min-w-0">
+              {feed.feedId === 'single' && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-accent px-1.5 py-0.5 rounded bg-level-1 border border-accent/40 shrink-0">
+                  Предпросмотр
+                </span>
+              )}
+              <span className="text-sm text-text-main truncate font-medium">
+                {track?.title}
+              </span>
+            </div>
             <span className="text-xs text-text-secondary truncate">
-              {track?.from_owner}
+              {track?.author || track?.from_owner}
             </span>
           </div>
         </div>
@@ -611,7 +618,7 @@ export default function Player({
             </HoverCardTrigger>
             <HoverCardContent
               side="left"
-              className="w-fit bg-transparent h-fit p-4 ring-1 ring-level-3 border-0"
+              className="w-fit bg-transparent h-fit p-4 ring-1 ring-accent border-0"
             >
               <Slider
                 className="w-20 ring-text-main/30 ring-1 rounded-full"

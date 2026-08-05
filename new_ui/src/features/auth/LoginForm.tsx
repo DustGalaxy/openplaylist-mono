@@ -140,7 +140,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-level-3"></div>
+              <div className="w-full border-t border-accent"></div>
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-level-1 text-text-main">

@@ -86,10 +86,10 @@ export default function DDPlaylistPicker({ track }: { track: Track }) {
       <DropdownMenuContent
         side="bottom"
         sideOffset={5}
-        className="bg-level-2 border-level-3 text-text-main max-h-50"
+        className="bg-level-2 border-accent text-text-main max-h-50"
       >
         <DropdownMenuLabel>{t('view.track.dd.label')}</DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-level-3" />
+        <DropdownMenuSeparator className="bg-accent" />
         <DropdownMenuGroup>
           {playlists ? (
             playlists.map((playlist) => {

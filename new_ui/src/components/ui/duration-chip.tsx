@@ -11,7 +11,7 @@ export default function DurationChip({ time }: { time: number }) {
         border-r-[3px] border-t-[3px]             
         sm:border-r-[5px] sm:border-t-[5px]
 
-         border-level-3
+         border-accent
         transform-origin-center
 
         h-[28px] sm:h-[32px] md:h-[40px]         

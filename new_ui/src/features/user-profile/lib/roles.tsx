@@ -34,7 +34,7 @@ const FALLBACK_TIER: RoleTierDef = {
   tier: -1,
   label: 'Member',
   icon: '',
-  base: 'bg-level-2 text-text-secondary border-level-3',
+  base: 'bg-level-2 text-text-secondary border-accent',
 }
 
 export function getTierDef(key: string): RoleTierDef {

@@ -15,6 +15,7 @@ from src.models.stats import (
     TopEntityItem,
     TopTrackItem,
 )
+from src.orm.auth_user import User
 from src.orm.playlist import Order, OrderPlaylistStatus, Playlist
 
 
@@ -54,10 +55,7 @@ class StatsRepository:
         stmt = _apply_date_filter(stmt, start_date)
 
         res = await session.execute(stmt)
-        return [
-            TopTrackItem(yt_video_id=row[0], title=row[1], count=row[2], total_duration=row[3])
-            for row in res.all()
-        ]
+        return [TopTrackItem(yt_video_id=row[0], title=row[1], count=row[2], total_duration=row[3]) for row in res.all()]
 
     async def _fetch_platform_breakdown(
         self, session: AsyncSession, where_clause: Any | None = None, start_date: datetime | None = None
@@ -68,16 +66,13 @@ class StatsRepository:
         stmt = _apply_date_filter(stmt, start_date)
 
         res = await session.execute(stmt)
-        return [
-            PlatformBreakdown(platform=_to_str(row[0]), count=row[1])
-            for row in res.all()
-        ]
+        return [PlatformBreakdown(platform=_to_str(row[0]), count=row[1]) for row in res.all()]
 
     async def get_outgoing_stats(
         self, session: AsyncSession, user_id: UUID | str, start_date: datetime | None = None
     ) -> OutgoingStatsResponse:
         user_id_str = str(user_id)
-        where_clause = (Order.requester_id == user_id_str)
+        where_clause = Order.requester_id == user_id_str
 
         # 1. Total count & total duration
         stmt_totals = _apply_date_filter(
@@ -99,18 +94,16 @@ class StatsRepository:
 
         # 3. Top streamers / owners
         stmt_streamers = _apply_date_filter(
-            select(Order.owner_id, func.count(Order.id).label("cnt"))
+            select(Order.owner_id, User.username, func.count(Order.id).label("cnt"))
             .where(where_clause)
-            .group_by(Order.owner_id)
+            .join(User, User.id == Order.owner_id)
+            .group_by(Order.owner_id, User.username)
             .order_by(text("cnt DESC"))
             .limit(10),
             start_date,
         )
         res_streamers = await session.execute(stmt_streamers)
-        top_streamers = [
-            TopEntityItem(entity_id=str(row[0]), name=str(row[0]), count=row[1])
-            for row in res_streamers.all()
-        ]
+        top_streamers = [TopEntityItem(entity_id=str(row[0]), name=str(row[1]), count=row[2]) for row in res_streamers.all()]
 
         # 4. Status breakdown
         stmt_status = _apply_date_filter(
@@ -121,10 +114,7 @@ class StatsRepository:
             start_date,
         )
         res_status = await session.execute(stmt_status)
-        status_breakdown = [
-            StatusBreakdown(status=_to_str(row[0]), count=row[1])
-            for row in res_status.all()
-        ]
+        status_breakdown = [StatusBreakdown(status=_to_str(row[0]), count=row[1]) for row in res_status.all()]
 
         return OutgoingStatsResponse(
             total_orders=total_orders,
@@ -138,7 +128,7 @@ class StatsRepository:
     async def get_incoming_stats(
         self, session: AsyncSession, owner_id: UUID, start_date: datetime | None = None
     ) -> IncomingStatsResponse:
-        where_clause = (Order.owner_id == owner_id)
+        where_clause = Order.owner_id == owner_id
 
         # 1. Total count & total duration
         stmt_totals = _apply_date_filter(
@@ -160,9 +150,7 @@ class StatsRepository:
 
         # 3. Owner vs Viewer ratio
         stmt_owner = _apply_date_filter(
-            select(Order.from_owner, func.count(Order.id))
-            .where(where_clause)
-            .group_by(Order.from_owner),
+            select(Order.from_owner, func.count(Order.id)).where(where_clause).group_by(Order.from_owner),
             start_date,
         )
         res_owner = await session.execute(stmt_owner)
@@ -184,10 +172,7 @@ class StatsRepository:
             start_date,
         )
         res_requesters = await session.execute(stmt_requesters)
-        top_requesters = [
-            TopEntityItem(entity_id=str(row[0]), name=str(row[1]), count=row[2])
-            for row in res_requesters.all()
-        ]
+        top_requesters = [TopEntityItem(entity_id=str(row[0]), name=str(row[1]), count=row[2]) for row in res_requesters.all()]
 
         return IncomingStatsResponse(
             total_orders=total_orders,
@@ -200,9 +185,7 @@ class StatsRepository:
             donation_summary=None,
         )
 
-    async def get_global_stats(
-        self, session: AsyncSession, start_date: datetime | None = None
-    ) -> GlobalStatsResponse:
+    async def get_global_stats(self, session: AsyncSession, start_date: datetime | None = None) -> GlobalStatsResponse:
         # 1. Total count & duration
         stmt_totals = _apply_date_filter(
             select(
@@ -224,10 +207,7 @@ class StatsRepository:
         # 3. Playlist mode breakdown
         stmt_mode = select(Playlist.mode, func.count(Playlist.id)).group_by(Playlist.mode)
         res_mode = await session.execute(stmt_mode)
-        mode_breakdown = [
-            PlatformBreakdown(platform=_to_str(row[0]), count=row[1])
-            for row in res_mode.all()
-        ]
+        mode_breakdown = [PlatformBreakdown(platform=_to_str(row[0]), count=row[1]) for row in res_mode.all()]
 
         return GlobalStatsResponse(
             total_orders=total_orders,

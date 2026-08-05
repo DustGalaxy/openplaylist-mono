@@ -64,7 +64,7 @@ export default function ReportModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm text-text-main bg-level-2 border-level-3">
+      <DialogContent className="sm:max-w-sm text-text-main bg-level-2 border-accent">
         <DialogTitle>
           {t('playlist.track.report.title', 'Report track')}
         </DialogTitle>

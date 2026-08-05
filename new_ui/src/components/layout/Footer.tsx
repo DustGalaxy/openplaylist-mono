@@ -30,7 +30,7 @@ export default function Footer() {
     <footer className="w-full flex justify-center px-4 pb-6 pt-6 mt-auto">
       <div
         className="
-          w-full max-w-5xl rounded-(--rounded-std) border-2 border-level-3 bg-level-2
+          w-full max-w-5xl rounded-(--rounded-std) border-2 border-accent bg-level-2
           sm:shadow-[-2px_2px_10px_rgba(0,0,0,0.15),-2px_2px_4px_rgba(0,0,0,0.15)]
           overflow-hidden text-text-main
         "
@@ -67,7 +67,7 @@ export default function Footer() {
           </nav>
         </div>
 
-        <div className="border-t border-level-3/40 px-5 py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-xs text-text-secondary">
+        <div className="border-t border-accent/40 px-5 py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-xs text-text-secondary">
           <span>
             {t('footer.copyright.start', 'Made in {{year}} by ', {
               year: 2026,

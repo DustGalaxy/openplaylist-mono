@@ -40,7 +40,7 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        `data-[state=active]:bg-level-3 
+        `data-[state=active]:bg-accent 
         text-text-main px-2 py-1  
         cursor-pointer
         rounded-(--rounded-std) 

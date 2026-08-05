@@ -114,15 +114,15 @@ const EmailConfirmPage = () => {
 
   if (!email || !sessionId) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
-        <div className="w-full max-w-md rounded-lg border border-red-500/20 bg-red-500/5 p-8">
+      <div className="flex items-center justify-center min-h-screen bg-level-1 px-4">
+        <div className="w-full max-w-md rounded-lg border border-red-500/20 bg-level-2 p-8">
           <div className="flex items-center gap-3 mb-4">
             <AlertCircle className="h-6 w-6 text-red-500" />
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-2xl font-bold text-text-main">
               {t('auth.emailConfirm.invalidLink')}
             </h1>
           </div>
-          <p className="text-slate-300 mb-6">
+          <p className="text-text-secondary mb-6">
             {t('auth.emailConfirm.missingParamsDetail')}
           </p>
           <Button onClick={() => navigate({ to: '/login' })} className="w-full">
@@ -134,24 +134,24 @@ const EmailConfirmPage = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
-      <div className="w-full max-w-md rounded-lg border border-slate-700 bg-slate-900/50 backdrop-blur-sm p-8">
+    <div className="flex items-center justify-center min-h-screen bg-level-1 px-4">
+      <div className="w-full max-w-md rounded-(--rounded-std) border border-accent-muted bg-level-2 backdrop-blur-sm p-8 shadow-xl">
         {confirmEmailMutation.isPending && (
           <>
             <div className="flex items-center justify-center mb-6">
               <div className="relative w-16 h-16">
-                <div className="absolute inset-0 rounded-full border-2 border-slate-700"></div>
-                <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-blue-500 animate-spin"></div>
-                <Loader2 className="absolute inset-2 h-12 w-12 text-blue-500 animate-spin m-auto" />
+                <div className="absolute inset-0 rounded-full border-2 border-accent-muted"></div>
+                <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-accent animate-spin"></div>
+                <Loader2 className="absolute inset-2 h-12 w-12 text-accent animate-spin m-auto" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-white text-center mb-2">
+            <h1 className="text-2xl font-bold text-text-main text-center mb-2">
               {t('auth.emailConfirm.confirming')}
             </h1>
-            <p className="text-slate-400 text-center">
+            <p className="text-text-secondary text-center">
               {t('auth.emailConfirm.verifyingEmail', { email })}
             </p>
-            <p className="text-slate-500 text-sm text-center mt-4">
+            <p className="text-text-placeholder text-sm text-center mt-4">
               {t('auth.emailConfirm.pleaseWait')}
             </p>
           </>
@@ -160,15 +160,15 @@ const EmailConfirmPage = () => {
         {confirmEmailMutation.isSuccess && (
           <>
             <div className="flex items-center justify-center mb-6">
-              <CheckCircle2 className="h-16 w-16 text-green-500 animate-pulse" />
+              <CheckCircle2 className="h-16 w-16 text-emerald-500 animate-pulse" />
             </div>
-            <h1 className="text-2xl font-bold text-white text-center mb-2">
+            <h1 className="text-2xl font-bold text-text-main text-center mb-2">
               {t('auth.emailConfirm.confirmed')}
             </h1>
-            <p className="text-slate-300 text-center mb-6">
+            <p className="text-text-secondary text-center mb-6">
               {t('auth.emailConfirm.confirmedLoggedIn')}
             </p>
-            <p className="text-slate-400 text-sm text-center">
+            <p className="text-text-secondary text-sm text-center">
               {t('auth.emailConfirm.redirecting')}
             </p>
           </>
@@ -178,11 +178,11 @@ const EmailConfirmPage = () => {
           <>
             <div className="flex items-center gap-3 mb-4">
               <AlertCircle className="h-6 w-6 text-red-500 flex-shrink-0" />
-              <h1 className="text-2xl font-bold text-white">
+              <h1 className="text-2xl font-bold text-text-main">
                 {t('auth.emailConfirm.failed')}
               </h1>
             </div>
-            <p className="text-slate-300 mb-6">{error}</p>
+            <p className="text-text-secondary mb-6">{error}</p>
             <div className="space-y-3">
               <Button
                 onClick={() => navigate({ to: '/register' })}

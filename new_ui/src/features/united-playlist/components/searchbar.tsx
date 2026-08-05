@@ -31,7 +31,7 @@ export default function SearchBar({
             if (e.key === 'Enter') action()
           }}
           placeholder={placeholder ?? t('publicSearch.searchPlaceholder')}
-          className="pl-10 h-11 border-2 border-level-3/70 rounded-(--rounded-std) bg-level-1 text-text-main"
+          className="pl-10 h-11 border-2 border-accent/70 rounded-(--rounded-std) bg-level-1 text-text-main"
         />
       </div>
       <Btn

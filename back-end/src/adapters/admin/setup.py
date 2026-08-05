@@ -11,8 +11,15 @@ from src.adapters.admin.custom_views.tasks import TasksSchedulerAdmin
 from src.adapters.admin.custom_views.twitch import TwitchAuthAdmin
 from src.adapters.admin.views import (
     BanlistAdmin,
+    BlockListAdmin,
+    ChatRulesAdmin,
+    ContentSettingsAdmin,
+    DonationRulesAdmin,
     FeatureFlagAdmin,
     LinkedAccountsAdmin,
+    OrderAdmin,
+    OrderPlaylistStatusAdmin,
+    PlaylistAdmin,
     TokenVaultAdmin,
     TwitchAdminTokenAdmin,
     UserAdmin,
@@ -69,6 +76,13 @@ def setup_admin(app: FastAPI) -> Admin:
     admin.add_view(TokenVaultAdmin)
     admin.add_view(FeatureFlagAdmin)
     admin.add_view(TwitchAdminTokenAdmin)
+    admin.add_view(PlaylistAdmin)
+    admin.add_view(OrderAdmin)
+    admin.add_view(OrderPlaylistStatusAdmin)
+    admin.add_view(ContentSettingsAdmin)
+    admin.add_view(BlockListAdmin)
+    admin.add_view(DonationRulesAdmin)
+    admin.add_view(ChatRulesAdmin)
     admin.add_view(TwitchAuthAdmin)
     admin.add_view(TasksSchedulerAdmin)
     return admin

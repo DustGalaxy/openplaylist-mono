@@ -22,9 +22,9 @@ export default function PlaylistDetailsForm() {
   )
 
   return (
-    <div className="p-3 border border-level-3/60 rounded-md bg-level-1 space-y-3.5 shadow-xs">
+    <div className="p-3 border border-accent/60 rounded-md bg-level-1 space-y-3.5 shadow-xs">
       <div className="flex items-center gap-2">
-        <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-level-2 border border-level-3/40 text-level-3">
+        <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-level-2 border border-accent/40 text-accent">
           <PencilLine className="size-4" />
         </div>
         <Label className="text-sm font-bold text-text-main">
@@ -61,7 +61,7 @@ export default function PlaylistDetailsForm() {
           }}
           placeholder={t('playlistSettings.details.namePlaceholder')}
           maxLength={MAX_NAME_LENGTH}
-          className="bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50"
+          className="bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-accent/50"
         />
         <DialogDescription className="text-[11px] text-text-secondary mt-0.5">
           {t('playlistSettings.details.nameHelp')}
@@ -93,7 +93,7 @@ export default function PlaylistDetailsForm() {
           placeholder={t('playlistSettings.details.descriptionPlaceholder')}
           maxLength={MAX_DESCRIPTION_LENGTH}
           rows={2}
-          className="bg-level-2 border-0 p-2 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50 resize-none min-h-[60px]"
+          className="bg-level-2 border-0 p-2 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-accent/50 resize-none min-h-[60px]"
         />
         <DialogDescription className="text-[11px] text-text-secondary mt-0.5">
           {t('playlistSettings.details.descriptionHelp')}

@@ -48,7 +48,7 @@ function RoleOverflowChip({ hiddenRoles }: { hiddenRoles: Array<PublicRole> }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="inline-flex items-center rounded-full border border-level-3 bg-level-2 px-2 py-0.5 text-[11px] font-semibold text-text-secondary cursor-default">
+        <span className="inline-flex items-center rounded-full border border-accent bg-level-2 px-2 py-0.5 text-[11px] font-semibold text-text-secondary cursor-default">
           +{hiddenRoles.length}
         </span>
       </TooltipTrigger>

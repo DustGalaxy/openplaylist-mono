@@ -73,11 +73,11 @@ export const SubscriptionCreateModal: React.FC<
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md bg-level-1 border-level-3 text-neutral-200 p-0 overflow-hidden gap-0">
+      <DialogContent className="sm:max-w-md bg-level-1 border-accent text-neutral-200 p-0 overflow-hidden gap-0">
         {/* Шапка модалки */}
-        <DialogHeader className="p-6 border-b border-level-3 text-left">
+        <DialogHeader className="p-6 border-b border-accent text-left">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-500/10 text-level-3 rounded-lg border border-level-4">
+            <div className="p-2 bg-indigo-500/10 text-accent rounded-lg border border-level-4">
               <Plus className="w-5 h-5" />
             </div>
             <div className="space-y-1">
@@ -96,7 +96,7 @@ export const SubscriptionCreateModal: React.FC<
         </DialogHeader>
 
         {/* Быстрые действия */}
-        <div className="px-6 py-2.5 bg-level-2 border-b border-level-3 flex justify-between items-center gap-2">
+        <div className="px-6 py-2.5 bg-level-2 border-b border-accent flex justify-between items-center gap-2">
           <span className="text-xs text-text-placeholder">
             {t('notifications.settings.quick_setup', 'Быстрые настройки:')}
           </span>
@@ -104,7 +104,7 @@ export const SubscriptionCreateModal: React.FC<
             <button
               type="button"
               onClick={handleUnmuteAll}
-              className="text-xs text-level-3 hover:text-level-3/105 font-medium transition"
+              className="text-xs text-accent hover:text-accent/105 font-medium transition"
             >
               {t('notifications.settings.unmute_all', 'Включить все')}
             </button>
@@ -154,7 +154,7 @@ export const SubscriptionCreateModal: React.FC<
                     onClick={() => handleToggle(item.id)}
                     className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out 
                       focus:outline-none focus:ring-2 focus:ring-level-4 focus:ring-offset-2 focus:ring-offset-neutral-900 ${
-                        isChecked ? 'bg-level-3' : 'bg-level-2'
+                        isChecked ? 'bg-accent' : 'bg-level-2'
                       }`}
                   >
                     <span
@@ -169,7 +169,7 @@ export const SubscriptionCreateModal: React.FC<
           </div>
 
           {/* Футер */}
-          <DialogFooter className="p-6 bg-level-2 border-t border-level-3 sm:justify-end gap-2 sm:gap-2">
+          <DialogFooter className="p-6 bg-level-2 border-t border-accent sm:justify-end gap-2 sm:gap-2">
             <Btn
               disabled={isSaving}
               onClick={onClose}

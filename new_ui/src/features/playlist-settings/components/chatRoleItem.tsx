@@ -57,7 +57,7 @@ const ChatRoleItem = ({
     <div
       ref={setNodeRef}
       style={style}
-      className="border border-level-3/60 rounded-md p-2 sm:p-2.5 bg-level-1 hover:border-level-3/80 transition-all flex items-center justify-between gap-2.5 shadow-xs cursor-grab active:cursor-grabbing group"
+      className="border border-accent/60 rounded-md p-2 sm:p-2.5 bg-level-1 hover:border-accent/80 transition-all flex items-center justify-between gap-2.5 shadow-xs cursor-grab active:cursor-grabbing group"
       {...attributes}
       {...listeners}
     >
@@ -65,7 +65,7 @@ const ChatRoleItem = ({
       <div className="flex items-center gap-2 flex-1 min-w-0">
         <GripVertical className="size-4 text-text-placeholder group-hover:text-text-secondary transition-colors shrink-0" />
         {roleData && (
-          <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-level-2 border border-level-3/40">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-level-2 border border-accent/40">
             {roleData.badge_type === 'img' &&
               typeof roleData.badge_url === 'string' && (
                 <img
@@ -75,7 +75,7 @@ const ChatRoleItem = ({
                 />
               )}
             {roleData.badge_type === 'svg' && roleData.badge_url && (
-              <div className="w-4 h-4 flex items-center justify-center text-level-3">
+              <div className="w-4 h-4 flex items-center justify-center text-accent">
                 {roleData.badge_url}
               </div>
             )}
@@ -119,7 +119,7 @@ const ChatRoleItem = ({
             </TooltipTrigger>
             <TooltipContent
               side="top"
-              className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+              className="bg-level-2 text-text-main border-accent/40 border text-xs"
             >
               <p>
                 {t(
@@ -149,7 +149,7 @@ const ChatRoleItem = ({
           </TooltipTrigger>
           <TooltipContent
             side="top"
-            className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+            className="bg-level-2 text-text-main border-accent/40 border text-xs"
           >
             <p>
               {t(

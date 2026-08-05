@@ -1,5 +1,5 @@
 // src/features/playlist/components/TrackCard.tsx
-import { ArrowUpRight, Calendar, Crown, Layers } from 'lucide-react'
+import { ArrowUpRight, Calendar, Crown, Layers, Play } from 'lucide-react'
 
 import WarningModal from '../modals/warningModal'
 import ReportModal from '../modals/ReportModal'
@@ -56,16 +56,21 @@ export default function TrackCard({
       className={cn(
         'flex items-center gap-2 p-2 rounded-md bg-level-2/50',
         isDragging && 'opacity-50',
-        isNowPlaying && 'ring-1 ring-level-3',
+        isNowPlaying && 'ring-1 ring-accent',
       )}
     >
-      <div className=" relative">
+      <div
+        className="relative group/thumb shrink-0 cursor-pointer"
+        onClick={play}
+      >
         <img
           src={`https://img.youtube.com/vi/${track.yt_video_id}/mqdefault.jpg`}
           alt=""
-          className="h-10 aspect-video rounded-xs object-cover shrink-0 cursor-pointer"
-          onClick={play}
+          className="h-10 aspect-video rounded-xs object-cover shrink-0"
         />
+        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition-opacity text-white rounded-xs">
+          <Play className="size-4 fill-white" />
+        </div>
         <div
           title={t('playlist.track.duration')}
           className="absolute text-[10px] bottom-0.5 right-0.5 px-1 py-px rounded-md font-mono bg-[#000000a7] text-white cursor-help"
@@ -77,13 +82,13 @@ export default function TrackCard({
       <div className="min-w-0 flex-1 flex flex-col">
         <div className="flex items-center gap-1.5 min-w-0">
           {group === 'vip' && (
-            <Crown className="size-3.5 text-level-3 shrink-0" />
+            <Crown className="size-3.5 text-accent shrink-0" />
           )}
           {group === 'background' && (
             <Layers className="size-3.5 text-text-placeholder shrink-0" />
           )}
           <span
-            className="truncate text-sm text-text-main cursor-pointer"
+            className="truncate text-sm text-text-main hover:text-accent transition-colors cursor-pointer"
             onClick={play}
           >
             {track.title}
@@ -100,7 +105,7 @@ export default function TrackCard({
             title={t('playlist.track.date', { date: longFormatDate })}
             className="flex items-center gap-1 px-2 py-1 rounded-md bg-level-1/40 border border-white/5 text-text-placeholder shadow-inner cursor-help"
           >
-            <Calendar className="w-3.5 h-3.5 text-level-3/70" />
+            <Calendar className="w-3.5 h-3.5 text-accent/70" />
             <span>{formattedDate}</span>
           </div>
 
@@ -110,7 +115,7 @@ export default function TrackCard({
             className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-level-1/60 border border-white/5 shadow-inner  justify-start cursor-help"
           >
             <ArrowUpRight
-              className={`w-3.5 h-3.5 ${+track.priority > 0 ? 'text-level-3 animate-pulse' : 'text-text-placeholder'}`}
+              className={`w-3.5 h-3.5 ${+track.priority > 0 ? 'text-accent animate-pulse' : 'text-text-placeholder'}`}
             />
             <span
               className={`font-bold ${+track.priority > 0 ? 'text-text-main' : 'text-text-placeholder'}`}

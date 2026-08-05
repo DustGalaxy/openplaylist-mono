@@ -40,7 +40,7 @@ export default function SupportModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-level-2 text-text-main border-2 border-level-3 sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-level-2 text-text-main border-2 border-accent sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader className="items-center text-center">
           <div className="p-3 rounded-full bg-(--color-accent-2)/10 mb-1">
             <Heart className="text-(--color-accent-2)" size={28} />
@@ -58,7 +58,7 @@ export default function SupportModal({
         </p>
 
         {/* Donation Section */}
-        <div className="flex flex-col items-center gap-3 p-4 rounded-xl bg-level-1 border border-level-3/50 text-center hidden">
+        <div className="flex flex-col items-center gap-3 p-4 rounded-xl bg-level-1 border border-accent/50 text-center hidden">
           <p className="text-xs font-medium text-text-main/90">
             {t(
               'supportModal.thankYou',
@@ -92,7 +92,7 @@ export default function SupportModal({
               size="icon"
               onClick={handleCopy}
               title={t('supportModal.copyLink', 'Copy link')}
-              className="shrink-0 border-level-3 hover:bg-level-2 text-text-main"
+              className="shrink-0 border-accent hover:bg-level-2 text-text-main"
             >
               {copied ? (
                 <Check size={16} className="text-green-500" />
@@ -109,7 +109,7 @@ export default function SupportModal({
             onOpenChange(false)
             onFeedbackClick()
           }}
-          className="w-full border-level-3 hover:bg-level-1 text-text-main"
+          className="w-full border-accent hover:bg-level-1 text-text-main"
         >
           {t('supportModal.feedbackCta', 'Leave feedback')}
         </Button>

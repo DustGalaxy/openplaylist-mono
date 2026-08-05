@@ -84,9 +84,9 @@ function MiniTrackCardImpl({
   return (
     <div
       className={cn(
-        'group relative w-full rounded-(--rounded-std) overflow-hidden border border-level-3/20 bg-level-2 shadow-md hover:shadow-lg',
+        'group relative w-full rounded-(--rounded-std) overflow-hidden border border-accent/20 bg-level-2 shadow-md hover:shadow-lg',
         !isDragging && 'transition-all duration-300',
-        isNowPlaying && 'ring-1 ring-level-3',
+        isNowPlaying && 'ring-1 ring-accent',
       )}
     >
       <div
@@ -107,7 +107,7 @@ function MiniTrackCardImpl({
         <div className="relative z-10 w-full rounded-lg p-1 min-w-0 drop-shadow-[0_2px_3px_rgba(0,0,0,0.15)] shadow-inner dark:drop-shadow-none bg-linear-to-b from-level-1/30 via-level-1/40 to-level-1/35 backdrop-blur-[1px]">
           <div className="flex items-center gap-1.5 min-w-0">
             {group === 'vip' && (
-              <Crown className="size-3.5 text-level-3 shrink-0" />
+              <Crown className="size-3.5 text-accent shrink-0" />
             )}
             {group === 'background' && (
               <Layers className="size-3.5 text-text-placeholder shrink-0" />
@@ -141,9 +141,9 @@ function MiniTrackCardImpl({
           <div className="flex gap-1.5 items-center">
             <div
               title={t('playlist.track.date', { date: longFormatDate })}
-              className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-level-2/80 border border-level-3/15 text-text-placeholder shadow-inner cursor-help"
+              className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-level-2/80 border border-accent/15 text-text-placeholder shadow-inner cursor-help"
             >
-              <Calendar className="w-3 h-3 text-level-3/80" />
+              <Calendar className="w-3 h-3 text-accent/80" />
               <span className="text-text-secondary font-medium text-xs">
                 {formattedDate}
               </span>
@@ -151,13 +151,13 @@ function MiniTrackCardImpl({
 
             <div
               title={t('playlist.track.priority')}
-              className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-level-2/90 border border-level-3/20 shadow-inner min-w-8.75 justify-center cursor-help"
+              className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-level-2/90 border border-accent/20 shadow-inner min-w-8.75 justify-center cursor-help"
             >
               <ArrowUpRight
                 className={cn(
                   'w-3 h-3',
                   track.priority > 0
-                    ? 'text-level-3 animate-pulse'
+                    ? 'text-accent animate-pulse'
                     : 'text-text-placeholder',
                 )}
               />
@@ -187,7 +187,7 @@ function MiniTrackCardImpl({
       {/* Панель действий — тап (мобайл) / hover (десктоп) */}
       <div
         className={cn(
-          'w-full flex gap-2 justify-center items-center bg-level-1/5 shadow-inner border-t border-level-3/10 transition-all duration-300 ease-in-out px-3 overflow-hidden',
+          'w-full flex gap-2 justify-center items-center bg-level-1/5 shadow-inner border-t border-accent/10 transition-all duration-300 ease-in-out px-3 overflow-hidden',
           actionsOpen
             ? 'max-h-14 opacity-100 py-2.5'
             : 'max-h-0 opacity-0 group-hover:max-h-14 group-hover:opacity-100 group-hover:py-2.5',

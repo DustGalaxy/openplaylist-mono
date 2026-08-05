@@ -27,10 +27,10 @@ function ScrollButton({
       onClick={onClick}
       className={cn(
         'flex h-9 w-9 shrink-0 items-center justify-center rounded-(--rounded-std)',
-        'border border-level-3/35 bg-level-2/95 text-text-secondary',
+        'border border-accent/35 bg-level-2/95 text-text-secondary',
         'shadow-[0_4px_16px_rgba(0,0,0,0.35)] transition-colors',
-        'hover:border-level-3/60 hover:bg-level-2 hover:text-level-3',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-level-3/40',
+        'hover:border-accent/60 hover:bg-level-2 hover:text-accent',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40',
       )}
     >
       <Icon className="h-4 w-4" strokeWidth={2} aria-hidden />
@@ -55,9 +55,7 @@ export function HorizontalScrollStrip({
     if (!el) return
     const { scrollLeft, scrollWidth, clientWidth } = el
     setCanScrollLeft(scrollLeft > SCROLL_EPSILON)
-    setCanScrollRight(
-      scrollLeft + clientWidth < scrollWidth - SCROLL_EPSILON,
-    )
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - SCROLL_EPSILON)
   }, [])
 
   const scrollByStep = useCallback((direction: 'left' | 'right') => {

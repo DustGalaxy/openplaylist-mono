@@ -108,9 +108,9 @@ export default function HeaderSearch() {
           placeholder={t('publicSearch.searchPlaceholder', 'Search...')}
           className="
             w-full h-7 sm:h-8 pl-7 sm:pl-8 pr-6 sm:pr-7 text-xs sm:text-sm
-            bg-level-1 border border-level-3/40 rounded-full
+            bg-level-1 border border-accent/40 rounded-full
             text-text-main placeholder:text-text-placeholder
-            focus:outline-none focus:border-level-3 focus:ring-1 focus:ring-level-3/50
+            focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/50
             transition-all duration-200
           "
         />
@@ -131,18 +131,18 @@ export default function HeaderSearch() {
           className="
             fixed sm:absolute top-11 sm:top-full left-2 right-2 sm:left-0 sm:right-auto mt-1
             sm:w-80 md:w-96 max-h-96
-            bg-level-2 border border-level-3/50 rounded-md
+            bg-level-2 border border-accent/50 rounded-md
             shadow-2xl z-50 overflow-hidden flex flex-col
           "
         >
           {/* Header Bar inside Dropdown */}
-          <div className="px-3 py-2 border-b border-level-3/40 flex items-center justify-between text-xs text-text-secondary">
+          <div className="px-3 py-2 border-b border-accent/40 flex items-center justify-between text-xs text-text-secondary">
             <span>{t('publicSearch.title', 'Public Playlists')}</span>
             {query.trim() && (
               <Link
                 to="/playlists"
                 onClick={handleClear}
-                className="text-level-3 hover:underline font-medium"
+                className="text-accent hover:underline font-medium"
               >
                 {t('publicSearch.viewAll', 'View all')}
               </Link>
@@ -153,14 +153,19 @@ export default function HeaderSearch() {
           <div className="overflow-y-auto p-2 flex-1 max-h-80">
             {isLoading && (
               <div className="py-8 flex flex-col items-center justify-center gap-2 text-text-secondary">
-                <Loader2 className="size-5 animate-spin text-level-3" />
-                <span className="text-xs">{t('publicSearch.searching', 'Searching...')}</span>
+                <Loader2 className="size-5 animate-spin text-accent" />
+                <span className="text-xs">
+                  {t('publicSearch.searching', 'Searching...')}
+                </span>
               </div>
             )}
 
             {!isLoading && hasSearched && playlists.length === 0 && (
               <div className="py-8 flex flex-col items-center justify-center gap-2 text-center text-text-secondary">
-                <SearchX className="size-8 text-text-placeholder" strokeWidth={1.5} />
+                <SearchX
+                  className="size-8 text-text-placeholder"
+                  strokeWidth={1.5}
+                />
                 <p className="text-xs font-medium text-text-main">
                   {t('publicSearch.notFound', 'No playlists found')}
                 </p>
@@ -185,8 +190,8 @@ export default function HeaderSearch() {
                     <div
                       className="
                         flex size-8 shrink-0 items-center justify-center rounded-md
-                        bg-level-1 border border-level-3/40 text-level-3
-                        group-hover:bg-level-3 group-hover:text-level-1 transition-colors
+                        bg-level-1 border border-accent/40 text-accent
+                        group-hover:bg-accent group-hover:text-level-1 transition-colors
                       "
                     >
                       <ListMusic className="size-4" />
@@ -199,7 +204,9 @@ export default function HeaderSearch() {
                       </h4>
                       <p className="flex items-center gap-1 text-[11px] text-text-secondary mt-0.5">
                         <User className="size-3 shrink-0" />
-                        <span className="truncate">{playlist.owner_nickname}</span>
+                        <span className="truncate">
+                          {playlist.owner_nickname}
+                        </span>
                       </p>
                       {playlist.discription && (
                         <p className="text-[10px] text-text-placeholder line-clamp-1 mt-0.5">
@@ -214,7 +221,12 @@ export default function HeaderSearch() {
 
             {!isLoading && !hasSearched && (
               <div className="py-6 px-2 text-center text-xs text-text-placeholder">
-                <p>{t('publicSearch.initialHint', 'Enter a search term to find playlists')}</p>
+                <p>
+                  {t(
+                    'publicSearch.initialHint',
+                    'Enter a search term to find playlists',
+                  )}
+                </p>
               </div>
             )}
           </div>

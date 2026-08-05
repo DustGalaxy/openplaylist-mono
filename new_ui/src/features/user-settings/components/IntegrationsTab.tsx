@@ -82,7 +82,9 @@ export function IntegrationsTab({
       ...prev,
       [`${platform}-${platform_user_id}-bot`]: true,
     }))
-    const loadingToast = toast.loading(t('settings.integrations.connecting', 'Connecting bot...'))
+    const loadingToast = toast.loading(
+      t('settings.integrations.connecting', 'Connecting bot...'),
+    )
 
     try {
       if (await connectBot(platform, platform_user_id)) {
@@ -99,7 +101,9 @@ export function IntegrationsTab({
     } catch (error) {
       console.error(`Failed to connect bot for ${platform}:`, error)
       toast.dismiss(loadingToast)
-      toast.error(t('settings.integrations.connectFailed', 'Failed to connect bot'))
+      toast.error(
+        t('settings.integrations.connectFailed', 'Failed to connect bot'),
+      )
       setLoading((prev) => ({
         ...prev,
         [`${platform}-${platform_user_id}-bot`]: false,
@@ -115,7 +119,9 @@ export function IntegrationsTab({
       ...prev,
       [`${platform}-${platformUserId}-bot-delete`]: true,
     }))
-    const loadingToast = toast.loading(tc('common.toast.confirming', 'Confirming...'))
+    const loadingToast = toast.loading(
+      tc('common.toast.confirming', 'Confirming...'),
+    )
 
     try {
       await disconnectBot(platform, platformUserId)
@@ -127,11 +133,15 @@ export function IntegrationsTab({
         ),
       )
       toast.dismiss(loadingToast)
-      toast.success(t('settings.integrations.botDisconnected', 'Bot disconnected'))
+      toast.success(
+        t('settings.integrations.botDisconnected', 'Bot disconnected'),
+      )
     } catch (error) {
       console.error(`Failed to disconnect bot for ${platform}:`, error)
       toast.dismiss(loadingToast)
-      toast.error(t('settings.integrations.disconnectFailed', 'Failed to disconnect bot'))
+      toast.error(
+        t('settings.integrations.disconnectFailed', 'Failed to disconnect bot'),
+      )
     } finally {
       setLoading((prev) => ({
         ...prev,
@@ -145,7 +155,9 @@ export function IntegrationsTab({
       ...prev,
       [`${platform}-${platformUserId}-delete`]: true,
     }))
-    const loadingToast = toast.loading(tc('common.toast.confirming', 'Confirming...'))
+    const loadingToast = toast.loading(
+      tc('common.toast.confirming', 'Confirming...'),
+    )
 
     try {
       await deleteIntegration(platform, platformUserId)
@@ -156,11 +168,18 @@ export function IntegrationsTab({
         ),
       )
       toast.dismiss(loadingToast)
-      toast.success(t('settings.integrations.disconnected', 'Account disconnected'))
+      toast.success(
+        t('settings.integrations.disconnected', 'Account disconnected'),
+      )
     } catch (error) {
       console.error(`Failed to disconnect ${platform}:`, error)
       toast.dismiss(loadingToast)
-      toast.error(t('settings.integrations.disconnectFailed', 'Failed to disconnect account'))
+      toast.error(
+        t(
+          'settings.integrations.disconnectFailed',
+          'Failed to disconnect account',
+        ),
+      )
     } finally {
       setLoading((prev) => ({
         ...prev,
@@ -181,41 +200,50 @@ export function IntegrationsTab({
     <div className="space-y-4">
       {/* Title Header */}
       <div className="flex items-start gap-2.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-accent/40 text-accent mt-0.5">
           <Link2 className="size-5" />
         </div>
         <div>
           <Label className="text-base font-bold text-text-main">
-            {t('settings.integrations.connectedAccounts', 'Integrations & Bots')}
+            {t('settings.integrations.title', 'Integrations & Bots')}
           </Label>
           <DialogDescription className="text-xs text-text-secondary mt-0.5">
-            {t('settings.integrations.subtitle', 'Connect streaming platforms, chat bots, and external accounts.')}
+            {t(
+              'settings.integrations.subtitle',
+              'Connect streaming platforms, chat bots, and external accounts.',
+            )}
           </DialogDescription>
         </div>
       </div>
 
       {/* Dead integrations banner */}
       {deadCount > 0 && (
-        <div className="flex items-start gap-2.5 p-3 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-200 text-xs">
-          <AlertTriangle className="size-4 shrink-0 text-amber-400 mt-0.5" />
+        <div className="flex items-start gap-2.5 p-3 rounded-md border border-amber-500/60 bg-amber-500/15 text-amber-900 dark:text-amber-200 text-xs font-medium shadow-xs">
+          <AlertTriangle className="size-4 shrink-0 text-amber-500 dark:text-amber-400 mt-0.5" />
           <p className="leading-snug">
             {t('settings.integrations.deadBanner', {
               count: deadCount,
-              defaultValue: 'Some account tokens have expired. Please reconnect them.',
+              defaultValue:
+                'Some account tokens have expired. Please reconnect them.',
             })}
           </p>
         </div>
       )}
 
       {/* Card 1: Connected Accounts */}
-      <div className="p-3 sm:p-4 border border-level-3/60 rounded-md bg-level-1 space-y-3 shadow-xs">
-        <div className="flex items-center justify-between pb-1 border-b border-level-3/40">
+      <div className="p-3 sm:p-4 border border-accent/60 rounded-md bg-level-1 space-y-3 shadow-xs">
+        <div className="flex items-center justify-between pb-1 border-b border-accent/40">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main">
-            <Link2 className="size-4 text-level-3" />
-            <span>{t('settings.integrations.connectedAccounts', 'Connected Accounts')}</span>
+            <Link2 className="size-4 text-accent" />
+            <span>
+              {t(
+                'settings.integrations.connectedAccounts',
+                'Connected Accounts',
+              )}
+            </span>
           </div>
           {integrations.length > 0 && (
-            <span className="text-[10px] text-text-placeholder font-mono px-2 py-0.5 rounded-full bg-level-2 border border-level-3/40">
+            <span className="text-[10px] text-text-placeholder font-mono px-2 py-0.5 rounded-full bg-level-2 border border-accent/40">
               {integrations.length}
             </span>
           )}
@@ -255,13 +283,16 @@ export function IntegrationsTab({
               />
             ))
           ) : (
-            <div className="p-6 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center space-y-1">
+            <div className="p-6 border border-dashed border-accent/60 rounded-md bg-level-1/50 text-center space-y-1">
               <Link2 className="size-6 text-text-placeholder mx-auto" />
               <p className="text-xs font-semibold text-text-main">
                 {t('settings.integrations.empty', 'No connected accounts yet')}
               </p>
               <p className="text-[11px] text-text-secondary max-w-xs mx-auto">
-                {t('settings.integrations.emptyHintLong', 'Connect your streaming and donation platforms below.')}
+                {t(
+                  'settings.integrations.emptyHintLong',
+                  'Connect your streaming and donation platforms below.',
+                )}
               </p>
             </div>
           )}
@@ -269,10 +300,12 @@ export function IntegrationsTab({
       </div>
 
       {/* Card 2: Available Platforms */}
-      <div className="p-3 sm:p-4 border border-level-3/60 rounded-md bg-level-1 space-y-3 shadow-xs">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-level-3/40">
-          <Plus className="size-4 text-level-3" />
-          <span>{t('settings.integrations.addAccounts', 'Available Platforms')}</span>
+      <div className="p-3 sm:p-4 border border-accent/60 rounded-md bg-level-1 space-y-3 shadow-xs">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-accent/40">
+          <Plus className="size-4 text-accent" />
+          <span>
+            {t('settings.integrations.addAccounts', 'Available Platforms')}
+          </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -281,9 +314,9 @@ export function IntegrationsTab({
             return (
               <div
                 key={platform}
-                className="flex items-center gap-3 p-2.5 rounded-md bg-level-2/70 border border-level-3/40 hover:border-level-3 transition-colors"
+                className="flex items-center gap-3 p-2.5 rounded-md bg-level-2/70 border border-accent/40 hover:border-accent transition-colors"
               >
-                <div className="size-9 shrink-0 flex items-center justify-center rounded-md bg-level-1 border border-level-3/40">
+                <div className="size-9 shrink-0 flex items-center justify-center rounded-md bg-level-1 border border-accent/40">
                   {config.icon}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -293,12 +326,15 @@ export function IntegrationsTab({
                   <p className="text-[10px] text-text-secondary truncate mt-0.5">
                     {isConnected
                       ? t('settings.integrations.alreadyConnected', 'Connected')
-                      : t('settings.integrations.connectHint', 'Click to connect')}
+                      : t(
+                          'settings.integrations.connectHint',
+                          'Click to connect',
+                        )}
                   </p>
                 </div>
                 <Btn
                   onClick={() => handleConnectPlatform(platform)}
-                  className="h-7 px-2.5 bg-level-1 text-xs font-semibold text-text-main shrink-0 hover:bg-level-3 transition-colors"
+                  className="h-7 px-2.5 bg-level-1 text-xs font-semibold text-text-main shrink-0 hover:bg-accent transition-colors"
                 >
                   {isConnected
                     ? t('settings.integrations.addAnother', '+ Add another')
@@ -358,8 +394,8 @@ function IntegrationCard({
     <div
       className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-md border text-xs transition-colors ${
         isDead
-          ? 'border-amber-500/40 bg-amber-500/10'
-          : 'border-level-3/40 bg-level-2/80 hover:border-level-3'
+          ? 'border-amber-500/60 bg-amber-500/15 dark:bg-amber-500/20 shadow-xs'
+          : 'border-accent/40 bg-level-2/80 hover:border-accent'
       }`}
     >
       {/* Left: Icon & Details */}
@@ -367,8 +403,8 @@ function IntegrationCard({
         <div
           className={`size-10 shrink-0 flex items-center justify-center rounded-md border ${
             isDead
-              ? 'bg-amber-500/15 border-amber-500/40'
-              : 'bg-level-1 border-level-3/40'
+              ? 'bg-amber-500/25 border-amber-500/60 text-amber-500 dark:text-amber-300'
+              : 'bg-level-1 border-accent/40'
           }`}
         >
           {config?.icon}
@@ -380,8 +416,8 @@ function IntegrationCard({
               {config?.name || intgr.platform}
             </span>
             {isDead && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border border-amber-500/50 bg-amber-500/15 text-amber-300 text-[10px] font-medium">
-                <AlertTriangle className="size-3" />
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-amber-500/70 bg-amber-500/25 text-amber-900 dark:text-amber-200 text-[10px] font-bold shadow-xs">
+                <AlertTriangle className="size-3 text-amber-500 dark:text-amber-400" />
                 {t('settings.integrations.tokenExpired', 'Expired')}
               </span>
             )}
@@ -405,9 +441,9 @@ function IntegrationCard({
             <button
               type="button"
               onClick={onReconnect}
-              className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md border border-amber-500/50 bg-amber-500/15 text-amber-200 text-xs font-medium hover:bg-amber-500/25 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 h-7 px-3 rounded-md border border-amber-500/60 bg-amber-500/20 dark:bg-amber-500/30 text-amber-900 dark:text-amber-100 font-semibold hover:bg-amber-500/35 transition-colors cursor-pointer text-xs shadow-xs"
             >
-              <RefreshCw className="size-3" />
+              <RefreshCw className="size-3.5 text-amber-500 dark:text-amber-300" />
               <span>{t('settings.integrations.reconnect', 'Reconnect')}</span>
             </button>
             <DisconnectButton
@@ -434,8 +470,11 @@ function IntegrationCard({
                   type="button"
                   onClick={onDisconnectBot}
                   disabled={isBotDeleteLoading}
-                  title={t('settings.integrations.disconnectBot', 'Disconnect bot')}
-                  className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md border border-level-3/40 bg-level-1 hover:border-red-500/40 hover:text-red-400 transition-colors text-xs text-text-secondary disabled:opacity-50 cursor-pointer"
+                  title={t(
+                    'settings.integrations.disconnectBot',
+                    'Disconnect bot',
+                  )}
+                  className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md border border-accent/40 bg-level-1 hover:border-red-500/40 hover:text-red-400 transition-colors text-xs text-text-secondary disabled:opacity-50 cursor-pointer"
                 >
                   <BotOff className="size-3" />
                   <span>
@@ -449,7 +488,7 @@ function IntegrationCard({
               <Btn
                 onClick={onConnectBot}
                 disabled={isBotLoading}
-                className="h-7 px-2.5 bg-level-1 text-xs font-semibold text-text-main hover:bg-level-3 transition-colors"
+                className="h-7 px-2.5 bg-level-1 text-xs font-semibold text-text-main hover:bg-accent transition-colors"
               >
                 <span>
                   {isBotLoading

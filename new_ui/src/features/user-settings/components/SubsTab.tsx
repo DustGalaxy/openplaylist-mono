@@ -70,7 +70,9 @@ export const SubsTab: React.FC = () => {
         throw new Error('Failed to unsubscribe')
       }
       setSubscriptions((prev) => prev.filter((sub) => sub.id !== subId))
-      toast.success(t('notifications.manager.unsubscribed', 'Unsubscribed successfully'))
+      toast.success(
+        t('notifications.manager.unsubscribed', 'Unsubscribed successfully'),
+      )
     } catch (err) {
       console.error('Failed to unsubscribe', err)
     }
@@ -101,7 +103,9 @@ export const SubsTab: React.FC = () => {
           sub.id === activeSub.id ? { ...sub, settings: newSettings } : sub,
         ),
       )
-      toast.success(t('notifications.manager.settings_saved', 'Settings updated'))
+      toast.success(
+        t('notifications.manager.settings_saved', 'Settings updated'),
+      )
     } catch (err) {
       console.error('Failed to save settings', err)
       throw err
@@ -111,7 +115,7 @@ export const SubsTab: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex h-40 items-center justify-center text-text-secondary text-xs">
-        <Loader2 className="size-5 animate-spin mr-2 text-level-3" />
+        <Loader2 className="size-5 animate-spin mr-2 text-accent" />
         <span>
           {t('notifications.manager.loading', 'Loading subscriptions...')}
         </span>
@@ -123,7 +127,7 @@ export const SubsTab: React.FC = () => {
     <div className="space-y-4">
       {/* Title Header */}
       <div className="flex items-start gap-2.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-accent/40 text-accent mt-0.5">
           <Bell className="size-5" />
         </div>
         <div>
@@ -140,21 +144,23 @@ export const SubsTab: React.FC = () => {
       </div>
 
       {/* Main Card Container */}
-      <div className="p-3 sm:p-4 border border-level-3/60 rounded-md bg-level-1 space-y-3 shadow-xs">
-        <div className="flex items-center justify-between pb-1 border-b border-level-3/40">
+      <div className="p-3 sm:p-4 border border-accent/60 rounded-md bg-level-1 space-y-3 shadow-xs">
+        <div className="flex items-center justify-between pb-1 border-b border-accent/40">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main">
-            <Bell className="size-4 text-level-3" />
-            <span>{t('notifications.manager.subscriptions', 'Active Subscriptions')}</span>
+            <Bell className="size-4 text-accent" />
+            <span>
+              {t('notifications.manager.subscriptions', 'Active Subscriptions')}
+            </span>
           </div>
           {subscriptions.length > 0 && (
-            <span className="text-[10px] text-text-placeholder font-mono px-2 py-0.5 rounded-full bg-level-2 border border-level-3/40">
+            <span className="text-[10px] text-text-placeholder font-mono px-2 py-0.5 rounded-full bg-level-2 border border-accent/40">
               {subscriptions.length}
             </span>
           )}
         </div>
 
         {subscriptions.length === 0 ? (
-          <div className="p-6 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center space-y-1">
+          <div className="p-6 border border-dashed border-accent/60 rounded-md bg-level-1/50 text-center space-y-1">
             <Bell className="size-6 text-text-placeholder mx-auto" />
             <p className="text-xs font-semibold text-text-main">
               {t('notifications.manager.empty', 'No active subscriptions yet')}
@@ -165,11 +171,11 @@ export const SubsTab: React.FC = () => {
             {subscriptions.map((sub) => (
               <div
                 key={sub.id}
-                className="flex items-center justify-between gap-3 p-2.5 rounded-md bg-level-2/80 border border-level-3/40 hover:border-level-3 transition-colors text-xs"
+                className="flex items-center justify-between gap-3 p-2.5 rounded-md bg-level-2/80 border border-accent/40 hover:border-accent transition-colors text-xs"
               >
                 {/* Left: Icon & Info */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="size-9 shrink-0 flex items-center justify-center rounded-md bg-level-1 border border-level-3/40">
+                  <div className="size-9 shrink-0 flex items-center justify-center rounded-md bg-level-1 border border-accent/40">
                     {sub.target_type === 'playlist' ? (
                       <ListMusic className="size-4 text-emerald-400" />
                     ) : (
@@ -181,7 +187,7 @@ export const SubsTab: React.FC = () => {
                       <span className="font-semibold text-text-main truncate max-w-40 sm:max-w-60">
                         {sub.target_name}
                       </span>
-                      <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-level-1 border border-level-3/40 text-text-secondary">
+                      <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-level-1 border border-accent/40 text-text-secondary">
                         {sub.target_type === 'playlist'
                           ? t('notifications.manager.type_playlist', 'Playlist')
                           : t('notifications.manager.type_user', 'User')}
@@ -191,15 +197,19 @@ export const SubsTab: React.FC = () => {
                     <div className="flex items-center gap-2 text-[11px] text-text-secondary mt-0.5">
                       {sub.target_type === 'playlist' && sub.target_owner && (
                         <span>
-                          {t('notifications.manager.author', 'Author')}: {sub.target_owner}
+                          {t('notifications.manager.author', 'Author')}:{' '}
+                          {sub.target_owner}
                         </span>
                       )}
                       <span>
                         {sub.settings.allowed_event_types.length === 0 ? (
-                          <span className="text-amber-400 font-medium">🚫 Muted</span>
+                          <span className="text-amber-400 font-medium">
+                            🚫 Muted
+                          </span>
                         ) : (
                           <span className="text-emerald-400 font-medium">
-                            🔔 {sub.settings.allowed_event_types.length} triggers
+                            🔔 {sub.settings.allowed_event_types.length}{' '}
+                            triggers
                           </span>
                         )}
                       </span>
@@ -212,10 +222,12 @@ export const SubsTab: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveSub(sub)}
-                    className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md bg-level-1 border border-level-3/40 hover:bg-level-3 transition-colors text-xs font-semibold text-text-main cursor-pointer"
+                    className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md bg-level-1 border border-accent/40 hover:bg-accent transition-colors text-xs font-semibold text-text-main cursor-pointer"
                   >
-                    <SlidersHorizontal className="size-3 text-level-3" />
-                    <span>{t('notifications.manager.btn_configure', 'Configure')}</span>
+                    <SlidersHorizontal className="size-3 text-accent" />
+                    <span>
+                      {t('notifications.manager.btn_configure', 'Configure')}
+                    </span>
                   </button>
 
                   <Tooltip>
@@ -230,9 +242,14 @@ export const SubsTab: React.FC = () => {
                     </TooltipTrigger>
                     <TooltipContent
                       side="top"
-                      className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+                      className="bg-level-2 text-text-main border-accent/40 border text-xs"
                     >
-                      <p>{t('notifications.manager.btn_unsubscribe_title', 'Unsubscribe')}</p>
+                      <p>
+                        {t(
+                          'notifications.manager.btn_unsubscribe_title',
+                          'Unsubscribe',
+                        )}
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </div>

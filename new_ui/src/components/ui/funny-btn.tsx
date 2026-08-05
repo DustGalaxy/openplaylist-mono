@@ -50,14 +50,14 @@ const UpDownBtn = ({
       <button
         type="button" // ОБЯЗАТЕЛЬНО: предотвращает сабмит формы
         onClick={() => handleAction('up')}
-        className="h-full w-full bg-level-2 pl-2 pr-2 hover:bg-level-3 active:bg-level-3/50 cursor-pointer flex items-center justify-center text-xs font-semibold select-none"
+        className="h-full w-full bg-level-2 pl-2 pr-2 hover:bg-accent active:bg-accent/50 cursor-pointer flex items-center justify-center text-xs font-semibold select-none"
       >
         ↑
       </button>
       <button
         type="button" // ОБЯЗАТЕЛЬНО: предотвращает сабмит формы
         onClick={() => handleAction('down')}
-        className="h-full w-full bg-level-2 pl-2 pr-2 hover:bg-level-3 active:bg-level-3/50 cursor-pointer flex items-center justify-center text-xs font-semibold select-none"
+        className="h-full w-full bg-level-2 pl-2 pr-2 hover:bg-accent active:bg-accent/50 cursor-pointer flex items-center justify-center text-xs font-semibold select-none"
       >
         ↓
       </button>

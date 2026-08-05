@@ -155,7 +155,7 @@ const TabBasic = () => {
     <div className="space-y-4">
       {/* Main Header */}
       <div className="flex items-start gap-2.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-accent/40 text-accent mt-0.5">
           <Settings className="size-5" />
         </div>
         <div>
@@ -172,9 +172,9 @@ const TabBasic = () => {
       </div>
 
       {/* Card 1: Details & Access */}
-      <div className="p-3 border border-level-3/60 rounded-md bg-level-1 space-y-3 shadow-xs">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-level-3/40">
-          <PencilLine className="size-4 text-level-3" />
+      <div className="p-3 border border-accent/60 rounded-md bg-level-1 space-y-3 shadow-xs">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-accent/40">
+          <PencilLine className="size-4 text-accent" />
           <span>
             {t('playlistSettings.details.title', 'Playlist Details & Access')}
           </span>
@@ -209,7 +209,7 @@ const TabBasic = () => {
             }}
             placeholder={t('playlistSettings.details.namePlaceholder')}
             maxLength={MAX_NAME_LENGTH}
-            className="bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50"
+            className="bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-accent/50"
           />
         </div>
 
@@ -238,7 +238,7 @@ const TabBasic = () => {
             placeholder={t('playlistSettings.details.descriptionPlaceholder')}
             maxLength={MAX_DESCRIPTION_LENGTH}
             rows={2}
-            className="bg-level-2 border-0 p-2 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50 resize-none min-h-[55px]"
+            className="bg-level-2 border-0 p-2 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-accent/50 resize-none min-h-[55px]"
           />
         </div>
 
@@ -321,9 +321,9 @@ const TabBasic = () => {
       </div>
 
       {/* Card 2: Execution Rules, Widget & Sources */}
-      <div className="p-3 border border-level-3/60 rounded-md bg-level-1 space-y-3 shadow-xs">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-level-3/40">
-          <Sliders className="size-4 text-level-3" />
+      <div className="p-3 border border-accent/60 rounded-md bg-level-1 space-y-3 shadow-xs">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-accent/40">
+          <Sliders className="size-4 text-accent" />
           <span>
             {t('playlistSettings.basic.priorityAndWidget', 'Priority & Widget')}
           </span>
@@ -442,13 +442,13 @@ const TabBasic = () => {
 
       {/* Background Tracks (Stream mode) */}
       {plstMode === 'stream' && (
-        <div className="pt-2 border-t border-level-3/40 space-y-2">
+        <div className="pt-2 border-t border-accent/40 space-y-2">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main">
-            <Music className="size-3.5 text-level-3" />
+            <Music className="size-3.5 text-accent" />
             <span>{t('playlistSettings.basic.backgroundTracks')}</span>
           </div>
           {playlist.track_data.length === 0 ? (
-            <div className="p-3 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center">
+            <div className="p-3 border border-dashed border-accent/60 rounded-md bg-level-1/50 text-center">
               <p className="text-xs text-text-secondary">
                 {t('playlistSettings.basic.backgroundTracksEmpty')}
               </p>
@@ -478,7 +478,7 @@ const TabBasic = () => {
                     <Checkbox
                       checked={isBackground}
                       onCheckedChange={() => {}}
-                      className="size-4 shrink-0 rounded border-level-3 cursor-pointer"
+                      className="size-4 shrink-0 rounded border-accent cursor-pointer"
                     />
                     <span className="font-medium text-text-main truncate">
                       {track.title}
@@ -492,20 +492,20 @@ const TabBasic = () => {
       )}
 
       {/* External Sources */}
-      <div className="pt-2 border-t border-level-3/40 space-y-2">
+      <div className="pt-2 border-t border-accent/40 space-y-2">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main">
-          <Share2 className="size-3.5 text-level-3" />
+          <Share2 className="size-3.5 text-accent" />
           <span>{t('playlistSettings.basic.externalSources')}</span>
         </div>
 
         {isLoadingIntegrations ? (
-          <div className="p-3 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center">
+          <div className="p-3 border border-dashed border-accent/60 rounded-md bg-level-1/50 text-center">
             <p className="text-xs text-text-secondary">
               {t('playlistSettings.basic.integrationsLoading')}
             </p>
           </div>
         ) : integrations.length === 0 ? (
-          <div className="p-3 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center">
+          <div className="p-3 border border-dashed border-accent/60 rounded-md bg-level-1/50 text-center">
             <p className="text-xs text-text-secondary">
               {t('playlistSettings.basic.integrationsEmpty')}
             </p>
@@ -544,11 +544,11 @@ const TabBasic = () => {
                         integration.platform_user_id,
                       )
                     }
-                    className="size-4 shrink-0 rounded border-level-3 cursor-pointer"
+                    className="size-4 shrink-0 rounded border-accent cursor-pointer"
                   />
 
                   <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <div className="flex size-6 shrink-0 items-center justify-center rounded bg-level-1 text-level-3">
+                    <div className="flex size-6 shrink-0 items-center justify-center rounded bg-level-1 text-accent">
                       {getPlatformIcon(integration.platform)}
                     </div>
                     <div className="flex flex-col min-w-0">

@@ -30,7 +30,7 @@ const TabBlock = () => {
     <div className="space-y-5">
       {/* Title Header */}
       <div className="flex items-start gap-2.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-accent/40 text-accent mt-0.5">
           <Ban className="size-5" />
         </div>
         <div>
@@ -48,9 +48,9 @@ const TabBlock = () => {
 
       {/* Block User Section */}
       <div className="space-y-3">
-        <div className="p-2.5 sm:p-3 border border-level-3/60 rounded-md bg-level-1 space-y-2.5 shadow-xs">
+        <div className="p-2.5 sm:p-3 border border-accent/60 rounded-md bg-level-1 space-y-2.5 shadow-xs">
           <div className="text-xs font-semibold text-text-main flex items-center gap-1.5">
-            <UserX className="size-4 text-level-3" />
+            <UserX className="size-4 text-accent" />
             <span>{t('playlistSettings.block.blockUser', 'Block User')}</span>
           </div>
 
@@ -93,7 +93,7 @@ const TabBlock = () => {
                   placeholder={t('playlistSettings.block.selectTriggerType')}
                 />
               </SelectTrigger>
-              <SelectContent className="bg-level-2  text-text-main border-level-3/40 text-xs">
+              <SelectContent className="bg-level-2  text-text-main border-accent/40 text-xs">
                 <SelectItem
                   value="USER_NAME"
                   className="focus:bg-level-1 text-text-main focus:text-text-main"
@@ -116,7 +116,7 @@ const TabBlock = () => {
                   placeholder={t('playlistSettings.block.selectPlatform')}
                 />
               </SelectTrigger>
-              <SelectContent className="bg-level-2 border-level-3/40  text-text-main text-xs">
+              <SelectContent className="bg-level-2 border-accent/40  text-text-main text-xs">
                 {Object.entries(RequestPlatform).map(([key, val]) => (
                   <SelectItem
                     key={key}
@@ -137,7 +137,7 @@ const TabBlock = () => {
                 'playlistSettings.block.enterNicknameOrId',
                 'Enter nickname or ID...',
               )}
-              className="flex-1 bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50"
+              className="flex-1 bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-accent/50"
             />
 
             {/* Submit Button */}
@@ -155,7 +155,7 @@ const TabBlock = () => {
         {playlist.block_list.length > 0 ? (
           <BlockList list={playlist.block_list} type="user" />
         ) : (
-          <div className="p-3 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center">
+          <div className="p-3 border border-dashed border-accent/60 rounded-md bg-level-1/50 text-center">
             <p className="text-xs text-text-secondary">
               {t('playlistSettings.block.emptyUsers', 'No blocked users.')}
             </p>
@@ -164,10 +164,10 @@ const TabBlock = () => {
       </div>
 
       {/* Block Track Section */}
-      <div className="space-y-3 pt-2 border-t border-level-3/40">
-        <div className="p-2.5 sm:p-3 border border-level-3/60 rounded-md bg-level-1 space-y-2.5 shadow-xs">
+      <div className="space-y-3 pt-2 border-t border-accent/40">
+        <div className="p-2.5 sm:p-3 border border-accent/60 rounded-md bg-level-1 space-y-2.5 shadow-xs">
           <div className="text-xs font-semibold text-text-main flex items-center gap-1.5">
-            <Video className="size-4 text-level-3" />
+            <Video className="size-4 text-accent" />
             <span>
               {t(
                 'playlistSettings.block.blockTrackYoutubeLabel',
@@ -215,7 +215,7 @@ const TabBlock = () => {
                 'playlistSettings.block.blockedVideoId',
                 'e.g. dQw4w9WgXcQ',
               )}
-              className="flex-1 bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm font-mono focus-visible:ring-1 focus-visible:ring-level-3/50"
+              className="flex-1 bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm font-mono focus-visible:ring-1 focus-visible:ring-accent/50"
             />
             <Btn
               type="submit"
@@ -231,7 +231,7 @@ const TabBlock = () => {
         {playlist.track_black_list.length > 0 ? (
           <BlockList list={playlist.track_black_list} type="track" />
         ) : (
-          <div className="p-3 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center">
+          <div className="p-3 border border-dashed border-accent/60 rounded-md bg-level-1/50 text-center">
             <p className="text-xs text-text-secondary">
               {t(
                 'playlistSettings.block.emptyTracks',

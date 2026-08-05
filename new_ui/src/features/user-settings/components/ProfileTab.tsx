@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { DialogDescription } from '@/components/ui/dialog'
+import { StatsPrivacySettingsSection } from './StatsPrivacySettingsSection'
 import {
   Tooltip,
   TooltipContent,
@@ -234,9 +235,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
       setNewSocialLink({ platform: '', url: '' })
 
       toast.dismiss(loadingToast)
-      toast.success(
-        t('settings.profile.linkAddedSuccess', 'Social link added'),
-      )
+      toast.success(t('settings.profile.linkAddedSuccess', 'Social link added'))
     } catch (error) {
       const errorMsg = getApiErrorMessage(
         error,
@@ -323,7 +322,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
     <div className="space-y-4">
       {/* Title Header */}
       <div className="flex items-start gap-2.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-accent/40 text-accent mt-0.5">
           <User className="size-5" />
         </div>
         <div>
@@ -340,9 +339,9 @@ export function ProfileTab({ user }: ProfileTabProps) {
       </div>
 
       {/* Card 1: User Info & Bio */}
-      <div className="p-3 sm:p-4 border border-level-3/60 rounded-md bg-level-1 space-y-4 shadow-xs">
+      <div className="p-3 sm:p-4 border border-accent/60 rounded-md bg-level-1 space-y-4 shadow-xs">
         {/* User Overview Bar */}
-        <div className="flex items-center gap-3.5 pb-3 border-b border-level-3/40">
+        <div className="flex items-center gap-3.5 pb-3 border-b border-accent/40">
           <div className="rounded-full size-14 bg-gradient-to-br from-[var(--color-accent-1)] to-[var(--color-accent-2)] p-0.5 shrink-0 shadow-md">
             <div className="w-full h-full rounded-full bg-level-2 overflow-hidden flex items-center justify-center">
               {user?.avatar_url ? (
@@ -397,7 +396,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
               'settings.profile.bioPlaceholder',
               'Tell users about yourself...',
             )}
-            className="bg-level-2 border-0 p-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50 resize-none min-h-[70px]"
+            className="bg-level-2 border-0 p-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-accent/50 resize-none min-h-[70px]"
           />
         </div>
 
@@ -426,7 +425,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
           <Btn
             onClick={handleSaveProfile}
             disabled={!profileDirty || profileSaving}
-            className="h-8 px-4 bg-level-2 text-xs font-semibold text-text-main hover:bg-level-3 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+            className="h-8 px-4 bg-level-2 text-xs font-semibold text-text-main hover:bg-accent transition-colors disabled:opacity-50 flex items-center gap-1.5"
           >
             <Save className="size-3.5" />
             <span>
@@ -439,9 +438,9 @@ export function ProfileTab({ user }: ProfileTabProps) {
       </div>
 
       {/* Card 2: Social Links */}
-      <div className="p-3 sm:p-4 border border-level-3/60 rounded-md bg-level-1 space-y-3.5 shadow-xs">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-level-3/40">
-          <Share2 className="size-4 text-level-3" />
+      <div className="p-3 sm:p-4 border border-accent/60 rounded-md bg-level-1 space-y-3.5 shadow-xs">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-accent/40">
+          <Share2 className="size-4 text-accent" />
           <span>
             {t('settings.profile.addSocialLinks', 'Social Media Links')}
           </span>
@@ -460,11 +459,11 @@ export function ProfileTab({ user }: ProfileTabProps) {
               )}
               value={newSocialLink.platform}
               onChange={(e) => handlePlatformChange(e.target.value)}
-              className="bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50"
+              className="bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-accent/50"
               autoComplete="off"
             />
             {platformSuggestions.length > 0 && newSocialLink.platform && (
-              <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-level-2 border border-level-3/50 rounded-md shadow-lg max-h-40 overflow-y-auto p-1">
+              <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-level-2 border border-accent/50 rounded-md shadow-lg max-h-40 overflow-y-auto p-1">
                 {platformSuggestions.map((platform) => (
                   <button
                     key={platform}
@@ -487,7 +486,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
               placeholder={t('settings.profile.urlPlaceholder', 'https://...')}
               value={newSocialLink.url}
               onChange={(e) => handleUrlChange(e.target.value)}
-              className="bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-level-3/50"
+              className="bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-accent/50"
             />
           </div>
 
@@ -495,7 +494,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
           <Btn
             onClick={handleAddSocialLink}
             disabled={uiState.socialLoading.add || false}
-            className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main shrink-0 flex items-center gap-1 hover:bg-level-3 transition-colors disabled:opacity-50"
+            className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main shrink-0 flex items-center gap-1 hover:bg-accent transition-colors disabled:opacity-50"
           >
             <Plus className="size-3.5" />
             <span>
@@ -512,7 +511,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
             {Object.entries(socialLinks).map(([platform, url]) => (
               <div
                 key={platform}
-                className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-level-2/80 border border-level-3/40 hover:border-level-3 transition-all text-xs"
+                className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-level-2/80 border border-accent/40 hover:border-accent transition-all text-xs"
               >
                 <a
                   href={url}
@@ -543,7 +542,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
                   </TooltipTrigger>
                   <TooltipContent
                     side="top"
-                    className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+                    className="bg-level-2 text-text-main border-accent/40 border text-xs"
                   >
                     <p>
                       {t('settings.profile.removePlatform', {
@@ -557,7 +556,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
             ))}
           </div>
         ) : (
-          <div className="p-3 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center">
+          <div className="p-3 border border-dashed border-accent/60 rounded-md bg-level-1/50 text-center">
             <p className="text-xs text-text-secondary">
               {t(
                 'settings.profile.noSocialLinksYet',
@@ -567,6 +566,9 @@ export function ProfileTab({ user }: ProfileTabProps) {
           </div>
         )}
       </div>
+
+      {/* Card 2.5: Statistics Privacy Settings */}
+      <StatsPrivacySettingsSection />
 
       {/* Card 3: Danger Zone */}
       <div className="p-3 sm:p-4 border border-red-500/30 rounded-md bg-red-500/5 space-y-3 shadow-xs">
@@ -595,7 +597,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
       {/* Delete Link Confirmation Dialog */}
       {uiState.deleteConfirmation && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="p-4 sm:p-5 max-w-sm w-full bg-level-2 border border-level-3/50 rounded-md shadow-2xl space-y-3">
+          <div className="p-4 sm:p-5 max-w-sm w-full bg-level-2 border border-accent/50 rounded-md shadow-2xl space-y-3">
             <h3 className="text-sm font-bold text-text-main">
               {t('settings.profile.confirmDeletion', 'Remove Social Link')}
             </h3>
@@ -614,7 +616,7 @@ export function ProfileTab({ user }: ProfileTabProps) {
                     deleteConfirmation: null,
                   }))
                 }
-                className="h-8 px-3 rounded-md bg-level-1 hover:bg-level-3 transition-colors text-xs font-semibold text-text-main cursor-pointer"
+                className="h-8 px-3 rounded-md bg-level-1 hover:bg-accent transition-colors text-xs font-semibold text-text-main cursor-pointer"
               >
                 {t('common.cancel', 'Cancel')}
               </button>

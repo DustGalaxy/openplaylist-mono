@@ -76,7 +76,7 @@ const DDNotificationList = () => {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        className="w-90 max-h-120 border-level-3 bg-level-2 rounded-md border text-text-main shadow-md p-0 z-99 overflow-y-scroll"
+        className="w-90 max-h-120 border-accent bg-level-2 rounded-md border text-text-main shadow-md p-0 z-99 overflow-y-scroll"
         align="end"
         forceMount
       >
@@ -107,7 +107,7 @@ const DDNotificationList = () => {
             <Settings2 className="size-5" />
           </button>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-level-3 m-0 p-0" />
+        <DropdownMenuSeparator className="bg-accent m-0 p-0" />
         {notifications.length > 0 ? (
           notifications.map((notification: ReadNotification) => {
             if (hideRead && notification.is_read) {

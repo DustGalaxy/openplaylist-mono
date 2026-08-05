@@ -217,7 +217,7 @@ export default function WarningModal({
           <TriangleAlert className="size-4" />
         </Btn>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-106.25 bg-level-1 border-level-3 text-text-main overflow-scroll">
+      <DialogContent className="sm:max-w-106.25 bg-level-1 border-accent text-text-main overflow-scroll">
         <DialogHeader>
           <DialogTitle className="text-xl">
             {t('playlist.report.title')}

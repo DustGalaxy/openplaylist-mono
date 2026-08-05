@@ -34,9 +34,13 @@ const ChatRoles = ({
   return (
     <div className="gap-1 flex flex-col">
       <Label className=" text-xl">{t('playlistSettings.priority.title')}</Label>
-      <DialogDescription>{t('playlistSettings.priority.costHelp')}</DialogDescription>
+      <DialogDescription>
+        {t('playlistSettings.priority.costHelp')}
+      </DialogDescription>
       <div className="grid grid-cols-[auto_1fr] gap-2">
-        <Label className=" text-lg">{t('playlistSettings.priority.costMode')}</Label>
+        <Label className=" text-lg">
+          {t('playlistSettings.priority.costMode')}
+        </Label>
         <RadioGroup
           defaultValue={costMode}
           className="flex gap-0 justify-end"
@@ -90,13 +94,15 @@ const ChatRoles = ({
         <p>{t('playlistSettings.priority.costHelpAdd')}</p>
       </DialogDescription>
 
-      {/* <div className="h-[1px] bg-level-3" /> */}
+      {/* <div className="h-[1px] bg-accent" /> */}
 
       {/* Cost settings */}
       <Accordion type="multiple">
         <AccordionItem value="twitch-costs">
           <AccordionTrigger>
-            <Label className=" text-xl">{t('playlistSettings.priority.twitch')}</Label>
+            <Label className=" text-xl">
+              {t('playlistSettings.priority.twitch')}
+            </Label>
           </AccordionTrigger>
           <AccordionContent>
             <TwitchPriority
@@ -108,10 +114,12 @@ const ChatRoles = ({
           </AccordionContent>
         </AccordionItem>
 
-        <div className="h-[1px] bg-level-3" />
+        <div className="h-[1px] bg-accent" />
         <AccordionItem value="donations-costs">
           <AccordionTrigger>
-            <Label className=" text-xl">{t('playlistSettings.priority.donations')}</Label>
+            <Label className=" text-xl">
+              {t('playlistSettings.priority.donations')}
+            </Label>
           </AccordionTrigger>
           <AccordionContent>
             <div className="flex justify-between gap-2 items-center">
@@ -134,7 +142,9 @@ const ChatRoles = ({
                     <path d="M12 4L12 6M12 18L12 20M15.5 8C15.1666667 6.66666667 14 6 12 6 9 6 8.5 7.95652174 8.5 9 8.5 13.140327 15.5 10.9649412 15.5 15 15.5 16.0434783 15 18 12 18 10 18 8.83333333 17.3333333 8.5 16"></path>{' '}
                   </g>
                 </svg>
-                <Label className=" text-lg">{t('playlistSettings.priority.donater')}</Label>
+                <Label className=" text-lg">
+                  {t('playlistSettings.priority.donater')}
+                </Label>
               </div>
 
               <Input
@@ -149,7 +159,7 @@ const ChatRoles = ({
                   })
                   canRequest.current = true
                 }}
-                className="border-level-3 border-1 w-20"
+                className="border-accent border-1 w-20"
               />
             </div>
           </AccordionContent>

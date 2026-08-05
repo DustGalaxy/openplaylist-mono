@@ -68,16 +68,16 @@ export function BotSettingsModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-          className="w-9 h-9 flex items-center justify-center rounded-(--rounded-std) border border-white/10 bg-level-1/50 text-text-secondary hover:text-text-main hover:border-level-3/30 transition-all"
+          className="w-9 h-9 flex items-center justify-center rounded-(--rounded-std) border border-white/10 bg-level-1/50 text-text-secondary hover:text-text-main hover:border-accent/30 transition-all"
           aria-label={t('botSettings.title')}
         >
           <Settings size={16} />
         </button>
       </DialogTrigger>
 
-      <DialogContent className="bg-level-2 border border-level-3/35 rounded-[11px] p-0 gap-0 max-w-[480px]">
+      <DialogContent className="bg-level-2 border border-accent/35 rounded-[11px] p-0 gap-0 max-w-[480px]">
         <DialogHeader className="flex flex-row items-center gap-3 px-6 pt-5 pb-4 border-b border-white/5">
-          <div className="w-10 h-10 flex items-center justify-center bg-level-1 border border-level-3/30 rounded-[9px] shrink-0">
+          <div className="w-10 h-10 flex items-center justify-center bg-level-1 border border-accent/30 rounded-[9px] shrink-0">
             {platformIcon}
           </div>
           <div>
@@ -143,7 +143,7 @@ function FieldRenderer({ field, value, onChange }: FieldRendererProps) {
           onChange={(e) => onChange(e.target.value)}
           maxLength={field.maxLength}
           placeholder={field.placeholder}
-          className="bg-level-1 border border-white/8 rounded-[9px] px-3.5 py-2.5 text-sm text-text-main outline-none focus:border-level-3/50 transition-colors"
+          className="bg-level-1 border border-white/8 rounded-[9px] px-3.5 py-2.5 text-sm text-text-main outline-none focus:border-accent/50 transition-colors"
         />
         {field.hintKey && (
           <p className="text-[11px] text-text-placeholder">
@@ -171,7 +171,7 @@ function FieldRenderer({ field, value, onChange }: FieldRendererProps) {
         </div>
         <div
           className={`w-9 h-5 rounded-full relative transition-colors shrink-0 ${
-            checked ? 'bg-level-3/80' : 'bg-white/15'
+            checked ? 'bg-accent/80' : 'bg-white/15'
           }`}
         >
           <div

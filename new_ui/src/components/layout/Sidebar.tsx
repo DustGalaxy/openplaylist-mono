@@ -1,6 +1,12 @@
 // src/components/layout/Sidebar.tsx
 import { Link, useLocation } from '@tanstack/react-router'
-import { AudioLines, FolderBookmark, House, X } from 'lucide-react'
+import {
+  AudioLines,
+  ChartColumnIncreasing,
+  FolderBookmark,
+  House,
+  X,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useIsPlaybackActive } from '@/stores/playbackStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -43,6 +49,15 @@ export default function Sidebar() {
           {t('sidebar.Saves', 'Saves')}
         </span>
       </Link>
+      <Link
+        to={`/statistic`}
+        className={`flex gap-3 ${location.pathname === '/statistic' && 'bg-level-1'} m-1 p-2 items-center hover:bg-level-1 rounded-sm`}
+      >
+        <ChartColumnIncreasing className="text-text-main" />
+        <span className="text-sm text-text-secondary uppercase tracking-wide">
+          {t('sidebar.Statistics', 'Statistics')}
+        </span>
+      </Link>
       <div className="flex w-full items-center justify-between px-3 py-3 mb-1.5">
         <div title={t('dashboard.tooltip.addPlaylist')} className="w-full">
           <AddPlaylistModal className="w-full" />
@@ -60,7 +75,7 @@ export default function Sidebar() {
     <div>
       <div className="sm:hidden">
         <Drawer direction="left" open={open} onOpenChange={setOpen}>
-          <DrawerContent className="bg-level-2 text-text-main border-level-3">
+          <DrawerContent className="bg-level-2 text-text-main border-accent">
             <div
               className=" text-text-secondary px-3 py-2"
               onClick={() => setOpen(!open)}
@@ -73,7 +88,7 @@ export default function Sidebar() {
         </Drawer>
       </div>
 
-      <aside className="hidden sm:flex w-55 h-full shrink-0 border-r border-level-3/40 bg-level-2 flex-col overflow-y-auto">
+      <aside className="hidden sm:flex w-55 h-full shrink-0 border-r border-accent/40 bg-level-2 flex-col overflow-y-auto">
         {navContent}
       </aside>
     </div>
@@ -97,7 +112,7 @@ function SidebarItem({ id, name }: { id: string; name: string }) {
           : 'text-text-secondary hover:bg-level-1/60',
       )}
     >
-      {isPlaying && <AudioLines size={14} className="text-level-3 shrink-0" />}
+      {isPlaying && <AudioLines size={14} className="text-accent shrink-0" />}
       <span className="truncate">{name}</span>
     </Link>
   )

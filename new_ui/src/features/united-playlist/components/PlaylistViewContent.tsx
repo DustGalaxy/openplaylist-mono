@@ -145,7 +145,7 @@ function PlaylistViewInner() {
                         !playlist.sync_playback_position,
                       )
                     }
-                    className="size-8 rounded-sm"
+                    className="size-8 p-1 rounded-sm"
                   >
                     <RadioTower className="size-5" />
                   </Btn>
@@ -227,7 +227,7 @@ function PlaylistViewInner() {
         </div>
 
         {(showConsole || showContentSettings) && (
-          <div className="h-full ring-1 ring-level-3 p-1 rounded-md">
+          <div className="h-full ring-1 ring-accent p-1 rounded-md">
             {showConsole && isOwnerLike && <LogPanel />}
             {showContentSettings && (
               <div className="flex flex-col gap-2 sm:gap-3">

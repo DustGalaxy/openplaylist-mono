@@ -124,7 +124,118 @@
   },
   "sidebar": {
     "Home": "Home",
-    "Saves": "Saves"
+    "Saves": "Saves",
+    "Statistics": "Statistics"
+  },
+  "stats": {
+    "eyebrow": "Analytics & Insights",
+    "title": "Order Statistics",
+    "subtitle": "Track order counts, listening durations, top requested tracks, and audience metrics.",
+    "totalOrders": "Total Orders",
+    "totalDuration": "Total Listening Time",
+    "activePlatforms": "Active Platforms",
+    "duration": "Duration",
+    "total": "Total",
+    "ordersCount": "orders",
+    "anonymous": "Anonymous",
+    "topFavoriteTrack": "Favorite Track",
+    "tabs": {
+      "myStats": "My Statistics",
+      "globalStats": "Global Statistics"
+    },
+    "subtabs": {
+      "incoming": "Incoming",
+      "outgoing": "Outgoing"
+    },
+    "periods": {
+      "24h": "24 hours",
+      "7d": "7 days",
+      "30d": "30 days",
+      "all_time": "All time"
+    },
+    "kpi": {
+      "totalOrdersIncoming": "Incoming Orders",
+      "incomingSubtitle": "Orders submitted to your playlists",
+      "totalOrdersOutgoing": "Outgoing Orders",
+      "outgoingSubtitle": "Orders sent to streamers",
+      "totalDuration": "Listening Duration",
+      "durationSubtitle": "Total duration of ordered tracks",
+      "autoBlocked": "Auto-Blocked Orders",
+      "blockedSubtitle": "Blocked by blacklists & rules",
+      "globalOrders": "Platform Total Orders",
+      "globalOrdersSubtitle": "Orders processed on OpenPlaylist",
+      "globalDuration": "Platform Listening Time",
+      "globalDurationSubtitle": "Combined music playback duration"
+    },
+    "topTracks": {
+      "title": "Top Tracks",
+      "total": "tracks",
+      "empty": "No track statistics available",
+      "orders": "orders",
+      "playOnYt": "Watch on YouTube",
+      "openLink": "Open link",
+      "incomingTitle": "Most Requested Tracks",
+      "outgoingTitle": "Your Most Ordered Tracks",
+      "globalTitle": "Most Popular Platform Tracks",
+      "popularNow": "Most Popular Tracks"
+    },
+    "topStreamers": {
+      "title": "Top Streamers"
+    },
+    "topRequesters": {
+      "title": "Top Requesters"
+    },
+    "entities": {
+      "total": "users",
+      "empty": "No user statistics available"
+    },
+    "platformBreakdown": {
+      "title": "Platform Breakdown",
+      "empty": "No platform data available"
+    },
+    "statusBreakdown": {
+      "title": "Order Statuses",
+      "empty": "No status data available"
+    },
+    "status": {
+      "listened": "Listened",
+      "inPlaylist": "In playlist",
+      "skipped": "Skipped",
+      "removed": "Removed"
+    },
+    "ownerVsViewer": {
+      "title": "Owner vs Viewers",
+      "empty": "No audience data available",
+      "owner": "Owner",
+      "viewer": "Viewers"
+    },
+    "globalBanner": {
+      "badge": "Live Platform Statistics",
+      "title": "OpenPlaylist Analytics"
+    },
+    "userWidget": {
+      "title": "Public Statistics"
+    },
+    "privacy": {
+      "title": "Statistics Privacy Settings",
+      "subtitle": "Control which statistics are visible on your public user profile.",
+      "success": "Privacy settings updated successfully",
+      "error": "Failed to update privacy settings",
+      "showOutgoing": "Show Outgoing Orders",
+      "showOutgoingDesc": "Allow others to view orders sent to streamers.",
+      "showIncoming": "Show Incoming Orders",
+      "showIncomingDesc": "Allow others to view orders in your playlists.",
+      "showTopTracks": "Show Top Tracks",
+      "showTopTracksDesc": "Display your most ordered and requested tracks.",
+      "showTopStreamers": "Show Top Streamers",
+      "showTopStreamersDesc": "Display streamers you order to most frequently.",
+      "showTopRequesters": "Show Top Requesters",
+      "showTopRequestersDesc": "Display top viewers ordering in your playlists.",
+      "showDonations": "Show Donation Summary",
+      "showDonationsDesc": "Display donation amounts and summary on your profile.",
+      "showModerationStats": "Show Moderation Stats",
+      "showModerationStatsDesc": "Display count of auto-blocked orders."
+    }
   },
   "supportModal": {
     "copyLink": "Copy link",

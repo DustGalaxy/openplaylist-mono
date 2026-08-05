@@ -33,7 +33,7 @@ function ContentSwitch({
       onClick={toggle}
       style={{ width, height }}
       className={cn(
-        'relative flex cursor-pointer select-none items-center rounded-2xl border-2 border-level-3/40 bg-level-2 p-1.5 transition-colors duration-300',
+        'relative flex cursor-pointer select-none items-center rounded-2xl border-2 border-accent/40 bg-level-2 p-1.5 transition-colors duration-300',
         className,
       )}
     >
@@ -67,7 +67,7 @@ function ContentSwitch({
             ? `translateX(calc(${width} - ${height} + 3px))`
             : 'translateX(0px)',
         }}
-        className="h-full aspect-square rounded-xl bg-level-3 shadow-md transition-transform duration-300 ease-in-out"
+        className="h-full aspect-square rounded-xl bg-accent shadow-md transition-transform duration-300 ease-in-out"
       />
     </div>
   )

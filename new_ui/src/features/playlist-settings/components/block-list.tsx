@@ -45,7 +45,7 @@ const UserBlockItem = ({
       : t('playlistSettings.block.userName', 'Username')
 
   return (
-    <div className="border border-level-3/60 rounded-md p-2 sm:p-2.5 bg-level-1 hover:border-level-3/80 transition-all flex items-center justify-between gap-3 shadow-xs">
+    <div className="border border-accent/60 rounded-md p-2 sm:p-2.5 bg-level-1 hover:border-accent/80 transition-all flex items-center justify-between gap-3 shadow-xs">
       <div className="min-w-0 flex items-center gap-2.5 flex-1">
         <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 whitespace-nowrap flex items-center gap-1.5 shrink-0">
           {icon}
@@ -73,7 +73,7 @@ const UserBlockItem = ({
         </TooltipTrigger>
         <TooltipContent
           side="top"
-          className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+          className="bg-level-2 text-text-main border-accent/40 border text-xs"
         >
           <p>{t('playlistSettings.block.unblockUser', 'Unblock user')}</p>
         </TooltipContent>
@@ -93,7 +93,7 @@ const TrackBlockItem = ({
   const ytUrl = `https://www.youtube.com/watch?v=${item}`
 
   return (
-    <div className="border border-level-3/60 rounded-md p-2 sm:p-2.5 bg-level-1 hover:border-level-3/80 transition-all flex items-center justify-between gap-3 shadow-xs">
+    <div className="border border-accent/60 rounded-md p-2 sm:p-2.5 bg-level-1 hover:border-accent/80 transition-all flex items-center justify-between gap-3 shadow-xs">
       <div className="min-w-0 flex items-center gap-2.5 flex-1">
         <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 whitespace-nowrap flex items-center gap-1.5 shrink-0">
           <Video className="size-3.5" />
@@ -133,7 +133,7 @@ const TrackBlockItem = ({
         </TooltipTrigger>
         <TooltipContent
           side="top"
-          className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+          className="bg-level-2 text-text-main border-accent/40 border text-xs"
         >
           <p>{t('playlistSettings.block.unblockTrack', 'Unblock track')}</p>
         </TooltipContent>

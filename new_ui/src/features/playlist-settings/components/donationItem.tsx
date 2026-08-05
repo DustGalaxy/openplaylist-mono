@@ -41,10 +41,7 @@ const DonationItem = ({ rule, onUpdate, onDelete }: DonationItemProps) => {
   const handleDelete = () => {
     if (
       confirm(
-        t(
-          'playlistSettings.donation.deleteRuleConfirm',
-          'Delete this rule?',
-        ),
+        t('playlistSettings.donation.deleteRuleConfirm', 'Delete this rule?'),
       )
     ) {
       onDelete()
@@ -52,7 +49,7 @@ const DonationItem = ({ rule, onUpdate, onDelete }: DonationItemProps) => {
   }
 
   return (
-    <div className="border border-level-3/60 rounded-md p-2 sm:p-2.5 bg-level-1 hover:border-level-3/80 transition-all flex flex-col sm:flex-row sm:items-center gap-2 relative shadow-xs group">
+    <div className="border border-accent/60 rounded-md p-2 sm:p-2.5 bg-level-1 hover:border-accent/80 transition-all flex flex-col sm:flex-row sm:items-center gap-2 relative shadow-xs group">
       {/* Rule Name Input + Tooltip */}
       <div className="flex-1 flex flex-col gap-0.5 min-w-0">
         <div className="flex items-center gap-1 sm:hidden">
@@ -66,15 +63,20 @@ const DonationItem = ({ rule, onUpdate, onDelete }: DonationItemProps) => {
             <Input
               value={rule.name || ''}
               placeholder={t('playlistSettings.donation.ruleName', 'Rule name')}
-              className="text-xs sm:text-sm bg-level-2 border-0 h-8 px-2.5 focus-visible:ring-1 focus-visible:ring-level-3/50"
+              className="text-xs sm:text-sm bg-level-2 border-0 h-8 px-2.5 focus-visible:ring-1 focus-visible:ring-accent/50"
               onChange={(e) => handleInputChange('name', e.target.value)}
             />
           </TooltipTrigger>
           <TooltipContent
             side="top"
-            className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+            className="bg-level-2 text-text-main border-accent/40 border text-xs"
           >
-            <p>{t('playlistSettings.donation.hints.name', 'Rule name (e.g. Tier $100+)')}</p>
+            <p>
+              {t(
+                'playlistSettings.donation.hints.name',
+                'Rule name (e.g. Tier $100+)',
+              )}
+            </p>
           </TooltipContent>
         </Tooltip>
       </div>
@@ -109,9 +111,14 @@ const DonationItem = ({ rule, onUpdate, onDelete }: DonationItemProps) => {
             </TooltipTrigger>
             <TooltipContent
               side="top"
-              className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+              className="bg-level-2 text-text-main border-accent/40 border text-xs"
             >
-              <p>{t('playlistSettings.donation.hints.amount', 'Minimum donation amount required')}</p>
+              <p>
+                {t(
+                  'playlistSettings.donation.hints.amount',
+                  'Minimum donation amount required',
+                )}
+              </p>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -130,7 +137,9 @@ const DonationItem = ({ rule, onUpdate, onDelete }: DonationItemProps) => {
                 <CurrencySelect
                   name="currency"
                   value={rule.currency}
-                  onValueChange={(value) => handleInputChange('currency', value)}
+                  onValueChange={(value) =>
+                    handleInputChange('currency', value)
+                  }
                   variant="small"
                   className="h-8 text-xs bg-level-2 border-0"
                 />
@@ -138,9 +147,14 @@ const DonationItem = ({ rule, onUpdate, onDelete }: DonationItemProps) => {
             </TooltipTrigger>
             <TooltipContent
               side="top"
-              className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+              className="bg-level-2 text-text-main border-accent/40 border text-xs"
             >
-              <p>{t('playlistSettings.donation.hints.currency', 'Donation currency')}</p>
+              <p>
+                {t(
+                  'playlistSettings.donation.hints.currency',
+                  'Donation currency',
+                )}
+              </p>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -163,7 +177,9 @@ const DonationItem = ({ rule, onUpdate, onDelete }: DonationItemProps) => {
                   value={rule.priority ?? ''}
                   placeholder="0"
                   className="border-0 bg-level-2 focus-visible:ring-0 rounded-r-none px-1.5 text-xs sm:text-sm h-8 [appearance:textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
-                  onChange={(e) => handleInputChange('priority', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('priority', e.target.value)
+                  }
                 />
                 <UpDownBtn
                   getInputRef={() => priorityInputRef.current}
@@ -173,9 +189,14 @@ const DonationItem = ({ rule, onUpdate, onDelete }: DonationItemProps) => {
             </TooltipTrigger>
             <TooltipContent
               side="top"
-              className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+              className="bg-level-2 text-text-main border-accent/40 border text-xs"
             >
-              <p>{t('playlistSettings.donation.hints.priority', 'Priority points added to queue (+10, +50)')}</p>
+              <p>
+                {t(
+                  'playlistSettings.donation.hints.priority',
+                  'Priority points added to queue (+10, +50)',
+                )}
+              </p>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -186,7 +207,10 @@ const DonationItem = ({ rule, onUpdate, onDelete }: DonationItemProps) => {
             <Btn
               onClick={handleDelete}
               type="button"
-              aria-label={t('playlistSettings.donation.hints.delete', 'Delete donation rule')}
+              aria-label={t(
+                'playlistSettings.donation.hints.delete',
+                'Delete donation rule',
+              )}
               className="p-1.5 text-text-placeholder hover:text-red-400 hover:bg-red-500/10 transition-colors rounded-sm h-8 w-8 flex items-center justify-center shrink-0"
               onPointerDown={(e) => e.stopPropagation()}
             >
@@ -195,9 +219,14 @@ const DonationItem = ({ rule, onUpdate, onDelete }: DonationItemProps) => {
           </TooltipTrigger>
           <TooltipContent
             side="top"
-            className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+            className="bg-level-2 text-text-main border-accent/40 border text-xs"
           >
-            <p>{t('playlistSettings.donation.hints.delete', 'Delete donation rule')}</p>
+            <p>
+              {t(
+                'playlistSettings.donation.hints.delete',
+                'Delete donation rule',
+              )}
+            </p>
           </TooltipContent>
         </Tooltip>
       </div>

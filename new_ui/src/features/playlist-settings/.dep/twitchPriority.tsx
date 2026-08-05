@@ -54,7 +54,7 @@ const TwitchPriority = ({
         <Input
           type="number"
           value={costBroacaster}
-          className="border-level-3 border-1 w-20"
+          className="border-accent border-1 w-20"
           onChange={(e) => {
             if (isNaN(parseInt(e.target.value))) return
             setCostBroacaster(parseInt(e.target.value))
@@ -88,7 +88,7 @@ const TwitchPriority = ({
             })
             canRequest.current = true
           }}
-          className="border-level-3 border-1 w-20"
+          className="border-accent border-1 w-20"
         />
       </div>
       <div className="flex justify-between gap-2 items-center">
@@ -113,7 +113,7 @@ const TwitchPriority = ({
             })
             canRequest.current = true
           }}
-          className="border-level-3 border-1 w-20"
+          className="border-accent border-1 w-20"
         />
       </div>
       <div className="flex justify-between gap-2 items-center">
@@ -142,7 +142,7 @@ const TwitchPriority = ({
             })
             canRequest.current = true
           }}
-          className="border-level-3 border-1 w-20"
+          className="border-accent border-1 w-20"
         />
       </div>
 
@@ -168,7 +168,7 @@ const TwitchPriority = ({
             })
             canRequest.current = true
           }}
-          className="border-level-3 border-1 w-20"
+          className="border-accent border-1 w-20"
         />
       </div>
       <div className="flex justify-between gap-2 items-center">
@@ -193,7 +193,7 @@ const TwitchPriority = ({
             })
             canRequest.current = true
           }}
-          className="border-level-3 border-1 w-20"
+          className="border-accent border-1 w-20"
         />
       </div>
       <div className="flex justify-between gap-2 items-center">
@@ -226,7 +226,7 @@ const TwitchPriority = ({
             })
             canRequest.current = true
           }}
-          className="border-level-3 border-1 w-20"
+          className="border-accent border-1 w-20"
         />
       </div>
     </div>

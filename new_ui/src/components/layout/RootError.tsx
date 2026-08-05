@@ -32,7 +32,7 @@ export default function ErrorComponent({ error }: ErrorComponentProps) {
           className={`${panelClass} max-w-xl mx-auto p-8 sm:p-12 text-center relative z-10`}
         >
           {/* Контейнер для иконки */}
-          <div className="h-16 w-16 rounded-(--rounded-std) bg-level-1 border border-level-3/40 text-level-3 mx-auto flex items-center justify-center mb-6 shadow-[0_0_24px_rgba(245,106,25,0.1)]">
+          <div className="h-16 w-16 rounded-(--rounded-std) bg-level-1 border border-accent/40 text-accent mx-auto flex items-center justify-center mb-6 shadow-[0_0_24px_rgba(245,106,25,0.1)]">
             <AlertCircle className="h-8 w-8" />
           </div>
 

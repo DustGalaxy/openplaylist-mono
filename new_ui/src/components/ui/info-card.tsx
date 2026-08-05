@@ -13,11 +13,11 @@ export default function InfoCard({
     <div
       className={`
         ${innerPanelClass} p-3 sm:p-4 flex flex-col gap-2
-        transition-colors hover:border-level-3/30
+        transition-colors hover:border-accent/30
       `}
     >
       <div className="flex items-center gap-2 text-text-placeholder">
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-level-2/80 text-level-3">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-level-2/80 text-accent">
           {icon}
         </span>
         <span className="text-[11px] uppercase tracking-wide leading-tight">

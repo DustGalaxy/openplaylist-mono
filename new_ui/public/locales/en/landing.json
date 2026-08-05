@@ -34,6 +34,7 @@
     "heroBody": "OpenPlaylist is a shared queue, not a personal playlist. Viewers suggest music, filters validate requests, and you manage the stream in one click.",
     "howItWorksTitle": "How it works",
     "loginAndStart": "Log In & Start",
+    "preview": "Preview",
     "steps": {
       "create": {
         "text": "Log in via Twitch or email, configure stream/static mode, and set content rules.",

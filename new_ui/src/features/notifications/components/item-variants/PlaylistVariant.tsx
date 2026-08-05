@@ -112,7 +112,7 @@ export const PlaylistVariant: React.FC<VariantProps> = ({
     //   return (
     //     <div className="text-sm text-text-placeholder leading-normal">
     //       {t('notifications.events.mode_changed', 'Режим очереди изменен на')}{' '}
-    //       <span className="px-1.5 py-0.5 rounded bg-level-2 border border-level-3 font-mono font-bold text-xs text-text-main">
+    //       <span className="px-1.5 py-0.5 rounded bg-level-2 border border-accent font-mono font-bold text-xs text-text-main">
     //         {data.mode}
     //       </span>{' '}
     //       {t('notifications.events.in_playlist', 'в')}{' '}

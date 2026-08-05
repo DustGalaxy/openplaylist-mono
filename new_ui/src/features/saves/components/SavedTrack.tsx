@@ -1,4 +1,4 @@
-import { Link, Trash } from 'lucide-react'
+import { Link, Play, Trash } from 'lucide-react'
 import { toast } from 'sonner'
 import type { TrackCardAction } from '@/features/united-playlist/components/trackParts/types'
 import type { SavedTrack } from '@/stores/savedStore'
@@ -9,6 +9,7 @@ import {
   FeatureI18nProvider,
   useFeatureTranslation,
 } from '@/lib/i18n/featureTranslation'
+import PlayTrackButton from '@/features/player/components/PlayTrackButton'
 
 export default function SavedTrackCard({ track }: { track: SavedTrack }) {
   const { t } = useFeatureTranslation()
@@ -18,7 +19,7 @@ export default function SavedTrackCard({ track }: { track: SavedTrack }) {
     navigator.clipboard.writeText(
       `https://www.youtube.com/watch?v=${track.yt_video_id}`,
     )
-    toast.success(t('playlist.track.actions.copied', 'Link copied'))
+    toast.success(t('playlist.toast.linkCopied', 'Link copied'))
   }
 
   const primary: Array<TrackCardAction> = [
@@ -36,22 +37,43 @@ export default function SavedTrackCard({ track }: { track: SavedTrack }) {
     },
   ]
 
+  const trackItem = {
+    yt_video_id: track.yt_video_id,
+    title: track.title,
+    duration: typeof track.duration === 'number' ? track.duration : undefined,
+  }
+
   return (
-    <div className={cn('flex items-center gap-2 p-2 rounded-md bg-level-2/50')}>
-      <div className="relative">
+    <div
+      className={cn(
+        'flex items-center gap-2 p-2 rounded-md bg-level-2/50 hover:bg-level-2/80 transition-colors',
+      )}
+    >
+      <div className="relative group/thumb shrink-0">
         <img
           src={`https://img.youtube.com/vi/${track.yt_video_id}/mqdefault.jpg`}
           alt=""
           className="h-10 aspect-video rounded-xs object-cover shrink-0"
         />
+        <PlayTrackButton
+          track={trackItem}
+          className="absolute inset-0 bg-black/50 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition-opacity text-white cursor-pointer rounded-xs"
+        >
+          <Play className="size-4 fill-white" />
+        </PlayTrackButton>
         <div className="absolute text-[10px] bottom-0.5 right-0.5 px-1 py-0.25 rounded-md font-mono bg-[#000000a7] text-white">
           {track.duration}
         </div>
       </div>
 
       <div className="min-w-0 flex-1 flex flex-col">
-        <span className="truncate text-sm text-text-main">{track.title}</span>
+        <PlayTrackButton track={trackItem} className="inline-block max-w-full">
+          <span className="truncate text-sm text-text-main hover:text-accent transition-colors cursor-pointer block">
+            {track.title}
+          </span>
+        </PlayTrackButton>
       </div>
+
       <FeatureI18nProvider ns="playlist">
         <TrackActions primary={primary} secondary={[]} track={track} />
       </FeatureI18nProvider>

@@ -161,17 +161,17 @@ const PlatformChatRolesTab = React.memo(
           <div className="flex items-end gap-2">
             <div className="flex-1">
               <Select value={selectedRole} onValueChange={setSelectedRole}>
-                <SelectTrigger className="bg-level-2 border-level-3 h-8 text-xs">
+                <SelectTrigger className="bg-level-2 border-accent h-8 text-xs">
                   <SelectValue
                     placeholder={t('playlistSettings.chatRoles.addRole')}
                   />
                 </SelectTrigger>
-                <SelectContent className="bg-level-2 border-level-3">
+                <SelectContent className="bg-level-2 border-accent">
                   {unusedRoles.map((role) => (
                     <SelectItem
                       key={role.key}
                       value={role.key}
-                      className="bg-level-2 focus:bg-level-3 text-xs cursor-pointer"
+                      className="bg-level-2 focus:bg-accent text-xs cursor-pointer"
                     >
                       <div className="flex items-center gap-1.5 text-text-main">
                         {role.badge_type === 'img' &&
@@ -223,7 +223,7 @@ const PlatformChatRolesTab = React.memo(
             <MyBtn
               onClick={handleAddRole}
               disabled={!selectedRole || isCreating}
-              className="px-3 h-8 text-xs bg-level-2 border border-level-3"
+              className="px-3 h-8 text-xs bg-level-2 border border-accent"
             >
               {t('playlistSettings.chatRoles.add')}
             </MyBtn>

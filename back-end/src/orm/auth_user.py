@@ -52,6 +52,7 @@ class User(Base, UUIDMixin, TimestampMixin):
     is_public: Mapped[bool] = mapped_column(default=True, nullable=False)
 
     social_links: Mapped[dict[str, str]] = mapped_column(JSONB, nullable=True)
+    stats_visibility: Mapped[dict] = mapped_column(JSONB, nullable=True, server_default="{}")
     linked_accounts: Mapped[list["LinkedAccounts"]] = relationship(lazy="joined")
     roles: Mapped[list["UserRole"]] = relationship(lazy="joined")
 

@@ -26,7 +26,7 @@ export default function Header() {
 
   return (
     <div className="w-full flex sticky top-0 z-50 justify-center">
-      <header className="w-full bg-level-2 text-text-main border-b border-level-3/40 px-2 sm:px-4 py-1.5 sm:py-2">
+      <header className="w-full bg-level-2 text-text-main border-b border-accent/40 px-2 sm:px-4 py-1.5 sm:py-2">
         <nav className="flex items-center justify-between w-full gap-1.5 sm:gap-3">
           {/* Left section: Sidebar toggle, Logo, Search */}
           <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
@@ -41,7 +41,7 @@ export default function Header() {
             )}
 
             <Link to="/" className="flex items-center gap-1.5 shrink-0 px-1">
-              <Disc3 className="size-5 sm:size-6 text-level-3" />
+              <Disc3 className="size-5 sm:size-6 text-accent" />
               <h1 className="hidden sm:block text-base sm:text-lg font-bold text-transparent bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)] bg-clip-text leading-normal">
                 {t('brand.name')} {t('brand.version')}
               </h1>
@@ -62,7 +62,7 @@ export default function Header() {
                     i18n.changeLanguage(e.target.value)
                     window.localStorage.setItem('Lng', e.target.value)
                   }}
-                  className="bg-level-1 text-text-main text-xs sm:text-sm rounded-md px-1.5 py-1 border border-level-3/40 cursor-pointer outline-none"
+                  className="bg-level-1 text-text-main text-xs sm:text-sm rounded-md px-1.5 py-1 border border-accent/40 cursor-pointer outline-none"
                 >
                   <option value="ru">RU</option>
                   <option value="en">EN</option>
@@ -71,7 +71,7 @@ export default function Header() {
 
                 <button
                   type="button"
-                  className="cursor-pointer text-xs sm:text-sm font-semibold hover:text-level-3 transition-colors"
+                  className="cursor-pointer text-xs sm:text-sm font-semibold hover:text-accent transition-colors"
                   onClick={() => navigate({ to: '/login' })}
                 >
                   {t('nav.login')}

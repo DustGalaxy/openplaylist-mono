@@ -45,16 +45,16 @@ export default function DropDownActions({
         </TooltipTrigger>
         <TooltipContent
           side="top"
-          className="bg-level-2 text-text-main border-level-3/40 border"
+          className="bg-level-2 text-text-main border-accent/40 border"
         >
           <p>{t('playlist.track.actions.moreActions', 'More actions')}</p>
         </TooltipContent>
       </Tooltip>
-      <DropdownMenuContent className="bg-level-2 text-text-main  border-level-3">
+      <DropdownMenuContent className="bg-level-2 text-text-main  border-accent">
         {/* Захардкожено напрямую, не через data-driven actions —
             component-в-actions ломал границу React Refresh и изоляцию хуков */}
         <AddToPlaylistSubmenu track={track} />
-        {actions.length > 0 && <DropdownMenuSeparator className="bg-level-3" />}
+        {actions.length > 0 && <DropdownMenuSeparator className="bg-accent" />}
 
         {actions.map((a) => {
           const Icon = a.icon

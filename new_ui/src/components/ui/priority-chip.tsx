@@ -6,7 +6,7 @@ export default function PriorityChip({ number }: { number: number }) {
       className="
         bg-level-2
         rounded-[var(--rounded-std)]            
-        border-r-[3px] border-t-[3px] sm:border-r-[5px] sm:border-t-[5px] border-level-3
+        border-r-[3px] border-t-[3px] sm:border-r-[5px] sm:border-t-[5px] border-accent
         
        
         h-[28px] sm:h-[32px] md:h-[40px]         

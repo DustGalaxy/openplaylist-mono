@@ -7,6 +7,7 @@ from src.models.stats import (
     TopEntityItem,
     TopTrackItem,
     UserStatsVisibilitySettings,
+    UserStatsVisibilitySettingsPatch,
 )
 from src.services.stats_service import StatsService
 
@@ -76,3 +77,21 @@ def test_filter_public_incoming_stats():
     filtered_with_donations = service.filter_public_incoming_stats(raw_stats, public_donation_settings)
     assert filtered_with_donations.auto_blocked_count == 5
     assert filtered_with_donations.donation_summary == {"USD": 50.0}
+
+
+def test_user_stats_visibility_settings_serialization():
+    settings = UserStatsVisibilitySettings(show_donations=True, show_top_tracks=False)
+    dumped = settings.model_dump()
+    assert dumped["show_donations"] is True
+    assert dumped["show_top_tracks"] is False
+
+    reconstructed = UserStatsVisibilitySettings.model_validate(dumped)
+    assert reconstructed.show_donations is True
+    assert reconstructed.show_top_tracks is False
+
+
+def test_user_stats_visibility_settings_patch():
+    patch = UserStatsVisibilitySettingsPatch(show_donations=True)
+    patch_dump = patch.model_dump(exclude_unset=True)
+    assert patch_dump == {"show_donations": True}
+    assert patch.show_top_tracks is None

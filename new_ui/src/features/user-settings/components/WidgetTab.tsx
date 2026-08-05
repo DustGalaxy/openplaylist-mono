@@ -105,7 +105,11 @@ export function WidgetTab() {
     : ''
   const cssPatch = useMemo(() => buildCssPatch(appearance), [appearance])
   const previewSrcDoc = useMemo(
-    () => buildPreviewSrcDoc(appearance, t('settings.widget.demoTrack', 'Artist — Track Title')),
+    () =>
+      buildPreviewSrcDoc(
+        appearance,
+        t('settings.widget.demoTrack', 'Artist — Track Title'),
+      ),
     [appearance, t],
   )
 
@@ -116,8 +120,14 @@ export function WidgetTab() {
 
   async function handleRegenerate() {
     const confirmMsg = token
-      ? t('settings.widget.regenerateConfirm', 'Are you sure you want to regenerate the widget token? Existing OBS browser sources will stop working.')
-      : t('settings.widget.generateConfirm', 'Generate a new OBS widget URL token?')
+      ? t(
+          'settings.widget.regenerateConfirm',
+          'Are you sure you want to regenerate the widget token? Existing OBS browser sources will stop working.',
+        )
+      : t(
+          'settings.widget.generateConfirm',
+          'Generate a new OBS widget URL token?',
+        )
     if (!window.confirm(confirmMsg)) return
     setRegenerating(true)
     try {
@@ -126,7 +136,9 @@ export function WidgetTab() {
       window.localStorage.setItem(TOKEN_STORAGE_KEY, res)
       toast.success(t('settings.widget.regenerated', 'Widget token updated'))
     } catch {
-      toast.error(t('settings.widget.regenerateFailed', 'Failed to generate token'))
+      toast.error(
+        t('settings.widget.regenerateFailed', 'Failed to generate token'),
+      )
     } finally {
       setRegenerating(false)
     }
@@ -143,23 +155,26 @@ export function WidgetTab() {
     <div className="space-y-4">
       {/* Title Header */}
       <div className="flex items-start gap-2.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-accent/40 text-accent mt-0.5">
           <Tv className="size-5" />
         </div>
         <div>
           <Label className="text-base font-bold text-text-main">
-            {t('settings.widget.linkTitle', 'OBS Overlay Widget')}
+            {t('settings.widget.title', 'OBS Overlay Widget')}
           </Label>
           <DialogDescription className="text-xs text-text-secondary mt-0.5">
-            {t('settings.widget.subtitle', 'Configure live track overlays for OBS Studio and broadcasting software.')}
+            {t(
+              'settings.widget.subtitle',
+              'Configure live track overlays for OBS Studio and broadcasting software.',
+            )}
           </DialogDescription>
         </div>
       </div>
 
       {/* Card 1: Token & Link */}
-      <div className="p-3 sm:p-4 border border-level-3/60 rounded-md bg-level-1 space-y-3 shadow-xs">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-level-3/40">
-          <Tv className="size-4 text-level-3" />
+      <div className="p-3 sm:p-4 border border-accent/60 rounded-md bg-level-1 space-y-3 shadow-xs">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-accent/40">
+          <Tv className="size-4 text-accent" />
           <span>{t('settings.widget.linkTitle', 'Widget URL & Token')}</span>
         </div>
 
@@ -167,7 +182,10 @@ export function WidgetTab() {
           <div className="flex items-start gap-2.5 p-3 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-200 text-xs">
             <AlertTriangle className="size-4 shrink-0 text-amber-400 mt-0.5" />
             <p className="leading-snug">
-              {t('settings.widget.noTokenWarning', 'No active widget token found. Generate one below to get started.')}
+              {t(
+                'settings.widget.noTokenWarning',
+                'No active widget token found. Generate one below to get started.',
+              )}
             </p>
           </div>
         )}
@@ -175,13 +193,20 @@ export function WidgetTab() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <Input
             readOnly
-            value={token ? widgetUrl : t('settings.widget.noTokenPlaceholder', 'Click Generate Token below')}
+            value={
+              token
+                ? widgetUrl
+                : t(
+                    'settings.widget.noTokenPlaceholder',
+                    'Click Generate Token below',
+                  )
+            }
             className="bg-level-2 border-0 h-8 px-2.5 text-xs sm:text-sm text-text-secondary truncate flex-1 min-w-0"
           />
           <Btn
             onClick={() => copy(widgetUrl, 'common.toast.copied')}
             disabled={!token}
-            className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main hover:bg-level-3 transition-colors disabled:opacity-50 shrink-0 flex items-center gap-1"
+            className="h-8 px-3 bg-level-2 text-xs font-semibold text-text-main hover:bg-accent transition-colors disabled:opacity-50 shrink-0 flex items-center gap-1"
           >
             <Copy className="size-3.5" />
             <span>{t('settings.widget.copyLink', 'Copy Link')}</span>
@@ -191,7 +216,9 @@ export function WidgetTab() {
             disabled={regenerating}
             className="h-8 px-3 bg-red-500/15 border border-red-500/40 text-red-400 hover:bg-red-500/30 transition-colors text-xs font-semibold shrink-0 flex items-center gap-1 disabled:opacity-50"
           >
-            <RefreshCw className={`size-3.5 ${regenerating ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`size-3.5 ${regenerating ? 'animate-spin' : ''}`}
+            />
             <span>
               {token
                 ? t('settings.widget.regenerate', 'Regenerate')
@@ -201,15 +228,20 @@ export function WidgetTab() {
         </div>
 
         <p className="text-[11px] text-text-placeholder">
-          {t('settings.widget.linkHint', 'Paste this URL as a Browser Source in OBS Studio.')}
+          {t(
+            'settings.widget.linkHint',
+            'Paste this URL as a Browser Source in OBS Studio.',
+          )}
         </p>
       </div>
 
       {/* Card 2: Appearance & Live Preview */}
-      <div className="p-3 sm:p-4 border border-level-3/60 rounded-md bg-level-1 shadow-xs space-y-3">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-level-3/40">
-          <Disc3 className="size-4 text-level-3" />
-          <span>{t('settings.widget.appearanceTitle', 'Appearance & Live Preview')}</span>
+      <div className="p-3 sm:p-4 border border-accent/60 rounded-md bg-level-1 shadow-xs space-y-3">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main pb-1 border-b border-accent/40">
+          <Disc3 className="size-4 text-accent" />
+          <span>
+            {t('settings.widget.appearanceTitle', 'Appearance & Live Preview')}
+          </span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -218,7 +250,7 @@ export function WidgetTab() {
             {/* Show Icon */}
             <div className="flex items-center justify-between p-2 rounded-md bg-level-2/60">
               <span className="font-semibold text-text-main flex items-center gap-2">
-                <Disc3 className="size-3.5 text-level-3" />
+                <Disc3 className="size-3.5 text-accent" />
                 {t('settings.widget.showIcon', 'Show Vinyl Icon')}
               </span>
               <Switch
@@ -229,7 +261,10 @@ export function WidgetTab() {
 
             {/* Text Color */}
             <div className="flex items-center justify-between p-2 rounded-md bg-level-2/60">
-              <Label htmlFor="w-text-color" className="font-semibold text-text-main text-xs cursor-pointer">
+              <Label
+                htmlFor="w-text-color"
+                className="font-semibold text-text-main text-xs cursor-pointer"
+              >
                 {t('settings.widget.textColor', 'Text Color')}
               </Label>
               <input
@@ -237,13 +272,16 @@ export function WidgetTab() {
                 type="color"
                 value={appearance.textColor}
                 onChange={(e) => setField('textColor', e.target.value)}
-                className="size-7 rounded cursor-pointer bg-transparent border border-level-3/40 p-0.5"
+                className="size-7 rounded cursor-pointer bg-transparent border border-accent/40 p-0.5"
               />
             </div>
 
             {/* Background Color */}
             <div className="flex items-center justify-between p-2 rounded-md bg-level-2/60">
-              <Label htmlFor="w-bg-color" className="font-semibold text-text-main text-xs cursor-pointer">
+              <Label
+                htmlFor="w-bg-color"
+                className="font-semibold text-text-main text-xs cursor-pointer"
+              >
                 {t('settings.widget.bgColor', 'Background Color')}
               </Label>
               <input
@@ -251,14 +289,17 @@ export function WidgetTab() {
                 type="color"
                 value={appearance.bgColor}
                 onChange={(e) => setField('bgColor', e.target.value)}
-                className="size-7 rounded cursor-pointer bg-transparent border border-level-3/40 p-0.5"
+                className="size-7 rounded cursor-pointer bg-transparent border border-accent/40 p-0.5"
               />
             </div>
 
             {/* Opacity Slider */}
             <div className="p-2 rounded-md bg-level-2/60 space-y-1">
               <div className="flex items-center justify-between">
-                <Label htmlFor="w-bg-opacity" className="font-semibold text-text-main text-xs cursor-pointer">
+                <Label
+                  htmlFor="w-bg-opacity"
+                  className="font-semibold text-text-main text-xs cursor-pointer"
+                >
                   {t('settings.widget.bgOpacity', 'Opacity')}
                 </Label>
                 <span className="text-[10px] text-text-placeholder font-mono">
@@ -272,14 +313,17 @@ export function WidgetTab() {
                 max={100}
                 value={appearance.bgOpacity}
                 onChange={(e) => setField('bgOpacity', Number(e.target.value))}
-                className="w-full accent-level-3 cursor-pointer h-1.5"
+                className="w-full accent-accent cursor-pointer h-1.5"
               />
             </div>
 
             {/* Font Size Slider */}
             <div className="p-2 rounded-md bg-level-2/60 space-y-1">
               <div className="flex items-center justify-between">
-                <Label htmlFor="w-font-size" className="font-semibold text-text-main text-xs cursor-pointer">
+                <Label
+                  htmlFor="w-font-size"
+                  className="font-semibold text-text-main text-xs cursor-pointer"
+                >
                   {t('settings.widget.fontSize', 'Font Size')}
                 </Label>
                 <span className="text-[10px] text-text-placeholder font-mono">
@@ -293,7 +337,7 @@ export function WidgetTab() {
                 max={32}
                 value={appearance.fontSize}
                 onChange={(e) => setField('fontSize', Number(e.target.value))}
-                className="w-full accent-level-3 cursor-pointer h-1.5"
+                className="w-full accent-accent cursor-pointer h-1.5"
               />
             </div>
           </div>
@@ -303,7 +347,7 @@ export function WidgetTab() {
             <Label className="text-[11px] font-semibold text-text-secondary">
               {t('settings.widget.previewTitle', 'Preview')}
             </Label>
-            <div className="rounded-md border border-level-3/40 bg-black/40 aspect-video overflow-hidden shadow-inner">
+            <div className="rounded-md border border-accent/40 bg-black/40 aspect-video overflow-hidden shadow-inner">
               <iframe
                 title="widget-preview"
                 srcDoc={previewSrcDoc}
@@ -315,26 +359,29 @@ export function WidgetTab() {
       </div>
 
       {/* Card 3: Custom CSS */}
-      <div className="p-3 sm:p-4 border border-level-3/60 rounded-md bg-level-1 space-y-3 shadow-xs">
-        <div className="flex items-center justify-between pb-1 border-b border-level-3/40">
+      <div className="p-3 sm:p-4 border border-accent/60 rounded-md bg-level-1 space-y-3 shadow-xs">
+        <div className="flex items-center justify-between pb-1 border-b border-accent/40">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-text-main">
-            <Copy className="size-4 text-level-3" />
+            <Copy className="size-4 text-accent" />
             <span>{t('settings.widget.cssTitle', 'Custom CSS for OBS')}</span>
           </div>
           <Btn
             onClick={() => copy(cssPatch, 'settings.widget.cssCopied')}
-            className="h-7 px-2.5 bg-level-2 text-xs font-semibold text-text-main hover:bg-level-3 transition-colors flex items-center gap-1"
+            className="h-7 px-2.5 bg-level-2 text-xs font-semibold text-text-main hover:bg-accent transition-colors flex items-center gap-1"
           >
             <Copy className="size-3" />
             <span>{t('settings.widget.cssCopy', 'Copy CSS')}</span>
           </Btn>
         </div>
 
-        <pre className="text-[11px] text-text-secondary bg-level-2/80 rounded-md border border-level-3/40 p-3 overflow-x-auto whitespace-pre-wrap font-mono">
+        <pre className="text-[11px] text-text-secondary bg-level-2/80 rounded-md border border-accent/40 p-3 overflow-x-auto whitespace-pre-wrap font-mono">
           {cssPatch}
         </pre>
         <p className="text-[11px] text-text-placeholder">
-          {t('settings.widget.cssHint', 'Paste into OBS Browser Source properties under "Custom CSS".')}
+          {t(
+            'settings.widget.cssHint',
+            'Paste into OBS Browser Source properties under "Custom CSS".',
+          )}
         </p>
       </div>
     </div>

@@ -34,7 +34,7 @@ export default function TrackActions({
             </TooltipTrigger>
             <TooltipContent
               side="top"
-              className="bg-level-2 text-text-main border-level-3/40 border"
+              className="bg-level-2 text-text-main border-accent/40 border"
             >
               <p>{a.label}</p>
             </TooltipContent>

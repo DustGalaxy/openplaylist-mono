@@ -160,7 +160,7 @@ function ThemePicker() {
   return (
     <div className="flex flex-col gap-2 p-1" style={{ width: 232 }}>
       {/* Список тем */}
-      <div className="flex flex-col gap-1 max-h-[280px] overflow-y-auto pr-0.5">
+      <div className="flex flex-col gap-1 max-h-70 overflow-y-auto pr-0.5">
         {allThemes.map((theme) => {
           const isActive = theme.id === activeId
           return (
@@ -168,10 +168,10 @@ function ThemePicker() {
               key={theme.id}
               onClick={() => handleSelect(theme)}
               className={[
-                'group flex items-center gap-3 px-3 py-2.5 rounded-[var(--rounded-std)]',
+                'group flex items-center gap-3 px-3 py-2.5 rounded-(--rounded-std)',
                 'transition-all text-left w-full shrink-0',
                 isActive
-                  ? 'bg-level-1 border border-level-3/50'
+                  ? 'bg-level-1 border border-accent/50'
                   : 'border border-transparent hover:bg-level-1/60 hover:border-white/8',
               ].join(' ')}
             >
@@ -197,7 +197,7 @@ function ThemePicker() {
                 />
                 <span
                   className="block rounded-full"
-                  style={{ width: 10, height: 10, background: theme.level3 }}
+                  style={{ width: 10, height: 10, background: theme.accent }}
                 />
               </div>
 
@@ -251,7 +251,7 @@ function ThemePicker() {
             max="360"
             value={customHue}
             onChange={handleHueChange}
-            className="flex-1 min-w-0 bg-level-1 border border-white/8 rounded px-1.5 py-0.5 text-xs text-text-main font-mono focus:outline-none focus:border-level-3/50 text-right"
+            className="flex-1 min-w-0 bg-level-1 border border-white/8 rounded px-1.5 py-0.5 text-xs text-text-main font-mono focus:outline-none focus:border-accent/50 text-right"
             placeholder="0-360"
           />
           <input
@@ -260,7 +260,7 @@ function ThemePicker() {
             max="360"
             value={customHue}
             onChange={handleHueChange}
-            className="w-24 h-1 bg-level-1 accent-[var(--level-3)] rounded-lg appearance-none cursor-pointer"
+            className="w-24 h-1 bg-level-1 accent-(--accent) rounded-lg appearance-none cursor-pointer"
           />
         </div>
       </div>
@@ -341,8 +341,8 @@ export default function MenuDropdown() {
           {/* <div className="hidden sm:block text-lg font-medium text-text-main">
             {user.username}
           </div> */}
-          {/* hover:ring-level-3 hover:ring-2 transition-all */}
-          <div className="rounded-full w-10 bg-level-3 -mr-1 ">
+          {/* hover:ring-accent hover:ring-2 transition-all */}
+          <div className="rounded-full w-10 bg-accent -mr-1 ">
             <img src={user.avatar_url} className="rounded-full" alt="" />
           </div>
         </div>
@@ -352,15 +352,15 @@ export default function MenuDropdown() {
         side="bottom"
         align="end"
         sideOffset={5}
-        className="bg-level-2 border-level-3 text-text-main"
+        className="bg-level-2 border-accent text-text-main"
       >
         <DropdownMenuLabel className="flex gap-2 items-center text-text-main text-[16px]">
-          <div className="rounded-full w-8.5 bg-level-3">
+          <div className="rounded-full w-8.5 bg-accent">
             <img src={user.avatar_url} className="rounded-full" alt="" />
           </div>
           {user.username}
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-level-3" />
+        <DropdownMenuSeparator className="bg-accent" />
         <div className="flex items-center gap-1">
           {actionButtons.map(
             ({ modal, icon: Icon, color, labelKey, fallback }) => (
@@ -383,7 +383,7 @@ export default function MenuDropdown() {
             ),
           )}
         </div>
-        <DropdownMenuSeparator className="bg-level-3" />
+        <DropdownMenuSeparator className="bg-accent" />
         {/* Language picker */}
         <DropdownMenuSub>
           <DropdownMenuGroup>
@@ -475,10 +475,7 @@ export default function MenuDropdown() {
             </DropdownMenuPortal>
           </DropdownMenuGroup>
         </DropdownMenuSub>
-        <DropdownMenuItem
-          disabled
-          onClick={() => navigate({ to: '/statistic' })}
-        >
+        <DropdownMenuItem onClick={() => navigate({ to: '/statistic' })}>
           <ChartColumnIncreasing /> {t('nav.statistic')}
         </DropdownMenuItem>
         <DropdownMenuItem disabled onClick={() => navigate({ to: '/history' })}>
@@ -488,7 +485,7 @@ export default function MenuDropdown() {
           <Settings /> {t('nav.settings')}
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator className="bg-level-3" />
+        <DropdownMenuSeparator className="bg-accent" />
 
         <DropdownMenuItem
           variant="destructive"

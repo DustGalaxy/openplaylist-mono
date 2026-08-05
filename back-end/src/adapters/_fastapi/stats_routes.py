@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from fastapi import APIRouter, Query, status
 
 from src.adapters._fastapi.dependencies import DB_SESSION, USER_ID
@@ -8,6 +9,7 @@ from src.models.stats import (
     OutgoingStatsResponse,
     TimeWindow,
     UserStatsVisibilitySettings,
+    UserStatsVisibilitySettingsPatch,
 )
 from src.services.stats_service import stats_service
 
@@ -69,19 +71,20 @@ async def get_public_user_stats(
     target_user_id: UUID,
     period: TimeWindow = Query(default=TimeWindow.ALL_TIME),
 ):
-    """Returns public profile statistics with privacy visibility settings applied."""
-    # Fetch default settings (basic metrics enabled by default)
-    visibility_settings = UserStatsVisibilitySettings()
+    """Returns public profile statistics with target user's privacy visibility settings applied."""
+    return await stats_service.get_public_user_stats(session, target_user_id, period)
 
-    raw_outgoing = await stats_service.get_outgoing_stats(session, target_user_id, period)
-    raw_incoming = await stats_service.get_incoming_stats(session, target_user_id, period)
 
-    filtered_outgoing = stats_service.filter_public_outgoing_stats(raw_outgoing, visibility_settings)
-    filtered_incoming = stats_service.filter_public_incoming_stats(raw_incoming, visibility_settings)
-
-    return {
-        "user_id": target_user_id,
-        "period": period,
-        "outgoing": filtered_outgoing,
-        "incoming": filtered_incoming,
-    }
+@router.patch(
+    "/me/privacy",
+    response_model=UserStatsVisibilitySettings,
+    status_code=status.HTTP_200_OK,
+    summary="Update privacy visibility settings for current user",
+)
+async def update_my_stats_privacy(
+    session: DB_SESSION,
+    user_id: USER_ID,
+    settings_data: UserStatsVisibilitySettingsPatch,
+):
+    """Saves user stats visibility preferences into database."""
+    return await stats_service.update_user_stats_privacy(session, user_id, settings_data)

@@ -68,8 +68,8 @@ function LogModal({
       <DialogTrigger className="flex items-center gap-2 w-full text-left cursor-pointer p-1 rounded">
         {children}
       </DialogTrigger>
-      <DialogContent className="w-[90%] sm:max-w-[450px] bg-level-1 border-level-3 text-text-main max-h-[85vh] flex flex-col p-6">
-        <DialogHeader className="flex flex-row items-center gap-3 space-y-0 pb-4 border-b border-level-3">
+      <DialogContent className="w-[90%] sm:max-w-[450px] bg-level-1 border-accent text-text-main max-h-[85vh] flex flex-col p-6">
+        <DialogHeader className="flex flex-row items-center gap-3 space-y-0 pb-4 border-b border-accent">
           <div className={`p-2 rounded-lg bg-level-2 ${eventColor}`}>
             <EventIcon className="h-5 w-5" />
           </div>
@@ -85,7 +85,7 @@ function LogModal({
 
         <div className="flex-1 overflow-y-auto py-4 space-y-4 font-sans text-sm">
           {/* Сетка параметров */}
-          <div className="grid grid-cols-3 gap-y-3 gap-x-2 bg-level-2/50 p-3 rounded-lg border border-level-3/50">
+          <div className="grid grid-cols-3 gap-y-3 gap-x-2 bg-level-2/50 p-3 rounded-lg border border-accent/50">
             <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
               <Calendar className="h-3.5 w-3.5" />{' '}
               {t('playlist.log.modal.created_at')}
@@ -165,12 +165,12 @@ function LogModal({
             <div className="text-xs text-muted-foreground flex items-center gap-1.5 px-1">
               <Code className="h-3.5 w-3.5" /> {t('playlist.log.modal.payload')}
             </div>
-            <pre className="bg-level-2 p-3 rounded-lg border border-level-3 font-mono text-[11px] overflow-x-auto text-text-muted max-h-[180px] scrollbar-thin">
+            <pre className="bg-level-2 p-3 rounded-lg border border-accent font-mono text-[11px] overflow-x-auto text-text-muted max-h-[180px] scrollbar-thin">
               {JSON.stringify(data.event_data, null, 2)}
             </pre>
           </div>
         </div>
-        <DialogFooter className="pt-2 border-t border-level-3" />
+        <DialogFooter className="pt-2 border-t border-accent" />
       </DialogContent>
     </Dialog>
   )

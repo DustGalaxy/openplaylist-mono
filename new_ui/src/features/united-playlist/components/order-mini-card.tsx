@@ -90,7 +90,7 @@ function OrderMiniCardImpl({
         icon: <ClipboardCopy className="w-4 h-4" />,
         on_click: copyLink,
         className:
-          'px-1 bg-level-2 border border-level-3/15 hover:bg-level-3/10 text-text-main',
+          'px-1 bg-level-2 border border-accent/15 hover:bg-accent/10 text-text-main',
         tooltip: t('playlist.track.copy'),
       },
       {
@@ -104,7 +104,7 @@ function OrderMiniCardImpl({
         ),
         on_click: toggleSave,
         className:
-          'px-1 bg-level-2 border border-level-3/15 hover:bg-level-3/10 text-text-main',
+          'px-1 bg-level-2 border border-accent/15 hover:bg-accent/10 text-text-main',
         tooltip: t('playlist.track.save'),
       },
     ]
@@ -113,7 +113,7 @@ function OrderMiniCardImpl({
 
     return (
       <div
-        className={`group relative w-full rounded-(--rounded-std) overflow-hidden border border-level-3/20 bg-level-2 shadow-md hover:shadow-lg ${
+        className={`group relative w-full rounded-(--rounded-std) overflow-hidden border border-accent/20 bg-level-2 shadow-md hover:shadow-lg ${
           isDragging ? '' : 'transition-all duration-300'
         }`}
       >
@@ -161,7 +161,7 @@ function OrderMiniCardImpl({
             {/* Длительность */}
             <div
               title={t('playlist.track.duration')}
-              className="px-1.5 py-0.5 rounded bg-level-1/90 text-text-main border border-level-3/20 font-bold cursor-help shadow-sm"
+              className="px-1.5 py-0.5 rounded bg-level-1/90 text-text-main border border-accent/20 font-bold cursor-help shadow-sm"
             >
               {formatTime(track.duration ? +track.duration : 0)}
             </div>
@@ -172,9 +172,9 @@ function OrderMiniCardImpl({
                   {/* Дата */}
                   <div
                     title={t('playlist.track.date', { date: longFormatDate })}
-                    className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-level-2/80 border border-level-3/15 text-text-placeholder shadow-inner cursor-help"
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-level-2/80 border border-accent/15 text-text-placeholder shadow-inner cursor-help"
                   >
-                    <Calendar className="w-3 h-3 text-level-3/80" />
+                    <Calendar className="w-3 h-3 text-accent/80" />
                     <span className="text-text-secondary font-medium text-xs">
                       {formattedDate}
                     </span>
@@ -183,10 +183,10 @@ function OrderMiniCardImpl({
                   {/* Приоритет */}
                   <div
                     title={t('playlist.track.priority')}
-                    className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-level-2/90 border border-level-3/20 shadow-inner min-w-8.75 justify-center cursor-help"
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-level-2/90 border border-accent/20 shadow-inner min-w-8.75 justify-center cursor-help"
                   >
                     <ArrowUpRight
-                      className={`w-3 h-3 ${+track.priority > 0 ? 'text-level-3 animate-pulse' : 'text-text-placeholder'}`}
+                      className={`w-3 h-3 ${+track.priority > 0 ? 'text-accent animate-pulse' : 'text-text-placeholder'}`}
                     />
                     <span
                       className={`font-bold ${+track.priority > 0 ? 'text-text-main' : 'text-text-placeholder'}`}
@@ -208,7 +208,7 @@ function OrderMiniCardImpl({
 
         {/* Панель управления — opens on tap (mobile) OR hover (desktop) */}
         <div
-          className={`w-full flex gap-2 justify-center items-center bg-level-1/5 shadow-inner border-t border-level-3/10 transition-all duration-300 ease-in-out px-3 overflow-hidden ${
+          className={`w-full flex gap-2 justify-center items-center bg-level-1/5 shadow-inner border-t border-accent/10 transition-all duration-300 ease-in-out px-3 overflow-hidden ${
             actionsOpen
               ? 'max-h-14 opacity-100 py-2.5'
               : 'max-h-0 opacity-0 group-hover:max-h-14 group-hover:opacity-100 group-hover:py-2.5'

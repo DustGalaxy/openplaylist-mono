@@ -55,7 +55,7 @@ export default function ContentSettingsSection({
     return (
       <div className="space-y-4">
         <div className="flex items-start gap-2.5">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-accent/40 text-accent mt-0.5">
             <ShieldCheck className="size-5" />
           </div>
           <div>
@@ -74,7 +74,7 @@ export default function ContentSettingsSection({
           </div>
         </div>
 
-        <div className="p-6 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center flex flex-col items-center gap-3">
+        <div className="p-6 border border-dashed border-accent/60 rounded-md bg-level-1/50 text-center flex flex-col items-center gap-3">
           <Sliders className="size-8 text-text-placeholder" strokeWidth={1.5} />
           <div>
             <p className="text-xs font-semibold text-text-main">
@@ -147,7 +147,7 @@ export default function ContentSettingsSection({
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-start gap-2.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-accent/40 text-accent mt-0.5">
           <ShieldCheck className="size-5" />
         </div>
         <div>
@@ -170,11 +170,11 @@ export default function ContentSettingsSection({
           return (
             <div
               key={field}
-              className="p-2.5 sm:p-3 border border-level-3/60 rounded-md bg-level-1 hover:border-level-3/80 transition-all flex items-center justify-between gap-3 shadow-xs"
+              className="p-2.5 sm:p-3 border border-accent/60 rounded-md bg-level-1 hover:border-accent/80 transition-all flex items-center justify-between gap-3 shadow-xs"
             >
               {/* Left Info */}
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-level-2 border border-level-3/40 text-level-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-level-2 border border-accent/40 text-accent">
                   <Icon className="size-4" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -183,7 +183,7 @@ export default function ContentSettingsSection({
                       {t(labelKey)}
                     </Label>
                     {unit && (
-                      <span className="text-[10px] px-1.5 py-0.2 bg-level-2 border border-level-3/40 rounded-full text-text-secondary">
+                      <span className="text-[10px] px-1.5 py-0.2 bg-level-2 border border-accent/40 rounded-full text-text-secondary">
                         {unit}
                       </span>
                     )}
@@ -194,7 +194,7 @@ export default function ContentSettingsSection({
                         </TooltipTrigger>
                         <TooltipContent
                           side="top"
-                          className="bg-level-2 text-text-main border-level-3/40 border text-xs max-w-xs"
+                          className="bg-level-2 text-text-main border-accent/40 border text-xs max-w-xs"
                         >
                           <p>{description}</p>
                         </TooltipContent>

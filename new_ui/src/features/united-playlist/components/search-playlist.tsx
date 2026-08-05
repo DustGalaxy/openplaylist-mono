@@ -77,7 +77,7 @@ const SearchPlaylist = ({
 
       {isLoading && (
         <div className="mt-8 flex items-center justify-center gap-2 text-text-secondary">
-          <Loader2 className="h-5 w-5 animate-spin text-level-3" />
+          <Loader2 className="h-5 w-5 animate-spin text-accent" />
           <span className="text-sm">{t('publicSearch.searching')}</span>
         </div>
       )}
@@ -107,15 +107,15 @@ const SearchPlaylist = ({
               to={`/playlists/${playlist.id}`}
               className={`
                 group text-left flex flex-col gap-3 p-5 ${panelClass}
-                border-level-3/50 transition-all duration-200
-                hover:border-level-3 hover:shadow-[0_0_24px_rgba(236,72,153,0.12)]
+                border-accent/50 transition-all duration-200
+                hover:border-accent hover:shadow-[0_0_24px_rgba(236,72,153,0.12)]
               `}
             >
               <div className="flex items-start gap-3">
                 <div
                   className="
                     flex h-10 w-10 shrink-0 items-center justify-center rounded-(--rounded-std)
-                    bg-level-1 border border-level-3/40 text-level-3
+                    bg-level-1 border border-accent/40 text-accent
                     group-hover:text-transparent group-hover:bg-gradient-to-br
                     group-hover:from-[var(--color-accent-2)] group-hover:via-[var(--color-accent-3)]
                     group-hover:to-[var(--color-accent-1)] transition-colors
@@ -125,7 +125,7 @@ const SearchPlaylist = ({
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3
-                    className={`font-bold text-lg truncate group-hover:underline decoration-level-3/60 ${gradientTextClass}`}
+                    className={`font-bold text-lg truncate group-hover:underline decoration-accent/60 ${gradientTextClass}`}
                   >
                     {playlist.name}
                   </h3>
@@ -138,7 +138,7 @@ const SearchPlaylist = ({
               <p className="text-sm text-text-secondary line-clamp-2 leading-relaxed">
                 {playlist.discription || t('publicSearch.noDescription')}
               </p>
-              <span className="text-xs font-medium text-level-3 group-hover:text-text-main transition-colors">
+              <span className="text-xs font-medium text-accent group-hover:text-text-main transition-colors">
                 {t('publicSearch.openPlaylist')} →
               </span>
             </Link>

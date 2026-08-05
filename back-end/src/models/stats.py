@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Any
 from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -19,6 +20,18 @@ class UserStatsVisibilitySettings(BaseModel):
     show_top_requesters: bool = True
     show_donations: bool = False
     show_moderation_stats: bool = False
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserStatsVisibilitySettingsPatch(BaseModel):
+    show_outgoing_stats: bool | None = None
+    show_incoming_stats: bool | None = None
+    show_top_tracks: bool | None = None
+    show_top_streamers: bool | None = None
+    show_top_requesters: bool | None = None
+    show_donations: bool | None = None
+    show_moderation_stats: bool | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

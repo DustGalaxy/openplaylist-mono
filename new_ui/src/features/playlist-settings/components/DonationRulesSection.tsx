@@ -73,7 +73,7 @@ export default function DonationRulesSection({
     <div className="space-y-4">
       {/* Header Title & Subtitle */}
       <div className="flex items-start gap-2.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-accent/40 text-accent mt-0.5">
           <HeartHandshake className="size-5" />
         </div>
         <div>
@@ -87,9 +87,9 @@ export default function DonationRulesSection({
       </div>
 
       {/* New Rule Creation Card */}
-      <div className="p-2.5 sm:p-3 border border-level-3/60 rounded-md bg-level-1 space-y-2.5 shadow-xs">
+      <div className="p-2.5 sm:p-3 border border-accent/60 rounded-md bg-level-1 space-y-2.5 shadow-xs">
         <div className="text-xs font-semibold text-text-main flex items-center gap-1.5">
-          <Plus className="size-3.5 text-level-3" />
+          <Plus className="size-3.5 text-accent" />
           <span>
             {t(
               'playlistSettings.donation.addRuleTitle',
@@ -115,7 +115,7 @@ export default function DonationRulesSection({
                     'playlistSettings.donation.ruleName',
                     'Rule name',
                   )}
-                  className="text-xs sm:text-sm bg-level-2 border-0 h-8 px-2.5 focus-visible:ring-1 focus-visible:ring-level-3/50"
+                  className="text-xs sm:text-sm bg-level-2 border-0 h-8 px-2.5 focus-visible:ring-1 focus-visible:ring-accent/50"
                   onChange={(e) =>
                     setNewRule((p) => ({ ...p, name: e.target.value }))
                   }
@@ -123,7 +123,7 @@ export default function DonationRulesSection({
               </TooltipTrigger>
               <TooltipContent
                 side="top"
-                className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+                className="bg-level-2 text-text-main border-accent/40 border text-xs"
               >
                 <p>
                   {t(
@@ -170,7 +170,7 @@ export default function DonationRulesSection({
                 </TooltipTrigger>
                 <TooltipContent
                   side="top"
-                  className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+                  className="bg-level-2 text-text-main border-accent/40 border text-xs"
                 >
                   <p>
                     {t(
@@ -206,7 +206,7 @@ export default function DonationRulesSection({
                 </TooltipTrigger>
                 <TooltipContent
                   side="top"
-                  className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+                  className="bg-level-2 text-text-main border-accent/40 border text-xs"
                 >
                   <p>
                     {t(
@@ -251,7 +251,7 @@ export default function DonationRulesSection({
                 </TooltipTrigger>
                 <TooltipContent
                   side="top"
-                  className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+                  className="bg-level-2 text-text-main border-accent/40 border text-xs"
                 >
                   <p>
                     {t(
@@ -306,7 +306,7 @@ export default function DonationRulesSection({
           ))}
         </div>
       ) : (
-        <div className="p-4 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center">
+        <div className="p-4 border border-dashed border-accent/60 rounded-md bg-level-1/50 text-center">
           <p className="text-xs text-text-secondary">
             {t(
               'playlistSettings.donation.noRules',

@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/avatar'
 import { RoleBadgeList } from '@/components/ui/role-badge'
 import { SocialLinksRow } from '@/components/ui/social-links-row'
+import { UserPopoverStatsWidget } from '@/features/stats'
 
 interface UserPopoverProps {
   user?: PublicUser
@@ -63,7 +64,7 @@ export const UserPopover: React.FC<UserPopoverProps> = ({ user }) => {
           <div className="text-text-main -mt-1">{userData?.username}</div>
           <button
             className="outline-none focus-visible:ring-2 focus-visible:ring-accent-3 rounded-full m-1.5
-          ring-2 ring-level-3 ring-offset-1 ring-offset-level-1
+          ring-2 ring-accent ring-offset-1 ring-offset-level-1
           "
           >
             <Avatar
@@ -86,10 +87,10 @@ export const UserPopover: React.FC<UserPopoverProps> = ({ user }) => {
 
       <PopoverContent
         align="end"
-        className="w-80 p-0 overflow-hidden bg-level-1 border-level-3 shadow-xl rounded-xl"
+        className="w-80 p-0 overflow-hidden bg-level-1 border-accent shadow-xl rounded-xl"
       >
         {/* 1. Декоративный баннер шапки */}
-        <div className="h-16 flex items-center bg-linear-to-r from-purple-900/40 via-indigo-900/40 to-accent-3/20 border-b border-level-3/50 relative">
+        <div className="h-16 flex items-center bg-linear-to-r from-purple-900/40 via-indigo-900/40 to-accent-3/20 border-b border-accent/50 relative">
           <Avatar
             size="lg"
             className="ring-3 ring-level-1 overflow-visible bg-level-2 ml-4 z-10"
@@ -132,9 +133,12 @@ export const UserPopover: React.FC<UserPopoverProps> = ({ user }) => {
               ? userData.bio
               : t('userProfile.noBio', '👀 No bio.')}
           </p>
+
+          {/* 5.5. Компактная статистика пользователя */}
+          <UserPopoverStatsWidget userId={userData?.id} className="mt-2" />
           {/* 6. Карточка "Сейчас слушает" */}
           {/* {userData.nowPlaying && (
-            <div className="mt-4 p-2.5 rounded-lg bg-level-2/70 border border-level-3/60 flex items-center gap-3">
+            <div className="mt-4 p-2.5 rounded-lg bg-level-2/70 border border-accent/60 flex items-center gap-3">
               <div className="w-9 h-9 rounded bg-accent-3/20 flex items-center justify-center shrink-0 text-accent-3">
                 <Music size={18} className="animate-pulse" />
               </div>
@@ -154,7 +158,7 @@ export const UserPopover: React.FC<UserPopoverProps> = ({ user }) => {
 
           {/* 7. Метаданные */}
           {/* {userData.joinedAt && (
-            <div className="mt-3 pt-3 border-t border-level-3/40 flex justify-between items-center text-[11px] text-text-secondary">
+            <div className="mt-3 pt-3 border-t border-accent/40 flex justify-between items-center text-[11px] text-text-secondary">
               <span>Спонсор проекта</span>
               <span>с {userData.joinedAt}</span>
             </div>

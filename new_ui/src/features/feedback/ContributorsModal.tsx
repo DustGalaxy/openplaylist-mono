@@ -31,7 +31,7 @@ export default function ContributorsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-level-2 text-text-main border-2 border-level-3 sm:max-w-md">
+      <DialogContent className="bg-level-2 text-text-main border-2 border-accent sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
             {t('contributorsModal.title', 'Contributors')}

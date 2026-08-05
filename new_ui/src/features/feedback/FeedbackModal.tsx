@@ -104,7 +104,7 @@ export default function FeedbackModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="bg-level-2 text-text-main border-2 border-level-3 sm:max-w-md">
+      <DialogContent className="bg-level-2 text-text-main border-2 border-accent sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -153,8 +153,8 @@ export default function FeedbackModal({
                   className={cn(
                     'h-7 w-7 rounded-full text-xs transition-colors border',
                     n <= rating && rating > 0
-                      ? 'bg-level-3 border-level-3 text-white'
-                      : 'bg-level-1 border-level-3/40 text-text-secondary hover:border-level-3',
+                      ? 'bg-accent border-accent text-white'
+                      : 'bg-level-1 border-accent/40 text-text-secondary hover:border-accent',
                   )}
                 >
                   {n}

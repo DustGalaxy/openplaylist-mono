@@ -68,7 +68,7 @@ export default function AddToPlaylistSubmenu({
         {t('playlist.track.actions.addToPlaylist', 'Add to playlist')}
       </DropdownMenuSubTrigger>
       <DropdownMenuPortal>
-        <DropdownMenuSubContent className="bg-level-2 border-level-3 text-text-main max-h-50 overflow-y-auto">
+        <DropdownMenuSubContent className="bg-level-2 border-accent text-text-main max-h-50 overflow-y-auto">
           <DropdownMenuGroup>
             {playlists ? (
               playlists.length > 0 ? (
@@ -100,7 +100,7 @@ export default function AddToPlaylistSubmenu({
               </DropdownMenuLabel>
             ) : null}
           </DropdownMenuGroup>
-          <DropdownMenuSeparator className="bg-level-3" />
+          <DropdownMenuSeparator className="bg-accent" />
           {user ? (
             <DropdownMenuItem
               disabled={selected.length === 0}

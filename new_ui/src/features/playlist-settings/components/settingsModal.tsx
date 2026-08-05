@@ -39,10 +39,10 @@ export function SettingsModalInner() {
 
   const retroTabStyles = `
     bg-level-2 data-[state=active]:bg-level-2 border-2 justify-start
-    ring-1 ring-level-3/40
-    shadow-[0_3px_0_0_var(--color-level-3),0_4px_5px_-1px_rgba(0,0,0,0.5)] 
-    sm:shadow-[0_3px_0_0_var(--color-level-3),0_5px_8px_-1px_rgba(0,0,0,0.55)]
-    hover:shadow-[0_3px_0_0_var(--color-level-3),0_0px_15px_rgba(255,255,255,0.25),0_4px_8px_rgba(255,255,255,0.15)]
+    ring-1 ring-accent/40
+    shadow-[0_3px_0_0_var(--color-accent),0_4px_5px_-1px_rgba(0,0,0,0.5)] 
+    sm:shadow-[0_3px_0_0_var(--color-accent),0_5px_8px_-1px_rgba(0,0,0,0.55)]
+    hover:shadow-[0_3px_0_0_var(--color-accent),0_0px_15px_rgba(255,255,255,0.25),0_4px_8px_rgba(255,255,255,0.15)]
     hover:text-shadow-[0_0_4px_rgba(255,255,255,0.8),_0_0_25px_rgba(255,255,255,0.4)]
     hover:[&_svg]:drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]
     disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none
@@ -52,7 +52,7 @@ export function SettingsModalInner() {
     transform translate-y-0 transition-all duration-100
     data-[state=active]:translate-y-[3px]
     sm:data-[state=active]:translate-y-[5px]
-    data-[state=active]:shadow-[0_0px_0_0_var(--color-level-3),0_0px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)]
+    data-[state=active]:shadow-[0_0px_0_0_var(--color-accent),0_0px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.05)]
   `
 
   return (
@@ -70,7 +70,7 @@ export function SettingsModalInner() {
         className="fixed 
       top-10! bottom-10! left-0! right-0! translate-x-0! translate-y-0! w-screen max-w-full px-1 sm:px-4 h-screen max-h-[90vh] 
       sm:top-[50%]! sm:left-[50%]! sm:-translate-x-1/2! sm:-translate-y-1/2! 
-      sm:max-w-6xl sm:h-[80vh] rounded-t-xl sm:rounded-xl bg-level-1 border-level-3 text-text-main flex flex-col overflow-scroll"
+      sm:max-w-6xl sm:h-[80vh] rounded-t-xl sm:rounded-xl bg-level-1 border-accent text-text-main flex flex-col overflow-scroll"
       >
         <Tabs className="min-w-full flex justify-start" defaultValue="general">
           <DialogHeader>

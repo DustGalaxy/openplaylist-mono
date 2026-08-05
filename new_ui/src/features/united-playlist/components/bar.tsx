@@ -149,9 +149,9 @@ export function PlaylistQueueInput({
           onChange={handleChange}
           placeholder={placeholder}
           className="
-            h-11 w-full border-2 border-level-3/70 rounded-(--rounded-std) bg-level-1
+            h-11 w-full border-2 border-accent/70 rounded-(--rounded-std) bg-level-1
             pr-4 pl-10 text-text-main placeholder:text-text-placeholder
-            focus-visible:border-level-3 focus-visible:ring-level-3/30 placeholder:text-xs sm:placeholder:text-sm
+            focus-visible:border-accent focus-visible:ring-accent/30 placeholder:text-xs sm:placeholder:text-sm
           "
         />
       </div>

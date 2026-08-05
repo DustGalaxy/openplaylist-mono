@@ -1,16 +1,20 @@
-from datetime import datetime, timedelta, timezone
 import json
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.dal._redis.broker import get_broker
 from src.dal.postgres.stats import stats_repository
+from src.dal.postgres.user import user_repository
+from src.models.auth_user import AuthUserUpdate
 from src.models.stats import (
     GlobalStatsResponse,
     IncomingStatsResponse,
     OutgoingStatsResponse,
     TimeWindow,
     UserStatsVisibilitySettings,
+    UserStatsVisibilitySettingsPatch,
 )
 
 
@@ -19,7 +23,7 @@ class StatsService:
     CACHE_TTL_GLOBAL = 3600  # 1 hour
 
     def calculate_start_date(self, time_window: TimeWindow) -> datetime | None:
-        now = datetime.now(timezone.utc)
+        now = datetime.now()
         if time_window == TimeWindow.LAST_24H:
             return now - timedelta(hours=24)
         elif time_window == TimeWindow.LAST_7D:
@@ -76,9 +80,7 @@ class StatsService:
 
         return stats
 
-    async def get_global_stats(
-        self, session: AsyncSession, time_window: TimeWindow = TimeWindow.ALL_TIME
-    ) -> GlobalStatsResponse:
+    async def get_global_stats(self, session: AsyncSession, time_window: TimeWindow = TimeWindow.ALL_TIME) -> GlobalStatsResponse:
         cache_key = f"stats:global:{time_window.value}"
         broker = get_broker()
 
@@ -98,6 +100,46 @@ class StatsService:
             pass
 
         return stats
+
+    async def get_user_visibility_settings(self, session: AsyncSession, user_id: UUID) -> UserStatsVisibilitySettings:
+        try:
+            user = await user_repository.get_one(session, user_id)
+            if user and user.stats_visibility and isinstance(user.stats_visibility, dict):
+                return UserStatsVisibilitySettings.model_validate(user.stats_visibility)
+        except Exception:
+            pass
+        return UserStatsVisibilitySettings()
+
+    async def get_public_user_stats(
+        self, session: AsyncSession, target_user_id: UUID, time_window: TimeWindow = TimeWindow.ALL_TIME
+    ) -> dict:
+        visibility_settings = await self.get_user_visibility_settings(session, target_user_id)
+
+        raw_outgoing = await self.get_outgoing_stats(session, target_user_id, time_window)
+        raw_incoming = await self.get_incoming_stats(session, target_user_id, time_window)
+
+        filtered_outgoing = self.filter_public_outgoing_stats(raw_outgoing, visibility_settings)
+        filtered_incoming = self.filter_public_incoming_stats(raw_incoming, visibility_settings)
+
+        return {
+            "user_id": target_user_id,
+            "period": time_window,
+            "outgoing": filtered_outgoing,
+            "incoming": filtered_incoming,
+        }
+
+    async def update_user_stats_privacy(
+        self, session: AsyncSession, user_id: UUID, settings_patch: UserStatsVisibilitySettingsPatch
+    ) -> UserStatsVisibilitySettings:
+        current_settings = await self.get_user_visibility_settings(session, user_id)
+        current_dict = current_settings.model_dump()
+        patch_dict = settings_patch.model_dump(exclude_unset=True)
+        merged_dict = {**current_dict, **{k: v for k, v in patch_dict.items() if v is not None}}
+
+        patch_data = AuthUserUpdate(stats_visibility=merged_dict)
+        updated_user = await user_repository.patch(session, patch_data, user_id)
+        raw_visibility = updated_user.stats_visibility or {}
+        return UserStatsVisibilitySettings.model_validate(raw_visibility)
 
     def filter_public_outgoing_stats(
         self, stats: OutgoingStatsResponse, settings: UserStatsVisibilitySettings

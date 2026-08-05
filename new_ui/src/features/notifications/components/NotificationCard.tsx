@@ -32,8 +32,8 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         {/* Точка непрочитанного */}
         {!isRead && (
           <span className="absolute left-1.5 top-2/5 flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-level-3 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-level-3"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
           </span>
         )}
         <span
@@ -47,7 +47,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
             <button
               type="button"
               onClick={onMarkAsRead}
-              className="p-1.5 text-text-placeholder hover:text-level-3 hover:bg-level-4 rounded-lg transition"
+              className="p-1.5 text-text-placeholder hover:text-accent hover:bg-level-4 rounded-lg transition"
               title={t(
                 'notifications.actions.mark_read',
                 'Отметить прочитанным',

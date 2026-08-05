@@ -131,7 +131,7 @@ export default function ChatRolesSection({
     <div className="space-y-4">
       {/* Title Header */}
       <div className="flex items-start gap-2.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-level-3/40 text-level-3 mt-0.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-level-1 border border-accent/40 text-accent mt-0.5">
           <UserCheck className="size-5" />
         </div>
         <div>
@@ -146,9 +146,9 @@ export default function ChatRolesSection({
 
       {/* Creation Card */}
       {unusedRoles.length > 0 && (
-        <div className="p-2.5 sm:p-3 border border-level-3/60 rounded-md bg-level-1 space-y-2.5 shadow-xs">
+        <div className="p-2.5 sm:p-3 border border-accent/60 rounded-md bg-level-1 space-y-2.5 shadow-xs">
           <div className="text-xs font-semibold text-text-main flex items-center gap-1.5">
-            <Plus className="size-3.5 text-level-3" />
+            <Plus className="size-3.5 text-accent" />
             <span>
               {t(
                 'playlistSettings.chatRoles.addRoleTitle',
@@ -166,12 +166,12 @@ export default function ChatRolesSection({
                     placeholder={t('playlistSettings.chatRoles.addRole')}
                   />
                 </SelectTrigger>
-                <SelectContent className="bg-level-2 border-level-3/40">
+                <SelectContent className="bg-level-2 border-accent/40">
                   {unusedRoles.map((role) => (
                     <SelectItem
                       key={role.key}
                       value={role.key}
-                      className="bg-level-2 focus:bg-level-3 text-xs cursor-pointer"
+                      className="bg-level-2 focus:bg-accent text-xs cursor-pointer"
                     >
                       <div className="flex items-center gap-2 text-text-main">
                         {role.badge_type === 'img' &&
@@ -183,7 +183,7 @@ export default function ChatRolesSection({
                             />
                           )}
                         {role.badge_type === 'svg' && role.badge_url && (
-                          <div className="w-4 h-4 flex items-center justify-center text-level-3">
+                          <div className="w-4 h-4 flex items-center justify-center text-accent">
                             {role.badge_url}
                           </div>
                         )}
@@ -232,7 +232,7 @@ export default function ChatRolesSection({
                   </TooltipTrigger>
                   <TooltipContent
                     side="top"
-                    className="bg-level-2 text-text-main border-level-3/40 border text-xs"
+                    className="bg-level-2 text-text-main border-accent/40 border text-xs"
                   >
                     <p>
                       {t(
@@ -295,7 +295,7 @@ export default function ChatRolesSection({
           </SortableContext>
         </DndContext>
       ) : (
-        <div className="p-4 border border-dashed border-level-3/60 rounded-md bg-level-1/50 text-center">
+        <div className="p-4 border border-dashed border-accent/60 rounded-md bg-level-1/50 text-center">
           <p className="text-xs font-semibold text-text-main">
             {t('playlistSettings.chatRoles.noRoles')}
           </p>
