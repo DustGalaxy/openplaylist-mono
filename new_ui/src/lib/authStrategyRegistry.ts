@@ -13,6 +13,7 @@ import { TwitchAuthStrategy } from './strategies/TwitchAuthStrategy'
 import { DaAuthStrategy } from './strategies/DaAuthStrategy'
 import { GoogleAuthStrategy } from './strategies/GoogleAuthStrategy'
 import { DonateXIntegrayionStrategy } from './strategies/DonateXIntegrationStrategy'
+import { DonatePayIntegrationStrategy } from './strategies/DonatePayIntegrationStrategy'
 
 /**
  * Initialize and register all available auth strategies
@@ -38,10 +39,9 @@ export function registerAuthStrategies(): void {
   const donateXStrategy = new DonateXIntegrayionStrategy()
   authStrategyManager.registerIntegrationStrategy('donatex', donateXStrategy)
 
-  // console.log(
-  //   'Auth strategies registered:',
-  //   authStrategyManager.getRegisteredPlatforms(),
-  // )
+  // Register DonatePay integration strategy
+  const donatePayStrategy = new DonatePayIntegrationStrategy()
+  authStrategyManager.registerIntegrationStrategy('donatepay', donatePayStrategy)
 }
 
 /**

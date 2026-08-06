@@ -162,6 +162,7 @@ class Platform(StrEnum):
     DA = "donationalerts"
     WEB = "web"
     DONATEX = "donatex"
+    DONATEPAY = "donatepay"
 
 
 # служебный sentinel — только для БД, не платформа
@@ -177,6 +178,7 @@ class ContentSettingScope(StrEnum):
     WEB = Platform.WEB
     DA = Platform.DA
     DONATEX = Platform.DONATEX
+    DONATEPAY = Platform.DONATEPAY
     GENERAL = GENERAL_SCOPE
 
 
@@ -186,11 +188,13 @@ class BlockListScope(StrEnum):
     DA = Platform.DA
     WEB = Platform.WEB
     DONATEX = Platform.DONATEX
+    DONATEPAY = Platform.DONATEPAY
 
 
 class DonationRuleScope(StrEnum):
     DA = Platform.DA
     DONATEX = Platform.DONATEX
+    DONATEPAY = Platform.DONATEPAY
     GENERAL = GENERAL_SCOPE
 
 
@@ -208,6 +212,7 @@ class IntegrationPlatform(StrEnum):
     GOOGLE = Platform.GOOGLE
     DA = Platform.DA
     DONATEX = Platform.DONATEX
+    DONATEPAY = Platform.DONATEPAY
 
 
 class IntegrationType(StrEnum):
@@ -243,6 +248,7 @@ class TrackSource(StrEnum):
     WEB = Platform.WEB
     DA = Platform.DA
     DONATEX = Platform.DONATEX
+    DONATEPAY = Platform.DONATEPAY
 
 
 class PlatformCap(StrEnum):

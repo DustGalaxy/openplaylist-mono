@@ -18,6 +18,7 @@ import {
 } from '@/features/landing/styles'
 import Twitch from '@/components/icons/icon-twtich'
 import DonationAlerts from '@/components/icons/icon-da'
+import DonatePayIcon from '@/components/icons/icon-donatepay'
 import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
 // ─── Hash helpers ──────────────────────────────────────────────────────────────
@@ -137,6 +138,12 @@ export function UserSettingsPage({
       loginHandler: async () => {
         await handleOAuthRedirect('donatex', true)
       },
+    },
+    donatepay: {
+      name: tc('platform.donatepay'),
+      icon: <DonatePayIcon width={45} height={45} />,
+      isUserKey: true,
+      loginHandler: async () => {},
     },
   } as const
 

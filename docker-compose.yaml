@@ -278,6 +278,23 @@ services:
         reservations:
           memory: 50M
 
+  bot-donatepay:
+    build:
+      context: ./bot_donatepay
+      dockerfile: ./Dockerfile
+    env_file:
+      - ./bot_donatepay/.env
+    volumes:
+      - ./bot_donatepay/src:/app/src
+    networks:
+      - default
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+        reservations:
+          memory: 50M
+
   frontend:
     build:
       context: ./new_ui

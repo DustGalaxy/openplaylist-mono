@@ -11,12 +11,14 @@ export enum Platform {
   Web = 'web',
   DonationAlerts = 'donationalerts',
   DonateX = 'donatex',
+  DonatePay = 'donatepay',
 }
 
 export enum DonationPlatform {
   General = '__general__',
   DonationAlerts = 'donationalerts',
   DonateX = 'donatex',
+  DonatePay = 'donatepay',
 }
 
 export enum ChatPlatform {
@@ -30,6 +32,7 @@ export enum RequestPlatform {
   YouTube = 'youtube',
   DonationAlerts = 'donationalerts',
   DonateX = 'donatex',
+  DonatePay = 'donatepay',
 }
 
 export enum ExternalContentPlatform {
@@ -37,6 +40,7 @@ export enum ExternalContentPlatform {
   YouTube = 'youtube',
   DonationAlerts = 'donationalerts',
   DonateX = 'donatex',
+  DonatePay = 'donatepay',
 }
 
 export enum PlaylistMode {
@@ -330,6 +334,7 @@ export type TrackAction =
 
 export type DeleteStatus = 'removed' | 'listened' | 'skipped' | 'reported'
 export type SortBy = 'priority' | 'date' | 'shuffle'
+export type RepeatMode = 'all' | 'once' | 'none'
 
 // ─── Cache & Store Architecture Types ───────────────────────────────
 

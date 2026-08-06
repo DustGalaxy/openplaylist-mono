@@ -5,16 +5,17 @@ import src.models  # noqa: F401
 from fastapi import APIRouter, FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from src.adapters._fastapi.feedback_routes import router as feedback_router
-from src.adapters._fastapi.stats_routes import router as stats_router
 from src.adapters._fastapi.login_routes import router as login_router
 from src.adapters._fastapi.notifications import router as notificattions_router
 from src.adapters._fastapi.order_routes import router as order_router
 from src.adapters._fastapi.playback_routes import router as playback_router
 from src.adapters._fastapi.playlist_routes import router as playlist_router
 from src.adapters._fastapi.settings_routes import router as settings_router
+from src.adapters._fastapi.stats_routes import router as stats_router
 from src.adapters._fastapi.stream_routes import router as stream_router
 from src.adapters._fastapi.user_routes import router as user_router
 from src.adapters._rabbit.bots.da import router as rmq_da_router
+from src.adapters._rabbit.bots.donatepay import router as rmq_donatepay_router
 from src.adapters._rabbit.bots.donatex import router as rmq_donatex_router
 from src.adapters._rabbit.bots.twitch import router as rmq_twitch_router
 from src.adapters._rabbit.broker import get_broker as get_rabbit_broker
@@ -35,7 +36,7 @@ async def lifespan(app: FastAPI):
         await load_feature_flags(session)
 
     rmq_broker = get_rabbit_broker()
-    rmq_broker.include_routers(rmq_donatex_router, rmq_twitch_router, rmq_da_router)
+    rmq_broker.include_routers(rmq_donatex_router, rmq_twitch_router, rmq_da_router, rmq_donatepay_router)
     await rmq_broker.start()
 
     get_broker().connect()

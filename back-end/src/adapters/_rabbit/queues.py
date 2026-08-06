@@ -47,6 +47,17 @@ bot_donatex_order_new = RabbitQueue("bot.donatex.order.new", durable=True)
 bot_donatex_ack_connection = RabbitQueue("bot.donatex.ack.connection", durable=True)
 bot_donatex_disconect = RabbitQueue("bot.donatex.disconnect", durable=True)
 
+# --- donatepay
+
+auth_user_donatepay_tokens_refreshed = RabbitQueue("auth.user.donatepay.tokens.refreshed", durable=True)
+auth_user_donatepay_all_request = RabbitQueue("auth.user.donatepay.all.request", durable=True)
+
+bot_donatepay_connect_request = RabbitQueue("bot.donatepay.connect.request", durable=True)
+bot_donatepay_connect_response = RabbitQueue("bot.donatepay.connect.response", durable=True)
+bot_donatepay_order_new = RabbitQueue("bot.donatepay.order.new", durable=True)
+bot_donatepay_ack_connection = RabbitQueue("bot.donatepay.ack.connection", durable=True)
+bot_donatepay_disconect = RabbitQueue("bot.donatepay.disconnect", durable=True)
+
 # --- status and internal
 
 playlist_order_created = RabbitQueue("playlist.order.created", durable=True)

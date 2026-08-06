@@ -4,6 +4,7 @@ from src.services.auth.twitch_service import AuthTwitchService
 from src.services.auth.da_service import AuthDAService
 from src.services.auth.google_service import AuthGoogleService
 from src.services.auth.donatex_service import AuthDonateXService
+from src.services.auth.donatepay_service import AuthDonatePayService
 from src.dto.internal.auth import IntegrationStrategy, PlatformCap
 from src._types import IntegrationPlatform, IntegrationType
 
@@ -66,3 +67,4 @@ manager.register(AuthTwitchService())
 manager.register(AuthDAService())
 manager.register(AuthGoogleService())
 manager.register(AuthDonateXService())
+manager.register(AuthDonatePayService())

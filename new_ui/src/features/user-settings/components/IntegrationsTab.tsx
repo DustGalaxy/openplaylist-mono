@@ -11,11 +11,23 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import type { Integration } from '@/types/user'
-import { connectBot, deleteIntegration, disconnectBot } from '@/api/api-user'
+import {
+  connectBot,
+  deleteIntegration,
+  disconnectBot,
+  linkIntegrationUserKey,
+} from '@/api/api-user'
 import { getGlobalSocket } from '@/api/io-sockets'
 import Btn from '@/components/ui/my-btn'
 import { Label } from '@/components/ui/label'
-import { DialogDescription } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { BotSettingsModal } from './BotSettingsModal'
 import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
@@ -25,6 +37,7 @@ interface IntegrationsTabProps {
     [key: string]: {
       name: string
       icon: React.ReactNode
+      isUserKey?: boolean
       loginHandler: (value: boolean) => void
     }
   }
@@ -39,6 +52,9 @@ export function IntegrationsTab({
   const [integrations, setIntegrations] =
     useState<Array<Integration>>(initialIntegrations)
   const [loading, setLoading] = useState<Record<string, boolean>>({})
+  const [userKeyModalPlatform, setUserKeyModalPlatform] = useState<string | null>(null)
+  const [userKeyInput, setUserKeyInput] = useState('')
+  const [submittingUserKey, setSubmittingUserKey] = useState(false)
 
   useEffect(() => {
     const global_socket = getGlobalSocket()
@@ -190,7 +206,37 @@ export function IntegrationsTab({
 
   const handleConnectPlatform = (platform: string) => {
     const config = platformConfigs[platform as keyof typeof platformConfigs]
-    config.loginHandler(true)
+    if (config?.isUserKey) {
+      setUserKeyModalPlatform(platform)
+      setUserKeyInput('')
+    } else {
+      config.loginHandler(true)
+    }
+  }
+
+  const handleLinkUserKeySubmit = async () => {
+    if (!userKeyModalPlatform || !userKeyInput.trim()) return
+    setSubmittingUserKey(true)
+    const loadingToast = toast.loading(tc('common.toast.saving', 'Saving...'))
+
+    try {
+      await linkIntegrationUserKey(userKeyModalPlatform, userKeyInput.trim())
+      toast.dismiss(loadingToast)
+      toast.success(
+        t('settings.integrations.accountConnected', 'Account linked successfully'),
+      )
+      setUserKeyModalPlatform(null)
+      setUserKeyInput('')
+      window.location.reload()
+    } catch (error) {
+      console.error(`Failed to link ${userKeyModalPlatform}:`, error)
+      toast.dismiss(loadingToast)
+      toast.error(
+        t('settings.integrations.connectFailed', 'Failed to connect integration'),
+      )
+    } finally {
+      setSubmittingUserKey(false)
+    }
   }
 
   const deadCount = integrations.filter((i) => i.is_dead).length
@@ -345,6 +391,80 @@ export function IntegrationsTab({
           })}
         </div>
       </div>
+
+      {userKeyModalPlatform && (
+        <Dialog
+          open={!!userKeyModalPlatform}
+          onOpenChange={(open) => {
+            if (!open) setUserKeyModalPlatform(null)
+          }}
+        >
+          <DialogContent className="max-w-md bg-level-1 border-accent/40">
+            <DialogHeader>
+              <DialogTitle className="text-base font-bold text-text-main">
+                {t('settings.integrations.connectUserKeyTitle', {
+                  platform:
+                    platformConfigs[userKeyModalPlatform]?.name ||
+                    userKeyModalPlatform,
+                  defaultValue: `Connect ${
+                    platformConfigs[userKeyModalPlatform]?.name ||
+                    userKeyModalPlatform
+                  }`,
+                })}
+              </DialogTitle>
+              <DialogDescription className="text-xs text-text-secondary">
+                {t(
+                  'settings.integrations.connectUserKeyDesc',
+                  'Enter your API Access Token (user key) from your platform account.',
+                )}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-3 py-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-text-main">
+                  {t(
+                    'settings.integrations.apiKeyLabel',
+                    'API Access Token / User Key',
+                  )}
+                </Label>
+                <Input
+                  type="password"
+                  value={userKeyInput}
+                  onChange={(e) => setUserKeyInput(e.target.value)}
+                  placeholder="e.g. 9mIQ65KXfnayYfFPLFYL1NGpb..."
+                  className="bg-level-2 border-accent/40 text-xs text-text-main"
+                />
+                <p className="text-[11px] text-text-secondary">
+                  {t(
+                    'settings.integrations.apiKeyHint',
+                    'You can find your API token in your DonatePay account settings (donatepay.eu/page/api).',
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-accent/40">
+              <button
+                type="button"
+                onClick={() => setUserKeyModalPlatform(null)}
+                className="h-8 px-3 rounded-md border border-accent/40 bg-level-2 text-xs font-medium text-text-secondary hover:text-text-main transition-colors"
+              >
+                {tc('common.cancel', 'Cancel')}
+              </button>
+              <Btn
+                onClick={handleLinkUserKeySubmit}
+                disabled={submittingUserKey || !userKeyInput.trim()}
+                className="h-8 px-4 bg-accent text-xs font-bold text-text-main"
+              >
+                {submittingUserKey
+                  ? tc('common.toast.saving', 'Connecting...')
+                  : t('settings.integrations.connectAccount', 'Connect')}
+              </Btn>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }

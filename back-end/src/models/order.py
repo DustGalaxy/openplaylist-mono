@@ -1,9 +1,8 @@
 from datetime import datetime
-from typing import Any, Type
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, model_validator
-
 from src._types import TrackSource
 
 
@@ -30,14 +29,20 @@ class DonatexExtraData(BaseModel):
     donation_currency: str
 
 
-ExtraData = TTVExtraData | DAExtraData | YTExtraData | WebExtraData | DonatexExtraData
+class DonatePayExtraData(BaseModel):
+    donation_amount: float
+    donation_currency: str
 
-STRATEGIES: dict[TrackSource, Type[ExtraData]] = {
+
+ExtraData = TTVExtraData | DAExtraData | YTExtraData | WebExtraData | DonatexExtraData | DonatePayExtraData
+
+STRATEGIES: dict[TrackSource, type[ExtraData]] = {
     TrackSource.TWITCH: TTVExtraData,
     TrackSource.YOUTUBE: YTExtraData,
     TrackSource.WEB: WebExtraData,
     TrackSource.DA: DAExtraData,
     TrackSource.DONATEX: DonatexExtraData,
+    TrackSource.DONATEPAY: DonatePayExtraData,
 }
 
 

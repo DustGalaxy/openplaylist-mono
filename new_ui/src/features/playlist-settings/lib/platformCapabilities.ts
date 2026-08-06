@@ -44,6 +44,13 @@ export const PLATFORM_CAPABILITIES: Record<Platform, PlatformCapabilities> = {
     labelKey: 'platform.donatex',
     icon: '',
   },
+  [Platform.DonatePay]: {
+    contentSettings: true,
+    chatRoles: false,
+    donationRules: true,
+    labelKey: 'platform.donatepay',
+    icon: '',
+  },
 }
 
 export function getPlatformCapabilities(

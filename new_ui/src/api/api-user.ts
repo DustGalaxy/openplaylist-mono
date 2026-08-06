@@ -40,6 +40,22 @@ export const linkIntegration = async (platform: string, code: string) => {
   return response.data
 }
 
+export const linkIntegrationUserKey = async (
+  platform: string,
+  userKey: string,
+) => {
+  const config = getConfig()
+  const response = await apiClient(
+    config.AUTH_API_URL + `/user/integration/${platform}/token`,
+    {
+      method: 'POST',
+      withCredentials: true,
+      data: { user_key: userKey },
+    },
+  )
+  return response.data
+}
+
 export const unlinkIntegration = async (platform: string) => {
   const config = getConfig()
   const response = await apiClient(config.AUTH_API_URL + `/user/integration`, {

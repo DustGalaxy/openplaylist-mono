@@ -66,7 +66,20 @@ class YTNewOrder(BaseModel):
     source: TrackSource = TrackSource.YOUTUBE
 
 
-POSSIBLE_ORDER_TYPE = DANewOrder | WebNewOrder | YTNewOrder | TTVNewOrder | DonatexNewOrder | DANewOrder
+class DonatePayNewOrder(BaseModel):
+    request_id: UUID
+    owner_platform_id: str
+    owner_id: UUID
+    requester_id: str
+    requester_nickname: str
+    donation_amount: float = 0.0
+    donation_currency: str
+    yt_video_url: str
+    priority: str = "donation"
+    source: TrackSource = TrackSource.DONATEPAY
+
+
+POSSIBLE_ORDER_TYPE = DANewOrder | WebNewOrder | YTNewOrder | TTVNewOrder | DonatexNewOrder | DonatePayNewOrder
 
 
 class OrderNew(BaseModel):
