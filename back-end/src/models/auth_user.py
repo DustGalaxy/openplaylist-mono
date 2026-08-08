@@ -7,9 +7,6 @@ from pydantic import BaseModel, ConfigDict, Field
 from src.models.linked_accounts import LinkedAccountsDomain
 
 
-
-
-
 class Role(BaseModel):
     id: str
     user_id: UUID

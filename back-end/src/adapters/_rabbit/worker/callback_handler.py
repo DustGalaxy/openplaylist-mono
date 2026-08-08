@@ -22,9 +22,7 @@ async def _(event: InternalPlaylistEvent):
         case InternalPlaylistEventType.TRACK_PLAY:
             if not event.track or not isinstance(event.track, OrderDomain):
                 return
-            await sio_playlist_service.set_playnow(
-                PlayNow(track_id=str(event.track.id), playlist_id=str(event.playlist_id))
-            )
+            await sio_playlist_service.set_playnow(PlayNow(track_id=str(event.track.id), playlist_id=str(event.playlist_id)))
 
         case (
             InternalPlaylistEventType.TRACK_REMOVED
@@ -34,9 +32,7 @@ async def _(event: InternalPlaylistEvent):
         ):
             if not event.track or not isinstance(event.track, OrderDomain):
                 return
-            await sio_playlist_service.delete_track(
-                Deleted(track_id=str(event.track.id), playlist_id=str(event.playlist_id))
-            )
+            await sio_playlist_service.delete_track(Deleted(track_id=str(event.track.id), playlist_id=str(event.playlist_id)))
 
         case InternalPlaylistEventType.TRACK_REMOVED_BULK:
             if not event.bulk_ids:

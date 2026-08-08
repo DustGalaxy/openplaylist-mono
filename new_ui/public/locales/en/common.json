@@ -270,5 +270,12 @@
       "subscriber": "Subscriber",
       "vip": "VIP"
     }
+  },
+  "sidebar": {
+    "Home": "Home",
+    "Saves": "Saves",
+    "Statistics": "Statistics",
+    "Favorites": "Favorite Playlists",
+    "MyPlaylists": "My Playlists"
   }
 }

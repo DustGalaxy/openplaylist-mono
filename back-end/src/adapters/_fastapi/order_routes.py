@@ -15,11 +15,21 @@ router = APIRouter(prefix="/order")
 async def new_order(
     order: WebNewOrder,
     current_user: CURR_USER,
+    start_from_target: bool = False,
 ):
     if "custom-" in order.priority and order.owner_id != current_user.id:
         raise HTTPException(400)
 
+    should_start_from_target = start_from_target or order.start_from_target
+
     await get_broker().publish(
-        NewOrderPayload(order=order, from_owner=order.owner_id == current_user.id), "order.proccess", main_exchange
+        NewOrderPayload(
+            order=order,
+            from_owner=order.owner_id == current_user.id,
+            start_from_target=should_start_from_target,
+        ),
+        "order.proccess",
+        main_exchange,
     )
+
     # await kick("order.new", taskiq_broker, order, is_owner, labels={"user_id": str(current_user.id)})

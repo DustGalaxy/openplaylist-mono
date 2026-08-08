@@ -21,7 +21,5 @@ class TokenVault(Base, UUIDMixin, TimestampMixin):
 
     last_update: Mapped[datetime] = mapped_column("last_update", nullable=False, server_default=func.now())
 
-    linked_account_id: Mapped[UUID] = mapped_column(
-        ForeignKey("linked_accounts.id", ondelete="CASCADE"), nullable=False
-    )
+    linked_account_id: Mapped[UUID] = mapped_column(ForeignKey("linked_accounts.id", ondelete="CASCADE"), nullable=False)
     linked_account: Mapped["LinkedAccounts"] = relationship(lazy="joined", back_populates="tokens")

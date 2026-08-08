@@ -104,9 +104,7 @@ async def create_content_settings(
 
 
 @router.post("/{playlist_id}/donation", status_code=201)
-async def create_donation_rules(
-    db_session: DB_SESSION, data: DonationRulesCreate, service: RULES_SERVICE, playlist_id: PLST_ID
-):
+async def create_donation_rules(db_session: DB_SESSION, data: DonationRulesCreate, service: RULES_SERVICE, playlist_id: PLST_ID):
     if not playlist_id:
         raise NotAuthorizedException()
     sub_item = await service.create_sub_item(db_session, data)
@@ -114,9 +112,7 @@ async def create_donation_rules(
 
 
 @router.post("/{playlist_id}/chat", status_code=201)
-async def create_chat_rules(
-    db_session: DB_SESSION, data: ChatRulesCreate, service: RULES_SERVICE, playlist_id: PLST_ID
-):
+async def create_chat_rules(db_session: DB_SESSION, data: ChatRulesCreate, service: RULES_SERVICE, playlist_id: PLST_ID):
     if not playlist_id:
         raise NotAuthorizedException()
 
@@ -125,9 +121,7 @@ async def create_chat_rules(
 
 
 @router.post("/{playlist_id}/blocklist")
-async def create_blocklist_settings(
-    db_session: DB_SESSION, data: BlockListCreate, service: RULES_SERVICE, playlist_id: PLST_ID
-):
+async def create_blocklist_settings(db_session: DB_SESSION, data: BlockListCreate, service: RULES_SERVICE, playlist_id: PLST_ID):
     if not playlist_id:
         raise NotAuthorizedException()
 
@@ -163,9 +157,7 @@ async def delete_chat_rules(db_session: DB_SESSION, item_id: UUID, service: RULE
 
 
 @router.delete("/{playlist_id}/blocklist/{item_id}", status_code=204)
-async def delete_blocklist_settings(
-    db_session: DB_SESSION, item_id: UUID, service: RULES_SERVICE, playlist_id: PLST_ID
-):
+async def delete_blocklist_settings(db_session: DB_SESSION, item_id: UUID, service: RULES_SERVICE, playlist_id: PLST_ID):
     if not playlist_id:
         raise NotAuthorizedException()
     sub_item = await service.delete_sub_item(db_session, item_id, playlist_id, "blocklist")

@@ -60,7 +60,8 @@ from unittest.mock import MagicMock
 import pytest
 
 # Импортируем только ValidationEngine — без всего тяжёлого окружения
-from src.services_low.settings import ValidationEngine
+from src.services.playlists.validation_engine import ValidationEngine
+
 
 
 # ============================================================================
@@ -202,7 +203,7 @@ class TestGetContentSettings:
         general = _content_settings(platform=general_scope, min_views=10)
         settings = _settings(content_settings=[general, specific])
 
-        result = engine.get_content_settigs(settings, chat_platform)
+        result = engine.get_content_settings(settings.content_settings, chat_platform)
 
         assert result["min_views"] == 500
 
@@ -213,7 +214,7 @@ class TestGetContentSettings:
         general = _content_settings(platform=general_scope, min_views=42)
         settings = _settings(content_settings=[general])
 
-        result = engine.get_content_settigs(settings, chat_platform)
+        result = engine.get_content_settings(settings.content_settings, chat_platform)
 
         assert result["min_views"] == 42
 
@@ -223,7 +224,7 @@ class TestGetContentSettings:
         settings = _settings(content_settings=[])
 
         with pytest.raises(ValueError, match="Cannot find base settings"):
-            engine.get_content_settigs(settings, chat_platform)
+            engine.get_content_settings(settings.content_settings, chat_platform)
 
     def test_non_vip_returns_effective_dict(self, general_scope):
         """Non-VIP возвращает базовый dict из content_settings."""
@@ -238,7 +239,7 @@ class TestGetContentSettings:
         )
         settings = _settings(content_settings=[cs])
 
-        result = engine.get_content_settigs(settings, general_scope)
+        result = engine.get_content_settings(settings.content_settings, general_scope)
 
         assert result == {
             "min_views": 100,
@@ -256,8 +257,8 @@ class TestGetContentSettings:
         cs = _content_settings(platform=general_scope, min_views=50)
         settings = _settings(content_settings=[cs])
 
-        assert engine_vip.get_content_settigs(settings, general_scope) == engine_non_vip.get_content_settigs(
-            settings, general_scope
+        assert engine_vip.get_content_settings(settings.content_settings, general_scope) == engine_non_vip.get_content_settings(
+            settings.content_settings, general_scope
         )
 
     def test_first_match_wins_when_multiple_platforms(self, chat_platform, general_scope):
@@ -268,7 +269,7 @@ class TestGetContentSettings:
         second = _content_settings(platform=chat_platform, min_views=999)
         settings = _settings(content_settings=[first, second])
 
-        result = engine.get_content_settigs(settings, chat_platform)
+        result = engine.get_content_settings(settings.content_settings, chat_platform)
         assert result["min_views"] == 111
 
 
@@ -286,7 +287,7 @@ class TestGetDonationsSettings:
         rule = _donation_rule(platform=donation_platform, amount=100)
         settings = _settings(donation_rules=[rule])
 
-        result = engine.get_donations_settings(settings, donation_platform)
+        result = engine.get_donations_settings(settings.donation_rules, donation_platform)
 
         assert len(result) == 1
         assert result[0]["amount"] == 100
@@ -303,7 +304,7 @@ class TestGetDonationsSettings:
         all_scopes = list(DonationRuleScope)
         other_platform = next(p for p in all_scopes if p != DonationRuleScope.GENERAL and p != donation_platform)
 
-        result = engine.get_donations_settings(settings, other_platform)
+        result = engine.get_donations_settings(settings.donation_rules, other_platform)
 
         assert len(result) == 1
         assert result[0]["amount"] == 50
@@ -314,7 +315,7 @@ class TestGetDonationsSettings:
         settings = _settings(donation_rules=[])
 
         # find_all вернёт [] (не None) — ValueError не кидается
-        result = engine.get_donations_settings(settings, donation_platform)
+        result = engine.get_donations_settings(settings.donation_rules, donation_platform)
         assert result == []
 
     def test_returns_multiple_general_rules(self):
@@ -331,7 +332,8 @@ class TestGetDonationsSettings:
         non_general = next(p for p in all_scopes if p != DonationRuleScope.GENERAL)
 
         settings = _settings(donation_rules=rules)
-        result = engine.get_donations_settings(settings, non_general)
+        result = engine.get_donations_settings(settings.donation_rules, non_general)
+
 
         assert len(result) == 2
         amounts = {r["amount"] for r in result}
@@ -424,9 +426,12 @@ class TestValidateTrack:
             max_playlist_size=0,
         )
 
-    # ------------------------------------------------------------------
-    # from_owner bypass
-    # ------------------------------------------------------------------
+    def _validate(self, engine, track, settings, playlist=None):
+        if playlist and hasattr(playlist, "track_data"):
+            settings.track_data = playlist.track_data
+        elif not hasattr(settings, "track_data"):
+            settings.track_data = []
+        return engine.validate_track(track, settings)
 
     def test_from_owner_skips_all_validation(self, general_scope, donation_platform):
         engine = self._make_clean_engine()
@@ -438,7 +443,7 @@ class TestValidateTrack:
         track = _track(from_owner=True, source=general_scope, yt_video_id="video_123")
         playlist = _playlist(track_data=["x", "y"])  # полный плейлист
 
-        result = engine.validate_track(track, settings, playlist)
+        result = self._validate(engine, track, settings, playlist)
         assert result == []
 
     # ------------------------------------------------------------------
@@ -457,7 +462,7 @@ class TestValidateTrack:
         track = _track(source=donation_platform, extra_data=extra)
         playlist = _playlist()
 
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "Wrong donation amount" in errors
 
     def test_correct_donation_amount_no_error(self, general_scope, donation_platform):
@@ -472,7 +477,7 @@ class TestValidateTrack:
         track = _track(source=donation_platform, extra_data=extra)
         playlist = _playlist()
 
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "Wrong donation amount" not in errors
 
     # ------------------------------------------------------------------
@@ -491,7 +496,7 @@ class TestValidateTrack:
         track = _track(source=donation_platform, extra_data=extra)
         playlist = _playlist()
 
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "Wrong donation currency" in errors
 
     # ------------------------------------------------------------------
@@ -512,7 +517,7 @@ class TestValidateTrack:
         )
         playlist = _playlist()
 
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "Blacklisted user" in errors
 
     def test_blacklisted_user_id_triggers_error(self, general_scope, chat_platform):
@@ -529,7 +534,7 @@ class TestValidateTrack:
         )
         playlist = _playlist()
 
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "Blacklisted user" in errors
 
     def test_block_list_different_platform_does_not_trigger(self, general_scope, chat_platform):
@@ -546,7 +551,7 @@ class TestValidateTrack:
         track = _track(source=chat_platform, requester_nickname="badguy")
         playlist = _playlist()
 
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "Blacklisted user" not in errors
 
     # ------------------------------------------------------------------
@@ -561,7 +566,7 @@ class TestValidateTrack:
         track = _track(source=chat_platform, yt_video_id="banned_video")
         playlist = _playlist()
 
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "Blacklisted track" in errors
 
     def test_non_blacklisted_track_no_error(self, general_scope, chat_platform):
@@ -572,7 +577,7 @@ class TestValidateTrack:
         track = _track(source=chat_platform, yt_video_id="clean_video")
         playlist = _playlist()
 
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "Blacklisted track" not in errors
 
     # ------------------------------------------------------------------
@@ -585,7 +590,7 @@ class TestValidateTrack:
         settings = _settings(content_settings=[cs])
 
         track = _track(source=chat_platform, views=500)
-        errors = engine.validate_track(track, settings, _playlist())
+        errors = self._validate(engine, track, settings, _playlist())
         assert "Not enough views" in errors
 
     def test_exact_min_views_passes(self, general_scope, chat_platform):
@@ -594,7 +599,7 @@ class TestValidateTrack:
         settings = _settings(content_settings=[cs])
 
         track = _track(source=chat_platform, views=1000)
-        errors = engine.validate_track(track, settings, _playlist())
+        errors = self._validate(engine, track, settings, _playlist())
         assert "Not enough views" not in errors
 
     # ------------------------------------------------------------------
@@ -607,7 +612,7 @@ class TestValidateTrack:
         settings = _settings(content_settings=[cs])
 
         track = _track(source=chat_platform, likes=10)
-        errors = engine.validate_track(track, settings, _playlist())
+        errors = self._validate(engine, track, settings, _playlist())
         assert "Not enough likes" in errors
 
     def test_exact_min_likes_passes(self, general_scope, chat_platform):
@@ -616,7 +621,7 @@ class TestValidateTrack:
         settings = _settings(content_settings=[cs])
 
         track = _track(source=chat_platform, likes=50)
-        errors = engine.validate_track(track, settings, _playlist())
+        errors = self._validate(engine, track, settings, _playlist())
         assert "Not enough likes" not in errors
 
     # ------------------------------------------------------------------
@@ -630,7 +635,7 @@ class TestValidateTrack:
         settings = _settings(content_settings=[cs])
 
         track = _track(source=chat_platform, duration=301)
-        errors = engine.validate_track(track, settings, _playlist())
+        errors = self._validate(engine, track, settings, _playlist())
         assert "Too long" in errors
 
     def test_exact_max_duration_passes(self, general_scope, chat_platform):
@@ -640,7 +645,7 @@ class TestValidateTrack:
         settings = _settings(content_settings=[cs])
 
         track = _track(source=chat_platform, duration=300)
-        errors = engine.validate_track(track, settings, _playlist())
+        errors = self._validate(engine, track, settings, _playlist())
         assert "Too long" not in errors
 
     def test_max_duration_zero_never_triggers(self, general_scope, chat_platform):
@@ -651,7 +656,7 @@ class TestValidateTrack:
 
         # Документируем текущее поведение: 0 < 180 == True → "Too long" будет!
         track = _track(source=chat_platform, duration=180)
-        errors = engine.validate_track(track, settings, _playlist())
+        errors = self._validate(engine, track, settings, _playlist())
         # Это покрывает реальное поведение кода как есть
         assert "Too long" in errors
 
@@ -666,7 +671,7 @@ class TestValidateTrack:
 
         playlist = _playlist(track_data=["t1", "t2"])  # ровно max
         track = _track(source=chat_platform)
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "Playlist is full" in errors
 
     def test_playlist_not_full_no_error(self, general_scope, chat_platform):
@@ -676,7 +681,7 @@ class TestValidateTrack:
 
         playlist = _playlist(track_data=["t1", "t2"])
         track = _track(source=chat_platform)
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "Playlist is full" not in errors
 
     def test_max_playlist_size_zero_means_unlimited(self, general_scope, chat_platform):
@@ -687,7 +692,7 @@ class TestValidateTrack:
 
         playlist = _playlist(track_data=["t" + str(i) for i in range(100)])
         track = _track(source=chat_platform)
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "Playlist is full" not in errors
 
     # ------------------------------------------------------------------
@@ -705,7 +710,7 @@ class TestValidateTrack:
         )
         playlist = _playlist(track_data=[prev])
         track = _track(source=chat_platform, yt_video_id="vid_abc")
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "Track cooldown" in errors
 
     def test_track_cooldown_passes_when_cooldown_expired(self, general_scope, chat_platform):
@@ -719,7 +724,7 @@ class TestValidateTrack:
         )
         playlist = _playlist(track_data=[prev])
         track = _track(source=chat_platform, yt_video_id="vid_abc")
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "Track cooldown" not in errors
 
     def test_track_cooldown_zero_never_triggers(self, general_scope, chat_platform):
@@ -731,7 +736,7 @@ class TestValidateTrack:
         prev = _prev_track(yt_video_id="vid_abc", created_at=datetime.now())
         playlist = _playlist(track_data=[prev])
         track = _track(source=chat_platform, yt_video_id="vid_abc")
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "Track cooldown" not in errors
 
     # ------------------------------------------------------------------
@@ -749,7 +754,7 @@ class TestValidateTrack:
         )
         playlist = _playlist(track_data=[prev])
         track = _track(source=chat_platform, requester_nickname="user1")
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "User cooldown" in errors
 
     def test_user_cooldown_passes_when_expired(self, general_scope, chat_platform):
@@ -763,7 +768,7 @@ class TestValidateTrack:
         )
         playlist = _playlist(track_data=[prev])
         track = _track(source=chat_platform, requester_nickname="user1")
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "User cooldown" not in errors
 
     def test_user_cooldown_zero_never_triggers(self, general_scope, chat_platform):
@@ -774,7 +779,7 @@ class TestValidateTrack:
         prev = _prev_track(requester_nickname="user1", created_at=datetime.now())
         playlist = _playlist(track_data=[prev])
         track = _track(source=chat_platform, requester_nickname="user1")
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert "User cooldown" not in errors
 
     # ------------------------------------------------------------------
@@ -801,7 +806,7 @@ class TestValidateTrack:
             views=0,
             likes=0,
         )
-        errors = engine.validate_track(track, settings, _playlist())
+        errors = self._validate(engine, track, settings, _playlist())
 
         assert "Not enough views" in errors
         assert "Not enough likes" in errors
@@ -831,7 +836,7 @@ class TestValidateTrack:
             duration=300,
         )
         playlist = _playlist(track_data=["existing"] * 5)
-        errors = engine.validate_track(track, settings, playlist)
+        errors = self._validate(engine, track, settings, playlist)
         assert errors == []
 
 

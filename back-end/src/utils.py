@@ -1,17 +1,17 @@
-from datetime import datetime
-from typing import Callable
-from urllib import parse
 import functools
 import json
+from collections.abc import Callable
+from datetime import datetime
+from urllib import parse
 from uuid import UUID, uuid4
 
 import isodate
 from pydantic import BaseModel
 from taskiq.kicker import AsyncKicker
 
-from src.dal._redis.broker import get_broker, RedisAdapter
-from src.settings import settings
 from src._types import EVENTS_MAP, PlaylistTypes, TargetType, UserTypes
+from src.dal._redis.broker import RedisAdapter, get_broker
+from src.settings import settings
 
 
 def find[T](list_to_search: list[T], condition_func: Callable[[T], bool]) -> T | None:
@@ -33,27 +33,84 @@ def parse_ISO_8601(s: str) -> int:
     return int(isodate.parse_duration(s).total_seconds())
 
 
+from src.dto.youtube import ParsedYouTubeUrl, YouTubePlaylistType, YouTubeUrlType
+
+
+def classify_youtube_playlist_id(playlist_id: str) -> YouTubePlaylistType:
+    playlist_id_upper = playlist_id.upper()
+    if (
+        playlist_id_upper.startswith("RD")
+        or playlist_id_upper.startswith("UL")
+        or playlist_id_upper.startswith("TL")
+        or playlist_id_upper.startswith("LL")
+    ):
+        return YouTubePlaylistType.AUTOMATIC_MIX
+    return YouTubePlaylistType.USER_CUSTOM
+
+
+def parse_youtube_url(url: str) -> ParsedYouTubeUrl | None:
+    if not url:
+        return None
+    query = parse.urlparse(url.strip())
+    hostname = query.hostname.lower() if query.hostname else ""
+    params = parse.parse_qs(query.query)
+
+    video_id: str | None = None
+    playlist_id: str | None = None
+
+    if hostname == "youtu.be":
+        path = query.path.lstrip("/")
+        if path:
+            video_id = path.split("/")[0]
+        if "list" in params and params["list"]:
+            playlist_id = params["list"][0]
+
+    elif hostname in ("www.youtube.com", "youtube.com", "m.youtube.com", "music.youtube.com"):
+        if query.path in ("/watch", "/watch/"):
+            if "v" in params and params["v"]:
+                video_id = params["v"][0]
+            if "list" in params and params["list"]:
+                playlist_id = params["list"][0]
+        elif query.path in ("/playlist", "/playlist/"):
+            if "list" in params and params["list"]:
+                playlist_id = params["list"][0]
+        elif query.path.startswith("/embed/"):
+            parts = [p for p in query.path.split("/") if p]
+            if len(parts) >= 2:
+                video_id = parts[1]
+            if "list" in params and params["list"]:
+                playlist_id = params["list"][0]
+        elif query.path.startswith("/v/"):
+            parts = [p for p in query.path.split("/") if p]
+            if len(parts) >= 2:
+                video_id = parts[1]
+            if "list" in params and params["list"]:
+                playlist_id = params["list"][0]
+
+    if not video_id and not playlist_id:
+        return None
+
+    playlist_type = classify_youtube_playlist_id(playlist_id) if playlist_id else None
+
+    if video_id and playlist_id:
+        url_type = YouTubeUrlType.VIDEO_IN_PLAYLIST
+    elif playlist_id:
+        url_type = YouTubeUrlType.PLAYLIST
+    else:
+        url_type = YouTubeUrlType.VIDEO
+
+    return ParsedYouTubeUrl(
+        url_type=url_type,
+        video_id=video_id,
+        playlist_id=playlist_id,
+        playlist_type=playlist_type,
+    )
+
+
 def extract_youtube_video_id(url: str) -> str | None:
-    """
-    Examples:
-    - http://youtu.be/SA2iWivDJiE
-    - http://www.youtube.com/watch?v=_oPAwA_Udwc&feature=feedu
-    - http://www.youtube.com/embed/SA2iWivDJiE
-    - http://www.youtube.com/v/SA2iWivDJiE?version=3&amp;hl=en_US
-    - https://music.youtube.com/watch?v=SA2iWivDJiE
-    """
-    query = parse.urlparse(url)
-    if query.hostname == "youtu.be":
-        return query.path[1:]
-    if query.hostname in ("www.youtube.com", "youtube.com", "m.youtube.com", "music.youtube.com"):
-        if query.path == "/watch":
-            p = parse.parse_qs(query.query)
-            return p["v"][0]
-        if query.path[:7] == "/embed/":
-            return query.path.split("/")[2]
-        if query.path[:3] == "/v/":
-            return query.path.split("/")[2]
-    return None
+    parsed = parse_youtube_url(url)
+    return parsed.video_id if parsed else None
+
 
 
 def prepare_obj(obj):

@@ -53,6 +53,7 @@ class WebNewOrder(BaseModel):
     yt_video_url: str
     priority: str
     source: TrackSource = TrackSource.WEB
+    start_from_target: bool = False
 
 
 class YTNewOrder(BaseModel):
@@ -97,6 +98,8 @@ class OrderNew(BaseModel):
 class NewOrderPayload(BaseModel):
     order: POSSIBLE_ORDER_TYPE
     from_owner: bool
+    start_from_target: bool = False
+
 
 
 class OrderUpdate(BaseModel):

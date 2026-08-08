@@ -12,9 +12,7 @@ from src.orm.linked_accounts import LinkedAccounts
 from src._types import IntegrationPlatform
 
 
-class LinkedAccountsRepository(
-    crud_factory(LinkedAccounts, LinkedAccountsDomain, LinkedAccountsCreate, LinkedAccountsUpdate)
-):
+class LinkedAccountsRepository(crud_factory(LinkedAccounts, LinkedAccountsDomain, LinkedAccountsCreate, LinkedAccountsUpdate)):
     def to_inner(self, data: LinkedAccountsCreate | LinkedAccountsDomain | LinkedAccountsUpdate) -> dict:
         return data.model_dump(exclude_unset=True)
 
@@ -34,17 +32,13 @@ class LinkedAccountsRepository(
         return LinkedAccountsDomain.model_validate(link)
 
     async def get_by_email_platform(self, session: AsyncSession, email: str, platform: IntegrationPlatform):
-        stmt = select(LinkedAccounts).where(
-            LinkedAccounts.platform_user_email == email, LinkedAccounts.platform == platform
-        )
+        stmt = select(LinkedAccounts).where(LinkedAccounts.platform_user_email == email, LinkedAccounts.platform == platform)
 
         res = await session.execute(stmt)
         user = res.unique().scalars().one_or_none()
 
         if not user:
-            raise NotFoundException(
-                f"{self.sqla_model.__tablename__} with email={email} and platform={platform} not found"
-            )
+            raise NotFoundException(f"{self.sqla_model.__tablename__} with email={email} and platform={platform} not found")
 
         return LinkedAccountsDomain.model_validate(user)
 

@@ -9,11 +9,13 @@ from src.services.auth.auth_service import auth_service
 from src.services.notification.notification_service import NotificationService, get_notification_service
 from src.services.playlist_log import PlaylistLogService, get_playlist_log_service
 from src.services.playlists.basic_service import PlaylistLowService, get_playlist_service, playlist_service
+from src.services.playlists.favorite_service import FavoritePlaylistService, get_favorite_playlist_service
 from src.services.playlists.rules_service import RulesService, get_rules_service
 from src.services.stream_service import StreamService, get_stream_service
 
 PLST_SERVICE = Annotated[PlaylistLowService, Depends(get_playlist_service)]
 RULES_SERVICE = Annotated[RulesService, Depends(get_rules_service)]
+FAVORITE_SERVICE = Annotated[FavoritePlaylistService, Depends(get_favorite_playlist_service)]
 PLST_LOG_SERVICE = Annotated[PlaylistLogService, Depends(get_playlist_log_service)]
 STREAM_SERVICE = Annotated[StreamService, Depends(get_stream_service)]
 NOTIFY_SERVICE = Annotated[NotificationService, Depends(get_notification_service)]

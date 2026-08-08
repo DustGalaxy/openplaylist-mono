@@ -7,9 +7,12 @@ import {
   Activity,
   ArrowRight,
   CheckCircle2,
+  ExternalLink,
+  Heart,
   ListMusic,
   Radio,
   Search,
+  Send,
   Shield,
   Sparkles,
   Turntable,
@@ -18,9 +21,16 @@ import {
 } from 'lucide-react'
 import Btn from '@/components/ui/my-btn'
 import SearchPlaylist from '@/features/united-playlist/components/search-playlist'
-import { gradientTextClass, panelClass } from '@/features/landing/styles'
+import {
+  badgeClass,
+  gradientTextClass,
+  panelClass,
+} from '@/features/landing/styles'
 import { useAuthStore } from '@/stores/authStore'
 import { GlobalStatsBannerWidget } from '@/features/stats'
+
+const PATREON_URL = 'https://patreon.com/DustGalaxy'
+const TELEGRAM_URL = 'https://t.me/dustgalaxy_dev' // TODO: Укажите ссылку на ваш Telegram-канал
 
 const featureKeys = [
   {
@@ -77,7 +87,7 @@ function FeatureCard({
   text: string
 }) {
   return (
-    <article className="group text-left rounded-xl border border-accent/40 bg-level-2/90 p-6 transition-all duration-300 hover:border-accent/80 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:-translate-y-0.5 flex flex-col justify-between relative overflow-hidden">
+    <article className="group text-left rounded-xl border border-accent/40 bg-level-2/90 p-6 transition-all duration-300 hover:border-accent/80 hover:shadow-xs hover:-translate-y-0.5 flex flex-col justify-between relative overflow-hidden">
       <div
         className={`absolute top-0 right-0 size-32 bg-linear-to-br ${color} rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
       />
@@ -99,39 +109,171 @@ function FeatureCard({
   )
 }
 
+function SocialBanner() {
+  const { t } = useFeatureTranslation()
+
+  return (
+    <section className="px-4">
+      <div className="mx-auto max-w-5xl rounded-2xl border border-accent/40 bg-level-2/90 p-6 sm:p-8 backdrop-blur-md shadow-xs relative overflow-hidden space-y-6">
+        {/* Layered ambient glow */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-10"
+          aria-hidden
+        >
+          <div className="absolute top-0 left-1/3 h-64 w-64 rounded-full bg-accent blur-[120px]" />
+          <div className="absolute bottom-0 right-1/3 h-64 w-64 rounded-full bg-(--color-accent-2) blur-[120px]" />
+        </div>
+
+        {/* Section Header */}
+        <div className="relative z-10 text-center max-w-2xl mx-auto space-y-3">
+          <div className="inline-flex justify-center">
+            <div className={badgeClass}>
+              <Heart className="size-3.5 text-accent shrink-0" />
+              <span>
+                {t('landing.socialBanner.badge', 'Сообщество и поддержка')}
+              </span>
+            </div>
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-text-main">
+            {t(
+              'landing.socialBanner.title',
+              'Присоединяйтесь и поддержите проект',
+            )}
+          </h2>
+          <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
+            {t(
+              'landing.socialBanner.subtitle',
+              'Следите за новостями в Telegram и помогайте развитию проекта на Patreon',
+            )}
+          </p>
+        </div>
+
+        {/* Social Cards Grid */}
+        <div className="relative z-10 grid gap-4 sm:grid-cols-2 pt-2">
+          {/* Telegram Card */}
+          <article className="group text-left rounded-xl border border-accent/40 bg-level-1/90 p-5 sm:p-6 transition-all duration-300 hover:border-accent/80 hover:-translate-y-0.5 flex flex-col justify-between relative overflow-hidden shadow-xs">
+            <div className="absolute top-0 right-0 size-32 bg-accent/5 rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+            <div className="relative z-10 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-level-2 border border-accent/30 text-accent group-hover:scale-110 transition-transform duration-300 shadow-xs">
+                  <Send className="size-6" />
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-text-secondary bg-level-2 px-2.5 py-1 rounded-full border border-accent/30">
+                  News & Updates
+                </span>
+              </div>
+
+              <h3 className="text-lg font-bold text-text-main group-hover:text-accent transition-colors">
+                {t('landing.socialBanner.telegram.title', 'Telegram-канал')}
+              </h3>
+
+              <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
+                {t(
+                  'landing.socialBanner.telegram.description',
+                  'Анонсы, новости и апдейты не только по OpenPlaylist, но и по другим проектам автора.',
+                )}
+              </p>
+            </div>
+
+            <div className="relative z-10 pt-5">
+              <a
+                href={TELEGRAM_URL || '#'}
+                target={TELEGRAM_URL ? '_blank' : undefined}
+                rel={TELEGRAM_URL ? 'noopener noreferrer' : undefined}
+                className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-level-2/80 hover:bg-level-1 text-text-main border border-accent/40 hover:border-accent/70 font-semibold text-xs sm:text-sm transition-all duration-200 shadow-xs hover:scale-[1.01]"
+              >
+                <span>
+                  {t('landing.socialBanner.telegram.cta', 'Перейти в Telegram')}
+                </span>
+                <ExternalLink className="size-4" />
+              </a>
+            </div>
+          </article>
+
+          {/* Patreon Card */}
+          <article className="group text-left rounded-xl border border-accent/40 bg-level-1/90 p-5 sm:p-6 transition-all duration-300 hover:border-accent/80 hover:-translate-y-0.5 flex flex-col justify-between relative overflow-hidden shadow-xs">
+            <div className="absolute top-0 right-0 size-32 bg-accent/5 rounded-full blur-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+            <div className="relative z-10 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-level-2 border border-accent/30 text-accent group-hover:scale-110 transition-transform duration-300 shadow-xs">
+                  <Heart className="size-6" />
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-text-secondary bg-level-2 px-2.5 py-1 rounded-full border border-accent/30">
+                  Support
+                </span>
+              </div>
+
+              <h3 className="text-lg font-bold text-text-main group-hover:text-accent transition-colors">
+                {t('landing.socialBanner.patreon.title', 'Patreon')}
+              </h3>
+
+              <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
+                {t(
+                  'landing.socialBanner.patreon.description',
+                  'Поддержите разработку финансово на Patreon — это помогает проекту активно расти и развиваться.',
+                )}
+              </p>
+            </div>
+
+            <div className="relative z-10 pt-5">
+              <a
+                href={PATREON_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-level-2/80 hover:bg-level-1 text-text-main border border-accent/40 hover:border-accent/70 font-semibold text-xs sm:text-sm transition-all duration-200 shadow-xs hover:scale-[1.01]"
+              >
+                <span>
+                  {t(
+                    'landing.socialBanner.patreon.cta',
+                    'Поддержать на Patreon',
+                  )}
+                </span>
+                <ExternalLink className="size-4" />
+              </a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function HomePage() {
   const { t } = useFeatureTranslation()
   const { isAuthenticated } = useAuthStore()
   const navigate = useNavigate()
 
   return (
-    <div className="w-full text-text-main space-y-8 pb-8">
+    <div className="w-full text-text-main space-y-8 sm:space-y-10 pb-12">
       {/* HERO SECTION */}
-      <section className="relative px-4 pt-6 pb-8 sm:pt-12 sm:pb-16 overflow-hidden">
+      <section className="relative px-4 pt-4 sm:pt-8 pb-6 sm:pb-10 overflow-hidden">
         {/* Layered ambient glows */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-25"
+          className="pointer-events-none absolute inset-0 opacity-20"
+          style={{
+            maskImage:
+              'linear-gradient(to bottom, black 0%, black 30%, transparent 100%)',
+            WebkitMaskImage:
+              'linear-gradient(to bottom, black 0%, black 30%, transparent 100%)',
+          }}
           aria-hidden
         >
-          <div className="absolute top-10 left-1/4 h-80 w-80 rounded-full bg-(--color-accent-3) blur-[140px]" />
-          <div className="absolute bottom-0 right-1/4 h-72 w-72 rounded-full bg-(--color-accent-2) blur-[130px]" />
+          <div className="absolute top-0 left-1/4 h-80 w-80 rounded-full bg-(--color-accent-3) blur-[140px]" />
+          <div className="absolute top-0 right-1/4 h-72 w-72 rounded-full bg-(--color-accent-2) blur-[130px]" />
         </div>
 
         <div className="relative mx-auto max-w-5xl">
           <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-12 items-center">
             {/* Left Hero Text */}
             <div className="text-left space-y-6">
-              <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-level-2/90 border border-accent/50 shadow-xs backdrop-blur-md">
-                <span className="relative flex size-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-                </span>
-                <span
-                  className={`text-xs font-bold tracking-wide ${gradientTextClass}`}
-                >
+              <div className={badgeClass}>
+                <Sparkles className="size-3.5 text-(--color-accent-2) shrink-0" />
+                <span className={gradientTextClass}>
                   {t('landing.eyebrow')}
                 </span>
-                <Sparkles className="size-3.5 text-(--color-accent-2)" />
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.06] tracking-tight text-transparent bg-linear-to-r from-(--color-accent-2) via-(--color-accent-3) to-(--color-accent-1) bg-clip-text">
@@ -180,7 +322,7 @@ export default function HomePage() {
             </div>
 
             {/* Right Hero Preview Card */}
-            <div className="rounded-2xl border border-accent/50 bg-level-2/95 p-6 sm:p-7 shadow-xl backdrop-blur-md relative group overflow-hidden">
+            <div className="rounded-2xl border border-accent/50 bg-level-2/95 p-6 sm:p-7 shadow-xs backdrop-blur-md relative group overflow-hidden">
               <div className="absolute top-0 right-0 size-40 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
 
               <div className="flex items-center justify-between border-b border-accent/40 pb-4 mb-5">
@@ -197,7 +339,6 @@ export default function HomePage() {
                     </p>
                   </div>
                 </div>
-                <Activity className="size-5 text-emerald-400 animate-pulse" />
               </div>
 
               <ul className="space-y-3.5 text-xs sm:text-sm">
@@ -243,7 +384,7 @@ export default function HomePage() {
       </section>
 
       {/* PREVIEW & FEATURES SECTION */}
-      <section className="px-4 py-12 sm:py-16 bg-level-2/30 border-y border-accent/30">
+      <section className="px-4 py-8 sm:py-12 bg-level-2/15 border-y border-accent/15">
         <div className="mx-auto max-w-5xl space-y-14">
           {/* App Window Preview Frame */}
           <div className="w-full flex flex-col justify-center space-y-6">
@@ -254,7 +395,7 @@ export default function HomePage() {
             </div>
 
             {/* Styled Window Wrapper */}
-            <div className="rounded-2xl border border-accent/50 bg-level-1/90 shadow-xl overflow-hidden backdrop-blur-md">
+            <div className="rounded-2xl border border-accent/50 bg-level-1/90 shadow-xs overflow-hidden backdrop-blur-md">
               {/* Window Header Bar */}
               <div className="px-4 py-2.5 bg-level-2 border-b border-accent/40 flex items-center">
                 <div className="flex items-center gap-2">
@@ -303,7 +444,7 @@ export default function HomePage() {
       </section>
 
       {/* HOW IT WORKS SECTION */}
-      <section className="px-4 py-12 sm:py-16">
+      <section className="px-4">
         <div className="mx-auto max-w-5xl space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <h2 className="text-2xl sm:text-3xl font-extrabold text-text-main">
@@ -336,14 +477,17 @@ export default function HomePage() {
       </section>
 
       {/* GLOBAL STATISTICS BANNER */}
-      <section className="px-4 py-4 sm:py-8">
+      <section className="px-4">
         <div className="mx-auto max-w-5xl">
           <GlobalStatsBannerWidget />
         </div>
       </section>
 
+      {/* SOCIAL & COMMUNITY BANNER */}
+      <SocialBanner />
+
       {/* SEARCH PLAYLIST / CTA SECTION */}
-      <section className="px-4 pb-12 sm:pb-16">
+      <section className="px-4">
         <div className="mx-auto max-w-5xl">
           <div className={`p-6 sm:p-8 ${panelClass} relative overflow-hidden`}>
             <FeatureI18nProvider ns={'playlist'}>

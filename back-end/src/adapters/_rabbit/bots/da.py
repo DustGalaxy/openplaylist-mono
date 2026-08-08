@@ -64,9 +64,7 @@ async def da_refresh_tokens(
     await message.ack()
     event: DATokenRefreshed = DATokenRefreshed.model_validate_json(message.body)
     async with async_session_maker() as session:
-        link = await linked_accounts_repository.get_by_id_platform(
-            session, event.platform_user_id, IntegrationPlatform.DA
-        )
+        link = await linked_accounts_repository.get_by_id_platform(session, event.platform_user_id, IntegrationPlatform.DA)
         tokens = await token_vault_repository.get_by_id_link(session, link.id)
 
         if not link:

@@ -39,9 +39,7 @@ class PlaylistRepository(
 
         return OrderDomain.model_validate(result)
 
-    async def get_id_by_user_id_and_playlist_id(
-        self, session: AsyncSession, user_id: UUID, playlist_id: UUID
-    ) -> UUID | None:
+    async def get_id_by_user_id_and_playlist_id(self, session: AsyncSession, user_id: UUID, playlist_id: UUID) -> UUID | None:
         stmt = select(Playlist.id).where(Playlist.id == playlist_id, Playlist.owner_id == user_id)
         result = await session.execute(stmt)
         result = result.unique().scalar_one_or_none()
@@ -88,11 +86,7 @@ class PlaylistRepository(
     ) -> list[PlaylistSchema]:
 
         target_source = {"platform": source.value, "platform_user_id": platform_user_id}
-        stmt = (
-            select(Playlist)
-            .where(Playlist.owner_id == owner_id)
-            .where(Playlist.allow_sources.contains([target_source]))
-        )
+        stmt = select(Playlist).where(Playlist.owner_id == owner_id).where(Playlist.allow_sources.contains([target_source]))
 
         result = await session.execute(stmt)
         items = result.unique().scalars().all()
@@ -144,11 +138,7 @@ class PlaylistRepository(
 
     async def add_order_to_playlist(self, session: AsyncSession, playlist_id: UUID, order: OrderCreate) -> OrderDomain:
         try:
-            plst = (
-                (await session.execute(select(Playlist).where(Playlist.id == playlist_id)))
-                .unique()
-                .scalar_one_or_none()
-            )
+            plst = (await session.execute(select(Playlist).where(Playlist.id == playlist_id))).unique().scalar_one_or_none()
             if not plst:
                 raise NotFoundException()
 
@@ -167,9 +157,35 @@ class PlaylistRepository(
             await session.rollback()
             raise RepositoryException(f"Unexpected error in model {self.sqla_model.__tablename__}: {e}") from e
 
-    async def remove_order_from_playlist(
-        self, session: AsyncSession, playlist_id: UUID, order_id: UUID, reason: DeleteStatus
-    ):
+    async def add_orders_to_playlist(
+        self, session: AsyncSession, playlist_id: UUID, orders: list[OrderCreate]
+    ) -> list[OrderDomain]:
+        if not orders:
+            return []
+        try:
+            plst = (await session.execute(select(Playlist).where(Playlist.id == playlist_id))).unique().scalar_one_or_none()
+            if not plst:
+                raise NotFoundException()
+
+            orm_orders = [Order(**order.model_dump()) for order in orders]
+            for orm_order in orm_orders:
+                plst.order_links.append(orm_order)
+
+            await session.commit()
+            for orm_order in orm_orders:
+                await session.refresh(orm_order)
+            return [OrderDomain.model_validate(orm_order) for orm_order in orm_orders]
+        except IntegrityError as e:
+            await session.rollback()
+            raise IntegrityConflictException(
+                f"{self.sqla_model.__tablename__} conflicts with existing data: {e}",
+            ) from e
+        except Exception as e:
+            await session.rollback()
+            raise RepositoryException(f"Unexpected error in model {self.sqla_model.__tablename__}: {e}") from e
+
+
+    async def remove_order_from_playlist(self, session: AsyncSession, playlist_id: UUID, order_id: UUID, reason: DeleteStatus):
         try:
             orm_order = (
                 (

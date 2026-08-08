@@ -139,9 +139,7 @@ class AuthTwitchService(IntegrationStrategy, RefreshTokenStrategy):
         )
         return PlatformAuthResult(user=user, tokens=tokens)
 
-    def get_broadcaster_subscriptions(
-        self, access_token: str, broadcaster_id: str
-    ) -> list[dict[str, Any]]:
+    def get_broadcaster_subscriptions(self, access_token: str, broadcaster_id: str) -> list[dict[str, Any]]:
         """Fetch all subscribers for a Twitch channel using broadcaster OAuth token."""
         subscribers: list[dict[str, Any]] = []
         cursor: str | None = None

@@ -36,9 +36,7 @@ def upgrade() -> None:
         sa.Column("id", sa.UUID(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        "idx_events_lookup", "notification_events", ["target_type", "target_id", "created_at"], unique=False
-    )
+    op.create_index("idx_events_lookup", "notification_events", ["target_type", "target_id", "created_at"], unique=False)
     op.create_index(op.f("ix_notification_events_id"), "notification_events", ["id"], unique=True)
     op.create_table(
         "direct_notifications",
@@ -87,7 +85,7 @@ def upgrade() -> None:
         "SELECT gen_random_uuid(), id, '{}' FROM users "
         "ON CONFLICT (user_id) DO NOTHING"
     )
-    
+
     op.create_table(
         "subscriptions",
         sa.Column("user_id", sa.UUID(), nullable=False),

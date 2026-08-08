@@ -1,8 +1,10 @@
 import type {
+  FavoriteStatusResponse,
   InputPlaylist,
   Order,
   Playlist,
   PlaylistPatch,
+  ReadPlaylistPreview,
 } from '@/types/playlist'
 import type { PlaylistLog } from '@/types/playlistLog'
 import apiClient from '@/lib/axios'
@@ -398,4 +400,67 @@ export const getPlaybackState = async (
     },
   ).catch(() => null)
   return response ? response.data : null
+}
+
+// ─── Favorite Playlist Operations ───────────────────────────────────
+
+export const fetchUserFavoritePlaylists = async (): Promise<
+  Array<ReadPlaylistPreview>
+> => {
+  const config = getConfig()
+  const response = await apiClient(config.PLST_API_URL + '/favorites/me', {
+    method: 'GET',
+    withCredentials: true,
+  })
+    .then((res) => res.data)
+    .catch(() => [])
+  return response || []
+}
+
+export const checkPlaylistFavoriteStatus = async (
+  playlist_id: string,
+): Promise<FavoriteStatusResponse | null> => {
+  const config = getConfig()
+  const response = await apiClient(
+    config.PLST_API_URL + `/${playlist_id}/is-favorite`,
+    {
+      method: 'GET',
+      withCredentials: true,
+    },
+  )
+    .then((res) => res.data)
+    .catch(() => null)
+  return response
+}
+
+export const addPlaylistToFavorites = async (
+  playlist_id: string,
+): Promise<FavoriteStatusResponse | null> => {
+  const config = getConfig()
+  const response = await apiClient(
+    config.PLST_API_URL + `/${playlist_id}/favorite`,
+    {
+      method: 'POST',
+      withCredentials: true,
+    },
+  )
+    .then((res) => res.data)
+    .catch(() => null)
+  return response
+}
+
+export const removePlaylistFromFavorites = async (
+  playlist_id: string,
+): Promise<FavoriteStatusResponse | null> => {
+  const config = getConfig()
+  const response = await apiClient(
+    config.PLST_API_URL + `/${playlist_id}/favorite`,
+    {
+      method: 'DELETE',
+      withCredentials: true,
+    },
+  )
+    .then((res) => res.data)
+    .catch(() => null)
+  return response
 }

@@ -1,11 +1,10 @@
 from datetime import datetime
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from src._types import BlockListScope, ChatRuleScope, ContentSettingScope, DeleteStatus, DonationRuleScope
-from src.dto.settings import ReadPlaylistSettings
 from src.models.order import OrderDomain
 from src.models.playlist import AllowedSource
 
@@ -13,6 +12,7 @@ from src.models.playlist import AllowedSource
 class TrackDeleteBulk(BaseModel):
     track_ids: list[UUID]
     reason: DeleteStatus = "listened"
+
 
 # class TrackAddBulk(BaseModel):
 #     track_ids: list[UUID]
@@ -52,7 +52,7 @@ class ReadDonationRules(BaseModel):
     currency: str = Field("USD", min_length=3, max_length=3)
     amount: float = Field(5.0, ge=0.0)
     priority: int
-    content_settings: Optional[dict] = None
+    content_settings: dict | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -64,8 +64,8 @@ class ReadChatRules(BaseModel):
     platform: ChatRuleScope
     key: str
     priority: int
-    content_settings: Optional[dict] = None
-    overrive_order: Optional[int] = None
+    content_settings: dict | None = None
+    overrive_order: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -80,7 +80,7 @@ class ReadPlaylist(BaseModel):
     tags: list[str] = Field(default_factory=list)
 
     is_public: bool
-    is_favorite: bool
+    favorites_count: int = Field(0, description="Total count of users who favorited this playlist")
     is_allow_external_requests: bool
     allow_sources: list[AllowedSource]
     show_in_widget: bool
@@ -93,7 +93,7 @@ class ReadPlaylist(BaseModel):
 
     mode: Literal["flow", "stream", "static"]
     repeat_mode: Literal["all", "once", "none"]
-    mode_settings: Dict[str, Any]
+    mode_settings: dict[str, Any]
     sync_playback_position: bool
     cost_mode: Literal["add", "max"]
 
@@ -116,11 +116,18 @@ class ReadPlaylistPreview(BaseModel):
     owner_nickname: str = Field(..., description="Nickname of the owner of the playlist")
     name: str = Field(..., max_length=100, description="Name of the playlist")
     description: str | None = Field(None, max_length=500, description="Description of the playlist")
+    favorites_count: int = Field(0, description="Total count of users who favorited this playlist")
 
     created_at: datetime = Field(..., description="Creation timestamp of the playlist")
     updated_at: datetime = Field(..., description="Last update timestamp of the playlist")
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class FavoriteStatusResponse(BaseModel):
+    playlist_id: UUID
+    is_favorite: bool
+    favorites_count: int
 
 
 class PlaylistBaseinfo(BaseModel):

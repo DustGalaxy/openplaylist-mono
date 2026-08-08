@@ -5,6 +5,7 @@ class NotEmbeddable(Exception):
     def __init__(self):
         super().__init__("Video is not embeddable")
 
+
 class NotAuthorizedException(HTTPException):
     def __init__(self):
         super().__init__(status_code=401, detail="Not authorized")
@@ -63,3 +64,16 @@ class NotActivePlaylist(TrackAddException):
 
 class BlackListUser(TrackAddException):
     pass
+
+
+class InvalidYouTubeUrl(TrackAddException):
+    pass
+
+
+class DynamicMixNotSupported(TrackAddException):
+    pass
+
+
+class PlaylistOrdersNotAllowedForViewers(TrackAddException):
+    pass
+

@@ -1,118 +1,28 @@
-from urllib.error import HTTPError
-import re
-import json
-from typing import TypedDict
-
-from pytubefix import YouTube
-import requests
-
-from src.dal._redis.broker import get_broker
-from src.dto.order import WebNewOrder, POSSIBLE_ORDER_TYPE
-from src.models.order import OrderCreate, STRATEGIES
-
-from src.utils import extract_youtube_video_id, parse_ISO_8601
-from src.settings import settings
-from src.exceptions import NotEmbeddable
-
-VideoInfo = TypedDict("VideoInfo", {"title": str, "author": str, "embeddable": bool, "views": int, "likes": int, "length": int})
+from src.dto.order import POSSIBLE_ORDER_TYPE, WebNewOrder
+from src.dto.youtube import YouTubePlaylistType, YouTubeUrlType
+from src.exceptions import (
+    DynamicMixNotSupported,
+    InvalidYouTubeUrl,
+    NotEmbeddable,
+    PlaylistOrdersNotAllowedForViewers,
+)
+from src.models.order import STRATEGIES, OrderCreate
+from src.services.youtube_service import VideoInfo, youtube_service
+from src.utils import parse_youtube_url
 
 
 class OrderService:
-    def get_data_from_pytube(self, url: str) -> VideoInfo:
-
-        yt = YouTube(url, "ANDROID")
-
-        try:
-            first_part = yt.initial_data["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][0]
-            second_part = first_part.get("videoPrimaryInfoRenderer") or first_part.get("videoSecondaryInfoRenderer")
-
-            likes = second_part["videoActions"]["menuRenderer"]["topLevelButtons"][0]["segmentedLikeDislikeButtonViewModel"][
-                "likeButtonViewModel"
-            ]["likeButtonViewModel"]["toggleButtonViewModel"]["toggleButtonViewModel"]["defaultButtonViewModel"][
-                "buttonViewModel"
-            ]["accessibilityText"]
-
-            likes_text = likes
-            like_template = r"like this video along with (.*?) other people"
-            text = str(likes_text)
-            matches = re.findall(like_template, text, re.MULTILINE)
-            likes = None
-            if len(matches) >= 1:
-                like_str: str = matches[0]
-                likes = int(like_str.replace(",", ""))
-        except Exception:
-            likes = None
-
-        return {
-            "title": yt.title if yt.title else "Unknown",
-            "author": yt.author if yt.author else "Unknown",
-            "embeddable": bool(yt.embed_html),
-            "length": yt.length if yt.length else 0,
-            "likes": likes if likes else 0,
-            "views": yt.views if yt.views else 0,
-        }
-
-    def get_data_from_youtube_api(self, video_id: str, api_key: str) -> VideoInfo:
-        BASE_YOUTUBE_API_VIDEOS_URL = "https://www.googleapis.com/youtube/v3/videos"
-
-        params = {
-            "part": "snippet,statistics,status,contentDetails",
-            "id": video_id,
-            "key": api_key,
-        }
-
-        response = requests.get(BASE_YOUTUBE_API_VIDEOS_URL, params=params)
-        response.raise_for_status()
-        json_data = response.json()
-
-        if not json_data.get("items"):
-            raise ValueError("Invalid YouTube video URL")
-
-        video_item = json_data["items"][0]
-
-        return {
-            "title": video_item["snippet"]["title"],
-            "author": video_item["snippet"]["channelTitle"],
-            "embeddable": video_item["status"]["embeddable"],
-            "views": int(video_item["statistics"].get("viewCount", 0)),
-            "likes": int(video_item["statistics"].get("likeCount", 0)),
-            "length": parse_ISO_8601(video_item["contentDetails"]["duration"]),  # формат ISO 8601 (например, PT4M13S)
-        }
-
-    def get_from_cache(self, video_id: str) -> VideoInfo | None:
-        data = get_broker().get(video_id)
-        if data is not None and str(data) != "None":
-            return json.loads(str(data))
-        else:
-            return
-
-    def save_to_cache(self, video_id: str, data: VideoInfo):
-        return get_broker().set(video_id, json.dumps(data), ex=60 * 60 * 24 * 3)
-
     def extract_extra_data(self, order: POSSIBLE_ORDER_TYPE):
         return STRATEGIES[order.source].model_validate(order, from_attributes=True)
 
-    async def init_order(self, order: POSSIBLE_ORDER_TYPE, from_owner: bool) -> OrderCreate:
-        yt_video_id = extract_youtube_video_id(order.yt_video_url)
-        if not yt_video_id:
-            raise ValueError("Invalid YouTube video URL")
-        yt_video_id = yt_video_id.strip()
-        data: VideoInfo | None = self.get_from_cache(yt_video_id)
-
-        if not data:
-            try:
-                if not settings.YOUTUBE_API_KEY:
-                    raise ValueError("YOUTUBE_API_KEY not found")
-                data = self.get_data_from_youtube_api(yt_video_id, settings.YOUTUBE_API_KEY)
-                if not data["embeddable"]:
-                    raise NotEmbeddable
-            except (requests.HTTPError, ValueError):
-                data = self.get_data_from_pytube(order.yt_video_url)
-
-            self.save_to_cache(yt_video_id, data)
-
+    def _create_order_dto(
+        self,
+        order: POSSIBLE_ORDER_TYPE,
+        from_owner: bool,
+        yt_video_id: str,
+        data: VideoInfo,
+    ) -> OrderCreate:
         extra_data = self.extract_extra_data(order)
-
         return OrderCreate(
             owner_id=order.owner_id,
             from_owner=from_owner,
@@ -129,6 +39,73 @@ class OrderService:
             request_id=order.request_id,
             source=order.source,
         )
+
+    async def init_orders(
+        self,
+        order: POSSIBLE_ORDER_TYPE,
+        from_owner: bool,
+        start_from_target: bool = False,
+    ) -> list[OrderCreate]:
+        parsed = parse_youtube_url(order.yt_video_url)
+        if not parsed:
+            raise InvalidYouTubeUrl("Invalid YouTube video URL")
+
+        # 1. Dynamic mix playlist handling
+        if parsed.playlist_id and parsed.playlist_type == YouTubePlaylistType.AUTOMATIC_MIX:
+            if not from_owner and parsed.video_id:
+                # Fallback to single track for viewers when a video_id is present
+                data = youtube_service.get_video_info(parsed.video_id, order.yt_video_url)
+                if not data["embeddable"]:
+                    raise NotEmbeddable()
+                return [self._create_order_dto(order, from_owner, parsed.video_id, data)]
+            raise DynamicMixNotSupported("Dynamic YouTube mixes are not supported")
+
+        # 2. Standard / Custom playlist handling
+        if parsed.playlist_id and parsed.playlist_type == YouTubePlaylistType.USER_CUSTOM:
+            if not from_owner:
+                if parsed.video_id:
+                    # Viewers ordering video_in_playlist links get only the single video
+                    data = youtube_service.get_video_info(parsed.video_id, order.yt_video_url)
+                    if not data["embeddable"]:
+                        raise NotEmbeddable()
+                    return [self._create_order_dto(order, from_owner, parsed.video_id, data)]
+                raise PlaylistOrdersNotAllowedForViewers("Playlist orders are only allowed for playlist owners")
+
+            # Owner importing a playlist (limit 50 tracks)
+            start_vid = parsed.video_id if (start_from_target and parsed.video_id) else None
+            tracks_info = youtube_service.get_playlist_tracks(parsed.playlist_id, start_video_id=start_vid, limit=50)
+
+            if not tracks_info and parsed.video_id:
+                # Fallback to single track if playlist track extraction yields nothing
+                data = youtube_service.get_video_info(parsed.video_id, order.yt_video_url)
+                if not data["embeddable"]:
+                    raise NotEmbeddable()
+                return [self._create_order_dto(order, from_owner, parsed.video_id, data)]
+
+            if not tracks_info:
+                raise InvalidYouTubeUrl("No accessible tracks found in YouTube playlist")
+
+            orders: list[OrderCreate] = []
+            for track_data in tracks_info:
+                if track_data.get("embeddable", True):
+                    orders.append(self._create_order_dto(order, from_owner, track_data["yt_video_id"], track_data))
+
+            return orders
+
+        # 3. Single video handling
+        if parsed.video_id:
+            data = youtube_service.get_video_info(parsed.video_id, order.yt_video_url)
+            if not data["embeddable"]:
+                raise NotEmbeddable()
+            return [self._create_order_dto(order, from_owner, parsed.video_id, data)]
+
+        raise InvalidYouTubeUrl("Invalid YouTube video URL")
+
+    async def init_order(self, order: POSSIBLE_ORDER_TYPE, from_owner: bool) -> OrderCreate:
+        orders = await self.init_orders(order, from_owner)
+        if not orders:
+            raise InvalidYouTubeUrl("Could not process video link")
+        return orders[0]
 
 
 order_service = OrderService()

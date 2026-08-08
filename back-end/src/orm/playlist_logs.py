@@ -28,11 +28,11 @@ class PlaylistLog(Base, UUIDMixin):
 # BEGIN
 #     IF random() < 0.01 THEN
 #         DELETE FROM playlist_logs
-#         WHERE playlist_id = NEW.playlist_id 
+#         WHERE playlist_id = NEW.playlist_id
 #         AND id NOT IN (
-#             SELECT id 
-#             FROM playlist_logs 
-#             WHERE playlist_id = NEW.playlist_id 
+#             SELECT id
+#             FROM playlist_logs
+#             WHERE playlist_id = NEW.playlist_id
 #             ORDER BY created_at DESC
 #             LIMIT 1000
 #         );

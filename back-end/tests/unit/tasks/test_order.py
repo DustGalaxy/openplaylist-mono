@@ -1,4 +1,5 @@
 """Tests for src/tasks/order.py"""
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest

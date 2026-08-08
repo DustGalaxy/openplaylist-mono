@@ -1,4 +1,5 @@
 """Tests for src/tasks/tokens.py"""
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -31,6 +32,7 @@ async def test_refresh_tokens_empty(mocker):
     mocker.patch("src.tasks.tokens.asyncio.sleep", new_callable=AsyncMock)
 
     from src.tasks.tokens import refresh_tokens
+
     await refresh_tokens()
 
     mock_token_service.refresh_token.assert_not_called()
@@ -41,8 +43,7 @@ async def test_refresh_tokens_empty(mocker):
 async def test_refresh_tokens_publishes_for_each_token(mocker):
     """Для каждого токена → refresh_token вызван + publish с правильными полями."""
     tokens = [_make_token("twitch", "u1", "p1"), _make_token("da", "u2", "p2")]
-    fresh = [MagicMock(access_token="at1", refresh_token="rt1"),
-             MagicMock(access_token="at2", refresh_token="rt2")]
+    fresh = [MagicMock(access_token="at1", refresh_token="rt1"), MagicMock(access_token="at2", refresh_token="rt2")]
 
     mock_session = AsyncMock()
     mock_cm = AsyncMock()
@@ -60,6 +61,7 @@ async def test_refresh_tokens_publishes_for_each_token(mocker):
     mocker.patch("src.tasks.tokens.asyncio.sleep", new_callable=AsyncMock)
 
     from src.tasks.tokens import refresh_tokens
+
     await refresh_tokens()
 
     assert mock_token_service.refresh_token.await_count == 2
@@ -85,14 +87,13 @@ async def test_refresh_tokens_sleeps_between_iterations(mocker):
 
     mock_token_service = mocker.patch("src.tasks.tokens.token_service")
     mock_token_service.fetch_tokens_to_refresh = AsyncMock(return_value=tokens)
-    mock_token_service.refresh_token = AsyncMock(
-        side_effect=[MagicMock(access_token="a", refresh_token="r")] * 2
-    )
+    mock_token_service.refresh_token = AsyncMock(side_effect=[MagicMock(access_token="a", refresh_token="r")] * 2)
 
     mocker.patch("src.tasks.tokens.rabbit_broker").publish = AsyncMock()
     mock_sleep = mocker.patch("src.tasks.tokens.asyncio.sleep", new_callable=AsyncMock)
 
     from src.tasks.tokens import refresh_tokens
+
     await refresh_tokens()
 
     assert mock_sleep.await_count == 2

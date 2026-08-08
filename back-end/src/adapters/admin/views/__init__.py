@@ -29,5 +29,3 @@ __all__ = [
     "DonationRulesAdmin",
     "ChatRulesAdmin",
 ]
-
-

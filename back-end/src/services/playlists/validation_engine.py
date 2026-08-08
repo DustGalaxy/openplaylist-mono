@@ -1,7 +1,3 @@
-
-
-
-
 from datetime import datetime
 from typing import Any
 
@@ -77,7 +73,7 @@ class ValidationEngine:
 
         # requester_roles = self.identify_roles(new_track.priority)
 
-        effective_content_settings = self.get_content_settings(playlist.content_settings, new_track.source) # type: ignore
+        effective_content_settings = self.get_content_settings(playlist.content_settings, new_track.source)  # type: ignore
 
         effective_donation_settings = self.get_donations_settings(playlist.donation_rules, new_track.source)  # type: ignore
 
@@ -88,7 +84,7 @@ class ValidationEngine:
                     and not self.check_donation_rules(
                         effective_donation_settings,
                         "amount",
-                        new_track.extra_data.donation_amount,   # type: ignore
+                        new_track.extra_data.donation_amount,  # type: ignore
                     )
                 ),
                 "Wrong donation amount",

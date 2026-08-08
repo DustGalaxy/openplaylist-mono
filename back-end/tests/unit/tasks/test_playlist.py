@@ -1,4 +1,5 @@
 """Tests for src/tasks/playlist.py"""
+
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -7,6 +8,7 @@ import pytest
 
 # ── простые sio-прокси ──────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_playnow_handler(mocker):
     event = MagicMock()
@@ -14,6 +16,7 @@ async def test_playnow_handler(mocker):
     mock_sio.set_playnow = AsyncMock()
 
     from src.tasks.playlist import playlist_track_playnow_handler
+
     await playlist_track_playnow_handler(event)
 
     mock_sio.set_playnow.assert_awaited_once_with(event)
@@ -27,6 +30,7 @@ async def test_track_added_handler_returns_true(mocker):
     mock_sio.add_track = AsyncMock()
 
     from src.tasks.playlist import playlist_track_added_handler
+
     result = await playlist_track_added_handler(payload, playlist_id)
 
     mock_sio.add_track.assert_awaited_once_with(payload, playlist_id)
@@ -40,6 +44,7 @@ async def test_track_deleted_handler(mocker):
     mock_sio.delete_track = AsyncMock()
 
     from src.tasks.playlist import playlist_track_deleted_handler
+
     await playlist_track_deleted_handler(payload)
 
     mock_sio.delete_track.assert_awaited_once_with(payload)
@@ -52,6 +57,7 @@ async def test_track_move_handler(mocker):
     mock_sio.move_track = AsyncMock()
 
     from src.tasks.playlist import playlist_track_move_handler
+
     await playlist_track_move_handler(event)
 
     mock_sio.move_track.assert_awaited_once_with(event)
@@ -64,6 +70,7 @@ async def test_privacy_private_handler(mocker):
     mock_sio.set_private = AsyncMock()
 
     from src.tasks.playlist import playlist_privacy_private_handler
+
     await playlist_privacy_private_handler(event)
 
     mock_sio.set_private.assert_awaited_once_with(event)
@@ -76,12 +83,14 @@ async def test_settings_changed_handler(mocker):
     mock_sio.settings_changed = AsyncMock()
 
     from src.tasks.playlist import playlist_settings_changed_handler
+
     await playlist_settings_changed_handler(event)
 
     mock_sio.settings_changed.assert_awaited_once_with(event)
 
 
 # ── handle_order_created ─────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_handle_order_created_kicks_for_each_track(mocker):
@@ -164,6 +173,7 @@ async def test_handle_order_created_logs_errors(mocker):
     # проверяем что передан правильный тип события
     call_args = mock_log_svc.log_and_emit.call_args
     from src._types import PlaylistLogsEventTypes
+
     assert call_args.args[3] == PlaylistLogsEventTypes.ADD_TRACK_ERROR
 
 
@@ -190,10 +200,12 @@ async def test_handle_order_created_mixed(mocker):
     mocker.patch("src.tasks.playlist.user_repository").get_one = AsyncMock(return_value=owner)
     mocker.patch(
         "src.tasks.playlist.add_to_playlist",
-        new=AsyncMock(return_value=(
-            [(track, pid_ok)],
-            [(["Not enough views"], "Strict", pid_err)],
-        )),
+        new=AsyncMock(
+            return_value=(
+                [(track, pid_ok)],
+                [(["Not enough views"], "Strict", pid_err)],
+            )
+        ),
     )
 
     mock_kick = mocker.patch("src.tasks.playlist.kick", new_callable=AsyncMock)

@@ -7,6 +7,7 @@ from src._types import DeleteStatus
 from src.adapters._fastapi.dependencies import (
     CURR_USER,
     DB_SESSION,
+    FAVORITE_SERVICE,
     PLST_LOG_SERVICE,
     PLST_SERVICE,
     USER_ID_OR_NONE,
@@ -15,6 +16,7 @@ from src.adapters._rabbit.broker import get_broker, main_publisher
 from src.adapters._rabbit.queues import playlist_fanout_exchange
 from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType, PlaylistSettings
 from src.dto.playlist import (
+    FavoriteStatusResponse,
     NewPlaylist,
     PlaylistBaseinfo,
     PlayNow,
@@ -41,20 +43,22 @@ async def get_playlists(
     service: PLST_SERVICE,
 ) -> list[ReadPlaylistPreview]:
     res = await service.search_playlist(db_session, query)
+    if not res:
+        return []
 
     data = []
-
     for p in res:
         user = await auth_service.user_repo.get_one(db_session, p.owner_id)
-        intance = ReadPlaylistPreview(
+        instance = ReadPlaylistPreview(
             id=p.id,
             owner_nickname=p.owner_nickname if user.is_public else "Anon",
             name=p.name,
             description=p.description,
+            favorites_count=p.favorites_count,
             created_at=p.created_at,
             updated_at=p.updated_at,
         )
-        data.append(intance)
+        data.append(instance)
 
     return data
 
@@ -149,6 +153,7 @@ async def get_my_playlists(
     preview: bool = False,
 ) -> list[ReadPlaylistPreview] | list[ReadPlaylist]:
     playlists = await service.get_by_owner(db_session, current_user.id)
+
     if preview:
         return [
             ReadPlaylistPreview(
@@ -156,6 +161,7 @@ async def get_my_playlists(
                 owner_nickname=p.owner_nickname,
                 name=p.name,
                 description=p.description,
+                favorites_count=p.favorites_count,
                 created_at=p.created_at,
                 updated_at=p.updated_at,
             )
@@ -177,7 +183,8 @@ async def get_playlist_data(
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")
 
-    return ReadPlaylist.model_validate(plst)
+    res = ReadPlaylist.model_validate(plst)
+    return res
 
 
 # --- public playlist operations ---
@@ -191,7 +198,8 @@ async def get_public_playlist(
     user_id_or_none: USER_ID_OR_NONE,
 ) -> ReadPlaylist:
     plst = await service.get_public_playlist(db_session, playlist_id, user_id_or_none)
-    return ReadPlaylist.model_validate(plst)
+    res = ReadPlaylist.model_validate(plst)
+    return res
 
 
 @router.get("/{playlist_id}/logs")
@@ -325,3 +333,45 @@ async def delete_tracks_from_playlist(
             )
     except NotFoundException:
         raise HTTPException(status_code=404, detail="Playlist not found")
+
+
+# --- favorite playlist operations ---
+
+
+@router.get("/favorites/me")
+async def get_my_favorite_playlists(
+    db_session: DB_SESSION,
+    current_user: CURR_USER,
+    favorite_service: FAVORITE_SERVICE,
+) -> list[ReadPlaylistPreview]:
+    return await favorite_service.get_user_favorites(db_session, current_user)
+
+
+@router.post("/{playlist_id}/favorite")
+async def add_playlist_to_favorites(
+    playlist_id: UUID,
+    db_session: DB_SESSION,
+    current_user: CURR_USER,
+    favorite_service: FAVORITE_SERVICE,
+) -> FavoriteStatusResponse:
+    return await favorite_service.add_to_favorites(db_session, current_user, playlist_id)
+
+
+@router.delete("/{playlist_id}/favorite")
+async def remove_playlist_from_favorites(
+    playlist_id: UUID,
+    db_session: DB_SESSION,
+    current_user: CURR_USER,
+    favorite_service: FAVORITE_SERVICE,
+) -> FavoriteStatusResponse:
+    return await favorite_service.remove_from_favorites(db_session, current_user, playlist_id)
+
+
+@router.get("/{playlist_id}/is-favorite")
+async def check_playlist_is_favorite(
+    playlist_id: UUID,
+    db_session: DB_SESSION,
+    current_user: CURR_USER,
+    favorite_service: FAVORITE_SERVICE,
+) -> FavoriteStatusResponse:
+    return await favorite_service.get_favorite_status(db_session, current_user, playlist_id)

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { ListMusic, Loader2, Search, SearchX, User, X } from 'lucide-react'
+import { Heart, ListMusic, Loader2, Search, SearchX, User, X } from 'lucide-react'
 import { getPublicPlaylists } from '@/api/api-playlist'
 import { useDebouncedEffect } from '@/hooks/useDeboucedEffect'
 import { useTranslation } from 'react-i18next'
@@ -197,11 +197,17 @@ export default function HeaderSearch() {
                       <ListMusic className="size-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h4
-                        className={`text-xs font-bold truncate group-hover:underline ${gradientTextClass}`}
-                      >
-                        {playlist.name}
-                      </h4>
+                      <div className="flex items-center justify-between gap-1">
+                        <h4
+                          className={`text-xs font-bold truncate group-hover:underline ${gradientTextClass}`}
+                        >
+                          {playlist.name}
+                        </h4>
+                        <div className="flex items-center gap-0.5 text-[10px] text-red-500 font-medium shrink-0">
+                          <Heart className="size-3 fill-red-500/20 text-red-500" />
+                          <span>{playlist.favorites_count ?? 0}</span>
+                        </div>
+                      </div>
                       <p className="flex items-center gap-1 text-[11px] text-text-secondary mt-0.5">
                         <User className="size-3 shrink-0" />
                         <span className="truncate">

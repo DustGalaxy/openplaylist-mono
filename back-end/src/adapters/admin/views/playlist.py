@@ -26,7 +26,6 @@ class PlaylistAdmin(ModelView, model=Playlist):
         Playlist.repeat_mode,
         Playlist.cost_mode,
         Playlist.is_public,
-        Playlist.is_favorite,
         Playlist.show_in_widget,
         Playlist.is_allow_external_requests,
         Playlist.created_at,
@@ -38,7 +37,6 @@ class PlaylistAdmin(ModelView, model=Playlist):
     ]
     column_filters = [
         BooleanFilter(Playlist.is_public),
-        BooleanFilter(Playlist.is_favorite),
         BooleanFilter(Playlist.show_in_widget),
         BooleanFilter(Playlist.is_allow_external_requests),
         AllUniqueStringValuesFilter(Playlist.mode),

@@ -26,9 +26,7 @@ async def test_login_by_social_existing_link(auth_service, mock_db_session, mock
     )
 
     platform_result = PlatformAuthResult(
-        user=PlatformUser(
-            id="twitch_123", username="twitch_user", avatar_url="url", email="user@test.com", email_verified=True
-        ),
+        user=PlatformUser(id="twitch_123", username="twitch_user", avatar_url="url", email="user@test.com", email_verified=True),
         tokens=PlatformTokens(access_token="access_123", refresh_token="refresh_123", expires_at=1700000000),
     )
     mock_strategy.fetch_identity = AsyncMock(return_value=platform_result)
@@ -72,9 +70,7 @@ async def test_login_by_social_existing_link(auth_service, mock_db_session, mock
     mocker.patch.object(auth_service, "encode_jwt", return_value="mocked_jwt_token")
 
     # Вызов
-    token = await auth_service.login_by_social(
-        db_session=mock_db_session, code="valid_code", platform=IntegrationPlatform.TWITCH
-    )
+    token = await auth_service.login_by_social(db_session=mock_db_session, code="valid_code", platform=IntegrationPlatform.TWITCH)
 
     # Проверки
     assert token == "mocked_jwt_token"
@@ -127,9 +123,7 @@ async def test_login_by_social_email_collision(auth_service, mock_db_session, mo
     # Вызов и ожидание исключения (в зависимости от вашей логики: HTTPException(400) или NeedConfirmationException)
     # Судя по трейсбеку, у вас падает именно на HTTPException(status_code=400, detail="Email collision")
     with pytest.raises(pytest.importorskip("fastapi").HTTPException) as exc_info:
-        await auth_service.login_by_social(
-            db_session=mock_db_session, code="valid_code", platform=IntegrationPlatform.TWITCH
-        )
+        await auth_service.login_by_social(db_session=mock_db_session, code="valid_code", platform=IntegrationPlatform.TWITCH)
 
     assert exc_info.value.status_code == 400
     assert exc_info.value.detail == "Email collision"
@@ -181,9 +175,7 @@ async def test_login_by_social_email_confirmation(auth_service, mock_db_session,
     auth_service.link_repo.get_by_email_platform = AsyncMock(return_value=clashing_link)
 
     with pytest.raises(NeedConfirmationException) as exc_info:
-        await auth_service.login_by_social(
-            db_session=mock_db_session, code="valid_code", platform=IntegrationPlatform.TWITCH
-        )
+        await auth_service.login_by_social(db_session=mock_db_session, code="valid_code", platform=IntegrationPlatform.TWITCH)
 
     assert exc_info.value.data["user_id"] == str(user_id)
 
@@ -251,9 +243,7 @@ async def test_login_by_social_user_email_exists_level_3(auth_service, mock_db_s
     mocker.patch.object(auth_service, "encode_jwt", return_value="jwt_level_3")
 
     # Вызов
-    token = await auth_service.login_by_social(
-        db_session=mock_db_session, code="valid_code", platform=IntegrationPlatform.TWITCH
-    )
+    token = await auth_service.login_by_social(db_session=mock_db_session, code="valid_code", platform=IntegrationPlatform.TWITCH)
 
     # Проверки
     assert token == "jwt_level_3"
@@ -277,9 +267,7 @@ async def test_login_by_social_new_user_level_4(auth_service, mock_db_session, m
     )
 
     platform_result = PlatformAuthResult(
-        user=PlatformUser(
-            id="twitch_777", username="new_user", avatar_url="url", email="new@test.com", email_verified=True
-        ),
+        user=PlatformUser(id="twitch_777", username="new_user", avatar_url="url", email="new@test.com", email_verified=True),
         tokens=PlatformTokens(access_token="access_777", refresh_token="refresh_777", expires_at=1700000000),
     )
     mock_strategy.fetch_identity = AsyncMock(return_value=platform_result)
@@ -323,9 +311,7 @@ async def test_login_by_social_new_user_level_4(auth_service, mock_db_session, m
     mocker.patch.object(auth_service, "encode_jwt", return_value="jwt_level_4")
 
     # Вызов
-    token = await auth_service.login_by_social(
-        db_session=mock_db_session, code="valid_code", platform=IntegrationPlatform.TWITCH
-    )
+    token = await auth_service.login_by_social(db_session=mock_db_session, code="valid_code", platform=IntegrationPlatform.TWITCH)
 
     # Проверки
     assert token == "jwt_level_4"

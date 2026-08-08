@@ -58,9 +58,11 @@ async def update_settings(
 
 # --- ПОДПИСКИ (Subscriptions) ---
 
+
 @router.get("/subscriptions", status_code=status.HTTP_200_OK)
 async def fetch_subscribe(service: NOTIFY_SERVICE, user_id: USER_ID, db_session: DB_SESSION):
     return await service.subs_repo.get_many(db_session, user_id, column="user_id")
+
 
 @router.post("/subscriptions", status_code=status.HTTP_201_CREATED)
 async def subscribe(service: NOTIFY_SERVICE, user_id: USER_ID, db_session: DB_SESSION, data: NewSubscription):
@@ -79,6 +81,7 @@ async def patch_sub(
         return await service.patch_subscription(db_session, user_id, id, SubscriptionPatch(**data.model_dump()))
     except PermissionError:
         raise HTTPException(401)
+
 
 @router.delete("/subscriptions/{subscription_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def unsubscribe(service: NOTIFY_SERVICE, user_id: USER_ID, db_session: DB_SESSION, subscription_id: UUID):

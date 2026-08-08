@@ -270,5 +270,12 @@
       "subscriber": "Подписчик",
       "vip": "VIP"
     }
+  },
+  "sidebar": {
+    "Home": "Головна",
+    "Saves": "Збережене",
+    "Statistics": "Статистика",
+    "Favorites": "Улюблені плейлисти",
+    "MyPlaylists": "Мої плейлисти"
   }
 }

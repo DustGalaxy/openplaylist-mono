@@ -1,17 +1,18 @@
 from datetime import datetime
 from enum import StrEnum
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Literal
 from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict, Field
 
-from src.models.order import OrderDomain
 from src._types import (
-    TrackSource,
+    BlockListScope,
+    ChatRuleScope,
     ContentSettingScope,
     DonationRuleScope,
-    ChatRuleScope,
-    BlockListScope,
+    TrackSource,
 )
+from src.models.order import OrderDomain
 
 
 class BlockTrigger(StrEnum):
@@ -51,7 +52,7 @@ class DonationRulesSchema(SubSchema):
     currency: str
     amount: float
     priority: int
-    content_settings: Optional[dict] = None
+    content_settings: dict | None = None
 
 
 class ChatRulesSchema(SubSchema):
@@ -66,40 +67,40 @@ class ContentSettingsPatch(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     platform: ContentSettingScope | None = None
-    min_views: Optional[int] = None
-    min_likes: Optional[int] = None
-    max_duration: Optional[int] = None
-    track_cooldown: Optional[int] = None
-    user_cooldown: Optional[int] = None
+    min_views: int | None = None
+    min_likes: int | None = None
+    max_duration: int | None = None
+    track_cooldown: int | None = None
+    user_cooldown: int | None = None
 
 
 class BlockListPatch(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    trigger_type: Optional[BlockTrigger] = None
-    trigger_value: Optional[str] = None
-    platform: Optional[BlockListScope] = None
+    trigger_type: BlockTrigger | None = None
+    trigger_value: str | None = None
+    platform: BlockListScope | None = None
 
 
 class DonationRulesPatch(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    platform: Optional[DonationRuleScope] = None
-    name: Optional[str] = None
-    currency: Optional[str] = None
-    amount: Optional[float] = None
-    priority: Optional[int] = None
-    content_settings: Optional[dict] = None
+    platform: DonationRuleScope | None = None
+    name: str | None = None
+    currency: str | None = None
+    amount: float | None = None
+    priority: int | None = None
+    content_settings: dict | None = None
 
 
 class ChatRulesPatch(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    platform: Optional[ChatRuleScope] = None
-    key: Optional[str] = None
-    priority: Optional[int] = None
-    content_settings: Optional[dict] = None
-    overrive_order: Optional[int] = None
+    platform: ChatRuleScope | None = None
+    key: str | None = None
+    priority: int | None = None
+    content_settings: dict | None = None
+    overrive_order: int | None = None
 
 
 class AllowedSource(BaseModel):
@@ -119,7 +120,7 @@ class PlaylistSchema(BaseModel):
     is_allow_external_requests: bool
     allow_sources: list[AllowedSource] = Field(default_factory=list)
     is_public: bool
-    is_favorite: bool
+    favorites_count: int = 0
     show_in_widget: bool
 
     track_data: list[OrderDomain] = Field(default_factory=list)
@@ -129,15 +130,15 @@ class PlaylistSchema(BaseModel):
     max_playlist_size: int
     mode: Literal["flow", "stream", "static"]
     repeat_mode: Literal["all", "once", "none"]
-    mode_settings: Dict[str, Any]
+    mode_settings: dict[str, Any]
     sync_playback_position: bool
     cost_mode: Literal["add", "max"]
 
-    track_black_list: List[str] = []
-    background_track_ids: List[str] = []
+    track_black_list: list[str] = []
+    background_track_ids: list[str] = []
     # Relationships
-    content_settings: List[ContentSettingsSchema] = []
-    block_list: List[BlockListSchema] = []
+    content_settings: list[ContentSettingsSchema] = []
+    block_list: list[BlockListSchema] = []
     donation_rules: list[DonationRulesSchema] = []
     chat_rules: list[ChatRulesSchema] = []
 
@@ -158,7 +159,6 @@ class PlaylistPatch(BaseModel):
     tags: list[str] | None = None
     allow_sources: list[AllowedSource] | None = None
     is_public: bool | None = None
-    is_favorite: bool | None = None
     is_allow_external_requests: bool | None = None
     show_in_widget: bool | None = None
     max_playlist_size: int | None = None
@@ -183,7 +183,6 @@ class PlaylistCreate(BaseModel):
     is_allow_external_requests: bool = False
     allow_sources: list[AllowedSource] = Field(default_factory=list)
     is_public: bool = False
-    is_favorite: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -197,7 +196,7 @@ class DonationRulesCreate(BaseModel):
     currency: str = Field("USD", min_length=3, max_length=3)
     amount: float = 5.0
     priority: int = 0
-    content_settings: Optional[dict] = None
+    content_settings: dict | None = None
 
 
 class ChatRulesCreate(BaseModel):
@@ -207,8 +206,8 @@ class ChatRulesCreate(BaseModel):
     platform: ChatRuleScope
     key: str = Field(..., max_length=255)
     priority: int
-    content_settings: Optional[dict] = None
-    overrive_order: Optional[int] = None
+    content_settings: dict | None = None
+    overrive_order: int | None = None
 
 
 class ContentSettingsCreate(BaseModel):

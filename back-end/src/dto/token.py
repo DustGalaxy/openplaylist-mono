@@ -16,5 +16,3 @@ class OAuthBody(BaseModel):
 
 class UserKeyBody(BaseModel):
     user_key: str
-
-

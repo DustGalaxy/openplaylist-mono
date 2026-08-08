@@ -31,9 +31,7 @@ def upgrade() -> None:
     # 1. Создаем новые типы ENUM в базе данных
     postgresql.ENUM("TWITCH", "YOUTUBE", "DA", "WEB", "DONATEX", name="blocklistscope").create(op.get_bind())
     postgresql.ENUM("TWITCH", "YOUTUBE", name="chatrulescope").create(op.get_bind())
-    postgresql.ENUM("TWITCH", "YOUTUBE", "WEB", "DA", "DONATEX", "GENERAL", name="contentsettingscope").create(
-        op.get_bind()
-    )
+    postgresql.ENUM("TWITCH", "YOUTUBE", "WEB", "DA", "DONATEX", "GENERAL", name="contentsettingscope").create(op.get_bind())
     postgresql.ENUM("DA", "DONATEX", "GENERAL", name="donationrulescope").create(op.get_bind())
     postgresql.ENUM("TWITCH", "YOUTUBE", "GOOGLE", "DA", "DONATEX", name="integrationplatform").create(op.get_bind())
 

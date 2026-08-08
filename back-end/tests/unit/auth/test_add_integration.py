@@ -25,9 +25,7 @@ def mock_strategy_setup(mocker):
             auth_flow=auth_flow,
         )
         platform_result = PlatformAuthResult(
-            user=PlatformUser(
-                id="twitch_123", username="tw_user", avatar_url="url", email="test@test.com", email_verified=True
-            ),
+            user=PlatformUser(id="twitch_123", username="tw_user", avatar_url="url", email="test@test.com", email_verified=True),
             tokens=PlatformTokens(access_token="acc", refresh_token="ref", expires_at=1700000000, token_type="Bearer"),
         )
         mock_strategy.fetch_identity = AsyncMock(return_value=platform_result)

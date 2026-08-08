@@ -61,9 +61,7 @@ async def twitch_refresh_tokens(
 
     async with async_session_maker() as session:
         try:
-            link = await linked_accounts_repository.get_by_id_platform(
-                session, str(event.twitch_id), IntegrationPlatform.TWITCH
-            )
+            link = await linked_accounts_repository.get_by_id_platform(session, str(event.twitch_id), IntegrationPlatform.TWITCH)
         except NotFoundException:
             # TODO: log
             return

@@ -28,9 +28,7 @@ class TwitchSubService:
     def __init__(self, token_repo: TwitchAdminTokenRepository = twitch_admin_token_repository):
         self.token_repo = token_repo
 
-    async def sync_subscribers_for_token(
-        self, session: AsyncSession, admin_token: TwitchAdminTokenDomain
-    ) -> dict[str, int]:
+    async def sync_subscribers_for_token(self, session: AsyncSession, admin_token: TwitchAdminTokenDomain) -> dict[str, int]:
         """Fetch subscribers from Twitch Helix API for a specific admin channel and update UserRole records in DB."""
         if not admin_token.twitch_user_id:
             logger.warning(f"Admin token {admin_token.id} has no twitch_user_id, skipping.")

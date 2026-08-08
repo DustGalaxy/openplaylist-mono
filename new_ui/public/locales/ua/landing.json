@@ -67,6 +67,21 @@
         "title": "Запустіть стрім"
       }
     },
+    "socialBanner": {
+      "badge": "Спільнота та підтримка",
+      "title": "Приєднуйтесь та підтримайте проєкт",
+      "subtitle": "Стежте за новинами в Telegram та допомагайте розвитку проєкту на Patreon",
+      "patreon": {
+        "title": "Patreon",
+        "description": "Підтримайте розробку фінансово на Patreon — це допомагає проєкту активно рости та розвиватися.",
+        "cta": "Підтримати на Patreon"
+      },
+      "telegram": {
+        "title": "Telegram-канал",
+        "description": "Анонси, новини та апдейти не лише по OpenPlaylist, а й по інших проєктах автора.",
+        "cta": "Перейти в Telegram"
+      }
+    },
     "title": "OPEN PLAYLIST"
   }
 }

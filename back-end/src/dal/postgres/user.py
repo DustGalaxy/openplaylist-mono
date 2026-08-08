@@ -37,9 +37,7 @@ class UserRepository(crud_factory(User, AuthUserSchema, AuthUserCreate, AuthUser
 
         return AuthUserSchema.model_validate(user)
 
-    async def get_by_tokens(
-        self, session: AsyncSession, access_token: str, refresh_token: str, platform: IntegrationPlatform
-    ):
+    async def get_by_tokens(self, session: AsyncSession, access_token: str, refresh_token: str, platform: IntegrationPlatform):
         stmt = (
             select(User)
             .join(LinkedAccounts, User.id == LinkedAccounts.user_id)

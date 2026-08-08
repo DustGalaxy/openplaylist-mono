@@ -5,7 +5,7 @@ import { useGlobalStats } from '../../hooks/useStats'
 import type { StatsPeriod } from '../../types'
 import { formatSecondsToReadable } from './KpiCard'
 import PeriodSelector from './PeriodSelector'
-import { panelClass } from '@/features/landing/styles'
+import { badgeClass, panelClass } from '@/features/landing/styles'
 import { cn } from '@/lib/utils'
 
 interface GlobalStatsBannerWidgetProps {
@@ -37,9 +37,9 @@ export const GlobalStatsBannerWidget: React.FC<
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 relative z-10">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-level-1 border border-accent/30 text-accent text-xs font-semibold tracking-wide mb-1.5">
-            <Sparkles className="size-3 text-accent" />
-            {t('stats.globalBanner.badge', 'Live Platform Statistics')}
+          <div className={`${badgeClass} mb-2`}>
+            <Sparkles className="size-3.5 text-accent shrink-0" />
+            <span>{t('stats.globalBanner.badge', 'Live Platform Statistics')}</span>
           </div>
           <h2 className="text-lg sm:text-xl font-bold text-text-main">
             {t('stats.globalBanner.title', 'OpenPlaylist Analytics')}

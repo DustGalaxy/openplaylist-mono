@@ -25,16 +25,12 @@ async def _(event: InternalPlaylistEvent):
     match event.event_type:
         case InternalPlaylistEventType.TRACK_ADDED:
             await notification_engine.add_event(
-                BaseEvent(
-                    target_id=event.playlist_id, target_type="playlist", event_type=PlaylistEventType.TRACK_ADDED
-                ),
+                BaseEvent(target_id=event.playlist_id, target_type="playlist", event_type=PlaylistEventType.TRACK_ADDED),
                 extra_data={"playlist_name": event.playlist_name, "owner_name": event.user_name},
             )
         case InternalPlaylistEventType.TRACK_REMOVED:
             await notification_engine.add_event(
-                BaseEvent(
-                    target_id=event.playlist_id, target_type="playlist", event_type=PlaylistEventType.TRACK_REMOVED
-                ),
+                BaseEvent(target_id=event.playlist_id, target_type="playlist", event_type=PlaylistEventType.TRACK_REMOVED),
                 extra_data={"playlist_name": event.playlist_name, "owner_name": event.user_name},
             )
         case InternalPlaylistEventType.TRACK_REMOVED_BULK:
@@ -42,9 +38,7 @@ async def _(event: InternalPlaylistEvent):
                 return
 
             await notification_engine.send_event(
-                BaseEvent(
-                    target_id=event.playlist_id, target_type="playlist", event_type=PlaylistEventType.TRACK_REMOVED
-                ),
+                BaseEvent(target_id=event.playlist_id, target_type="playlist", event_type=PlaylistEventType.TRACK_REMOVED),
                 extra_data={
                     "counter": len(event.bulk_ids),
                     "playlist_name": event.playlist_name,
@@ -56,9 +50,7 @@ async def _(event: InternalPlaylistEvent):
                 return
 
             await notification_engine.send_event(
-                BaseEvent(
-                    target_id=event.playlist_id, target_type="playlist", event_type=PlaylistEventType.TRACK_ADDED
-                ),
+                BaseEvent(target_id=event.playlist_id, target_type="playlist", event_type=PlaylistEventType.TRACK_ADDED),
                 extra_data={
                     "counter": len(event.bulk_ids),
                     "playlist_name": event.playlist_name,

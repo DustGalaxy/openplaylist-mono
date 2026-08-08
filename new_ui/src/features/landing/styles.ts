@@ -2,11 +2,11 @@ export const gradientTextClass =
   'text-transparent bg-gradient-to-r from-[var(--color-accent-2)] via-[var(--color-accent-3)] to-[var(--color-accent-1)] bg-clip-text bg-[length:200%_auto] animate-bg-move'
 
 export const panelClass =
-  'rounded-(--rounded-std) border border-accent/35 bg-level-2/95 shadow-[0_8px_20px_rgba(0,0,0,0.15)]'
+  'rounded-(--rounded-std) border border-accent/35 bg-level-2/95 shadow-xs'
 
 /** Stronger accent border — landing hero cards, footer */
 export const panelAccentClass =
-  'rounded-(--rounded-std) border-2 border-accent bg-level-2 shadow-[-2px_2px_14px_rgba(0,0,0,0.3)]'
+  'rounded-(--rounded-std) border-2 border-accent bg-level-2 shadow-xs'
 
 export const pageWrapClass = 'w-full text-text-main px-4 pt-4 pb-8 sm:pb-10'
 
@@ -40,3 +40,7 @@ export const feedbackErrorClass = 'border-danger/40 bg-danger/10 text-danger'
 /** Compact metadata chip — mode badges, track count, etc. */
 export const infoChipClass =
   'inline-flex items-center gap-2 rounded-full border border-accent/20 bg-level-1/50 text-text-secondary text-xs font-medium'
+
+/** Unified badge style — hero eyebrow, stats banner badge, social banner badge */
+export const badgeClass =
+  'inline-flex items-center gap-2 px-3 py-1 rounded-full bg-level-1/90 border border-accent/40 text-accent text-xs font-bold tracking-wide shadow-xs backdrop-blur-md'

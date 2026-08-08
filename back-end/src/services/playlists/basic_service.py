@@ -2,20 +2,16 @@ from datetime import datetime
 from uuid import UUID
 
 from fastapi import HTTPException, status
-
 from simple_repository.exceptions import NotFoundException
 
-
-from src.dto.internal.domain_events import InternalPlaylistEventType
-from src.dal.postgres.playlist import playlist_repository, PlaylistRepository
-
+from src._types import AsyncSession, DeleteStatus
+from src.dal.postgres.playlist import PlaylistRepository, playlist_repository
 from src.dto.playlist import NewPlaylist, PlaylistBaseinfo
+from src.exceptions import NotAuthorizedException
 from src.models.auth_user import AuthUserSchema as User
 from src.models.order import OrderCreate, OrderDomain
-from src.exceptions import NotAuthorizedException
-from src.models.playlist import PlaylistCreate, PlaylistSchema, PlaylistPatch
+from src.models.playlist import PlaylistCreate, PlaylistPatch, PlaylistSchema
 from src.services.playlists.validation_engine import ValidationEngine
-from src._types import AsyncSession, DeleteStatus
 
 
 class PlaylistLowService:
@@ -23,7 +19,7 @@ class PlaylistLowService:
         self,
         _playlist_repository: PlaylistRepository,
     ):
-        self._playlist_repository = _playlist_repository
+        self._playlist_repository: PlaylistRepository = _playlist_repository
 
     async def get(self, session: AsyncSession, playlist_id: UUID, user: User):
         plst = await self._playlist_repository.get_one(session, playlist_id)
@@ -48,9 +44,7 @@ class PlaylistLowService:
     async def get_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistSchema:
         return await self._playlist_repository.get_user_playlist_by_name(session, owner_id, name)
 
-    async def get_public_playlist(
-        self, session: AsyncSession, playlist_id: UUID, user_id: UUID | None = None
-    ) -> PlaylistSchema:
+    async def get_public_playlist(self, session: AsyncSession, playlist_id: UUID, user_id: UUID | None = None) -> PlaylistSchema:
         plst = await self._playlist_repository.get_one(session, playlist_id)
         if not plst.is_public and (not user_id or plst.owner_id != user_id):
             raise HTTPException(status_code=404, detail="Playlist not found")

@@ -216,6 +216,7 @@ export type InputPlaylist = {
   tags: Array<string>
   is_public: boolean
   is_favorite: boolean
+  favorites_count: number
   is_allow_external_requests: boolean
   allow_sources: Array<AllowSources>
   show_in_widget: boolean
@@ -235,6 +236,22 @@ export type InputPlaylist = {
   chat_rules: Array<ReadChatRules>
   created_at: string
   updated_at: string
+}
+
+export interface FavoriteStatusResponse {
+  playlist_id: string
+  is_favorite: boolean
+  favorites_count: number
+}
+
+export interface ReadPlaylistPreview {
+  id: string
+  owner_nickname: string
+  name: string
+  description?: string | null
+  favorites_count: number
+  created_at?: string
+  updated_at?: string
 }
 
 export type Playlist = Omit<InputPlaylist, 'now_playing'> & {

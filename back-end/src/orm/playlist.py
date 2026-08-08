@@ -69,7 +69,7 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
 
     # Флаги видимости
     is_public: Mapped[bool] = mapped_column(default=False, nullable=False)
-    is_favorite: Mapped[bool] = mapped_column(default=False, nullable=False)
+    favorites_count: Mapped[int] = mapped_column(default=0, nullable=False, server_default="0")
     show_in_widget: Mapped[bool] = mapped_column(default=False, nullable=False)
     is_allow_external_requests: Mapped[bool] = mapped_column(default=False, nullable=False)
 
@@ -99,15 +99,11 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
     content_settings: Mapped[list["ContentSettings"]] = relationship(
         back_populates="playlist", cascade="all, delete-orphan", lazy="selectin"
     )
-    chat_rules: Mapped[list["ChatRules"]] = relationship(
-        back_populates="playlist", cascade="all, delete-orphan", lazy="selectin"
-    )
+    chat_rules: Mapped[list["ChatRules"]] = relationship(back_populates="playlist", cascade="all, delete-orphan", lazy="selectin")
     donation_rules: Mapped[list["DonationRules"]] = relationship(
         back_populates="playlist", cascade="all, delete-orphan", lazy="selectin"
     )
-    block_list: Mapped[list["BlockList"]] = relationship(
-        back_populates="playlist", cascade="all, delete-orphan", lazy="selectin"
-    )
+    block_list: Mapped[list["BlockList"]] = relationship(back_populates="playlist", cascade="all, delete-orphan", lazy="selectin")
 
     # Связи заказов
     order_associations: Mapped[list["OrderPlaylistStatus"]] = relationship(
@@ -122,9 +118,7 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
     order_links: AssociationProxy[list["Order"]] = association_proxy(
         target_collection="order_associations", attr="order", creator=lambda obj: OrderPlaylistStatus(order=obj)
     )
-    track_data: AssociationProxy[list["Order"]] = association_proxy(
-        target_collection="active_order_associations", attr="order"
-    )
+    track_data: AssociationProxy[list["Order"]] = association_proxy(target_collection="active_order_associations", attr="order")
 
 
 class OrderPlaylistStatus(Base, TimestampMixin):
@@ -134,9 +128,7 @@ class OrderPlaylistStatus(Base, TimestampMixin):
     playlist_id: Mapped[UUID] = mapped_column(PGUUID, ForeignKey("playlists.id", ondelete="CASCADE"), primary_key=True)
     status: Mapped[Status] = mapped_column(default="in playlist")
 
-    order: Mapped["Order"] = relationship(
-        back_populates="playlist_associations", lazy="selectin", cascade="all, delete"
-    )
+    order: Mapped["Order"] = relationship(back_populates="playlist_associations", lazy="selectin", cascade="all, delete")
     playlist: Mapped["Playlist"] = relationship(back_populates="order_associations")
 
 

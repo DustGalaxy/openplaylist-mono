@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
   Bell,
-  Music2,
+  Heart,
   PanelLeftClose,
   PanelLeftOpen,
   Radio,
@@ -14,6 +14,7 @@ import {
   Shield,
   Terminal,
 } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   PlaylistViewProvider,
   usePlaylistView,
@@ -40,8 +41,14 @@ import {
 } from '@/features/landing/styles'
 import UserPopover from '@/features/user-profile/components/UserPopover'
 import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
-import { FeatureLock } from '@/features/feature-gate'
 import BulkClearModal from '@/features/united-playlist/components/modals/BulkClearModal'
+import { useAuthStore } from '@/stores/authStore'
+import { useUserPlaylistRecordsStore } from '@/stores/userPlaylistInfoStore'
+import {
+  addPlaylistToFavorites,
+  checkPlaylistFavoriteStatus,
+  removePlaylistFromFavorites,
+} from '@/api/api-playlist'
 
 export default function PlaylistViewContent({ slot }: { slot: SlotId }) {
   return (
@@ -54,8 +61,15 @@ export default function PlaylistViewContent({ slot }: { slot: SlotId }) {
 function PlaylistViewInner() {
   const { t: tc } = useTranslation()
   const { t } = useFeatureTranslation()
-  const { slot, playlist, playlistId, role, isLoading, owner } =
-    usePlaylistView()
+  const queryClient = useQueryClient()
+  const { isAuthenticated } = useAuthStore()
+  const favorites = useUserPlaylistRecordsStore((s) => s.favorites) || []
+  const addFavoriteStore = useUserPlaylistRecordsStore((s) => s.addFavorite)
+  const removeFavoriteStore = useUserPlaylistRecordsStore(
+    (s) => s.removeFavorite,
+  )
+
+  const { playlist, playlistId, role, isLoading, owner } = usePlaylistView()
   const { toggleExternalRequests, toggleBroadcast, setAcceptSync } =
     usePlaylistStore()
 
@@ -69,6 +83,79 @@ function PlaylistViewInner() {
   const [selectedContentSettingIndex, setSelectedContentSettingIndex] =
     React.useState(0)
   const [openNewSubModal, setOpenNewSubModal] = React.useState(false)
+
+  const isStoreFavorite = playlistId
+    ? favorites.some((f) => f.id === playlistId)
+    : false
+  const [isFavorite, setIsFavorite] = React.useState<boolean>(
+    playlist?.is_favorite ?? isStoreFavorite,
+  )
+  const [favoritesCount, setFavoritesCount] = React.useState<number>(
+    playlist?.favorites_count ?? 0,
+  )
+
+  useEffect(() => {
+    if (playlist) {
+      setIsFavorite(playlist.is_favorite ?? isStoreFavorite)
+      setFavoritesCount(playlist.favorites_count ?? 0)
+    }
+  }, [
+    playlist?.id,
+    playlist?.is_favorite,
+    playlist?.favorites_count,
+    isStoreFavorite,
+  ])
+
+  useEffect(() => {
+    if (!isAuthenticated || !playlistId) return
+    checkPlaylistFavoriteStatus(playlistId).then((res) => {
+      if (res) {
+        setIsFavorite(res.is_favorite)
+        setFavoritesCount(res.favorites_count)
+        if (playlist) {
+          if (res.is_favorite) {
+            addFavoriteStore({ id: playlist.id, name: playlist.name })
+          } else {
+            removeFavoriteStore(playlist.id)
+          }
+        }
+      }
+    })
+  }, [playlistId, isAuthenticated])
+
+  const handleToggleFavorite = async () => {
+    if (!playlist) return
+    if (!isAuthenticated) {
+      toast.error(
+        t(
+          'playlist.favorite.loginToFavorite',
+          'Войдите, чтобы добавить в любимые',
+        ),
+      )
+      return
+    }
+
+    if (isFavorite) {
+      setIsFavorite(false)
+      setFavoritesCount((c) => Math.max(0, c - 1))
+      removeFavoriteStore(playlist.id)
+      const res = await removePlaylistFromFavorites(playlist.id)
+      if (res) {
+        setIsFavorite(res.is_favorite)
+        setFavoritesCount(res.favorites_count)
+      }
+    } else {
+      setIsFavorite(true)
+      setFavoritesCount((c) => c + 1)
+      addFavoriteStore({ id: playlist.id, name: playlist.name })
+      const res = await addPlaylistToFavorites(playlist.id)
+      if (res) {
+        setIsFavorite(res.is_favorite)
+        setFavoritesCount(res.favorites_count)
+      }
+    }
+    queryClient.invalidateQueries({ queryKey: ['favoritePlaylists'] })
+  }
 
   if (!playlistId) {
     // viewer, nothing loaded yet — search screen
@@ -163,6 +250,28 @@ function PlaylistViewInner() {
           </div>
           <div className="flex gap-2 items-center">
             <Btn
+              title={
+                isFavorite
+                  ? t('playlist.favorite.remove', 'Удалить из любимых')
+                  : t('playlist.favorite.add', 'Добавить в любимые')
+              }
+              className={cn(
+                'px-2 py-1 bg-level-2 h-8 rounded-sm flex items-center gap-1.5 text-xs font-medium transition-colors cursor-pointer',
+                isFavorite
+                  ? 'text-red-500 hover:text-red-400'
+                  : 'text-text-secondary hover:text-text-main',
+              )}
+              onClick={handleToggleFavorite}
+            >
+              <Heart
+                className={cn(
+                  'size-4 shrink-0 stroke-accent',
+                  isFavorite && 'fill-red-500/10 text-red-500 stroke-red-500',
+                )}
+              />
+              <span>{favoritesCount}</span>
+            </Btn>
+            <Btn
               title={t('playlist.tooltip.share')}
               className="p-1 bg-level-2 size-8 rounded-sm"
               onClick={copyLink}
@@ -232,23 +341,25 @@ function PlaylistViewInner() {
             {showContentSettings && (
               <div className="flex flex-col gap-2 sm:gap-3">
                 <div className="flex gap-2 flex-wrap">
-                  {playlist.content_settings.map((setting, index) => (
-                    <button
-                      key={setting.platform}
-                      type="button"
-                      onClick={() => setSelectedContentSettingIndex(index)}
-                      className={cn(
-                        filterTabBaseClass,
-                        selectedContentSettingIndex === index
-                          ? filterTabActiveClass
-                          : filterTabInactiveClass,
-                      )}
-                    >
-                      {setting.platform === Platform.General
-                        ? tc('common.general')
-                        : setting.platform}
-                    </button>
-                  ))}
+                  {playlist.content_settings.map(
+                    (setting: any, index: number) => (
+                      <button
+                        key={setting.platform}
+                        type="button"
+                        onClick={() => setSelectedContentSettingIndex(index)}
+                        className={cn(
+                          filterTabBaseClass,
+                          selectedContentSettingIndex === index
+                            ? filterTabActiveClass
+                            : filterTabInactiveClass,
+                        )}
+                      >
+                        {setting.platform === Platform.General
+                          ? tc('common.general')
+                          : setting.platform}
+                      </button>
+                    ),
+                  )}
                 </div>
                 {contentSettings && (
                   <InfoCardGroup

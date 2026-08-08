@@ -92,10 +92,7 @@ TargetType = Literal["playlist", "user"]
 
 UserTypes = UserPlaylistCreatePayload | UserPlaylistDeletePayload
 PlaylistTypes = (
-    TrackAddedPayload
-    | TrackRemovedPayload
-    | BasicNamePayload
-    | BasicVisibilityPayload
+    TrackAddedPayload | TrackRemovedPayload | BasicNamePayload | BasicVisibilityPayload
     # | RealtimeSyncPayload
     # | RulesModePayload
     # | RulesValidationPayload

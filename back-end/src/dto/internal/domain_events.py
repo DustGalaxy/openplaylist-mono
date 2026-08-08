@@ -22,7 +22,6 @@ class PlaylistSettings(BaseModel):
     is_allow_external_requests: bool
     allow_sources: list[AllowedSource] = Field(default_factory=list)
     is_public: bool
-    is_favorite: bool
     show_in_widget: bool
     now_playing: str | None = Field(None)
 

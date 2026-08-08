@@ -35,9 +35,7 @@ def _drop_fk_for_column(table_name: str, column_name: str) -> None:
 def upgrade() -> None:
     # 1. Добавляем временную колонку tmp_playlist_id
     for table in TABLES:
-        op.add_column(
-            table, sa.Column("tmp_playlist_id", sa.UUID(), nullable=True)
-        )
+        op.add_column(table, sa.Column("tmp_playlist_id", sa.UUID(), nullable=True))
 
     # 2. Переносим данные из settings.playlist_id
     for table in TABLES:
@@ -109,14 +107,10 @@ def downgrade() -> None:
     op.drop_index("ix_donation_rules_unique_trigger", table_name="donation_rules")
 
     for table in TABLES:
-        op.drop_constraint(
-            f"fk_{table}_playlists_id_playlist", table, type_="foreignkey"
-        )
+        op.drop_constraint(f"fk_{table}_playlists_id_playlist", table, type_="foreignkey")
 
     for table in TABLES:
-        op.add_column(
-            table, sa.Column("tmp_settings_id", sa.UUID(), nullable=True)
-        )
+        op.add_column(table, sa.Column("tmp_settings_id", sa.UUID(), nullable=True))
 
     for table in TABLES:
         op.execute(

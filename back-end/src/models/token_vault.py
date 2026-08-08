@@ -20,7 +20,6 @@ class TokenVaultDomain(BaseModel):
     expires_at: int | None
 
     last_update: datetime
-    
 
     created_at: datetime
     updated_at: datetime

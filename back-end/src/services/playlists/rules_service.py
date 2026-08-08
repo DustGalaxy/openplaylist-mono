@@ -53,9 +53,7 @@ class StrategyManager:
         else:
             strategy = self._registry.get(type(obj))
         if strategy is None:
-            raise NotImplementedError(
-                f"Strategy for {type(obj) if not isinstance(obj, str) else obj} is not implemented"
-            )
+            raise NotImplementedError(f"Strategy for {type(obj) if not isinstance(obj, str) else obj} is not implemented")
         return strategy
 
 

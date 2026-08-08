@@ -1,7 +1,6 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 import { Link } from '@tanstack/react-router'
-import { ListMusic, Loader2, SearchX, User } from 'lucide-react'
+import { Heart, ListMusic, Loader2, SearchX, User } from 'lucide-react'
 
 import { getPublicPlaylists } from '@/api/api-playlist'
 import { gradientTextClass, panelClass } from '@/features/landing/styles'
@@ -13,6 +12,7 @@ export type PublicPlaylistResult = {
   name: string
   owner_nickname: string
   discription?: string
+  favorites_count?: number
 }
 
 type SearchPlaylistProps = {
@@ -104,37 +104,46 @@ const SearchPlaylist = ({
           {playlists.map((playlist) => (
             <Link
               key={playlist.id}
-              to={`/playlists/${playlist.id}`}
+              to="/playlists/$playlistId"
+              params={{ playlistId: playlist.id }}
               className={`
                 group text-left flex flex-col gap-3 p-5 ${panelClass}
                 border-accent/50 transition-all duration-200
                 hover:border-accent hover:shadow-[0_0_24px_rgba(236,72,153,0.12)]
               `}
             >
-              <div className="flex items-start gap-3">
-                <div
-                  className="
-                    flex h-10 w-10 shrink-0 items-center justify-center rounded-(--rounded-std)
-                    bg-level-1 border border-accent/40 text-accent
-                    group-hover:text-transparent group-hover:bg-gradient-to-br
-                    group-hover:from-[var(--color-accent-2)] group-hover:via-[var(--color-accent-3)]
-                    group-hover:to-[var(--color-accent-1)] transition-colors
-                  "
-                >
-                  <ListMusic className="h-5 w-5 group-hover:text-level-1" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3
-                    className={`font-bold text-lg truncate group-hover:underline decoration-accent/60 ${gradientTextClass}`}
+              <div className="flex items-start gap-3 justify-between">
+                <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <div
+                    className="
+                      flex h-10 w-10 shrink-0 items-center justify-center rounded-(--rounded-std)
+                      bg-level-1 border border-accent/40 text-accent
+                      group-hover:text-transparent group-hover:bg-gradient-to-br
+                      group-hover:from-[var(--color-accent-2)] group-hover:via-[var(--color-accent-3)]
+                      group-hover:to-[var(--color-accent-1)] transition-colors
+                    "
                   >
-                    {playlist.name}
-                  </h3>
-                  <p className="flex items-center gap-1.5 text-sm text-text-secondary mt-1">
-                    <User className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">{playlist.owner_nickname}</span>
-                  </p>
+                    <ListMusic className="h-5 w-5 group-hover:text-level-1" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3
+                      className={`font-bold text-lg truncate group-hover:underline decoration-accent/60 ${gradientTextClass}`}
+                    >
+                      {playlist.name}
+                    </h3>
+                    <p className="flex items-center gap-1.5 text-sm text-text-secondary mt-1">
+                      <User className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{playlist.owner_nickname}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 text-xs text-red-500 font-medium shrink-0 bg-level-1/80 px-2 py-1 rounded border border-accent/20">
+                  <Heart className="h-3.5 w-3.5 fill-red-500/20 text-red-500" />
+                  <span>{playlist.favorites_count ?? 0}</span>
                 </div>
               </div>
+
               <p className="text-sm text-text-secondary line-clamp-2 leading-relaxed">
                 {playlist.discription || t('publicSearch.noDescription')}
               </p>

@@ -1,5 +1,10 @@
 {
   "playlist": {
+    "favorite": {
+      "add": "Добавить в любимые",
+      "remove": "Удалить из любимых",
+      "loginToFavorite": "Войдите, чтобы добавить в любимые"
+    },
     "addbar": {
       "placeholder": "Вставьте URL сюда",
       "submit": "Добавить",

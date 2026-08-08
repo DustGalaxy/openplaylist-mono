@@ -11,9 +11,11 @@ from src.adapters._redis.broker import RedisAdapter
 from src.settings import settings
 from src.services.auth.auth_service import AuthService
 
+
 @pytest.fixture(scope="session")
 def anyio_backend():
     return "asyncio"
+
 
 @pytest.fixture
 def auth_service():
@@ -22,11 +24,12 @@ def auth_service():
     link_repo = AsyncMock()
     token_vault_repo = AsyncMock()
     service = AuthService(user_repo, link_repo, token_vault_repo)
-    
+
     # Мокаем hasher целиком, чтобы избежать read-only ограничений argon2 в Си
     service.hasher = MagicMock()
-    
+
     return service
+
 
 @pytest.fixture
 def mock_db_session():
@@ -53,7 +56,6 @@ async def get_broker() -> RedisAdapter:
     if _broker is None:
         _broker = RedisAdapter(settings.REDIS_URL + "/99", decode_responses=True)
     return _broker
-
 
 
 @pytest.fixture

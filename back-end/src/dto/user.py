@@ -59,7 +59,7 @@ class UserPatch(BaseModel):
     email: str | None = None
     password: str | None = None
     bio: str | None = None
-    is_public: bool | None = None 
+    is_public: bool | None = None
     avatar_url: str | None = Field(None, alias="profile_image_url")
     social_links: dict[str, str] | None = None
 

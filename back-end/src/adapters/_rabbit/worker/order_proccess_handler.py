@@ -9,7 +9,7 @@ from src.database import async_session_maker
 from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType
 from src.dto.order import NewOrderPayload
 from src.services.order_service import order_service
-from src.services.playlist_service import add_to_playlist
+from src.services.playlist_service import add_to_playlist_batch
 
 router = RabbitRouter()
 
@@ -18,11 +18,18 @@ router = RabbitRouter()
 async def _(
     payload: NewOrderPayload,
 ):
-    typed_payload = await order_service.init_order(payload.order, payload.from_owner)
+    typed_orders = await order_service.init_orders(
+        payload.order, payload.from_owner, start_from_target=payload.start_from_target
+    )
 
-    async with async_session_maker() as db_session:                            
-        owner = await user_repository.get_one(db_session, typed_payload.owner_id)
-        tracks, errors = await add_to_playlist(db_session, typed_payload, owner, typed_payload.from_owner)
+    if not typed_orders:
+        return
+
+    first_order = typed_orders[0]
+
+    async with async_session_maker() as db_session:
+        owner = await user_repository.get_one(db_session, first_order.owner_id)
+        tracks, errors = await add_to_playlist_batch(db_session, typed_orders, owner, payload.from_owner)
 
     for track, playlist in tracks:
         await main_publisher.publish(
@@ -51,7 +58,7 @@ async def _(
                 show_in_widget=playlist.show_in_widget,
                 user_id=owner.id,
                 user_name=owner.username,
-                track=typed_payload,
+                track=first_order,
                 error_list=error_list,
             ),
             exchange=playlist_fanout_exchange,

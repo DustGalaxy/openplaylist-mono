@@ -34,7 +34,7 @@ class Settings(Base, UUIDMixin, TimestampMixin):
 
     mode_settings: Mapped[dict] = mapped_column(
         JSONB,
-        default_factory=lambda:{
+        default_factory=lambda: {
             "flow": {
                 "priority_break_point": 0,
                 "sort_settings_vip": {"date": "desc", "priority": "none", "order_mode": "auto", "manual_order_ids": []},
@@ -93,5 +93,3 @@ class Settings(Base, UUIDMixin, TimestampMixin):
             f"{self.track_black_list=}, {self.block_list=}, {self.created_at=}, "
             f"{self.updated_at=})>"
         )
-
-

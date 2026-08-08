@@ -126,9 +126,7 @@ class NotificationRepository:
 
         # Объединение, сортировка по дате создания и пагинация
         final_query = (
-            union_all(direct_notifications, subscription_notifications)
-            .order_by(literal_column("created_at").desc())
-            .limit(limit)
+            union_all(direct_notifications, subscription_notifications).order_by(literal_column("created_at").desc()).limit(limit)
         )
 
         result = await session.execute(final_query)
@@ -144,7 +142,7 @@ class NotificationRepository:
             NotificationSettingsORM.user_id == user_id
         )
         settings_result = await session.execute(settings_stmt)
-        
+
         last_read_ts = settings_result.scalar_one_or_none() or datetime(1970, 1, 1)
         # 2. Считаем непрочитанные Директ-уведомления (где is_read == False)
         direct_unread = (

@@ -29,5 +29,5 @@ class FeedbackData(BaseModel):
 
     user_agent: str
     type: Literal["feedback", "bug_report"]
-    
+
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

@@ -1,14 +1,16 @@
-// src/hooks/usePlaylistsLifecycle.ts
 import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
-import { fetchUserPlaylistData } from '@/api/api-playlist'
+import {
+  fetchUserFavoritePlaylists,
+  fetchUserPlaylistData,
+} from '@/api/api-playlist'
 import { useUserPlaylistRecordsStore } from '@/stores/userPlaylistInfoStore'
 
 export function usePlaylistsLifecycle() {
   const { isAuthenticated } = useAuthStore()
 
-  const { data: playlistsData, isLoading } = useQuery({
+  const { data: playlistsData } = useQuery({
     queryKey: ['playlistsData'],
     queryFn: fetchUserPlaylistData,
     enabled: isAuthenticated,
@@ -17,11 +19,33 @@ export function usePlaylistsLifecycle() {
     refetchInterval: false,
   })
 
+  const { data: favoritesData } = useQuery({
+    queryKey: ['favoritePlaylists'],
+    queryFn: fetchUserFavoritePlaylists,
+    enabled: isAuthenticated,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchInterval: false,
+  })
+
   useEffect(() => {
-    if (!playlistsData) return
-    const info = playlistsData.map((p) => {
-      return { id: p.id, name: p.name }
-    })
-    useUserPlaylistRecordsStore.getState().set(info)
-  }, [isAuthenticated, isLoading, playlistsData])
+    if (!isAuthenticated) {
+      useUserPlaylistRecordsStore.getState().clear()
+      return
+    }
+
+    if (playlistsData) {
+      const info = playlistsData.map((p: any) => {
+        return { id: p.id, name: p.name }
+      })
+      useUserPlaylistRecordsStore.getState().set(info)
+    }
+
+    if (favoritesData) {
+      const favInfo = favoritesData.map((f: any) => {
+        return { id: f.id, name: f.name, owner_nickname: f.owner_nickname }
+      })
+      useUserPlaylistRecordsStore.getState().setFavorites(favInfo)
+    }
+  }, [isAuthenticated, playlistsData, favoritesData])
 }

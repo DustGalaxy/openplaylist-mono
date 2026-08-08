@@ -13,8 +13,15 @@ from src.adapters._rabbit.queues import main_exchange
 @pytest.fixture
 def base_user():
     return AuthUserSchema(
-        id=uuid4(), username="streamer", email="streamer@test.com", password="hash",
-        email_confirmed=True, is_active=True, last_login=datetime.now(), created_at=datetime.now(), updated_at=datetime.now()
+        id=uuid4(),
+        username="streamer",
+        email="streamer@test.com",
+        password="hash",
+        email_confirmed=True,
+        is_active=True,
+        last_login=datetime.now(),
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
     )
 
 
@@ -24,9 +31,7 @@ async def test_disconnect_bot_integration_not_found(auth_service, mock_db_sessio
     base_user.linked_accounts = []
 
     with pytest.raises(HTTPException) as exc_info:
-        await auth_service.disconnect_bot(
-            mock_db_session, base_user, IntegrationPlatform.TWITCH, "twitch_123"
-        )
+        await auth_service.disconnect_bot(mock_db_session, base_user, IntegrationPlatform.TWITCH, "twitch_123")
 
     assert exc_info.value.status_code == 400
     assert "User does not have a" in exc_info.value.detail
@@ -36,16 +41,22 @@ async def test_disconnect_bot_integration_not_found(auth_service, mock_db_sessio
 async def test_disconnect_bot_already_disconnected(auth_service, mock_db_session, base_user):
     """Успех: Бот уже не подключен (bot_connection=False). Метод сразу возвращает True."""
     integration = LinkedAccountsDomain(
-        id=uuid4(), user_id=base_user.id, platform=IntegrationPlatform.TWITCH, platform_user_id="twitch_123",
-        platform_username="tw", platform_avatar_url="url", platform_user_email="m@m.com",
+        id=uuid4(),
+        user_id=base_user.id,
+        platform=IntegrationPlatform.TWITCH,
+        platform_user_id="twitch_123",
+        platform_username="tw",
+        platform_avatar_url="url",
+        platform_user_email="m@m.com",
         bot_connection=False,  # Бот уже отключен
-        bot_settings=None, is_dead=False, created_at=datetime.now(), updated_at=datetime.now()
+        bot_settings=None,
+        is_dead=False,
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
     )
     base_user.linked_accounts = [integration]
 
-    result = await auth_service.disconnect_bot(
-        mock_db_session, base_user, IntegrationPlatform.TWITCH, "twitch_123"
-    )
+    result = await auth_service.disconnect_bot(mock_db_session, base_user, IntegrationPlatform.TWITCH, "twitch_123")
 
     assert result is True
     auth_service.link_repo.update.assert_not_called()
@@ -55,9 +66,18 @@ async def test_disconnect_bot_already_disconnected(auth_service, mock_db_session
 async def test_disconnect_bot_timeout(auth_service, mock_db_session, base_user, mocker):
     """Ошибка 500: Брокер выбросил TimeoutError при попытке отключить бота."""
     integration = LinkedAccountsDomain(
-        id=uuid4(), user_id=base_user.id, platform=IntegrationPlatform.TWITCH, platform_user_id="twitch_123",
-        platform_username="tw", platform_avatar_url="url", platform_user_email="m@m.com",
-        bot_connection=True, bot_settings=None, is_dead=False, created_at=datetime.now(), updated_at=datetime.now()
+        id=uuid4(),
+        user_id=base_user.id,
+        platform=IntegrationPlatform.TWITCH,
+        platform_user_id="twitch_123",
+        platform_username="tw",
+        platform_avatar_url="url",
+        platform_user_email="m@m.com",
+        bot_connection=True,
+        bot_settings=None,
+        is_dead=False,
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
     )
     base_user.linked_accounts = [integration]
 
@@ -69,9 +89,7 @@ async def test_disconnect_bot_timeout(auth_service, mock_db_session, base_user, 
     mocker.patch("src.services.auth.auth_service.broker.request", AsyncMock(side_effect=TimeoutError()))
 
     with pytest.raises(HTTPException) as exc_info:
-        await auth_service.disconnect_bot(
-            mock_db_session, base_user, IntegrationPlatform.TWITCH, "twitch_123"
-        )
+        await auth_service.disconnect_bot(mock_db_session, base_user, IntegrationPlatform.TWITCH, "twitch_123")
 
     assert exc_info.value.status_code == 500
     assert exc_info.value.detail == "Bot unavalible"
@@ -84,9 +102,18 @@ async def test_disconnect_bot_success(auth_service, mock_db_session, base_user, 
     """Успех: Бот отключен через RPC, bot_connection изменен на False, запись в БД обновлена."""
     platform_user_id = "twitch_123"
     integration = LinkedAccountsDomain(
-        id=uuid4(), user_id=base_user.id, platform=IntegrationPlatform.TWITCH, platform_user_id=platform_user_id,
-        platform_username="tw", platform_avatar_url="url", platform_user_email="m@m.com",
-        bot_connection=True, bot_settings={"prefix": "!"}, is_dead=False, created_at=datetime.now(), updated_at=datetime.now()
+        id=uuid4(),
+        user_id=base_user.id,
+        platform=IntegrationPlatform.TWITCH,
+        platform_user_id=platform_user_id,
+        platform_username="tw",
+        platform_avatar_url="url",
+        platform_user_email="m@m.com",
+        bot_connection=True,
+        bot_settings={"prefix": "!"},
+        is_dead=False,
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
     )
     base_user.linked_accounts = [integration]
 
@@ -97,18 +124,13 @@ async def test_disconnect_bot_success(auth_service, mock_db_session, base_user, 
     mock_broker_request = mocker.patch("src.services.auth.auth_service.broker.request", AsyncMock())
     auth_service.link_repo.update = AsyncMock()
 
-    result = await auth_service.disconnect_bot(
-        mock_db_session, base_user, IntegrationPlatform.TWITCH, platform_user_id
-    )
+    result = await auth_service.disconnect_bot(mock_db_session, base_user, IntegrationPlatform.TWITCH, platform_user_id)
 
     # Проверки
     assert result is True
     assert integration.bot_connection is False
-    
+
     mock_broker_request.assert_called_once_with(
-        platform_user_id,
-        queue="twitch_disconnect_queue",
-        exchange=main_exchange,
-        timeout=5
+        platform_user_id, queue="twitch_disconnect_queue", exchange=main_exchange, timeout=5
     )
     auth_service.link_repo.update.assert_called_once_with(mock_db_session, integration)
