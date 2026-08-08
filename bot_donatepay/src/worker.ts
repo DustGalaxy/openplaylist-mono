@@ -67,6 +67,9 @@ export interface ConnectionData {
   user_id: string; // UUID владельца аккаунта в OpenPlaylist
   platform_user_id: string;
   access_token: string;
+  platform?: string;
+  refresh_token?: string;
+  expires_at?: number;
   bot_settings?: Record<string, any> | null;
 }
 
@@ -102,6 +105,11 @@ const CONFIG = {
     process.env.RABBITMQ_CONNECT_QUEUE || "bot.donatepay.connect.request",
   disconnectQueue:
     process.env.RABBITMQ_DISCONNECT_QUEUE || "bot.donatepay.disconnect",
+  tokenDiedQueue:
+    process.env.RABBITMQ_TOKEN_DIED_QUEUE || "donatepay.user.token.died",
+  allUsersRequestQueue:
+    process.env.RABBITMQ_ALL_USERS_REQUEST_QUEUE ||
+    "auth.user.donatepay.all.request",
   mainExchange: process.env.RABBITMQ_MAIN_EXCHANGE || "main_exchange",
   tokenUrl:
     process.env.DONATEPAY_TOKEN_URL ||
@@ -180,6 +188,165 @@ async function fetchSubscriptionToken(
   return await res.json();
 }
 
+export async function invalidateUserToken(
+  conn: ConnectionData,
+  reason?: string,
+): Promise<void> {
+  console.error(
+    `[Manager] Инвалидация API ключа для пользователя ${conn.platform_user_id}. Причина: ${reason || "ошибка авторизации"}`,
+  );
+
+  stopStream(conn.platform_user_id);
+
+  if (rabbitChannel) {
+    try {
+      const payload = Buffer.from(
+        JSON.stringify({
+          access_token: conn.access_token,
+          platform_user_id: conn.platform_user_id,
+        }),
+      );
+
+      rabbitChannel.publish(
+        CONFIG.mainExchange,
+        CONFIG.tokenDiedQueue,
+        payload,
+        { persistent: true },
+      );
+      console.log(
+        `[Manager] Оповещение о недействительном API ключе отправлено в ${CONFIG.tokenDiedQueue} для пользователя ${conn.platform_user_id}`,
+      );
+    } catch (err: any) {
+      console.error(
+        `[Manager] Ошибка при отправке user_token_died:`,
+        err.message,
+      );
+    }
+  }
+}
+
+export async function fetchUsersFromBackend(
+  timeoutMs = 10000,
+): Promise<ConnectionData[]> {
+  if (!rabbitChannel) {
+    throw new Error("RabbitMQ channel not initialized");
+  }
+
+  console.log(
+    `[Manager] Запрос списка пользователей с сервера (${CONFIG.allUsersRequestQueue})...`,
+  );
+
+  const replyQueue = await rabbitChannel.assertQueue("", {
+    exclusive: true,
+    autoDelete: true,
+  });
+  const correlationId = crypto.randomUUID();
+
+  return new Promise<ConnectionData[]>((resolve, reject) => {
+    let timer: NodeJS.Timeout;
+
+    const consumerPromise = rabbitChannel!.consume(
+      replyQueue.queue,
+      (msg) => {
+        if (!msg) return;
+        if (msg.properties.correlationId === correlationId) {
+          clearTimeout(timer);
+          try {
+            const content = msg.content.toString();
+            const rawUsers = JSON.parse(content);
+            console.log(
+              `[Manager] Успешно получено пользователей с сервера: ${Array.isArray(rawUsers) ? rawUsers.length : 0}`,
+            );
+            const users: ConnectionData[] = (
+              Array.isArray(rawUsers) ? rawUsers : []
+            ).map((u: any) => ({
+              user_id: u.user_id,
+              platform: u.platform,
+              platform_user_id: u.platform_user_id,
+              access_token: u.access_token,
+              refresh_token: u.refresh_token || "",
+              expires_at: u.expires_at || 0,
+              bot_settings: u.bot_settings ?? null,
+            }));
+            resolve(users);
+          } catch (err) {
+            reject(new Error(`Failed to parse users response: ${err}`));
+          } finally {
+            rabbitChannel?.cancel(msg.fields.consumerTag).catch(() => {});
+            rabbitChannel?.deleteQueue(replyQueue.queue).catch(() => {});
+          }
+        }
+      },
+      { noAck: true },
+    );
+
+    timer = setTimeout(async () => {
+      try {
+        const { consumerTag } = await consumerPromise;
+        await rabbitChannel?.cancel(consumerTag).catch(() => {});
+        await rabbitChannel?.deleteQueue(replyQueue.queue).catch(() => {});
+      } catch (_) {}
+      reject(
+        new Error(`Timeout (${timeoutMs}ms) waiting for users from server`),
+      );
+    }, timeoutMs);
+
+    rabbitChannel!.publish(
+      CONFIG.mainExchange,
+      CONFIG.allUsersRequestQueue,
+      Buffer.from(JSON.stringify({})),
+      {
+        replyTo: replyQueue.queue,
+        correlationId: correlationId,
+        persistent: false,
+      },
+    );
+  });
+}
+
+export async function setupUsers(): Promise<void> {
+  const retries = [5000, 10000, 10000, 30000];
+  let users: ConnectionData[] | null = null;
+
+  for (let i = 0; i <= retries.length; i++) {
+    try {
+      users = await fetchUsersFromBackend(10000);
+      break;
+    } catch (err: any) {
+      console.error(
+        `[Manager] Ошибка запроса пользователей (${err.message})...`,
+      );
+      if (i < retries.length) {
+        console.log(
+          `[Manager] Повтор запроса пользователей через ${retries[i] / 1000} сек...`,
+        );
+        await new Promise((r) => setTimeout(r, retries[i]));
+      }
+    }
+  }
+
+  if (!users) {
+    console.error(
+      "[Manager] Не удалось получить пользователей с сервера после нескольких попыток.",
+    );
+    return;
+  }
+
+  console.log(
+    `[Manager] Подключение сокетов для ${users.length} пользователей...`,
+  );
+  for (const user of users) {
+    try {
+      await startStream(user);
+    } catch (err: any) {
+      console.error(
+        `[Manager] Ошибка подключения для пользователя ${user.platform_user_id}:`,
+        err,
+      );
+    }
+  }
+}
+
 async function startStream(conn: ConnectionData): Promise<boolean> {
   const channelName = `$public:${conn.platform_user_id}`;
 
@@ -209,8 +376,15 @@ async function startStream(conn: ConnectionData): Promise<boolean> {
         );
         cb({ status: 200, data: subData });
       } catch (err: any) {
-        console.error("[Centrifuge] Error fetching subscription token:", err);
+        console.error(
+          `[Centrifuge] Error fetching subscription token for ${conn.platform_user_id}:`,
+          err,
+        );
         cb({ status: 500, error: err.message });
+        await invalidateUserToken(
+          conn,
+          `Subscription token error: ${err.message}`,
+        );
       }
     },
     disableWithCredentials: true,
@@ -268,9 +442,17 @@ async function startStream(conn: ConnectionData): Promise<boolean> {
     subscription.on("subscribe", (ctx: any) =>
       console.log(`[Centrifuge] Успешная подписка на ${channelName}:`, ctx),
     );
-    subscription.on("error", (err: any) =>
-      console.error(`[Centrifuge] Ошибка подписки на ${channelName}:`, err),
-    );
+    subscription.on("error", async (err: any) => {
+      console.error(`[Centrifuge] Ошибка подписки на ${channelName}:`, err);
+      const errStr = String(err?.message || err?.code || err);
+      if (
+        errStr.includes("401") ||
+        errStr.includes("403") ||
+        errStr.includes("token")
+      ) {
+        await invalidateUserToken(conn, `Subscription error: ${errStr}`);
+      }
+    });
 
     centrifuge.on("connect", (ctx: { client: string }) =>
       console.log(
@@ -280,9 +462,13 @@ async function startStream(conn: ConnectionData): Promise<boolean> {
     centrifuge.on("disconnect", (ctx: any) =>
       console.log(`[Centrifuge] Отключен от сокета для ${channelName}:`, ctx),
     );
-    centrifuge.on("error", (err: any) =>
-      console.error(`[Centrifuge] Ошибка на канале ${channelName}:`, err),
-    );
+    centrifuge.on("error", async (err: any) => {
+      console.error(`[Centrifuge] Ошибка на канале ${channelName}:`, err);
+      const errStr = String(err?.message || err?.code || err);
+      if (errStr.includes("401") || errStr.includes("403")) {
+        await invalidateUserToken(conn, `Socket error: ${errStr}`);
+      }
+    });
 
     centrifuge.connect();
     activeStreams.set(conn.platform_user_id, {
@@ -296,6 +482,7 @@ async function startStream(conn: ConnectionData): Promise<boolean> {
       `[Manager] Не удалось запустить стрим для ${conn.platform_user_id}:`,
       err.message,
     );
+    await invalidateUserToken(conn, `Connection token failed: ${err.message}`);
     return false;
   }
 }
@@ -459,6 +646,13 @@ async function initRabbit(): Promise<void> {
     console.log(
       `[Manager] Очереди инициализированы. Слушаю подключение в ${CONFIG.connectQueue} и отключение в ${CONFIG.disconnectQueue}`,
     );
+
+    setupUsers().catch((err) => {
+      console.error(
+        "[Manager] Ошибка при заведении пользователей с сервера:",
+        err,
+      );
+    });
 
     connection.on("error", (err) => {
       console.error("[Manager] Ошибка подключения RabbitMQ:", err);
