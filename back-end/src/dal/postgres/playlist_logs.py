@@ -2,14 +2,13 @@ from uuid import UUID
 
 from pydantic import BaseModel
 from simple_repository import crud_factory
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.playlist_logs import PlaylistLogSchema, PlaylistLogCreate
-from src.orm.playlist_logs import PlaylistLog
-from src.orm.playlist import Playlist
 from src._types import PlaylistLogsEventTypes
+from src.models.playlist_logs import PlaylistLogCreate, PlaylistLogSchema
+from src.orm.playlist import Playlist
+from src.orm.playlist_logs import PlaylistLog
 
 
 class PlaylistLogsRepository(crud_factory(PlaylistLog, PlaylistLogSchema, PlaylistLogCreate, dict)):
@@ -21,12 +20,11 @@ class PlaylistLogsRepository(crud_factory(PlaylistLog, PlaylistLogSchema, Playli
     def to_repr(self, object: PlaylistLog) -> PlaylistLogSchema:
         return PlaylistLogSchema.model_validate(object)
 
-    async def get_logs(self, session: AsyncSession, playlist_id: UUID, user_id: UUID) -> list[PlaylistLogSchema]:
-        stmt = (
-            select(PlaylistLog)
-            .where(PlaylistLog.user_id == user_id, PlaylistLog.playlist_id == playlist_id)
-            .order_by(PlaylistLog.created_at.asc())
-        )
+    async def get_logs(self, session: AsyncSession, playlist_id: UUID, user_id: UUID | None = None) -> list[PlaylistLogSchema]:
+        stmt = select(PlaylistLog).where(PlaylistLog.playlist_id == playlist_id)
+        if user_id is not None:
+            stmt = stmt.where(PlaylistLog.user_id == user_id)
+        stmt = stmt.order_by(PlaylistLog.created_at.asc())
         result = await session.execute(stmt)
 
         return [self.to_repr(item) for item in result.unique().scalars().all()]

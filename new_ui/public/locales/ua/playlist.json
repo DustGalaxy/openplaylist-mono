@@ -5,6 +5,10 @@
       "remove": "Видалити з улюблених",
       "loginToFavorite": "Увійдіть, щоб додати в улюблені"
     },
+    "trackCounter": {
+      "title": "Кількість треків у плейлисті",
+      "label": "Треків"
+    },
     "addbar": {
       "placeholder": "Вставьте URL сюда",
       "submit": "Добавить",

@@ -5,17 +5,20 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     tanstackRouter({ autoCodeSplitting: true }),
     viteReact(),
     tailwindcss(),
   ],
-  define: {
-    'console.log': '(() => {})',
-    'console.info': '(() => {})',
-    'console.debug': '(() => {})',
-  },
+  define:
+    mode === 'production'
+      ? {
+          'console.log': '(() => {})',
+          'console.info': '(() => {})',
+          'console.debug': '(() => {})',
+        }
+      : {},
   build: {
     chunkSizeWarningLimit: 1000,
     rolldownOptions: {
@@ -119,4 +122,4 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-})
+}))

@@ -5,6 +5,7 @@ import {
   fetchUserFavoritePlaylists,
   fetchUserPlaylistData,
 } from '@/api/api-playlist'
+import { fetchUserModeratedPlaylists } from '@/api/api-moderators'
 import { useUserPlaylistRecordsStore } from '@/stores/userPlaylistInfoStore'
 
 export function usePlaylistsLifecycle() {
@@ -28,24 +29,45 @@ export function usePlaylistsLifecycle() {
     refetchInterval: false,
   })
 
+  const { data: moderatedData } = useQuery({
+    queryKey: ['moderatedPlaylists'],
+    queryFn: fetchUserModeratedPlaylists,
+    enabled: isAuthenticated,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchInterval: false,
+  })
+
   useEffect(() => {
     if (!isAuthenticated) {
       useUserPlaylistRecordsStore.getState().clear()
       return
     }
 
-    if (playlistsData) {
+    if (Array.isArray(playlistsData)) {
       const info = playlistsData.map((p: any) => {
         return { id: p.id, name: p.name }
       })
       useUserPlaylistRecordsStore.getState().set(info)
     }
 
-    if (favoritesData) {
+    if (Array.isArray(favoritesData)) {
       const favInfo = favoritesData.map((f: any) => {
         return { id: f.id, name: f.name, owner_nickname: f.owner_nickname }
       })
       useUserPlaylistRecordsStore.getState().setFavorites(favInfo)
     }
-  }, [isAuthenticated, playlistsData, favoritesData])
+
+    if (Array.isArray(moderatedData)) {
+      const modInfo = moderatedData.map((m: any) => {
+        return {
+          moderator_id: m.moderator_id,
+          id: m.playlist?.id,
+          name: m.playlist?.name || m.playlist?.title || 'Плейлист',
+          owner_nickname: m.playlist?.owner_name,
+        }
+      })
+      useUserPlaylistRecordsStore.getState().setModerated(modInfo)
+    }
+  }, [isAuthenticated, playlistsData, favoritesData, moderatedData])
 }

@@ -227,8 +227,8 @@ export function getRole(
 ): PlaylistRole {
   if (!playlist || !userId) return 'viewer'
   if (playlist.owner_id === userId) return 'owner'
-  // ponytail: operator_ids not yet in InputPlaylist — stub until backend contract lands
-  // if (playlist.operator_ids?.includes(userId)) return 'operator'
+  if (playlist.moderators?.some((m) => m.user_id === userId && m.is_active))
+    return 'operator'
   return 'viewer'
 }
 

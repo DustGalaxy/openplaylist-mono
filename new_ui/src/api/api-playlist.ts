@@ -132,6 +132,7 @@ export const addTrackToPlaylist = async (order: Order) => {
     method: 'POST',
     withCredentials: true,
     data: order,
+    params: order.start_from_target ? { start_from_target: true } : undefined,
   })
   return response.data
 }
@@ -141,8 +142,6 @@ export const removeTrackFromPlaylist = async (
   track_id: string,
   reason?: string,
 ) => {
-  const { user } = useAuthStore.getState()
-  if (!user) return
   const config = getConfig()
   const response = await apiClient(
     config.PLST_API_URL +
@@ -161,8 +160,6 @@ export const bulkRemoveTracksFromPlaylist = async (
   track_ids: Array<string>,
   reason?: string,
 ) => {
-  const { user } = useAuthStore.getState()
-  if (!user) return
   const config = getConfig()
   const responce = await apiClient(
     config.PLST_API_URL + `/${playlist_id}/track/bulk-delete`,
@@ -195,8 +192,6 @@ export const postPlayNow = async (
   playlist_id: string,
   track_id: string | undefined,
 ) => {
-  const { user } = useAuthStore.getState()
-  if (!user) return
   const config = getConfig()
   const response = await apiClient(
     config.PLST_API_URL + `/${playlist_id}/playnow`,
@@ -346,6 +341,7 @@ export const postPauseState = async (
   is_paused: boolean,
   position: number,
   track_id: string,
+  client_id?: string,
 ) => {
   const config = getConfig()
   return apiClient(
@@ -353,7 +349,7 @@ export const postPauseState = async (
     {
       method: 'POST',
       withCredentials: true,
-      data: { is_paused, position, track_id },
+      data: { is_paused, position, track_id, client_id },
     },
   )
 }
@@ -362,6 +358,7 @@ export const postSeekState = async (
   playlist_id: string,
   position: number,
   track_id: string,
+  client_id?: string,
 ) => {
   const config = getConfig()
   return apiClient(
@@ -369,7 +366,7 @@ export const postSeekState = async (
     {
       method: 'POST',
       withCredentials: true,
-      data: { position, track_id },
+      data: { position, track_id, client_id },
     },
   )
 }
@@ -377,6 +374,7 @@ export const postSeekState = async (
 export const postPositionState = async (
   playlist_id: string,
   position: number,
+  client_id: string,
 ) => {
   const config = getConfig()
   return apiClient(
@@ -384,7 +382,7 @@ export const postPositionState = async (
     {
       method: 'POST',
       withCredentials: true,
-      data: position,
+      data: { position: position, client_id: client_id },
     },
   )
 }

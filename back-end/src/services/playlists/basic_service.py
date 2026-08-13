@@ -21,10 +21,11 @@ class PlaylistLowService:
     ):
         self._playlist_repository: PlaylistRepository = _playlist_repository
 
-    async def get(self, session: AsyncSession, playlist_id: UUID, user: User):
+    async def get(self, session: AsyncSession, playlist_id: UUID, user: User | None = None, skip_owner_check: bool = False):
         plst = await self._playlist_repository.get_one(session, playlist_id)
-        if user.id != plst.owner_id:
-            raise NotAuthorizedException()
+        if not skip_owner_check:
+            if not user or user.id != plst.owner_id:
+                raise NotAuthorizedException()
         return plst
 
     async def is_your_playlist_id(self, session: AsyncSession, playlist_id: UUID, user_id: UUID):

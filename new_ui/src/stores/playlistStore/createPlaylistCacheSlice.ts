@@ -56,6 +56,7 @@ const emptyLocal = (): PlaylistCacheEntry['local'] => ({
   syncSeek: null,
   syncPause: null,
   acceptSync: false,
+  isRemoteControlMode: false,
 
   pendingResume: null,
   pendingInterrupt: null,
@@ -137,6 +138,7 @@ export const createPlaylistCacheSlice: StateCreator<
 
     bindPlaylistEvents(playlistId, get)
     safeEmit(get().socket, 'subscribe', { playlist_id: playlistId })
+    safeEmit(get().socket, 'playback_subscribe', { playlist_id: playlistId })
 
     set((s) => ({
       cache: {
@@ -185,6 +187,7 @@ export const createPlaylistCacheSlice: StateCreator<
     if (refCount <= 0) {
       unbindPlaylistEvents(playlistId, get().socket)
       safeEmit(get().socket, 'unsubscribe', { playlist_id: playlistId })
+      safeEmit(get().socket, 'playback_unsubscribe', { playlist_id: playlistId })
       set((s) => {
         const { [playlistId]: _drop, ...rest } = s.cache
         return { cache: rest }
@@ -212,6 +215,7 @@ export const createPlaylistCacheSlice: StateCreator<
       attachedIds.forEach((id) => {
         bindPlaylistEvents(id, get)
         safeEmit(socket, 'subscribe', { playlist_id: id })
+        safeEmit(socket, 'playback_subscribe', { playlist_id: id })
       })
       get().registerSocketLifecycle()
     }
@@ -243,9 +247,10 @@ export const createPlaylistCacheSlice: StateCreator<
     const socket = get().socket
     if (!socket) return
     socket.on('connect', () => {
-      Object.keys(get().cache).forEach((id) =>
-        safeEmit(socket, 'subscribe', { playlist_id: id }),
-      )
+      Object.keys(get().cache).forEach((id) => {
+        safeEmit(socket, 'subscribe', { playlist_id: id })
+        safeEmit(socket, 'playback_subscribe', { playlist_id: id })
+      })
     })
   },
 })
@@ -281,6 +286,22 @@ function bindPlaylistEvents(playlistId: string, get: () => StoreState) {
     get().updatePlaylistData(playlistId, (p) =>
       mergeNowPlaying(p, trackData.track_id),
     )
+    const s = get()
+    const playerPlaylistId = s.slots.player.playlistId
+    const role = s.getSlotRole('player')
+    const isRemote = !!s.cache[playlistId]?.local.isRemoteControlMode
+
+    if (
+      (playerPlaylistId === playlistId && role === 'owner') ||
+      isRemote
+    ) {
+      if (
+        trackData.track_id &&
+        trackData.track_id !== s.slots.player.currentTrackId
+      ) {
+        s.setPlayerTrack(trackData.track_id)
+      }
+    }
   })
 
   socket.on(`settings_changed:${playlistId}`, (event: Partial<Playlist>) => {
@@ -295,14 +316,51 @@ function bindPlaylistEvents(playlistId: string, get: () => StoreState) {
   })
 
   socket.on(`playback_pause:${playlistId}`, (event: SyncPausePayload) => {
-    if (!get().cache[playlistId]?.local.acceptSync) return
+    const s = get()
+    const entry = s.cache[playlistId]
+    const playerPlaylistId = s.slots.player.playlistId
+    const role = s.getSlotRole('player')
+    const isPlayerSlot = playerPlaylistId === playlistId
+    const isRemote = !!entry?.local.isRemoteControlMode
 
-    get().updateLocal(playlistId, { syncPause: event })
+    if (
+      entry?.local.acceptSync ||
+      isRemote ||
+      (isPlayerSlot && role === 'owner')
+    ) {
+      get().updateLocal(playlistId, { syncPause: event })
+      if (
+        event.track_id &&
+        event.track_id !== s.slots.player.currentTrackId &&
+        (isRemote || (isPlayerSlot && role === 'owner'))
+      ) {
+        s.setPlayerTrack(event.track_id)
+      }
+    }
   })
 
   socket.on(`playback_seek:${playlistId}`, (event: SyncSeekPayload) => {
-    if (!get().cache[playlistId]?.local.acceptSync) return
-    get().updateLocal(playlistId, { syncSeek: event })
+    const s = get()
+    const entry = s.cache[playlistId]
+    const playerPlaylistId = s.slots.player.playlistId
+    const role = s.getSlotRole('player')
+    const isPlayerSlot = playerPlaylistId === playlistId
+    const isRemote = !!entry?.local.isRemoteControlMode
+
+    if (
+      entry?.local.acceptSync ||
+      isRemote ||
+      (isPlayerSlot && role === 'owner')
+    ) {
+      get().updateLocal(playlistId, { syncSeek: event })
+      if (
+        event.track_id &&
+        event.track_id !== s.slots.player.currentTrackId &&
+        (isRemote || (isPlayerSlot && role === 'owner'))
+      ) {
+        s.setPlayerTrack(event.track_id)
+      }
+    }
   })
 }
 

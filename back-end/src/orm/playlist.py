@@ -1,6 +1,8 @@
 import enum
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 from uuid import UUID
+
+from src.orm.moderator import PlaylistModerator
 
 from sqlalchemy import Enum, ForeignKey, Index, Integer, String
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
@@ -104,6 +106,9 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
         back_populates="playlist", cascade="all, delete-orphan", lazy="selectin"
     )
     block_list: Mapped[list["BlockList"]] = relationship(back_populates="playlist", cascade="all, delete-orphan", lazy="selectin")
+    moderators: Mapped[list["PlaylistModerator"]] = relationship(
+        back_populates="playlist", cascade="all, delete-orphan", lazy="selectin"
+    )
 
     # Связи заказов
     order_associations: Mapped[list["OrderPlaylistStatus"]] = relationship(

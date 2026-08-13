@@ -30,6 +30,7 @@ import {
 import { cn, formatTime } from '@/lib/utils'
 import { useAppSettingsStore } from '@/stores/appSettingsStore'
 import { useLayoutStore } from '@/stores/layoutStore'
+import { usePlaylistStore } from '@/stores/playlistStore'
 
 const RATES = [1, 1.5, 2] as const
 const PLAYER_CONFIG = { youtube: { color: 'white' } }
@@ -71,6 +72,11 @@ export default function Player({
   const [duration, setDuration] = useState(0)
   const [seeking, setSeeking] = useState(false)
 
+  const isRemoteControlMode = usePlaylistStore((s) => {
+    const playlistId = s.slots.player.playlistId
+    return playlistId ? !!s.cache[playlistId]?.local.isRemoteControlMode : false
+  })
+
   useEffect(() => {
     const onVis = () => {
       isTabHiddenRef.current = document.hidden
@@ -101,10 +107,28 @@ export default function Player({
     lastSeekTokenRef.current = feed.seekSignal.token
     const pos = feed.seekSignal.position
 
-    if (playerRef.current && typeof pos === 'number' && Number.isFinite(pos)) {
-      playerRef.current.currentTime = pos
+    if (typeof pos === 'number' && Number.isFinite(pos)) {
+      if (playerRef.current) {
+        playerRef.current.currentTime = pos
+      }
+      setPlayedSeconds(pos)
+      const dur = track?.duration_seconds || duration || 1
+      if (dur > 0) setPlayed(Math.min(1, Math.max(0, pos / dur)))
     }
-  }, [feed.seekSignal])
+  }, [feed.seekSignal, track?.duration_seconds, duration])
+
+  useEffect(() => {
+    if (!isRemoteControlMode || !feed.playing) return
+    const dur = track?.duration_seconds || duration || 1
+    const interval = window.setInterval(() => {
+      setPlayedSeconds((prev) => {
+        const nextSec = prev + 1
+        if (dur > 0) setPlayed(Math.min(1, nextSec / dur))
+        return nextSec
+      })
+    }, 1000)
+    return () => window.clearInterval(interval)
+  }, [isRemoteControlMode, feed.playing, track?.duration_seconds, duration])
 
   const setPlayerRef = useCallback((player: HTMLVideoElement) => {
     if (!player) return
@@ -188,9 +212,9 @@ export default function Player({
                 width="100%"
                 height="100%"
                 src={videoUrl}
-                playing={feed.playing}
-                volume={liveVolume ?? volume}
-                muted={volume === 0}
+                playing={feed.playing && !isRemoteControlMode}
+                volume={isRemoteControlMode ? 0 : (liveVolume ?? volume)}
+                muted={isRemoteControlMode || volume === 0}
                 playbackRate={playbackRate}
                 config={PLAYER_CONFIG}
                 onReady={handleReady}

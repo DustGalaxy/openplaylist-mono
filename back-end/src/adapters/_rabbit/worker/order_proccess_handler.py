@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from faststream.rabbit import RabbitRouter
 
@@ -6,12 +6,23 @@ from src.adapters._rabbit.broker import main_publisher
 from src.adapters._rabbit.queues import main_exchange, playlist_fanout_exchange
 from src.dal.postgres.user import user_repository
 from src.database import async_session_maker
-from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType
+from src.dto.internal.domain_events import EventOperator, InternalPlaylistEvent, InternalPlaylistEventType
 from src.dto.order import NewOrderPayload
 from src.services.order_service import order_service
 from src.services.playlist_service import add_to_playlist_batch
 
 router = RabbitRouter()
+
+
+def _parse_uuid(val: str | UUID | None) -> UUID | None:
+    if isinstance(val, UUID):
+        return val
+    if isinstance(val, str):
+        try:
+            return UUID(val)
+        except ValueError:
+            return None
+    return None
 
 
 @router.subscriber("order.proccess", main_exchange)
@@ -32,6 +43,8 @@ async def _(
         tracks, errors = await add_to_playlist_batch(db_session, typed_orders, owner, payload.from_owner)
 
     for track, playlist in tracks:
+        op_user_id = owner.id if track.from_owner else _parse_uuid(getattr(track, "requester_id", None))
+        op_access = "owner" if track.from_owner else "none"
         await main_publisher.publish(
             InternalPlaylistEvent(
                 event_id=uuid4(),
@@ -42,12 +55,15 @@ async def _(
                 show_in_widget=playlist.show_in_widget,
                 user_id=owner.id,
                 user_name=owner.username,
+                operator=EventOperator(user_id=op_user_id, nickname=track.requester_nickname, access_level=op_access),
                 track=track,
             ),
             exchange=playlist_fanout_exchange,
         )
 
     for error_list, playlist in errors:
+        op_user_id = owner.id if first_order.from_owner else _parse_uuid(getattr(first_order, "requester_id", None))
+        op_access = "owner" if first_order.from_owner else "none"
         await main_publisher.publish(
             InternalPlaylistEvent(
                 event_id=uuid4(),
@@ -58,6 +74,7 @@ async def _(
                 show_in_widget=playlist.show_in_widget,
                 user_id=owner.id,
                 user_name=owner.username,
+                operator=EventOperator(user_id=op_user_id, nickname=first_order.requester_nickname, access_level=op_access),
                 track=first_order,
                 error_list=error_list,
             ),

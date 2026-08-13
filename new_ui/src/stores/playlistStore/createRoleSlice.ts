@@ -1,4 +1,5 @@
 import type { StateCreator } from 'zustand'
+import { getModeratorToken } from '@/lib/moderatorTokenStorage'
 import type {
   Playlist,
   PlaylistRole,
@@ -38,9 +39,14 @@ export const createRoleSlice: StateCreator<
   Pick<StoreState, keyof RoleSlice>
 > = (set, get) => ({
   getRole: (playlist, userId) => {
-    if (!playlist || !userId) return 'viewer'
-    if (playlist.owner_id === userId) return 'owner'
-    // ponytail: operator_ids not yet in InputPlaylist — stub until backend contract lands
+    if (!playlist) return 'viewer'
+    if (userId && playlist.owner_id === userId) return 'owner'
+    if (playlist.id && getModeratorToken(playlist.id)) return 'operator'
+    if (
+      userId &&
+      playlist.moderators?.some((m) => m.user_id === userId && m.is_active)
+    )
+      return 'operator'
     return 'viewer'
   },
 
@@ -48,6 +54,8 @@ export const createRoleSlice: StateCreator<
     const s = get()
     const playlistId = s.slots[slot].playlistId
     const playlist = playlistId ? s.cache[playlistId]?.data : undefined
+    console.log(s.getRole(playlist, s.userId))
+
     return s.getRole(playlist, s.userId)
   },
 

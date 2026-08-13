@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import axios, { AxiosError } from 'axios'
-import { FeatureI18nProvider, useFeatureTranslation } from '@/lib/i18n/featureTranslation'
+import {
+  FeatureI18nProvider,
+  useFeatureTranslation,
+} from '@/lib/i18n/featureTranslation'
 
 import { useAuthStore } from '@/stores/authStore'
 import { getConfig } from '@/lib/utils'
@@ -14,6 +17,14 @@ interface SearchParams {
   email?: string
   session_id?: string
 }
+
+export const Route = createFileRoute('/email-confirm')({
+  component: () => (
+    <FeatureI18nProvider ns="auth">
+      <EmailConfirmPage />
+    </FeatureI18nProvider>
+  ),
+})
 
 const EmailConfirmPage = () => {
   const { t } = useFeatureTranslation()
@@ -53,7 +64,8 @@ const EmailConfirmPage = () => {
           }
           if (axiosError.response?.status === 400) {
             throw new Error(
-              axiosError.response.data?.detail || t('auth.emailConfirm.invalid'),
+              axiosError.response.data?.detail ||
+                t('auth.emailConfirm.invalid'),
             )
           }
           if (axiosError.response?.status === 401) {
@@ -90,7 +102,7 @@ const EmailConfirmPage = () => {
             setUser(data.user, data.expired_at)
           }
           setLoadingAuth(false)
-          navigate({ to: '/dashboard' })
+          navigate({ to: '/playlists' })
         })
     },
     onError: (error) => {
@@ -105,7 +117,7 @@ const EmailConfirmPage = () => {
 
   useEffect(() => {
     if (user) {
-      navigate({ to: '/dashboard' })
+      navigate({ to: '/playlists' })
     }
     if (email && sessionId) {
       confirmEmailMutation.mutate()
@@ -186,14 +198,12 @@ const EmailConfirmPage = () => {
             <div className="space-y-3">
               <Button
                 onClick={() => navigate({ to: '/register' })}
-                variant="default"
                 className="w-full"
               >
                 {t('auth.emailConfirm.tryAgain')}
               </Button>
               <Button
                 onClick={() => navigate({ to: '/login' })}
-                variant="outline"
                 className="w-full"
               >
                 {t('auth.emailConfirm.backToLogin')}
@@ -205,11 +215,5 @@ const EmailConfirmPage = () => {
     </div>
   )
 }
-export const Route = createFileRoute('/email-confirm')({
-  component: () => (
-    <FeatureI18nProvider ns="auth">
-      <EmailConfirmPage />
-    </FeatureI18nProvider>
-  ),
-})
+
 export default EmailConfirmPage

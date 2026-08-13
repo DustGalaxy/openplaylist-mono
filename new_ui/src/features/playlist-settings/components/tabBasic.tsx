@@ -58,6 +58,7 @@ const TabBasic = () => {
   const [integrations, setIntegrations] = useState<Array<Integration>>([])
   const [isLoadingIntegrations, setIsLoadingIntegrations] = useState(false)
   const breakPointRef = useRef<HTMLInputElement>(null)
+  const maxPlaylistSizeRef = useRef<HTMLInputElement>(null)
 
   const activeModeSettings = playlist.mode_settings[plstMode]
 
@@ -398,6 +399,39 @@ const TabBasic = () => {
                   setPriorityMode(value === 'right' ? 'add' : 'max')
                 }}
                 defaultValue={playlist.cost_mode === 'max' ? 'left' : 'right'}
+              />
+            </div>
+          </div>
+
+          {/* Max Playlist Size */}
+          <div className="flex items-center justify-between gap-2 p-2 rounded-md bg-level-2/60 sm:col-span-2">
+            <div className="min-w-0 flex-1">
+              <Label className="text-xs font-semibold text-text-main truncate block">
+                {t('playlistSettings.basic.maxPlaylistSize')}
+              </Label>
+              <span className="text-[10px] text-text-placeholder truncate block">
+                {t('playlistSettings.basic.maxPlaylistSizeHint')}
+              </span>
+            </div>
+            <div className="flex rounded-[--rounded-std] items-center overflow-hidden h-7 shrink-0">
+              <Input
+                id="max-playlist-size-id"
+                type="number"
+                ref={maxPlaylistSizeRef}
+                min={0}
+                dir="rtl"
+                value={playlist.max_playlist_size ?? 0}
+                className="border-0 bg-level-2 focus-visible:ring-0 rounded-r-none px-1.5 text-xs h-7 w-20 [appearance:textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+                onChange={(e) => {
+                  const value = Math.max(0, Number(e.target.value) || 0)
+                  patchDebounced(playlist.id, {
+                    max_playlist_size: value,
+                  })
+                }}
+              />
+              <UpDownBtn
+                getInputRef={() => maxPlaylistSizeRef.current}
+                className="rounded-r-[--rounded-std] rounded-l-none overflow-clip h-7"
               />
             </div>
           </div>

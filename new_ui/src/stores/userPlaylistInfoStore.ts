@@ -1,7 +1,14 @@
 import { create } from 'zustand'
 import { deletePlaylist } from '@/api/api-playlist'
 
-type PlaylistBaseInfo = {
+export type PlaylistBaseInfo = {
+  id: string
+  name: string
+  owner_nickname?: string
+}
+
+export type UserModeratedPlaylistInfo = {
+  moderator_id: string
   id: string
   name: string
   owner_nickname?: string
@@ -10,12 +17,15 @@ type PlaylistBaseInfo = {
 type userPlaylistRecordsStore = {
   playlists: Array<PlaylistBaseInfo>
   favorites: Array<PlaylistBaseInfo>
+  moderated: Array<UserModeratedPlaylistInfo>
   loading: boolean
 
   set: (playlists: Array<PlaylistBaseInfo>) => void
   setFavorites: (favorites: Array<PlaylistBaseInfo>) => void
+  setModerated: (moderated: Array<UserModeratedPlaylistInfo>) => void
   addFavorite: (playlist: PlaylistBaseInfo) => void
   removeFavorite: (id: string) => void
+  removeModerated: (playlistId: string) => void
   add: (playlist: PlaylistBaseInfo) => void
   remove: (id: string) => void
   clear: () => void
@@ -25,10 +35,12 @@ export const useUserPlaylistRecordsStore = create<userPlaylistRecordsStore>(
   (set) => ({
     playlists: [],
     favorites: [],
+    moderated: [],
     loading: false,
 
     set: (playlists) => set({ playlists }),
     setFavorites: (favorites) => set({ favorites }),
+    setModerated: (moderated) => set({ moderated }),
     addFavorite: (playlist) =>
       set((state) => {
         if (state.favorites.some((f) => f.id === playlist.id)) return state
@@ -41,6 +53,11 @@ export const useUserPlaylistRecordsStore = create<userPlaylistRecordsStore>(
       set((state) => ({
         ...state,
         favorites: state.favorites.filter((f) => f.id !== id),
+      })),
+    removeModerated: (playlistId) =>
+      set((state) => ({
+        ...state,
+        moderated: state.moderated.filter((m) => m.id !== playlistId),
       })),
     add: (playlist) =>
       set((state) => {
@@ -55,10 +72,11 @@ export const useUserPlaylistRecordsStore = create<userPlaylistRecordsStore>(
           ...state,
           playlists: state.playlists.filter((p) => p.id !== id),
           favorites: state.favorites.filter((f) => f.id !== id),
+          moderated: state.moderated.filter((m) => m.id !== id),
         }
       })
       await deletePlaylist(id)
     },
-    clear: () => set({ playlists: [], favorites: [], loading: false }),
+    clear: () => set({ playlists: [], favorites: [], moderated: [], loading: false }),
   }),
 )

@@ -22,7 +22,13 @@ export const createPlaybackOpsSlice: StateCreator<
       })
     }
 
-    if (s.canActInSlot('player', 'setNowPlaying')) {
+    const role = s.getSlotRole('player')
+    const isRemoteControlMode = !!s.cache[playlistId]?.local?.isRemoteControlMode
+    const shouldBroadcast =
+      s.canActInSlot('player', 'setNowPlaying') &&
+      (role === 'owner' || isRemoteControlMode)
+
+    if (shouldBroadcast) {
       postPlayNow(playlistId, trackId).catch((e) =>
         console.error('[playback] postPlayNow failed', e),
       )
@@ -82,7 +88,13 @@ export const createPlaybackOpsSlice: StateCreator<
     const playlistId = s.slots.player.playlistId
     if (!playlistId) return
     get().setPlayerTrack(null)
-    if (s.canActInSlot('player', 'setNowPlaying')) {
+    const role = s.getSlotRole('player')
+    const isRemoteControlMode = !!s.cache[playlistId]?.local?.isRemoteControlMode
+    const shouldBroadcast =
+      s.canActInSlot('player', 'setNowPlaying') &&
+      (role === 'owner' || isRemoteControlMode)
+
+    if (shouldBroadcast) {
       postPlayNow(playlistId, undefined).catch((e) =>
         console.error('[playback] postPlayNow(stop) failed', e),
       )

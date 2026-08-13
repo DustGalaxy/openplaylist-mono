@@ -7,12 +7,18 @@ import {
   CheckCircle2,
   Code,
   Info,
+  Link as LinkIcon,
   ListMusic,
   Monitor,
   Play,
+  ShieldAlert,
+  ShieldCheck,
+  ShieldOff,
   SkipForward,
   Trash2,
   User,
+  UserMinus,
+  UserPlus,
   XCircle,
 } from 'lucide-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -46,6 +52,12 @@ function getEventMeta(type: EventType) {
     [EventType.LISTEN_TRACK]: { icon: ListMusic, color: 'text-indigo-500' },
     [EventType.SKIP_TRACK]: { icon: SkipForward, color: 'text-amber-500' },
     [EventType.REPORT_TRACK]: { icon: AlertTriangle, color: 'text-orange-500' },
+    [EventType.CLAIM_LINK]: { icon: ShieldCheck, color: 'text-emerald-500' },
+    [EventType.FAILED_CLAIM_LINK]: { icon: ShieldAlert, color: 'text-red-500' },
+    [EventType.MODERATOR_LEAVE]: { icon: UserMinus, color: 'text-amber-500' },
+    [EventType.CREATE_MODERATOR_TOKEN]: { icon: LinkIcon, color: 'text-blue-500' },
+    [EventType.ADD_MODERATOR_DIRECT]: { icon: UserPlus, color: 'text-purple-500' },
+    [EventType.REVOKE_MODERATOR]: { icon: ShieldOff, color: 'text-rose-500' },
     [EventType.ERROR]: { icon: XCircle, color: 'text-red-600' },
   }
   return map[type] || { icon: Info, color: 'text-primary' }
@@ -63,6 +75,15 @@ function LogModal({
 
   const { playlist } = usePlaylistView()
   if (!playlist) return
+
+  const op = data.event_data.operator || {
+    nickname: undefined,
+    user_id: undefined,
+    access_level: data.event_data.by_owner ? 'owner' : 'none',
+  }
+
+  const accessLevelKey = op.access_level || (data.event_data.by_owner ? 'owner' : 'none')
+
   return (
     <Dialog>
       <DialogTrigger className="flex items-center gap-2 w-full text-left cursor-pointer p-1 rounded">
@@ -99,7 +120,7 @@ function LogModal({
               {t('playlist.log.modal.event_type')}
             </span>
             <span className="col-span-2 text-right font-medium">
-              {t(`playlist.log.types.${data.event_type}`)}
+              {t(`playlist.log.types.${data.event_type}`, { defaultValue: data.event_type })}
             </span>
 
             <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
@@ -114,27 +135,42 @@ function LogModal({
               <User className="h-3.5 w-3.5" />{' '}
               {t('playlist.log.modal.initiated_by')}
             </span>
-            <span className="col-span-2 text-right">
+            <span className="col-span-2 text-right flex flex-col items-end gap-0.5">
               <span
-                className={`text-xs px-2 py-0.5 rounded-full ${
-                  data.event_data.by_owner
-                    ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-                    : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
+                className={`text-xs px-2 py-0.5 rounded-full border ${
+                  accessLevelKey === 'owner'
+                    ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                    : accessLevelKey === 'moderator'
+                    ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                    : 'bg-blue-500/10 text-blue-500 border-blue-500/20'
                 }`}
               >
-                {data.event_data.by_owner
-                  ? t('playlist.log.modal.owner')
-                  : t('playlist.log.modal.guest')}
+                {accessLevelKey === 'owner'
+                  ? t('playlist.log.modal.owner', { defaultValue: 'Owner' })
+                  : accessLevelKey === 'moderator'
+                  ? t('playlist.log.modal.moderator', { defaultValue: 'Moderator' })
+                  : t('playlist.log.modal.guest', { defaultValue: 'None' })}
               </span>
+              {op.nickname && (
+                <span className="text-xs text-text-main font-medium">
+                  {op.nickname}
+                </span>
+              )}
+              {op.user_id && (
+                <span className="text-[10px] font-mono text-muted-foreground">
+                  ID: {op.user_id}
+                </span>
+              )}
             </span>
           </div>
 
-          {data.event_type === EventType.ADD_TRACK_ERROR &&
+          {(data.event_type === EventType.ADD_TRACK_ERROR ||
+            data.event_type === EventType.FAILED_CLAIM_LINK) &&
             data.event_data.errors && (
               <div className="space-y-1.5">
                 <div className="text-xs text-red-400 flex items-center gap-1.5 px-1 font-medium">
                   <AlertTriangle className="h-3.5 w-3.5" />
-                  {t('playlist.log.types.add_track_error')}
+                  {t('playlist.log.types.error', { defaultValue: 'Errors' })}
                 </div>
                 <div className="bg-red-500/5 border border-red-500/20 rounded-lg p-3 space-y-1">
                   {Array.isArray(data.event_data.errors) ? (
@@ -153,7 +189,7 @@ function LogModal({
                     ))
                   ) : (
                     <div className="text-xs text-red-200/90">
-                      {t('playlist.log.errors.unknown')}
+                      {t('playlist.log.errors.unknown', { defaultValue: 'Unknown error' })}
                     </div>
                   )}
                 </div>
@@ -239,11 +275,12 @@ export default function LogPanel() {
   }, [playlistId, queryClient])
 
   function getLogBody(log: PlaylistLog) {
-    const { title, errors } = log.event_data
+    const { title, errors, operator } = log.event_data
+    const nickname = operator?.nickname || 'User'
 
     switch (log.event_type) {
       case EventType.ADD_TRACK:
-        return t('playlist.log.add_track', { title })
+        return t('playlist.log.add_track', { title, defaultValue: `Added track: ${title}` })
 
       case EventType.ADD_TRACK_ERROR: {
         const translatedErrors = Array.isArray(errors)
@@ -252,33 +289,52 @@ export default function LogPanel() {
                 t(`playlist.log.errors.${err}`, { defaultValue: err }),
               )
               .join(', ')
-          : t('playlist.log.errors.unknown')
+          : t('playlist.log.errors.unknown', { defaultValue: 'Unknown error' })
 
         return t('playlist.log.add_track_error', {
           title: title || 'Unknown Track',
           error: translatedErrors,
+          defaultValue: `Track add error: ${title} (${translatedErrors})`,
         })
       }
 
       case EventType.PLAY_TRACK:
         return title
-          ? t('playlist.log.play_track', { title })
-          : t('playlist.log.no_track')
+          ? t('playlist.log.play_track', { title, defaultValue: `Now playing: ${title}` })
+          : t('playlist.log.no_track', { defaultValue: 'Now playing' })
 
       case EventType.REMOVE_TRACK:
-        return t('playlist.log.remove_track', { title })
+        return t('playlist.log.remove_track', { title, defaultValue: `Removed track: ${title}` })
 
       case EventType.LISTEN_TRACK:
-        return t('playlist.log.listen_track', { title })
+        return t('playlist.log.listen_track', { title, defaultValue: `Listened track: ${title}` })
 
       case EventType.SKIP_TRACK:
-        return t('playlist.log.skip_track', { title })
+        return t('playlist.log.skip_track', { title, defaultValue: `Skipped track: ${title}` })
 
       case EventType.REPORT_TRACK:
-        return t('playlist.log.report_track', { title })
+        return t('playlist.log.report_track', { title, defaultValue: `Reported track: ${title}` })
+
+      case EventType.CLAIM_LINK:
+        return t('playlist.log.claim_link', { nickname, defaultValue: `Moderator claimed invite link (${nickname})` })
+
+      case EventType.FAILED_CLAIM_LINK:
+        return t('playlist.log.failed_claim_link', { nickname, defaultValue: `Failed claim link attempt (${nickname})` })
+
+      case EventType.MODERATOR_LEAVE:
+        return t('playlist.log.moderator_leave', { nickname, defaultValue: `Moderator left (${nickname})` })
+
+      case EventType.CREATE_MODERATOR_TOKEN:
+        return t('playlist.log.create_moderator_token', { nickname, defaultValue: `Created moderator link (${nickname})` })
+
+      case EventType.ADD_MODERATOR_DIRECT:
+        return t('playlist.log.add_moderator_direct', { nickname, defaultValue: `Added moderator directly (${nickname})` })
+
+      case EventType.REVOKE_MODERATOR:
+        return t('playlist.log.revoke_moderator', { nickname, defaultValue: `Revoked moderator access (${nickname})` })
 
       case EventType.ERROR:
-        return t('playlist.log.types.error')
+        return t('playlist.log.types.error', { defaultValue: 'Error' })
 
       default:
         return log.event_type

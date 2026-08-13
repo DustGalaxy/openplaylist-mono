@@ -73,15 +73,43 @@ class BasicNamespace(BaseNamespace):
         await self._clean_redis_session(sid)
 
 
+from src.services.playlists.moderator_service import moderator_service
+
+
 class PlstUpdsNamespace(BaseNamespace):
     def __init__(self, namespace: str):
         super().__init__(namespace, redis_prefix="playlist")
 
-    async def on_connect(self, sid, environ, auth):
+    async def on_connect(self, sid, environ, auth=None):
         logger.info(f"Connect: sid {sid} to {self.namespace}")
+        token = None
+        if auth and isinstance(auth, dict) and "token" in auth:
+            token = auth["token"]
+        if not token and environ.get("QUERY_STRING"):
+            from urllib.parse import parse_qs
+            qs = parse_qs(environ["QUERY_STRING"])
+            if "token" in qs:
+                token = qs["token"][0]
+
+        if token:
+            try:
+                async with async_session_maker() as db_session:
+                    mod = await moderator_service.mod_repo.get_by_token(db_session, token)
+                    if mod and mod.is_active:
+                        mod_id = f"mod_{mod.id}"
+                        await self.save_session(sid, {"user_id": mod_id, "is_moderator": True, "token": token}, self.namespace)
+                        get_broker().hset(f"{self.redis_prefix}:users:{mod_id}", "sid", sid)
+                        return True
+            except Exception as e:
+                logger.error(f"Failed to authenticate moderator token in socket connect: {e}")
+
         user_id = await self._authenticate_via_cookie(sid, environ)
         if not user_id:
-            return False
+            user_id = f"anon_{sid}"
+            await self.save_session(sid, {"user_id": user_id, "is_anonymous": True}, self.namespace)
+            get_broker().hset(f"{self.redis_prefix}:users:{user_id}", "sid", sid)
+
+        return True
 
     async def on_subscribe(self, sid, data):
         session = await self.get_session(sid, self.namespace)

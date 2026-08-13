@@ -148,6 +148,13 @@ class PlaylistLogsEventTypes(StrEnum):
     SKIP_TRACK = "skip_track"
     REPORT_TRACK = "report_track"
 
+    CLAIM_LINK = "claim_link"
+    FAILED_CLAIM_LINK = "failed_claim_link"
+    MODERATOR_LEAVE = "moderator_leave"
+    CREATE_MODERATOR_TOKEN = "create_moderator_token"
+    ADD_MODERATOR_DIRECT = "add_moderator_direct"
+    REVOKE_MODERATOR = "revoke_moderator"
+
     ERROR = "error"
 
 
@@ -256,3 +263,5 @@ class PlatformCap(StrEnum):
 Status = Literal["in playlist", "removed", "listened", "skipped", "reported"]
 DeleteStatus = Literal["removed", "listened", "skipped", "reported"]
 Source = Literal["twitch", "youtube", "web", "da"]
+
+

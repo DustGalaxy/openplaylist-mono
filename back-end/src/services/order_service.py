@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from src.dto.order import POSSIBLE_ORDER_TYPE, WebNewOrder
 from src.dto.youtube import YouTubePlaylistType, YouTubeUrlType
 from src.exceptions import (
@@ -36,7 +38,7 @@ class OrderService:
             views=data["views"],
             likes=data["likes"],
             extra_data=extra_data,
-            request_id=order.request_id,
+            request_id=uuid4(),
             source=order.source,
         )
 

@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
   Bell,
+  Cast,
   Heart,
+  ListMusic,
   PanelLeftClose,
   PanelLeftOpen,
   Radio,
@@ -12,6 +14,7 @@ import {
   RadioTower,
   Share2,
   Shield,
+  SlidersHorizontal,
   Terminal,
 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -49,6 +52,9 @@ import {
   checkPlaylistFavoriteStatus,
   removePlaylistFromFavorites,
 } from '@/api/api-playlist'
+import { usePlaylistAccess } from '@/hooks/usePlaylistAccess'
+import { getModeratorToken } from '@/lib/moderatorTokenStorage'
+import { getPlsUpdsSocket } from '@/api/io-sockets'
 
 export default function PlaylistViewContent({ slot }: { slot: SlotId }) {
   return (
@@ -70,11 +76,31 @@ function PlaylistViewInner() {
   )
 
   const { playlist, playlistId, role, isLoading, owner } = usePlaylistView()
-  const { toggleExternalRequests, toggleBroadcast, setAcceptSync } =
-    usePlaylistStore()
+  const { isModerator, canManageSettings, accessInfo } =
+    usePlaylistAccess(playlistId)
+
+  useEffect(() => {
+    if (playlistId) {
+      const modToken = getModeratorToken(playlistId)
+      if (modToken) {
+        getPlsUpdsSocket(modToken)
+      }
+    }
+  }, [playlistId, accessInfo])
+
+  const {
+    toggleExternalRequests,
+    toggleBroadcast,
+    setAcceptSync,
+    setRemoteControlMode,
+  } = usePlaylistStore()
 
   const acceptSync = usePlaylistStore((s) =>
     playlistId ? s.cache[playlistId]?.local.acceptSync : false,
+  )
+
+  const isRemoteControlMode = usePlaylistStore((s) =>
+    playlistId ? s.cache[playlistId]?.local.isRemoteControlMode : false,
   )
 
   const [toggled, setToggled] = React.useState(false)
@@ -175,6 +201,7 @@ function PlaylistViewInner() {
     )
   }
 
+  const isOwner = role === 'owner'
   const isOwnerLike = role === 'owner' || role === 'operator'
   const isViewerLike = role === 'viewer'
   const contentSettings = playlist.content_settings[selectedContentSettingIndex]
@@ -196,7 +223,7 @@ function PlaylistViewInner() {
       {/* header actions */}
       <div className="flex flex-col gap-4 w-full rounded-md">
         <div className="flex w-full gap-1 sm:gap-2 justify-between items-center">
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             {isOwnerLike && (
               <>
                 <Btn
@@ -222,7 +249,7 @@ function PlaylistViewInner() {
                     : t('playlist.status.offline')}
                 </Btn>
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 justify-between">
                   <Btn
                     title={t('playlist.tooltip.sync')}
                     isActive={playlist.sync_playback_position}
@@ -236,6 +263,18 @@ function PlaylistViewInner() {
                   >
                     <RadioTower className="size-5" />
                   </Btn>
+                  {isModerator && (
+                    <Btn
+                      title="Управление трансляцией"
+                      isActive={isRemoteControlMode}
+                      onClick={() =>
+                        setRemoteControlMode(playlist.id, !isRemoteControlMode)
+                      }
+                      className="size-8 p-1 rounded-sm"
+                    >
+                      <Cast className="size-5" />
+                    </Btn>
+                  )}
                 </div>
               </>
             )}
@@ -324,8 +363,21 @@ function PlaylistViewInner() {
                   <Terminal className="size-5" />
                 </Btn>
                 <BulkClearModal />
-                <SettingsModal />
               </>
+            )}
+            {(isOwner || (isModerator && canManageSettings)) && (
+              <SettingsModal />
+            )}
+            {isModerator && accessInfo && (
+              <div
+                className="flex items-center gap-1 px-2 py-1 rounded-sm bg-accent/20 border border-accent/40 text-accent text-xs font-mono"
+                title={`Режим модератора: ${accessInfo.name}`}
+              >
+                <Shield className="size-3.5" />
+                <span className="truncate max-w-[120px]">
+                  {accessInfo.name}
+                </span>
+              </div>
             )}
             {isViewerLike && (
               <div className="-mt-0.5">
@@ -382,8 +434,23 @@ function PlaylistViewInner() {
       <div>
         <PlaylistQueueInput />
       </div>
-      <div className="flex flex-col md:flex-row md:justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-level-1/30 backdrop-blur-xs">
         <SortPanel />
+        <div
+          className="inline-flex items-center gap-1.5 h-8 px-3 text-xs rounded-md bg-level-2/80 border border-white/5 text-text-secondary shrink-0 self-start sm:self-auto shadow-xs"
+          title={t('playlist.trackCounter.title', 'Всего треков в очереди')}
+        >
+          <ListMusic className="size-4 text-accent shrink-0" />
+          <span className="font-mono">
+            {t('playlist.trackCounter.label', 'Треков')}:{' '}
+            <strong className="text-text-main font-semibold">
+              {playlist.track_data.length}
+            </strong>
+            {playlist.max_playlist_size > 0
+              ? ` / ${playlist.max_playlist_size}`
+              : ''}
+          </span>
+        </div>
       </div>
 
       <div className="flex w-full gap-2 sm:gap-4">

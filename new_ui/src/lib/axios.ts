@@ -3,8 +3,7 @@ import type { AxiosError, AxiosInstance } from 'axios'
 import { useAuthStore } from '@/stores/authStore'
 import { queryClient } from '@/routes/__root'
 import { router } from '@/main'
-
-// import { BASIC_API_URL } from '@/main'
+import { getModeratorToken } from '@/lib/moderatorTokenStorage'
 
 let isClearingAuth = false
 
@@ -15,19 +14,34 @@ const apiClient: AxiosInstance = axios.create({
   },
 })
 
-// apiClient.interceptors.request.use(
-//   (config) => {
-//     console.log('Axios request URL:', config.url)
-//     console.log('Axios request Method:', config.method)
-//     console.log('Axios request Headers:', config.headers)
-//     console.log('Axios request Data:', config.data) // Для POST это тело запроса
-//     return config
-//   },
-//   (error) => {
-//     console.error('Axios request preparation error:', error)
-//     return Promise.reject(error)
-//   },
-// )
+apiClient.interceptors.request.use(
+  (config) => {
+    if (config.url) {
+      const match = config.url.match(/\/(?:playlist|playback)\/([a-f0-9-]{36})/i)
+      let playlistId = match ? match[1] : null
+
+      if (
+        !playlistId &&
+        config.data &&
+        typeof config.data === 'object' &&
+        'playlist_id' in config.data &&
+        config.data.playlist_id
+      ) {
+        playlistId = String(config.data.playlist_id)
+      }
+
+      if (playlistId) {
+        const modToken = getModeratorToken(playlistId)
+        if (modToken) {
+          config.headers = config.headers || {}
+          config.headers['X-Moderator-Token'] = modToken
+        }
+      }
+    }
+    return config
+  },
+  (error) => Promise.reject(error),
+)
 
 // Добавляем интерцептор для ответов
 apiClient.interceptors.response.use(

@@ -1,12 +1,16 @@
 // src/components/layout/Sidebar.tsx
+import { useState } from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
 import {
   AudioLines,
   ChartColumnIncreasing,
+  ChevronDown,
+  ChevronUp,
   FolderBookmark,
   Heart,
   House,
   ListMusic,
+  Shield,
   X,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -14,7 +18,10 @@ import { useIsPlaybackActive } from '@/stores/playbackStore'
 import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
 import AddPlaylistModal from '@/features/united-playlist/components/newPlaylistModal'
-import { useUserPlaylistRecordsStore } from '@/stores/userPlaylistInfoStore'
+import {
+  useUserPlaylistRecordsStore,
+  type PlaylistBaseInfo,
+} from '@/stores/userPlaylistInfoStore'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { useMobileSidebarStore } from '@/stores/mobileSidebarStore'
 
@@ -22,6 +29,7 @@ export default function Sidebar() {
   const { t } = useTranslation()
   const playlists = useUserPlaylistRecordsStore((s) => s.playlists) || []
   const favorites = useUserPlaylistRecordsStore((s) => s.favorites) || []
+  const moderated = useUserPlaylistRecordsStore((s) => s.moderated) || []
   const { isAuthenticated } = useAuthStore()
   const open = useMobileSidebarStore((s) => s.open)
   const setOpen = useMobileSidebarStore((s) => s.setOpen)
@@ -71,32 +79,34 @@ export default function Sidebar() {
 
       {/* Favorites Section */}
       {favorites.length > 0 && (
-        <div className="mt-2 mb-1 px-2">
-          <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-            <Heart className="size-3.5 text-red-500 fill-red-500/20" />
-            <span>{t('sidebar.Favorites', 'Любимые плейлисты')}</span>
-          </div>
-          <nav className="flex flex-col gap-0.5 mt-1">
-            {favorites.map((p) => (
-              <SidebarItem key={p.id} id={p.id} name={p.name} isFavorite />
-            ))}
-          </nav>
-        </div>
+        <CollapsibleSection
+          title={t('sidebar.Favorites', 'Любимые плейлисты')}
+          icon={<Heart className="size-3.5 text-red-500 fill-red-500/20" />}
+          items={favorites}
+          renderItem={(p) => (
+            <SidebarItem key={p.id} id={p.id} name={p.name} isFavorite />
+          )}
+        />
       )}
 
       {/* My Playlists Section */}
       {ownedNonFavorites.length > 0 && (
-        <div className="mt-2 mb-1 px-2">
-          <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-semibold text-text-secondary uppercase tracking-wider">
-            <ListMusic className="size-3.5 text-accent" />
-            <span>{t('sidebar.MyPlaylists', 'Мои плейлисты')}</span>
-          </div>
-          <nav className="flex flex-col gap-0.5 mt-1">
-            {ownedNonFavorites.map((p) => (
-              <SidebarItem key={p.id} id={p.id} name={p.name} />
-            ))}
-          </nav>
-        </div>
+        <CollapsibleSection
+          title={t('sidebar.MyPlaylists', 'Мои плейлисты')}
+          icon={<ListMusic className="size-3.5 text-accent" />}
+          items={ownedNonFavorites}
+          renderItem={(p) => <SidebarItem key={p.id} id={p.id} name={p.name} />}
+        />
+      )}
+
+      {/* Moderated Playlists Section */}
+      {moderated.length > 0 && (
+        <CollapsibleSection
+          title={t('sidebar.ModeratedPlaylists', 'Модерируемые')}
+          icon={<Shield className="size-3.5 text-blue-400" />}
+          items={moderated}
+          renderItem={(m) => <SidebarItem key={m.id} id={m.id} name={m.name} />}
+        />
       )}
     </>
   )
@@ -121,6 +131,60 @@ export default function Sidebar() {
       <aside className="hidden sm:flex w-55 h-full shrink-0 border-r border-accent/40 bg-level-2 flex-col overflow-y-auto">
         {navContent}
       </aside>
+    </div>
+  )
+}
+
+function CollapsibleSection<T extends { id: string }>({
+  title,
+  icon,
+  items,
+  renderItem,
+  initialCount = 5,
+}: {
+  title: string
+  icon: React.ReactNode
+  items: T[]
+  renderItem: (item: T) => React.ReactNode
+  initialCount?: number
+}) {
+  const { t } = useTranslation()
+  const [expanded, setExpanded] = useState(false)
+  const visibleItems = expanded ? items : items.slice(0, initialCount)
+  const hasMore = items.length > initialCount
+
+  return (
+    <div className="mt-2 mb-1 px-2">
+      <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-semibold text-text-secondary uppercase tracking-wider">
+        {icon}
+        <span>{title}</span>
+      </div>
+      <nav className="flex flex-col gap-0.5 mt-1">
+        {visibleItems.map(renderItem)}
+      </nav>
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          className="flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-text-secondary hover:text-text-main transition-colors mt-0.5"
+        >
+          {expanded ? (
+            <>
+              <ChevronUp className="size-3" />
+              <span>{t('sidebar.collapse', 'Свернуть')}</span>
+            </>
+          ) : (
+            <>
+              <ChevronDown className="size-3" />
+              <span>
+                {t('sidebar.showMore', 'Ещё ({{count}})', {
+                  count: items.length - initialCount,
+                })}
+              </span>
+            </>
+          )}
+        </button>
+      )}
     </div>
   )
 }

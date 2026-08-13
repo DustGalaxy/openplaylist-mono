@@ -16,6 +16,8 @@ import {
 } from '@/api/api-playlist'
 import { usePlaybackStore } from '@/stores/playbackStore'
 
+const CLIENT_ID = Math.random().toString(36).substring(2, 15)
+
 const EMPTY_CAPABILITIES = {
   canSkip: false,
   canSeekArbitrary: false,
@@ -66,10 +68,8 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
 
   const sessionRestored = usePlaylistStore((s) => s.playerSessionRestored)
 
-  // show_in_widget is a broadcast too (OBS widget), independent of the viewer-sync toggle
   const shouldBroadcast =
-    canControlPlayback &&
-    !!(playlist?.sync_playback_position || playlist?.show_in_widget)
+    canControlPlayback && (role === 'owner' || !!local?.isRemoteControlMode)
 
   const useBackendPositionStore =
     role !== 'viewer' && !!playlist?.sync_playback_position
@@ -113,23 +113,41 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
   }, [nowPlayingTrack?.id])
 
   useEffect(() => {
-    if (role !== 'viewer' || !local?.acceptSync || !playlist) return
-    const incomingSeek = local.syncSeek
+    if (!playlist) return
+    const isOwner = role === 'owner'
+    const isSyncingViewer = role === 'viewer' && !!local?.acceptSync
+    const isRemoteMod = role === 'operator' && !!local?.isRemoteControlMode
+    const isSyncingMod = role === 'operator' && !!local?.acceptSync
+
+    if (!isOwner && !isSyncingViewer && !isRemoteMod && !isSyncingMod) return
+
+    const incomingSeek = local?.syncSeek
     if (incomingSeek) {
-      if (incomingSeek.track_id !== currentTrackId)
-        playTrack(incomingSeek.track_id)
-      seek(incomingSeek.position)
+      if (incomingSeek.client_id !== CLIENT_ID) {
+        if (incomingSeek.track_id && incomingSeek.track_id !== currentTrackId)
+          playTrack(incomingSeek.track_id)
+        seek(incomingSeek.position)
+      }
       updateLocal(playlist.id, { syncSeek: null })
     }
-    const incomingPause = local.syncPause
+    const incomingPause = local?.syncPause
     if (incomingPause) {
-      if (incomingPause.track_id !== currentTrackId)
-        playTrack(incomingPause.track_id)
-      seek(incomingPause.position)
-      setPlaying(!incomingPause.is_paused)
+      if (incomingPause.client_id !== CLIENT_ID) {
+        if (incomingPause.track_id && incomingPause.track_id !== currentTrackId)
+          playTrack(incomingPause.track_id)
+        seek(incomingPause.position)
+        setPlaying(!incomingPause.is_paused)
+      }
       updateLocal(playlist.id, { syncPause: null })
     }
-  }, [local?.syncSeek, local?.syncPause, role])
+  }, [
+    local?.syncSeek,
+    local?.syncPause,
+    role,
+    playlist,
+    local?.acceptSync,
+    local?.isRemoteControlMode,
+  ])
 
   const activeTrackIdRef = useRef(currentTrackId)
   activeTrackIdRef.current = currentTrackId
@@ -146,6 +164,7 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
       .save(playlistId, {
         track_id: trackId,
         position,
+        client_id: CLIENT_ID,
         updated_at: new Date().toISOString(),
       })
       .catch(() => {})
@@ -198,9 +217,11 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     if (!shouldBroadcast || !nowPlayingTrack || !playlist) return
     const interval = window.setInterval(() => {
       if (playingRef.current)
-        postPositionState(playlist.id, positionGetterRef.current()).catch(
-          () => {},
-        )
+        postPositionState(
+          playlist.id,
+          positionGetterRef.current(),
+          CLIENT_ID,
+        ).catch(() => {})
     }, 5000)
     return () => window.clearInterval(interval)
   }, [shouldBroadcast, nowPlayingTrack?.id, playlist?.id])
@@ -267,12 +288,13 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     onPlayerStateChange: (p) => {
       if (p === playing) return
       setPlaying(p)
-      if (shouldBroadcast && nowPlayingTrack) {
+      if ((shouldBroadcast || local?.isRemoteControlMode) && nowPlayingTrack) {
         postPauseState(
           playlist.id,
           !p,
           positionGetterRef.current(),
           nowPlayingTrack.id,
+          CLIENT_ID,
         ).catch(() => {})
       }
     },
@@ -300,27 +322,35 @@ export function usePlaybackFeed(slot: SlotId = 'player'): PlaybackFeed {
     },
     seek: (seconds) => {
       seek(seconds)
-      if (shouldBroadcast && nowPlayingTrack) {
-        postSeekState(playlist.id, seconds, nowPlayingTrack.id).catch((e) =>
-          console.error('[feed] postSeekState failed', e),
-        )
+      if ((shouldBroadcast || local?.isRemoteControlMode) && nowPlayingTrack) {
+        postSeekState(
+          playlist.id,
+          seconds,
+          nowPlayingTrack.id,
+          CLIENT_ID,
+        ).catch((e) => console.error('[feed] postSeekState failed', e))
       }
     },
-    stop: canControlPlayback
-      ? () => {
-          if (shouldBroadcast && nowPlayingTrack) {
-            postPauseState(
-              playlist.id,
-              true,
-              positionGetterRef.current(),
-              nowPlayingTrack.id,
-            ).catch(() => {})
+    stop:
+      canControlPlayback || local?.isRemoteControlMode
+        ? () => {
+            if (
+              (shouldBroadcast || local?.isRemoteControlMode) &&
+              nowPlayingTrack
+            ) {
+              postPauseState(
+                playlist.id,
+                true,
+                positionGetterRef.current(),
+                nowPlayingTrack.id,
+                CLIENT_ID,
+              ).catch(() => {})
+            }
+            clearActivePlayback()
+            setPlaying(false)
+            stopPlayback()
           }
-          clearActivePlayback()
-          setPlaying(false)
-          stopPlayback()
-        }
-      : undefined,
+        : undefined,
     requestSync:
       role === 'viewer'
         ? async () => {

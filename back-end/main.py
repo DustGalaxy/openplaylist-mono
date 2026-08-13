@@ -5,8 +5,11 @@ import src.models  # noqa: F401
 from fastapi import APIRouter, FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from src.adapters._fastapi.feedback_routes import router as feedback_router
+from src.adapters._fastapi.history_routes import router as history_router
 from src.adapters._fastapi.login_routes import router as login_router
+from src.adapters._fastapi.moderator_routes import router as moderator_router
 from src.adapters._fastapi.notifications import router as notificattions_router
+
 from src.adapters._fastapi.order_routes import router as order_router
 from src.adapters._fastapi.playback_routes import router as playback_router
 from src.adapters._fastapi.playlist_routes import router as playlist_router
@@ -82,12 +85,14 @@ api_route.include_router(login_router)
 api_route.include_router(user_router)
 api_route.include_router(order_router)
 api_route.include_router(playlist_router)
+api_route.include_router(moderator_router)
 api_route.include_router(settings_router)
 api_route.include_router(stream_router)
 api_route.include_router(playback_router)
 api_route.include_router(notificattions_router)
 api_route.include_router(feedback_router)
 api_route.include_router(stats_router)
+api_route.include_router(history_router)
 # app.add_route("/api/socket.io/", route=sio_asgi_app, methods=["GET", "POST"])
 # app.add_api_websocket_route("/api/socket.io/", sio_asgi_app)
 

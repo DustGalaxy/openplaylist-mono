@@ -1,8 +1,7 @@
 from uuid import UUID
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from src.orm.token_vault import TokenVault
+from src.orm.token_vault import TokenVault
 
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship

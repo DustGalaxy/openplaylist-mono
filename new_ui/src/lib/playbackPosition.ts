@@ -59,7 +59,7 @@ export const localPlaybackPositionStore: PlaybackPositionStore = {
 export const backendPlaybackPositionStore: PlaybackPositionStore = {
   id: 'backend',
   async save(playlistId, pos) {
-    await postPositionState(playlistId, pos.position)
+    await postPositionState(playlistId, pos.position, pos.client_id)
   },
   async load(playlistId) {
     const raw = await getPlaybackState(playlistId)
@@ -67,6 +67,7 @@ export const backendPlaybackPositionStore: PlaybackPositionStore = {
     return {
       track_id: raw.track_id,
       position: parseFloat(raw.position),
+      client_id: raw.client_id,
       updated_at: raw.updated_at,
     }
   },

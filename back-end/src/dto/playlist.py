@@ -70,6 +70,29 @@ class ReadChatRules(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ReadPlaylistPreview(BaseModel):
+    id: UUID = Field(..., description="Unique identifier for the playlist")
+
+    owner_nickname: str = Field(..., description="Nickname of the owner of the playlist")
+    name: str = Field(..., max_length=100, description="Name of the playlist")
+    description: str | None = Field(None, max_length=500, description="Description of the playlist")
+    favorites_count: int = Field(0, description="Total count of users who favorited this playlist")
+
+    tags: list[str] = Field(default_factory=list, description="Tags associated with the playlist")
+    now_playing: str | None = Field(None, description="Title of the currently playing track")
+    track_count: int = Field(0, description="Total count of tracks in the playlist")
+
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+from src.dto.moderator import ReadPlaylistModerator, UserModeratedPlaylistResponse
+
+UserModeratedPlaylistResponse.model_rebuild()
+
+
 class ReadPlaylist(BaseModel):
     id: UUID
     owner_id: UUID
@@ -103,23 +126,10 @@ class ReadPlaylist(BaseModel):
     block_list: list[ReadBlockList] = Field(default_factory=list)
     donation_rules: list[ReadDonationRules] = Field(default_factory=list)
     chat_rules: list[ReadChatRules] = Field(default_factory=list)
+    moderators: list[ReadPlaylistModerator] = Field(default_factory=list)
 
     created_at: datetime
     updated_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class ReadPlaylistPreview(BaseModel):
-    id: UUID = Field(..., description="Unique identifier for the playlist")
-
-    owner_nickname: str = Field(..., description="Nickname of the owner of the playlist")
-    name: str = Field(..., max_length=100, description="Name of the playlist")
-    description: str | None = Field(None, max_length=500, description="Description of the playlist")
-    favorites_count: int = Field(0, description="Total count of users who favorited this playlist")
-
-    created_at: datetime = Field(..., description="Creation timestamp of the playlist")
-    updated_at: datetime = Field(..., description="Last update timestamp of the playlist")
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -118,6 +118,58 @@ export function extractYouTubeVideoId(urlStr: string): string | null {
   }
 }
 
+export interface ParsedYouTubeUrl {
+  videoId: string | null
+  playlistId: string | null
+  isPlaylist: boolean
+  hasTargetVideo: boolean
+}
+
+/**
+ * Распознает YouTube ссылки, включая видео и плейлисты (list=...).
+ */
+export function parseYouTubeUrl(urlStr: string): ParsedYouTubeUrl | null {
+  if (!urlStr) return null
+  try {
+    const url = new URL(urlStr.trim())
+    const host = url.hostname.replace(/^www\./, '').toLowerCase()
+
+    let videoId: string | null = null
+    const playlistId: string | null = url.searchParams.get('list') || null
+
+    if (host === 'youtu.be') {
+      const pathId = url.pathname.slice(1).split('/')[0]
+      if (pathId) videoId = pathId
+    } else if (
+      host === 'youtube.com' ||
+      host === 'm.youtube.com' ||
+      host === 'music.youtube.com'
+    ) {
+      if (url.pathname === '/watch' || url.pathname === '/watch/') {
+        videoId = url.searchParams.get('v') || null
+      } else if (url.pathname.startsWith('/embed/')) {
+        const parts = url.pathname.split('/').filter(Boolean)
+        if (parts.length >= 2) videoId = parts[1]
+      } else if (url.pathname.startsWith('/v/')) {
+        const parts = url.pathname.split('/').filter(Boolean)
+        if (parts.length >= 2) videoId = parts[1]
+      }
+    }
+
+    if (!videoId && !playlistId) return null
+
+    return {
+      videoId,
+      playlistId,
+      isPlaylist: Boolean(playlistId),
+      hasTargetVideo: Boolean(videoId && playlistId),
+    }
+  } catch {
+    return null
+  }
+}
+
+
 /**
  * Возвращает новый объект, в котором удалены все поля со значением null или undefined.
  * Не мутирует исходный объект.

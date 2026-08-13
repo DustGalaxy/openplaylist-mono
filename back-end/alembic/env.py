@@ -25,6 +25,7 @@ from src.orm.playlist import (  # noqa: F401
 from src.orm.playlist_logs import PlaylistLog  # noqa: F401
 from src.orm.stream_token import StreamToken  # noqa: F401
 from src.orm.token_vault import TokenVault  # noqa: F401
+from src.orm.moderator import PlaylistModerator  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

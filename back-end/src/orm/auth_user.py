@@ -8,8 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src._types import Platform
 from src.database import Base, TimestampMixin, UUIDMixin
 
-if TYPE_CHECKING:
-    from src.orm.linked_accounts import LinkedAccounts
+from src.orm.linked_accounts import LinkedAccounts
 
 
 class UserRole(Base):

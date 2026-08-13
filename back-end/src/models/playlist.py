@@ -12,6 +12,7 @@ from src._types import (
     DonationRuleScope,
     TrackSource,
 )
+from src.models.moderator import PlaylistModeratorPublicSchema
 from src.models.order import OrderDomain
 
 
@@ -141,6 +142,7 @@ class PlaylistSchema(BaseModel):
     block_list: list[BlockListSchema] = []
     donation_rules: list[DonationRulesSchema] = []
     chat_rules: list[ChatRulesSchema] = []
+    moderators: list[PlaylistModeratorPublicSchema] = []
 
     created_at: datetime
     updated_at: datetime

@@ -41,6 +41,12 @@ class PlaylistSettings(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class EventOperator(BaseModel):
+    user_id: UUID | None = None
+    nickname: str | None = None
+    access_level: Literal["owner", "moderator", "none"] = "none"
+
+
 class InternalPlaylistEventType(StrEnum):
     TRACK_ADDED = "track.added"
     TRACK_ADDED_BULK = "track.added.bulk"
@@ -57,6 +63,13 @@ class InternalPlaylistEventType(StrEnum):
     PLAYLIST_CREATED = "playlist.created"
     PLAYLIST_DELETED = "playlist.deleted"
 
+    MODERATOR_CLAIMED = "moderator.claimed"
+    MODERATOR_CLAIM_FAILED = "moderator.claim_failed"
+    MODERATOR_LEFT = "moderator.left"
+    MODERATOR_TOKEN_CREATED = "moderator.token_created"
+    MODERATOR_ADDED_DIRECT = "moderator.added_direct"
+    MODERATOR_REVOKED = "moderator.revoked"
+
 
 class InternalPlaylistEvent(BaseModel):
     event_id: UUID
@@ -68,6 +81,8 @@ class InternalPlaylistEvent(BaseModel):
     show_in_widget: bool
     user_id: UUID
     user_name: str
+
+    operator: EventOperator | None = None
 
     track: OrderDomain | OrderCreate | None = None
     bulk_ids: list[UUID] | None = None

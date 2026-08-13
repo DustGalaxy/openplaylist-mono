@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import type { Socket } from 'socket.io-client'
 import type { PublicUser } from './user'
+import type { PublicModeratorItem } from './moderator'
 
 // ─── Enums & Basic Platforms ─────────────────────────────────────────
 
@@ -69,6 +70,7 @@ export type Order = {
   yt_video_url: string
   priority: string
   source: 'web'
+  start_from_target?: boolean
 }
 export interface Track {
   id: string // orderId (уникальный для записи в плейлисте)
@@ -106,6 +108,7 @@ export interface WireTrack {
 export interface TrackInput {
   yt_video_url: string
   priority?: string
+  start_from_target?: boolean
 }
 
 export interface FeedTrack {
@@ -234,6 +237,7 @@ export type InputPlaylist = {
   block_list: Array<ReadBlockList>
   donation_rules: Array<ReadDonationRules>
   chat_rules: Array<ReadChatRules>
+  moderators?: Array<PublicModeratorItem>
   created_at: string
   updated_at: string
 }
@@ -292,6 +296,7 @@ export interface PausedBackground {
 export interface PlaybackPosition {
   track_id: string
   position: number
+  client_id: string
   updated_at: string | number
 }
 
@@ -301,16 +306,16 @@ export type PlayNow = {
 }
 
 export interface SyncSeekPayload {
-  track_id: string
   position: number
-  updated_at: number
+  track_id?: string
+  client_id?: string
 }
 
 export interface SyncPausePayload {
   is_paused: boolean
-  track_id: string
   position: number
-  updated_at: number
+  track_id?: string
+  client_id?: string
 }
 
 export interface NextTrackDecision {
@@ -371,6 +376,7 @@ export interface PlaylistCacheEntry {
     syncSeek: SyncSeekPayload | null
     syncPause: SyncPausePayload | null
     acceptSync: boolean
+    isRemoteControlMode: boolean
 
     pendingInterrupt: PendingInterrupt | null
     pendingResume: PendingResume | null
@@ -457,6 +463,7 @@ export interface PlaybackOpsSlice {
 export interface SyncSlice {
   toggleBroadcast: (playlistId: string, enabled: boolean) => void
   setAcceptSync: (playlistId: string, accept: boolean) => void
+  setRemoteControlMode: (playlistId: string, enabled: boolean) => void
 }
 
 export interface PlaylistSettingsSlice {

@@ -1,6 +1,5 @@
 // src/features/playlist/components/sortPanel.tsx
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 import {
   ArrowDown01,
   ArrowUp01,
@@ -9,7 +8,6 @@ import {
   Calendar,
   Crown,
   GripVertical,
-  Layers,
   ListMusic,
   Minus,
   Radio,
@@ -21,12 +19,6 @@ import {
 } from '../context/playlist-view-context'
 import type { OrderMode, SortSettings } from '@/stores/playlistStore/types'
 import { usePlaylistStore } from '@/stores/playlistStore'
-import { getActiveModeSettings } from '@/stores/playlistStore/helpers'
-import {
-  filterTabActiveClass,
-  filterTabBaseClass,
-  filterTabInactiveClass,
-} from '@/features/landing/styles'
 import { cn } from '@/lib/utils'
 import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
 
@@ -46,13 +38,13 @@ const nextDirection = (d: SortDirection): SortDirection =>
 
 function SortDirectionIndicator({ direction }: { direction: SortDirection }) {
   const styleBase =
-    'size-4 transition-transform duration-200 animate-[sort-pop_250ms_ease-out]'
+    'size-3.5 transition-transform duration-200 animate-[sort-pop_250ms_ease-out]'
   if (direction === 'none')
-    return <Minus className={cn(styleBase, 'text-text-placeholder')} />
+    return <Minus className={cn(styleBase, 'text-text-placeholder/60')} />
   return direction === 'asc' ? (
-    <ArrowUp01 className={styleBase} />
+    <ArrowUp01 className={cn(styleBase, 'text-accent')} />
   ) : (
-    <ArrowDown01 className={styleBase} />
+    <ArrowDown01 className={cn(styleBase, 'text-accent')} />
   )
 }
 
@@ -77,10 +69,12 @@ function OrderModeToggle({
     { key: 'auto', label: t('sort.mode.auto'), icon: ArrowUpDown },
     { key: 'free', label: t('sort.mode.free'), icon: GripVertical },
   ]
+
   return (
-    <div className="flex gap-1">
+    <div className="flex items-center gap-1 bg-level-2/80 p-1 rounded-md border border-white/5 shadow-xs">
       {modes.map((m) => {
         const Icon = m.icon
+        const isActive = value === m.key
         return (
           <button
             key={m.key}
@@ -88,13 +82,19 @@ function OrderModeToggle({
             onClick={() => onChange(m.key)}
             title={m.label}
             className={cn(
-              filterTabBaseClass,
-              'p-2 text-xs flex items-center justify-center',
-              value === m.key ? filterTabActiveClass : filterTabInactiveClass,
+              'h-7.5 px-3 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer',
+              isActive
+                ? 'bg-level-1 text-text-main border border-accent/40 shadow-xs'
+                : 'text-text-secondary hover:text-text-main hover:bg-level-1/40 border border-transparent',
             )}
           >
-            <Icon className="size-4" />
-            <span className="hidden md:inline ml-1.5">{m.label}</span>
+            <Icon
+              className={cn(
+                'size-3.5',
+                isActive ? 'text-accent' : 'text-text-secondary',
+              )}
+            />
+            <span className="hidden md:inline">{m.label}</span>
           </button>
         )
       })}
@@ -113,32 +113,33 @@ function SortButtons({
 
   if (sortSettings.order_mode === 'host') {
     return (
-      <div className="hidden md:flex items-center gap-1 text-text-placeholder text-xs py-2">
-        <Radio className="size-4" />
+      <div className="hidden md:flex items-center gap-1.5 text-text-secondary text-xs h-8 px-3 rounded-md bg-level-2/80 border border-white/5 shadow-xs">
+        <Radio className="size-3.5 text-accent shrink-0" />
         <span>{t('sort.mode.hostHint')}</span>
       </div>
     )
   }
   if (sortSettings.order_mode === 'random') {
     return (
-      <div className="hidden md:flex items-center gap-1 text-text-placeholder text-xs py-2">
-        <Shuffle className="size-4" />
+      <div className="hidden md:flex items-center gap-1.5 text-text-secondary text-xs h-8 px-3 rounded-md bg-level-2/80 border border-white/5 shadow-xs">
+        <Shuffle className="size-3.5 text-accent shrink-0" />
         <span>{t('sort.mode.randomHint')}</span>
       </div>
     )
   }
   if (sortSettings.order_mode === 'free') {
     return (
-      <div className="hidden md:flex items-center gap-1 text-text-placeholder text-xs py-2">
-        <GripVertical className="size-4" />
+      <div className="hidden md:flex items-center gap-1.5 text-text-secondary text-xs h-8 px-3 rounded-md bg-level-2/80 border border-white/5 shadow-xs">
+        <GripVertical className="size-3.5 text-accent shrink-0" />
         <span className="hidden md:inline">{t('sort.mode.freeHint')}</span>
       </div>
     )
   }
 
   return (
-    <div className="flex gap-2 sm:gap-3 justify-center items-end">
+    <div className="flex items-center gap-1 sm:gap-1.5">
       <button
+        type="button"
         title={
           sortSettings.priority === 'asc'
             ? t('sort.priority.lowFirst')
@@ -150,19 +151,25 @@ function SortButtons({
           onChange({ priority: nextDirection(sortSettings.priority) })
         }
         className={cn(
-          filterTabBaseClass,
-          'p-1 text-xs flex items-center justify-center',
+          'h-8 px-3 text-xs font-medium rounded-md border transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs',
           sortSettings.priority !== 'none'
-            ? filterTabActiveClass
-            : filterTabInactiveClass,
+            ? 'bg-level-1 border-accent/50 text-text-main shadow-accent/5'
+            : 'bg-level-2/80 border-white/5 text-text-secondary hover:bg-level-1/60 hover:text-text-main hover:border-white/10',
         )}
       >
-        <span className="flex flex-col sm:flex-row items-center gap-1">
-          <ArrowUpRight className="size-6 sm:size-6.5 px-1" />
-          <SortDirectionIndicator direction={sortSettings.priority} />
-        </span>
+        <ArrowUpRight
+          className={cn(
+            'size-3.5',
+            sortSettings.priority !== 'none'
+              ? 'text-accent'
+              : 'text-text-secondary',
+          )}
+        />
+        <SortDirectionIndicator direction={sortSettings.priority} />
       </button>
+
       <button
+        type="button"
         title={
           sortSettings.date === 'asc'
             ? t('sort.date.olderFirst')
@@ -172,17 +179,21 @@ function SortButtons({
         }
         onClick={() => onChange({ date: nextDirection(sortSettings.date) })}
         className={cn(
-          filterTabBaseClass,
-          'p-1 text-xs items-center justify-center flex',
+          'h-8 px-3 text-xs font-medium rounded-md border transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs',
           sortSettings.date !== 'none'
-            ? filterTabActiveClass
-            : filterTabInactiveClass,
+            ? 'bg-level-1 border-accent/50 text-text-main shadow-accent/5'
+            : 'bg-level-2/80 border-white/5 text-text-secondary hover:bg-level-1/60 hover:text-text-main hover:border-white/10',
         )}
       >
-        <span className="flex flex-col sm:flex-row items-center gap-1">
-          <Calendar className="size-6 sm:size-6.5 px-1" />
-          <SortDirectionIndicator direction={sortSettings.date} />
-        </span>
+        <Calendar
+          className={cn(
+            'size-3.5',
+            sortSettings.date !== 'none'
+              ? 'text-accent'
+              : 'text-text-secondary',
+          )}
+        />
+        <SortDirectionIndicator direction={sortSettings.date} />
       </button>
     </div>
   )
@@ -202,20 +213,22 @@ export default function SortPanel() {
   if (role === 'viewer') {
     if (!sortOverride) return null
     return (
-      <div className="flex flex-row justify-between sm:justify-start gap-1 sm:gap-2 items-center">
+      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
         <style>{`@keyframes sort-pop { 0% { transform: scale(0.5); opacity: 0.3; } 60% { transform: scale(1.25); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }`}</style>
         <OrderModeToggle
           value={sortOverride.order_mode}
           onChange={(order_mode) => setSort(slot, 'regular', { order_mode })}
           showHost
         />
-        <div
-          className={`w-px h-6 bg-text-placeholder ${sortOverride.order_mode === 'auto' ? 'block' : 'hidden sm:block'}`}
-        />
-        <SortButtons
-          sortSettings={sortOverride}
-          onChange={(patch) => setSort(slot, 'regular', patch)}
-        />
+        {sortOverride.order_mode === 'auto' && (
+          <>
+            <div className="w-px h-4 bg-white/10 mx-0.5 shrink-0 hidden sm:block" />
+            <SortButtons
+              sortSettings={sortOverride}
+              onChange={(patch) => setSort(slot, 'regular', patch)}
+            />
+          </>
+        )}
       </div>
     )
   }
@@ -231,16 +244,17 @@ export default function SortPanel() {
   const tab = groups.includes(activeTab) ? activeTab : 'regular'
   const settingsKey =
     tab === 'vip' ? 'sort_settings_vip' : 'sort_settings_regular'
+  const currentSettings = activeModeSettings[settingsKey]
 
   return (
-    <div
-      className={`flex flex-row justify-between sm:justify-start gap-1 sm:gap-2 items-center`}
-    >
+    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
       <style>{`@keyframes sort-pop { 0% { transform: scale(0.5); opacity: 0.3; } 60% { transform: scale(1.25); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }`}</style>
+
       {showTabs && (
-        <div className="flex gap-1 items-center">
+        <div className="flex items-center gap-1 bg-level-2/80 p-1 rounded-md border border-white/5 shadow-xs">
           {groups.map((g) => {
             const Icon = queueIcons[g]
+            const isActive = tab === g
             return (
               <button
                 key={g}
@@ -248,13 +262,19 @@ export default function SortPanel() {
                 onClick={() => setActiveTab(g)}
                 title={t(`sort.tabs.${g}`)}
                 className={cn(
-                  filterTabBaseClass,
-                  'p-2 text-xs flex items-center justify-center',
-                  tab === g ? filterTabActiveClass : filterTabInactiveClass,
+                  'h-7.5 px-3 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer',
+                  isActive
+                    ? 'bg-level-1 text-accent border border-accent/40 shadow-xs'
+                    : 'text-text-secondary hover:text-text-main hover:bg-level-1/40 border border-transparent',
                 )}
               >
-                <Icon className="size-4" />
-                <span className="hidden md:inline ml-1.5">
+                <Icon
+                  className={cn(
+                    'size-3.5',
+                    isActive ? 'text-accent' : 'text-text-secondary',
+                  )}
+                />
+                <span className="hidden sm:inline">
                   {t(`sort.tabs.${g}`)}
                 </span>
               </button>
@@ -262,21 +282,24 @@ export default function SortPanel() {
           })}
         </div>
       )}
-      <div
-        className={`w-px h-6 bg-text-placeholder ${showTabs ? 'block' : 'hidden'}`}
-      />
+
+      {showTabs && (
+        <div className="w-px h-4 bg-white/10 mx-0.5 shrink-0 hidden sm:block" />
+      )}
 
       <OrderModeToggle
-        value={activeModeSettings[settingsKey].order_mode}
+        value={currentSettings.order_mode}
         onChange={(order_mode) => setSort(slot, tab, { order_mode })}
       />
-      <div
-        className={`w-px h-6 bg-text-placeholder ${activeModeSettings[settingsKey].order_mode === 'auto' ? 'block' : 'hidden sm:block'}`}
-      />
+
+      <div className="w-px h-4 bg-white/10 mx-0.5 shrink-0 hidden sm:block" />
+
       <SortButtons
-        sortSettings={activeModeSettings[settingsKey]}
+        sortSettings={currentSettings}
         onChange={(patch) => setSort(slot, tab, patch)}
       />
     </div>
   )
 }
+
+

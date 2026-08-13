@@ -20,6 +20,7 @@ from src.adapters.admin.views import (
     OrderAdmin,
     OrderPlaylistStatusAdmin,
     PlaylistAdmin,
+    PlaylistModeratorAdmin,
     TokenVaultAdmin,
     TwitchAdminTokenAdmin,
     UserAdmin,
@@ -77,6 +78,7 @@ def setup_admin(app: FastAPI) -> Admin:
     admin.add_view(FeatureFlagAdmin)
     admin.add_view(TwitchAdminTokenAdmin)
     admin.add_view(PlaylistAdmin)
+    admin.add_view(PlaylistModeratorAdmin)
     admin.add_view(OrderAdmin)
     admin.add_view(OrderPlaylistStatusAdmin)
     admin.add_view(ContentSettingsAdmin)
