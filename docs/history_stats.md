@@ -158,6 +158,7 @@ stateDiagram-v2
 ## 3. Детальная спецификация таблиц истории и эндпоинтов
 
 ### 3.1. Структура таблицы `playback_history`
+
 - `id`: UUID (Primary Key).
 - `user_id`: UUID (Foreign Key -> `auth_user.id`).
 - `playlist_id`: UUID (Foreign Key -> `playlist.id`).
@@ -165,6 +166,7 @@ stateDiagram-v2
 - `played_at`: Timestamp (Indexed).
 
 ### 3.2. Временные окна (`TimeWindow` Enum)
+
 - `LAST_24H`: За последние 24 часа.
 - `LAST_7D`: За последние 7 дней.
 - `LAST_30D`: За последние 30 дней.

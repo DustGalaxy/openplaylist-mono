@@ -40,6 +40,7 @@ import { cn } from '@/lib/utils'
 import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context'
 import { usePlaylistStore } from '@/stores/playlistStore'
 import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
+import DonatePayIcon from '@/components/icons/icon-donatepay'
 
 const MAX_NAME_LENGTH = 100
 const MAX_DESCRIPTION_LENGTH = 500
@@ -93,6 +94,7 @@ const TabBasic = () => {
       donatex: (
         <img src="/donatex-icon.png" width={18} height={18} alt="donatex" />
       ),
+      donatepay: <DonatePayIcon />,
       google: <Google className={iconStyles} />,
     }
     return (

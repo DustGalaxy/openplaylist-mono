@@ -161,6 +161,7 @@ stateDiagram-v2
 ## 3. Детальная спецификация очередей ботов
 
 ### 3.1. Структура сообщений `bot.{platform}.connect.request`
+
 - `user_id`: UUID пользователя в OpenPlaylist.
 - `platform`: Enum (`da`, `twitch`, `donatepay`, `donatex`).
 - `platform_user_id`: Идентификатор аккаунта стримера на платформе.
@@ -168,6 +169,7 @@ stateDiagram-v2
 - `refresh_token`: Токен обновления.
 
 ### 3.2. Автоматическое обновление токенов
+
 - Фоновая задача `src/tasks/tokens.py` регулярно проверяет время жизни токенов в `TokenVault`.
 - Если `expires_at < now()`, выполняются OAuth-запросы на refresh и результат публикуется в очередей `auth.user.{platform}.tokens.refreshed`.
 - Боты перехватывают новые токены на лету без разрыва соединения WebSocket.
