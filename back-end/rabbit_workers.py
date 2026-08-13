@@ -3,11 +3,13 @@ from contextlib import asynccontextmanager
 from faststream import ContextRepo, FastStream
 from src.adapters._rabbit.broker import broker
 from src.adapters._rabbit.worker.callback_handler import router as callback_router
+from src.adapters._rabbit.worker.history_handler import router as history_router
 from src.adapters._rabbit.worker.logs_handler import router as log_router
 from src.adapters._rabbit.worker.notification_handler import router as notify_touter
 from src.adapters._rabbit.worker.order_proccess_handler import router as order_router
 from src.adapters._rabbit.worker.post_callbacks import router as post_callback_router
 from src.adapters._rabbit.worker.widget_handler import router as widget_router
+from src.adapters._rabbit.worker.playback_handler import router as playback_router
 from src.dal._redis.broker import get_broker
 
 # Регистрируем общий роутер в брокере
@@ -18,7 +20,10 @@ broker.include_routers(
     widget_router,
     order_router,
     post_callback_router,
+    history_router,
+    playback_router,
 )
+
 
 
 @asynccontextmanager

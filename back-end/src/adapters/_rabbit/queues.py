@@ -71,4 +71,6 @@ playlist_track_move = RabbitQueue("playlist.track.move", durable=True)
 playlist_privacy_private = RabbitQueue("playlist.privacy.private", durable=True)
 playlist_privacy_public = RabbitQueue("playlist.privacy.public", durable=True)
 
-# playlist_settings_request = RabbitQueue("playlist.settings.request", durable=True, exclusive=True)
+playback_pause_queue = RabbitQueue("playback.pause", durable=True)
+playback_seek_queue = RabbitQueue("playback.seek", durable=True)
+
