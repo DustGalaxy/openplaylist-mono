@@ -67,6 +67,21 @@
         "title": "Go Live"
       }
     },
+    "socialBanner": {
+      "badge": "Community & Support",
+      "title": "Join our community & support the project",
+      "subtitle": "Follow news on Telegram and help the project grow on Patreon",
+      "patreon": {
+        "title": "Patreon",
+        "description": "Support the development financially on Patreon — helping the project grow and evolve.",
+        "cta": "Support on Patreon"
+      },
+      "telegram": {
+        "title": "Telegram Channel",
+        "description": "Announcements, news, and updates not only for OpenPlaylist, but also for author's other projects.",
+        "cta": "Join Telegram"
+      }
+    },
     "title": "OPEN PLAYLIST"
   }
 }

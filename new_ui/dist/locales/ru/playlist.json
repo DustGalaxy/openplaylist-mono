@@ -1,5 +1,14 @@
 {
   "playlist": {
+    "favorite": {
+      "add": "Добавить в любимые",
+      "remove": "Удалить из любимых",
+      "loginToFavorite": "Войдите, чтобы добавить в любимые"
+    },
+    "trackCounter": {
+      "title": "Количество треков в плейлисте",
+      "label": "Треков"
+    },
     "addbar": {
       "placeholder": "Вставьте URL сюда",
       "submit": "Добавить",

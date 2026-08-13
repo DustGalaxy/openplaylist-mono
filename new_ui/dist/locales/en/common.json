@@ -6,12 +6,15 @@
   },
   "common": {
     "cancel": "Cancel",
+    "copied": "Copied",
+    "copy": "Copy",
     "delete": "Delete",
     "general": "General",
     "general2": "General",
-    "loading": "Loading notifications...",
+    "link": "Link",
+    "loading": "Loading...",
     "or": "or",
-    "save": "Сохранить",
+    "save": "Save",
     "toast": {
       "confirming": "Processing...",
       "copied": "Copied to clipboard!",
@@ -270,5 +273,15 @@
       "subscriber": "Subscriber",
       "vip": "VIP"
     }
+  },
+  "sidebar": {
+    "Home": "Home",
+    "Saves": "Saves",
+    "Statistics": "Statistics",
+    "Favorites": "Favorite Playlists",
+    "MyPlaylists": "My Playlists",
+    "ModeratedPlaylists": "Moderated",
+    "collapse": "Collapse",
+    "showMore": "More ({{count}})"
   }
 }

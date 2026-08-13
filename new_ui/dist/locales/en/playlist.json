@@ -1,5 +1,14 @@
 {
   "playlist": {
+    "favorite": {
+      "add": "Add to favorites",
+      "remove": "Remove from favorites",
+      "loginToFavorite": "Sign in to add to favorites"
+    },
+    "trackCounter": {
+      "title": "Number of tracks in playlist",
+      "label": "Tracks"
+    },
     "addbar": {
       "placeholder": "Place url here",
       "submit": "Add Track",

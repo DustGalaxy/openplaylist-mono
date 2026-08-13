@@ -6,10 +6,13 @@
   },
   "common": {
     "cancel": "Отмена",
+    "copied": "Скопировано",
+    "copy": "Копировать",
     "delete": "Удалить",
     "general": "Общие",
     "general2": "Общая",
-    "loading": "Загрузка уведомлений...",
+    "link": "Ссылка",
+    "loading": "Загрузка...",
     "or": "или",
     "save": "Сохранить",
     "toast": {
@@ -270,5 +273,15 @@
       "subscriber": "Подписчик",
       "vip": "VIP"
     }
+  },
+  "sidebar": {
+    "Home": "Главная",
+    "Saves": "Сохранённое",
+    "Statistics": "Статистика",
+    "Favorites": "Любимые плейлисты",
+    "MyPlaylists": "Мои плейлисты",
+    "ModeratedPlaylists": "Модерируемые",
+    "collapse": "Свернуть",
+    "showMore": "Ещё ({{count}})"
   }
 }
