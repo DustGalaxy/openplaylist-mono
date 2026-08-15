@@ -28,6 +28,7 @@ import { DEFAULT_SORT } from '@/types/playlist'
 import { fetchPlaylistPublic } from '@/api/api-playlist'
 import { computePriority } from '@/lib/utils'
 import { fetchUserPublic } from '@/api/api-user'
+import { CLIENT_ID } from '@/lib/clientId'
 
 export interface CacheSlice {
   cache: Record<string, PlaylistCacheEntry>
@@ -316,6 +317,7 @@ function bindPlaylistEvents(playlistId: string, get: () => StoreState) {
   })
 
   socket.on(`playback_pause:${playlistId}`, (event: SyncPausePayload) => {
+    if (event.client_id === CLIENT_ID) return
     const s = get()
     const entry = s.cache[playlistId]
     const playerPlaylistId = s.slots.player.playlistId
@@ -329,17 +331,11 @@ function bindPlaylistEvents(playlistId: string, get: () => StoreState) {
       (isPlayerSlot && role === 'owner')
     ) {
       get().updateLocal(playlistId, { syncPause: event })
-      if (
-        event.track_id &&
-        event.track_id !== s.slots.player.currentTrackId &&
-        (isRemote || (isPlayerSlot && role === 'owner'))
-      ) {
-        s.setPlayerTrack(event.track_id)
-      }
     }
   })
 
   socket.on(`playback_seek:${playlistId}`, (event: SyncSeekPayload) => {
+    if (event.client_id === CLIENT_ID) return
     const s = get()
     const entry = s.cache[playlistId]
     const playerPlaylistId = s.slots.player.playlistId
@@ -353,16 +349,10 @@ function bindPlaylistEvents(playlistId: string, get: () => StoreState) {
       (isPlayerSlot && role === 'owner')
     ) {
       get().updateLocal(playlistId, { syncSeek: event })
-      if (
-        event.track_id &&
-        event.track_id !== s.slots.player.currentTrackId &&
-        (isRemote || (isPlayerSlot && role === 'owner'))
-      ) {
-        s.setPlayerTrack(event.track_id)
-      }
     }
   })
 }
+
 
 function unbindPlaylistEvents(playlistId: string, socket: Socket) {
   ;[

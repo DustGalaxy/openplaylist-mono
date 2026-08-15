@@ -96,12 +96,53 @@ async def test_playback_handler_client_id_propagation():
         mock_widget_pause.assert_called_once_with(user_id, pause_dto)
 
     seek_dto = Seek(position=20.0, track_id=uuid4(), client_id="client-xyz")
-    seek_event = PlaybackSeekEvent(playlist_id=playlist_id, user_id=user_id, state=seek_dto)
+@pytest.mark.asyncio
+async def test_playback_routes_position_no_publish_and_seek_publishes():
+    from src.adapters._fastapi.playback_routes import post_position_state, post_seek_state
+    from src.dto.moderator import ModeratorAccessInfo
+    from src.dto.playback import Seek
 
-    with patch("src.adapters._rabbit.worker.playback_handler.sio_playlist_service.seek", new_callable=AsyncMock) as mock_sio_seek, \
-         patch("src.adapters._rabbit.worker.playback_handler.sio_widget_service.seek", new_callable=AsyncMock) as mock_widget_seek:
-        await playback_seek_subscriber(seek_event)
-        mock_sio_seek.assert_called_once_with(playlist_id, seek_dto)
-        assert mock_sio_seek.call_args[0][1].client_id == "client-xyz"
-        mock_widget_seek.assert_called_once_with(user_id, seek_dto)
+    playlist_id = uuid4()
+    user_id = uuid4()
+    access = ModeratorAccessInfo(
+        playlist_id=playlist_id,
+        user_id=user_id,
+        name="test_mod",
+        access_level="moderator",
+        permissions={"can_manage_playback": True},
+    )
+
+
+    # 1. Test post_position_state: updates position state but does NOT publish to rabbit
+    with patch("src.adapters._fastapi.playback_routes.set_position_state", new_callable=AsyncMock) as mock_set_pos, \
+         patch("src.adapters._fastapi.playback_routes.main_publisher.publish", new_callable=AsyncMock) as mock_publish:
+        mock_db = AsyncMock()
+        await post_position_state(
+            db_session=mock_db,
+            access=access,
+            playlist_id=playlist_id,
+            position=33.5,
+            client_id="client_pos_1",
+        )
+        mock_set_pos.assert_called_once_with(mock_db, playlist_id, 33.5, skip_owner_check=True)
+        mock_publish.assert_not_called()
+
+    # 2. Test post_seek_state: updates seek state AND publishes PlaybackSeekEvent
+    seek_data = Seek(position=45.0, track_id=uuid4(), client_id="client_seek_1")
+    with patch("src.adapters._fastapi.playback_routes.seek", new_callable=AsyncMock) as mock_seek, \
+         patch("src.adapters._fastapi.playback_routes.main_publisher.publish", new_callable=AsyncMock) as mock_publish:
+        mock_db = AsyncMock()
+        await post_seek_state(
+            db_session=mock_db,
+            access=access,
+            playlist_id=playlist_id,
+            data=seek_data,
+        )
+        mock_seek.assert_called_once_with(mock_db, playlist_id, seek_data, skip_owner_check=True)
+        mock_publish.assert_called_once()
+        published_event = mock_publish.call_args[0][0]
+        assert published_event.playlist_id == playlist_id
+        assert published_event.state.position == 45.0
+        assert published_event.state.client_id == "client_seek_1"
+
 

@@ -16,6 +16,7 @@ from src.adapters._fastapi.dependencies import (
 )
 from src.adapters._rabbit.broker import get_broker, main_publisher
 from src.adapters._rabbit.queues import playlist_fanout_exchange
+from src.dal._redis.playback_repository import playback_repository
 from src.dto.internal.domain_events import EventOperator, InternalPlaylistEvent, InternalPlaylistEventType, PlaylistSettings
 from src.dto.moderator import UserModeratedPlaylistResponse
 from src.dto.playlist import (
@@ -281,6 +282,10 @@ async def set_play_now_for_playlist(
     try:
         plst = await service.get(db_session, playlist_id, skip_owner_check=True)
         order = await service.set_play_now(db_session, plst, playnow.track_id, None)
+        playback_repository.save_state(
+            playlist_id,
+            {"track_id": str(playnow.track_id) if playnow.track_id else "None", "position": "0.0"},
+        )
         await get_broker().publish(
             InternalPlaylistEvent(
                 event_id=uuid4(),

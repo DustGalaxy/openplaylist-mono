@@ -15,8 +15,7 @@ import {
   postSeekState,
 } from '@/api/api-playlist'
 import { usePlaybackStore } from '@/stores/playbackStore'
-
-const CLIENT_ID = Math.random().toString(36).substring(2, 15)
+import { CLIENT_ID } from '@/lib/clientId'
 
 const EMPTY_CAPABILITIES = {
   canSkip: false,
