@@ -85,6 +85,8 @@ export interface Track {
   extra_data: Record<string, any>
   loading?: boolean // для оптимистичного состояния
   from_owner?: boolean // трек добавлен самим стримером (с бэкенда)
+  note?: string | null
+  is_note_public?: boolean
 }
 
 export interface WireTrack {
@@ -101,6 +103,8 @@ export interface WireTrack {
   likes: number
   source: Platform
   extra_data: Record<string, any>
+  note?: string | null
+  is_note_public?: boolean
   created_at: string
   updated_at: string
 }
@@ -449,6 +453,12 @@ export interface TrackOpsSlice {
     trackIds: Array<string>,
     reason: DeleteStatus,
   ) => Promise<void>
+  updateTrackNote: (
+    playlistId: string,
+    trackId: string,
+    note: string | null,
+    isPublic?: boolean,
+  ) => void
 }
 
 export interface PlaybackOpsSlice {

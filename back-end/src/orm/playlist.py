@@ -2,8 +2,6 @@ import enum
 from typing import TYPE_CHECKING, Literal
 from uuid import UUID
 
-from src.orm.moderator import PlaylistModerator
-
 from sqlalchemy import Enum, ForeignKey, Index, Integer, String
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
@@ -12,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src._types import BlockListScope, ChatRuleScope, ContentSettingScope, DonationRuleScope, Platform, Status
 from src.database import Base, TimestampMixin, UUIDMixin
+from src.orm.moderator import PlaylistModerator
 
 
 def generic_mode_settings():
@@ -58,6 +57,22 @@ class Order(Base, UUIDMixin, TimestampMixin):
     extra_data: Mapped[dict] = mapped_column(JSONB, nullable=True)
 
     playlist_associations: Mapped[list["OrderPlaylistStatus"]] = relationship(back_populates="order")
+
+    @property
+    def note(self) -> str | None:
+        if "_dynamic_note" in self.__dict__:
+            return self._dynamic_note
+        if "playlist_associations" in self.__dict__ and self.__dict__["playlist_associations"]:
+            return self.__dict__["playlist_associations"][0].note
+        return None
+
+    @property
+    def is_note_public(self) -> bool:
+        if "_dynamic_is_note_public" in self.__dict__:
+            return self._dynamic_is_note_public
+        if "playlist_associations" in self.__dict__ and self.__dict__["playlist_associations"]:
+            return self.__dict__["playlist_associations"][0].is_note_public
+        return True
 
 
 class Playlist(Base, UUIDMixin, TimestampMixin):
@@ -132,6 +147,8 @@ class OrderPlaylistStatus(Base, TimestampMixin):
     order_id: Mapped[UUID] = mapped_column(PGUUID, ForeignKey("orders.id", ondelete="CASCADE"), primary_key=True)
     playlist_id: Mapped[UUID] = mapped_column(PGUUID, ForeignKey("playlists.id", ondelete="CASCADE"), primary_key=True)
     status: Mapped[Status] = mapped_column(default="in playlist")
+    note: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    is_note_public: Mapped[bool] = mapped_column(default=True, nullable=False, server_default="true")
 
     order: Mapped["Order"] = relationship(back_populates="playlist_associations", lazy="selectin", cascade="all, delete")
     playlist: Mapped["Playlist"] = relationship(back_populates="order_associations")

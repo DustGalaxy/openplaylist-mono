@@ -12,6 +12,7 @@ from src.services.playlist_log import PlaylistLogService, get_playlist_log_servi
 from src.services.playlists.basic_service import PlaylistLowService, get_playlist_service, playlist_service
 from src.services.playlists.favorite_service import FavoritePlaylistService, get_favorite_playlist_service
 from src.services.playlists.moderator_service import ModeratorService, get_moderator_service
+from src.services.playlists.order_note_service import OrderNoteService, get_order_note_service
 from src.services.playlists.rules_service import RulesService, get_rules_service
 from src.services.stream_service import StreamService, get_stream_service
 
@@ -22,6 +23,7 @@ PLST_LOG_SERVICE = Annotated[PlaylistLogService, Depends(get_playlist_log_servic
 STREAM_SERVICE = Annotated[StreamService, Depends(get_stream_service)]
 NOTIFY_SERVICE = Annotated[NotificationService, Depends(get_notification_service)]
 MODERATOR_SERVICE = Annotated[ModeratorService, Depends(get_moderator_service)]
+ORDER_NOTE_SERVICE = Annotated[OrderNoteService, Depends(get_order_note_service)]
 
 DB_SESSION = Annotated[AsyncSession, Depends(get_async_session)]
 CURR_USER = Annotated[User, Depends(auth_service.get_current_user)]

@@ -65,6 +65,9 @@ class OrderDomain(BaseModel):
 
     extra_data: ExtraData
 
+    note: str | None = None
+    is_note_public: bool = True
+
     created_at: datetime
     updated_at: datetime
 

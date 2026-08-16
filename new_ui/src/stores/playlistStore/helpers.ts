@@ -95,6 +95,8 @@ export function toTrack(
     source: wire.source,
     extra_data: wire.extra_data,
     from_owner: wire.from_owner,
+    note: wire.note,
+    is_note_public: wire.is_note_public,
   }
   return {
     ...withLabelPriority,

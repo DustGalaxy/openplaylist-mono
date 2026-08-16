@@ -62,4 +62,13 @@ export const createTrackOpsSlice: StateCreator<
       return
     await bulkRemoveTracksFromPlaylist(playlistId, trackIds, reason)
   },
+
+  updateTrackNote: (playlistId, trackId, note, isPublic = true) => {
+    get().updatePlaylistData(playlistId, (pl) => ({
+      ...pl,
+      track_data: pl.track_data.map((t) =>
+        t.id === trackId ? { ...t, note, is_note_public: isPublic } : t,
+      ),
+    }))
+  },
 })

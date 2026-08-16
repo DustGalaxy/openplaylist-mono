@@ -9,8 +9,11 @@ import {
 } from 'lucide-react'
 import WarningModal from '../modals/warningModal'
 import ReportModal from '../modals/ReportModal'
+import OrderNoteModal from '../modals/OrderNoteModal'
 import TrackActions from './TrackActions'
+import NotePopover from './NotePopover'
 import { useTrackActions } from './useTrackActions'
+import { usePlaylistView } from '../../context/playlist-view-context'
 import type { TrackCardAction } from './types'
 import type { Track } from '@/types/playlist'
 import { cn } from '@/lib/utils'
@@ -31,6 +34,7 @@ function MiniTrackCardImpl({
   isNowPlaying = false,
 }: MiniTrackCardProps) {
   const { t, i18n } = useFeatureTranslation()
+  const { role } = usePlaylistView()
   const { width } = useWindowDimensions()
   const [actionsOpen, setActionsOpen] = React.useState(false)
   const { primary, secondary, play, openModal, closeModal } = useTrackActions(
@@ -105,19 +109,22 @@ function MiniTrackCardImpl({
 
         {/* Верхняя строка: группа + название + заказчик */}
         <div className="relative z-10 w-full rounded-lg p-1 min-w-0 drop-shadow-[0_2px_3px_rgba(0,0,0,0.15)] shadow-inner dark:drop-shadow-none bg-linear-to-b from-level-1/30 via-level-1/40 to-level-1/35 backdrop-blur-[1px]">
-          <div className="flex items-center gap-1.5 min-w-0">
-            {group === 'vip' && (
-              <Crown className="size-3.5 text-accent shrink-0" />
-            )}
-            {group === 'background' && (
-              <Layers className="size-3.5 text-text-placeholder shrink-0" />
-            )}
-            <div
-              className="text-[14px] font-semibold text-left truncate text-text-main tracking-wide"
-              title={track.title}
-            >
-              {track.title}
+          <div className="flex items-center justify-between gap-1.5 min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              {group === 'vip' && (
+                <Crown className="size-3.5 text-accent shrink-0" />
+              )}
+              {group === 'background' && (
+                <Layers className="size-3.5 text-text-placeholder shrink-0" />
+              )}
+              <div
+                className="text-[14px] font-semibold text-left truncate text-text-main tracking-wide"
+                title={track.title}
+              >
+                {track.title}
+              </div>
             </div>
+            <NotePopover track={track} isOwner={role === 'owner'} />
           </div>
 
           {track.requester_nickname ? (
@@ -206,6 +213,9 @@ function MiniTrackCardImpl({
       {openModal === 'report' && (
         <ReportModal track={track} open onOpenChange={closeModal} />
       )}
+      {openModal === 'note' && (
+        <OrderNoteModal track={track} open onOpenChange={closeModal} />
+      )}
     </div>
   )
 }
@@ -216,6 +226,8 @@ function areEqual(prev: MiniTrackCardProps, next: MiniTrackCardProps) {
     prev.track.priority === next.track.priority &&
     prev.track.title === next.track.title &&
     prev.track.requester_nickname === next.track.requester_nickname &&
+    prev.track.note === next.track.note &&
+    prev.track.is_note_public === next.track.is_note_public &&
     prev.group === next.group &&
     prev.isDragging === next.isDragging &&
     prev.isNowPlaying === next.isNowPlaying

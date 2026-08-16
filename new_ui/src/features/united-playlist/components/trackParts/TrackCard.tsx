@@ -3,8 +3,11 @@ import { ArrowUpRight, Calendar, Crown, Layers, Play } from 'lucide-react'
 
 import WarningModal from '../modals/warningModal'
 import ReportModal from '../modals/ReportModal'
+import OrderNoteModal from '../modals/OrderNoteModal'
 import TrackActions from './TrackActions'
+import NotePopover from './NotePopover'
 import { useTrackActions } from './useTrackActions'
+import { usePlaylistView } from '../../context/playlist-view-context'
 import type { Track } from '@/types/playlist'
 import { cn } from '@/lib/utils'
 import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
@@ -21,6 +24,7 @@ export default function TrackCard({
   isNowPlaying?: boolean
 }) {
   const { t, i18n } = useFeatureTranslation()
+  const { role } = usePlaylistView()
   const { primary, secondary, play, openModal, closeModal } = useTrackActions(
     track,
     group,
@@ -93,6 +97,7 @@ export default function TrackCard({
           >
             {track.title}
           </span>
+          <NotePopover track={track} isOwner={role === 'owner'} />
         </div>
         <span className="truncate text-xs text-text-secondary">
           {track.requester_nickname}
@@ -130,6 +135,9 @@ export default function TrackCard({
         )}
         {openModal === 'report' && (
           <ReportModal track={track} open onOpenChange={closeModal} />
+        )}
+        {openModal === 'note' && (
+          <OrderNoteModal track={track} open onOpenChange={closeModal} />
         )}
       </div>
     </div>

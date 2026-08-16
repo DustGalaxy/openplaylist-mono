@@ -235,7 +235,7 @@ function PlaylistViewInner() {
                     )
                   }
                   className={cn(
-                    'inline-flex items-center gap-1.5 px-1.5 py-1 sm:px-3 sm:py-1.5 text-sm font-mono rounded-sm bg-level-2 ',
+                    'inline-flex items-center gap-1.5 px-1.5 py-1 sm:px-3 sm:py-1.5 min-h-8 min-w-8 text-sm font-mono rounded-sm bg-level-2 ',
                     playlist.is_allow_external_requests
                       ? ' text-emerald-500'
                       : ' text-text-secondary',
@@ -244,9 +244,11 @@ function PlaylistViewInner() {
                   <span
                     className={`h-1.5 w-1.5 rounded-full ${playlist.is_allow_external_requests ? 'bg-emerald-400' : 'bg-text-placeholder'}`}
                   />
-                  {playlist.is_allow_external_requests
-                    ? t('playlist.status.online')
-                    : t('playlist.status.offline')}
+                  <span className="hidden sm:inline">
+                    {playlist.is_allow_external_requests
+                      ? t('playlist.status.online')
+                      : t('playlist.status.offline')}
+                  </span>
                 </Btn>
 
                 <div className="flex items-center gap-1.5 justify-between">

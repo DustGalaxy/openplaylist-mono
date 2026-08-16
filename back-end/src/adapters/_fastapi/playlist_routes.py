@@ -10,6 +10,7 @@ from src.adapters._fastapi.dependencies import (
     FAVORITE_SERVICE,
     MODERATOR_ACCESS,
     MODERATOR_SERVICE,
+    ORDER_NOTE_SERVICE,
     PLST_LOG_SERVICE,
     PLST_SERVICE,
     USER_ID_OR_NONE,
@@ -19,6 +20,7 @@ from src.adapters._rabbit.queues import playlist_fanout_exchange
 from src.dal._redis.playback_repository import playback_repository
 from src.dto.internal.domain_events import EventOperator, InternalPlaylistEvent, InternalPlaylistEventType, PlaylistSettings
 from src.dto.moderator import UserModeratedPlaylistResponse
+from src.dto.order_note import OrderNoteResponse, OrderNoteUpsert
 from src.dto.playlist import (
     FavoriteStatusResponse,
     NewPlaylist,
@@ -222,6 +224,10 @@ async def get_public_playlist(
 ) -> ReadPlaylist:
     plst = await service.get_public_playlist(db_session, playlist_id, user_id_or_none)
     res = ReadPlaylist.model_validate(plst)
+    if not user_id_or_none or user_id_or_none != plst.owner_id:
+        for track in res.track_data:
+            if not track.is_note_public:
+                track.note = None
     return res
 
 
@@ -424,3 +430,41 @@ async def check_playlist_is_favorite(
     favorite_service: FAVORITE_SERVICE,
 ) -> FavoriteStatusResponse:
     return await favorite_service.get_favorite_status(db_session, current_user, playlist_id)
+
+
+# --- order note operations ---
+
+
+@router.get("/{playlist_id}/order/{order_id}/note")
+async def get_order_note(
+    db_session: DB_SESSION,
+    note_service: ORDER_NOTE_SERVICE,
+    playlist_id: UUID,
+    order_id: UUID,
+    user_id_or_none: USER_ID_OR_NONE = None,
+) -> OrderNoteResponse:
+    return await note_service.get_note(db_session, playlist_id, order_id, user_id_or_none)
+
+
+@router.put("/{playlist_id}/order/{order_id}/note")
+@router.post("/{playlist_id}/order/{order_id}/note")
+async def upsert_order_note(
+    db_session: DB_SESSION,
+    note_service: ORDER_NOTE_SERVICE,
+    current_user: CURR_USER,
+    playlist_id: UUID,
+    order_id: UUID,
+    data: OrderNoteUpsert,
+) -> OrderNoteResponse:
+    return await note_service.upsert_note(db_session, playlist_id, order_id, current_user.id, data)
+
+
+@router.delete("/{playlist_id}/order/{order_id}/note", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_order_note(
+    db_session: DB_SESSION,
+    note_service: ORDER_NOTE_SERVICE,
+    current_user: CURR_USER,
+    playlist_id: UUID,
+    order_id: UUID,
+) -> None:
+    await note_service.delete_note(db_session, playlist_id, order_id, current_user.id)

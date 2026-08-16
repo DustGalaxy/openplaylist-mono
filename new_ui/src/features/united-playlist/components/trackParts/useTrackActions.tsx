@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Ban, Bookmark, BookmarkCheck, Flag, Link, Trash } from 'lucide-react'
+import { Ban, Bookmark, BookmarkCheck, FilePenLine, Flag, Link, Trash } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { usePlaylistView } from '../../context/playlist-view-context'
@@ -8,7 +8,7 @@ import type { TrackCardAction } from './types'
 import { usePlaylistStore } from '@/stores/playlistStore'
 import { useSavedStore } from '@/stores/savedStore'
 
-type OpenModal = 'block' | 'report' | null
+export type OpenTrackModal = 'block' | 'report' | 'note' | null
 
 export function useTrackActions(
   track: Track,
@@ -22,7 +22,7 @@ export function useTrackActions(
     addTrack: addSavedTrack,
     removeTrack: removeSavedTrack,
   } = useSavedStore()
-  const [openModal, setOpenModal] = useState<OpenModal>(null)
+  const [openModal, setOpenModal] = useState<OpenTrackModal>(null)
   const closeModal = () => setOpenModal(null)
 
   const play = () => {
@@ -86,6 +86,18 @@ export function useTrackActions(
   // addToPlaylist больше не тут — рендерится напрямую в DropDownActions
   // (component-в-actions ломал границу React Refresh / изоляцию хуков)
   const secondary: Array<TrackCardAction> = [
+    ...(role === 'owner'
+      ? [
+          {
+            key: 'note',
+            icon: FilePenLine,
+            label: track.note
+              ? t('playlist.track.actions.editNote', 'Edit note')
+              : t('playlist.track.actions.addNote', 'Add note'),
+            onClick: () => setOpenModal('note'),
+          },
+        ]
+      : []),
     ...(canManage
       ? [
           {
