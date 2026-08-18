@@ -54,6 +54,7 @@ mindmap
 | Раздел | Файл документации | Описание и основные графики |
 | :--- | :--- | :--- |
 | **Playback** | [`docs/playback.md`](file:///e:/vs-code-projects/openplaylist-mono/docs/playback.md) | Система воспроизведения, Модель Единственного Лидера, Redis DAL `PlaybackRepository`, синхронизация плееров и оверлеев OBS. |
+| **Player V2 Quick Ref** | [`docs/quick_reference_player_v2.md`](file:///e:/vs-code-projects/openplaylist-mono/docs/quick_reference_player_v2.md) | Быстрая шпаргалка по UserPlayer V2, режимам `listen`/`control`, фильтрации эха и особенностям ReactPlayer 3.4. |
 | **Playlists & Permissions** | [`docs/playlists.md`](file:///e:/vs-code-projects/openplaylist-mono/docs/playlists.md) | Управление плейлистами, режимы работы (`flow`, `stream`, `static`), токены модераторов и разграничение прав (`MODERATOR_ACCESS`). |
 | **Orders Pipeline** | [`docs/orders.md`](file:///e:/vs-code-projects/openplaylist-mono/docs/orders.md) | Прием и обработка музыкальных заказов, валидация черных списков, батч-воркер `order.proccess`, сфера доменных событий. |
 | **Realtime Engine** | [`docs/realtime.md`](file:///e:/vs-code-projects/openplaylist-mono/docs/realtime.md) | Мультинеймспейсный Socket.IO сервер (`/`, `/plst_upds`, `/widget`), авторизация по кукам и динамическое управление комнатами. |
