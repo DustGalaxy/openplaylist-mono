@@ -66,7 +66,19 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold">Select Twitch Scopes</label>
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <label class="form-label fw-bold mb-0">Select Twitch Scopes</label>
+              <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-primary" onclick="applyPreset('bot')">
+                  <i class="fa-solid fa-robot me-1"></i> Preset: Bot Account
+                </button>
+                <button type="button" class="btn btn-outline-info" onclick="applyPreset('streamer')">
+                  <i class="fa-solid fa-tower-broadcast me-1"></i> Preset: Streamer
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="applyPreset('all')">Select All</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="applyPreset('clear')">Clear</button>
+              </div>
+            </div>
             <div class="row g-2">
               {% for scope in available_scopes %}
               <div class="col-md-6 col-lg-4">
@@ -109,4 +121,23 @@
     </div>
   </div>
 </div>
+<script>
+function applyPreset(preset) {
+  const botScopes = ['user:bot', 'user:read:chat', 'user:write:chat', 'chat:read', 'chat:edit', 'user:read:email'];
+  const streamerScopes = ['channel:bot', 'channel:read:redemptions', 'channel:manage:redemptions', 'user:read:email'];
+  const checkboxes = document.querySelectorAll('input[name="scopes"]');
+
+  checkboxes.forEach(cb => {
+    if (preset === 'all') {
+      cb.checked = true;
+    } else if (preset === 'clear') {
+      cb.checked = false;
+    } else if (preset === 'bot') {
+      cb.checked = botScopes.includes(cb.value);
+    } else if (preset === 'streamer') {
+      cb.checked = streamerScopes.includes(cb.value);
+    }
+  });
+}
+</script>
 {% endblock %}

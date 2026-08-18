@@ -21,7 +21,7 @@ bot_da_disconect = RabbitQueue("bot.da.disconnect", durable=True)
 
 # --- twitch
 
-auth_user_twitch_tokens_refreshed = RabbitQueue("auth.user.twtich.tokens.refreshed", durable=True)
+auth_user_twitch_tokens_refreshed = RabbitQueue("auth.user.twitch.tokens.refreshed", durable=True)
 auth_user_twitch_all_request = RabbitQueue("auth.user.twitch.all.request", durable=True)
 
 bot_twitch_connect_request = RabbitQueue("bot.twitch.connect.request", durable=True)
@@ -73,4 +73,10 @@ playlist_privacy_public = RabbitQueue("playlist.privacy.public", durable=True)
 
 playback_pause_queue = RabbitQueue("playback.pause", durable=True)
 playback_seek_queue = RabbitQueue("playback.seek", durable=True)
+
+# --- bot order status feedback
+bot_order_completed = RabbitQueue("bot.order.completed", durable=True)
+bot_order_cancelled = RabbitQueue("bot.order.cancelled", durable=True)
+bot_order_partially_completed = RabbitQueue("bot.order.partially_completed", durable=True)
+
 

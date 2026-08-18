@@ -3,11 +3,16 @@ from uuid import UUID, uuid4
 from faststream.rabbit import RabbitRouter
 
 from src.adapters._rabbit.broker import main_publisher
-from src.adapters._rabbit.queues import main_exchange, playlist_fanout_exchange
+from src.adapters._rabbit.queues import (
+    bot_order_cancelled,
+    bot_order_completed,
+    main_exchange,
+    playlist_fanout_exchange,
+)
 from src.dal.postgres.user import user_repository
 from src.database import async_session_maker
 from src.dto.internal.domain_events import EventOperator, InternalPlaylistEvent, InternalPlaylistEventType
-from src.dto.order import NewOrderPayload
+from src.dto.order import NewOrderPayload, OrderUpdate
 from src.services.order_service import order_service
 from src.services.playlist_service import add_to_playlist_batch
 
@@ -29,9 +34,34 @@ def _parse_uuid(val: str | UUID | None) -> UUID | None:
 async def _(
     payload: NewOrderPayload,
 ):
-    typed_orders = await order_service.init_orders(
-        payload.order, payload.from_owner, start_from_target=payload.start_from_target
-    )
+    try:
+        typed_orders = await order_service.init_orders(
+            payload.order, payload.from_owner, start_from_target=payload.start_from_target
+        )
+    except Exception as exc:
+        reward_id = getattr(payload.order, "reward_id", None)
+        redemption_id = getattr(payload.order, "redemption_id", None)
+        owner_platform_id = getattr(payload.order, "owner_platform_id", None)
+        owner_id = getattr(payload.order, "owner_id", None)
+        requester_nickname = getattr(payload.order, "requester_nickname", "anonymous")
+
+        if owner_id:
+            await main_publisher.publish(
+                OrderUpdate(
+                    order_id=getattr(payload.order, "request_id", uuid4()),
+                    owner_id=owner_id,
+                    owner_platform_id=str(owner_platform_id) if owner_platform_id else None,
+                    requester_nickname=requester_nickname,
+                    status="cancelled",
+                    priority=getattr(payload.order, "priority", "points"),
+                    details=f"Заказ отменен: {str(exc)}",
+                    reward_id=reward_id,
+                    redemption_id=redemption_id,
+                ),
+                bot_order_cancelled,
+                main_exchange,
+            )
+        return
 
     if not typed_orders:
         return
@@ -61,6 +91,27 @@ async def _(
             exchange=playlist_fanout_exchange,
         )
 
+        reward_id = getattr(track.extra_data, "reward_id", None)
+        redemption_id = getattr(track.extra_data, "redemption_id", None)
+        owner_platform_id = getattr(first_order, "owner_platform_id", None)
+
+        await main_publisher.publish(
+            OrderUpdate(
+                order_id=track.id,
+                owner_id=owner.id,
+                owner_platform_id=str(owner_platform_id) if owner_platform_id else None,
+                requester_nickname=track.requester_nickname,
+                playlist_name=playlist.name,
+                status="completed",
+                priority=track.priority,
+                details=f"Трек '{track.title}' добавлен в плейлист '{playlist.name}'",
+                reward_id=reward_id,
+                redemption_id=redemption_id,
+            ),
+            bot_order_completed,
+            main_exchange,
+        )
+
     for error_list, playlist in errors:
         op_user_id = owner.id if first_order.from_owner else _parse_uuid(getattr(first_order, "requester_id", None))
         op_access = "owner" if first_order.from_owner else "none"
@@ -80,3 +131,26 @@ async def _(
             ),
             exchange=playlist_fanout_exchange,
         )
+
+        reward_id = getattr(first_order.extra_data, "reward_id", None)
+        redemption_id = getattr(first_order.extra_data, "redemption_id", None)
+        owner_platform_id = getattr(first_order, "owner_platform_id", None)
+        error_text = ", ".join(error_list) if error_list else "Ошибка добавления трека"
+
+        await main_publisher.publish(
+            OrderUpdate(
+                order_id=first_order.request_id,
+                owner_id=owner.id,
+                owner_platform_id=str(owner_platform_id) if owner_platform_id else None,
+                requester_nickname=first_order.requester_nickname,
+                playlist_name=playlist.name,
+                status="cancelled",
+                priority=first_order.priority,
+                details=f"Заказ отменен: {error_text}",
+                reward_id=reward_id,
+                redemption_id=redemption_id,
+            ),
+            bot_order_cancelled,
+            main_exchange,
+        )
+

@@ -18,7 +18,17 @@ AVAILABLE_TWITCH_SCOPES: list[dict[str, str]] = [
     {
         "name": "user:bot",
         "description": "Join a specified chat channel as your user and appear as a bot, and perform chat-related actions as your user.",
-        "category": "User",
+        "category": "Bot",
+    },
+    {
+        "name": "user:read:chat",
+        "description": "Receive and view live chat messages on channels where the bot is present.",
+        "category": "Bot",
+    },
+    {
+        "name": "user:write:chat",
+        "description": "Send live chat messages on channels where the bot is authorized.",
+        "category": "Bot",
     },
     {
         "name": "channel:bot",
@@ -37,12 +47,12 @@ AVAILABLE_TWITCH_SCOPES: list[dict[str, str]] = [
     },
     {
         "name": "chat:read",
-        "description": "Read chat messages in channel",
+        "description": "Read chat messages in channel (Legacy)",
         "category": "Chat",
     },
     {
         "name": "chat:edit",
-        "description": "Send chat messages in channel",
+        "description": "Send chat messages in channel (Legacy)",
         "category": "Chat",
     },
     {
@@ -58,6 +68,11 @@ AVAILABLE_TWITCH_SCOPES: list[dict[str, str]] = [
     {
         "name": "channel:read:redemptions",
         "description": "View Channel Points Custom Rewards and redemptions",
+        "category": "Channel Points",
+    },
+    {
+        "name": "channel:manage:redemptions",
+        "description": "Create, update, and manage Channel Points Custom Rewards and redemptions",
         "category": "Channel Points",
     },
 ]
@@ -102,7 +117,8 @@ class TwitchAuthAdmin(BaseView):
                 "scope": scope_param,
                 "state": state,
             }
-            auth_url = f"{settings.TWITCH_URL}/oauth2/authorize?{urlencode(query_params)}"
+            twitch_base_url = getattr(settings, "TWITCH_URL", "https://id.twitch.tv")
+            auth_url = f"{twitch_base_url}/oauth2/authorize?{urlencode(query_params)}"
 
             if action == "authorize":
                 return RedirectResponse(auth_url, status_code=303)
@@ -174,8 +190,31 @@ class TwitchAuthAdmin(BaseView):
                             scope=token.scope if isinstance(token.scope, list) else [],
                             is_active=True,
                         )
-                        res = await twitch_admin_token_service.save_or_update_token(session, create_dto)
-                        print(res)
+                        saved_token = await twitch_admin_token_service.save_or_update_token(session, create_dto)
+
+                        # Publish to RabbitMQ so bot_ttv connects the token in real-time
+                        try:
+                            from src.adapters._rabbit.broker import get_broker
+                            from src.adapters._rabbit.queues import main_exchange
+                            from src.adapters._rabbit.bots.dto import Tokens
+
+                            broker = get_broker()
+                            if broker and user_info and hasattr(user_info, "id"):
+                                await broker.publish(
+                                    Tokens(
+                                        user_id=str(saved_token.id),
+                                        access_token=saved_token.access_token,
+                                        refresh_token=saved_token.refresh_token,
+                                        expires_at=int(saved_token.expires_at.timestamp()) if saved_token.expires_at else 0,
+                                        platform="twitch",
+                                        platform_user_id=str(user_info.id),
+                                        bot_settings={"prefix": "!"},
+                                    ),
+                                    "bot.twitch.connect.request",
+                                    main_exchange,
+                                )
+                        except Exception:
+                            pass
                 except Exception:
                     pass
             except HTTPException as http_ex:

@@ -23,14 +23,14 @@ class AuthUserSchema(BaseModel):
     id: UUID
 
     username: str
-    bio: str
+    bio: str = ""
     email: str
     email_confirmed: bool
     password: str | None = None
     avatar_url: str | None = None
 
     vip_expires_at: datetime | None = None
-    is_public: bool
+    is_public: bool = True
     is_active: bool
 
     linked_accounts: list[LinkedAccountsDomain] = Field(default_factory=list)

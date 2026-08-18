@@ -4,12 +4,12 @@ import jwt
 import socketio
 from fastapi import HTTPException
 
-from src.services.stream_service import StreamService
-from src.settings import settings
-from src.services.realtime.sio_playlist import sio_playlist_service, room_manager
-from src.services.realtime.sio_widget import sio_widget_service
 from src.dal._redis.broker import get_broker
 from src.database import async_session_maker
+from src.services.realtime.sio_playlist import room_manager, sio_playlist_service
+from src.services.realtime.sio_widget import sio_widget_service
+from src.services.stream_service import StreamService
+from src.settings import settings
 
 logger = logging.getLogger("uvicorn.error")
 

@@ -52,6 +52,20 @@ class TwitchAdminTokenService:
         """Fetch all active Twitch admin tokens."""
         return await self.repository.fetch_all_active_tokens(session)
 
+    async def get_active_tokens(self, session: AsyncSession) -> list[TwitchAdminTokenDomain]:
+        """Alias for fetch_all_active_tokens."""
+        return await self.repository.fetch_all_active_tokens(session)
+
+    async def get_token_by_user_id(self, session: AsyncSession, twitch_user_id: str) -> TwitchAdminTokenDomain | None:
+        """Fetch active token by twitch_user_id."""
+        return await self.repository.get_by_twitch_user_id(session, twitch_user_id)
+
+    async def update_token(
+        self, session: AsyncSession, token_id: int, data: TwitchAdminTokenUpdate
+    ) -> TwitchAdminTokenDomain:
+        """Update TwitchAdminToken."""
+        return await self.repository.update(session, token_id, data)
+
     async def refresh_token(self, token: TwitchAdminTokenDomain, session: AsyncSession) -> bool:
         """Refresh a single TwitchAdminToken using Twitch OAuth API and update DB via repository."""
         if not token.refresh_token:

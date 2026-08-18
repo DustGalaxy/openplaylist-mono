@@ -17,11 +17,11 @@ def test_calculate_start_date():
 
     date_24h = service.calculate_start_date(TimeWindow.LAST_24H)
     assert date_24h is not None
-    assert (datetime.now(timezone.utc) - date_24h).total_seconds() >= 23 * 3600
+    assert (datetime.now() - date_24h).total_seconds() >= 23 * 3600
 
     date_7d = service.calculate_start_date(TimeWindow.LAST_7D)
     assert date_7d is not None
-    assert (datetime.now(timezone.utc) - date_7d).total_seconds() >= 6 * 86400
+    assert (datetime.now() - date_7d).total_seconds() >= 6 * 86400
 
     date_all = service.calculate_start_date(TimeWindow.ALL_TIME)
     assert date_all is None

@@ -64,8 +64,12 @@ window.appConfig = {
   AUTH_API_URL: `${BACKEND_DOMAIN}/api`,
   ORDER_API_URL: `${BACKEND_DOMAIN}/api/order`,
   TWITCH_CLIENT_ID: 'vsil95c2am4rgvbgdax1o4a1u003mx',
-  TWITCH_REDIRECT_URI: `${PROJECT_DOMAIN}/oauth-callback`,
-  TWITCH_SCOPES: ['user:read:email'],
+  TWITCH_SCOPES: [
+    'user:read:email',
+    'channel:bot',
+    'channel:read:redemptions',
+    'channel:manage:redemptions',
+  ],
   GOOGLE_CLIENT_ID:
     '684341768922-sd9fgqd8l3vhr7e4iep5c3ddqsgboaic.apps.googleusercontent.com',
   GOOGLE_REDIRECT_URI: `${PROJECT_DOMAIN}/oauth-callback`,

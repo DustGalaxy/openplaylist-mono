@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from src._types import Status, TrackSource
+from src._types import OrderStatus, TrackSource
 from src.models.order import ExtraData
 
 
@@ -40,6 +40,8 @@ class TTVNewOrder(BaseModel):
     requester_nickname: str
     yt_video_url: str
     priority: str
+    reward_id: str | None = None
+    redemption_id: str | None = None
     source: TrackSource = TrackSource.TWITCH
 
 
@@ -105,10 +107,14 @@ class NewOrderPayload(BaseModel):
 class OrderUpdate(BaseModel):
     order_id: UUID
     owner_id: UUID
+    owner_platform_id: str | None = None
     requester_nickname: str
-    status: Status
+    playlist_name: str | None = None
+    status: OrderStatus
     priority: str
     details: str
+    reward_id: str | None = None
+    redemption_id: str | None = None
 
 
 class HTTPOrderNew(BaseModel):

@@ -142,9 +142,18 @@ class PlaylistRepository(
             if not plst:
                 raise NotFoundException()
 
-            orm_order = Order(**order.model_dump())
+            orm_order = None
+            if getattr(order, "request_id", None):
+                stmt = select(Order).where(Order.request_id == order.request_id)
+                orm_order = (await session.execute(stmt)).scalar_one_or_none()
 
-            plst.order_links.append(orm_order)
+            if not orm_order:
+                orm_order = Order(**order.model_dump())
+
+            existing_pl_order_ids = {assoc.order_id for assoc in plst.order_associations}
+            if orm_order.id not in existing_pl_order_ids:
+                plst.order_links.append(orm_order)
+
             await session.commit()
             await session.refresh(orm_order)
             return OrderDomain.model_validate(orm_order)
@@ -167,9 +176,29 @@ class PlaylistRepository(
             if not plst:
                 raise NotFoundException()
 
-            orm_orders = [Order(**order.model_dump()) for order in orders]
-            for orm_order in orm_orders:
-                plst.order_links.append(orm_order)
+            req_ids = [order.request_id for order in orders if getattr(order, "request_id", None)]
+            existing_orders_map: dict[UUID, Order] = {}
+            if req_ids:
+                stmt = select(Order).where(Order.request_id.in_(req_ids))
+                res = await session.execute(stmt)
+                for existing in res.scalars().all():
+                    existing_orders_map[existing.request_id] = existing
+
+            existing_pl_order_ids = {assoc.order_id for assoc in plst.order_associations}
+
+            orm_orders: list[Order] = []
+            for order in orders:
+                req_id = getattr(order, "request_id", None)
+                if req_id and req_id in existing_orders_map:
+                    orm_order = existing_orders_map[req_id]
+                else:
+                    orm_order = Order(**order.model_dump())
+                    if req_id:
+                        existing_orders_map[req_id] = orm_order
+
+                if orm_order.id not in existing_pl_order_ids:
+                    plst.order_links.append(orm_order)
+                orm_orders.append(orm_order)
 
             await session.commit()
             for orm_order in orm_orders:

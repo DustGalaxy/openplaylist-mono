@@ -262,6 +262,8 @@ class PlatformCap(StrEnum):
 
 Status = Literal["in playlist", "removed", "listened", "skipped", "reported"]
 DeleteStatus = Literal["removed", "listened", "skipped", "reported"]
+OrderStatus = Literal["processing", "completed", "cancelled"]
+
 Source = Literal["twitch", "youtube", "web", "da"]
 
 

@@ -38,9 +38,12 @@ async def order_new_from_twitch(event: TTVNewOrder):
 async def get_all_twitch_users():
     async with async_session_maker() as session:
         from src.services.auth.auth_service import auth_service
+        from src.services.admin.twitch_admin_token_service import twitch_admin_token_service
 
         tokens = await auth_service.get_all_tokens(session, IntegrationPlatform.TWITCH)
-        return [
+        existing_pids = {token.linked_account.platform_user_id for token in tokens}
+
+        result = [
             Tokens(
                 user_id=str(token.linked_account.user_id),
                 access_token=token.access_token,
@@ -53,26 +56,61 @@ async def get_all_twitch_users():
             for token in tokens
         ]
 
+        try:
+            admin_tokens = await twitch_admin_token_service.get_active_tokens(session)
+            for admin_tok in admin_tokens:
+                if admin_tok.twitch_user_id and admin_tok.twitch_user_id not in existing_pids:
+                    result.append(
+                        Tokens(
+                            user_id=str(admin_tok.id),
+                            access_token=admin_tok.access_token,
+                            refresh_token=admin_tok.refresh_token,
+                            expires_at=int(admin_tok.expires_at.timestamp()) if admin_tok.expires_at else 0,
+                            platform="twitch",
+                            platform_user_id=admin_tok.twitch_user_id,
+                            bot_settings={"prefix": "!"},
+                        )
+                    )
+        except Exception:
+            pass
+
+        return result
+
 
 @router.subscriber(auth_user_twitch_tokens_refreshed, exchange=main_exchange)
 async def twitch_refresh_tokens(
     event: TwitchTokenRefreshed,
 ):
-
     async with async_session_maker() as session:
         try:
             link = await linked_accounts_repository.get_by_id_platform(session, str(event.twitch_id), IntegrationPlatform.TWITCH)
+            tokens = await token_vault_repository.get_by_id_link(session, link.id)
+            if tokens:
+                tokens.access_token = event.access_token
+                tokens.refresh_token = event.refresh_token
+                tokens.expires_at = event.expires_in + int(datetime.now().timestamp())
+                await token_vault_repository.update(session, tokens)
         except NotFoundException:
-            # TODO: log
-            return
-        tokens = await token_vault_repository.get_by_id_link(session, link.id)
+            try:
+                from src.services.admin.twitch_admin_token_service import twitch_admin_token_service
+                from src.models.twitch_admin_token import TwitchAdminTokenUpdate
+                from datetime import timedelta, UTC
 
-        if not link:
-            return
-        tokens.access_token = event.access_token
-        tokens.refresh_token = event.refresh_token
-        tokens.expires_at = event.expires_in + int(datetime.now().timestamp())
-        await token_vault_repository.update(session, tokens)
+                admin_tok = await twitch_admin_token_service.get_token_by_user_id(session, str(event.twitch_id))
+                if admin_tok:
+                    expires_at = datetime.now(UTC) + timedelta(seconds=event.expires_in)
+                    await twitch_admin_token_service.update_token(
+                        session,
+                        admin_tok.id,
+                        TwitchAdminTokenUpdate(
+                            access_token=event.access_token,
+                            refresh_token=event.refresh_token,
+                            expires_in=event.expires_in,
+                            expires_at=expires_at,
+                        ),
+                    )
+            except Exception:
+                pass
 
 
 @router.subscriber("twitch.user.token.died", exchange=main_exchange)

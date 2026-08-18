@@ -226,7 +226,7 @@ async def test_connect_bot_success(auth_service, mock_db_session, base_user, moc
     mock_broker_request = mocker.patch("src.services.auth.auth_service.broker.request", AsyncMock(return_value=mock_response))
 
     auth_service.link_repo.update = AsyncMock()
-    mock_sio_ack = mocker.patch("src.services.auth.auth_service.sio_service.ack_bot_connection", AsyncMock())
+    mock_sio_ack = mocker.patch("src.services.auth.auth_service.sio_playlist_service.ack_bot_connection", AsyncMock())
 
     # Вызов
     await auth_service.connect_bot(mock_db_session, base_user, IntegrationPlatform.TWITCH, platform_user_id)

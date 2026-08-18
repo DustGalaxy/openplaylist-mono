@@ -15,7 +15,9 @@ class YTExtraData(BaseModel):
 
 
 class TTVExtraData(BaseModel):
-    requester_id: int
+    requester_id: int | str
+    reward_id: str | None = None
+    redemption_id: str | None = None
 
 
 class DAExtraData(BaseModel):

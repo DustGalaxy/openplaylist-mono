@@ -50,7 +50,7 @@ async def test_bot_was_disconnected_success(auth_service, mock_db_session):
     result = await auth_service.bot_was_disconnected(mock_db_session, IntegrationPlatform.TWITCH, platform_user_id)
 
     # Проверки
-    assert result is None
+    assert result == integration
     assert integration.bot_connection is False
     assert integration.is_dead is True
 
