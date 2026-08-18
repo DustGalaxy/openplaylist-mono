@@ -15,6 +15,8 @@ __pycache__*
 *.pem
 *.log
 *.db
+*.db-shm
+*.db-wal
 *.env
 *.sqlite3
 *.__pycache__

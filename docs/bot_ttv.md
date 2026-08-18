@@ -272,7 +272,7 @@ sequenceDiagram
 | Очередь / Топик | Exchange | DTO / Payload | Описание |
 | :--- | :--- | :--- | :--- |
 | `bot.twitch.order.new` | `main_exchange` (DIRECT) | `OrderNew` | Публикация нового заказа трека в пайплайн бэкенда. |
-| `auth.user.twtich.tokens.refreshed` | `main_exchange` (DIRECT) | `dict` (twitch_id, tokens) | Оповещение бэкенда о том, что TwitchIO автоматически обновил токен. |
+| `auth.user.twitch.tokens.refreshed` | `main_exchange` (DIRECT) | `dict` (twitch_id, tokens) | Оповещение бэкенда о том, что TwitchIO автоматически обновил токен. |
 | `twitch.user.token.died` | `main_exchange` (DIRECT) | `dict` (platform_user_id, ...) | Оповещение об аннулировании токена стримера. |
 | `auth.user.twitch.all.request` | `main_exchange` (DIRECT) | RPC Request -> `list[Tokens]` | Запрос полного списка подключенных стримеров при старте бота. |
 | `playlist.settings.request` | `main_exchange` (DIRECT) | RPC Request -> `ReadPlaylistSettings` | Запрос настроек конкретного плейлиста (ACL). |
