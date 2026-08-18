@@ -6,7 +6,7 @@ bot_order_cancelled = RabbitQueue("bot.order.cancelled", durable=True)
 bot_order_partially_completed = RabbitQueue("bot.order.partially_completed", durable=True)
 
 playlist_settings_request = RabbitQueue("playlist.settings.request", durable=True)
-auth_user_twitch_tokens_refreshed = RabbitQueue("auth.user.twtich.tokens.refreshed", durable=True)
+auth_user_twitch_tokens_refreshed = RabbitQueue("auth.user.twitch.tokens.refreshed", durable=True)
 user_token_died = RabbitQueue("twitch.user.token.died", durable=True)
 
 bot_twitch_connect_request = RabbitQueue("bot.twitch.connect.request", durable=True)

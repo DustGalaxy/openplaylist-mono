@@ -1,18 +1,14 @@
 import random
 
 import twitchio
+from src.log_setup import LOGGER
 from twitchio.ext import commands
 
 
 class MainCommands(commands.Component):
-    # An example of a Component with some simple commands and listeners
-    # You can use Components within modules for a more organized codebase and hot-reloading.
-
-    # An example of listening to an event
-    # We use a listener in our Component to display the messages received.
     @commands.Component.listener()
     async def event_message(self, payload: twitchio.ChatMessage) -> None:
-        print(f"[{payload.broadcaster.name}] - {payload.chatter.name}: {payload.text}")
+        LOGGER.debug(f"[{payload.broadcaster.name}] - {payload.chatter.name}: {payload.text}")
 
     @commands.command()
     async def hi(self, ctx: commands.Context) -> None:

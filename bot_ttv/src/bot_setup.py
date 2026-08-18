@@ -10,7 +10,6 @@ Consider reading through the documentation for AutoBot for more in depth explana
 import asyncio
 from typing import Self
 
-import asqlite
 import twitchio
 from twitchio import eventsub
 from twitchio.exceptions import InvalidTokenException
@@ -35,7 +34,7 @@ class Bot(commands.AutoBot):
         self.prefixes = {user.platform_user_id: user.bot_settings.prefix for user in users}
         super().__init__(
             client_id=settings.TWITCH_CLIENT_ID,
-            client_secret=settings.TWICTH_CLIENT_SECRET,
+            client_secret=settings.TWITCH_CLIENT_SECRET,
             bot_id=settings.BOT_ID,
             owner_id=settings.OWNER_ID,
             prefix=self.custom_prefix,  # type: ignore
@@ -68,16 +67,12 @@ class Bot(commands.AutoBot):
             # We usually don't want subscribe to events on the bots channel...
             return
 
-        # A list of subscriptions we would like to make to the newly authorized channel...
-        sub = eventsub.ChatMessageSubscription(broadcaster_user_id=payload.user_id, user_id=self.bot_id)
+        sub_chat = eventsub.ChatMessageSubscription(broadcaster_user_id=payload.user_id, user_id=self.bot_id)
+        sub_points = eventsub.ChannelPointsRedeemAddSubscription(broadcaster_user_id=payload.user_id)
 
-        await self.multi_subscribe(
-            [
-                sub,
-            ]
-        )
+        await self.multi_subscribe([sub_chat, sub_points])
 
-        LOGGER.info("Subscribed to channel: %s", payload.user_id)
+        LOGGER.info("Subscribed to channel chat & points: %s", payload.user_id)
 
     async def add_token(
         self, token: str, refresh: str, event: Tokens | None = None

@@ -30,6 +30,35 @@ async def order_status(message: RabbitMessage = Context()) -> None:
     if bot is None:
         return
     event: OrderUpdate = OrderUpdate.model_validate_json(message.body)
+
+    # If this was a Channel Points order, update redemption status on Twitch
+    if event.owner_platform_id and event.reward_id and event.redemption_id:
+        try:
+            if event.status == "cancelled":
+                await bot.http.patch_custom_reward_redemption(
+                    broadcaster_id=event.owner_platform_id,
+                    token_for=event.owner_platform_id,
+                    reward_id=event.reward_id,
+                    id=event.redemption_id,
+                    status="CANCELED",
+                )
+                LOGGER.info(
+                    f"Refunded channel points for viewer {event.requester_nickname} (redemption {event.redemption_id})"
+                )
+            elif event.status == "completed":
+                await bot.http.patch_custom_reward_redemption(
+                    broadcaster_id=event.owner_platform_id,
+                    token_for=event.owner_platform_id,
+                    reward_id=event.reward_id,
+                    id=event.redemption_id,
+                    status="FULFILLED",
+                )
+                LOGGER.info(
+                    f"Fulfilled channel points for viewer {event.requester_nickname} (redemption {event.redemption_id})"
+                )
+        except Exception as e:
+            LOGGER.error(f"Failed to update Twitch redemption status for order {event.order_id}: {e}")
+
     user = bot.create_partialuser(user_id=event.owner_platform_id)
     await user.send_message(sender=bot.bot_id, message=f"@{event.requester_nickname} {event.details}")
 
@@ -48,6 +77,9 @@ async def connect_to_twitch(message: RabbitMessage = Context()):
                 eventsub.ChatMessageSubscription(
                     broadcaster_user_id=event.platform_user_id,
                     user_id=bot.bot_id,
+                ),
+                eventsub.ChannelPointsRedeemAddSubscription(
+                    broadcaster_user_id=event.platform_user_id,
                 ),
             ]
         )

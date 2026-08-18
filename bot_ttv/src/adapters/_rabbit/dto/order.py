@@ -15,6 +15,8 @@ class OrderUpdate(BaseModel):
     playlist_name: str | None = None
     status: Status
     details: str
+    reward_id: str | None = None
+    redemption_id: str | None = None
 
 
 class NewOrderPayload(BaseModel):
@@ -23,6 +25,8 @@ class NewOrderPayload(BaseModel):
     chatter_nickname: str
     yt_video_url: str
     priority: str
+    reward_id: str | None = None
+    redemption_id: str | None = None
 
 
 class OrderNew(BaseModel):
@@ -33,3 +37,6 @@ class OrderNew(BaseModel):
     requester_nickname: str
     yt_video_url: str
     priority: str
+    reward_id: str | None = None
+    redemption_id: str | None = None
+
