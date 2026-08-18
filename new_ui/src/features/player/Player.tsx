@@ -20,6 +20,8 @@ import {
   X,
 } from 'lucide-react'
 import type { PlaybackFeed } from './types'
+import { useAudioKeepAlive } from './hooks/useAudioKeepAlive'
+import { useMediaSession } from './hooks/useMediaSession'
 import Btn from '@/components/ui/my-btn'
 import { Slider } from '@/components/ui/slider'
 import {
@@ -48,6 +50,13 @@ export default function Player({
   const isReadyRef = useRef(false)
   const lastSeekTokenRef = useRef<number | null>(null)
   const isTabHiddenRef = useRef(false)
+  const endedHandledTrackIdRef = useRef<string | null>(null)
+
+  // Keep background audio active to prevent browser tab throttling/freezing
+  useAudioKeepAlive(feed.playing)
+
+  // Connect native OS media controls and metadata
+  useMediaSession(feed)
 
   const contentAreaEl = useLayoutStore((s) => s.contentAreaEl)
 
@@ -99,6 +108,7 @@ export default function Player({
 
   useEffect(() => {
     isReadyRef.current = false
+    endedHandledTrackIdRef.current = null
   }, [track?.id])
 
   useEffect(() => {
@@ -145,7 +155,26 @@ export default function Player({
     }
   }
 
+  const handleEnd = useCallback(() => {
+    if (!track?.id || endedHandledTrackIdRef.current === track.id) return
+    endedHandledTrackIdRef.current = track.id
+    feed.onEnded()
+  }, [track?.id, feed.onEnded])
+
   const handlePause = () => {
+    const p = playerRef.current
+    // Watchdog: If YouTube player paused within 1.0s of the end in background, consider it ended
+    if (
+      p &&
+      p.duration > 2 &&
+      p.currentTime >= p.duration - 1.0 &&
+      track?.id &&
+      endedHandledTrackIdRef.current !== track.id
+    ) {
+      handleEnd()
+      return
+    }
+
     if (isTabHiddenRef.current) return
     feed.onPlayerStateChange(false)
   }
@@ -155,16 +184,23 @@ export default function Player({
     if (!p || seeking || !p.duration) return
     setPlayedSeconds(p.currentTime)
     setPlayed(p.currentTime / p.duration)
+
+    // Watchdog: If playback is within 0.5s of the end and playing, trigger completion safely
+    if (
+      feed.playing &&
+      p.duration > 2 &&
+      p.currentTime >= p.duration - 0.5 &&
+      track?.id &&
+      endedHandledTrackIdRef.current !== track.id
+    ) {
+      handleEnd()
+    }
   }
 
   const handleSeekCommit = ([value]: Array<number>) => {
     setSeeking(false)
     if (!feed.capabilities.canSeekArbitrary || !playerRef.current) return
     feed.seek(value * playerRef.current.duration)
-  }
-
-  const handleEnd = () => {
-    feed.onEnded()
   }
 
   const cycleRepeat = () => {
@@ -179,29 +215,27 @@ export default function Player({
 
   return (
     <div className={cn('flex flex-col gap-3 w-full', className)}>
-      {/* Video Overlay Modal Portal — Fills content area */}
+      {/* Video Overlay Modal Portal — Completely covers playlist / content area */}
       {contentAreaEl &&
         createPortal(
           <div
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setHidden(true)
-              }
-            }}
             className={cn(
-              'absolute inset-0 z-30 flex justify-center items-center overflow-hidden p-2 sm:p-4',
-              'bg-level-1/90 backdrop-blur-md',
-              'transition-[height,padding,border,opacity] duration-300 ease-in-out',
+              'transition-opacity duration-300 ease-in-out',
               hidden
-                ? 'h-0 py-0 opacity-0 pointer-events-none'
-                : 'h-full border-t border-accent/40 opacity-100',
+                ? 'fixed -left-[9999px] top-0 w-[480px] h-[270px] opacity-0 pointer-events-none -z-50'
+                : 'absolute inset-0 z-30 flex flex-col bg-black overflow-hidden opacity-100',
             )}
           >
-            <div className="relative w-full h-full max-w-5xl max-h-[calc(100vh-120px)] aspect-video rounded-(--rounded-std) overflow-hidden shadow-2xl border border-accent/40 bg-black flex items-center justify-center">
+            <div
+              className={cn(
+                'relative flex items-center justify-center bg-black overflow-hidden',
+                hidden ? 'w-[480px] h-[270px]' : 'w-full h-full',
+              )}
+            >
               <Btn
                 onClick={() => setHidden(true)}
                 aria-label={t('controls.closeVideo', 'Close video player')}
-                className="absolute top-3 right-3 z-40 p-1.5 rounded-sm bg-level-2 text-text-main backdrop-blur-sm border border-white/20 transition-all cursor-pointer"
+                className="absolute top-4 right-4 z-40 p-2 rounded-lg bg-level-2/90 text-text-main backdrop-blur-md border border-white/20 transition-all cursor-pointer shadow-lg"
               >
                 <X className="size-5" />
               </Btn>

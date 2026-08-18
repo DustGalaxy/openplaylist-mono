@@ -59,12 +59,14 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
                 <div className="flex-1 flex min-h-0 ">
                   <Sidebar />
-                  <main
+                  <div
                     ref={setContentAreaEl}
-                    className="flex-1 min-w-0 overflow-y-auto relative p-1"
+                    className="flex-1 min-w-0 relative flex flex-col overflow-hidden"
                   >
-                    <Outlet />
-                  </main>
+                    <main className="flex-1 min-w-0 overflow-y-auto p-1">
+                      <Outlet />
+                    </main>
+                  </div>
                 </div>
 
                 <PlayerBar />
