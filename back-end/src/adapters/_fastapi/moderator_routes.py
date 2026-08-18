@@ -1,212 +1,161 @@
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Query, status
 
 from src.adapters._fastapi.dependencies import (
     CURR_USER,
     DB_SESSION,
-    MODERATOR_ACCESS,
     MODERATOR_SERVICE,
+    PLAYLIST_ACCESS,
 )
-from src.adapters._rabbit.broker import main_publisher
-from src.adapters._rabbit.queues import playlist_fanout_exchange
-from src.dal.postgres.playlist import playlist_repository
-from src.dal.postgres.user import user_repository
-from src.dto.internal.domain_events import EventOperator, InternalPlaylistEvent, InternalPlaylistEventType
 from src.dto.moderator import (
-    CreateModeratorTokenRequest,
-    DirectAddModeratorRequest,
-    ModeratorAccessInfo,
-    ModeratorItemResponse,
-    UpdateModeratorRequest,
+    ChannelModeratorResponse,
+    CreateChannelModeratorTokenRequest,
+    DirectAddChannelModeratorRequest,
+    GrantPlaylistAccessRequest,
+    ModeratedChannelResponse,
+    ModeratorPlaylistAccessInfo,
+    PlaylistAccessResponse,
+    UpdateChannelModeratorRequest,
 )
 
-router = APIRouter(prefix="/playlist/{playlist_id}/moderators")
+channel_router = APIRouter(prefix="/channel/moderators", tags=["Channel Moderators"])
+playlist_mod_router = APIRouter(prefix="/playlist/{playlist_id}/moderators", tags=["Playlist Moderators"])
 
 
-async def _publish_moderator_event(
+@channel_router.post("/token", status_code=status.HTTP_201_CREATED)
+async def create_channel_moderator_token(
     db_session: DB_SESSION,
-    playlist_id: UUID,
-    event_type: InternalPlaylistEventType,
-    operator: EventOperator,
-    error_list: list[str] | None = None,
-) -> None:
-
-    playlist = await playlist_repository.get_one(db_session, playlist_id)
-    owner = await user_repository.get_one(db_session, playlist.owner_id)
-    owner_name = owner.username if owner else "Owner"
-    await main_publisher.publish(
-        InternalPlaylistEvent(
-            event_id=uuid4(),
-            event_type=event_type,
-            playlist_id=playlist.id,
-            playlist_name=playlist.name,
-            playlist_is_public=playlist.is_public,
-            show_in_widget=playlist.show_in_widget,
-            user_id=playlist.owner_id,
-            user_name=owner_name,
-            operator=operator,
-            error_list=error_list,
-        ),
-        exchange=playlist_fanout_exchange,
-    )
-
-
-@router.post("/token", status_code=status.HTTP_201_CREATED)
-async def create_moderator_token(
-    db_session: DB_SESSION,
-    playlist_id: UUID,
     current_user: CURR_USER,
     service: MODERATOR_SERVICE,
-    data: CreateModeratorTokenRequest,
-) -> ModeratorItemResponse:
-    res = await service.create_moderator_token(
+    data: CreateChannelModeratorTokenRequest,
+) -> ChannelModeratorResponse:
+    return await service.create_channel_moderator_token(
         db_session=db_session,
-        playlist_id=playlist_id,
         owner_id=current_user.id,
         data=data,
     )
-    await _publish_moderator_event(
-        db_session=db_session,
-        playlist_id=playlist_id,
-        event_type=InternalPlaylistEventType.MODERATOR_TOKEN_CREATED,
-        operator=EventOperator(user_id=current_user.id, nickname=current_user.username, access_level="owner"),
-    )
-    return res
 
 
-@router.post("/user", status_code=status.HTTP_201_CREATED)
-async def add_moderator_by_user_id(
+@channel_router.post("/user", status_code=status.HTTP_201_CREATED)
+async def add_channel_moderator_by_user_id(
     db_session: DB_SESSION,
-    playlist_id: UUID,
     current_user: CURR_USER,
     service: MODERATOR_SERVICE,
-    data: DirectAddModeratorRequest,
-) -> ModeratorItemResponse:
-    res = await service.add_moderator_by_user_id(
+    data: DirectAddChannelModeratorRequest,
+) -> ChannelModeratorResponse:
+    return await service.add_channel_moderator_by_user_id(
         db_session=db_session,
-        playlist_id=playlist_id,
         owner_id=current_user.id,
         data=data,
     )
-    await _publish_moderator_event(
-        db_session=db_session,
-        playlist_id=playlist_id,
-        event_type=InternalPlaylistEventType.MODERATOR_ADDED_DIRECT,
-        operator=EventOperator(user_id=current_user.id, nickname=current_user.username, access_level="owner"),
-    )
-    return res
 
 
-@router.post("/claim", status_code=status.HTTP_200_OK)
-async def claim_moderator_token(
+@channel_router.post("/claim", status_code=status.HTTP_200_OK)
+async def claim_channel_moderator_token(
     db_session: DB_SESSION,
-    playlist_id: UUID,
     current_user: CURR_USER,
     service: MODERATOR_SERVICE,
     token: str = Query(...),
-) -> ModeratorItemResponse:
-    try:
-        res = await service.claim_moderator_token(
-            db_session=db_session,
-            playlist_id=playlist_id,
-            current_user_id=current_user.id,
-            token=token,
-        )
-        await _publish_moderator_event(
-            db_session=db_session,
-            playlist_id=playlist_id,
-            event_type=InternalPlaylistEventType.MODERATOR_CLAIMED,
-            operator=EventOperator(user_id=current_user.id, nickname=current_user.username, access_level="moderator"),
-        )
-        return res
-    except HTTPException as exc:
-        await _publish_moderator_event(
-            db_session=db_session,
-            playlist_id=playlist_id,
-            event_type=InternalPlaylistEventType.MODERATOR_CLAIM_FAILED,
-            operator=EventOperator(user_id=current_user.id, nickname=current_user.username, access_level="none"),
-            error_list=[str(exc.detail)],
-        )
-        raise exc
+) -> ChannelModeratorResponse:
+    return await service.claim_channel_moderator_token(
+        db_session=db_session,
+        current_user_id=current_user.id,
+        token=token,
+    )
 
 
-@router.patch("/{moderator_id}", status_code=status.HTTP_200_OK)
-async def patch_moderator(
+@channel_router.patch("/{moderator_id}", status_code=status.HTTP_200_OK)
+async def patch_channel_moderator(
     db_session: DB_SESSION,
-    playlist_id: UUID,
     moderator_id: UUID,
     current_user: CURR_USER,
     service: MODERATOR_SERVICE,
-    data: UpdateModeratorRequest,
-) -> ModeratorItemResponse:
-    return await service.patch_moderator(
+    data: UpdateChannelModeratorRequest,
+) -> ChannelModeratorResponse:
+    return await service.patch_channel_moderator(
         db_session=db_session,
-        playlist_id=playlist_id,
-        moderator_id=moderator_id,
         owner_id=current_user.id,
+        moderator_id=moderator_id,
         data=data,
     )
 
 
-@router.delete("/leave", status_code=status.HTTP_204_NO_CONTENT)
-async def leave_moderator(
+@channel_router.delete("/{moderator_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def revoke_channel_moderator(
     db_session: DB_SESSION,
-    playlist_id: UUID,
-    current_user: CURR_USER,
-    service: MODERATOR_SERVICE,
-) -> None:
-    await service.leave_moderator(
-        db_session=db_session,
-        playlist_id=playlist_id,
-        current_user_id=current_user.id,
-    )
-    await _publish_moderator_event(
-        db_session=db_session,
-        playlist_id=playlist_id,
-        event_type=InternalPlaylistEventType.MODERATOR_LEFT,
-        operator=EventOperator(user_id=current_user.id, nickname=current_user.username, access_level="moderator"),
-    )
-
-
-@router.get("", status_code=status.HTTP_200_OK)
-async def list_moderators(
-    db_session: DB_SESSION,
-    playlist_id: UUID,
-    current_user: CURR_USER,
-    service: MODERATOR_SERVICE,
-) -> list[ModeratorItemResponse]:
-    return await service.list_moderators(
-        db_session=db_session,
-        playlist_id=playlist_id,
-        owner_id=current_user.id,
-    )
-
-
-@router.delete("/{moderator_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def revoke_moderator(
-    db_session: DB_SESSION,
-    playlist_id: UUID,
     moderator_id: UUID,
     current_user: CURR_USER,
     service: MODERATOR_SERVICE,
 ) -> None:
-    await service.revoke_moderator(
+    await service.revoke_channel_moderator(
         db_session=db_session,
-        playlist_id=playlist_id,
+        owner_id=current_user.id,
         moderator_id=moderator_id,
+    )
+
+
+@channel_router.get("", status_code=status.HTTP_200_OK)
+async def list_channel_moderators(
+    db_session: DB_SESSION,
+    current_user: CURR_USER,
+    service: MODERATOR_SERVICE,
+) -> list[ChannelModeratorResponse]:
+    return await service.list_channel_moderators(
+        db_session=db_session,
         owner_id=current_user.id,
     )
-    await _publish_moderator_event(
+
+
+@channel_router.get("/moderated", status_code=status.HTTP_200_OK)
+async def list_moderated_channels(
+    db_session: DB_SESSION,
+    current_user: CURR_USER,
+    service: MODERATOR_SERVICE,
+) -> list[ModeratedChannelResponse]:
+    return await service.list_moderated_channels(
         db_session=db_session,
-        playlist_id=playlist_id,
-        event_type=InternalPlaylistEventType.MODERATOR_REVOKED,
-        operator=EventOperator(user_id=current_user.id, nickname=current_user.username, access_level="owner"),
+        user_id=current_user.id,
     )
 
 
-@router.get("/access", status_code=status.HTTP_200_OK)
-async def get_moderator_access(
-    access_info: MODERATOR_ACCESS,
-) -> ModeratorAccessInfo:
+@channel_router.post("/{moderator_id}/playlists", status_code=status.HTTP_200_OK)
+async def grant_playlist_access(
+    db_session: DB_SESSION,
+    moderator_id: UUID,
+    current_user: CURR_USER,
+    service: MODERATOR_SERVICE,
+    data: GrantPlaylistAccessRequest,
+) -> PlaylistAccessResponse:
+    return await service.grant_playlist_access(
+        db_session=db_session,
+        owner_id=current_user.id,
+        moderator_id=moderator_id,
+        data=data,
+    )
+
+
+@channel_router.delete("/{moderator_id}/playlists/{playlist_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def revoke_playlist_access(
+    db_session: DB_SESSION,
+    moderator_id: UUID,
+    playlist_id: UUID,
+    current_user: CURR_USER,
+    service: MODERATOR_SERVICE,
+) -> None:
+    await service.revoke_playlist_access(
+        db_session=db_session,
+        owner_id=current_user.id,
+        moderator_id=moderator_id,
+        playlist_id=playlist_id,
+    )
+
+
+@playlist_mod_router.get("/access", status_code=status.HTTP_200_OK)
+async def get_playlist_moderator_access(
+    access_info: PLAYLIST_ACCESS,
+) -> ModeratorPlaylistAccessInfo:
     return access_info
+
+
+router = channel_router

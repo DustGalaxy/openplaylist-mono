@@ -18,7 +18,7 @@ router = APIRouter(prefix="/playback")
 
 @router.post("/{playlist_id}/state/pause", status_code=status.HTTP_200_OK)
 async def post_pause_state(db_session: DB_SESSION, access: MODERATOR_ACCESS, playlist_id: UUID, data: Pause) -> None:
-    if not access.permissions.get("can_manage_playback", False):
+    if not access.can_manage_tracks:
         raise HTTPException(status_code=403, detail="Moderator missing playback permissions")
     try:
         await pause(db_session, playlist_id, data, skip_owner_check=True)
@@ -33,7 +33,7 @@ async def post_pause_state(db_session: DB_SESSION, access: MODERATOR_ACCESS, pla
 
 @router.post("/{playlist_id}/state/seek", status_code=status.HTTP_200_OK)
 async def post_seek_state(db_session: DB_SESSION, access: MODERATOR_ACCESS, playlist_id: UUID, data: Seek) -> None:
-    if not access.permissions.get("can_manage_playback", False):
+    if not access.can_manage_tracks:
         raise HTTPException(status_code=403, detail="Moderator missing playback permissions")
     try:
         await seek(db_session, playlist_id, data, skip_owner_check=True)
@@ -48,7 +48,7 @@ async def post_seek_state(db_session: DB_SESSION, access: MODERATOR_ACCESS, play
 
 @router.post("/{playlist_id}/state/position", status_code=status.HTTP_200_OK)
 async def post_position_state(db_session: DB_SESSION, access: MODERATOR_ACCESS, playlist_id: UUID, position: float = Body(), client_id: str = Body(),) -> None:
-    if not access.permissions.get("can_manage_playback", False):
+    if not access.can_manage_tracks:
         raise HTTPException(status_code=403, detail="Moderator missing playback permissions")
     try:
         await set_position_state(db_session, playlist_id, position, skip_owner_check=True)

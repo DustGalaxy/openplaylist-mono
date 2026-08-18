@@ -63,7 +63,6 @@ describe('Playback Synchronization & Echo Filtering', () => {
             syncSeek: null,
             syncPause: null,
             acceptSync: true,
-            isRemoteControlMode: false,
             pendingResume: null,
             pendingInterrupt: null,
           },
@@ -184,5 +183,84 @@ describe('Playback Synchronization & Echo Filtering', () => {
     expect(get().updateLocal).toHaveBeenCalledWith(playlistId, { syncPause: remotePayload })
     // Must NOT call setPlayerTrack on pause
     expect(get().setPlayerTrack).not.toHaveBeenCalled()
+  })
+
+  it('handles player_track_change from remote client and updates track and state', async () => {
+    const { listeners, get } = createMockStore()
+    const changeHandler = listeners['player_track_change']
+    expect(changeHandler).toBeDefined()
+
+    const remotePayload = {
+      track: { id: 'new-remote-track', title: 'Remote Song', yt_video_id: 'abc123' },
+      playlist_id: playlistId,
+      client_id: 'streamer-host-tab',
+      owner_id: 'streamer-owner-id',
+    }
+
+    await changeHandler(remotePayload)
+
+    expect(get().setPlayerTrack).toHaveBeenCalledWith('new-remote-track')
+  })
+
+  it('ignores player_track_change if client_id is own CLIENT_ID', async () => {
+    const { listeners, get } = createMockStore()
+    const changeHandler = listeners['player_track_change']
+
+    const selfPayload = {
+      track: { id: 'my-own-track', title: 'My Song', yt_video_id: 'xyz789' },
+      playlist_id: playlistId,
+      client_id: CLIENT_ID,
+      owner_id: 'streamer-owner-id',
+    }
+
+    await changeHandler(selfPayload)
+
+    expect(get().setPlayerTrack).not.toHaveBeenCalled()
+  })
+
+  it('handles player_pause from remote client and updates syncPause in current player slot', () => {
+    const { listeners, get } = createMockStore()
+    const pauseHandler = listeners['player_pause']
+    expect(pauseHandler).toBeDefined()
+
+    const remotePayload = {
+      is_paused: true,
+      position: 42.0,
+      client_id: 'remote-controller',
+      owner_id: 'owner-id-123',
+    }
+
+    pauseHandler(remotePayload)
+
+    expect(get().updateLocal).toHaveBeenCalledWith(playlistId, {
+      syncPause: {
+        is_paused: true,
+        position: 42.0,
+        track_id: 'current-track-active',
+        client_id: 'remote-controller',
+      },
+    })
+  })
+
+  it('handles player_seek from remote client and updates syncSeek in current player slot', () => {
+    const { listeners, get } = createMockStore()
+    const seekHandler = listeners['player_seek']
+    expect(seekHandler).toBeDefined()
+
+    const remotePayload = {
+      position: 88.5,
+      client_id: 'remote-controller',
+      owner_id: 'owner-id-123',
+    }
+
+    seekHandler(remotePayload)
+
+    expect(get().updateLocal).toHaveBeenCalledWith(playlistId, {
+      syncSeek: {
+        position: 88.5,
+        track_id: 'current-track-active',
+        client_id: 'remote-controller',
+      },
+    })
   })
 })

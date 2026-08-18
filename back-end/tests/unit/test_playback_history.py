@@ -112,7 +112,6 @@ async def test_history_rabbitmq_subscriber(sample_user_id, sample_order_id, samp
         playlist_id=sample_playlist_id,
         playlist_name="Test Pl",
         playlist_is_public=True,
-        show_in_widget=True,
         user_id=sample_user_id,
         user_name="TestUser",
         track=track_domain,

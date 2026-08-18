@@ -1,7 +1,7 @@
 from .auth_user import Banlist, User, UserRole
 from .feature_flags import FeatureFlag
 from .linked_accounts import LinkedAccounts
-from .moderator import PlaylistModerator
+from .moderator import ChannelModerator, ModeratorPlaylistAccess
 from .notification import (
     DirectNotificationORM,
     EventNotificationORM,
@@ -30,7 +30,8 @@ __all__ = [
     "UserRole",
     "FeatureFlag",
     "LinkedAccounts",
-    "PlaylistModerator",
+    "ChannelModerator",
+    "ModeratorPlaylistAccess",
     "DirectNotificationORM",
     "EventNotificationORM",
     "NotificationSettingsORM",

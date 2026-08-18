@@ -60,6 +60,7 @@ window.appConfig = {
   WS_API_URL: `${BACKEND_DOMAIN}`,
   SOCKET_PATH: '/api/socket.io',
   API_URL: `${BACKEND_DOMAIN}/api`,
+  BACKEND_API_URL: `${BACKEND_DOMAIN}/api`,
   PLST_API_URL: `${BACKEND_DOMAIN}/api/playlist`,
   AUTH_API_URL: `${BACKEND_DOMAIN}/api`,
   ORDER_API_URL: `${BACKEND_DOMAIN}/api/order`,
@@ -92,10 +93,14 @@ window.appConfig = {
 
 registerAuthStrategies()
 
-usePlaylistStore.getState().setSocket(getPlsUpdsSocket())
+if (typeof usePlaylistStore !== 'undefined' && usePlaylistStore?.getState) {
+  usePlaylistStore.getState().setSocket(getPlsUpdsSocket())
+}
 
 useAuthStore.subscribe((state) => {
-  usePlaylistStore.getState().setUserId(state.user?.id ?? null)
+  if (typeof usePlaylistStore !== 'undefined' && usePlaylistStore?.getState) {
+    usePlaylistStore.getState().setUserId(state.user?.id ?? null)
+  }
 })
 
 // Create a new router instance

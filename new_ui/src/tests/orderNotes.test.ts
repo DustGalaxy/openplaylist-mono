@@ -25,7 +25,6 @@ describe('Order Notes', () => {
     description: null,
     is_public: true,
     favorites_count: 0,
-    show_in_widget: false,
     is_allow_external_requests: true,
     allow_sources: [],
     mode: 'static',

@@ -7,7 +7,7 @@ from src.services.permitions.permition_service import check_feature, get_effecti
 from src._types import AuthFlow, IntegrationPlatform
 from src.adapters._fastapi.dependencies import CURR_USER, DB_SESSION, MODERATOR_SERVICE
 from src.dto.bots import BotConnectBody, UpdateBotSettingsBody
-from src.dto.moderator import UserModeratedPlaylistResponse
+from src.dto.moderator import ModeratedChannelResponse
 from src.dto.token import OAuthBody, UserKeyBody
 from src.dto.user import IntegrationRead, PublicUserRead, UserPatch, UserRead
 
@@ -59,8 +59,8 @@ async def get_my_moderated_playlists(
     db_session: DB_SESSION,
     curr_user: CURR_USER,
     mod_service: MODERATOR_SERVICE,
-) -> list[UserModeratedPlaylistResponse]:
-    return await mod_service.get_user_moderated_playlists(db_session, curr_user.id)
+) -> list[ModeratedChannelResponse]:
+    return await mod_service.list_moderated_channels(db_session, curr_user.id)
 
 
 

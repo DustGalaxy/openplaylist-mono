@@ -36,7 +36,6 @@ def mock_playlist(mock_user):
         tags=[],
         is_public=True,
         favorites_count=0,
-        show_in_widget=True,
         is_allow_external_requests=True,
         max_playlist_size=100,
         mode="static",

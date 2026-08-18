@@ -7,11 +7,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.adapters._fastapi.feedback_routes import router as feedback_router
 from src.adapters._fastapi.history_routes import router as history_router
 from src.adapters._fastapi.login_routes import router as login_router
-from src.adapters._fastapi.moderator_routes import router as moderator_router
+from src.adapters._fastapi.moderator_routes import channel_router as channel_moderator_router, playlist_mod_router
 from src.adapters._fastapi.notifications import router as notificattions_router
 
 from src.adapters._fastapi.order_routes import router as order_router
 from src.adapters._fastapi.playback_routes import router as playback_router
+from src.adapters._fastapi.player_routes import router as player_router
 from src.adapters._fastapi.playlist_routes import router as playlist_router
 from src.adapters._fastapi.settings_routes import router as settings_router
 from src.adapters._fastapi.stats_routes import router as stats_router
@@ -85,7 +86,9 @@ api_route.include_router(login_router)
 api_route.include_router(user_router)
 api_route.include_router(order_router)
 api_route.include_router(playlist_router)
-api_route.include_router(moderator_router)
+api_route.include_router(channel_moderator_router)
+api_route.include_router(playlist_mod_router)
+api_route.include_router(player_router)
 api_route.include_router(settings_router)
 api_route.include_router(stream_router)
 api_route.include_router(playback_router)

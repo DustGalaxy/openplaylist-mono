@@ -34,7 +34,6 @@ class PlaylistLogsRepository(crud_factory(PlaylistLog, PlaylistLogSchema, Playli
             select(PlaylistLog)
             .join(Playlist)
             .where(
-                Playlist.show_in_widget,
                 PlaylistLog.user_id == user_id,
                 PlaylistLog.event_type == PlaylistLogsEventTypes.PLAY_TRACK,
             )

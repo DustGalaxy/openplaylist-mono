@@ -99,17 +99,18 @@ async def test_playback_handler_client_id_propagation():
 @pytest.mark.asyncio
 async def test_playback_routes_position_no_publish_and_seek_publishes():
     from src.adapters._fastapi.playback_routes import post_position_state, post_seek_state
-    from src.dto.moderator import ModeratorAccessInfo
+    from src.dto.moderator import ModeratorPlaylistAccessInfo
     from src.dto.playback import Seek
 
     playlist_id = uuid4()
     user_id = uuid4()
-    access = ModeratorAccessInfo(
+    access = ModeratorPlaylistAccessInfo(
         playlist_id=playlist_id,
         user_id=user_id,
         name="test_mod",
         access_level="moderator",
-        permissions={"can_manage_playback": True},
+        can_manage_tracks=True,
+        can_manage_settings=False,
     )
 
 

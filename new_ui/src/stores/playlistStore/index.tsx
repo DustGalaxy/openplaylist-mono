@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { safeEmit } from '@/lib/socketUtils'
 import { createPlaylistCacheSlice } from './createPlaylistCacheSlice'
 import { createSlotSlice } from './createSlotSlice'
 import { createTrackOpsSlice } from './createTrackOpsSlice'
@@ -12,7 +13,13 @@ import type { StoreState } from '@/types/playlist'
 export const usePlaylistStore = create<StoreState>()((set, get, ...rest) => ({
   userId: null,
   socket: null,
-  setUserId: (userId) => set({ userId }),
+  setUserId: (userId) => {
+    set({ userId })
+    const socket = get().socket
+    if (socket && userId) {
+      safeEmit(socket, 'player_subscribe', { owner_id: userId })
+    }
+  },
   setSocket: (socket) => set({ socket }),
   playerSessionRestored: false,
 

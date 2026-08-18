@@ -12,7 +12,7 @@ from src._types import (
     DonationRuleScope,
     TrackSource,
 )
-from src.models.moderator import PlaylistModeratorPublicSchema
+from src.models.moderator import ModeratorPlaylistAccessSchema
 from src.models.order import OrderDomain
 
 
@@ -122,7 +122,6 @@ class PlaylistSchema(BaseModel):
     allow_sources: list[AllowedSource] = Field(default_factory=list)
     is_public: bool
     favorites_count: int = 0
-    show_in_widget: bool
 
     track_data: list[OrderDomain] = Field(default_factory=list)
     active_tracks: list[OrderDomain] = Field(default_factory=list)
@@ -142,7 +141,7 @@ class PlaylistSchema(BaseModel):
     block_list: list[BlockListSchema] = []
     donation_rules: list[DonationRulesSchema] = []
     chat_rules: list[ChatRulesSchema] = []
-    moderators: list[PlaylistModeratorPublicSchema] = []
+    moderator_access: list[ModeratorPlaylistAccessSchema] = []
 
     created_at: datetime
     updated_at: datetime
@@ -162,7 +161,6 @@ class PlaylistPatch(BaseModel):
     allow_sources: list[AllowedSource] | None = None
     is_public: bool | None = None
     is_allow_external_requests: bool | None = None
-    show_in_widget: bool | None = None
     max_playlist_size: int | None = None
     mode: Literal["flow", "stream", "static"] | None = None
     repeat_mode: Literal["all", "once", "none"] | None = None

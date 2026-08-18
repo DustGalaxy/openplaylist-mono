@@ -12,15 +12,16 @@ from src.adapters.admin.custom_views.twitch import TwitchAuthAdmin
 from src.adapters.admin.views import (
     BanlistAdmin,
     BlockListAdmin,
+    ChannelModeratorAdmin,
     ChatRulesAdmin,
     ContentSettingsAdmin,
     DonationRulesAdmin,
     FeatureFlagAdmin,
     LinkedAccountsAdmin,
+    ModeratorPlaylistAccessAdmin,
     OrderAdmin,
     OrderPlaylistStatusAdmin,
     PlaylistAdmin,
-    PlaylistModeratorAdmin,
     TokenVaultAdmin,
     TwitchAdminTokenAdmin,
     UserAdmin,
@@ -78,7 +79,8 @@ def setup_admin(app: FastAPI) -> Admin:
     admin.add_view(FeatureFlagAdmin)
     admin.add_view(TwitchAdminTokenAdmin)
     admin.add_view(PlaylistAdmin)
-    admin.add_view(PlaylistModeratorAdmin)
+    admin.add_view(ChannelModeratorAdmin)
+    admin.add_view(ModeratorPlaylistAccessAdmin)
     admin.add_view(OrderAdmin)
     admin.add_view(OrderPlaylistStatusAdmin)
     admin.add_view(ContentSettingsAdmin)

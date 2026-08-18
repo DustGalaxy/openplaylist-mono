@@ -140,9 +140,51 @@ class SioPlaylistUpdateService:
         else:
             await self.sio.emit("subscribe_denied", {"room_id": playlist_id}, to=sid, namespace=self.namespace)
 
-    async def unsub_plst_upds(self, sid: str, playlist_id: UUID, user_id: UUID):
-        room_manager.leave_room(sid, str(playlist_id), namespace=self.namespace)
-        print(f"⬅️ Пользователь {user_id} вышел из комнаты {playlist_id}")
+    async def emit_player_track_change(self, owner_id: UUID, track_data: dict, playlist_id: UUID, client_id: str):
+        sids = room_manager.get_sids(f"player:{owner_id!s}", self.namespace)
+        await self.sio.emit(
+            "player_track_change",
+            {"track": track_data, "playlist_id": str(playlist_id), "client_id": client_id, "owner_id": str(owner_id)},
+            to=[*sids],
+            namespace=self.namespace,
+        )
+
+    async def emit_player_pause(self, owner_id: UUID, is_paused: bool, position: float, client_id: str):
+        sids = room_manager.get_sids(f"player:{owner_id!s}", self.namespace)
+        await self.sio.emit(
+            "player_pause",
+            {"is_paused": is_paused, "position": position, "client_id": client_id, "owner_id": str(owner_id)},
+            to=[*sids],
+            namespace=self.namespace,
+        )
+
+    async def emit_player_seek(self, owner_id: UUID, position: float, client_id: str):
+        sids = room_manager.get_sids(f"player:{owner_id!s}", self.namespace)
+        await self.sio.emit(
+            "player_seek",
+            {"position": position, "client_id": client_id, "owner_id": str(owner_id)},
+            to=[*sids],
+            namespace=self.namespace,
+        )
+
+    async def emit_player_volume(self, owner_id: UUID, volume: int, client_id: str):
+        sids = room_manager.get_sids(f"player:{owner_id!s}", self.namespace)
+        await self.sio.emit(
+            "player_volume",
+            {"volume": volume, "client_id": client_id, "owner_id": str(owner_id)},
+            to=[*sids],
+            namespace=self.namespace,
+        )
+
+    async def sub_player(self, sid: str, owner_id: UUID, user_id: str):
+        await self.sio.emit("player_subscribe_success", to=sid, namespace=self.namespace)
+        room_manager.enter_room(sid, f"player:{owner_id!s}", self.namespace)
+        print(f"➡️ Пользователь {user_id} вошел в комнату player:{owner_id}")
+
+    async def unsub_player(self, sid: str, owner_id: UUID, user_id: str):
+        room_manager.leave_room(sid, f"player:{owner_id!s}", namespace=self.namespace)
+        print(f"⬅️ Пользователь {user_id} вышел из комнаты player:{owner_id}")
 
 
 sio_playlist_service = SioPlaylistUpdateService(sio)
+

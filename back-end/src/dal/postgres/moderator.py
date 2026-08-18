@@ -6,68 +6,131 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.models.moderator import ModeratorCreate, ModeratorPatch, PlaylistModeratorSchema
-from src.orm.moderator import PlaylistModerator
+from src.models.moderator import (
+    ChannelModeratorCreate,
+    ChannelModeratorPatch,
+    ChannelModeratorSchema,
+    ModeratorPlaylistAccessCreate,
+    ModeratorPlaylistAccessPatch,
+    ModeratorPlaylistAccessSchema,
+)
+from src.orm.moderator import ChannelModerator, ModeratorPlaylistAccess
 
 logger = logging.getLogger(__name__)
 
 
-class ModeratorRepository(crud_factory(PlaylistModerator, PlaylistModeratorSchema, ModeratorCreate, ModeratorPatch)):
-    def to_inner(self, data: ModeratorCreate | PlaylistModeratorSchema | ModeratorPatch) -> dict:
+class ChannelModeratorRepository(crud_factory(ChannelModerator, ChannelModeratorSchema, ChannelModeratorCreate, ChannelModeratorPatch)):
+    def to_inner(self, data: ChannelModeratorCreate | ChannelModeratorSchema | ChannelModeratorPatch) -> dict:
         return data.model_dump(exclude_unset=True)
 
-    def to_repr(self, object: PlaylistModerator) -> PlaylistModeratorSchema:
+    def to_repr(self, object: ChannelModerator) -> ChannelModeratorSchema:
         return self.domain_model.model_validate(object)
 
-    async def get_by_token(self, session: AsyncSession, token: str) -> PlaylistModeratorSchema | None:
-        stmt = select(PlaylistModerator).where(
-            PlaylistModerator.token == token,
-            PlaylistModerator.is_active == True,
+    async def get_by_token(self, session: AsyncSession, token: str) -> ChannelModeratorSchema | None:
+        stmt = (
+            select(ChannelModerator)
+            .options(selectinload(ChannelModerator.playlist_access))
+            .where(
+                ChannelModerator.token == token,
+                ChannelModerator.is_active == True,
+            )
         )
         res = await session.execute(stmt)
         obj = res.scalar_one_or_none()
         if not obj:
             return None
-        return PlaylistModeratorSchema.model_validate(obj)
+        return ChannelModeratorSchema.model_validate(obj)
 
-    async def get_by_playlist_and_user(
-        self, session: AsyncSession, playlist_id: UUID, user_id: UUID
-    ) -> PlaylistModeratorSchema | None:
-        stmt = select(PlaylistModerator).where(
-            PlaylistModerator.playlist_id == playlist_id,
-            PlaylistModerator.user_id == user_id,
-            PlaylistModerator.is_active == True,
+    async def get_by_owner_and_user(
+        self, session: AsyncSession, owner_id: UUID, user_id: UUID
+    ) -> ChannelModeratorSchema | None:
+        stmt = (
+            select(ChannelModerator)
+            .options(selectinload(ChannelModerator.playlist_access))
+            .where(
+                ChannelModerator.owner_id == owner_id,
+                ChannelModerator.user_id == user_id,
+                ChannelModerator.is_active == True,
+            )
         )
         res = await session.execute(stmt)
         obj = res.scalar_one_or_none()
         if not obj:
             return None
-        return PlaylistModeratorSchema.model_validate(obj)
+        return ChannelModeratorSchema.model_validate(obj)
 
-    async def get_all_by_playlist(
-        self, session: AsyncSession, playlist_id: UUID
-    ) -> list[PlaylistModeratorSchema]:
-        stmt = select(PlaylistModerator).where(
-            PlaylistModerator.playlist_id == playlist_id,
-        ).order_by(PlaylistModerator.created_at.desc())
+    async def get_all_by_owner(
+        self, session: AsyncSession, owner_id: UUID
+    ) -> list[ChannelModeratorSchema]:
+        stmt = (
+            select(ChannelModerator)
+            .options(selectinload(ChannelModerator.playlist_access))
+            .where(ChannelModerator.owner_id == owner_id)
+            .order_by(ChannelModerator.created_at.desc())
+        )
         res = await session.execute(stmt)
         objs = res.scalars().all()
-        return [PlaylistModeratorSchema.model_validate(x) for x in objs]
+        return [ChannelModeratorSchema.model_validate(x) for x in objs]
 
-    async def get_all_by_user(
+    async def get_all_by_moderator_user(
         self, session: AsyncSession, user_id: UUID
-    ) -> list[PlaylistModerator]:
+    ) -> list[ChannelModerator]:
         stmt = (
-            select(PlaylistModerator)
-            .options(selectinload(PlaylistModerator.playlist))
-            .where(
-                PlaylistModerator.user_id == user_id,
-                PlaylistModerator.is_active == True,
+            select(ChannelModerator)
+            .options(
+                selectinload(ChannelModerator.owner),
+                selectinload(ChannelModerator.playlist_access).selectinload(ModeratorPlaylistAccess.playlist),
             )
-            .order_by(PlaylistModerator.created_at.desc())
+            .where(
+                ChannelModerator.user_id == user_id,
+                ChannelModerator.is_active == True,
+            )
+            .order_by(ChannelModerator.created_at.desc())
         )
         res = await session.execute(stmt)
         return list(res.scalars().all())
 
 
-moderator_repository = ModeratorRepository()
+class ModeratorPlaylistAccessRepository(
+    crud_factory(
+        ModeratorPlaylistAccess,
+        ModeratorPlaylistAccessSchema,
+        ModeratorPlaylistAccessCreate,
+        ModeratorPlaylistAccessPatch,
+    )
+):
+    def to_inner(
+        self,
+        data: ModeratorPlaylistAccessCreate | ModeratorPlaylistAccessSchema | ModeratorPlaylistAccessPatch,
+    ) -> dict:
+        return data.model_dump(exclude_unset=True)
+
+    def to_repr(self, object: ModeratorPlaylistAccess) -> ModeratorPlaylistAccessSchema:
+        return self.domain_model.model_validate(object)
+
+    async def get_by_mod_and_playlist(
+        self, session: AsyncSession, moderator_id: UUID, playlist_id: UUID
+    ) -> ModeratorPlaylistAccessSchema | None:
+        stmt = select(ModeratorPlaylistAccess).where(
+            ModeratorPlaylistAccess.moderator_id == moderator_id,
+            ModeratorPlaylistAccess.playlist_id == playlist_id,
+        )
+        res = await session.execute(stmt)
+        obj = res.scalar_one_or_none()
+        if not obj:
+            return None
+        return ModeratorPlaylistAccessSchema.model_validate(obj)
+
+    async def get_all_by_moderator(
+        self, session: AsyncSession, moderator_id: UUID
+    ) -> list[ModeratorPlaylistAccessSchema]:
+        stmt = select(ModeratorPlaylistAccess).where(
+            ModeratorPlaylistAccess.moderator_id == moderator_id
+        )
+        res = await session.execute(stmt)
+        objs = res.scalars().all()
+        return [ModeratorPlaylistAccessSchema.model_validate(x) for x in objs]
+
+
+channel_moderator_repository = ChannelModeratorRepository()
+moderator_playlist_access_repository = ModeratorPlaylistAccessRepository()

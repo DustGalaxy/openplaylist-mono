@@ -9,7 +9,7 @@ import pytest
 async def test_log_calls_sio_service_log():
     log_schema = MagicMock()
 
-    with patch("src.tasks.log.sio_service") as mock_sio:
+    with patch("src.tasks.log.sio_playlist_service") as mock_sio:
         mock_sio.log = AsyncMock()
         from src.tasks.log import log
 

@@ -1,10 +1,13 @@
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
+import type { QueryClient } from '@tanstack/react-query'
+import { queryClient } from '@/lib/queryClient'
+export { queryClient } from '@/lib/queryClient'
 import Header from '@/components/layout/Header'
 import Sidebar from '@/components/layout/Sidebar'
 import PlayerBar from '@/features/player/PlayerBar'
-import { useCurrentUserQuery } from '@/hooks/useAuth.tsx'
-import { useAuthStore } from '@/stores/authStore.tsx'
+import { useCurrentUserQuery } from '@/hooks/useAuth'
+import { useAuthStore } from '@/stores/authStore'
 import { Toaster } from '@/components/ui/sonner'
 import { usePlaylistsLifecycle } from '@/hooks/usePlaylistsLifecycle'
 import { useLayoutStore } from '@/stores/layoutStore'
@@ -14,8 +17,6 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 interface MyRouterContext {
   queryClient: QueryClient
 }
-
-export const queryClient = new QueryClient()
 
 function AppProviders({ children }: { children: React.ReactNode }) {
   const { isLoadingAuth } = useAuthStore()

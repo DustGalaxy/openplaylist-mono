@@ -59,14 +59,21 @@ export function usePlaylistsLifecycle() {
     }
 
     if (Array.isArray(moderatedData)) {
-      const modInfo = moderatedData.map((m: any) => {
-        return {
-          moderator_id: m.moderator_id,
-          id: m.playlist?.id,
-          name: m.playlist?.name || m.playlist?.title || 'Плейлист',
-          owner_nickname: m.playlist?.owner_name,
+      const modInfo: any[] = []
+      for (const channel of moderatedData) {
+        if (Array.isArray(channel.playlist_access)) {
+          for (const pa of channel.playlist_access) {
+            if (pa && pa.playlist_id && pa.playlist_id !== 'undefined') {
+              modInfo.push({
+                moderator_id: channel.moderator_id,
+                id: pa.playlist_id,
+                name: pa.playlist_name || `Плейлист (${channel.owner_name})`,
+                owner_nickname: channel.owner_name,
+              })
+            }
+          }
         }
-      })
+      }
       useUserPlaylistRecordsStore.getState().setModerated(modInfo)
     }
   }, [isAuthenticated, playlistsData, favoritesData, moderatedData])

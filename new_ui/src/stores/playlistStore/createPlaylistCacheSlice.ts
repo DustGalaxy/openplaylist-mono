@@ -29,6 +29,20 @@ import { fetchPlaylistPublic } from '@/api/api-playlist'
 import { computePriority } from '@/lib/utils'
 import { fetchUserPublic } from '@/api/api-user'
 import { CLIENT_ID } from '@/lib/clientId'
+import { usePlaybackStore } from '@/stores/playbackStore'
+
+interface SyncPausePayload {
+  is_paused: boolean
+  position: number
+  track_id: string
+  client_id?: string
+}
+
+interface SyncSeekPayload {
+  position: number
+  track_id: string
+  client_id?: string
+}
 
 export interface CacheSlice {
   cache: Record<string, PlaylistCacheEntry>
@@ -57,7 +71,6 @@ const emptyLocal = (): PlaylistCacheEntry['local'] => ({
   syncSeek: null,
   syncPause: null,
   acceptSync: false,
-  isRemoteControlMode: false,
 
   pendingResume: null,
   pendingInterrupt: null,
@@ -122,6 +135,15 @@ export const createPlaylistCacheSlice: StateCreator<
   cache: {},
 
   attachPlaylist: async (playlistId) => {
+    if (
+      !playlistId ||
+      playlistId === 'undefined' ||
+      playlistId === 'null' ||
+      !playlistId.trim()
+    ) {
+      return
+    }
+
     const existing = get().cache[playlistId]
 
     if (existing) {
@@ -206,6 +228,7 @@ export const createPlaylistCacheSlice: StateCreator<
 
     if (prevSocket) {
       attachedIds.forEach((id) => unbindPlaylistEvents(id, prevSocket))
+      unbindGlobalPlayerEvents(prevSocket)
       prevSocket.off('connect')
       prevSocket.disconnect()
     }
@@ -213,6 +236,12 @@ export const createPlaylistCacheSlice: StateCreator<
     set({ socket })
 
     if (socket) {
+      bindGlobalPlayerEvents(socket, get)
+      const currentOwnerId =
+        usePlaybackStore?.getState?.()?.activeChannel?.owner_id || get().userId
+      if (currentOwnerId) {
+        safeEmit(socket, 'player_subscribe', { owner_id: currentOwnerId })
+      }
       attachedIds.forEach((id) => {
         bindPlaylistEvents(id, get)
         safeEmit(socket, 'subscribe', { playlist_id: id })
@@ -248,6 +277,11 @@ export const createPlaylistCacheSlice: StateCreator<
     const socket = get().socket
     if (!socket) return
     socket.on('connect', () => {
+      const currentOwnerId =
+        usePlaybackStore?.getState?.()?.activeChannel?.owner_id || get().userId
+      if (currentOwnerId) {
+        safeEmit(socket, 'player_subscribe', { owner_id: currentOwnerId })
+      }
       Object.keys(get().cache).forEach((id) => {
         safeEmit(socket, 'subscribe', { playlist_id: id })
         safeEmit(socket, 'playback_subscribe', { playlist_id: id })
@@ -255,6 +289,141 @@ export const createPlaylistCacheSlice: StateCreator<
     })
   },
 })
+
+function bindGlobalPlayerEvents(socket: Socket, get: () => StoreState) {
+  socket.on(
+    'player_track_change',
+    async (data: {
+      track: any
+      playlist_id: string
+      client_id: string
+      owner_id: string
+    }) => {
+      if (data.client_id === CLIENT_ID) return
+      const s = get()
+      const currentOwnerId =
+        usePlaybackStore?.getState?.()?.activeChannel?.owner_id || s.userId
+      if (data.owner_id && currentOwnerId && data.owner_id !== currentOwnerId)
+        return
+
+      if (usePlaybackStore?.getState) {
+        usePlaybackStore.getState().setPlayerState({
+          owner_id: data.owner_id,
+          active_playlist_id: data.playlist_id,
+          current_track_id: data.track?.id,
+          current_track_data: data.track,
+          position: 0,
+          is_paused: false,
+          volume: 100,
+          broadcast_to_widget: true,
+          last_client_id: data.client_id,
+          updated_at: new Date().toISOString(),
+        })
+      }
+
+      const isOwner = s.userId === data.owner_id
+      const playerMode = usePlaybackStore?.getState?.()?.playerMode
+      const local = s.slots.player.playlistId
+        ? s.cache[s.slots.player.playlistId]?.local
+        : undefined
+      const isSyncing = !!local?.acceptSync
+
+      // Only affect local player slot if user is stream owner, or has remote control / sync active
+      if (!isOwner && playerMode !== 'control' && !isSyncing) {
+        return
+      }
+
+      if (data.playlist_id) {
+        if (s.slots.player.playlistId !== data.playlist_id) {
+          await s.setSlotPlaylist('player', data.playlist_id)
+        }
+      }
+      if (data.track?.id) {
+        s.setPlayerTrack(data.track.id)
+      }
+    },
+  )
+
+  socket.on(
+    'player_pause',
+    (data: {
+      is_paused: boolean
+      position: number
+      client_id: string
+      owner_id: string
+    }) => {
+      if (data.client_id === CLIENT_ID) return
+      const s = get()
+      const currentOwnerId =
+        usePlaybackStore?.getState?.()?.activeChannel?.owner_id || s.userId
+      if (data.owner_id && currentOwnerId && data.owner_id !== currentOwnerId)
+        return
+
+      const isOwner = s.userId === data.owner_id
+      const playerMode = usePlaybackStore?.getState?.()?.playerMode
+      const local = s.slots.player.playlistId
+        ? s.cache[s.slots.player.playlistId]?.local
+        : undefined
+      const isSyncing = !!local?.acceptSync
+
+      if (!isOwner && playerMode !== 'control' && !isSyncing) {
+        return
+      }
+
+      const playlistId = s.slots.player.playlistId
+      if (playlistId) {
+        s.updateLocal(playlistId, {
+          syncPause: {
+            is_paused: data.is_paused,
+            position: data.position,
+            track_id: s.slots.player.currentTrackId || '',
+            client_id: data.client_id,
+          },
+        })
+      }
+    },
+  )
+
+  socket.on(
+    'player_seek',
+    (data: { position: number; client_id: string; owner_id: string }) => {
+      if (data.client_id === CLIENT_ID) return
+      const s = get()
+      const currentOwnerId =
+        usePlaybackStore?.getState?.()?.activeChannel?.owner_id || s.userId
+      if (data.owner_id && currentOwnerId && data.owner_id !== currentOwnerId)
+        return
+
+      const isOwner = s.userId === data.owner_id
+      const playerMode = usePlaybackStore?.getState?.()?.playerMode
+      const local = s.slots.player.playlistId
+        ? s.cache[s.slots.player.playlistId]?.local
+        : undefined
+      const isSyncing = !!local?.acceptSync
+
+      if (!isOwner && playerMode !== 'control' && !isSyncing) {
+        return
+      }
+
+      const playlistId = s.slots.player.playlistId
+      if (playlistId) {
+        s.updateLocal(playlistId, {
+          syncSeek: {
+            position: data.position,
+            track_id: s.slots.player.currentTrackId || '',
+            client_id: data.client_id,
+          },
+        })
+      }
+    },
+  )
+}
+
+function unbindGlobalPlayerEvents(socket: Socket) {
+  ;['player_track_change', 'player_pause', 'player_seek', 'player_volume'].forEach(
+    (ev) => socket.off(ev),
+  )
+}
 
 function bindPlaylistEvents(playlistId: string, get: () => StoreState) {
   const socket = get().socket
@@ -283,19 +452,20 @@ function bindPlaylistEvents(playlistId: string, get: () => StoreState) {
       })
     },
   )
-  socket.on(`playnow:${playlistId}`, (trackData: { track_id: string }) => {
+  socket.on(`playnow:${playlistId}`, async (trackData: { track_id: string }) => {
     get().updatePlaylistData(playlistId, (p) =>
       mergeNowPlaying(p, trackData.track_id),
     )
     const s = get()
     const playerPlaylistId = s.slots.player.playlistId
-    const role = s.getSlotRole('player')
-    const isRemote = !!s.cache[playlistId]?.local.isRemoteControlMode
+    const isOwner = s.userId === s.cache[playlistId]?.data?.owner_id
+    const isSyncing = !!s.cache[playlistId]?.local.acceptSync
+    const playerMode = usePlaybackStore.getState().playerMode
 
-    if (
-      (playerPlaylistId === playlistId && role === 'owner') ||
-      isRemote
-    ) {
+    if (isOwner || isSyncing || playerMode === 'control') {
+      if (playerPlaylistId !== playlistId) {
+        await s.setSlotPlaylist('player', playlistId)
+      }
       if (
         trackData.track_id &&
         trackData.track_id !== s.slots.player.currentTrackId
@@ -320,16 +490,11 @@ function bindPlaylistEvents(playlistId: string, get: () => StoreState) {
     if (event.client_id === CLIENT_ID) return
     const s = get()
     const entry = s.cache[playlistId]
-    const playerPlaylistId = s.slots.player.playlistId
-    const role = s.getSlotRole('player')
-    const isPlayerSlot = playerPlaylistId === playlistId
-    const isRemote = !!entry?.local.isRemoteControlMode
+    const isOwner = s.userId === s.cache[playlistId]?.data?.owner_id
+    const isSyncing = !!entry?.local.acceptSync
+    const playerMode = usePlaybackStore.getState().playerMode
 
-    if (
-      entry?.local.acceptSync ||
-      isRemote ||
-      (isPlayerSlot && role === 'owner')
-    ) {
+    if (isOwner || isSyncing || playerMode === 'control') {
       get().updateLocal(playlistId, { syncPause: event })
     }
   })
@@ -338,21 +503,15 @@ function bindPlaylistEvents(playlistId: string, get: () => StoreState) {
     if (event.client_id === CLIENT_ID) return
     const s = get()
     const entry = s.cache[playlistId]
-    const playerPlaylistId = s.slots.player.playlistId
-    const role = s.getSlotRole('player')
-    const isPlayerSlot = playerPlaylistId === playlistId
-    const isRemote = !!entry?.local.isRemoteControlMode
+    const isOwner = s.userId === s.cache[playlistId]?.data?.owner_id
+    const isSyncing = !!entry?.local.acceptSync
+    const playerMode = usePlaybackStore.getState().playerMode
 
-    if (
-      entry?.local.acceptSync ||
-      isRemote ||
-      (isPlayerSlot && role === 'owner')
-    ) {
+    if (isOwner || isSyncing || playerMode === 'control') {
       get().updateLocal(playlistId, { syncSeek: event })
     }
   })
 }
-
 
 function unbindPlaylistEvents(playlistId: string, socket: Socket) {
   ;[

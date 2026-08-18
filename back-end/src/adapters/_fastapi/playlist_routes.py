@@ -19,7 +19,6 @@ from src.adapters._rabbit.broker import get_broker, main_publisher
 from src.adapters._rabbit.queues import playlist_fanout_exchange
 from src.dal._redis.playback_repository import playback_repository
 from src.dto.internal.domain_events import EventOperator, InternalPlaylistEvent, InternalPlaylistEventType, PlaylistSettings
-from src.dto.moderator import UserModeratedPlaylistResponse
 from src.dto.order_note import OrderNoteResponse, OrderNoteUpsert
 from src.dto.playlist import (
     FavoriteStatusResponse,
@@ -85,7 +84,6 @@ async def create_playlist(
             playlist_id=created_playlist.id,
             playlist_name=created_playlist.name,
             playlist_is_public=created_playlist.is_public,
-            show_in_widget=created_playlist.show_in_widget,
             user_id=current_user.id,
             user_name=current_user.username,
             operator=EventOperator(user_id=current_user.id, nickname=current_user.username, access_level="owner"),
@@ -103,7 +101,7 @@ async def patch_playlist(
     patch_schema: PlaylistPatch,
     playlist_id: UUID,
 ) -> ReadPlaylist:
-    if not access.permissions.get("can_manage_settings", False):
+    if not access.can_manage_settings:
         raise HTTPException(status_code=403, detail="Moderator missing can_manage_settings permission")
     plst = await service.get(db_session, playlist_id, skip_owner_check=True)
     new_plst = await service.patch_playlist(db_session, patch_schema, playlist_id)
@@ -115,7 +113,6 @@ async def patch_playlist(
             playlist_id=playlist_id,
             playlist_name=plst.name,
             playlist_is_public=plst.is_public,
-            show_in_widget=plst.show_in_widget,
             user_id=plst.owner_id,
             user_name=access.name,
             operator=EventOperator(
@@ -147,7 +144,6 @@ async def delete_playlist(
                 playlist_id=playlist_id,
                 playlist_name=plst.name,
                 playlist_is_public=plst.is_public,
-                show_in_widget=plst.show_in_widget,
                 user_id=current_user.id,
                 user_name=current_user.username,
                 operator=EventOperator(user_id=current_user.id, nickname=current_user.username, access_level="owner"),
@@ -186,13 +182,16 @@ async def get_my_playlists(
         return [ReadPlaylist.model_validate(p) for p in playlists]
 
 
+from src.dto.moderator import ModeratedChannelResponse
+
+
 @router.get("/moderating/me", status_code=status.HTTP_200_OK)
 async def get_my_moderated_playlists(
     db_session: DB_SESSION,
     current_user: CURR_USER,
     mod_service: MODERATOR_SERVICE,
-) -> list[UserModeratedPlaylistResponse]:
-    return await mod_service.get_user_moderated_playlists(db_session, current_user.id)
+) -> list[ModeratedChannelResponse]:
+    return await mod_service.list_moderated_channels(db_session, current_user.id)
 
 
 
@@ -283,8 +282,8 @@ async def set_play_now_for_playlist(
     playlist_id: UUID,
     playnow: PlayNow,
 ) -> None:
-    if not (access.permissions.get("can_manage_playback", False) or access.permissions.get("can_manage_queue", False)):
-        raise HTTPException(status_code=403, detail="Moderator missing playback/queue permissions")
+    if not access.can_manage_tracks:
+        raise HTTPException(status_code=403, detail="Moderator missing playback/tracks permissions")
     try:
         plst = await service.get(db_session, playlist_id, skip_owner_check=True)
         order = await service.set_play_now(db_session, plst, playnow.track_id, None)
@@ -299,7 +298,6 @@ async def set_play_now_for_playlist(
                 playlist_id=playlist_id,
                 playlist_name=plst.name,
                 playlist_is_public=plst.is_public,
-                show_in_widget=plst.show_in_widget,
                 user_id=plst.owner_id,
                 user_name=access.name,
                 operator=EventOperator(
@@ -324,8 +322,8 @@ async def delete_track_from_playlist(
     track_id: UUID,
     reason: DeleteStatus = "listened",
 ) -> None:
-    if not access.permissions.get("can_manage_queue", False):
-        raise HTTPException(status_code=403, detail="Moderator missing can_manage_queue permission")
+    if not access.can_manage_tracks:
+        raise HTTPException(status_code=403, detail="Moderator missing can_manage_tracks permission")
     try:
         playlist = await service.get(db_session, playlist_id, skip_owner_check=True)
         order_to_delete = find(playlist.track_data, lambda x: x.id == track_id)
@@ -341,7 +339,6 @@ async def delete_track_from_playlist(
                 playlist_id=playlist_id,
                 playlist_name=playlist.name,
                 playlist_is_public=playlist.is_public,
-                show_in_widget=playlist.show_in_widget,
                 user_id=playlist.owner_id,
                 user_name=access.name,
                 operator=EventOperator(
@@ -361,8 +358,8 @@ async def delete_track_from_playlist(
 async def delete_tracks_from_playlist(
     db_session: DB_SESSION, service: PLST_SERVICE, access: MODERATOR_ACCESS, playlist_id: UUID, data: TrackDeleteBulk
 ) -> None:
-    if not access.permissions.get("can_manage_queue", False):
-        raise HTTPException(status_code=403, detail="Moderator missing can_manage_queue permission")
+    if not access.can_manage_tracks:
+        raise HTTPException(status_code=403, detail="Moderator missing can_manage_tracks permission")
     try:
         playlist = await service.get(db_session, playlist_id, skip_owner_check=True)
         deleted = await service.delete_track_bulk(db_session, playlist_id, data.track_ids, data.reason)
@@ -374,7 +371,6 @@ async def delete_tracks_from_playlist(
                     playlist_id=playlist_id,
                     playlist_name=playlist.name,
                     playlist_is_public=playlist.is_public,
-                    show_in_widget=playlist.show_in_widget,
                     user_id=playlist.owner_id,
                     user_name=access.name,
                     operator=EventOperator(

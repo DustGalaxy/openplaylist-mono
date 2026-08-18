@@ -1,8 +1,7 @@
 import axios from 'axios'
 import type { AxiosError, AxiosInstance } from 'axios'
 import { useAuthStore } from '@/stores/authStore'
-import { queryClient } from '@/routes/__root'
-import { router } from '@/main'
+import { queryClient } from '@/lib/queryClient'
 import { getModeratorToken } from '@/lib/moderatorTokenStorage'
 
 let isClearingAuth = false
@@ -79,11 +78,8 @@ apiClient.interceptors.response.use(
             clearAuth() // Очищаем состояние аутентификации
             queryClient.clear() // Очищаем кэш React Query
 
-            // *** Используем router.navigate() из TanStack Router ***
-            // Проверяем, существует ли router (на случай, если он еще не инициализирован)
-            // и не находимся ли мы уже на целевой странице
-            if (router && router.state.location.pathname !== '/') {
-              await router.navigate({ to: '/' }) // Перенаправляем на главную
+            if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+              window.location.href = '/'
             }
           }
           // Сбросить флаг после того, как логика очистки выполнена

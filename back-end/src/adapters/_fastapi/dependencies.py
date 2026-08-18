@@ -4,10 +4,11 @@ from uuid import UUID
 from fastapi import Depends, Header, Query
 
 from src.database import AsyncSession, get_async_session
-from src.dto.moderator import ModeratorAccessInfo
+from src.dto.moderator import ModeratorChannelAccessInfo, ModeratorPlaylistAccessInfo
 from src.models.auth_user import AuthUserSchema as User
 from src.services.auth.auth_service import auth_service
 from src.services.notification.notification_service import NotificationService, get_notification_service
+from src.services.player_service import PlayerService, get_player_service
 from src.services.playlist_log import PlaylistLogService, get_playlist_log_service
 from src.services.playlists.basic_service import PlaylistLowService, get_playlist_service, playlist_service
 from src.services.playlists.favorite_service import FavoritePlaylistService, get_favorite_playlist_service
@@ -24,6 +25,7 @@ STREAM_SERVICE = Annotated[StreamService, Depends(get_stream_service)]
 NOTIFY_SERVICE = Annotated[NotificationService, Depends(get_notification_service)]
 MODERATOR_SERVICE = Annotated[ModeratorService, Depends(get_moderator_service)]
 ORDER_NOTE_SERVICE = Annotated[OrderNoteService, Depends(get_order_note_service)]
+PLAYER_SERVICE = Annotated[PlayerService, Depends(get_player_service)]
 
 DB_SESSION = Annotated[AsyncSession, Depends(get_async_session)]
 CURR_USER = Annotated[User, Depends(auth_service.get_current_user)]
@@ -38,6 +40,21 @@ async def beb(db_session: DB_SESSION, playlist_id: UUID, user_id: USER_ID):
 PLST_ID = Annotated[UUID | None, Depends(beb)]
 
 
+async def get_channel_moderator_access(
+    db_session: DB_SESSION,
+    owner_id: UUID,
+    user_id: USER_ID_OR_NONE = None,
+    token: str | None = Query(None),
+    x_moderator_token: str | None = Header(None, alias="X-Moderator-Token"),
+    mod_service: ModeratorService = Depends(get_moderator_service),
+) -> ModeratorChannelAccessInfo:
+    token_to_use = token or x_moderator_token
+    return await mod_service.get_channel_access_info(db_session, owner_id, user_id=user_id, token=token_to_use)
+
+
+CHANNEL_MODERATOR_ACCESS = Annotated[ModeratorChannelAccessInfo, Depends(get_channel_moderator_access)]
+
+
 async def get_playlist_moderator_access(
     db_session: DB_SESSION,
     playlist_id: UUID,
@@ -45,10 +62,10 @@ async def get_playlist_moderator_access(
     token: str | None = Query(None),
     x_moderator_token: str | None = Header(None, alias="X-Moderator-Token"),
     mod_service: ModeratorService = Depends(get_moderator_service),
-) -> ModeratorAccessInfo:
+) -> ModeratorPlaylistAccessInfo:
     token_to_use = token or x_moderator_token
-    return await mod_service.get_access_info(db_session, playlist_id, user_id=user_id, token=token_to_use)
+    return await mod_service.get_playlist_access_info(db_session, playlist_id, user_id=user_id, token=token_to_use)
 
 
-MODERATOR_ACCESS = Annotated[ModeratorAccessInfo, Depends(get_playlist_moderator_access)]
-
+PLAYLIST_ACCESS = Annotated[ModeratorPlaylistAccessInfo, Depends(get_playlist_moderator_access)]
+MODERATOR_ACCESS = PLAYLIST_ACCESS

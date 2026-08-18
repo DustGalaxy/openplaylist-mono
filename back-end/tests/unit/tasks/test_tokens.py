@@ -26,7 +26,7 @@ async def test_refresh_tokens_empty(mocker):
     mock_token_service.fetch_tokens_to_refresh = AsyncMock(return_value=[])
     mock_token_service.refresh_token = AsyncMock()
 
-    mock_broker = mocker.patch("src.tasks.tokens.rabbit_broker")
+    mock_broker = mocker.patch("src.tasks.tokens.main_publisher")
     mock_broker.publish = AsyncMock()
 
     mocker.patch("src.tasks.tokens.asyncio.sleep", new_callable=AsyncMock)
@@ -55,7 +55,7 @@ async def test_refresh_tokens_publishes_for_each_token(mocker):
     mock_token_service.fetch_tokens_to_refresh = AsyncMock(return_value=tokens)
     mock_token_service.refresh_token = AsyncMock(side_effect=fresh)
 
-    mock_broker = mocker.patch("src.tasks.tokens.rabbit_broker")
+    mock_broker = mocker.patch("src.tasks.tokens.main_publisher")
     mock_broker.publish = AsyncMock()
 
     mocker.patch("src.tasks.tokens.asyncio.sleep", new_callable=AsyncMock)
@@ -89,7 +89,7 @@ async def test_refresh_tokens_sleeps_between_iterations(mocker):
     mock_token_service.fetch_tokens_to_refresh = AsyncMock(return_value=tokens)
     mock_token_service.refresh_token = AsyncMock(side_effect=[MagicMock(access_token="a", refresh_token="r")] * 2)
 
-    mocker.patch("src.tasks.tokens.rabbit_broker").publish = AsyncMock()
+    mocker.patch("src.tasks.tokens.main_publisher").publish = AsyncMock()
     mock_sleep = mocker.patch("src.tasks.tokens.asyncio.sleep", new_callable=AsyncMock)
 
     from src.tasks.tokens import refresh_tokens

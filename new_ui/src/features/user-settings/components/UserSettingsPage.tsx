@@ -6,6 +6,7 @@ import { AccountTab } from './AccountTab'
 import { IntegrationsTab } from './IntegrationsTab'
 import WidgetTab from './WidgetTab'
 import { SubsTab } from './SubsTab'
+import { ModeratorsTab } from './ModeratorsTab'
 import type { Integration, UserProfile } from '@/types/user'
 import { useOAuthUrl } from '@/hooks/useAuthUrl'
 import {
@@ -30,6 +31,7 @@ const VALID_TABS = [
   'integrations',
   'subscriptions',
   'widget',
+  'moderators',
 ] as const
 type TabId = (typeof VALID_TABS)[number]
 
@@ -99,6 +101,7 @@ export function UserSettingsPage({
       icon: '🔔',
     },
     { id: 'widget', label: t('settings.tabs.widget'), icon: '🖼️' },
+    { id: 'moderators', label: 'Модераторы', icon: '🛡️' },
   ]
 
   const handleOAuthRedirect = useOAuthUrl()
@@ -197,6 +200,7 @@ export function UserSettingsPage({
           )}
           {activeTab === 'subscriptions' && <SubsTab />}
           {activeTab === 'widget' && <WidgetTab />}
+          {activeTab === 'moderators' && <ModeratorsTab />}
         </div>
       </div>
     </div>

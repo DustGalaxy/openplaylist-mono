@@ -10,10 +10,19 @@ import type { PlaylistLog } from '@/types/playlistLog'
 import apiClient from '@/lib/axios'
 import { useAuthStore } from '@/stores/authStore'
 import { getConfig, removeNullAndUndefined } from '@/lib/utils'
+import { getModeratorToken } from '@/lib/moderatorTokenStorage'
 
 export const fetchPlaylistPublic = async (
   playlist_id: string,
 ): Promise<InputPlaylist | null> => {
+  if (
+    !playlist_id ||
+    playlist_id === 'undefined' ||
+    playlist_id === 'null' ||
+    !playlist_id.trim()
+  ) {
+    return null
+  }
   const config = getConfig()
   const response = await apiClient(
     config.PLST_API_URL + `/${playlist_id}/public`,
@@ -33,6 +42,14 @@ export const fetchPlaylistPublic = async (
 export const fetchPlaylist = async (
   playlist_id: string,
 ): Promise<InputPlaylist | null> => {
+  if (
+    !playlist_id ||
+    playlist_id === 'undefined' ||
+    playlist_id === 'null' ||
+    !playlist_id.trim()
+  ) {
+    return null
+  }
   const config = getConfig()
   const response = await apiClient(config.PLST_API_URL + `/${playlist_id}`, {
     method: 'GET',
@@ -68,6 +85,8 @@ export const fetchUserPlaylistPreviews = async () => {
     .catch((error) => {})
   return response
 }
+
+export const fetchMyPlaylists = fetchUserPlaylistPreviews
 
 export const changePlaylistActive = async (
   playlist_id: string,
@@ -191,13 +210,20 @@ export const changePlaylistSettings = async (
 export const postPlayNow = async (
   playlist_id: string,
   track_id: string | undefined,
+  token?: string | null,
 ) => {
   const config = getConfig()
+  const modToken = token || getModeratorToken(playlist_id)
+  const headers: Record<string, string> = {}
+  if (modToken) {
+    headers['X-Moderator-Token'] = modToken
+  }
   const response = await apiClient(
     config.PLST_API_URL + `/${playlist_id}/playnow`,
     {
       method: 'PATCH',
       withCredentials: true,
+      headers,
       data: {
         playlist_id: playlist_id,
         track_id: track_id ? track_id : null,
@@ -209,7 +235,6 @@ export const postPlayNow = async (
 
 export const createNewPlaylist = async (
   name: string,
-  showInWidget: boolean,
   description?: string,
 ) => {
   const config = getConfig()
@@ -218,7 +243,6 @@ export const createNewPlaylist = async (
     withCredentials: true,
     data: {
       name: name,
-      show_in_widget: showInWidget,
       description: description,
     },
   })
@@ -418,6 +442,14 @@ export const fetchUserFavoritePlaylists = async (): Promise<
 export const checkPlaylistFavoriteStatus = async (
   playlist_id: string,
 ): Promise<FavoriteStatusResponse | null> => {
+  if (
+    !playlist_id ||
+    playlist_id === 'undefined' ||
+    playlist_id === 'null' ||
+    !playlist_id.trim()
+  ) {
+    return null
+  }
   const config = getConfig()
   const response = await apiClient(
     config.PLST_API_URL + `/${playlist_id}/is-favorite`,

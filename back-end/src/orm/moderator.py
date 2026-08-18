@@ -1,9 +1,8 @@
 from datetime import datetime
-from typing import final
+from typing import TYPE_CHECKING, final
 from uuid import UUID
 
 from sqlalchemy import ForeignKey, Index, String
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -11,22 +10,17 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.database import Base, TimestampMixin, UUIDMixin
 from src.orm.auth_user import User
 
-
-def default_permissions():
-    return {
-        "can_manage_queue": True,
-        "can_manage_playback": True,
-        "can_manage_settings": False,
-    }
+if TYPE_CHECKING:
+    from src.orm.playlist import Playlist
 
 
 @final
-class PlaylistModerator(Base, UUIDMixin, TimestampMixin):
-    __tablename__ = "playlist_moderators"
+class ChannelModerator(Base, UUIDMixin, TimestampMixin):
+    __tablename__ = "channel_moderators"
 
-    playlist_id: Mapped[UUID] = mapped_column(
+    owner_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True),
-        ForeignKey("playlists.id", ondelete="CASCADE"),
+        ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -40,18 +34,44 @@ class PlaylistModerator(Base, UUIDMixin, TimestampMixin):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     token: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
 
-    permissions: Mapped[dict[str, bool]] = mapped_column(
-        JSONB,
-        nullable=False,
-        default=default_permissions,
-        server_default='{"can_manage_queue": true, "can_manage_playback": true, "can_manage_settings": false}',
-    )
+    can_control_player: Mapped[bool] = mapped_column(default=True, nullable=False)
+    can_manage_all_playlists: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     expires_at: Mapped[datetime | None] = mapped_column(nullable=True)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
 
-    playlist: Mapped["Playlist"] = relationship(back_populates="moderators")
-    user: Mapped["User"] = relationship(lazy="selectin")
+    owner: Mapped["User"] = relationship(foreign_keys=[owner_id], lazy="selectin")
+    user: Mapped["User | None"] = relationship(foreign_keys=[user_id], lazy="selectin")
     user_name: AssociationProxy[str | None] = association_proxy("user", "username")
 
-    __table_args__ = (Index("ix_playlist_moderators_playlist_user", "playlist_id", "user_id"),)
+    playlist_access: Mapped[list["ModeratorPlaylistAccess"]] = relationship(
+        back_populates="moderator", cascade="all, delete-orphan", lazy="selectin"
+    )
+
+    __table_args__ = (Index("ix_channel_moderators_owner_user", "owner_id", "user_id"),)
+
+
+@final
+class ModeratorPlaylistAccess(Base, UUIDMixin, TimestampMixin):
+    __tablename__ = "moderator_playlist_access"
+
+    moderator_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("channel_moderators.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    playlist_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("playlists.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    can_manage_tracks: Mapped[bool] = mapped_column(default=True, nullable=False)
+    can_manage_settings: Mapped[bool] = mapped_column(default=False, nullable=False)
+
+    moderator: Mapped["ChannelModerator"] = relationship(back_populates="playlist_access")
+    playlist: Mapped["Playlist"] = relationship(back_populates="moderator_access", lazy="selectin")
+
+    __table_args__ = (Index("ix_moderator_playlist_access_mod_plst", "moderator_id", "playlist_id", unique=True),)

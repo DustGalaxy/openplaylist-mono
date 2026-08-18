@@ -40,6 +40,7 @@ const makeModeSettings = ({
   priority_break_point: priorityBreakPoint,
   sort_settings_vip: makeSortSettings(vipOrder),
   sort_settings_regular: makeSortSettings(regularOrder),
+  ...(backgroundTrackIds.length > 0 ? { backgroundTrackIds } : {}),
 })
 
 const makeTrack = (id: string, priority = 0): Track => ({
@@ -59,7 +60,7 @@ const makePlaylist = ({
   mode = PlaylistMode.Static,
   tracks = [],
   settings = makeModeSettings(),
-  background_track_ids = [],
+  background_track_ids,
   shuffle = false,
 }: {
   mode?: PlaylistMode
@@ -78,7 +79,6 @@ const makePlaylist = ({
   is_favorite: false,
   is_allow_external_requests: true,
   allow_sources: [],
-  show_in_widget: false,
   track_data: tracks,
   max_playlist_size: 100,
   mode,
@@ -91,7 +91,10 @@ const makePlaylist = ({
   sync_playback_position: false,
   shuffle,
   cost_mode: 'add',
-  background_track_ids: background_track_ids,
+  background_track_ids:
+    background_track_ids !== undefined
+      ? background_track_ids
+      : (settings as any).backgroundTrackIds || [],
   track_black_list: [],
   content_settings: [],
   block_list: [],

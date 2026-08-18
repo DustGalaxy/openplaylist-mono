@@ -1,5 +1,6 @@
 import type { StateCreator } from 'zustand'
 import { getModeratorToken } from '@/lib/moderatorTokenStorage'
+import { usePlaybackStore } from '@/stores/playbackStore'
 import type {
   Playlist,
   PlaylistRole,
@@ -42,11 +43,17 @@ export const createRoleSlice: StateCreator<
     if (!playlist) return 'viewer'
     if (userId && playlist.owner_id === userId) return 'owner'
     if (playlist.id && getModeratorToken(playlist.id)) return 'operator'
-    if (
-      userId &&
-      playlist.moderators?.some((m) => m.user_id === userId && m.is_active)
+    const isChannelMod = usePlaybackStore?.getState?.()?.moderatedChannels?.some?.(
+      (c) =>
+        c.owner_id === playlist.owner_id &&
+        (c.can_manage_all_playlists ||
+          c.playlist_access?.some((pa) => pa.playlist_id === playlist.id)),
     )
-      return 'operator'
+    if (isChannelMod) return 'operator'
+    const isPlaylistMod = (playlist as any)?.moderators?.some(
+      (m: any) => m.user_id === userId && m.is_active !== false,
+    )
+    if (isPlaylistMod) return 'operator'
     return 'viewer'
   },
 

@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
   Bell,
-  Cast,
   Heart,
   ListMusic,
   PanelLeftClose,
@@ -88,19 +87,11 @@ function PlaylistViewInner() {
     }
   }, [playlistId, accessInfo])
 
-  const {
-    toggleExternalRequests,
-    toggleBroadcast,
-    setAcceptSync,
-    setRemoteControlMode,
-  } = usePlaylistStore()
+  const { toggleExternalRequests, toggleBroadcast, setAcceptSync } =
+    usePlaylistStore()
 
   const acceptSync = usePlaylistStore((s) =>
     playlistId ? s.cache[playlistId]?.local.acceptSync : false,
-  )
-
-  const isRemoteControlMode = usePlaylistStore((s) =>
-    playlistId ? s.cache[playlistId]?.local.isRemoteControlMode : false,
   )
 
   const [toggled, setToggled] = React.useState(false)
@@ -251,33 +242,19 @@ function PlaylistViewInner() {
                   </span>
                 </Btn>
 
-                <div className="flex items-center gap-1.5 justify-between">
-                  <Btn
-                    title={t('playlist.tooltip.sync')}
-                    isActive={playlist.sync_playback_position}
-                    onClick={() =>
-                      toggleBroadcast(
-                        playlist.id,
-                        !playlist.sync_playback_position,
-                      )
-                    }
-                    className="size-8 p-1 rounded-sm"
-                  >
-                    <RadioTower className="size-5" />
-                  </Btn>
-                  {isModerator && (
-                    <Btn
-                      title="Управление трансляцией"
-                      isActive={isRemoteControlMode}
-                      onClick={() =>
-                        setRemoteControlMode(playlist.id, !isRemoteControlMode)
-                      }
-                      className="size-8 p-1 rounded-sm"
-                    >
-                      <Cast className="size-5" />
-                    </Btn>
-                  )}
-                </div>
+                <Btn
+                  title={t('playlist.tooltip.sync')}
+                  isActive={playlist.sync_playback_position}
+                  onClick={() =>
+                    toggleBroadcast(
+                      playlist.id,
+                      !playlist.sync_playback_position,
+                    )
+                  }
+                  className="size-8 p-1 rounded-sm"
+                >
+                  <RadioTower className="size-5" />
+                </Btn>
               </>
             )}
             {isViewerLike && (

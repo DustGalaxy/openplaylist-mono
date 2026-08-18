@@ -226,7 +226,6 @@ export type InputPlaylist = {
   favorites_count: number
   is_allow_external_requests: boolean
   allow_sources: Array<AllowSources>
-  show_in_widget: boolean
   now_playing?: string
   track_data: Array<WireTrack>
   background_track_ids: Array<string>
@@ -274,7 +273,6 @@ export type PlaylistPatch = {
   allow_sources?: Array<AllowSources>
   is_public?: boolean
   is_favorite?: boolean
-  show_in_widget?: boolean
   is_allow_external_requests?: boolean
   max_playlist_size?: number
   mode?: PlaylistMode
@@ -380,7 +378,6 @@ export interface PlaylistCacheEntry {
     syncSeek: SyncSeekPayload | null
     syncPause: SyncPausePayload | null
     acceptSync: boolean
-    isRemoteControlMode: boolean
 
     pendingInterrupt: PendingInterrupt | null
     pendingResume: PendingResume | null
@@ -473,7 +470,6 @@ export interface PlaybackOpsSlice {
 export interface SyncSlice {
   toggleBroadcast: (playlistId: string, enabled: boolean) => void
   setAcceptSync: (playlistId: string, accept: boolean) => void
-  setRemoteControlMode: (playlistId: string, enabled: boolean) => void
 }
 
 export interface PlaylistSettingsSlice {

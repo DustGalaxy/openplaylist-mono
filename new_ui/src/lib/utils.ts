@@ -16,11 +16,40 @@ export function cn(...inputs: Array<ClassValue>) {
 }
 
 export const formatTime = (time: number): string => {
+  if (typeof time !== 'number' || isNaN(time) || !isFinite(time) || time < 0)
+    return '0:00'
   const minutes = Math.floor(time / 60)
   const seconds =
     time % 60 < 10 ? `0${Math.floor(time % 60)}` : Math.floor(time % 60)
 
   return `${minutes}:${seconds}`
+}
+
+export function parseDurationSeconds(dur: unknown): number {
+  if (typeof dur === 'number' && !isNaN(dur) && isFinite(dur) && dur > 0)
+    return dur
+  if (typeof dur === 'string') {
+    const trimmed = dur.trim()
+    if (/^\d+$/.test(trimmed)) {
+      const parsed = parseInt(trimmed, 10)
+      return isNaN(parsed) ? 0 : parsed
+    }
+    if (trimmed.includes(':')) {
+      const parts = trimmed.split(':').map((p) => parseInt(p, 10))
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        return parts[0] * 60 + parts[1]
+      }
+      if (
+        parts.length === 3 &&
+        !isNaN(parts[0]) &&
+        !isNaN(parts[1]) &&
+        !isNaN(parts[2])
+      ) {
+        return parts[0] * 3600 + parts[1] * 60 + parts[2]
+      }
+    }
+  }
+  return 0
 }
 
 export function getRandomInt(max: number) {
@@ -189,5 +218,30 @@ export function removeNullAndUndefined<T extends Record<string, any>>(
 }
 
 export function getConfig() {
-  return window.appConfig
+  if (typeof window !== 'undefined' && window.appConfig) {
+    return window.appConfig
+  }
+  return {
+    PROJECT_DOMAIN: 'http://localhost:3000',
+    BACKEND_DOMAIN: 'http://localhost:8000',
+    API_URL: 'http://localhost:8000/api',
+    WS_API_URL: 'http://localhost:8000',
+    SOCKET_PATH: '/api/socket.io',
+    PLST_API_URL: 'http://localhost:8000/api/playlist',
+    AUTH_API_URL: 'http://localhost:8000/api',
+    ORDER_API_URL: 'http://localhost:8000/api/order',
+    TWITCH_CLIENT_ID: '',
+    TWITCH_REDIRECT_URI: '',
+    TWITCH_SCOPES: [],
+    GOOGLE_CLIENT_ID: '',
+    GOOGLE_REDIRECT_URI: '',
+    GOOGLE_SCOPES: [],
+    DONATEX_CLIENT_ID: '',
+    DONATEX_REDIRECT_URI: '',
+    DONATEX_SCOPES: [],
+    DONATEX_CODE_CHALLENGE_METHOD: 'S256',
+    DA_CLIENT_ID: '19392',
+    DA_REDIRECT_URI: '',
+    DA_SCOPES: [],
+  }
 }

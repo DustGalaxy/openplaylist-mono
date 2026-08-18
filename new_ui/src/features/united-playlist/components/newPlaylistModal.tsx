@@ -33,7 +33,6 @@ export default function AddPlaylistModal({
 
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
-  const [showInWidget, setShowInWinget] = React.useState(false)
 
   const [isLoading, setIsLoading] = React.useState(false)
   const [open, setOpen] = React.useState(false)
@@ -50,7 +49,7 @@ export default function AddPlaylistModal({
     const loadingToast = toast.loading(t('playlist.create.submitting'))
 
     try {
-      const newPlst = await createNewPlaylist(name, showInWidget, description)
+      const newPlst = await createNewPlaylist(name, description)
 
       if (newPlst) {
         add(newPlst)
@@ -114,18 +113,6 @@ export default function AddPlaylistModal({
           onChange={(e) => setDescription(e.target.value)}
           disabled={isLoading}
         />
-        <div className="flex items-center justify-between">
-          <Label className="text-lg">{t('playlist.create.showInWidget')}</Label>
-          <Switch
-            checked={showInWidget}
-            onCheckedChange={(v) => setShowInWinget(v)}
-            className="ring-1 ring-accent"
-          />
-        </div>
-
-        <DialogDescription>
-          {t('playlist.create.showInWidgetHint')}
-        </DialogDescription>
 
         <DialogFooter>
           <DialogClose asChild>

@@ -88,9 +88,7 @@ class ReadPlaylistPreview(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-from src.dto.moderator import ReadPlaylistModerator, UserModeratedPlaylistResponse
-
-UserModeratedPlaylistResponse.model_rebuild()
+from src.dto.moderator import PlaylistAccessResponse
 
 
 class ReadPlaylist(BaseModel):
@@ -106,7 +104,6 @@ class ReadPlaylist(BaseModel):
     favorites_count: int = Field(0, description="Total count of users who favorited this playlist")
     is_allow_external_requests: bool
     allow_sources: list[AllowedSource]
-    show_in_widget: bool
 
     now_playing: str | None = Field(None)
 
@@ -126,7 +123,7 @@ class ReadPlaylist(BaseModel):
     block_list: list[ReadBlockList] = Field(default_factory=list)
     donation_rules: list[ReadDonationRules] = Field(default_factory=list)
     chat_rules: list[ReadChatRules] = Field(default_factory=list)
-    moderators: list[ReadPlaylistModerator] = Field(default_factory=list)
+    moderator_access: list[PlaylistAccessResponse] = Field(default_factory=list)
 
     created_at: datetime
     updated_at: datetime
@@ -154,7 +151,6 @@ class PlaylistBaseinfo(BaseModel):
 class NewPlaylist(BaseModel):
     name: str
     description: str
-    show_in_widget: bool
 
 
 class PlayNow(BaseModel):

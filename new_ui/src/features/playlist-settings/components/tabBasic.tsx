@@ -55,7 +55,6 @@ const TabBasic = () => {
   const [plstMode, setPlstMode] = useState(playlist.mode)
   const [isPublic, setIsPublic] = useState(playlist.is_public)
   const [priorityMode, setPriorityMode] = useState(playlist.cost_mode)
-  const [showInWidget, setShowInWidget] = useState(playlist.show_in_widget)
   const [integrations, setIntegrations] = useState<Array<Integration>>([])
   const [isLoadingIntegrations, setIsLoadingIntegrations] = useState(false)
   const breakPointRef = useRef<HTMLInputElement>(null)
@@ -436,42 +435,6 @@ const TabBasic = () => {
                 className="rounded-r-[--rounded-std] rounded-l-none overflow-clip h-7"
               />
             </div>
-          </div>
-        </div>
-
-        {/* Show in Widget - Dedicated full-width row */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2 rounded-md bg-level-2/60">
-          <div className="min-w-0 flex-1">
-            <Label className="text-xs font-semibold text-text-main">
-              {t('playlistSettings.basic.showInWidget')}
-            </Label>
-          </div>
-          <div className="shrink-0 flex items-center self-end sm:self-auto">
-            <ContentSwitch
-              leftLabel={
-                <Label
-                  htmlFor="widget-no-id"
-                  className="cursor-pointer text-xs font-semibold"
-                >
-                  {t('playlistSettings.basic.showInWidgetNo')}
-                </Label>
-              }
-              rightLabel={
-                <Label
-                  htmlFor="widget-yes-id"
-                  className="cursor-pointer text-xs font-semibold"
-                >
-                  {t('playlistSettings.basic.showInWidgetYes')}
-                </Label>
-              }
-              onChange={(value) => {
-                patchDebounced(playlist.id, {
-                  show_in_widget: value === 'right',
-                })
-                setShowInWidget(value === 'right')
-              }}
-              defaultValue={playlist.show_in_widget ? 'right' : 'left'}
-            />
           </div>
         </div>
       </div>

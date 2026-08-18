@@ -10,7 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src._types import BlockListScope, ChatRuleScope, ContentSettingScope, DonationRuleScope, Platform, Status
 from src.database import Base, TimestampMixin, UUIDMixin
-from src.orm.moderator import PlaylistModerator
+from src.orm.moderator import ModeratorPlaylistAccess
 
 
 def generic_mode_settings():
@@ -87,7 +87,6 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
     # Флаги видимости
     is_public: Mapped[bool] = mapped_column(default=False, nullable=False)
     favorites_count: Mapped[int] = mapped_column(default=0, nullable=False, server_default="0")
-    show_in_widget: Mapped[bool] = mapped_column(default=False, nullable=False)
     is_allow_external_requests: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     # Параметры проигрывания и ограничения
@@ -121,7 +120,7 @@ class Playlist(Base, UUIDMixin, TimestampMixin):
         back_populates="playlist", cascade="all, delete-orphan", lazy="selectin"
     )
     block_list: Mapped[list["BlockList"]] = relationship(back_populates="playlist", cascade="all, delete-orphan", lazy="selectin")
-    moderators: Mapped[list["PlaylistModerator"]] = relationship(
+    moderator_access: Mapped[list["ModeratorPlaylistAccess"]] = relationship(
         back_populates="playlist", cascade="all, delete-orphan", lazy="selectin"
     )
 

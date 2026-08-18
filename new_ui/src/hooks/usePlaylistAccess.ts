@@ -22,7 +22,12 @@ export function usePlaylistAccess(playlistId?: string): PlaylistAccessState {
   const [loading, setLoading] = useState<boolean>(true)
 
   const loadAccess = useCallback(async () => {
-    if (!playlistId) {
+    if (
+      !playlistId ||
+      playlistId === 'undefined' ||
+      playlistId === 'null' ||
+      !playlistId.trim()
+    ) {
       setAccessInfo(null)
       setLoading(false)
       return
@@ -54,11 +59,22 @@ export function usePlaylistAccess(playlistId?: string): PlaylistAccessState {
 
   const isOwner = accessInfo?.access_level === 'owner'
   const isModerator =
-    Boolean(accessInfo) && accessInfo?.access_level !== 'owner' && accessInfo?.access_level !== 'none'
+    Boolean(accessInfo) &&
+    accessInfo?.access_level !== 'owner' &&
+    accessInfo?.access_level !== 'none'
 
-  const canManageQueue = isOwner || Boolean(accessInfo?.permissions?.can_manage_queue)
-  const canManagePlayback = isOwner || Boolean(accessInfo?.permissions?.can_manage_playback)
-  const canManageSettings = isOwner || Boolean(accessInfo?.permissions?.can_manage_settings)
+  const canManageQueue =
+    isOwner ||
+    Boolean(accessInfo?.can_manage_tracks) ||
+    Boolean((accessInfo as any)?.permissions?.can_manage_queue)
+  const canManagePlayback =
+    isOwner ||
+    Boolean(accessInfo?.can_manage_tracks) ||
+    Boolean((accessInfo as any)?.permissions?.can_manage_playback)
+  const canManageSettings =
+    isOwner ||
+    Boolean(accessInfo?.can_manage_settings) ||
+    Boolean((accessInfo as any)?.permissions?.can_manage_settings)
 
   return {
     accessInfo,

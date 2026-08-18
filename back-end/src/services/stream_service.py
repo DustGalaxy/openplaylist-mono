@@ -29,6 +29,10 @@ class StreamService:
         await repo.upsert(db_session, user_id, token_hash)
 
     async def get_current_playing_track(self, db_session: AsyncSession, user_id: UUID) -> dict[str, Any] | None:
+        from src.dal._redis.player_repository import player_repository
+        state = await player_repository.get_player_state(user_id)
+        if state and state.current_track_data:
+            return state.current_track_data
         data = await get_playlist_logs_repository().get_last_playnow(db_session, user_id)
         return data.event_data if data else None
 

@@ -20,12 +20,17 @@ export const createSlotSlice: StateCreator<
     page: { playlistId: null, currentTrackId: null },
   },
 
-  setSlotPlaylist: async (slot, playlistId) => {
+  setSlotPlaylist: (slot, rawPlaylistId) => {
+    const playlistId =
+      rawPlaylistId &&
+      rawPlaylistId !== 'undefined' &&
+      rawPlaylistId !== 'null' &&
+      rawPlaylistId.trim()
+        ? rawPlaylistId.trim()
+        : null
+
     const prev = get().slots[slot].playlistId
     if (prev === playlistId) return
-
-    if (prev) get().detachPlaylist(prev)
-    if (playlistId) await get().attachPlaylist(playlistId)
 
     set((s) => ({
       slots: {
@@ -37,6 +42,9 @@ export const createSlotSlice: StateCreator<
         },
       },
     }))
+
+    if (prev) get().detachPlaylist(prev)
+    if (playlistId) void get().attachPlaylist(playlistId)
 
     if (slot === 'player' && !playlistId) savePlayerSession(null)
   },

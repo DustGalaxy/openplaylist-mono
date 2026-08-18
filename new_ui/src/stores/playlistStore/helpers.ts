@@ -37,14 +37,7 @@ export function toPlaylist(input: InputPlaylist): Playlist {
   return { ...input, now_playing, track_data }
 }
 
-// ─── socket ────────────────────────────────────────────────────────
-export function safeEmit(
-  s: Socket | undefined | null,
-  event: string,
-  payload: any,
-) {
-  if (s !== undefined && s !== null && s.emit) s.emit(event, payload)
-}
+export { safeEmit } from '@/lib/socketUtils'
 
 export function buildViewerFeed(
   pl: Playlist,
@@ -90,6 +83,7 @@ export function toTrack(
     priority: wire.priority as unknown as number, // computePriority reads this as the raw label string first
     title: wire.title,
     duration: formatTime(wire.duration),
+    duration_seconds: wire.duration,
     requester_nickname: wire.requester_nickname,
     created_at: wire.created_at,
     source: wire.source,
@@ -306,28 +300,46 @@ export function isVipTrack(track: Track, modeSettings: ModeSettings): boolean {
 }
 
 export function isBackgroundTrack(
-  mode: PlaylistMode,
-  background_track_ids: Array<string>,
+  mode: PlaylistMode | string,
+  background_track_ids_or_settings:
+    | Array<string>
+    | ModeSettings
+    | { background_track_ids?: Array<string>; backgroundTrackIds?: Array<string> }
+    | undefined,
   trackId: string,
 ): boolean {
-  return mode === 'stream' && background_track_ids.includes(trackId)
+  if (String(mode).toLowerCase() !== 'stream') return false
+  if (!background_track_ids_or_settings) return false
+  if (Array.isArray(background_track_ids_or_settings)) {
+    return background_track_ids_or_settings.includes(trackId)
+  }
+  const ids =
+    (background_track_ids_or_settings as any).backgroundTrackIds ||
+    (background_track_ids_or_settings as any).background_track_ids ||
+    []
+  return Array.isArray(ids) && ids.includes(trackId)
 }
 
 export function splitQueue(playlist: Playlist): SplitQueue {
   const modeSettings = getActiveModeSettings(playlist)
+  const bgIds: Array<string> =
+    (modeSettings as any)?.backgroundTrackIds?.length
+      ? (modeSettings as any).backgroundTrackIds
+      : (modeSettings as any)?.background_track_ids?.length
+        ? (modeSettings as any).background_track_ids
+        : Array.isArray(playlist.background_track_ids)
+          ? playlist.background_track_ids
+          : []
 
-  const pool: Array<Track> =
-    playlist.mode === 'stream'
-      ? playlist.track_data.filter(
-          (t) => !playlist.background_track_ids.includes(t.id),
-        )
-      : playlist.track_data
+  const isStream = String(playlist.mode).toLowerCase() === 'stream'
+  const pool: Array<Track> = isStream
+    ? playlist.track_data.filter((t) => !bgIds.includes(t.id))
+    : playlist.track_data
 
-  const background: Array<Track> =
-    playlist.mode === 'stream'
-      ? playlist.background_track_ids
-          .map((id) => playlist.track_data.find((t) => t.id === id))
-          .filter((t): t is Track => t !== undefined)
+  const background: Array<Track> = isStream
+    ? bgIds
+        .map((id) => playlist.track_data.find((t) => t.id === id))
+        .filter((t): t is Track => t !== undefined)
       : []
 
   if (modeSettings.priority_break_point <= 0) {
@@ -358,9 +370,17 @@ export function isLastInGroup(
 
 export function getTrackGroup(track: Track | undefined, playlist: Playlist) {
   if (!track) return undefined
-  else if (
-    isBackgroundTrack(playlist.mode, playlist.background_track_ids, track.id)
-  )
+  const modeSettings = getActiveModeSettings(playlist)
+  const bgIds =
+    (modeSettings as any)?.backgroundTrackIds?.length
+      ? (modeSettings as any).backgroundTrackIds
+      : (modeSettings as any)?.background_track_ids?.length
+        ? (modeSettings as any).background_track_ids
+        : Array.isArray(playlist.background_track_ids)
+          ? playlist.background_track_ids
+          : []
+
+  if (isBackgroundTrack(playlist.mode, bgIds, track.id))
     return 'background'
   else if (isVipTrack(track, playlist.mode_settings[playlist.mode]))
     return 'vip'
@@ -370,12 +390,15 @@ export function getTrackGroup(track: Track | undefined, playlist: Playlist) {
 export function pickNextFromGroup(
   list: Array<Track>,
   currentId: string | undefined,
-  shuffle: boolean,
-  repeatAll: boolean,
+  orderModeOrShuffle: SortSettings['order_mode'] | boolean = 'auto',
+  repeatAll: boolean = false,
 ): Track | undefined {
   if (list.length === 0) return undefined
 
-  if (shuffle) {
+  const isRandom =
+    orderModeOrShuffle === 'random' || orderModeOrShuffle === true
+
+  if (isRandom) {
     const pool = currentId ? list.filter((t) => t.id !== currentId) : list
     if (pool.length > 0) return pool[Math.floor(Math.random() * pool.length)]
     return repeatAll ? list[Math.floor(Math.random() * list.length)] : undefined
@@ -394,7 +417,6 @@ export interface NextTrackDecision {
   removeCurrentId: string | undefined
   resumePositionSeconds: number | undefined
   consumedPausedBackground: boolean
-  consumedPausedRegular: boolean
 }
 
 export function resolveNextTrack(
@@ -406,47 +428,81 @@ export function resolveNextTrack(
 }
 
 export function resolveStaticNext(
-  currentTrackId: string | undefined,
+  currentTrackOrId: Track | string | undefined,
   vip: Array<Track>,
   regular: Array<Track>,
   currentWasVip: boolean,
-  shuffle: boolean,
-  repeatAll: boolean,
-  resumed: PausedBackground | null,
+  vipOrder: SortSettings['order_mode'] | boolean = 'auto',
+  regularOrder: SortSettings['order_mode'] | boolean = 'auto',
+  repeatAll: boolean = false,
+  resumeFromPausedBackground?:
+    | (() => PausedBackground | null | undefined)
+    | PausedBackground
+    | null,
 ) {
+  const currentTrackId =
+    typeof currentTrackOrId === 'object' && currentTrackOrId !== null
+      ? currentTrackOrId.id
+      : currentTrackOrId
+
   const currentGroup = currentWasVip ? vip : regular
-  if (currentTrackId === undefined)
+  const currentOrder = currentWasVip ? vipOrder : regularOrder
+
+  if (currentTrackId === undefined) {
+    const firstVip = vip[0]?.id
+    const firstReg = regular[0]?.id
     return {
-      trackId: vip[0]?.id ?? regular[0]?.id,
+      trackId: firstVip ?? firstReg,
       resumePositionSeconds: undefined,
-      consumedPausedRegular: false,
-    }
-  if (!isLastInGroup(currentGroup, currentTrackId)) {
-    return {
-      trackId: pickNextFromGroup(currentGroup, currentTrackId, shuffle, false)
-        ?.id,
-      resumePositionSeconds: undefined,
-      consumedPausedRegular: false,
+      consumedPausedBackground: false,
     }
   }
-  if (currentWasVip && resumed)
+
+  if (!isLastInGroup(currentGroup, currentTrackId)) {
+    const next = pickNextFromGroup(
+      currentGroup,
+      currentTrackId,
+      currentOrder,
+      false,
+    )
+    return {
+      trackId: next?.id,
+      resumePositionSeconds: undefined,
+      consumedPausedBackground: false,
+    }
+  }
+
+  const getResumed = (): PausedBackground | null | undefined => {
+    if (typeof resumeFromPausedBackground === 'function') {
+      return resumeFromPausedBackground()
+    }
+    return resumeFromPausedBackground
+  }
+
+  const resumed = getResumed()
+  if (currentWasVip && resumed) {
     return {
       trackId: resumed.track_id,
       resumePositionSeconds: resumed.position_seconds,
-      consumedPausedRegular: true,
+      consumedPausedBackground: true,
     }
+  }
 
-  let trackId = undefined
+  let trackId: string | undefined = undefined
   if (currentWasVip) {
-    trackId = regular[0] ? regular[0].id : repeatAll ? vip[0]?.id : undefined
+    trackId = regular[0]
+      ? regular[0].id
+      : repeatAll
+        ? (vip[0]?.id ?? regular[0]?.id)
+        : undefined
   } else {
-    trackId = repeatAll ? (vip[0] ? vip[0].id : regular[0].id) : undefined
+    trackId = repeatAll ? (vip[0]?.id ?? regular[0]?.id) : undefined
   }
 
   return {
-    trackId: trackId,
+    trackId,
     resumePositionSeconds: undefined,
-    consumedPausedRegular: false,
+    consumedPausedBackground: false,
   }
 }
 
@@ -457,87 +513,115 @@ export function resolveFlowStreamNext(
   vip: Array<Track>,
   regular: Array<Track>,
   background: Array<Track>,
-  vipOrder: OrderMode,
-  regularOrder: OrderMode,
-  resumeFromPausedBackground: () => PausedBackground | undefined,
+  vipOrder: SortSettings['order_mode'] | boolean,
+  regularOrder: SortSettings['order_mode'] | boolean,
+  resumeFromPausedBackground: () => PausedBackground | null | undefined,
 ): NextTrackDecision {
-  // Определяем, относится ли ТЕКУЩИЙ трек к VIP или Regular
+  const bgIds =
+    Array.isArray(pl.background_track_ids) && pl.background_track_ids.length > 0
+      ? pl.background_track_ids
+      : (modeSettings as any)?.backgroundTrackIds ||
+        (modeSettings as any)?.background_track_ids ||
+        []
+
   const currentWasVip =
     currentTrack !== undefined && isVipTrack(currentTrack, modeSettings)
   const currentWasBackground = currentTrack
-    ? isBackgroundTrack(pl.mode, modeSettings, currentTrack.id)
+    ? isBackgroundTrack(pl.mode, bgIds, currentTrack.id)
     : false
   const currentWasRegular =
     currentTrack !== undefined && !currentWasVip && !currentWasBackground
 
+  const isStream = String(pl.mode).toLowerCase() === 'stream'
+
   // 1. ПРИОРИТЕТ 1: VIP ТРЕКИ
-  // Если текущий был VIP, он уходит из очереди. Для всех остальных случаев берём весь список vip.
   const remainingVip = currentWasVip
     ? vip.filter((t) => t.id !== currentTrack.id)
     : vip
 
   if (remainingVip.length > 0) {
-    // Вся группа VIP еще не отиграла -> берем самый верхний доступный трек
-    const nextVip = pickNextFromGroup(remainingVip, undefined, vipOrder, false)
+    const isRandom = vipOrder === 'random' || vipOrder === true
+    const nextVip = currentWasVip
+      ? pickNextFromGroup(vip, currentTrack.id, vipOrder, false) ?? remainingVip[0]
+      : isRandom
+        ? pickNextFromGroup(remainingVip, undefined, 'random', false)
+        : remainingVip[0]
+
     return {
       nextTrackId: nextVip?.id,
-      removeCurrentId: currentWasVip ? currentTrack.id : undefined,
+      removeCurrentId:
+        isStream && currentWasVip ? currentTrack.id : undefined,
       resumePositionSeconds: undefined,
       consumedPausedBackground: false,
     }
   }
 
   // 2. ПРИОРИТЕТ 2: REGULAR ТРЕКИ
-  // VIP пуст. Если текущий трек был Regular, он завершился и должен быть удален.
   const remainingRegular = currentWasRegular
     ? regular.filter((t) => t.id !== currentTrack.id)
     : regular
 
   if (remainingRegular.length > 0) {
-    // Берём самый верхний трек из Regular
-    const nextRegular = pickNextFromGroup(
-      remainingRegular,
-      undefined,
-      regularOrder,
-      false,
-    )
+    const isRandom = regularOrder === 'random' || regularOrder === true
+    const nextRegular = currentWasRegular
+      ? pickNextFromGroup(regular, currentTrack.id, regularOrder, false) ??
+        remainingRegular[0]
+      : isRandom
+        ? pickNextFromGroup(remainingRegular, undefined, 'random', false)
+        : remainingRegular[0]
+
     return {
       nextTrackId: nextRegular?.id,
-      // Удаляем либо завершившийся VIP (который только что доиграл), либо завершившийся Regular
       removeCurrentId:
-        currentWasVip || currentWasRegular ? currentTrack.id : undefined,
+        isStream && (currentWasVip || currentWasRegular)
+          ? currentTrack.id
+          : undefined,
       resumePositionSeconds: undefined,
       consumedPausedBackground: false,
     }
   }
 
   // 3. ПРИОРИТЕТ 3: ВОЗВРАТ ИЗ ПАУЗЫ (BACKGROUND)
-  // И VIP, и Regular полностью пусты -> проверяем, не прерывали ли мы фоновый трек ранее
   const resumed = resumeFromPausedBackground()
   if (resumed) {
     return {
       nextTrackId: resumed.track_id,
       removeCurrentId:
-        currentWasVip || currentWasRegular ? currentTrack.id : undefined,
+        isStream && (currentWasVip || currentWasRegular)
+          ? currentTrack.id
+          : undefined,
       resumePositionSeconds: resumed.position_seconds,
       consumedPausedBackground: true,
     }
   }
 
   // 4. ПРИОРИТЕТ 4: ФОНОВЫЕ ТРЕКИ (BACKGROUND)
-  // Если стартанули с нуля (нет текущего) или доиграл фоновый трек — крутим фоновую очередь по кругу
-  const bgOrder = pl.shuffle ? 'random' : 'auto'
-  const nextBg = pickNextFromGroup(
-    background,
-    currentWasBackground ? currentTrack.id : undefined,
-    bgOrder,
-    true,
-  )
+  if (background.length > 0) {
+    const bgOrder = pl.shuffle ? 'random' : 'auto'
+    const nextBg = pickNextFromGroup(
+      background,
+      currentWasBackground ? currentTrack.id : undefined,
+      bgOrder,
+      true,
+    )
+
+    return {
+      nextTrackId: nextBg?.id,
+      removeCurrentId:
+        isStream && (currentWasVip || currentWasRegular)
+          ? currentTrack.id
+          : undefined,
+      resumePositionSeconds: undefined,
+      consumedPausedBackground: false,
+    }
+  }
 
   return {
-    nextTrackId: nextBg?.id,
+    nextTrackId: undefined,
     removeCurrentId:
-      currentWasVip || currentWasRegular ? currentTrack.id : undefined,
+      isStream && (currentWasVip || currentWasRegular)
+        ? currentTrack.id
+        : undefined,
     resumePositionSeconds: undefined,
     consumedPausedBackground: false,
   }
@@ -554,179 +638,56 @@ export function pickNext(
       removeCurrentId: undefined,
       resumePositionSeconds: undefined,
       consumedPausedBackground: false,
-      consumedPausedRegular: false,
     }
 
+  const modeSettings = getActiveModeSettings(pl)
   const currentTrack = currentTrackId
     ? pl.track_data.find((t) => t.id === currentTrackId)
     : undefined
   const { vip, regular, background } = splitQueue(pl)
-  const currentTrackGroup = getTrackGroup(currentTrack, pl)
   const repeatAll = pl.mode === 'stream' || entry.local.repeatMode === 'all'
-  const removeCurrentId =
-    pl.mode === 'stream' && currentTrackGroup !== 'background'
-      ? currentTrackId
-      : undefined
 
-  if (entry.local.shuffle) {
-    if (vip.length || regular.length) {
-      const next = [...vip, ...regular][
-        Math.floor(Math.random() * (vip.length + regular.length))
-      ]
-      return {
-        nextTrackId: next.id,
-        removeCurrentId: removeCurrentId,
-        resumePositionSeconds: undefined,
-        consumedPausedBackground: false,
-        consumedPausedRegular: true,
-      }
-    }
-  }
+  const isShuffle = pl.shuffle || entry.local.shuffle
+  const vipOrder = isShuffle ? 'random' : modeSettings.sort_settings_vip.order_mode
+  const regularOrder = isShuffle
+    ? 'random'
+    : modeSettings.sort_settings_regular.order_mode
 
   if (pl.mode === 'static') {
+    const currentTrackGroup = getTrackGroup(currentTrack, pl)
     const {
       trackId: nextTrackId,
       resumePositionSeconds,
-      consumedPausedRegular,
+      consumedPausedBackground,
     } = resolveStaticNext(
       currentTrackId,
       vip,
       regular,
       currentTrackGroup === 'vip',
-      false,
+      vipOrder,
+      regularOrder,
       repeatAll,
-      entry.local.paused_regular,
+      entry.local.paused_background || entry.local.paused_regular,
     )
-    console.log('pl = ', pl)
-    console.log('repeatAll', repeatAll)
-    console.log('nextTrackId', nextTrackId)
 
     return {
-      nextTrackId: nextTrackId,
+      nextTrackId,
       removeCurrentId: undefined,
-      resumePositionSeconds: resumePositionSeconds,
-      consumedPausedBackground: false,
-      consumedPausedRegular: consumedPausedRegular,
+      resumePositionSeconds,
+      consumedPausedBackground: !!consumedPausedBackground,
     }
   }
 
-  if (currentTrackGroup === 'vip') {
-    const last = vip.filter((t) => t.id !== currentTrackId)
-    if (last.length)
-      return {
-        nextTrackId: pickNextFromGroup(vip, currentTrackId, false, repeatAll)
-          ?.id,
-        removeCurrentId: removeCurrentId,
-        resumePositionSeconds: undefined,
-        consumedPausedBackground: false,
-        consumedPausedRegular: false,
-      }
-    else if (regular.length) {
-      if (entry.local.paused_regular) {
-        return {
-          nextTrackId: entry.local.paused_regular.track_id,
-          removeCurrentId: removeCurrentId,
-          resumePositionSeconds: entry.local.paused_regular.position_seconds,
-          consumedPausedBackground: false,
-          consumedPausedRegular: true,
-        }
-      } else {
-        return {
-          nextTrackId: regular[0].id,
-          removeCurrentId: removeCurrentId,
-          resumePositionSeconds: undefined,
-          consumedPausedBackground: false,
-          consumedPausedRegular: false,
-        }
-      }
-    } else if (background.length) {
-      if (entry.local.paused_background)
-        return {
-          nextTrackId: entry.local.paused_background.track_id,
-          removeCurrentId: removeCurrentId,
-          resumePositionSeconds: entry.local.paused_background.position_seconds,
-          consumedPausedBackground: true,
-          consumedPausedRegular: false,
-        }
-      else
-        return {
-          nextTrackId: background[0].id,
-          removeCurrentId: removeCurrentId,
-          resumePositionSeconds: undefined,
-          consumedPausedBackground: false,
-          consumedPausedRegular: false,
-        }
-    }
-  } else if (currentTrackGroup === 'regular') {
-    const last = regular.filter((t) => t.id !== currentTrackId)
-    if (last.length)
-      return {
-        nextTrackId: pickNextFromGroup(
-          regular,
-          currentTrackId,
-          false,
-          repeatAll,
-        )?.id,
-        removeCurrentId: removeCurrentId,
-        resumePositionSeconds: undefined,
-        consumedPausedBackground: false,
-        consumedPausedRegular: false,
-      }
-    else if (vip.length) {
-      return {
-        nextTrackId: vip[0].id,
-        removeCurrentId: removeCurrentId,
-        resumePositionSeconds: undefined,
-        consumedPausedBackground: false,
-        consumedPausedRegular: false,
-      }
-    } else if (background.length) {
-      if (entry.local.paused_background)
-        return {
-          nextTrackId: entry.local.paused_background.track_id,
-          removeCurrentId: removeCurrentId,
-          resumePositionSeconds: entry.local.paused_background.position_seconds,
-          consumedPausedBackground: true,
-          consumedPausedRegular: false,
-        }
-      else
-        return {
-          nextTrackId: background[0].id,
-          removeCurrentId: removeCurrentId,
-          resumePositionSeconds: undefined,
-          consumedPausedBackground: false,
-          consumedPausedRegular: false,
-        }
-    }
-  } else if (currentTrackGroup === 'background') {
-    if (vip.length || regular.length) {
-      return {
-        nextTrackId: vip.length ? vip[0].id : regular[0].id,
-        removeCurrentId: undefined,
-        resumePositionSeconds: undefined,
-        consumedPausedBackground: false,
-        consumedPausedRegular: false,
-      }
-    }
-
-    let id = undefined
-    const idx = background.findIndex((t) => t.id === currentTrackId)
-    if (idx === -1) id = background[0].id
-    if (idx + 1 < background.length) id = background[idx + 1].id
-
-    return {
-      nextTrackId: id,
-      removeCurrentId: undefined,
-      resumePositionSeconds: undefined,
-      consumedPausedBackground: false,
-      consumedPausedRegular: false,
-    }
-  }
-  return {
-    nextTrackId: vip[0]?.id ?? regular[0]?.id,
-    removeCurrentId: undefined,
-    resumePositionSeconds: undefined,
-    consumedPausedBackground: false,
-    consumedPausedRegular: false,
-  }
+  // Stream & Flow modes
+  return resolveFlowStreamNext(
+    pl,
+    currentTrack,
+    modeSettings,
+    vip,
+    regular,
+    background,
+    vipOrder,
+    regularOrder,
+    () => entry.local.paused_background,
+  )
 }

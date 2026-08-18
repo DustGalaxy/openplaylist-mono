@@ -22,7 +22,6 @@ class PlaylistSettings(BaseModel):
     is_allow_external_requests: bool
     allow_sources: list[AllowedSource] = Field(default_factory=list)
     is_public: bool
-    show_in_widget: bool
     now_playing: str | None = Field(None)
 
     max_playlist_size: int
@@ -78,7 +77,6 @@ class InternalPlaylistEvent(BaseModel):
     playlist_id: UUID
     playlist_name: str
     playlist_is_public: bool
-    show_in_widget: bool
     user_id: UUID
     user_name: str
 

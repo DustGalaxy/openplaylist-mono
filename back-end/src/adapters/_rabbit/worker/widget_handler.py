@@ -11,9 +11,6 @@ router = RabbitRouter()
 
 @router.subscriber("internal.playlist.widget", playlist_fanout_exchange)
 async def _(event: InternalPlaylistEvent):
-    if not event.show_in_widget:
-        return
-
     match event.event_type:
         case InternalPlaylistEventType.TRACK_PLAY:
             data = (

@@ -35,9 +35,17 @@ export default function Sidebar() {
   const setOpen = useMobileSidebarStore((s) => s.setOpen)
   const location = useLocation()
 
-  // Deduplicate playlists so owned playlists already in favorites do not repeat
+  // Deduplicate playlists so owned playlists already in favorites do not repeat, and exclude invalid IDs
   const favoritedIds = new Set(favorites.map((f) => f.id))
-  const ownedNonFavorites = playlists.filter((p) => !favoritedIds.has(p.id))
+  const ownedNonFavorites = playlists.filter(
+    (p) => p && p.id && p.id !== 'undefined' && !favoritedIds.has(p.id),
+  )
+  const validFavorites = favorites.filter(
+    (f) => f && f.id && f.id !== 'undefined',
+  )
+  const validModerated = moderated.filter(
+    (m) => m && m.id && m.id !== 'undefined',
+  )
 
   const navContent = (
     <>
@@ -78,11 +86,11 @@ export default function Sidebar() {
       )}
 
       {/* Favorites Section */}
-      {favorites.length > 0 && (
+      {validFavorites.length > 0 && (
         <CollapsibleSection
           title={t('sidebar.Favorites', 'Любимые плейлисты')}
           icon={<Heart className="size-3.5 text-red-500 fill-red-500/20" />}
-          items={favorites}
+          items={validFavorites}
           renderItem={(p) => (
             <SidebarItem key={p.id} id={p.id} name={p.name} isFavorite />
           )}
@@ -100,11 +108,11 @@ export default function Sidebar() {
       )}
 
       {/* Moderated Playlists Section */}
-      {moderated.length > 0 && (
+      {validModerated.length > 0 && (
         <CollapsibleSection
           title={t('sidebar.ModeratedPlaylists', 'Модерируемые')}
           icon={<Shield className="size-3.5 text-blue-400" />}
-          items={moderated}
+          items={validModerated}
           renderItem={(m) => <SidebarItem key={m.id} id={m.id} name={m.name} />}
         />
       )}

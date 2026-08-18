@@ -12,7 +12,7 @@ export function usePlayerSessionRestore() {
 
     const session = loadPlayerSession()
     if (!session) {
-      usePlaylistStore.getState().setPlayerSessionRestored()
+      usePlaylistStore.getState().setPlayerSessionRestored(true)
       return
     }
 
@@ -27,7 +27,7 @@ export function usePlayerSessionRestore() {
       if (trackStillExists) {
         usePlaylistStore.getState().setPlayerTrack(session.trackId)
       }
-      usePlaylistStore.getState().setPlayerSessionRestored()
+      usePlaylistStore.getState().setPlayerSessionRestored(true)
     })()
   }, [])
 }

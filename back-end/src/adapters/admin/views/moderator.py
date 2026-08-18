@@ -1,36 +1,65 @@
 from sqladmin import ModelView
 from sqladmin.filters import BooleanFilter
 
-from src.orm.moderator import PlaylistModerator
+from src.orm.moderator import ChannelModerator, ModeratorPlaylistAccess
 
 
-class PlaylistModeratorAdmin(ModelView, model=PlaylistModerator):
-    name = "Playlist Moderator"
-    name_plural = "Playlist Moderators"
+class ChannelModeratorAdmin(ModelView, model=ChannelModerator):
+    name = "Channel Moderator"
+    name_plural = "Channel Moderators"
     icon = "fa-solid fa-user-shield"
 
     column_list = [
-        PlaylistModerator.id,
-        PlaylistModerator.playlist_id,
-        PlaylistModerator.user_id,
-        PlaylistModerator.name,
-        PlaylistModerator.is_active,
-        PlaylistModerator.expires_at,
-        PlaylistModerator.created_at,
+        ChannelModerator.id,
+        ChannelModerator.owner_id,
+        ChannelModerator.user_id,
+        ChannelModerator.name,
+        ChannelModerator.can_control_player,
+        ChannelModerator.can_manage_all_playlists,
+        ChannelModerator.is_active,
+        ChannelModerator.expires_at,
+        ChannelModerator.created_at,
     ]
     column_searchable_list = [
-        PlaylistModerator.name,
-        PlaylistModerator.token,
-        PlaylistModerator.playlist_id,
-        PlaylistModerator.user_id,
+        ChannelModerator.name,
+        ChannelModerator.token,
+        ChannelModerator.owner_id,
+        ChannelModerator.user_id,
     ]
     column_filters = [
-        BooleanFilter(PlaylistModerator.is_active),
+        BooleanFilter(ChannelModerator.is_active),
+        BooleanFilter(ChannelModerator.can_control_player),
+        BooleanFilter(ChannelModerator.can_manage_all_playlists),
     ]
     form_excluded_columns = [
-        PlaylistModerator.created_at,
-        PlaylistModerator.updated_at,
-        PlaylistModerator.playlist,
-        PlaylistModerator.user,
+        ChannelModerator.created_at,
+        ChannelModerator.updated_at,
+        ChannelModerator.owner,
+        ChannelModerator.user,
+        ChannelModerator.playlist_access,
     ]
 
+
+class ModeratorPlaylistAccessAdmin(ModelView, model=ModeratorPlaylistAccess):
+    name = "Moderator Playlist Access"
+    name_plural = "Moderator Playlist Accesses"
+    icon = "fa-solid fa-lock-open"
+
+    column_list = [
+        ModeratorPlaylistAccess.id,
+        ModeratorPlaylistAccess.moderator_id,
+        ModeratorPlaylistAccess.playlist_id,
+        ModeratorPlaylistAccess.can_manage_tracks,
+        ModeratorPlaylistAccess.can_manage_settings,
+        ModeratorPlaylistAccess.created_at,
+    ]
+    column_filters = [
+        BooleanFilter(ModeratorPlaylistAccess.can_manage_tracks),
+        BooleanFilter(ModeratorPlaylistAccess.can_manage_settings),
+    ]
+    form_excluded_columns = [
+        ModeratorPlaylistAccess.created_at,
+        ModeratorPlaylistAccess.updated_at,
+        ModeratorPlaylistAccess.moderator,
+        ModeratorPlaylistAccess.playlist,
+    ]

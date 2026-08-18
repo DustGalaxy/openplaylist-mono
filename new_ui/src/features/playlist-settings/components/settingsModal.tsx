@@ -4,7 +4,6 @@ import { LogOut, Settings, ShieldAlert } from 'lucide-react'
 import TabBasic from './tabBasic.tsx'
 import TabPlatforms from './TabPlatforms.tsx'
 import TabBlock from './tabBlock'
-import TabModerators from './TabModerators'
 import { Label } from '@/components/ui/label'
 import Btn from '@/components/ui/my-btn'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -108,7 +107,7 @@ export function SettingsModalInner() {
           <TabsList
             className={`w-full grid ${
               isOwner
-                ? 'grid-cols-2 sm:grid-cols-5'
+                ? 'grid-cols-2 sm:grid-cols-4'
                 : isModerator
                   ? 'grid-cols-2 sm:grid-cols-4'
                   : 'grid-cols-2 sm:grid-cols-3'
@@ -124,14 +123,9 @@ export function SettingsModalInner() {
               {t('playlistSettings.tabs.block')}
             </TabsTrigger>
             {isOwner && (
-              <>
-                <TabsTrigger className={retroTabStyles} value="moderators">
-                  {t('playlistSettings.tabs.moderators', 'Модерация')}
-                </TabsTrigger>
-                <TabsTrigger className={retroTabStyles} value="delete">
-                  {t('playlistSettings.tabs.delete')}
-                </TabsTrigger>
-              </>
+              <TabsTrigger className={retroTabStyles} value="delete">
+                {t('playlistSettings.tabs.delete')}
+              </TabsTrigger>
             )}
             {!isOwner && isModerator && (
               <TabsTrigger className={retroTabStyles} value="leave">
@@ -153,51 +147,45 @@ export function SettingsModalInner() {
           </TabsContent>
 
           {isOwner && (
-            <>
-              <TabsContent key="moderationtab" value="moderators">
-                <TabModerators />
-              </TabsContent>
-
-              <TabsContent key="deletetab" value="delete">
-                <div className="gap-1 flex justify-between mb-4">
+            <TabsContent key="deletetab" value="delete">
+              <div className="gap-1 flex justify-between mb-4">
+                <Label className="text-red-500 text-xl">
+                  {t('playlistSettings.delete.title')}
+                </Label>
+                <div className="flex gap-2">
                   <Label className="text-red-500 text-xl">
-                    {t('playlistSettings.delete.title')}
+                    {countToDelete}
                   </Label>
-                  <div className="flex gap-2">
-                    <Label className="text-red-500 text-xl">
-                      {countToDelete}
-                    </Label>
-                    <Btn
-                      className="bg-level-2"
-                      disabled={deleteTimeout || countToDelete === 0}
-                      onClick={() => {
-                        if (countToDelete > 1) {
-                          setCountToDelete(countToDelete - 1)
-                          setDeleteTimeout(true)
-                          setTimeout(() => setDeleteTimeout(false), 1000)
-                        } else if (countToDelete === 1) {
-                          useUserPlaylistRecordsStore
-                            .getState()
-                            .remove(playlist.id)
-                          setCountToDelete(0)
-                          toast.success(
-                            t('playlistSettings.toast.playlistDeleted', {
-                              name: playlist.name,
-                            }),
-                          )
-                        } else {
-                          setCountToDelete(3)
-                        }
-                      }}
-                    >
-                      <div className="py-1 px-2">
-                        {t('playlistSettings.delete.button')}
-                      </div>
-                    </Btn>
-                  </div>
+                  <Btn
+                    className="bg-level-2"
+                    disabled={deleteTimeout || countToDelete === 0}
+                    onClick={() => {
+                      if (countToDelete > 1) {
+                        setCountToDelete(countToDelete - 1)
+                        setDeleteTimeout(true)
+                        setTimeout(() => setDeleteTimeout(false), 1000)
+                      } else if (countToDelete === 1) {
+                        useUserPlaylistRecordsStore
+                          .getState()
+                          .remove(playlist.id)
+                        setCountToDelete(0)
+                        toast.success(
+                          t('playlistSettings.toast.playlistDeleted', {
+                            name: playlist.name,
+                          }),
+                        )
+                      } else {
+                        setCountToDelete(3)
+                      }
+                    }}
+                  >
+                    <div className="py-1 px-2">
+                      {t('playlistSettings.delete.button')}
+                    </div>
+                  </Btn>
                 </div>
-              </TabsContent>
-            </>
+              </div>
+            </TabsContent>
           )}
 
           {!isOwner && isModerator && (

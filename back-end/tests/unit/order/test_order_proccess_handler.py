@@ -78,7 +78,6 @@ async def test_order_proccess_handler_success(mock_ttv_order, mocker):
     mock_playlist.id = uuid4()
     mock_playlist.name = "Main Playlist"
     mock_playlist.is_public = True
-    mock_playlist.show_in_widget = True
 
     mocker.patch(
         "src.adapters._rabbit.worker.order_proccess_handler.add_to_playlist_batch",
@@ -153,7 +152,6 @@ async def test_order_proccess_handler_rejected(mock_ttv_order, mocker):
     mock_playlist.id = uuid4()
     mock_playlist.name = "Main Playlist"
     mock_playlist.is_public = True
-    mock_playlist.show_in_widget = True
 
     mocker.patch(
         "src.adapters._rabbit.worker.order_proccess_handler.add_to_playlist_batch",
