@@ -11,7 +11,7 @@ export default function PlayerBar() {
   const feed = activeMode === 'single' ? singleTrackFeed : playlistFeed
 
   return (
-    <div className="min-h-16 md:h-18 shrink-0 border-t border-accent/40 bg-level-2 px-2.5 sm:px-3 py-1.5 md:py-0 flex items-center shadow-lg">
+    <div className="min-h-20 md:h-22 shrink-0 border-t border-accent/30 bg-level-2/95 backdrop-blur-md px-3 sm:px-4 py-2 flex items-center shadow-2xl z-20">
       <Player feed={feed} />
     </div>
   )
