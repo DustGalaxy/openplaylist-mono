@@ -173,7 +173,7 @@ export function PlaylistQueueInput({
                   ref={priorityInpuRef}
                   value={customPriority}
                   // dir="rtl"
-                  className="border-0 bg-level-2 w-14 focus-visible:ring-0 rounded-r-none [appearance:textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+                  className="border-0 bg-level-2 w-14 h-9 focus-visible:ring-0 rounded-r-none [appearance:textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
                   onChange={handleCustomPriority}
                 />
                 <UpDownBtn inputRef={priorityInpuRef} />
