@@ -33,6 +33,7 @@ class OrderService:
             requester_nickname=order.requester_nickname,
             yt_video_id=yt_video_id,
             title=data["title"],
+            author=data.get("author", "Unknown"),
             duration=data["length"],
             priority=order.priority,
             views=data["views"],

@@ -53,6 +53,7 @@ async def test_init_order_success(order_service, mock_order, mocker):
     res = await order_service.init_order(mock_order, from_owner=True)
 
     assert res.title == "Rick Astley - Never Gonna Give You Up"
+    assert res.author == "RickAstleyVEVO"
     assert res.duration == 212
     assert res.from_owner is True
 

@@ -44,6 +44,7 @@ async def test_init_orders_single_video(sample_web_order, monkeypatch):
     assert len(orders) == 1
     assert orders[0].yt_video_id == "dQw4w9WgXcQ"
     assert orders[0].title == "Rick Astley - Never Gonna Give You Up"
+    assert orders[0].author == "RickAstleyVEVO"
 
 
 @pytest.mark.asyncio

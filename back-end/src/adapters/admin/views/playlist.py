@@ -63,6 +63,7 @@ class OrderAdmin(ModelView, model=Order):
     column_list = [
         Order.id,
         Order.title,
+        Order.author,
         Order.requester_nickname,
         Order.owner_platform_id,
         Order.source,
@@ -73,6 +74,7 @@ class OrderAdmin(ModelView, model=Order):
     ]
     column_searchable_list = [
         Order.title,
+        Order.author,
         Order.yt_video_id,
         Order.requester_nickname,
         Order.requester_id,

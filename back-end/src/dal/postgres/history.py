@@ -94,6 +94,7 @@ class PlaybackHistoryRepository(crud_factory(PlaybackHistory, PlaybackHistorySch
                     playlist_id=history_obj.playlist_id,
                     playlist_name=pl_name,
                     title=order_obj.title,
+                    author=getattr(order_obj, "author", None) or "Unknown",
                     yt_video_id=order_obj.yt_video_id,
                     duration=order_obj.duration,
                     views=order_obj.views,

@@ -38,6 +38,7 @@ class Order(Base, UUIDMixin, TimestampMixin):
 
     yt_video_id: Mapped[str]
     title: Mapped[str]
+    author: Mapped[str] = mapped_column(String(255), nullable=False, default="Unknown", server_default="Unknown")
     duration: Mapped[int]
     views: Mapped[int]
     likes: Mapped[int]

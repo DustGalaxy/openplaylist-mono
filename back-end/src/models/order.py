@@ -59,6 +59,7 @@ class OrderDomain(BaseModel):
 
     yt_video_id: str
     title: str
+    author: str = "Unknown"
     duration: int
     views: int
     likes: int
@@ -116,6 +117,7 @@ class OrderCreate(BaseModel):
 
     yt_video_id: str
     title: str
+    author: str = "Unknown"
     duration: int
     views: int
     likes: int

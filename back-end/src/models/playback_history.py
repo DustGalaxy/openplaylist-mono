@@ -28,6 +28,7 @@ class PlaybackHistoryItemResponse(BaseModel):
     playlist_id: UUID
     playlist_name: str
     title: str
+    author: str = "Unknown"
     yt_video_id: str
     duration: int
     views: int
