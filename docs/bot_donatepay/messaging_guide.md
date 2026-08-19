@@ -3,8 +3,8 @@
 В данном руководстве подробно и простым языком разбирается, как устроен слой взаимодействия с брокером сообщений **RabbitMQ** в микросервисе `bot_donatepay`.
 
 Мы детально разберем два ключевых файла:
-1. [`src/messaging/amqp-client.ts`](file:///e:/vs-code-projects/openplaylist-mono/bot_donatepay/src/messaging/amqp-client.ts) — шлюз для работы с RabbitMQ (подключение, очереди, отправка сообщений и RPC).
-2. [`src/messaging/command-handlers.ts`](file:///e:/vs-code-projects/openplaylist-mono/bot_donatepay/src/messaging/command-handlers.ts) — обработчики входящих команд от бэкенда (подключить/отключить стримера).
+1. [`src/messaging/amqp-client.ts`](../../bot_donatepay/src/messaging/amqp-client.ts) — шлюз для работы с RabbitMQ (подключение, очереди, отправка сообщений и RPC).
+2. [`src/messaging/command-handlers.ts`](../../bot_donatepay/src/messaging/command-handlers.ts) — обработчики входящих команд от бэкенда (подключить/отключить стримера).
 
 ---
 

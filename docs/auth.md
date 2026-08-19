@@ -7,6 +7,7 @@
 ## 1. Архитектурный обзор (Architecture Overview)
 
 Подсистема авторизации состоит из 4 ключевых компонентов:
+
 1. **Безопасная классическая аутентификация (Argon2id + Email Verification)**:
    - Использование криптографического алгоритма **Argon2id** (`argon2-cffi`) для хеширования паролей с проверкой необходимости перехеширования (`check_needs_rehash`).
    - Двухэтапная регистрация с сохранением временного состояния пользователя в Redis (`email_new_user_data:{email}:{session_id}`) до подтверждения email.
@@ -202,6 +203,7 @@ stateDiagram-v2
 ## 3. Детальная спецификация компонентов и таблиц
 
 ### 3.1. Схема базы данных (PostgreSQL Models & Tables)
+
 1. **`auth_user` (`src/models/auth_user.py` / `src/orm/auth_user.py`)**:
    - `id`: UUID (Primary Key).
    - `email`: String (Unique, Indexed).
@@ -229,6 +231,7 @@ stateDiagram-v2
    - `expires_at`: BigInteger Timestamp.
 
 ### 3.2. Безопасность и алгоритмы шифрования
+
 - **Password Hashing**: `Argon2id` с параметрами по умолчанию от `argon2-cffi`. Проверка устаревания параметров через `hasher.check_needs_rehash(user.password)`.
 - **JWT Signatures**: `PyJWT` алгоритм `HS256`. Ключ `JWT_SECRET_KEY`, время жизни сессии задается `SESSION_LIVE_TIME` (по умолчанию 30 дней).
 - **Cookie Security**:
@@ -238,11 +241,15 @@ stateDiagram-v2
   - `samesite`: `lax` / `strict`
 
 ### 3.3. Брандмауэр и зависимость авторизации (`CURR_USER`)
+
 В FastAPI эндпоинтах авторизация внедряется через зависимость:
+
 ```python
 CURR_USER = Annotated[User, Depends(auth_service.get_current_user)]
 ```
+
 При каждом запросе:
+
 1. Зависимость `APIKeyCookie` извлекает токен из куки `settings.COOKIE_NAME`.
 2. `auth_service.get_current_user` декодирует JWT и сверяет подпись.
 3. Проверяется срок действия (`exp`).
