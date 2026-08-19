@@ -32,6 +32,7 @@ import { useAppSettingsStore } from '@/stores/appSettingsStore'
 import { useLayoutStore } from '@/stores/layoutStore'
 import { usePlaylistStore } from '@/stores/playlistStore'
 import { usePlaybackStore } from '@/stores/playbackStore'
+import { useAuthStore } from '@/stores/authStore'
 import { fetchModeratedChannels } from '@/api/api-moderators'
 
 const RATES = [1, 1.5, 2] as const
@@ -156,7 +157,10 @@ export default function Player({
       : parseDurationSeconds(track?.duration_seconds ?? track?.duration)
 
   const safePlayedSeconds =
-    typeof playedSeconds === 'number' && !isNaN(playedSeconds) && isFinite(playedSeconds) && playedSeconds >= 0
+    typeof playedSeconds === 'number' &&
+    !isNaN(playedSeconds) &&
+    isFinite(playedSeconds) &&
+    playedSeconds >= 0
       ? playedSeconds
       : 0
 
@@ -169,12 +173,16 @@ export default function Player({
       endedHandledTrackIdRef.current = null
       setPlayed(0)
       setPlayedSeconds(0)
-      const parsedDur = parseDurationSeconds(track.duration_seconds ?? track.duration)
+      const parsedDur = parseDurationSeconds(
+        track.duration_seconds ?? track.duration,
+      )
       if (parsedDur > 0) {
         setDuration(parsedDur)
       }
     } else if (track) {
-      const parsedDur = parseDurationSeconds(track.duration_seconds ?? track.duration)
+      const parsedDur = parseDurationSeconds(
+        track.duration_seconds ?? track.duration,
+      )
       if (parsedDur > 0 && !duration) {
         setDuration(parsedDur)
       }
@@ -209,9 +217,7 @@ export default function Player({
     const interval = window.setInterval(() => {
       setPlayedSeconds((prev) => {
         const safePrev =
-          typeof prev === 'number' && !isNaN(prev) && isFinite(prev)
-            ? prev
-            : 0
+          typeof prev === 'number' && !isNaN(prev) && isFinite(prev) ? prev : 0
         if (safeDuration > 0 && safePrev >= safeDuration) {
           return safePrev
         }
@@ -281,21 +287,6 @@ export default function Player({
     feed.setRepeatMode(modes[nextIndex])
   }
 
-  const toggleBroadcastWidget = async () => {
-    const nextVal = !broadcastToWidget
-    setBroadcastToWidget(nextVal)
-    if (activeChannel?.owner_id) {
-      try {
-        await setPlayerBroadcastToWidget(activeChannel.owner_id, {
-          enabled: nextVal,
-          client_id: CLIENT_ID,
-        })
-      } catch (err) {
-        console.error('Failed to toggle widget broadcast:', err)
-      }
-    }
-  }
-
   return (
     <div
       className={cn(
@@ -359,7 +350,7 @@ export default function Player({
                         const dur =
                           safeDuration > 0
                             ? safeDuration
-                            : (e.currentTarget?.duration || 1)
+                            : e.currentTarget?.duration || 1
                         setPlayed(Math.min(1, Math.max(0, ps / dur)))
                       }
                     }
@@ -448,9 +439,9 @@ export default function Player({
             />
           )}
           <div className="min-w-0 flex flex-col flex-1 justify-center">
-            <div className="flex items-center gap-1.5 min-w-0">
+            <div className="flex items-center gap-1 min-w-0">
               {feed.feedId === 'single' ? (
-                <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-wider text-accent px-1.5 py-0.5 rounded bg-level-1 border border-accent/40 shrink-0">
+                <span className="inline-flex items-center text-[10px] font-bosemiboldld uppercase tracking-wider text-accent px-1.5 py-0.5 rounded bg-level-1 border border-accent/40 shrink-0">
                   Предпросмотр
                 </span>
               ) : (
@@ -463,22 +454,22 @@ export default function Player({
                   </span>
                 )
               )}
-              <span
-                className="text-xs sm:text-sm text-text-main truncate font-semibold tracking-tight"
-                title={track?.title}
-              >
-                {track?.title || 'Нет трека'}
-              </span>
+              {track?.requester_nickname && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded  bg-level-1 border border-accent/20 font-semibold text-text-secondary truncate shrink-0">
+                  Заказ: {track.requester_nickname}
+                </span>
+              )}
             </div>
+            <span
+              className="text-xs sm:text-sm text-text-main truncate font-semibold tracking-tight"
+              title={track?.title}
+            >
+              {track?.title || 'Нет трека'}
+            </span>
             <div className="flex items-center gap-1.5 text-[11px] text-text-secondary truncate mt-0.5">
               <span className="truncate">
                 {track?.author || track?.from_owner || 'OpenPlaylist'}
               </span>
-              {track?.requester_nickname && (
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-accent/15 text-accent border border-accent/30 font-medium truncate shrink-0">
-                  Заказ: {track.requester_nickname}
-                </span>
-              )}
             </div>
           </div>
         </div>
@@ -590,7 +581,10 @@ export default function Player({
           <Btn
             onClick={() => setHidden(!hidden)}
             isActive={!hidden}
-            aria-label={t('controls.toggleVideo', 'Toggle video player display')}
+            aria-label={t(
+              'controls.toggleVideo',
+              'Toggle video player display',
+            )}
             title={hidden ? 'Открыть видео' : 'Скрыть видео'}
             className={controBtnStyle}
           >

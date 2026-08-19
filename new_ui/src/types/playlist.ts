@@ -78,6 +78,7 @@ export interface Track {
   yt_video_id: string
   priority: number
   title: string
+  author: string
   duration: string
   requester_nickname: string
   created_at: string // ISO

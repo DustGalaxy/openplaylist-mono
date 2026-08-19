@@ -1,17 +1,14 @@
 import React, { useState } from 'react'
 import {
-  ChevronDown,
+  Cast,
   Headphones,
   ListMusic,
-  Play,
-  RadioTower,
   RefreshCw,
   Settings2,
   Shield,
   SlidersHorizontal,
   Square,
   Trash2,
-  X,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import Btn from '@/components/ui/my-btn'
@@ -23,6 +20,7 @@ import {
 import { cn, formatTime } from '@/lib/utils'
 import { usePlaybackStore } from '@/stores/playbackStore'
 import { usePlaylistStore } from '@/stores/playlistStore'
+import { useAuthStore } from '@/stores/authStore'
 import { useAppSettingsStore } from '@/stores/appSettingsStore'
 import { useUpNextFeed } from '@/hooks/useUpNextFeed'
 import { setPlayerBroadcastToWidget } from '@/api/api-player'
@@ -48,6 +46,8 @@ export function PlayerOptionsPopover({
   const [isOpen, setIsOpen] = useState(false)
   const [deletingTrackId, setDeletingTrackId] = useState<string | null>(null)
 
+  const user = useAuthStore((s) => s.user)
+
   const {
     playerMode,
     setPlayerMode,
@@ -70,12 +70,20 @@ export function PlayerOptionsPopover({
 
   const upNextTracks = useUpNextFeed(playlistId, currentTrackId, 5)
 
+  const isOwnChannelSelected = Boolean(
+    activeChannel?.is_owner ||
+      (!activeChannel && user) ||
+      (user && activeChannel?.owner_id === user.id),
+  )
+
   const toggleBroadcastWidget = async () => {
     const nextVal = !broadcastToWidget
     setBroadcastToWidget(nextVal)
-    if (activeChannel?.owner_id) {
+    const targetOwnerId =
+      activeChannel?.owner_id || user?.id || usePlaylistStore.getState().userId
+    if (targetOwnerId) {
       try {
-        await setPlayerBroadcastToWidget(activeChannel.owner_id, {
+        await setPlayerBroadcastToWidget(targetOwnerId, {
           enabled: nextVal,
           client_id: CLIENT_ID,
         })
@@ -190,7 +198,7 @@ export function PlayerOptionsPopover({
         </div>
 
         {/* Section 2: Channel Selector (Moderation) - Only in Control Mode */}
-        {isControlMode && moderatedChannels.length > 0 && (
+        {isControlMode && (
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
               Канал стрима (Контекст)
@@ -201,7 +209,7 @@ export function PlayerOptionsPopover({
                 onClick={() => setActiveChannel(null)}
                 className={cn(
                   'w-full text-left px-2.5 py-1.5 rounded-md flex items-center justify-between text-xs transition-colors cursor-pointer',
-                  !activeChannel
+                  isOwnChannelSelected
                     ? 'bg-accent/20 text-accent font-semibold border border-accent/30'
                     : 'text-text-main hover:bg-level-2',
                 )}
@@ -210,13 +218,15 @@ export function PlayerOptionsPopover({
                   <Shield className="size-3.5 text-accent shrink-0" />
                   <span className="truncate">Мой канал (Собственный)</span>
                 </div>
-                {!activeChannel && (
+                {isOwnChannelSelected && (
                   <span className="size-2 rounded-full bg-accent shrink-0" />
                 )}
               </button>
 
               {moderatedChannels.map((c) => {
-                const isSelected = activeChannel?.owner_id === c.owner_id
+                const isSelected =
+                  activeChannel?.owner_id === c.owner_id &&
+                  !activeChannel?.is_owner
                 return (
                   <button
                     key={c.moderator_id}
@@ -254,7 +264,7 @@ export function PlayerOptionsPopover({
         {/* Section 3: OBS Stream Widget Toggle */}
         <div className="flex items-center justify-between p-2 rounded-lg bg-level-1 border border-accent/20">
           <div className="flex items-center gap-2">
-            <RadioTower
+            <Cast
               className={cn(
                 'size-4',
                 broadcastToWidget ? 'text-accent' : 'text-text-secondary',

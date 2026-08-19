@@ -22,7 +22,7 @@ export function useSingleTrackFeed(): PlaybackFeed {
       yt_video_id: activeSingleTrack.yt_video_id,
       title: activeSingleTrack.title,
       duration: activeSingleTrack.duration ?? 0,
-      author: activeSingleTrack.author || 'Preview Track',
+      author: activeSingleTrack.author || '[Unknown author]',
       source: 'web',
       from_owner: false,
       priority: 0,
@@ -31,7 +31,8 @@ export function useSingleTrackFeed(): PlaybackFeed {
     }
   }, [activeSingleTrack])
 
-  const feedRepeatMode: RepeatMode = storeRepeatMode === 'once' ? 'once' : 'none'
+  const feedRepeatMode: RepeatMode =
+    storeRepeatMode === 'once' ? 'once' : 'none'
 
   return {
     feedId: 'single',

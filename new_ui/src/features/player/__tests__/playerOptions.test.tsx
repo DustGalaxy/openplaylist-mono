@@ -5,6 +5,8 @@ import React from 'react'
 import { PlayerOptionsPopover } from '../components/PlayerOptionsPopover'
 import { usePlaybackStore } from '@/stores/playbackStore'
 import { usePlaylistStore } from '@/stores/playlistStore'
+import { useAuthStore } from '@/stores/authStore'
+import { setPlayerBroadcastToWidget } from '@/api/api-player'
 import { Platform, PlaylistMode, type Track } from '@/types/playlist'
 import type { PlaybackFeed } from '../types'
 
@@ -13,6 +15,15 @@ vi.mock('react-i18next', () => ({
     t: (key: string, fallback?: string) => fallback || key,
   }),
 }))
+
+vi.mock('@/api/api-player', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, any>>()
+  return {
+    ...actual,
+    fetchPlayerState: vi.fn().mockResolvedValue(null),
+    setPlayerBroadcastToWidget: vi.fn().mockResolvedValue({}),
+  }
+})
 
 const makeMockFeed = (): PlaybackFeed => ({
   feedId: 'player:test',
@@ -54,15 +65,36 @@ const makeTrack = (id: string, title: string): Track => ({
 
 describe('PlayerOptionsPopover', () => {
   beforeEach(() => {
+    vi.clearAllMocks()
+
+    useAuthStore.setState({
+      user: {
+        id: 'user-1',
+        username: 'StreamerUser',
+        bio: '',
+        is_public: true,
+        email_confirmed: true,
+        avatar_url: '',
+      },
+      isAuthenticated: true,
+    })
+
     usePlaybackStore.setState({
       playerMode: 'listen',
-      activeChannel: null,
+      activeChannel: {
+        owner_id: 'user-1',
+        name: 'StreamerUser',
+        is_owner: true,
+        can_control_player: true,
+        can_manage_all_playlists: true,
+      },
       moderatedChannels: [],
       broadcastToWidget: true,
     })
 
     const tracks = [makeTrack('t1', 'Track 1'), makeTrack('t2', 'Track 2'), makeTrack('t3', 'Track 3')]
     usePlaylistStore.setState({
+      userId: 'user-1',
       slots: {
         player: { playlistId: 'pl-1', currentTrackId: 't1' },
       } as any,
@@ -136,7 +168,7 @@ describe('PlayerOptionsPopover', () => {
     expect(usePlaybackStore.getState().playerMode).toBe('listen')
   })
 
-  it('toggles OBS widget broadcast state', () => {
+  it('toggles OBS widget broadcast state and calls API', () => {
     const feed = makeMockFeed()
     render(<PlayerOptionsPopover feed={feed} playlistId="pl-1" currentTrackId="t1" />)
 
@@ -146,6 +178,10 @@ describe('PlayerOptionsPopover', () => {
     fireEvent.click(widgetToggleBtn)
 
     expect(usePlaybackStore.getState().broadcastToWidget).toBe(false)
+    expect(setPlayerBroadcastToWidget).toHaveBeenCalledWith('user-1', {
+      enabled: false,
+      client_id: expect.any(String),
+    })
   })
 
   it('renders Up Next tracks and supports deleting a track', async () => {
@@ -200,5 +236,15 @@ describe('PlayerOptionsPopover', () => {
     // Now channel selector is visible
     expect(screen.getByText('Канал стрима (Контекст)')).toBeDefined()
     expect(screen.getByText('StreamerNick')).toBeDefined()
+
+    // Click moderated channel
+    fireEvent.click(screen.getByText('StreamerNick'))
+    expect(usePlaybackStore.getState().activeChannel?.owner_id).toBe('o1')
+    expect(usePlaybackStore.getState().activeChannel?.is_owner).toBe(false)
+
+    // Switch back to own channel
+    fireEvent.click(screen.getByText('Мой канал (Собственный)'))
+    expect(usePlaybackStore.getState().activeChannel?.owner_id).toBe('user-1')
+    expect(usePlaybackStore.getState().activeChannel?.is_owner).toBe(true)
   })
 })
