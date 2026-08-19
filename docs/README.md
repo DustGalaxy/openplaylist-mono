@@ -6,68 +6,71 @@
 
 ---
 
-## 1. Карта подсистем и разделы документации
+## 1. Карта подсистем монорепозитория
 
 ```mermaid
 mindmap
   root((OpenPlaylist Mono))
-    Playback System
-      Single Leader Model
-      Redis DAL Repository
-      RabbitMQ FastStream
-      Socket.IO /plst_upds & /widget
-    Playlist & Permissions
-      Modes flow / stream / static
-      Moderator RBAC Tokens
-      Settings Patch & Sync
-    Order Pipeline
-      Track Validation & Normalization
-      Batch Processing order.proccess
-      Fanout Event Dispatching
-    Realtime Engine
-      Multi-Namespace Socket.IO
-      Cookie JWT Authentication
-      Room Manager
-    Bot Integrations
-      bot_ttv Twitch IRC & PubSub
+    Core Backend (docs/core/)
+      Playback System (Single Leader, Redis DAL)
+      Playlists & Permissions (RBAC, Modes)
+      Order Pipeline (Batch, Blacklist, Events)
+      Realtime Engine (Socket.IO Namespaces, Rooms)
+      Playlist Audit Logs (Async Worker, PostgreSQL)
+      History & Analytics (Stats Aggregation)
+      Auth & Identity (Argon2id, OAuth2 PKCE)
+    Player & UI (docs/player/)
+      UserPlayer V2 Architecture
+      Client-Driven Playback & Echo Filter
+      Moderation & Remote Control
+    Bots & Integrations (docs/bots/)
+      bot_ttv Twitch IRC & EventSub
       bot_da DonationAlerts Centrifugo
-      bot_donatepay DonatePay Centrifuge JS
+      bot_donatepay DonatePay AMQP & Handlers
       bot_donatex DonateX SignalR Core
-      Token Auto-Refresh Vault
-    History & Analytics
-      Async History Logger
-      Stats Aggregation & Time Windows
-      TaskIQ Retention Cleanup
-    Playlist Audit Logs
-      Async Logs Worker internal.playlist.log
-      Operator Metadata Extraction
-      Realtime Socket.IO Broadcast log:id
-      PostgreSQL Audit Trail
-    Auth & Identity
-      Argon2id Hashing
-      OAuth2 PKCE Strategies
-      Email Collision Resolution Levels 1-4
+      TokenVault Auto-Refresh
+    Architecture & Audits (docs/architecture/)
+      System Flow & Event Audit
 ```
 
 ---
 
-## 2. Разделы документации
+## 2. Структурированный каталог документации
 
-| Раздел | Файл документации | Описание и основные графики |
+### 2.1. Ядро бэкенда (`docs/core/`)
+
+| Раздел | Файл документации | Описание и ключевые компоненты |
 | :--- | :--- | :--- |
-| **Playback** | [`docs/playback.md`](./playback.md) | Система воспроизведения, Модель Единственного Лидера, Redis DAL `PlaybackRepository`, синхронизация плееров и оверлеев OBS. |
-| **Player V2 Quick Ref** | [`docs/quick_reference_player_v2.md`](./quick_reference_player_v2.md) | Быстрая шпаргалка по UserPlayer V2, режимам `listen`/`control`, фильтрации эха и особенностям ReactPlayer 3.4. |
-| **Playlists & Permissions** | [`docs/playlists.md`](./playlists.md) | Управление плейлистами, режимы работы (`flow`, `stream`, `static`), токены модераторов и разграничение прав (`MODERATOR_ACCESS`). |
-| **Orders Pipeline** | [`docs/orders.md`](./orders.md) | Прием и обработка музыкальных заказов, валидация черных списков, батч-воркер `order.proccess`, сфера доменных событий. |
-| **Realtime Engine** | [`docs/realtime.md`](./realtime.md) | Мультинеймспейсный Socket.IO сервер (`/`, `/plst_upds`, `/widget`), авторизация по кукам и динамическое управление комнатами. |
-| **Integrations & Bots Overview** | [`docs/integrations.md`](./integrations.md) | Общий обзор интеграций донат-платформ и ботов, схема `TokenVault`, шина RabbitMQ, жизненный цикл токенов и обработка отключений. |
-| **Twitch Bot (`bot_ttv`)** | [`docs/bot_ttv.md`](./bot_ttv.md) | Микросервис Twitch: прием треков через чат и баллы канала (Channel Points), расчет приоритетов ролей, кэширование в Redis. |
-| **DonationAlerts Bot (`bot_da`)** | [`docs/integrations.md#donationalerts`](./integrations.md#donationalerts) | Микросервис DonationAlerts: протокол Centrifugo WebSocket, HTTP API клиент, автообновление OAuth2 и отправка заказов. |
-| **DonatePay Bot (`bot_donatepay`)** | [`docs/bot_donatepay/messaging_guide.md`](./bot_donatepay/messaging_guide.md) | Микросервис DonatePay (TypeScript): модульная архитектура, WebSocket Centrifuge, AMQP клиент, RPC запросы и Command Handlers. |
-| **DonateX Bot (`bot_donatex`)** | [`docs/integrations.md#donatex`](./integrations.md#donatex) | Микросервис DonateX: интеграция через SignalR Core WebSocket (`/public-donations-hub`), перехват 401, auto-refresh токенов. |
-| **Playlist Audit Logs** | [`docs/playlist_logs.md`](./playlist_logs.md) | Журнал аудита действий операторов/модераторов, асинхронный воркер `logs_handler.py`, хранение в PostgreSQL и живое вещание `log:{playlist_id}`. |
-| **History & Analytics** | [`docs/history_stats.md`](./history_stats.md) | Логирование истории воспроизведения через `history_handler.py`, агрегация статистики по временным окнам и очистка устаревших данных. |
-| **Auth & Identity** | [`docs/auth.md`](./auth.md) | Классическая аутентификация (Argon2id), стратегии OAuth2 PKCE, разрешение коллизий учетных записей (Levels 1–4) и JWT-сессии. |
+| **Playback** | [`docs/core/playback.md`](./core/playback.md) | Система воспроизведения, Модель Единственного Лидера, Redis DAL `PlaybackRepository`, синхронизация плееров и оверлеев OBS. |
+| **Playlists & Permissions** | [`docs/core/playlists.md`](./core/playlists.md) | Управление плейлистами, режимы работы (`flow`, `stream`, `static`), токены модераторов и разграничение прав (`MODERATOR_ACCESS`). |
+| **Orders Pipeline** | [`docs/core/orders.md`](./core/orders.md) | Прием и обработка музыкальных заказов, валидация черных списков, батч-воркер `order.proccess`, сфера доменных событий. |
+| **Realtime Engine** | [`docs/core/realtime.md`](./core/realtime.md) | Мультинеймспейсный Socket.IO сервер (`/`, `/plst_upds`, `/widget`), авторизация по кукам и динамическое управление комнатами. |
+| **Playlist Audit Logs** | [`docs/core/playlist_logs.md`](./core/playlist_logs.md) | Журнал аудита действий операторов/модераторов, асинхронный воркер `logs_handler.py`, хранение в PostgreSQL и живое вещание `log:{playlist_id}`. |
+| **History & Analytics** | [`docs/core/history_stats.md`](./core/history_stats.md) | Логирование истории воспроизведения через `history_handler.py`, агрегация статистики по временным окнам и очистка устаревших данных. |
+| **Auth & Identity** | [`docs/core/auth.md`](./core/auth.md) | Классическая аутентификация (Argon2id), стратегии OAuth2 PKCE, разрешение коллизий учетных записей (Levels 1–4) и JWT-сессии. |
+
+### 2.2. Плеер и интерфейс (`docs/player/`)
+
+| Раздел | Файл документации | Описание и ключевые компоненты |
+| :--- | :--- | :--- |
+| **Player V2 Quick Ref** | [`docs/player/quick_reference_player_v2.md`](./player/quick_reference_player_v2.md) | Быстрая шпаргалка по UserPlayer V2, режимам `listen`/`control`, фильтрации эха и особенностям ReactPlayer 3.4. |
+| **Player & Moderation V2 Concept** | [`docs/player/player_and_moderation_v2_concept.md`](./player/player_and_moderation_v2_concept.md) | Архитектурная концепция User Player V2, удаление `show_in_widget`, клиентский выбор треков и модерация. |
+
+### 2.3. Интеграции и боты (`docs/bots/`)
+
+| Раздел | Файл документации | Описание и ключевые компоненты |
+| :--- | :--- | :--- |
+| **Integrations & Bots Overview** | [`docs/bots/integrations.md`](./bots/integrations.md) | Общий обзор интеграций донат-платформ и ботов, схема `TokenVault`, шина RabbitMQ, жизненный цикл токенов и обработка отключений. |
+| **Twitch Bot (`bot_ttv`)** | [`docs/bots/bot_ttv.md`](./bots/bot_ttv.md) | Микросервис Twitch: прием треков через чат и баллы канала (Channel Points), расчет приоритетов ролей, кэширование в Redis. |
+| **DonationAlerts Bot (`bot_da`)** | [`docs/bots/integrations.md#donationalerts`](./bots/integrations.md#donationalerts) | Микросервис DonationAlerts: протокол Centrifugo WebSocket, HTTP API клиент, автообновление OAuth2 и отправка заказов. |
+| **DonatePay Bot (`bot_donatepay`)** | [`docs/bots/bot_donatepay/messaging_guide.md`](./bots/bot_donatepay/messaging_guide.md) | Микросервис DonatePay (TypeScript): модульная архитектура, WebSocket Centrifuge, AMQP клиент, RPC запросы и Command Handlers. |
+| **DonateX Bot (`bot_donatex`)** | [`docs/bots/integrations.md#donatex`](./bots/integrations.md#donatex) | Микросервис DonateX: интеграция через SignalR Core WebSocket (`/public-donations-hub`), перехват 401, auto-refresh токенов. |
+
+### 2.4. Архитектурный аудит и системные срезы (`docs/architecture/`)
+
+| Раздел | Файл документации | Описание и ключевые компоненты |
+| :--- | :--- | :--- |
+| **System Architecture Audit** | [`docs/architecture/system_audit.md`](./architecture/system_audit.md) | Комплексный аудит связей, потоков событий, очередей RabbitMQ и потенциальных узких мест системы. |
 
 ---
 
