@@ -3,13 +3,10 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from fastapi.testclient import TestClient
 
-from src.database import async_session_maker, create_db, drop_db
-
 from main import app
-
 from src.adapters._redis.broker import RedisAdapter
-from src.settings import settings
 from src.services.auth.auth_service import AuthService
+from src.settings import settings
 
 
 @pytest.fixture(scope="session")

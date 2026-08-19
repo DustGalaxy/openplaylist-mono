@@ -62,8 +62,6 @@ import pytest
 # Импортируем только ValidationEngine — без всего тяжёлого окружения
 from src.services.playlists.validation_engine import ValidationEngine
 
-
-
 # ============================================================================
 # Builder-helpers — создаём минимальные заглушки без Pydantic
 # ============================================================================
@@ -280,7 +278,6 @@ class TestGetContentSettings:
 
 class TestGetDonationsSettings:
     def test_returns_rules_for_exact_platform(self, donation_platform):
-        from src._types import DonationRuleScope
 
         engine = ValidationEngine(owner_is_vip=False)
 
@@ -404,7 +401,6 @@ class TestValidateTrack:
         """
         Настройки, которые пропускают трек по всем правилам кроме явно заданных.
         """
-        from src._types import ContentSettingScope
 
         cs = _content_settings(
             platform=general_scope,

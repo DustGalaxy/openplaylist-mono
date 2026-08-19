@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 
 from sqlalchemy import DateTime, String
 from sqlalchemy.dialects.postgresql import JSONB

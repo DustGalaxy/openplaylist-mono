@@ -1,8 +1,10 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 from fastapi import HTTPException
+
+from src._types import AuthFlow, IntegrationPlatform, IntegrationType
 from src.services.auth.donatepay_service import AuthDonatePayService
-from src._types import IntegrationPlatform, AuthFlow, IntegrationType
 
 
 @pytest.fixture

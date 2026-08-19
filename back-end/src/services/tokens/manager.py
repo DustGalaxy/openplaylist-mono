@@ -1,9 +1,8 @@
-from src.dto.internal.auth import RefreshTokenStrategy, IntegrationPlatform
-
-from src.services.auth.twitch_service import AuthTwitchService
+from src.dto.internal.auth import IntegrationPlatform, RefreshTokenStrategy
 from src.services.auth.da_service import AuthDAService
 from src.services.auth.donatex_service import AuthDonateXService
 from src.services.auth.google_service import AuthGoogleService
+from src.services.auth.twitch_service import AuthTwitchService
 
 
 class TokenStrategyManager:

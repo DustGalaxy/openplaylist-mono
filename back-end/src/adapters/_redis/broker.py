@@ -4,7 +4,6 @@ from redis import Redis
 
 from src.settings import settings
 
-
 if TYPE_CHECKING:
 
     class RedisAdapter(Redis):  # pyright: ignore[reportRedeclaration]

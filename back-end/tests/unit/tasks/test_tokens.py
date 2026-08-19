@@ -1,6 +1,6 @@
 """Tests for src/tasks/tokens.py"""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

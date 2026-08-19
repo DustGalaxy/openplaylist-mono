@@ -1,4 +1,4 @@
-from faststream.rabbit import RabbitExchange, RabbitQueue, ExchangeType
+from faststream.rabbit import ExchangeType, RabbitExchange, RabbitQueue
 
 main_exchange = RabbitExchange("main_exchange", type=ExchangeType.DIRECT, durable=True)
 topic_exchange = RabbitExchange("topic_exchange", type=ExchangeType.TOPIC, durable=True)

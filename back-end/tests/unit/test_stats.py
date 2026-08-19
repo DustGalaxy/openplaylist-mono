@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
-import pytest
+from datetime import datetime
+
 from src.models.stats import (
     IncomingStatsResponse,
     OutgoingStatsResponse,

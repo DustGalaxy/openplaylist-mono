@@ -10,6 +10,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import APIKeyCookie
 from simple_repository.exceptions import NotFoundException
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src._types import AuthFlow, IntegrationPlatform
 from src.adapters._rabbit.broker import broker, main_publisher
 from src.adapters._rabbit.queues import main_exchange, user_fanout_exchange

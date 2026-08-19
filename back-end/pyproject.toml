@@ -55,6 +55,8 @@ reportPrivateLocalImportUsage = "none"
 reportExplicitAny = "none"
 reportAny = "none"
 reportMissingTypeStubs = "none"
+reportUnannotatedClassAttribute = "none"
 
 [tool.ruff.format]
 line-ending = "auto"
+

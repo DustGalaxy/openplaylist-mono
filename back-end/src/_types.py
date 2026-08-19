@@ -1,8 +1,7 @@
-from pydantic import BaseModel
 from enum import StrEnum
-from typing import Literal, TypedDict
+from typing import Literal
 
-from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
 
 # ==========================================
 # 1. ТИПЫ ИЗМЕНЕНИЙ (EVENT TYPES) AS ENUMS

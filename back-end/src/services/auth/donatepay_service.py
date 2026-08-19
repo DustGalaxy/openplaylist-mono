@@ -1,20 +1,20 @@
 import logging
 
+import httpx
 from fastapi import HTTPException
 from faststream.rabbit import RabbitQueue
-import httpx
 
+from src._types import IntegrationPlatform, IntegrationType, PlatformCap
+from src.adapters._rabbit.queues import bot_donatepay_connect_request
 from src.dto.internal.auth import (
-    PlatformMeta,
-    PlatformUser,
+    AuthFlow,
     IntegrationStrategy,
     PlatformAuthResult,
+    PlatformMeta,
     PlatformTokens,
-    AuthFlow,
+    PlatformUser,
 )
-from src.adapters._rabbit.queues import bot_donatepay_connect_request
 from src.settings import settings
-from src._types import IntegrationPlatform, IntegrationType, PlatformCap
 
 logger = logging.getLogger(__name__)
 

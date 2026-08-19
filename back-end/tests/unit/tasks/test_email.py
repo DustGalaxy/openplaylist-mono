@@ -1,9 +1,6 @@
 """Tests for src/tasks/email.py"""
 
-from unittest.mock import MagicMock, patch
-
-import pytest
-
+from unittest.mock import MagicMock
 
 _FAKE_SETTINGS = {
     "SMTP_EMAIL_ADDRESS": "sender@example.com",

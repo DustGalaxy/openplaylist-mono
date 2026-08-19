@@ -10,6 +10,7 @@ from src.database import Base
 from src.orm.auth_user import User  # noqa: F401
 from src.orm.feature_flags import FeatureFlag  # noqa: F401
 from src.orm.linked_accounts import LinkedAccounts  # noqa: F401
+from src.orm.moderator import ModeratorPlaylistAccess  # noqa: F401
 from src.orm.notification import *  # noqa: F403
 from src.orm.playlist import (  # noqa: F401
     BlockList,
@@ -25,7 +26,6 @@ from src.orm.playlist import (  # noqa: F401
 from src.orm.playlist_logs import PlaylistLog  # noqa: F401
 from src.orm.stream_token import StreamToken  # noqa: F401
 from src.orm.token_vault import TokenVault  # noqa: F401
-from src.orm.moderator import ModeratorPlaylistAccess  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

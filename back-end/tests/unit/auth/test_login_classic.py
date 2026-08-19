@@ -1,12 +1,10 @@
-import pytest
 from datetime import datetime
-from uuid import uuid4
 from unittest.mock import AsyncMock
+from uuid import uuid4
 
-from fastapi import HTTPException
-
+import pytest
 from argon2.exceptions import VerifyMismatchError
-
+from fastapi import HTTPException
 
 from src.models.auth_user import AuthUserSchema
 

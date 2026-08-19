@@ -1,6 +1,6 @@
 from datetime import datetime
-from uuid import UUID
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 if TYPE_CHECKING:
     from src.models.linked_accounts import LinkedAccountsDomain

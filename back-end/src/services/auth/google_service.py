@@ -1,25 +1,24 @@
-from datetime import datetime
 import logging
+from datetime import datetime
 
-from fastapi import HTTPException
 import httpx
-from faststream.rabbit import RabbitQueue
 import jwt
+from fastapi import HTTPException
+from faststream.rabbit import RabbitQueue
 
-from src.dto.internal.google import GoogleTokenResponseDTO, GoogleIdTokenPayloadDTO
+from src._types import IntegrationPlatform, IntegrationType
 from src.dto.internal.auth import (
-    PlatformMeta,
-    PlatformUser,
+    AuthFlow,
     IntegrationStrategy,
     PlatformAuthResult,
+    PlatformMeta,
     PlatformTokens,
-    AuthFlow,
+    PlatformUser,
     RefreshTokenStrategy,
 )
+from src.dto.internal.google import GoogleIdTokenPayloadDTO, GoogleTokenResponseDTO
 from src.dto.internal.token import Tokens
-
 from src.settings import settings
-from src._types import IntegrationPlatform, IntegrationType
 
 logger = logging.getLogger(__name__)
 

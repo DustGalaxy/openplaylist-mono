@@ -1,12 +1,12 @@
 from taskiq import TaskiqMiddleware, TaskiqScheduler
 from taskiq.schedule_sources import LabelScheduleSource
-from taskiq_redis import RedisAsyncResultBackend, ListQueueBroker, ListRedisScheduleSource
+from taskiq_redis import ListQueueBroker, ListRedisScheduleSource, RedisAsyncResultBackend
 
-from src.settings import settings
 from src.adapters._rabbit import broker as rabbit_broker
 from src.adapters._sio.init import sio
 from src.dal._redis.broker import get_broker
 from src.models import model_rebuild
+from src.settings import settings
 
 model_rebuild()
 

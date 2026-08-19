@@ -1,15 +1,16 @@
 from contextlib import asynccontextmanager
 
 import socketio
-import src.models  # noqa: F401
 from fastapi import APIRouter, FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
+
+import src.models  # noqa: F401
 from src.adapters._fastapi.feedback_routes import router as feedback_router
 from src.adapters._fastapi.history_routes import router as history_router
 from src.adapters._fastapi.login_routes import router as login_router
-from src.adapters._fastapi.moderator_routes import channel_router as channel_moderator_router, playlist_mod_router
+from src.adapters._fastapi.moderator_routes import channel_router as channel_moderator_router
+from src.adapters._fastapi.moderator_routes import playlist_mod_router
 from src.adapters._fastapi.notifications import router as notificattions_router
-
 from src.adapters._fastapi.order_routes import router as order_router
 from src.adapters._fastapi.playback_routes import router as playback_router
 from src.adapters._fastapi.player_routes import router as player_router

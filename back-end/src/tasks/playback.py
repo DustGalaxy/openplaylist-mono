@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from src.settings import settings
 from src.dto.playback import Pause, Seek
 from src.services.realtime.sio_playlist import sio_playlist_service
 from src.services.realtime.sio_widget import sio_widget_service

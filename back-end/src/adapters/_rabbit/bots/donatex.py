@@ -5,6 +5,7 @@ from faststream import Context
 from faststream.rabbit import RabbitRouter
 from faststream.rabbit.message import RabbitMessage
 from simple_repository.exceptions import NotFoundException
+
 from src._types import IntegrationPlatform
 from src.adapters._rabbit.bots.dto import DonateXTokenRefreshed, Tokens
 from src.adapters._rabbit.broker import get_broker

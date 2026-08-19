@@ -3,19 +3,17 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Response
 
-from src.services.permitions.permition_service import check_feature, get_effective_tier, FEATURE_FLAGS
 from src._types import AuthFlow, IntegrationPlatform
 from src.adapters._fastapi.dependencies import CURR_USER, DB_SESSION, MODERATOR_SERVICE
 from src.dto.bots import BotConnectBody, UpdateBotSettingsBody
 from src.dto.moderator import ModeratedChannelResponse
 from src.dto.token import OAuthBody, UserKeyBody
 from src.dto.user import IntegrationRead, PublicUserRead, UserPatch, UserRead
-
 from src.models.auth_user import AuthUserUpdate
 from src.services.auth.auth_service import auth_service
 from src.services.auth.strategy_manager import manager
+from src.services.permitions.permition_service import FEATURE_FLAGS, get_effective_tier
 from src.settings import settings
-from src.utils import find
 
 router = APIRouter(prefix="/user")
 

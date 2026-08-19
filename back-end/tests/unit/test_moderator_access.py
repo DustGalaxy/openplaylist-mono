@@ -5,7 +5,6 @@ from uuid import uuid4
 import pytest
 from fastapi import HTTPException
 
-from src.dto.moderator import CreateChannelModeratorTokenRequest, DirectAddChannelModeratorRequest, GrantPlaylistAccessRequest
 from src.models.moderator import ChannelModeratorSchema, ModeratorPlaylistAccessSchema
 from src.models.playlist import PlaylistSchema
 from src.services.playlists.moderator_service import ModeratorService

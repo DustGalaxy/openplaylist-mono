@@ -3,11 +3,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
+
+from src._types import TrackSource
 from src.adapters._rabbit.worker.history_handler import history_event_subscriber
 from src.dal.postgres.history import PlaybackHistoryRepository
 from src.dto.internal.domain_events import InternalPlaylistEvent, InternalPlaylistEventType
 from src.models.order import OrderDomain, WebExtraData
-from src._types import TrackSource
 
 
 @pytest.fixture

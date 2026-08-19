@@ -7,18 +7,18 @@ Create Date: 2026-07-02 07:27:16.253751
 """
 
 import json
+from typing import Sequence
 
-from typing import Sequence, Union
-
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
+
 # revision identifiers, used by Alembic.
 revision: str = "e6c9f7027511"
-down_revision: Union[str, Sequence[str], None] = "5fd2683ce4e2"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "5fd2683ce4e2"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:

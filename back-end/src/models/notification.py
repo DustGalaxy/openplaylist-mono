@@ -4,7 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 from pydantic.fields import Field
 
-from src._types import NotificationType, PlaylistEventType, TargetType, UserEventType, UserTypes, PlaylistTypes
+from src._types import NotificationType, PlaylistEventType, PlaylistTypes, TargetType, UserEventType, UserTypes
 
 
 # --- shared

@@ -1,9 +1,6 @@
-from datetime import datetime
-from typing import Any
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from simple_repository.exceptions import NotFoundException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,7 +14,7 @@ from src.dto.player import (
     PlayerVolumeRequest,
 )
 from src.models.order import OrderDomain
-from src.orm.playlist import Order, OrderPlaylistStatus, Playlist
+from src.orm.playlist import Order, OrderPlaylistStatus
 from src.services.realtime.sio_playlist import sio_playlist_service
 from src.services.realtime.sio_widget import sio_widget_service
 

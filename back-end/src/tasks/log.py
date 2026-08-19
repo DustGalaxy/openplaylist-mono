@@ -1,7 +1,5 @@
-from src.services.realtime.sio_playlist import sio_playlist_service
-
 from src.models.playlist_logs import PlaylistLogSchema
-
+from src.services.realtime.sio_playlist import sio_playlist_service
 from taskiq_broker import task_broker as taskiq_broker
 
 

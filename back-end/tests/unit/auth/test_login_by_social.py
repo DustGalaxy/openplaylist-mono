@@ -1,13 +1,13 @@
-import pytest
 from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-from unittest.mock import MagicMock, AsyncMock
 
+import pytest
 from simple_repository.exceptions import NotFoundException
 
 from src._types import AuthFlow, IntegrationPlatform, IntegrationType
+from src.dto.internal.auth import PlatformAuthResult, PlatformMeta, PlatformTokens, PlatformUser
 from src.exceptions import NeedConfirmationException
-from src.dto.internal.auth import PlatformAuthResult, PlatformMeta, PlatformUser, PlatformTokens
 from src.models.auth_user import AuthUserSchema
 from src.models.linked_accounts import LinkedAccountsDomain
 

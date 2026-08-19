@@ -1,11 +1,11 @@
 import logging
 from datetime import datetime
-from typing import Any, ClassVar
+from typing import Any
 
 import httpx
 from fastapi import HTTPException
 from faststream.rabbit import RabbitQueue
-from pydantic import BaseModel
+
 from src._types import IntegrationPlatform, IntegrationType, PlatformCap
 from src.adapters._rabbit.queues import bot_twitch_connect_request, bot_twitch_disconect, bot_twitch_settings
 from src.dto.internal.auth import (

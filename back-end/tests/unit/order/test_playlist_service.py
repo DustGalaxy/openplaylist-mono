@@ -13,7 +13,7 @@ Covered cases:
   9. validate_track returns falsy (empty list) – treated as "no errors", event used as track
 """
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest

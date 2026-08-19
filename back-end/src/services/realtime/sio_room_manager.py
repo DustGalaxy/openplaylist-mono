@@ -1,4 +1,4 @@
-from src.dal._redis.broker import get_broker, RedisAdapter
+from src.dal._redis.broker import RedisAdapter, get_broker
 
 
 class RoomManager:

@@ -3,7 +3,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from sqladmin import Admin
 from starlette.requests import Request
-from starlette.responses import RedirectResponse, Response, JSONResponse
+from starlette.responses import JSONResponse, RedirectResponse, Response
 from starlette.routing import Route
 
 from src.adapters.admin.auth import authentication_backend

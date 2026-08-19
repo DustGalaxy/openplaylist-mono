@@ -6,10 +6,11 @@ Create Date: 2026-08-06 12:42:44.916429
 
 """
 
-from typing import Sequence, Union
+from typing import Sequence
+
+import sqlalchemy as sa
 
 from alembic import op
-import sqlalchemy as sa
 from src._types import (
     BlockListScope,
     ContentSettingScope,
@@ -18,12 +19,11 @@ from src._types import (
     Platform,
 )
 
-
 # revision identifiers, used by Alembic.
 revision: str = "9376a16df26b"
-down_revision: Union[str, Sequence[str], None] = "5877b17e59cb"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "5877b17e59cb"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:

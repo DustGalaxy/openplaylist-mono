@@ -1,9 +1,10 @@
 from datetime import datetime
-from typing import Literal, Optional, Dict, Any
+from typing import Any, Dict, Literal, Optional
 from uuid import UUID
-from pydantic import BaseModel, Field, ConfigDict
 
-from src._types import ContentSettingScope, DonationRuleScope, ChatRuleScope, BlockListScope
+from pydantic import BaseModel, ConfigDict, Field
+
+from src._types import BlockListScope, ChatRuleScope, ContentSettingScope, DonationRuleScope
 
 
 class ReadContentSettings(BaseModel):

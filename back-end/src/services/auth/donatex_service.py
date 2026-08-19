@@ -1,23 +1,23 @@
-from datetime import datetime
 import logging
+from datetime import datetime
 
+import httpx
 from fastapi import HTTPException
 from faststream.rabbit import RabbitQueue
-import httpx
 
-from src.dto.internal.donatex import DonateXTokenResponse, DonateXUserResponse
+from src._types import IntegrationPlatform, IntegrationType, PlatformCap
+from src.adapters._rabbit.queues import bot_donatex_connect_request
 from src.dto.internal.auth import (
-    PlatformMeta,
-    PlatformUser,
+    AuthFlow,
     IntegrationStrategy,
     PlatformAuthResult,
+    PlatformMeta,
     PlatformTokens,
-    AuthFlow,
+    PlatformUser,
     RefreshTokenStrategy,
 )
-from src.adapters._rabbit.queues import bot_donatex_connect_request
+from src.dto.internal.donatex import DonateXTokenResponse, DonateXUserResponse
 from src.settings import settings
-from src._types import IntegrationPlatform, IntegrationType, PlatformCap
 
 logger = logging.getLogger(__name__)
 

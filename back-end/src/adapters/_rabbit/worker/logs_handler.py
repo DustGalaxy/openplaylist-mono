@@ -1,5 +1,5 @@
 from typing import Any
-from faststream.log import logger
+
 from faststream.rabbit import RabbitRouter
 
 from src._types import PlaylistLogsEventTypes

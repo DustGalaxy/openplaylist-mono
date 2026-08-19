@@ -1,10 +1,9 @@
-from abc import abstractmethod
-from typing import ClassVar, Protocol, TypedDict, overload, Any
+from typing import Any, Protocol
 
-from pydantic import BaseModel
 from faststream.rabbit import RabbitQueue
+from pydantic import BaseModel
 
-from src._types import IntegrationPlatform, AuthFlow, PlatformCap, IntegrationType
+from src._types import AuthFlow, IntegrationPlatform, IntegrationType, PlatformCap
 
 
 class PlatformTokens(BaseModel):

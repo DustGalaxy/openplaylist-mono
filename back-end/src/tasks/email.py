@@ -1,6 +1,6 @@
 import smtplib
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 from src.settings import settings
 from taskiq_broker import task_broker as taskiq_broker

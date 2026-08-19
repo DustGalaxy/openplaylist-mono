@@ -1,6 +1,6 @@
 import inspect
-from uuid import UUID
 from typing import TypedDict
+from uuid import UUID
 
 from src.dal._redis.broker import get_broker
 

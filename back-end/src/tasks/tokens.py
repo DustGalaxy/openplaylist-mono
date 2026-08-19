@@ -1,11 +1,10 @@
 import asyncio
 import random
 
-from src.services.tokens.token_service import token_service
-from src.adapters._rabbit.queues import topic_exchange
 from src.adapters._rabbit.broker import main_publisher
-
+from src.adapters._rabbit.queues import topic_exchange
 from src.database import async_session_maker
+from src.services.tokens.token_service import token_service
 from taskiq_broker import task_broker as taskiq_broker
 
 

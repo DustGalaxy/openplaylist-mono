@@ -1,14 +1,15 @@
-import pytest
 from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-from unittest.mock import MagicMock, AsyncMock
 
+import pytest
 from fastapi import HTTPException
+
 from src._types import IntegrationPlatform
+from src.adapters._rabbit.queues import main_exchange
 from src.models.auth_user import AuthUserSchema
 from src.models.linked_accounts import LinkedAccountsDomain
 from src.models.token_vault import TokenVaultDomain
-from src.adapters._rabbit.queues import main_exchange
 
 
 @pytest.fixture

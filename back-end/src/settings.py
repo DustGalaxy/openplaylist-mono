@@ -1,3 +1,4 @@
+# pyright: reportConstantRedefinition=false
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -29,9 +30,7 @@ class Settings(BaseSettings):
     )
     TWITCH_ADMIN_STATE: str = Field(alias="TWITCH_ADMIN_STATE", default="admin_oauth_state")
     TWITCH_URL: str = Field(default="https://id.twitch.tv")
-    TWITCH_SCOPES: str = Field(
-        default="user:read:email channel:bot channel:read:redemptions channel:manage:redemptions"
-    )
+    TWITCH_SCOPES: str = Field(default="user:read:email channel:bot channel:read:redemptions channel:manage:redemptions")
 
     DA_APP_ID: str = Field(alias="DA_APP_ID", default="18779")
     DA_API_KEY: str = Field(alias="DA_API_KEY")

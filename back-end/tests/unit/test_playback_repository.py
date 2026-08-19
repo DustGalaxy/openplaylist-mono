@@ -1,6 +1,7 @@
-import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
+
+import pytest
 
 from src.dal._redis.playback_repository import PlaybackRepository, parse_state
 
@@ -58,7 +59,7 @@ async def test_playback_repository_save_and_get_state():
 
 
 def test_playback_dto_client_id():
-    from src.dto.playback import Pause, Seek, PlaybackPauseEvent, PlaybackSeekEvent
+    from src.dto.playback import Pause, PlaybackPauseEvent, PlaybackSeekEvent, Seek
 
     pause_dto = Pause(is_paused=True, position=12.5, track_id=uuid4(), client_id="test-client-123")
     assert pause_dto.client_id == "test-client-123"
@@ -77,25 +78,32 @@ def test_playback_dto_client_id():
 
 @pytest.mark.asyncio
 async def test_playback_handler_client_id_propagation():
-    from src.dto.playback import Pause, Seek, PlaybackPauseEvent, PlaybackSeekEvent
     from src.adapters._rabbit.worker.playback_handler import (
         playback_pause_subscriber,
-        playback_seek_subscriber,
     )
+    from src.dto.playback import Pause, PlaybackPauseEvent, Seek
 
     playlist_id = uuid4()
     user_id = uuid4()
     pause_dto = Pause(is_paused=True, position=10.0, track_id=uuid4(), client_id="client-abc")
     pause_event = PlaybackPauseEvent(playlist_id=playlist_id, user_id=user_id, state=pause_dto)
 
-    with patch("src.adapters._rabbit.worker.playback_handler.sio_playlist_service.pause", new_callable=AsyncMock) as mock_sio_pause, \
-         patch("src.adapters._rabbit.worker.playback_handler.sio_widget_service.pause", new_callable=AsyncMock) as mock_widget_pause:
+    with (
+        patch(
+            "src.adapters._rabbit.worker.playback_handler.sio_playlist_service.pause", new_callable=AsyncMock
+        ) as mock_sio_pause,
+        patch(
+            "src.adapters._rabbit.worker.playback_handler.sio_widget_service.pause", new_callable=AsyncMock
+        ) as mock_widget_pause,
+    ):
         await playback_pause_subscriber(pause_event)
         mock_sio_pause.assert_called_once_with(playlist_id, pause_dto)
         assert mock_sio_pause.call_args[0][1].client_id == "client-abc"
         mock_widget_pause.assert_called_once_with(user_id, pause_dto)
 
     seek_dto = Seek(position=20.0, track_id=uuid4(), client_id="client-xyz")
+
+
 @pytest.mark.asyncio
 async def test_playback_routes_position_no_publish_and_seek_publishes():
     from src.adapters._fastapi.playback_routes import post_position_state, post_seek_state
@@ -113,10 +121,11 @@ async def test_playback_routes_position_no_publish_and_seek_publishes():
         can_manage_settings=False,
     )
 
-
     # 1. Test post_position_state: updates position state but does NOT publish to rabbit
-    with patch("src.adapters._fastapi.playback_routes.set_position_state", new_callable=AsyncMock) as mock_set_pos, \
-         patch("src.adapters._fastapi.playback_routes.main_publisher.publish", new_callable=AsyncMock) as mock_publish:
+    with (
+        patch("src.adapters._fastapi.playback_routes.set_position_state", new_callable=AsyncMock) as mock_set_pos,
+        patch("src.adapters._fastapi.playback_routes.main_publisher.publish", new_callable=AsyncMock) as mock_publish,
+    ):
         mock_db = AsyncMock()
         await post_position_state(
             db_session=mock_db,
@@ -130,8 +139,10 @@ async def test_playback_routes_position_no_publish_and_seek_publishes():
 
     # 2. Test post_seek_state: updates seek state AND publishes PlaybackSeekEvent
     seek_data = Seek(position=45.0, track_id=uuid4(), client_id="client_seek_1")
-    with patch("src.adapters._fastapi.playback_routes.seek", new_callable=AsyncMock) as mock_seek, \
-         patch("src.adapters._fastapi.playback_routes.main_publisher.publish", new_callable=AsyncMock) as mock_publish:
+    with (
+        patch("src.adapters._fastapi.playback_routes.seek", new_callable=AsyncMock) as mock_seek,
+        patch("src.adapters._fastapi.playback_routes.main_publisher.publish", new_callable=AsyncMock) as mock_publish,
+    ):
         mock_db = AsyncMock()
         await post_seek_state(
             db_session=mock_db,
@@ -145,5 +156,3 @@ async def test_playback_routes_position_no_publish_and_seek_publishes():
         assert published_event.playlist_id == playlist_id
         assert published_event.state.position == 45.0
         assert published_event.state.client_id == "client_seek_1"
-
-

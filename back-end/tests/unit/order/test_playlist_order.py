@@ -1,15 +1,15 @@
 from uuid import uuid4
-import pytest
-from unittest.mock import MagicMock
 
-from src.dto.order import WebNewOrder
+import pytest
+
 from src._types import TrackSource
+from src.dto.order import WebNewOrder
 from src.exceptions import (
     DynamicMixNotSupported,
     PlaylistOrdersNotAllowedForViewers,
 )
 from src.services.order_service import order_service
-from src.services.youtube_service import youtube_service, VideoInfo
+from src.services.youtube_service import VideoInfo, youtube_service
 
 
 @pytest.fixture

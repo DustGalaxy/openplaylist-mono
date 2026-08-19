@@ -3,11 +3,11 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.token_vault import TokenVaultCreate, TokenVaultDomain
-from src.dal.postgres.token import token_vault_repository, TokenVaultRepository
-from src.dto.internal.token import Tokens
-from src.services.tokens.manager import manager
+from src.dal.postgres.token import TokenVaultRepository, token_vault_repository
 from src.database import async_session_maker
+from src.dto.internal.token import Tokens
+from src.models.token_vault import TokenVaultCreate, TokenVaultDomain
+from src.services.tokens.manager import manager
 
 
 class TokenService:

@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 from src.dto.order import POSSIBLE_ORDER_TYPE, WebNewOrder
-from src.dto.youtube import YouTubePlaylistType, YouTubeUrlType
+from src.dto.youtube import YouTubePlaylistType
 from src.exceptions import (
     DynamicMixNotSupported,
     InvalidYouTubeUrl,

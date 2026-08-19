@@ -1,9 +1,9 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from uuid import UUID
 
 from simple_repository import crud_factory
 from simple_repository.exceptions import IntegrityConflictException, RepositoryException
-from sqlalchemy import case, delete, func, literal_column, select, union_all, update
+from sqlalchemy import case, func, literal_column, select, union_all, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 

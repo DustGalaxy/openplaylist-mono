@@ -1,15 +1,13 @@
 from logging import getLogger
 from uuid import UUID
 
-from taskiq_broker import task_broker as taskiq_broker
-
+from src._types import PlaylistEventType
+from src.dal._redis.broker import get_broker
+from src.database import async_session_maker
 from src.models.notification import EventNotificationCreate
 from src.services.notification.notification_service import _notification_service
-from src.dal._redis.broker import get_broker
-
-from src.database import async_session_maker
-from src._types import PlaylistEventType, TrackAddedPayload
 from src.utils import get_event_payload_type
+from taskiq_broker import task_broker as taskiq_broker
 
 logger = getLogger(__name__)
 

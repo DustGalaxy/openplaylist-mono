@@ -1,18 +1,12 @@
-import enum
 from typing import Literal
 from uuid import UUID
 
-from sqlalchemy import Enum, ForeignKey, Index, Integer, String
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import ARRAY, UUID as PGUUID, JSONB
 
-from src.database import Base, UUIDMixin, TimestampMixin
-from src._types import (
-    ContentSettingScope,
-    BlockListScope,
-    ChatRuleScope,
-    DonationRuleScope,
-)
+from src.database import Base, TimestampMixin, UUIDMixin
 
 
 class Settings(Base, UUIDMixin, TimestampMixin):

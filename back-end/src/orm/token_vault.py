@@ -1,6 +1,6 @@
 from datetime import datetime
-from uuid import UUID
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 if TYPE_CHECKING:
     from src.orm.linked_accounts import LinkedAccounts
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.database import Base, UUIDMixin, TimestampMixin
+from src.database import Base, TimestampMixin, UUIDMixin
 
 
 class TokenVault(Base, UUIDMixin, TimestampMixin):

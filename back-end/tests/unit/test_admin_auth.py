@@ -1,9 +1,7 @@
-import pytest
 from argon2 import PasswordHasher
 from fastapi import FastAPI
 from starlette.testclient import TestClient
 
-from src.adapters.admin.auth import AdminAuth
 from src.adapters.admin.setup import setup_admin
 from src.settings import settings
 

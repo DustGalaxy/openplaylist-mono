@@ -1,6 +1,7 @@
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
+
+import pytest
 
 from src.adapters._rabbit.queues import bot_order_cancelled, bot_order_completed, main_exchange, playlist_fanout_exchange
 from src.adapters._rabbit.worker.order_proccess_handler import _ as handle_order_proccess

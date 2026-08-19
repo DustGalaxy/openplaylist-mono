@@ -1,11 +1,9 @@
-from enum import StrEnum
-from uuid import UUID
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import BaseModel
 
-from src._types import TrackSource, OrderStatus
-from src.models.order import OrderDomain
+from src._types import OrderStatus, TrackSource
 
 
 class OrderCreated(BaseModel):

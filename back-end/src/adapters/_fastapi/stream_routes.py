@@ -1,7 +1,5 @@
-from uuid import UUID
 
-from fastapi import APIRouter, Body, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import APIRouter
 
 from .dependencies import CURR_USER, DB_SESSION, STREAM_SERVICE
 

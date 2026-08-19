@@ -32,11 +32,11 @@ exclude = [
 line-length = 130
 indent-width = 4
 
-# Assume Python 3.10
-target-version = "py310"
+# Assume Python 3.13
+target-version = "py313"
 
 [lint]
-# select = [...]  # See the Default Rules page for the full listing.
+select = ["E", "F", "I"]
 ignore = []
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
@@ -45,6 +45,10 @@ unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[lint.isort]
+known-first-party = ["src"]
+
 
 [format]
 # Like Black, use double quotes for strings.

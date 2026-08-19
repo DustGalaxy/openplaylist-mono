@@ -4,7 +4,7 @@ from uuid import uuid4
 from faststream import Context
 from faststream.rabbit import RabbitRouter
 from faststream.rabbit.message import RabbitMessage
-from simple_repository.exceptions import NotFoundException
+
 from src._types import IntegrationPlatform
 from src.adapters._rabbit.bots.dto import Tokens
 from src.adapters._rabbit.broker import get_broker
@@ -14,8 +14,6 @@ from src.adapters._rabbit.queues import (
     main_exchange,
     user_fanout_exchange,
 )
-from src.dal.postgres.linked_account import linked_accounts_repository
-from src.dal.postgres.token import token_vault_repository
 from src.database import async_session_maker
 from src.dto.internal.domain_events import InternalUserEvent, InternalUserEventType
 from src.dto.order import DonatePayNewOrder, NewOrderPayload

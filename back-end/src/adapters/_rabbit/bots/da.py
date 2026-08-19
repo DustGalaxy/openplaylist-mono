@@ -2,26 +2,25 @@ import json
 from uuid import uuid4
 
 from faststream import Context
-from faststream.rabbit.message import RabbitMessage
 from faststream.rabbit import RabbitRouter
+from faststream.rabbit.message import RabbitMessage
 
-from src.adapters._rabbit.bots.dto import DATokenRefreshed, DAUser as DAUser_Rabbit
+from src._types import IntegrationPlatform
+from src.adapters._rabbit.bots.dto import DATokenRefreshed
+from src.adapters._rabbit.bots.dto import DAUser as DAUser_Rabbit
 from src.adapters._rabbit.broker import get_broker
 from src.adapters._rabbit.queues import (
-    main_exchange,
-    user_fanout_exchange,
     auth_user_da_all_request,
     auth_user_da_tokens_refreshed,
     bot_da_order_new,
+    main_exchange,
+    user_fanout_exchange,
 )
+from src.dal.postgres.linked_account import linked_accounts_repository
+from src.dal.postgres.token import token_vault_repository
+from src.database import async_session_maker
 from src.dto.internal.domain_events import InternalUserEvent, InternalUserEventType
 from src.dto.order import DANewOrder, NewOrderPayload
-from src._types import IntegrationPlatform
-from src.database import async_session_maker
-
-from src.dal.postgres.token import token_vault_repository
-from src.dal.postgres.linked_account import linked_accounts_repository
-
 
 router = RabbitRouter()
 

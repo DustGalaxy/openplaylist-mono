@@ -6,7 +6,7 @@ import jwt
 from argon2 import PasswordHasher
 from sqladmin.authentication import AuthenticationBackend
 from starlette.requests import Request
-from starlette.responses import Response, JSONResponse
+from starlette.responses import JSONResponse, Response
 
 from src.settings import settings
 

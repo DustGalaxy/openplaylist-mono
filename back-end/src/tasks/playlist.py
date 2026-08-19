@@ -1,11 +1,8 @@
 from uuid import UUID
 
-from src.dal._redis.broker import get_broker
-from src.database import async_session_maker
 from src.dto.events import Deleted, Moved, PlayNow, Private
 from src.dto.settings import ReadPlaylistSettings
 from src.models.order import OrderDomain
-from src.services.playlists.basic_service import playlist_service
 from src.services.realtime.sio_playlist import sio_playlist_service
 from src.utils import conditional_trace
 from taskiq_broker import task_broker as taskiq_broker

@@ -6,24 +6,26 @@ Create Date: 2026-06-13 12:19:56.055651
 
 """
 
-from typing import Sequence, Union
+from typing import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "8d8533322bfe"
-down_revision: Union[str, Sequence[str], None] = "dad794a50fdd"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "dad794a50fdd"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 import sqlalchemy as sa
-from alembic import op
 
 # Обязательно импортируем dialect-специфичный ENUM для Postgres
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 
 def upgrade() -> None:

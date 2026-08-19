@@ -1,9 +1,9 @@
-from uuid import UUID
 from typing import TypedDict
+from uuid import UUID
 
-from src.dal._redis.playback_repository import playback_repository, parse_state
-from src.dal.postgres.playlist import playlist_repository
 from src._types import AsyncSession
+from src.dal._redis.playback_repository import playback_repository
+from src.dal.postgres.playlist import playlist_repository
 from src.dto.playback import Pause, Seek
 
 State = TypedDict("State", {"is_paused": str, "position": str, "track_id": str | None})

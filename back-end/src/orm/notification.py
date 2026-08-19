@@ -1,12 +1,12 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, Index, func, text, Enum
+from sqlalchemy import ForeignKey, Index, func, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src._types import NotificationType, PLAYLIST_EVENTS_SET, USER_EVENTS_SET
-from src.database import Base, UUIDMixin, TimestampMixin
+from src._types import PLAYLIST_EVENTS_SET, USER_EVENTS_SET
+from src.database import Base, TimestampMixin, UUIDMixin
 
 
 def get_default_subscription_settings(context) -> dict:

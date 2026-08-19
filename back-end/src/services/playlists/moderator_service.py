@@ -4,7 +4,6 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from simple_repository.exceptions import NotFoundException
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.dal.postgres.moderator import (
@@ -25,7 +24,6 @@ from src.dto.moderator import (
     ModeratorPlaylistAccessInfo,
     PlaylistAccessResponse,
     UpdateChannelModeratorRequest,
-    UpdatePlaylistAccessRequest,
 )
 from src.models.moderator import (
     ChannelModeratorCreate,

@@ -1,19 +1,19 @@
 import json
 from collections.abc import AsyncGenerator
-from uuid import UUID as UUIDTYPE
 from datetime import datetime
+from uuid import UUID as UUIDTYPE
 
 from pydantic import BaseModel
-from uuid6 import uuid7
 from sqlalchemy import DateTime, func
-from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 from sqlalchemy.dialects.postgresql import UUID as UUIDCOLUMN
 from sqlalchemy.ext.asyncio import (
-    create_async_engine,
+    AsyncEngine,
     AsyncSession,
     async_sessionmaker,
-    AsyncEngine,
+    create_async_engine,
 )
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from uuid6 import uuid7
 
 from src.settings import settings
 

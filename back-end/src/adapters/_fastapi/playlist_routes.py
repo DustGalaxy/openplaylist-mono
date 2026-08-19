@@ -32,7 +32,6 @@ from src.dto.playlist import (
 from src.dto.playlist_log import ReadPlaylistLog
 from src.models.playlist import PlaylistPatch
 from src.services.auth.auth_service import auth_service
-from src.services.permitions.permition_service import check_feature
 from src.utils import find
 
 router = APIRouter(prefix="/playlist")

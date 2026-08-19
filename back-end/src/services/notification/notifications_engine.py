@@ -1,17 +1,16 @@
+from logging import getLogger
 from typing import Any
 from uuid import UUID
-from logging import getLogger
-
-from src.dal._redis.broker import RedisAdapter, get_broker
-from src.dto.internal.notifications import BaseEvent
-from src.delay_task import delay_kick
-from taskiq_broker import task_broker
-from src.services.notification.notification_service import _notification_service
-from src.models.notification import EventNotificationCreate, DirectNotificationCreate
-from src.utils import get_event_payload_type
-from src.database import async_session_maker
 
 from src._types import NotificationType
+from src.dal._redis.broker import RedisAdapter, get_broker
+from src.database import async_session_maker
+from src.delay_task import delay_kick
+from src.dto.internal.notifications import BaseEvent
+from src.models.notification import DirectNotificationCreate, EventNotificationCreate
+from src.services.notification.notification_service import _notification_service
+from src.utils import get_event_payload_type
+from taskiq_broker import task_broker
 
 logger = getLogger(__name__)
 

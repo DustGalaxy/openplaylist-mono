@@ -5,8 +5,8 @@ from simple_repository.exceptions import NotFoundException
 
 from src.dal.postgres.order_note import OrderNoteRepository, order_note_repository
 from src.dal.postgres.playlist import PlaylistRepository, playlist_repository
-from src.dto.order_note import OrderNoteResponse, OrderNoteUpsert
 from src.database import AsyncSession
+from src.dto.order_note import OrderNoteResponse, OrderNoteUpsert
 
 
 class OrderNoteService:

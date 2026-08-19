@@ -1,5 +1,5 @@
 import enum
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 from uuid import UUID
 
 from sqlalchemy import Enum, ForeignKey, Index, Integer, String

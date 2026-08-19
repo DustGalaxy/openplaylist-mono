@@ -1,10 +1,11 @@
-import pytest
-from uuid import uuid4
 from unittest.mock import MagicMock
+from uuid import uuid4
 
-from src.services.order_service import OrderService
-from src.services.youtube_service import youtube_service, VideoInfo
+import pytest
+
 from src.exceptions import InvalidYouTubeUrl, NotEmbeddable
+from src.services.order_service import OrderService
+from src.services.youtube_service import VideoInfo, youtube_service
 
 
 @pytest.fixture

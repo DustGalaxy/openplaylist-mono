@@ -1,4 +1,1 @@
-from . import da
-from . import twitch
-from . import donatex
-from . import donatepay
+from . import da, donatepay, donatex, twitch

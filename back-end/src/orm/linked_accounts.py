@@ -1,14 +1,12 @@
 from uuid import UUID
-from typing import TYPE_CHECKING
-
-from src.orm.token_vault import TokenVault
 
 from sqlalchemy import Enum, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src._types import IntegrationPlatform
-from src.database import Base, UUIDMixin, TimestampMixin
+from src.database import Base, TimestampMixin, UUIDMixin
+from src.orm.token_vault import TokenVault
 
 
 class LinkedAccounts(Base, UUIDMixin, TimestampMixin):

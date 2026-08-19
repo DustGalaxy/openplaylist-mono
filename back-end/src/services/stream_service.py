@@ -6,9 +6,8 @@ from uuid import UUID
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.dal.postgres.stream_token import get_stream_token_repository
-
 from src.dal.postgres.playlist_logs import get_playlist_logs_repository
+from src.dal.postgres.stream_token import get_stream_token_repository
 
 
 class StreamService:

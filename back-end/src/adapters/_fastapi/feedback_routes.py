@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 
 from src.dto.feedback import FeedbackData
 from src.tasks.email import send_email

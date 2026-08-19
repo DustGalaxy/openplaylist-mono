@@ -3,7 +3,6 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from src._types import OrderStatus, TrackSource
-from src.models.order import ExtraData
 
 
 class DonatexNewOrder(BaseModel):

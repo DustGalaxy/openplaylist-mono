@@ -194,9 +194,9 @@ class TwitchAuthAdmin(BaseView):
 
                         # Publish to RabbitMQ so bot_ttv connects the token in real-time
                         try:
+                            from src.adapters._rabbit.bots.dto import Tokens
                             from src.adapters._rabbit.broker import get_broker
                             from src.adapters._rabbit.queues import main_exchange
-                            from src.adapters._rabbit.bots.dto import Tokens
 
                             broker = get_broker()
                             if broker and user_info and hasattr(user_info, "id"):

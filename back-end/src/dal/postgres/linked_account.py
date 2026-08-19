@@ -1,15 +1,12 @@
-from uuid import UUID
 
 from simple_repository import crud_factory
 from simple_repository.exceptions import NotFoundException
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.linked_accounts import LinkedAccountsDomain, LinkedAccountsCreate, LinkedAccountsUpdate
-from src.orm.linked_accounts import LinkedAccounts
-
 from src._types import IntegrationPlatform
+from src.models.linked_accounts import LinkedAccountsCreate, LinkedAccountsDomain, LinkedAccountsUpdate
+from src.orm.linked_accounts import LinkedAccounts
 
 
 class LinkedAccountsRepository(crud_factory(LinkedAccounts, LinkedAccountsDomain, LinkedAccountsCreate, LinkedAccountsUpdate)):

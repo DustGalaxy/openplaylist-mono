@@ -1,5 +1,5 @@
-from src.dto.youtube import YouTubeUrlType, YouTubePlaylistType
-from src.utils import parse_youtube_url, classify_youtube_playlist_id
+from src.dto.youtube import YouTubePlaylistType, YouTubeUrlType
+from src.utils import classify_youtube_playlist_id, parse_youtube_url
 
 
 def test_classify_youtube_playlist_id():

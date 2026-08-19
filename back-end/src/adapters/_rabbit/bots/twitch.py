@@ -4,22 +4,21 @@ from uuid import uuid4
 from faststream.rabbit import RabbitRouter
 from simple_repository.exceptions import NotFoundException
 
+from src._types import IntegrationPlatform
+from src.adapters._rabbit.bots.dto import Tokens, TwitchTokenRefreshed
 from src.adapters._rabbit.broker import get_broker
 from src.adapters._rabbit.queues import (
-    user_fanout_exchange,
-    main_exchange,
     auth_user_twitch_all_request,
-    bot_twitch_order_new,
     auth_user_twitch_tokens_refreshed,
+    bot_twitch_order_new,
+    main_exchange,
+    user_fanout_exchange,
 )
+from src.dal.postgres.linked_account import linked_accounts_repository
+from src.dal.postgres.token import token_vault_repository
+from src.database import async_session_maker
 from src.dto.internal.domain_events import InternalUserEvent, InternalUserEventType
 from src.dto.order import NewOrderPayload, TTVNewOrder
-from src.adapters._rabbit.bots.dto import Tokens, TwitchTokenRefreshed
-
-from src.dal.postgres.token import token_vault_repository
-from src.dal.postgres.linked_account import linked_accounts_repository
-from src._types import IntegrationPlatform
-from src.database import async_session_maker
 
 router = RabbitRouter()
 
@@ -37,8 +36,8 @@ async def order_new_from_twitch(event: TTVNewOrder):
 @router.subscriber(auth_user_twitch_all_request, exchange=main_exchange)
 async def get_all_twitch_users():
     async with async_session_maker() as session:
-        from src.services.auth.auth_service import auth_service
         from src.services.admin.twitch_admin_token_service import twitch_admin_token_service
+        from src.services.auth.auth_service import auth_service
 
         tokens = await auth_service.get_all_tokens(session, IntegrationPlatform.TWITCH)
         existing_pids = {token.linked_account.platform_user_id for token in tokens}
@@ -92,9 +91,10 @@ async def twitch_refresh_tokens(
                 await token_vault_repository.update(session, tokens)
         except NotFoundException:
             try:
-                from src.services.admin.twitch_admin_token_service import twitch_admin_token_service
+                from datetime import UTC, timedelta
+
                 from src.models.twitch_admin_token import TwitchAdminTokenUpdate
-                from datetime import timedelta, UTC
+                from src.services.admin.twitch_admin_token_service import twitch_admin_token_service
 
                 admin_tok = await twitch_admin_token_service.get_token_by_user_id(session, str(event.twitch_id))
                 if admin_tok:

@@ -1,9 +1,10 @@
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 from uuid import uuid4
+
 import pytest
 
 from src._types import PlaylistLogsEventTypes
-from src.adapters._rabbit.worker.logs_handler import _get_operator_payload, _
+from src.adapters._rabbit.worker.logs_handler import _, _get_operator_payload
 from src.dto.internal.domain_events import EventOperator, InternalPlaylistEvent, InternalPlaylistEventType
 
 
