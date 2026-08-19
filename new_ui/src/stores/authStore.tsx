@@ -12,6 +12,22 @@ interface AuthState {
   clearAuth: () => void
 }
 
+const getSafeStorage = () => {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    return window.localStorage
+  }
+  try {
+    if (typeof localStorage !== 'undefined' && typeof localStorage.getItem === 'function') {
+      return localStorage
+    }
+  } catch {}
+  return {
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {},
+  }
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -38,7 +54,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => getSafeStorage()),
       // Оптимизация: сохраняем только user и expired_at. 
       // isAuthenticated вычисляется автоматически при инициализации, предотвращая десинхронизацию.
       partialize: (state) => ({

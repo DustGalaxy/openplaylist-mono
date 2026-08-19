@@ -12,19 +12,16 @@ import type {
 
 const getBaseUrl = () => {
   const config = getConfig()
-  return config.API_URL || config.BACKEND_API_URL || `${config.BACKEND_DOMAIN}/api`
+  return config.API_URL || `${config.BACKEND_DOMAIN}/api`
 }
 
 export const fetchPlayerState = async (
   ownerId: string,
 ): Promise<PlayerState | null> => {
-  const response = await apiClient(
-    `${getBaseUrl()}/player/${ownerId}/state`,
-    {
-      method: 'GET',
-      withCredentials: true,
-    },
-  ).catch((err) => {
+  const response = await apiClient(`${getBaseUrl()}/player/${ownerId}/state`, {
+    method: 'GET',
+    withCredentials: true,
+  }).catch((err) => {
     if (err.response?.status === 404) return null
     throw err
   })
@@ -44,15 +41,12 @@ export const playPlayerTrack = async (
     headers['X-Moderator-Token'] = modToken
   }
 
-  const response = await apiClient(
-    `${getBaseUrl()}/player/${ownerId}/play`,
-    {
-      method: 'POST',
-      withCredentials: true,
-      headers,
-      data: removeNullAndUndefined(data),
-    },
-  )
+  const response = await apiClient(`${getBaseUrl()}/player/${ownerId}/play`, {
+    method: 'POST',
+    withCredentials: true,
+    headers,
+    data: removeNullAndUndefined(data),
+  })
   return response.data
 }
 
@@ -67,15 +61,12 @@ export const pausePlayer = async (
     headers['X-Moderator-Token'] = modToken
   }
 
-  const response = await apiClient(
-    `${getBaseUrl()}/player/${ownerId}/pause`,
-    {
-      method: 'POST',
-      withCredentials: true,
-      headers,
-      data: removeNullAndUndefined(data),
-    },
-  )
+  const response = await apiClient(`${getBaseUrl()}/player/${ownerId}/pause`, {
+    method: 'POST',
+    withCredentials: true,
+    headers,
+    data: removeNullAndUndefined(data),
+  })
   return response.data
 }
 
@@ -90,15 +81,12 @@ export const seekPlayer = async (
     headers['X-Moderator-Token'] = modToken
   }
 
-  const response = await apiClient(
-    `${getBaseUrl()}/player/${ownerId}/seek`,
-    {
-      method: 'POST',
-      withCredentials: true,
-      headers,
-      data: removeNullAndUndefined(data),
-    },
-  )
+  const response = await apiClient(`${getBaseUrl()}/player/${ownerId}/seek`, {
+    method: 'POST',
+    withCredentials: true,
+    headers,
+    data: removeNullAndUndefined(data),
+  })
   return response.data
 }
 
@@ -113,15 +101,12 @@ export const setPlayerVolume = async (
     headers['X-Moderator-Token'] = modToken
   }
 
-  const response = await apiClient(
-    `${getBaseUrl()}/player/${ownerId}/volume`,
-    {
-      method: 'POST',
-      withCredentials: true,
-      headers,
-      data: removeNullAndUndefined(data),
-    },
-  )
+  const response = await apiClient(`${getBaseUrl()}/player/${ownerId}/volume`, {
+    method: 'POST',
+    withCredentials: true,
+    headers,
+    data: removeNullAndUndefined(data),
+  })
   return response.data
 }
 

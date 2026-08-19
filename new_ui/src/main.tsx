@@ -16,6 +16,7 @@ import ErrorComponent from './components/layout/RootError.tsx'
 import { usePlaylistStore } from './stores/playlistStore/index.tsx'
 import { getPlsUpdsSocket } from './api/io-sockets.ts'
 import { useAuthStore } from './stores/authStore.tsx'
+import { usePlaybackStore } from './stores/playbackStore.tsx'
 
 declare global {
   interface Window {
@@ -101,7 +102,15 @@ useAuthStore.subscribe((state) => {
   if (typeof usePlaylistStore !== 'undefined' && usePlaylistStore?.getState) {
     usePlaylistStore.getState().setUserId(state.user?.id ?? null)
   }
+  if (typeof usePlaybackStore !== 'undefined' && usePlaybackStore?.getState) {
+    usePlaybackStore.getState().syncUserChannel(state.user)
+  }
 })
+
+const initialUser = useAuthStore.getState().user
+if (initialUser && typeof usePlaybackStore !== 'undefined' && usePlaybackStore?.getState) {
+  usePlaybackStore.getState().syncUserChannel(initialUser)
+}
 
 // Create a new router instance
 export const router = createRouter({

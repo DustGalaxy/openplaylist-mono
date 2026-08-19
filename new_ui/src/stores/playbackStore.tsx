@@ -1,8 +1,24 @@
 import { create } from 'zustand'
 import type { ActiveChannel, PlayerMode, PlayerState } from '@/types/player'
 import type { ModeratedChannelResponse } from '@/types/moderator'
+import type { UserProfile } from '@/types/user'
+import { useAuthStore } from '@/stores/authStore'
+import { fetchPlayerState } from '@/api/api-player'
+import { safeEmit } from '@/lib/socketUtils'
 
 export type PlaybackMode = 'owner' | 'viewer' | 'single'
+
+export const createUserChannel = (user: {
+  id: string
+  username?: string
+  nickname?: string
+}): ActiveChannel => ({
+  owner_id: user.id,
+  name: user.username || user.nickname || 'Мой канал',
+  is_owner: true,
+  can_control_player: true,
+  can_manage_all_playlists: true,
+})
 
 interface PlaybackStore {
   // Legacy / slot support
@@ -20,13 +36,11 @@ interface PlaybackStore {
 
   setPlayerMode: (mode: PlayerMode) => void
   setActiveChannel: (channel: ActiveChannel | null) => void
+  syncUserChannel: (user: UserProfile | null) => void
   setModeratedChannels: (channels: ModeratedChannelResponse[]) => void
   setBroadcastToWidget: (enabled: boolean) => void
   setPlayerState: (state: PlayerState | null) => void
 }
-
-import { fetchPlayerState } from '@/api/api-player'
-import { safeEmit } from '@/lib/socketUtils'
 
 export const usePlaybackStore = create<PlaybackStore>((set, get) => ({
   activePlaybackId: null,
@@ -48,13 +62,25 @@ export const usePlaybackStore = create<PlaybackStore>((set, get) => ({
   setPlayerMode: (mode) => set({ playerMode: mode }),
 
   setActiveChannel: (channel) => {
-    set({ activeChannel: channel })
+    let resolvedChannel = channel
+    if (!resolvedChannel) {
+      const user = useAuthStore.getState().user
+      if (user) {
+        resolvedChannel = createUserChannel(user)
+      }
+    }
+
+    const prevOwnerId = get().activeChannel?.owner_id
+    const newOwnerId = resolvedChannel?.owner_id
+
+    set({ activeChannel: resolvedChannel })
+
+    if (prevOwnerId === newOwnerId && get().playerState) {
+      return
+    }
 
     void import('@/stores/playlistStore')
       .then(async ({ usePlaylistStore }) => {
-        const userId = usePlaylistStore.getState().userId
-        const prevOwnerId = get().activeChannel?.owner_id || userId
-        const newOwnerId = channel?.owner_id || userId
         const socket = usePlaylistStore.getState().socket
 
         if (socket && prevOwnerId && prevOwnerId !== newOwnerId) {
@@ -87,11 +113,39 @@ export const usePlaybackStore = create<PlaybackStore>((set, get) => ({
           } catch (err) {
             console.error('[playbackStore] fetchPlayerState failed:', err)
           }
+        } else {
+          set({ playerState: null })
         }
       })
       .catch((err) =>
         console.error('[playbackStore] playlistStore import failed:', err),
       )
+  },
+
+  syncUserChannel: (user) => {
+    if (!user) {
+      const prevOwnerId = get().activeChannel?.owner_id
+      set({
+        activeChannel: null,
+        playerState: null,
+        moderatedChannels: [],
+      })
+      if (prevOwnerId) {
+        void import('@/stores/playlistStore').then(({ usePlaylistStore }) => {
+          const socket = usePlaylistStore.getState().socket
+          if (socket) {
+            safeEmit(socket, 'player_unsubscribe', { owner_id: prevOwnerId })
+          }
+        })
+      }
+      return
+    }
+
+    const currentChannel = get().activeChannel
+    if (!currentChannel || currentChannel.is_owner) {
+      const userChannel = createUserChannel(user)
+      get().setActiveChannel(userChannel)
+    }
   },
 
   setModeratedChannels: (channels) => set({ moderatedChannels: channels }),
@@ -101,3 +155,4 @@ export const usePlaybackStore = create<PlaybackStore>((set, get) => ({
 
 export const useIsPlaybackActive = (id: string, mode: PlaybackMode) =>
   usePlaybackStore((s) => s.activePlaybackId === id && s.activeMode === mode)
+
