@@ -63,6 +63,7 @@ mindmap
 | **Playlist Audit Logs** | [`docs/playlist_logs.md`](file:///e:/vs-code-projects/openplaylist-mono/docs/playlist_logs.md) | Журнал аудита действий операторов/модераторов, асинхронный воркер `logs_handler.py`, хранение в PostgreSQL и живое вещание `log:{playlist_id}`. |
 | **History & Analytics** | [`docs/history_stats.md`](file:///e:/vs-code-projects/openplaylist-mono/docs/history_stats.md) | Логирование истории воспроизведения через `history_handler.py`, агрегация статистики по временным окнам и очистка устаревших данных. |
 | **Auth & Identity** | [`docs/auth.md`](file:///e:/vs-code-projects/openplaylist-mono/docs/auth.md) | Классическая аутентификация (Argon2id), стратегии OAuth2 PKCE, разрешение коллизий учетных записей (Levels 1–4) и JWT-сессии. |
+| **DonatePay Bot Messaging** | [`docs/bot_donatepay/messaging_guide.md`](file:///e:/vs-code-projects/openplaylist-mono/docs/bot_donatepay/messaging_guide.md) | Руководство для новичков по RabbitMQ, AMQP клиенту, RPC запросам и Command Handlers в DonatePay боте. |
 
 
 ---

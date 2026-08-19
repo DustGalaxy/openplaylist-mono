@@ -285,7 +285,7 @@ services:
     env_file:
       - ./bot_donatepay/.env
     volumes:
-      - ./bot_donatepay/src:/app/src
+      - ./bot_donatepay/dist:/app/dist
     networks:
       - default
     deploy:

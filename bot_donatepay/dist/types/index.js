@@ -14,9 +14,6 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * Entrypoint for backward-compatibility with existing docker scripts, package.json scripts,
- * and external importers.
- */
-__exportStar(require("./index"), exports);
-require("./index");
+__exportStar(require("./donatepay.types"), exports);
+__exportStar(require("./user.types"), exports);
+__exportStar(require("./messaging.types"), exports);
