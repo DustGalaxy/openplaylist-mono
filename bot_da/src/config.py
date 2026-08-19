@@ -1,18 +1,22 @@
+from typing import Literal
+
 from pydantic import model_validator
-from pydantic_settings import BaseSettings  # Для загрузки конфига
+from pydantic.fields import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 # --- Загрузка конфигурации ---
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    MODE: Literal["prod", "dev"] = Field(default="dev")
     PROJECT_DOMAIN: str = "http://localhost:3000"
+
     APP_ID: str = "18779"
     API_KEY: str = ""
     REDIRECT_URI: str = ""
-    SESSION_SECRET_KEY: str
 
-    RABBITMQ_URL: str
-    DB_URL: str
-    REDIS_URL: str
+    RABBITMQ_URL: str = Field(default="amqp://localhost")
 
     DA_SCOPES: str = "oauth-user-show oauth-donation-subscribe"
     DA_AUTHORIZATION_URL: str = "https://www.donationalerts.com/oauth/authorize"
@@ -22,11 +26,9 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def compute_urls(self) -> "Settings":
-        # Если в .env написано MODE=prod, меняем домен (или подтягиваем из другой переменной PROD_PROJECT_DOMAIN)
+        if self.MODE == "prod":
+            self.PROJECT_DOMAIN = "https://theopenplaylist.com"
 
-        self.PROJECT_DOMAIN = "https://openplaylist.midnull.space"
-
-        # Формируем зависимые ссылки
         self.REDIRECT_URI = f"{self.PROJECT_DOMAIN}/oauth-callback"
         return self
 

@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-
-from _types import IManager
+from typing import Any
 
 
 @dataclass
 class Context:
-    manager: IManager | None = None
+    manager: Any = None
 
 
 context = Context()

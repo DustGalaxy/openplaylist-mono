@@ -1,18 +1,21 @@
 import json
 import logging
 from uuid import UUID
-
 from uuid6 import uuid7
 
-from dto.da import DonationData
-from dto.order import OrderNew
-from adapters._rabbit.broker import rabbit_broker, order_new, main_exchange
-from utils import extract_youtube_url
+from src.adapters._rabbit.broker import main_exchange, order_new, rabbit_broker
+from src.dto.da import DonationData
+from src.dto.order import OrderNew
+from src.utils import extract_youtube_url
+
 
 logger = logging.getLogger(__name__)
 
-async def _request_processing(owner_id: UUID, donation: DonationData, yt_url: str):
-    logger.info("Donation is valid. Requesting order...")
+
+async def _request_processing(owner_id: UUID, donation: DonationData, yt_url: str) -> None:
+    logger.info(
+        f"Publishing new order to '{order_new.name}' (requester='{donation.username}', amount={donation.amount_in_user_currency} {donation.currency})..."
+    )
 
     await rabbit_broker.publish(
         OrderNew(
@@ -29,48 +32,53 @@ async def _request_processing(owner_id: UUID, donation: DonationData, yt_url: st
         order_new,
         main_exchange,
     )
+    logger.info(f"Order successfully published for donation ID={donation.id}")
+
+
+async def _data_proccesing(donation_payload: dict, owner_id: UUID):
+    try:
+        donation = DonationData.model_validate(donation_payload)
+    except Exception as e:
+        logger.warning(f"Failed to validate DonationData payload: {e}. Payload: {donation_payload}")
+        return
+
+    logger.info(
+        f"Received donation ID={donation.id} from '{donation.username}' ({donation.amount_in_user_currency} {donation.currency})"
+    )
+
+    yt_url = extract_youtube_url(donation.message)
+    if yt_url:
+        logger.info(f"Extracted YouTube URL '{yt_url}' from donation ID={donation.id}")
+        try:
+            await _request_processing(owner_id, donation, yt_url)
+        except Exception as e:
+            logger.error(f"Failed to publish order for donation ID={donation.id}: {e}", exc_info=True)
+    else:
+        logger.info(f"No YouTube URL found in message for donation ID={donation.id}")
 
 
 async def handler(message_str: str, owner_id: UUID, channel_name: str) -> None:
     try:
         message = json.loads(message_str)
+    except json.JSONDecodeError:
+        logger.error(f"Failed to decode JSON message from channel '{channel_name}': {message_str}")
+        return
+
+    try:
         if "result" in message and "channel" in message["result"] and message["result"]["channel"] == channel_name:
-            if "data" in message["result"] and "data" in message["result"]["data"]:
-                donation_data = message["result"]["data"]["data"]
-                logger.info(
-                    f"Received donation: ID={donation_data.get('id')}, User={donation_data.get('username') or donation_data.get('name')}, Amount={donation_data.get('amount')} {donation_data.get('currency')}"
-                )
-                donation = DonationData.model_validate(donation_data)
-                yt_url = extract_youtube_url(donation.message)
-                if yt_url:
-                    await _request_processing(owner_id, donation, yt_url)
+            result = message["result"]
+            if "data" in result and isinstance(result["data"], dict) and "data" in result["data"]:
+                await _data_proccesing(result["data"]["data"], owner_id)
+            elif "type" in result and result.get("type") == 1:
+                logger.info(f"Subscription confirmation event received on channel '{channel_name}'.")
 
-            elif (
-                "type" in message["result"]
-                and message["result"]["type"] == 1
-                and "data" in message["result"]
-                and "info" in message["result"]["data"]
-            ):
-                logger.info("Subscription confirmation message received. Broadcasting connected status.")
-
-                # React to connection
-                # await websocket_manager.broadcast({"type": "listener_status", "status": "connected"})
-            else:
-                logger.warning(f"Received message on channel, but 'data.data' missing: {message_str}")
         elif "id" in message:
             if message.get("id") == 2 and "result" in message:
-                logger.info(
-                    "Successfully subscribed to channel (received subscribe ack). Broadcasting connected status."
-                )
-
-                # React to connection
-                # await websocket_manager.broadcast({"type": "listener_status", "status": "connected"})
+                logger.info(f"Successfully subscribed to channel '{channel_name}' (received subscribe ack).")
             else:
-                logger.debug(f"Received message with ID (likely ping or subscribe ack): {message_str}")
+                logger.debug(f"Received message with id={message.get('id')}: {message_str}")
         else:
-            logger.warning(f"Received unhandled message format: {message_str}")
+            logger.debug(f"Received unhandled message format: {message_str}")
 
-    except json.JSONDecodeError:
-        logger.error(f"Failed to decode JSON message: {message_str}")
     except Exception as e:
-        logger.exception(f"Error processing message: {e}")
+        logger.exception(f"Unexpected error processing Centrifugo message on channel '{channel_name}': {e}")

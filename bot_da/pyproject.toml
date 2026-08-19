@@ -1,20 +1,23 @@
 [project]
-name = "da-service"
+name = "bot-da"
 version = "0.1.0"
-description = "Add your description here"
+description = "DonationAlerts integration bot for OpenPlaylist"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "aiosqlite>=0.21.0",
-    "fastapi>=0.116.1",
-    "faststream[rabbit]>=0.5.48",
+    "faststream[cli,rabbit]>=0.5.48",
     "httpx>=0.28.1",
-    "itsdangerous>=2.2.0",
     "pydantic-settings>=2.10.1",
-    "redis>=6.4.0",
-    "simple-repo-asyncsqla>=2.0.1",
-    "sqlalchemy[asyncio]>=2.0.43",
     "uuid6>=2025.0.1",
-    "uvicorn>=0.35.0",
     "websockets>=15.0.1",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+asyncio_mode = "auto"
