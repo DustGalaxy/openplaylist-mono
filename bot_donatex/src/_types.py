@@ -31,10 +31,10 @@ class IDonateXListener(ABC):
 
 
 class IManager(ABC):
-    connections: list[IDonateXListener] = []
+    connections: list[IDonateXListener]
 
     def __init__(self) -> None:
-        pass
+        self.connections = []
 
     @abstractmethod
     async def add_connection(self, data: ConnectionData): ...

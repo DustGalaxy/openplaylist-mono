@@ -11,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 async def _request_processing(owner_id: UUID, donation: DonationData, owner_platform_id: str, yt_url: str):
-    logger.info("Donation is valid. Requesting order...")
+    logger.info(
+        f"Publishing new order to '{order_new.name}' (requester='{donation.username}', amount={donation.amount} {donation.currency})..."
+    )
 
     await rabbit_broker.publish(
         OrderNew(
@@ -28,12 +30,30 @@ async def _request_processing(owner_id: UUID, donation: DonationData, owner_plat
         order_new,
         main_exchange,
     )
+    logger.info(f"Order successfully published to RabbitMQ for platform_user_id='{owner_platform_id}'")
 
 
 async def handler(donation_data: dict, owner_id: UUID, owner_platform_id: str) -> None:
+    try:
+        donation = DonationData.model_validate(donation_data)
+    except Exception as e:
+        logger.warning(
+            f"Failed to validate DonateX donation payload for platform_user_id='{owner_platform_id}': {e}. Payload preview: {donation_data}"
+        )
+        return
 
-    donation = DonationData.model_validate(donation_data)
     yt_url = extract_youtube_url(donation.message)
-    print(yt_url)
     if yt_url:
-        await _request_processing(owner_id, donation, owner_platform_id, yt_url)
+        logger.info(
+            f"Extracted YouTube URL '{yt_url}' from donation by '{donation.username}' ({donation.amount} {donation.currency})"
+        )
+        try:
+            await _request_processing(owner_id, donation, owner_platform_id, yt_url)
+        except Exception as e:
+            logger.error(
+                f"Failed to publish order for donation {donation.id} (user='{owner_platform_id}'): {e}",
+            )
+    else:
+        logger.info(
+            f"No valid YouTube URL in donation message from '{donation.username}' ({donation.amount} {donation.currency})"
+        )
