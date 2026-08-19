@@ -253,10 +253,16 @@
 - Test config:
   - `pytest.ini` sets `pythonpath = src`, `asyncio_mode = auto`, `testpaths = tests`, `IS_TESTING=True`.
 - Type checking:
-  - `pyproject.toml` configures `basedpyright`.
+  - `pyproject.toml` configures `basedpyright` (`reportUnannotatedClassAttribute = "none"`).
   - Command: `uv run basedpyright` if installed in the active environment.
-- Formatting/linting:
-  - No Ruff, Black, or MyPy dependency/config declared in `pyproject.toml`.
+- Formatting & Linting (`ruff`):
+  - Configured in `ruff.toml` and `pyproject.toml` (target Python 3.13).
+  - Rules enabled: `select = ["E", "F", "I"]` with `known-first-party = ["src"]`.
+  - Format command: `uv run ruff format .`
+  - Import sorting (isort): `uv run ruff check --select I --fix .`
+  - Modern type annotations (`|` instead of `Union`/`Optional`): `uv run ruff check --select UP007 --fix .`
+  - Line endings: strictly `LF` (`\n`), enforced via `.gitattributes` and editor `files.eol: "\n"`.
+
 
 ### CI/CD & Deployment
 
