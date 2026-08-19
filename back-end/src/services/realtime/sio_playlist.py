@@ -140,6 +140,10 @@ class SioPlaylistUpdateService:
         else:
             await self.sio.emit("subscribe_denied", {"room_id": playlist_id}, to=sid, namespace=self.namespace)
 
+    async def unsub_plst_upds(self, sid: str, playlist_id: UUID, user_id: str):
+        room_manager.leave_room(sid, str(playlist_id), namespace=self.namespace)
+        print(f"⬅️ Пользователь {user_id} вышел из комнаты {playlist_id}")
+
     async def emit_player_track_change(self, owner_id: UUID, track_data: dict, playlist_id: UUID, client_id: str):
         sids = room_manager.get_sids(f"player:{owner_id!s}", self.namespace)
         await self.sio.emit(
