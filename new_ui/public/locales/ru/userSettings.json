@@ -143,6 +143,7 @@
     "tabs": {
       "account": "Аккаунт",
       "integrations": "Интеграции",
+      "moderators": "Модераторы",
       "profile": "Профиль",
       "subscriptions": "Подписки",
       "widget": "OBS Виджет"
@@ -152,6 +153,111 @@
       "cta": "Перейти ко входу",
       "message": "Вам необходимо войти в систему, чтобы управлять своим аккаунтом.",
       "title": "Настройки"
+    },
+    "moderators": {
+      "title": "Модерация канала (V2)",
+      "subtitle": "Управляйте модераторами вашего канала или активируйте полученный токен приглашения.",
+      "claimTokenBtn": "Активировать токен",
+      "createTokenBtn": "Создать ссылку-токен",
+      "addByIdBtn": "Добавить по ID",
+      "moderatedChannelsTitle": "Каналы, на которых вы модератор:",
+      "channelOwner": "Канал: {{name}}",
+      "playerPerm": "🎛️ Плеер ",
+      "allPlaylistsPerm": "• Все плейлисты",
+      "playlistsCountPerm": "• Плейлистов: {{count}}",
+      "statusActive": "Активен",
+      "myModeratorsTitle": "Модераторы моего канала:",
+      "loading": "Загрузка модераторов...",
+      "noModerators": "У вас пока нет назначенных модераторов на канале.",
+      "statusBound": "Привязан",
+      "statusPending": "Ожидает активации",
+      "copyTokenTitle": "Скопировать токен",
+      "tokenBtn": "Токен",
+      "copyLinkTitle": "Скопировать готовую ссылку-приглашение",
+      "copyLinkBtn": "Скопировать ссылку",
+      "hidePlaylists": "Скрыть плейлисты",
+      "showPlaylists": "Плейлисты",
+      "revokeModTitle": "Отозвать модератора",
+      "playerAndWidgetControl": "Управление плеером и виджетом",
+      "accessAllPlaylists": "Доступ ко ВСЕМ плейлистам",
+      "specificPlaylistsAccess": "Доступ к отдельным плейлистам",
+      "selectPlaylistPlaceholder": "Выберите плейлист...",
+      "permTracks": "Треки",
+      "permSettings": "Настройки",
+      "grantAccessBtn": "Выдать доступ",
+      "noPlaylistAccessGranted": "Нет выданных прав на плейлисты.",
+      "badgeTracks": "🎵 Треки ",
+      "badgeSettings": "⚙️ Настройки",
+      "revokePlaylistAccessTitle": "Удалить доступ",
+      "cancelBtn": "Отмена",
+      "defaultTokenName": "Модератор стрима",
+      "defaultDirectAddName": "Модератор",
+      "claimModal": {
+        "title": "Активировать токен модератора",
+        "subtitle": "Вставьте строку токена или полученную ссылку-приглашение для подключения к каналу стримера.",
+        "inputLabel": "Токен или ссылка",
+        "inputPlaceholder": "Вставьте токен или ссылку...",
+        "claimBtn": "Активировать",
+        "claiming": "Активация..."
+      },
+      "createModal": {
+        "title": "Создать ссылку-токен модератора",
+        "nameLabel": "Название / Описание",
+        "namePlaceholder": "Например: Модератор чата",
+        "selectPlaylistsLabel": "Выберите плейлисты для доступа:",
+        "selectedCount": "Выбрано: {{count}}",
+        "noPlaylists": "У вас пока нет созданных плейлистов",
+        "createBtn": "Создать",
+        "creating": "Создание..."
+      },
+      "directAddModal": {
+        "title": "Добавить модератора по ID",
+        "userIdLabel": "User ID (UUID)",
+        "userIdPlaceholder": "например, 123e4567-e89b-12d3-a456-426614174000",
+        "nameLabel": "Имя / Заметка",
+        "namePlaceholder": "Модератор",
+        "addBtn": "Добавить",
+        "adding": "Добавление..."
+      },
+      "success": {
+        "tokenCreated": "Токен модератора успешно создан",
+        "moderatorAdded": "Модератор успешно добавлен",
+        "tokenClaimed": "Токен успешно активирован! Вы подключены как модератор.",
+        "moderatorRevoked": "Модератор отозван",
+        "playerRightsUpdated": "Права на плеер обновлены",
+        "playlistRightsUpdated": "Права на плейлисты обновлены",
+        "playlistAccessGranted": "Доступ к плейлисту предоставлен",
+        "playlistAccessRevoked": "Доступ к плейлисту отозван",
+        "linkCopied": "Ссылка-приглашение скопирована",
+        "tokenCopied": "Токен скопирован"
+      },
+      "errors": {
+        "loadFailed": "Не удалось загрузить данные модерации",
+        "tokenCreateFailed": "Ошибка создания токена",
+        "userIdRequired": "Укажите ID пользователя",
+        "moderatorAddFailed": "Ошибка добавления модератора",
+        "tokenRequired": "Введите токен модератора",
+        "tokenClaimFailed": "Не удалось активировать токен",
+        "moderatorRevokeFailed": "Ошибка отзыва модератора",
+        "rightsUpdateFailed": "Ошибка обновления прав",
+        "playlistAccessGrantFailed": "Ошибка предоставления доступа",
+        "playlistAccessRevokeFailed": "Ошибка отзыва доступа к плейлисту"
+      }
+    },
+    "botSettings": {
+      "cancel": "Отмена",
+      "save": "Сохранить",
+      "saving": "Сохранение...",
+      "saveFailed": "Не удалось сохранить настройки бота",
+      "saved": "Настройки бота успешно сохранены",
+      "title": "Настройки бота",
+      "twitch": {
+        "prefix": {
+          "hint": "Символ(ы), который(е) будут использоваться как префикс для команд бота в чате Twitch. Например, если вы установите его на '!', зрители будут использовать '!mr' для отправки трека.",
+          "label": "Префикс команд",
+          "placeholder": "Введите префикс команд"
+        }
+      }
     },
     "widget": {
       "appearanceTitle": "Внешний вид",
@@ -180,5 +286,21 @@
       "textColor": "Цвет текста",
       "title": "Виджет оверлея OBS"
     }
+  },
+  "botSettings": {
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "saving": "Сохранение...",
+    "saveFailed": "Не удалось сохранить настройки бота",
+    "saved": "Настройки бота успешно сохранены",
+    "title": "Настройки бота",
+    "twitch": {
+      "prefix": {
+        "hint": "Символ(ы), который(е) будут использоваться как префикс для команд бота в чате Twitch. Например, если вы установите его на '!', зрители будут использовать '!mr' для отправки трека.",
+        "label": "Префикс команд",
+        "placeholder": "Введите префикс команд"
+      }
+    }
   }
 }
+

@@ -4,6 +4,7 @@ export type FieldDef =
       key: string
       labelKey: string
       hintKey?: string
+      placeholderKey?: string
       maxLength?: number
       placeholder?: string
     }
@@ -17,3 +18,4 @@ export type FieldDef =
 export interface BotSettingsConfig {
   fields: FieldDef[]
 }
+

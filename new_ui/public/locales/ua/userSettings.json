@@ -143,6 +143,7 @@
     "tabs": {
       "account": "Акаунт",
       "integrations": "Інтеграції",
+      "moderators": "Модератори",
       "profile": "Профіль",
       "subscriptions": "Підписки",
       "widget": "Віджет"
@@ -153,12 +154,117 @@
       "message": "Вам потрібно спочатку увійти, щоб керувати акаунтом.",
       "title": "Налаштування"
     },
+    "moderators": {
+      "title": "Модерація каналу (V2)",
+      "subtitle": "Керуйте модераторами вашого каналу або активуйте отриманий токен запрошення.",
+      "claimTokenBtn": "Активувати токен",
+      "createTokenBtn": "Створити посилання-токен",
+      "addByIdBtn": "Додати за ID",
+      "moderatedChannelsTitle": "Канали, де ви модератор:",
+      "channelOwner": "Канал: {{name}}",
+      "playerPerm": "🎛️ Плеєр ",
+      "allPlaylistsPerm": "• Усі плейлисти",
+      "playlistsCountPerm": "• Плейлистів: {{count}}",
+      "statusActive": "Активний",
+      "myModeratorsTitle": "Модератори мого каналу:",
+      "loading": "Завантаження модераторів...",
+      "noModerators": "У вас поки немає призначених модераторів на каналі.",
+      "statusBound": "Прив'язаний",
+      "statusPending": "Очікує активації",
+      "copyTokenTitle": "Скопіювати токен",
+      "tokenBtn": "Токен",
+      "copyLinkTitle": "Скопіювати готове посилання-запрошення",
+      "copyLinkBtn": "Скопіювати посилання",
+      "hidePlaylists": "Сховати плейлисти",
+      "showPlaylists": "Плейлисти",
+      "revokeModTitle": "Відкликати модератора",
+      "playerAndWidgetControl": "Керування плеєром і віджетом",
+      "accessAllPlaylists": "Доступ до ВСІХ плейлистів",
+      "specificPlaylistsAccess": "Доступ до окремих плейлистів",
+      "selectPlaylistPlaceholder": "Оберіть плейлист...",
+      "permTracks": "Треки",
+      "permSettings": "Налаштування",
+      "grantAccessBtn": "Надати доступ",
+      "noPlaylistAccessGranted": "Немає наданих прав на плейлисти.",
+      "badgeTracks": "🎵 Треки ",
+      "badgeSettings": "⚙️ Налаштування",
+      "revokePlaylistAccessTitle": "Видалити доступ",
+      "cancelBtn": "Скасувати",
+      "defaultTokenName": "Модератор стріму",
+      "defaultDirectAddName": "Модератор",
+      "claimModal": {
+        "title": "Активувати токен модератора",
+        "subtitle": "Вставте рядок токена або отримане посилання-запрошення для підключення до каналу стрімера.",
+        "inputLabel": "Токен або посилання",
+        "inputPlaceholder": "Вставте токен або посилання...",
+        "claimBtn": "Активувати",
+        "claiming": "Активація..."
+      },
+      "createModal": {
+        "title": "Створити посилання-токен модератора",
+        "nameLabel": "Назва / Опис",
+        "namePlaceholder": "Наприклад: Модератор чату",
+        "selectPlaylistsLabel": "Оберіть плейлисти для доступу:",
+        "selectedCount": "Обрано: {{count}}",
+        "noPlaylists": "У вас поки немає створених плейлистів",
+        "createBtn": "Створити",
+        "creating": "Створення..."
+      },
+      "directAddModal": {
+        "title": "Додати модератора за ID",
+        "userIdLabel": "User ID (UUID)",
+        "userIdPlaceholder": "наприклад, 123e4567-e89b-12d3-a456-426614174000",
+        "nameLabel": "Ім'я / Примітка",
+        "namePlaceholder": "Модератор",
+        "addBtn": "Додати",
+        "adding": "Додавання..."
+      },
+      "success": {
+        "tokenCreated": "Токен модератора успішно створено",
+        "moderatorAdded": "Модератора успішно додано",
+        "tokenClaimed": "Токен успішно активовано! Ви підключені як модератор.",
+        "moderatorRevoked": "Модератора відкликано",
+        "playerRightsUpdated": "Права на плеєр оновлено",
+        "playlistRightsUpdated": "Права на плейлисти оновлено",
+        "playlistAccessGranted": "Доступ до плейлиста надано",
+        "playlistAccessRevoked": "Доступ до плейлиста відкликано",
+        "linkCopied": "Посилання-запрошення скопійовано",
+        "tokenCopied": "Токен скопійовано"
+      },
+      "errors": {
+        "loadFailed": "Не вдалося завантажити дані модерації",
+        "tokenCreateFailed": "Помилка створення токена",
+        "userIdRequired": "Вкажіть ID користувача",
+        "moderatorAddFailed": "Помилка додавання модератора",
+        "tokenRequired": "Введіть токен модератора",
+        "tokenClaimFailed": "Не вдалося активувати токен",
+        "moderatorRevokeFailed": "Помилка відкликання модератора",
+        "rightsUpdateFailed": "Помилка оновлення прав",
+        "playlistAccessGrantFailed": "Помилка надання доступу",
+        "playlistAccessRevokeFailed": "Помилка відкликання доступу до плейлиста"
+      }
+    },
+    "botSettings": {
+      "cancel": "Скасувати",
+      "save": "Зберегти",
+      "saving": "Збереження...",
+      "saveFailed": "Не вдалося зберегти налаштування бота",
+      "saved": "Налаштування бота успішно збережено",
+      "title": "Налаштування бота",
+      "twitch": {
+        "prefix": {
+          "hint": "Символ(и), що використовуватимуться як префікс для команд бота в чаті Twitch. Наприклад, якщо встановити '!', глядачі використовуватимуть '!mr' для надсилання треку.",
+          "label": "Префікс команд",
+          "placeholder": "Введіть префікс команд"
+        }
+      }
+    },
     "widget": {
       "appearanceTitle": "Зовнішній вигляд",
       "bgColor": "Колір фону",
       "bgOpacity": "Прозорість фону",
       "copyLink": "Копіювати посилання",
-      "cssCopied": "CSS скопирован — вставьте его в OBS (Источник «Браузер» → Свойства → Пользовательский CSS)",
+      "cssCopied": "CSS скопійовано — вставте його в OBS (Джерело «Браузер» → Властивості → Користувацький CSS)",
       "cssCopy": "Копіювати CSS",
       "cssHint": "Додаткові стилі CSS для віджета",
       "cssTitle": "Кастомний CSS",
@@ -179,46 +285,22 @@
       "subtitle": "Налаштовуйте оверлеї поточного треку для OBS Studio та програм трансляції.",
       "textColor": "Колір тексту",
       "title": "Віджет оверлею OBS"
+    }
+  },
+  "botSettings": {
+    "cancel": "Скасувати",
+    "save": "Зберегти",
+    "saving": "Збереження...",
+    "saveFailed": "Не вдалося зберегти налаштування бота",
+    "saved": "Налаштування бота успішно збережено",
+    "title": "Налаштування бота",
+    "twitch": {
+      "prefix": {
+        "hint": "Символ(и), що використовуватимуться як префікс для команд бота в чаті Twitch. Наприклад, якщо встановити '!', глядачі використовуватимуть '!mr' для надсилання треку.",
+        "label": "Префікс команд",
+        "placeholder": "Введіть префікс команд"
       }
-    },
-    "subtitle": "Управляйте налаштуваннями вашого акаунту та профілю",
-    "tabs": {
-      "account": "Акаунт",
-      "integrations": "Інтеграції",
-      "profile": "Профіль",
-      "subscriptions": "Підписки",
-      "widget": "Віджет"
-    },
-    "title": "Налаштування",
-    "unauth": {
-      "cta": "Перейти до входу",
-      "message": "Вам потрібно спочатку увійти, щоб керувати акаунтом.",
-      "title": "Налаштування"
-    },
-    "widget": {
-      "appearanceTitle": "Зовнішній вигляд",
-      "bgColor": "Колір фону",
-      "bgOpacity": "Прозорість фону",
-      "copyLink": "Копіювати посилання",
-      "cssCopied": "CSS скопирован — вставьте его в OBS (Источник «Браузер» → Свойства → Пользовательский CSS)",
-      "cssCopy": "Копіювати CSS",
-      "cssHint": "Додаткові стилі CSS для віджета",
-      "cssTitle": "Кастомний CSS",
-      "demoTrack": "Демонстраційний трек",
-      "fontSize": "Розмір шрифту",
-      "generate": "Згенерувати",
-      "generateConfirm": "Згенерувати новий токен віджета?",
-      "linkHint": "Використовуйте це посилання в OBS / Streamlabs",
-      "linkTitle": "Посилання на віджет",
-      "noTokenPlaceholder": "Натисніть Згенерувати для отримання посилання",
-      "noTokenWarning": "Токен віджета не згенеровано",
-      "previewTitle": "Попередній перегляд",
-      "regenerate": "Перегенерувати",
-      "regenerateConfirm": "Ви впевнені, що хочете перегенерувати токен віджета?",
-      "regenerateFailed": "Помилка регенерації токена",
-      "regenerated": "Токен перегенеровано",
-      "showIcon": "Показувати іконку",
-      "textColor": "Колір тексту"
     }
   }
 }
+

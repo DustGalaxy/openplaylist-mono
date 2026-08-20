@@ -117,8 +117,8 @@ export function PlayerOptionsPopover({
       <PopoverTrigger asChild>
         <Btn
           isActive={isOpen || isControlMode}
-          aria-label="Опции и очередь воспроизведения"
-          title="Опции и очередь воспроизведения"
+          aria-label={t('popover.triggerAria', 'Опции и очередь воспроизведения')}
+          title={t('popover.triggerAria', 'Опции и очередь воспроизведения')}
           className={cn(
             'p-1 rounded-sm size-8 sm:size-9 bg-level-2 relative',
             className,
@@ -142,7 +142,7 @@ export function PlayerOptionsPopover({
           <div className="flex items-center gap-2">
             <Settings2 className="size-4 text-accent" />
             <span className="font-semibold text-sm text-text-main">
-              Опции воспроизведения
+              {t('popover.title', 'Опции воспроизведения')}
             </span>
           </div>
           <span
@@ -153,14 +153,16 @@ export function PlayerOptionsPopover({
                 : 'bg-level-1 text-text-secondary border-accent/20',
             )}
           >
-            {isControlMode ? 'Управление' : 'Слушаю'}
+            {isControlMode
+              ? t('popover.modes.control', 'Управление')
+              : t('popover.modes.listen', 'Слушаю')}
           </span>
         </div>
 
         {/* Section 1: Player Mode Switcher */}
         <div className="space-y-1.5">
           <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
-            Режим плеера
+            {t('popover.playerModeLabel', 'Режим плеера')}
           </label>
           <div className="grid grid-cols-2 gap-1.5 bg-level-1 p-1 rounded-lg border border-accent/20">
             <button
@@ -174,7 +176,7 @@ export function PlayerOptionsPopover({
               )}
             >
               <Headphones className="size-3.5" />
-              <span>Слушаю</span>
+              <span>{t('popover.modes.listen', 'Слушаю')}</span>
             </button>
             <button
               type="button"
@@ -187,13 +189,19 @@ export function PlayerOptionsPopover({
               )}
             >
               <SlidersHorizontal className="size-3.5" />
-              <span>Управление</span>
+              <span>{t('popover.modes.control', 'Управление')}</span>
             </button>
           </div>
           <p className="text-[10px] text-text-secondary leading-tight px-0.5">
             {playerMode === 'listen'
-              ? 'Локальный звук включен. Действия применяются только для вас.'
-              : 'Локальный звук заглушен. Команды транслируются стримеру в OBS.'}
+              ? t(
+                  'popover.modeHelp.listen',
+                  'Локальный звук включен. Действия применяются только для вас.',
+                )
+              : t(
+                  'popover.modeHelp.control',
+                  'Локальный звук заглушен. Команды транслируются стримеру в OBS.',
+                )}
           </p>
         </div>
 
@@ -201,7 +209,7 @@ export function PlayerOptionsPopover({
         {isControlMode && (
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
-              Канал стрима (Контекст)
+              {t('popover.channelSelectorLabel', 'Канал стрима (Контекст)')}
             </label>
             <div className="space-y-1 bg-level-1 p-1 rounded-lg border border-accent/20">
               <button
@@ -216,7 +224,9 @@ export function PlayerOptionsPopover({
               >
                 <div className="flex items-center gap-2 truncate">
                   <Shield className="size-3.5 text-accent shrink-0" />
-                  <span className="truncate">Мой канал (Собственный)</span>
+                  <span className="truncate">
+                    {t('popover.ownChannel', 'Мой канал (Собственный)')}
+                  </span>
                 </div>
                 {isOwnChannelSelected && (
                   <span className="size-2 rounded-full bg-accent shrink-0" />
@@ -272,19 +282,25 @@ export function PlayerOptionsPopover({
             />
             <div className="flex flex-col">
               <span className="font-medium text-xs">
-                Трансляция в виджет OBS
+                {t('popover.widgetBroadcastTitle', 'Трансляция в виджет OBS')}
               </span>
               <span className="text-[10px] text-text-secondary">
                 {broadcastToWidget
-                  ? 'Включена (стрим слышит музыку)'
-                  : 'Выключена'}
+                  ? t(
+                      'popover.widgetBroadcastEnabled',
+                      'Включена (стрим слышит музыку)',
+                    )
+                  : t('popover.widgetBroadcastDisabled', 'Выключена')}
               </span>
             </div>
           </div>
           <Btn
             isActive={broadcastToWidget}
             onClick={toggleBroadcastWidget}
-            aria-label="Переключить трансляцию в виджет"
+            aria-label={t(
+              'popover.toggleWidgetBroadcastAria',
+              'Переключить трансляцию в виджет',
+            )}
             className="p-1 rounded-sm size-8 bg-level-2 shrink-0"
           >
             <span
@@ -302,7 +318,7 @@ export function PlayerOptionsPopover({
         <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-level-1 border border-accent/20">
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mr-1">
-              Скорость:
+              {t('popover.speedLabel', 'Скорость:')}
             </span>
             {RATES.map((rate) => (
               <Btn
@@ -321,7 +337,7 @@ export function PlayerOptionsPopover({
               <Btn
                 onClick={feed.stop}
                 aria-label={t('controls.stop', 'Остановить воспроизведение')}
-                title="Остановить воспроизведение"
+                title={t('popover.stopPlaybackTitle', 'Остановить воспроизведение')}
                 className="p-1 rounded-sm size-7 bg-level-2 text-danger"
               >
                 <Square className="size-3" />
@@ -332,7 +348,10 @@ export function PlayerOptionsPopover({
               <Btn
                 onClick={feed.requestSync}
                 aria-label={t('controls.sync', 'Синхронизировать')}
-                title="Синхронизировать со стримом"
+                title={t(
+                  'popover.syncWithStreamTitle',
+                  'Синхронизировать со стримом',
+                )}
                 className="p-1 rounded-sm size-7 bg-level-2"
               >
                 <RefreshCw className="size-3" />
@@ -346,16 +365,18 @@ export function PlayerOptionsPopover({
           <div className="flex items-center justify-between px-0.5">
             <span className="font-bold text-text-main flex items-center gap-1.5 text-xs">
               <ListMusic className="size-3.5 text-accent" />
-              Далее в очереди
+              {t('popover.upNextTitle', 'Далее в очереди')}
             </span>
             <span className="text-[10px] text-text-secondary font-mono px-1.5 py-0.5 rounded bg-level-1 border border-accent/20">
-              {upNextTracks.length} трек(-ов)
+              {t('popover.tracksCount', '{{count}} трек(-ов)', {
+                count: upNextTracks.length,
+              })}
             </span>
           </div>
 
           {upNextTracks.length === 0 ? (
             <div className="p-3 text-center text-text-secondary italic text-xs bg-level-1/40 rounded-lg border border-dashed border-accent/20">
-              Нет следующих треков в очереди
+              {t('popover.noUpNextTracks', 'Нет следующих треков в очереди')}
             </div>
           ) : (
             <div className="space-y-1 max-h-52 overflow-y-auto pr-0.5">
@@ -382,7 +403,9 @@ export function PlayerOptionsPopover({
                     <div className="flex items-center gap-1.5 text-[10px] text-text-secondary truncate">
                       <span className="truncate">
                         {nt.requester_nickname
-                          ? `Заказ: ${nt.requester_nickname}`
+                          ? t('popover.trackRequester', 'Заказ: {{nickname}}', {
+                              nickname: nt.requester_nickname,
+                            })
                           : nt.author || 'OpenPlaylist'}
                       </span>
                       {nt.duration > 0 && (
@@ -401,8 +424,14 @@ export function PlayerOptionsPopover({
                       type="button"
                       disabled={deletingTrackId === nt.id}
                       onClick={(e) => handleRemoveTrack(nt.id, e)}
-                      aria-label="Удалить из очереди"
-                      title="Удалить из очереди"
+                      aria-label={t(
+                        'popover.removeFromQueue',
+                        'Удалить из очереди',
+                      )}
+                      title={t(
+                        'popover.removeFromQueue',
+                        'Удалить из очереди',
+                      )}
                       className="p-1 rounded-sm text-text-secondary hover:text-danger transition-colors opacity-70 group-hover:opacity-100 shrink-0 cursor-pointer disabled:opacity-30"
                     >
                       <Trash2 className="size-3.5" />

@@ -1,15 +1,56 @@
 {
   "controls": {
-    "mute": "Mute audio",
-    "next": "Next track",
-    "pause": "Pause",
-    "play": "Play",
-    "prev": "Previous track",
+    "mute": "Вимкнути звук",
+    "unmute": "Увімкнути звук",
+    "next": "Наступний трек",
+    "prev": "Попередній трек",
+    "pause": "Пауза",
+    "play": "Відтворення",
     "repeat": "Повтор",
+    "repeatStatus": "Повтор: {{mode}}",
+    "repeatAll": "Повторювати все",
+    "repeatOnce": "Повторювати один трек",
+    "repeatOff": "Без повтору",
     "shuffle": "Випадковий порядок",
-    "stop": "Stop playback",
-    "sync": "Request player sync",
-    "toggleVideo": "Toggle video player display",
-    "unmute": "Unmute audio"
+    "stop": "Зупинити відтворення",
+    "sync": "Синхронізувати зі стрімом",
+    "toggleVideo": "Показати/приховати відеоплеєр",
+    "closeVideo": "Закрити відеоплеєр",
+    "openVideo": "Відкрити відео",
+    "hideVideo": "Приховати відео"
+  },
+  "trackInfo": {
+    "preview": "Попередній перегляд",
+    "playlistTitle": "Плейліст: {{name}}",
+    "order": "Замовлення: {{nickname}}",
+    "noTrack": "Немає треку"
+  },
+  "popover": {
+    "triggerAria": "Опції та черга відтворення",
+    "title": "Опції відтворення",
+    "playerModeLabel": "Режим плеєра",
+    "modes": {
+      "listen": "Слухаю",
+      "control": "Керування"
+    },
+    "modeHelp": {
+      "listen": "Локальний звук увімкнено. Дії застосовуються лише для вас.",
+      "control": "Локальний звук вимкнено. Команди транслюються стрімеру в OBS."
+    },
+    "channelSelectorLabel": "Канал стріму (Контекст)",
+    "ownChannel": "Мій канал (Власний)",
+    "widgetBroadcastTitle": "Трансляція у віджет OBS",
+    "widgetBroadcastEnabled": "Увімкнено (стрім чує музику)",
+    "widgetBroadcastDisabled": "Вимкнено",
+    "toggleWidgetBroadcastAria": "Перемкнути трансляцію у віджет",
+    "speedLabel": "Швидкість:",
+    "stopPlaybackTitle": "Зупинити відтворення",
+    "syncWithStreamTitle": "Синхронізувати зі стрімом",
+    "upNextTitle": "Далі в черзі",
+    "tracksCount": "{{count}} трек(-ів)",
+    "noUpNextTracks": "Немає наступних треків у черзі",
+    "trackRequester": "Замовлення: {{nickname}}",
+    "removeFromQueue": "Видалити з черги"
   }
 }
+

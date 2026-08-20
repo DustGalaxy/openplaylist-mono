@@ -1,7 +1,6 @@
 // src/features/integrations/bot-settings/BotSettingsModal.tsx
 
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Settings } from 'lucide-react'
 import type { Integration } from '@/types/user'
@@ -9,6 +8,7 @@ import type { FieldDef } from '@/features/user-settings/botSettings/types'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -55,10 +55,17 @@ export function BotSettingsModal({
         values,
       )
       onSaved({ ...integration, bot_settings: updated })
-      toast.success(t('botSettings.saved'))
+      toast.success(
+        t('settings.botSettings.saved', 'Настройки бота успешно сохранены'),
+      )
       setOpen(false)
     } catch {
-      toast.error(t('botSettings.saveFailed'))
+      toast.error(
+        t(
+          'settings.botSettings.saveFailed',
+          'Не удалось сохранить настройки бота',
+        ),
+      )
     } finally {
       setSaving(false)
     }
@@ -68,8 +75,9 @@ export function BotSettingsModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-          className="w-9 h-9 flex items-center justify-center rounded-(--rounded-std) border border-white/10 bg-level-1/50 text-text-secondary hover:text-text-main hover:border-accent/30 transition-all"
-          aria-label={t('botSettings.title')}
+          className="w-9 h-9 flex items-center justify-center rounded-(--rounded-std) border border-white/10 bg-level-1/50 text-text-secondary hover:text-text-main hover:border-accent/30 transition-all cursor-pointer"
+          aria-label={t('settings.botSettings.title', 'Настройки бота')}
+          title={t('settings.botSettings.title', 'Настройки бота')}
         >
           <Settings size={16} />
         </button>
@@ -82,11 +90,12 @@ export function BotSettingsModal({
           </div>
           <div>
             <DialogTitle className="text-[15px] font-medium text-text-main leading-none">
-              {t('botSettings.title')} — {platformName}
+              {t('settings.botSettings.title', 'Настройки бота')} —{' '}
+              {platformName}
             </DialogTitle>
-            <p className="text-xs text-text-placeholder mt-1">
+            <DialogDescription className="text-xs text-text-placeholder mt-1">
               @{integration.platform_username}
-            </p>
+            </DialogDescription>
           </div>
         </DialogHeader>
 
@@ -103,18 +112,20 @@ export function BotSettingsModal({
 
         <DialogFooter className="px-6 pb-5 pt-4 border-t w-full border-white/5 flex flex-row justify-between gap-2">
           <Btn
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-level-2 font-mono text-base px-2"
-          >
-            {saving ? '...' : t('botSettings.save')}
-          </Btn>
-          <Btn
             onClick={() => setOpen(false)}
             disabled={saving}
             className="bg-level-2 font-mono text-base px-2"
           >
-            {t('botSettings.cancel')}
+            {t('settings.botSettings.cancel', 'Отмена')}
+          </Btn>
+          <Btn
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-level-2 font-mono text-base px-6"
+          >
+            {saving
+              ? t('settings.botSettings.saving', 'Сохранение...')
+              : t('settings.botSettings.save', 'Сохранить')}
           </Btn>
         </DialogFooter>
       </DialogContent>
@@ -129,25 +140,29 @@ interface FieldRendererProps {
 }
 
 function FieldRenderer({ field, value, onChange }: FieldRendererProps) {
-  const { t } = useTranslation()
+  const { t } = useFeatureTranslation()
 
   if (field.type === 'text') {
     return (
       <div className="flex flex-col gap-1.5">
         <span className="text-[11px] font-medium uppercase tracking-wider text-text-placeholder">
-          {t(field.labelKey)}
+          {t(field.labelKey, field.key)}
         </span>
         <input
           type="text"
           value={(value as string) ?? ''}
           onChange={(e) => onChange(e.target.value)}
           maxLength={field.maxLength}
-          placeholder={field.placeholder}
+          placeholder={
+            field.placeholderKey
+              ? t(field.placeholderKey, field.placeholder || '')
+              : field.placeholder
+          }
           className="bg-level-1 border border-white/8 rounded-[9px] px-3.5 py-2.5 text-sm text-text-main outline-none focus:border-accent/50 transition-colors"
         />
         {field.hintKey && (
           <p className="text-[11px] text-text-placeholder">
-            {t(field.hintKey)}
+            {t(field.hintKey, '')}
           </p>
         )}
       </div>
@@ -162,10 +177,12 @@ function FieldRenderer({ field, value, onChange }: FieldRendererProps) {
         onClick={() => onChange(!checked)}
       >
         <div>
-          <div className="text-sm text-text-main">{t(field.labelKey)}</div>
+          <div className="text-sm text-text-main">
+            {t(field.labelKey, field.key)}
+          </div>
           {field.descKey && (
             <div className="text-[11px] text-text-placeholder mt-0.5">
-              {t(field.descKey)}
+              {t(field.descKey, '')}
             </div>
           )}
         </div>

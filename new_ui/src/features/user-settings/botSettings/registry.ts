@@ -6,8 +6,9 @@ const registry: Record<string, BotSettingsConfig> = {
       {
         type: 'text',
         key: 'prefix',
-        labelKey: 'botSettings.twitch.prefix.label',
-        hintKey: 'botSettings.twitch.prefix.hint',
+        labelKey: 'settings.botSettings.twitch.prefix.label',
+        hintKey: 'settings.botSettings.twitch.prefix.hint',
+        placeholderKey: 'settings.botSettings.twitch.prefix.placeholder',
         maxLength: 5,
         placeholder: '!',
       },
@@ -23,3 +24,4 @@ export function getBotSettingsConfig(
 ): BotSettingsConfig | null {
   return registry[platform] ?? null
 }
+
