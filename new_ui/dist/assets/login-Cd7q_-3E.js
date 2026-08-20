@@ -1,0 +1,1 @@
+import{St as e}from"./vendor-misc-CNHY3HqE.js";import{rt as t}from"./index-CmS7aBfO.js";import{n}from"./auth-Dc4kP68c.js";var r=e(),i=function(){return(0,r.jsx)(`div`,{className:`min-h-screen flex items-center justify-center bg-level-1 px-4`,children:(0,r.jsx)(t,{ns:`auth`,children:(0,r.jsx)(n,{})})})};export{i as component};
