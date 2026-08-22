@@ -3,7 +3,7 @@ from enum import StrEnum
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from src._types import (
     BlockListScope,
@@ -109,6 +109,21 @@ class AllowedSource(BaseModel):
     platform_user_id: str
 
 
+def sanitize_tags(tags: list[str] | None) -> list[str] | None:
+    if tags is None:
+        return None
+    seen = set()
+    cleaned = []
+    for t in tags:
+        if not isinstance(t, str):
+            continue
+        item = t.strip().lstrip("#").strip().lower()
+        if item and item not in seen:
+            seen.add(item)
+            cleaned.append(item[:30])
+    return cleaned[:10]
+
+
 class PlaylistSchema(BaseModel):
     id: UUID
 
@@ -148,6 +163,12 @@ class PlaylistSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+    @field_validator("tags", mode="before")
+    @classmethod
+    def validate_tags(cls, v: list[str] | None) -> list[str]:
+        cleaned = sanitize_tags(v)
+        return cleaned if cleaned is not None else []
+
     def set_play_now(self, track_id: str):
         self.now_playing = track_id
 
@@ -173,6 +194,11 @@ class PlaylistPatch(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+    @field_validator("tags", mode="before")
+    @classmethod
+    def validate_tags(cls, v: list[str] | None) -> list[str] | None:
+        return sanitize_tags(v)
+
 
 class PlaylistCreate(BaseModel):
     owner_id: UUID
@@ -185,6 +211,12 @@ class PlaylistCreate(BaseModel):
     is_public: bool = False
 
     model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("tags", mode="before")
+    @classmethod
+    def validate_tags(cls, v: list[str] | None) -> list[str]:
+        cleaned = sanitize_tags(v)
+        return cleaned if cleaned is not None else []
 
 
 class DonationRulesCreate(BaseModel):

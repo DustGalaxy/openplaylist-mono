@@ -31,6 +31,7 @@ import { Textarea } from '@/components/ui/textarea'
 import UpDownBtn from '@/components/ui/funny-btn'
 import { getUserIntegrations } from '@/api/api-user'
 import ContentSwitch from '@/components/ui/content-switch'
+import { TagInput } from '@/components/ui/tag-input'
 import {
   filterTabActiveClass,
   filterTabBaseClass,
@@ -52,6 +53,7 @@ const TabBasic = () => {
 
   const [name, setName] = useState(playlist.name)
   const [description, setDescription] = useState(playlist.description ?? '')
+  const [tags, setTags] = useState<string[]>(playlist.tags ?? [])
   const [plstMode, setPlstMode] = useState(playlist.mode)
   const [isPublic, setIsPublic] = useState(playlist.is_public)
   const [priorityMode, setPriorityMode] = useState(playlist.cost_mode)
@@ -59,6 +61,17 @@ const TabBasic = () => {
   const [isLoadingIntegrations, setIsLoadingIntegrations] = useState(false)
   const breakPointRef = useRef<HTMLInputElement>(null)
   const maxPlaylistSizeRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (playlist.tags) {
+      setTags(playlist.tags)
+    }
+  }, [playlist.tags])
+
+  const handleTagsChange = (newTags: string[]) => {
+    setTags(newTags)
+    patchDebounced(playlist.id, { tags: newTags })
+  }
 
   const activeModeSettings = playlist.mode_settings[plstMode]
 
@@ -243,6 +256,21 @@ const TabBasic = () => {
             className="bg-level-2 border-0 p-2 text-xs sm:text-sm focus-visible:ring-1 focus-visible:ring-accent/50 resize-none min-h-[55px]"
           />
         </div>
+
+        {/* Tags */}
+        <TagInput
+          tags={tags}
+          onChange={handleTagsChange}
+          label={t('playlistSettings.tags.label', 'Tags')}
+          placeholder={t(
+            'playlistSettings.tags.placeholder',
+            'Add tag... (e.g. lofi, gaming, chill)',
+          )}
+          hint={t(
+            'playlistSettings.tags.hint',
+            'Add tags to help viewers find your playlist in search',
+          )}
+        />
 
         {/* Mode & Privacy Toggles */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">

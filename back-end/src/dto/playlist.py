@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from src._types import BlockListScope, ChatRuleScope, ContentSettingScope, DeleteStatus, DonationRuleScope
+from src.dto.moderator import PlaylistAccessResponse
 from src.models.order import OrderDomain
 from src.models.playlist import AllowedSource
 
@@ -88,9 +89,6 @@ class ReadPlaylistPreview(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-from src.dto.moderator import PlaylistAccessResponse
-
-
 class ReadPlaylist(BaseModel):
     id: UUID
     owner_id: UUID
@@ -150,7 +148,13 @@ class PlaylistBaseinfo(BaseModel):
 
 class NewPlaylist(BaseModel):
     name: str
-    description: str
+    description: str | None = None
+    tags: list[str] = Field(default_factory=list)
+
+
+class PopularTagResponse(BaseModel):
+    tag: str
+    count: int
 
 
 class PlayNow(BaseModel):

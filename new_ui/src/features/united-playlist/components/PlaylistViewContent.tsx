@@ -258,11 +258,25 @@ function PlaylistViewInner() {
               </>
             )}
             {isViewerLike && (
-              <div className="flex flex-col ">
-                <div className="text-text-main ">{playlist.name}</div>
-                <div className="text-text-secondary text-xs">
-                  {playlist.description || 'No discription'}
-                </div>
+              <div className="flex flex-col">
+                <div className="text-text-main font-semibold">{playlist.name}</div>
+                {playlist.description && (
+                  <div className="text-text-secondary text-xs">
+                    {playlist.description}
+                  </div>
+                )}
+                {playlist.tags && playlist.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {playlist.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-accent/15 border border-accent/30 text-accent"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

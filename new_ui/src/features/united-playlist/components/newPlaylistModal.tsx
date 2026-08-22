@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { Plus } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import Btn from '@/components/ui/my-btn'
+import { TagInput } from '@/components/ui/tag-input'
 
 import { Label } from '@/components/ui/label'
 import {
@@ -33,6 +34,7 @@ export default function AddPlaylistModal({
 
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
+  const [tags, setTags] = React.useState<string[]>([])
 
   const [isLoading, setIsLoading] = React.useState(false)
   const [open, setOpen] = React.useState(false)
@@ -41,7 +43,7 @@ export default function AddPlaylistModal({
 
   const handleCreatePlaylist = async () => {
     if (!name.trim()) {
-      toast.error(ts('playlistSettings.details.nameRequired'))
+      toast.error(ts('playlistSettings.details.nameRequired', 'Playlist name is required'))
       return
     }
 
@@ -49,7 +51,7 @@ export default function AddPlaylistModal({
     const loadingToast = toast.loading(t('playlist.create.submitting'))
 
     try {
-      const newPlst = await createNewPlaylist(name, description)
+      const newPlst = await createNewPlaylist(name, description, tags)
 
       if (newPlst) {
         add(newPlst)
@@ -61,6 +63,7 @@ export default function AddPlaylistModal({
         )
         setName('')
         setDescription('')
+        setTags([])
         setOpen(false)
       } else {
         toast.dismiss(loadingToast)
@@ -91,28 +94,45 @@ export default function AddPlaylistModal({
             {t('playlist.create.description')}
           </DialogDescription>
         </DialogHeader>
-        <Label className="text-lg">{t('playlist.create.nameLabel')}</Label>
-        <DialogDescription>{t('playlist.create.nameHint')}</DialogDescription>
-        <Input
-          type="text"
-          placeholder={t('playlist.create.namePlaceholder')}
-          className="border-accent border w-full mb-4"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          disabled={isLoading}
-        />
-        <Label className="text-lg">
-          {t('playlist.create.descriptionLabel')}
-        </Label>
+        <div className="space-y-4 py-2">
+          <div>
+            <Label className="text-sm font-semibold">{t('playlist.create.nameLabel')}</Label>
+            <DialogDescription className="text-xs text-text-secondary mb-1.5">{t('playlist.create.nameHint')}</DialogDescription>
+            <Input
+              type="text"
+              placeholder={t('playlist.create.namePlaceholder')}
+              className="border-accent/50 border w-full bg-level-1"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
 
-        <Input
-          type="text"
-          placeholder={t('playlist.create.descriptionPlaceholder')}
-          className="border-accent border w-full mb-4"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          disabled={isLoading}
-        />
+          <div>
+            <Label className="text-sm font-semibold">
+              {t('playlist.create.descriptionLabel')}
+            </Label>
+            <Input
+              type="text"
+              placeholder={t('playlist.create.descriptionPlaceholder')}
+              className="border-accent/50 border w-full bg-level-1 mt-1.5"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+
+          <div>
+            <TagInput
+              tags={tags}
+              onChange={setTags}
+              label={t('playlistSettings.tags.label', 'Tags')}
+              placeholder={t('playlistSettings.tags.placeholder', 'Add tag... (e.g. lofi, gaming)')}
+              hint={t('playlistSettings.tags.hint', 'Add tags to make your playlist easier to find')}
+              disabled={isLoading}
+            />
+          </div>
+        </div>
 
         <DialogFooter>
           <DialogClose asChild>

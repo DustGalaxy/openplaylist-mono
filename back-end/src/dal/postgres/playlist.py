@@ -61,25 +61,60 @@ class PlaylistRepository(
             raise NotActivePlaylist("Active playlist not found")
         return PlaylistSchema.model_validate(result)
 
-    async def get_by_string(self, session: AsyncSession, query: str) -> list[PlaylistSchema]:
-        superstring_condition = or_(
-            literal(query).ilike(func.concat("%", Playlist.name, "%")),
-            literal(query).ilike(func.concat("%", Playlist.owner_nickname, "%")),
-            literal(query).ilike(func.concat("%", Playlist.description, "%")),
-        )
-        search_pattern = f"%{query}%"
-        search_condition = or_(
-            Playlist.name.ilike(search_pattern),
-            Playlist.owner_nickname.ilike(search_pattern),
-            Playlist.description.ilike(search_pattern),
-        )
-        combined_condition = or_(search_condition, superstring_condition)
-        stmt = select(Playlist).where(combined_condition)
+    async def get_by_string(
+        self, session: AsyncSession, query: str = "", tag: str | None = None
+    ) -> list[PlaylistSchema]:
+        conditions = []
+        clean_query = query.strip() if query else ""
+        clean_tag = tag.strip().lstrip("#").lower() if tag else None
 
+        if clean_query:
+            search_pattern = f"%{clean_query}%"
+            clean_tag_query = clean_query.lstrip("#").lower()
+            tag_pattern = f"%{clean_tag_query}%"
+
+            superstring_condition = or_(
+                literal(clean_query).ilike(func.concat("%", Playlist.name, "%")),
+                literal(clean_query).ilike(func.concat("%", Playlist.owner_nickname, "%")),
+                literal(clean_query).ilike(func.concat("%", Playlist.description, "%")),
+            )
+            search_condition = or_(
+                Playlist.name.ilike(search_pattern),
+                Playlist.owner_nickname.ilike(search_pattern),
+                Playlist.description.ilike(search_pattern),
+                func.array_to_string(Playlist.tags, " ").ilike(tag_pattern),
+            )
+            conditions.append(or_(search_condition, superstring_condition))
+
+        if clean_tag:
+            tag_filter_pattern = f"%{clean_tag}%"
+            conditions.append(func.array_to_string(Playlist.tags, " ").ilike(tag_filter_pattern))
+
+        stmt = select(Playlist)
+        if conditions:
+            stmt = stmt.where(*conditions)
+        else:
+            stmt = stmt.where(Playlist.is_public.is_(True))
+
+        stmt = stmt.order_by(Playlist.favorites_count.desc(), Playlist.created_at.desc())
         result = await session.execute(stmt)
         result = result.scalars().unique().all()
 
         return [PlaylistSchema.model_validate(item) for item in result]
+
+    async def get_popular_tags(self, session: AsyncSession, limit: int = 20) -> list[dict]:
+        tag_col = func.unnest(Playlist.tags).column_valued("tag")
+        subquery = select(tag_col).where(Playlist.is_public.is_(True)).subquery()
+        stmt = (
+            select(subquery.c.tag, func.count().label("count"))
+            .where(subquery.c.tag != "")
+            .group_by(subquery.c.tag)
+            .order_by(func.count().desc())
+            .limit(limit)
+        )
+        result = await session.execute(stmt)
+        rows = result.all()
+        return [{"tag": row[0], "count": row[1]} for row in rows]
 
     async def get_user_playlists_by_sourse(
         self, session: AsyncSession, owner_id: UUID, platform_user_id: str, source: TrackSource

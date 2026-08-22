@@ -19,12 +19,14 @@ from src.adapters._rabbit.broker import get_broker, main_publisher
 from src.adapters._rabbit.queues import playlist_fanout_exchange
 from src.dal._redis.playback_repository import playback_repository
 from src.dto.internal.domain_events import EventOperator, InternalPlaylistEvent, InternalPlaylistEventType, PlaylistSettings
+from src.dto.moderator import ModeratedChannelResponse
 from src.dto.order_note import OrderNoteResponse, OrderNoteUpsert
 from src.dto.playlist import (
     FavoriteStatusResponse,
     NewPlaylist,
     PlaylistBaseinfo,
     PlayNow,
+    PopularTagResponse,
     ReadPlaylist,
     ReadPlaylistPreview,
     TrackDeleteBulk,
@@ -40,25 +42,41 @@ router = APIRouter(prefix="/playlist")
 # --- basic operations ---
 
 
-@router.get("")
-async def get_playlists(
-    query: str,
+@router.get("/tags/popular")
+async def get_popular_tags(
     db_session: DB_SESSION,
     service: PLST_SERVICE,
+    limit: int = 20,
+) -> list[PopularTagResponse]:
+    tags_data = await service.get_popular_tags(db_session, limit=limit)
+    return [PopularTagResponse.model_validate(t) for t in tags_data]
+
+
+@router.get("")
+async def get_playlists(
+    db_session: DB_SESSION,
+    service: PLST_SERVICE,
+    query: str = "",
+    tag: str | None = None,
 ) -> list[ReadPlaylistPreview]:
-    res = await service.search_playlist(db_session, query)
+    res = await service.search_playlist(db_session, query=query, tag=tag)
     if not res:
         return []
 
     data = []
     for p in res:
         user = await auth_service.user_repo.get_one(db_session, p.owner_id)
+        active_cnt = len(p.active_tracks) if getattr(p, "active_tracks", None) else 0
+        total_cnt = len(p.track_data) if getattr(p, "track_data", None) else 0
         instance = ReadPlaylistPreview(
             id=p.id,
             owner_nickname=p.owner_nickname if user.is_public else "Anon",
             name=p.name,
             description=p.description,
             favorites_count=p.favorites_count,
+            tags=p.tags,
+            now_playing=p.now_playing,
+            track_count=active_cnt or total_cnt,
             created_at=p.created_at,
             updated_at=p.updated_at,
         )
@@ -172,6 +190,13 @@ async def get_my_playlists(
                 name=p.name,
                 description=p.description,
                 favorites_count=p.favorites_count,
+                tags=p.tags,
+                now_playing=p.now_playing,
+                track_count=(
+                    len(p.active_tracks)
+                    if getattr(p, "active_tracks", None)
+                    else (len(p.track_data) if getattr(p, "track_data", None) else 0)
+                ),
                 created_at=p.created_at,
                 updated_at=p.updated_at,
             )
@@ -179,9 +204,6 @@ async def get_my_playlists(
         ]
     else:
         return [ReadPlaylist.model_validate(p) for p in playlists]
-
-
-from src.dto.moderator import ModeratedChannelResponse
 
 
 @router.get("/moderating/me", status_code=status.HTTP_200_OK)

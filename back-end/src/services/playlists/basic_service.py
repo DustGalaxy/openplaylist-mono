@@ -38,9 +38,14 @@ class PlaylistLowService:
     ):
         return await self._playlist_repository.get_many(session, owner_id, column="owner_id")
 
-    async def search_playlist(self, session: AsyncSession, query: str) -> list[PlaylistSchema]:
-        plsts = await self._playlist_repository.get_by_string(session, query)
+    async def search_playlist(
+        self, session: AsyncSession, query: str = "", tag: str | None = None
+    ) -> list[PlaylistSchema]:
+        plsts = await self._playlist_repository.get_by_string(session, query, tag)
         return [plst for plst in plsts if plst.is_public]
+
+    async def get_popular_tags(self, session: AsyncSession, limit: int = 20) -> list[dict]:
+        return await self._playlist_repository.get_popular_tags(session, limit)
 
     async def get_by_name(self, session: AsyncSession, owner_id: UUID, name: str) -> PlaylistSchema:
         return await self._playlist_repository.get_user_playlist_by_name(session, owner_id, name)
@@ -76,6 +81,7 @@ class PlaylistLowService:
             owner_nickname=user.username,
             name=data.name,
             description=data.description,
+            tags=data.tags,
         )
 
         created_playlist = await self._playlist_repository.create_with_settings(session, new_playlist)

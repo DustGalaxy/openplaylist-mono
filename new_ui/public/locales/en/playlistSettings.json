@@ -136,6 +136,15 @@
       "nameTooLong": "Playlist name is too long",
       "title": "Playlist Details"
     },
+    "tags": {
+      "addTag": "Add tag",
+      "duplicateTag": "This tag is already added",
+      "hint": "Add tags to help viewers find your playlist in search",
+      "label": "Tags",
+      "maxTagsReached": "Maximum {{max}} tags allowed",
+      "placeholder": "Add tag... (e.g. lofi, gaming, chill)",
+      "tagTooLong": "Tag cannot exceed {{max}} characters"
+    },
     "donation": {
       "add": "Add",
       "addRuleTitle": "Create new donation rule",
