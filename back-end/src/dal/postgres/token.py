@@ -31,7 +31,10 @@ class TokenVaultRepository(crud_factory(TokenVault, TokenVaultDomain, TokenVault
         return TokenVaultDomain.model_validate(tokens)
 
     async def fetch_tokens_to_refresh(self, session: AsyncSession) -> list[TokenVaultDomain]:
-        stmt = select(TokenVault).where(TokenVault.expires_at < int(datetime.now().timestamp()) - 60 * 60 * 2)
+        stmt = select(TokenVault).where(
+            TokenVault.refresh_token.isnot(None),
+            TokenVault.expires_at < int(datetime.now().timestamp()) + 60 * 60 * 2,
+        )
 
         result = await session.execute(stmt)
         result = result.unique().scalars().all()
@@ -54,7 +57,7 @@ class TokenVaultRepository(crud_factory(TokenVault, TokenVaultDomain, TokenVault
         stmt = (
             select(TokenVault)
             .join(LinkedAccounts, TokenVault.linked_account_id == LinkedAccounts.id)
-            .where(LinkedAccounts.platform == platform, LinkedAccounts.bot_connection == True)
+            .where(LinkedAccounts.platform == platform, LinkedAccounts.bot_connection)
         )
 
         result = await session.execute(stmt)
