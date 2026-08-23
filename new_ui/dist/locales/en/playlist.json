@@ -279,6 +279,7 @@
   },
   "publicSearch": {
     "clear": "Clear search",
+    "clearTagFilter": "Clear tag filter",
     "initialHint": "Enter a search query",
     "initialHintFull": "Enter a query and press Search to see public playlists.",
     "noDescription": "No description",
@@ -286,12 +287,13 @@
     "notFoundHint": "Try a different query",
     "notFoundHintFull": "Try another term or check that the playlist is open for public viewing.",
     "openPlaylist": "Open playlist",
-    "placeholder": "Playlist name, author, or description text...",
+    "placeholder": "Playlist name, author, description, or #tag...",
+    "popularTags": "Popular:",
     "searchFailed": "Search failed. Please try again.",
     "searchPlaceholder": "Search…",
     "searching": "Searching playlists...",
     "submit": "Search",
-    "subtitle": "By playlist name, author nickname, or description",
+    "subtitle": "By playlist name, author nickname, description, or tags",
     "title": "Find a public playlist",
     "viewAll": "View all results"
   },
