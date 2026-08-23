@@ -30,13 +30,15 @@ class SioWidgetService:
         sid = self.sid_from_uid(user_id)
         await self.emit("current_track", track, to=sid)
 
-    async def pause(self, user_id: UUID, data: Pause):
+    async def pause(self, user_id: UUID, data: Pause | dict):
         sid = self.sid_from_uid(user_id)
-        await self.emit("pause", data.model_dump_json(), to=sid)
+        payload = data.model_dump() if hasattr(data, "model_dump") else data
+        await self.emit("pause", payload, to=sid)
 
-    async def seek(self, user_id: UUID, data: Seek):
+    async def seek(self, user_id: UUID, data: Seek | dict):
         sid = self.sid_from_uid(user_id)
-        await self.emit("seek", data.model_dump_json(), to=sid)
+        payload = data.model_dump() if hasattr(data, "model_dump") else data
+        await self.emit("seek", payload, to=sid)
 
 
 sio_widget_service = SioWidgetService(sio)
