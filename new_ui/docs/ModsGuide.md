@@ -1,108 +1,70 @@
-# гайд по модам плейлистов
+# Playlist Modes & Queue Rules Guide
 
-## общие правила для всех плейлистов
+## 1. General Rules for All Playlists
 
-У плейлиста есть флаг shuffle он берёт случайный трек и игнорирует сортировку
+- **Shuffle Flag:** Selects a random track from the eligible pool, bypassing sort ordering.
+- **Queue Progression Modes:**
+  - **Automatic:** Sorted dynamically by configured sort rules.
+  - **Random:** Next track chosen randomly within category (Standard / VIP / Background).
+  - **Manual / Free Reordering:** Drag-and-drop manual ordering where new tracks append to the end.
+- **VIP / Premium Threshold:** A track is classified as VIP when its calculated priority meets or exceeds `priority_break_point`.
 
-у модов есть режим работы:
-
-- автоматический
-- случайный: следующий трек может быть любым из категории(обычные/премиум/фоновые) в этом режиме треки добавляются в конец категории
-- свободный
-
-Трек считает премиум когда его приоритет равен или выше priority_break_point для данного режима.
-
-базовая структура данных режима:
-
+### Mode Data Structure
 ```json
 {
   "modeName": { 
-    "priority_break_point": number,
+    "priority_break_point": 100,
     "sort_settings_vip": {
       "date": "desc",
-      "priority": "desc",
+      "priority": "desc"
     },
     "sort_settings_background": {
       "date": "desc",
-      "priority": "desc",
+      "priority": "desc"
     },
     "manual_order_ids": []
-  },
+  }
 }
 ```
 
-в режим Stream добавляется `"background_track_ids": []` - массив id треков которые будут играть фоном
+In **Stream** mode, `background_track_ids: []` specifies the list of persistent background loop tracks.
 
-в режиме Stream при свободном перемещении обычные/премиум треки и фоновые перемещаются отдельно и не могут смешиваться
+---
 
-## обычный плейлист (Static)
+## 2. Static Playlist (`static`)
 
-### заказаные треки (обычные треки)
+### Standard Ordered Tracks
+- **Post-playback:** Tracks remain in the playlist after playing.
+- **Sorting:** Priority, date, or free manual reordering.
 
-после прослушивания - треки остаются
+### VIP Tracks
+- Separate sort configuration and distinct visual highlighting on track cards.
+- Preempts currently playing non-VIP tracks if configured.
 
-сортировка по приоритету, дате и свободное перемещение (треки добавляются в конец)
+---
 
-что происходит когда заказной трек попадает в очередь - встаёт в очередь согласно правилам
+## 3. Flow Playlist (`flow`)
 
-### премиум треки
+### Standard Ordered Tracks
+- **Post-playback:** Tracks are automatically removed from the queue after playing.
+- **Sorting:** Priority, date, or manual reordering.
 
-отдельная сортировка для премиум треков и свободное перемещение (треки добавляются в конец)
+### VIP Tracks
+- Separate VIP sort rules and card visual styling.
 
-что происходит когда премиум трек попадает в очередь - прерывает текущий не премиум трек и путём сортировки встаёт в премиум часть очереди
+---
 
-можно ли перемещать премиум треки в свободном режиме - да
+## 4. Stream Playlist (`stream`)
 
-как выделяются премиум треки - визуальным изменением карточки, мб крутая оконтовка или что то подобное
+### Background Tracks
+- Reside in an isolated background loop sub-queue.
+- Background tracks are not deleted upon completion; they cycle continuously in a loop when no viewer orders exist.
+- Any track can be flagged as background music.
+- Distinct visual grouping separating background tracks from active viewer requests.
 
-## потоковый плейлист (Flow)
+### Viewer Order Tracks
+- **Post-playback:** Automatically removed upon completion.
+- **Behavior:** Inbound orders immediately interrupt the active background track and begin playing according to queue rules.
 
-### заказаные треки (обычные треки)
-
-после прослушивания - треки удаляются
-
-сортировка по приоритету, дате и свободное перемещение (треки добавляются в конец)
-
-что происходит когда заказной трек попадает в очередь - встаёт в очередь согласно правилам
-
-### премиум треки
-
-отдельная сортировка для премиум треков и свободное перемещение (треки добавляются в конец)
-
-что происходит когда премиум трек попадает в очередь - прерывает текущий не премиум трек и путём сортировки встаёт в премиум часть очереди
-
-можно ли перемещать премиум треки в свободном режиме - да
-
-как выделяются премиум треки - визуальным изменением карточки, мб крутая оконтовка или что то подобное
-
-## стримовый плейлист (Stream)
-
-### фоновые треки
-
-есть фоновые треки в отдельной очереди
-
-фоновые треки не удаляются после прослушивания и их очередь играет по кругу
-
-любой трек можно сделать фоновым
-
-фоновые треки находятся в отдельной группе и визуально отделены от основной очереди
-
-фоновые треки не имеют автоматической сортировки т.е. всегда в свободном режиме
-
-### заказаные треки (обычные треки)
-
-после прослушивания - заказаные треки удаляются
-
-сортировка по приоритету, дате и свободное перемещение (треки добавляются в конец)
-
-что происходит когда заказной трек попадает в очередь - прерывает фоновый трек и встаёт в очередь согласно правилам
-
-### премиум треки
-
-отдельная сортировка для премиум треков и свободное перемещение (треки добавляются в конец)
-
-что происходит когда премиум трек попадает в очередь - прерывает текущий не премиум трек и путём сортировки встаёт в премиум часть очереди
-
-можно ли перемещать премиум треки в свободном режиме - да
-
-как выделяются премиум треки - визуальным изменением карточки, мб крутая оконтовка или что то подобное
+### VIP Tracks
+- VIP orders interrupt active standard orders and advance to the top of the queue.

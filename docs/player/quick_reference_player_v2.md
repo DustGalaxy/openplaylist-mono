@@ -1,66 +1,66 @@
-# Краткий экскурс: Архитектура Плеера и Модерации V2 (Quick Reference)
+# Quick Reference: Player & Moderation Architecture V2
 
-> **Назначение:** Быстрая шпаргалка и контекст для последующих сессий разработки.
-
----
-
-## 1. Концепция UserPlayer V2 & Модели Состояния
-
-1. **UserPlayer в Redis (`player:{owner_id}`):**
-   * Состояние плеера стримера хранится в **Redis Hash** с TTL (7 дней с автопродлением).
-   * Структура: `owner_id`, `active_playlist_id`, `current_track_id`, `current_track_data` (JSON), `position`, `is_paused`, `volume`, `broadcast_to_widget`, `last_client_id`, `updated_at`.
-   * OBS-виджет (`/widget`) и модераторы в режиме управления читают и синхронизируются с этим состоянием.
-
-2. **Два режима плеера (`usePlaybackStore.playerMode`):**
-   * **`'listen'` (Слушаю / Локальный режим):**
-     * Пользователь/модератор слушает музыку для себя в браузере (звук включён).
-     * Любые действия (клик по треку, пауза, перемотка, скип) выполняются **локально** и **НЕ отправляются стримеру**.
-     * События со стрима не перебивают играющий локально трек.
-   * **`'control'` (Управление трансляцией):**
-     * Модератор управляет стримом выбранного канала (`activeChannel.owner_id`).
-     * Локальный звук в браузере модератора заглушен (`volume = 0`), чтобы не дублировать стрим.
-     * Действия транслируются на бэкенд через `/player/{owner_id}/*` и Socket.IO.
-
-3. **Синхронизация для зрителей (`acceptSync`):**
-   * Обычные зрители могут включить кнопку синхронизации («Радио»), чтобы слушать стрим синхронно в браузере (`acceptSync: true`).
+> **Purpose:** Quick reference and context cheat sheet for development sessions.
 
 ---
 
-## 2. Фильтрация Эха (`CLIENT_ID`) и Правила Broadcast
+## 1. UserPlayer V2 Concept & State Model
 
-### Правило отправки (`shouldBroadcast`):
+1. **UserPlayer in Redis (`player:{owner_id}`):**
+   * Streamer playback state is stored in a **Redis Hash** with TTL (7-day sliding window on activity).
+   * Schema: `owner_id`, `active_playlist_id`, `current_track_id`, `current_track_data` (JSON), `position`, `is_paused`, `volume`, `broadcast_to_widget`, `last_client_id`, `updated_at`.
+   * OBS stream overlay (`/widget`) and moderators in control mode subscribe and synchronize with this state.
+
+2. **Dual Player Modes (`usePlaybackStore.playerMode`):**
+   * **`'listen'` (Local Listening Mode):**
+     * User/moderator plays music locally in their browser (audio unmuted).
+     * Actions (clicking tracks, play/pause, seek, skip) remain **local** and **are NOT sent to the streamer**.
+     * Stream events do not interrupt local playback.
+   * **`'control'` (Stream Remote Control Mode):**
+     * Moderator controls the live stream of the selected channel (`activeChannel.owner_id`).
+     * Local browser audio in the moderator tab is muted (`volume = 0`) to prevent stream echo.
+     * Actions are dispatched to the backend via `/player/{owner_id}/*` and Socket.IO.
+
+3. **Viewer Synchronization (`acceptSync`):**
+   * Standard viewers can toggle the sync button ("Radio" mode) to mirror stream playback in their browser (`acceptSync: true`).
+
+---
+
+## 2. Echo Filtering (`CLIENT_ID`) & Broadcast Rules
+
+### Outbound Rule (`shouldBroadcast`):
 ```ts
-// Команды отправляются на стрим ТОЛЬКО если пользователь — владелец,
-// либо модератор в активном режиме 'control'
+// Commands are broadcast to stream ONLY if the user is the owner,
+// or an authorized moderator in active 'control' mode
 const shouldBroadcast =
   role === 'owner' ||
   ((role === 'operator' || canControlPlayback) && playerMode === 'control')
 ```
 
-### Правило приёма входящих событий (Socket.IO):
-* Всегда проверяется: `incoming.client_id !== CLIENT_ID` (игнорировать собственные события).
-* Локальный слот плеера обновляется только при: `isOwner || playerMode === 'control' || acceptSync`.
+### Inbound Rule (Socket.IO):
+* Always verified: `incoming.client_id !== CLIENT_ID` (ignore self-originated events).
+* Local playback slot updates only if: `isOwner || playerMode === 'control' || acceptSync`.
 
 ---
 
-## 3. Специфика ReactPlayer v3.4.0 (`@muxinc/youtube-video-element`)
+## 3. ReactPlayer v3.4.0 Specifics (`@muxinc/youtube-video-element`)
 
-1. **Обязательный `src`:**
-   * В `react-player` 3.x для YouTube используется кастомный HTML5 элемент. Необходимо передавать `<ReactPlayer src={videoUrl} ... />` (а не только legacy `url`).
+1. **Mandatory `src` Property:**
+   * In `react-player` 3.x with YouTube custom elements, pass `<ReactPlayer src={videoUrl} ... />` (instead of legacy `url`).
 2. **HTML5 Event Handlers:**
-   * Прогресс и длительность читаются через стандартные события: `onTimeUpdate`, `onDurationChange`, `onLoadedMetadata`, `onPlay`, `onPause`, `onEnded`.
-3. **Защита от ложных пауз:**
-   * `handlePause` проверяет готовность плеера, чтобы события буферизации YouTube не сбрасывали флаг `feed.playing`.
+   * Progress and duration are read through standard events: `onTimeUpdate`, `onDurationChange`, `onLoadedMetadata`, `onPlay`, `onPause`, `onEnded`.
+3. **Buffering Pause Protection:**
+   * `handlePause` validates player readiness so YouTube buffering cycles do not falsely unset `feed.playing`.
 
 ---
 
-## 4. Памятка по разработке и командам
+## 4. Development & Testing Guidelines
 
 * **Python Backend (`back-end/`):**
-  * Всегда использовать `uv`!
-  * Запуск тестов: `uv run pytest`
-  * Запуск скриптов: `uv run python <script.py>`
+  * Always use `uv`!
+  * Run tests: `uv run pytest`
+  * Run scripts: `uv run python <script.py>`
 * **React Frontend (`new_ui/`):**
-  * Запуск тестов: `npx vitest run`
-* **UI Компоненты (`Btn`):**
-  * Компонент `Btn` (`src/components/ui/my-btn.tsx`) содержит встроенные 3D-стили и тени — **не добавлять** лишние `hover:bg-*` или `hover:text-*`.
+  * Run tests: `npx vitest run`
+* **UI Components (`Btn`):**
+  * The custom `Btn` component (`src/components/ui/my-btn.tsx`) has built-in 3D button styling and drop-shadows — do not add extra `hover:bg-*` or `hover:text-*`.

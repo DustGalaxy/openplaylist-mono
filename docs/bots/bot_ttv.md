@@ -1,30 +1,30 @@
-# Архитектура микросервиса Twitch-бота (bot_ttv Architecture)
+# Twitch Bot Microservice Architecture (`bot_ttv`)
 
-Документ описывает внутреннюю архитектуру, механизмы интеграции, форматы сообщений и жизненный цикл микросервиса **`bot_ttv`** — официального Twitch-бота платформы **OpenPlaylist**.
-
----
-
-## 1. Архитектурный обзор (System Overview)
-
-Микросервис `bot_ttv` обеспечивает двустороннее взаимодействие между чатами стримеров на платформе **Twitch** и ядром **OpenPlaylist**:
-
-1. **Музыкальные заказы из чата Twitch**:
-   - Прием команд заказа треков (`!mr <url>`, `::mr <url>`) с динамическим префиксом для каждого стримера.
-   - Прием заказов через баллы канала Twitch (**Channel Points**) при активации награды `music_request_points`.
-   - Вычисление рангов и привилегий зрителя (Broadcaster, Moderator, VIP, Subscriber, Turbo, Artist, Founder) для расчета приоритета очереди.
-2. **Обратная связь в чат**:
-   - Асинхронное получение статусов заказов от бэкенда (`bot.order.completed`, `bot.order.cancelled`, `bot.order.partially_completed`) и отправка персональных уведомлений заказчикам в чат.
-3. **Управление состоянием и модерация**:
-   - Включение и выключение заказов музыки модераторами стримера (`!mr on/off`, `!mr points on/off`).
-   - Кэширование состояния фич-флагов в **Redis**.
-4. **Управление мультитенантным подключением**:
-   - Единый инстанс `twitchio.ext.commands.AutoBot`, обслуживающий сотни каналов одновременно.
-   - Динамическое подключение (`bot.twitch.connect.request`) и отключение (`bot.twitch.disconnect`).
-   - Автоматическая ротация и синхронизация OAuth токенов с `TokenVault` бэкенда.
+This document describes the internal architecture, integration patterns, message schemas, and operational lifecycle of **`bot_ttv`**—the official Twitch bot microservice for the **OpenPlaylist** platform.
 
 ---
 
-## 2. Компонентная архитектура (Component Architecture)
+## 1. System Overview
+
+The `bot_ttv` microservice enables bidirectional communication between streamer Twitch chats and the **OpenPlaylist** core:
+
+1. **Twitch Chat Music Requests:**
+   - Ingests track order commands (`!mr <url>`, `::mr <url>`) with per-channel dynamic command prefixes.
+   - Accepts requests via Twitch **Channel Points** rewards (`music_request_points`).
+   - Resolves viewer badge privileges (Broadcaster, Moderator, VIP, Subscriber, Turbo, Artist, Founder) to calculate queue priority scoring.
+2. **Real-time Chat Feedback:**
+   - Asynchronously receives order lifecycle updates from backend workers (`bot.order.completed`, `bot.order.cancelled`, `bot.order.partially_completed`) and dispatches notifications directly to chatters.
+3. **State Management & In-Stream Moderation:**
+   - Channel moderators can toggle order availability on the fly (`!mr on/off`, `!mr points on/off`).
+   - Feature flags are cached with sub-millisecond access in **Redis**.
+4. **Multi-Tenant Connection Engine:**
+   - Single multi-tenant `twitchio.ext.commands.AutoBot` instance serving hundreds of streamer channels concurrently.
+   - Dynamic channel joining (`bot.twitch.connect.request`) and parting (`bot.twitch.disconnect`).
+   - Automatic OAuth2 token rotation synchronized with the backend's `TokenVault`.
+
+---
+
+## 2. Component Architecture
 
 ```mermaid
 flowchart TB
@@ -66,7 +66,7 @@ flowchart TB
 
     subgraph OpenPlaylistBackend ["OpenPlaylist Backend Core"]
         BackendOrders["Order Processing Pipeline\n(order.proccess)"]
-        TokenVault["Token Refresh TaskIQ Task\n(src/tasks/tokens.py)"]
+        TokenVault["Token Refresh Taskiq Task\n(src/tasks/tokens.py)"]
         UserBotAPI["User Bot Management API\n(/user/bots/twitch/*)"]
     end
 
@@ -101,105 +101,105 @@ flowchart TB
 
 ---
 
-## 3. Внутренняя структура модулей (Directory Structure)
+## 3. Directory Structure
 
-```
+```text
 bot_ttv/
-├── Dockerfile                  # Сборка контейнера Python 3.13
-├── pyproject.toml              # Зависимости: faststream, twitchio, redis, pydantic, asqlite
-├── main.py                     # Lifespan FastStream, запуск RabbitMQ, Redis и бота
+├── Dockerfile                  # Python 3.13 Container Build
+├── pyproject.toml              # Dependencies: faststream, twitchio, redis, pydantic, asqlite
+├── main.py                     # FastStream Lifespan, RabbitMQ, Redis, and Bot startup
 └── src/
-    ├── config.py               # Pydantic BaseSettings (.env конфигурация)
-    ├── log_setup.py            # Настройка логов
-    ├── bot_setup.py            # Класс Bot(commands.AutoBot), инициализация токенов и EventSub
-    ├── utils.py                # Regex YouTube URL, валидаторы прав стримера/модератора
-    ├── acl/                    # Anti-Corruption Layer (RPC запросы к бэкенду)
-    │   ├── playlist.py         # PlaylistACL: получение настроек плейлиста
-    │   └── user.py             # UserACL: получение списка стримеров при старте
+    ├── config.py               # Pydantic BaseSettings (.env loader)
+    ├── log_setup.py            # Structured logging configuration
+    ├── bot_setup.py            # Bot(commands.AutoBot), token initialization, EventSub
+    ├── utils.py                # Regex YouTube parsers, streamer/moderator role guards
+    ├── acl/                    # Anti-Corruption Layer (RPC requests to backend)
+    │   ├── playlist.py         # PlaylistACL: playlist settings fetcher
+    │   └── user.py             # UserACL: initial streamer list resolver
     ├── adapters/
-    │   ├── _rabbit/            # RabbitMQ адаптер (FastStream)
-    │   │   ├── broker.py       # Определение очередей и эксчейнджей
-    │   │   ├── handlers.py     # Обработчики очередей (статусы заказов, подключение, настройки)
-    │   │   └── dto/            # Pydantic DTO (Order, Settings, User Tokens)
+    │   ├── _rabbit/            # RabbitMQ FastStream adapter
+    │   │   ├── broker.py       # Queue and Exchange topology
+    │   │   ├── handlers.py     # Consumer routers (order statuses, connection, settings)
+    │   │   └── dto/            # Pydantic DTOs (Order, Settings, User Tokens)
     │   │       ├── order.py    # OrderNew, OrderUpdate, NewOrderPayload
     │   │       ├── settings.py # ReadPlaylistSettings, SortSettings
     │   │       └── user.py     # Tokens, TwitchBotSettings, SettingsConteiner
-    │   └── _redis/             # Redis адаптер
-    │       └── broker.py       # RedisAdapter c декоратором @ready_check
-    └── components/             # TwitchIO компоненты
-        ├── listners.py         # Listner: трансформация NewOrderPayload -> OrderNew -> RabbitMQ
-        ├── main_commands.py    # Базовые команды (!hi, !say, !give, !choice, !socials)
-        └── music_request.py    # Музыкальные заказы (!mr, !mr on/off, !mr points on/off, reward)
+    │   └── _redis/             # Redis Cache Adapter
+    │       └── broker.py       # RedisAdapter with @ready_check decorator
+    └── components/             # TwitchIO Command Components
+        ├── listners.py         # Listener: NewOrderPayload -> OrderNew -> RabbitMQ
+        ├── main_commands.py    # General chat commands (!hi, !say, !give, !socials)
+        └── music_request.py    # Music commands (!mr, !mr on/off, !mr points on/off)
 ```
 
 ---
 
-## 4. Потоки данных и диаграммы последовательности (Data Flows & Sequences)
+## 4. Data Flows & Sequence Diagrams
 
-### 4.1. Заказ музыки через чат-команду (`!mr <url>`)
+### 4.1. Track Order via Chat Command (`!mr <url>`)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Chatter as Зритель (Chatter)
+    actor Chatter as Viewer (Chatter)
     participant TTV as Twitch Chat (EventSub)
     participant MR as MusicRequest Component
     participant Redis as Redis Cache
-    participant Listener as Listner Component
+    participant Listener as Listener Component
     participant Rabbit as RabbitMQ (main_exchange)
     participant Backend as Backend (Order Pipeline)
 
-    Chatter->>TTV: Отправка сообщения: !mr https://youtu.be/dQw4w9WgXcQ
-    TTV->>MR: Вызов команды mr(ctx, yt_url)
-    MR->>Redis: Проверка флага "{channel_name}:mr:enable"
+    Chatter->>TTV: Send message: !mr https://youtu.be/dQw4w9WgXcQ
+    TTV->>MR: Execute command mr(ctx, yt_url)
+    MR->>Redis: Check flag "{channel_name}:mr:enable"
     
-    alt Заказ музыки выключен
+    alt Orders Disabled
         Redis-->>MR: 0 (Disabled)
-        MR->>TTV: ctx.reply("Заказ музыки сейчас не доступен.")
-    else Заказ музыки активен
+        MR->>TTV: ctx.reply("Music requests are currently disabled.")
+    else Orders Enabled
         Redis-->>MR: 1 (Enabled)
-        MR->>MR: Вычисление бейджей чаттера (broadcaster, mod, vip, sub, turbo, artist, founder)
-        MR->>MR: Формирование строки priority ("moderator:vip")
-        MR->>TTV: ctx.reply("Обрабатываю заказ...")
+        MR->>MR: Evaluate chatter badges (broadcaster, mod, vip, sub, turbo, artist, founder)
+        MR->>MR: Construct priority string ("moderator:vip")
+        MR->>TTV: ctx.reply("Processing your order...")
         MR->>Listener: safe_dispatch("new_order", NewOrderPayload)
-        Listener->>Listener: Поиск user_id владельца по broadcaster_id
-        Listener->>Rabbit: Publish OrderNew в "bot.twitch.order.new"
-        Rabbit->>Backend: Обработка трека, валидация и добавление в плейлист
+        Listener->>Listener: Resolve owner user_id by broadcaster_id
+        Listener->>Rabbit: Publish OrderNew to "bot.twitch.order.new"
+        Rabbit->>Backend: Ingest, validate, and queue track in playlist
     end
 ```
 
 ---
 
-### 4.2. Заказ музыки через Twitch Channel Points
+### 4.2. Track Order via Twitch Channel Points
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Chatter as Зритель (Зритель за баллы)
+    actor Chatter as Viewer (Channel Points)
     participant TTV as Twitch Channel Points
     participant MR as MusicRequest Component
     participant Redis as Redis Cache
-    participant Listener as Listner Component
+    participant Listener as Listener Component
     participant Rabbit as RabbitMQ (main_exchange)
 
-    Chatter->>TTV: Активация награды "music_request_points" с текстом URL
+    Chatter->>TTV: Redeem reward "music_request_points" with URL
     TTV->>MR: @commands.reward_command(id="music_request_points")
-    MR->>Redis: Проверка флага "{channel_name}_music_request_forpoints_enable"
+    MR->>Redis: Check flag "{channel_name}_music_request_forpoints_enable"
     
-    alt Награда отключена в кэше
+    alt Reward Disabled
         Redis-->>MR: 0 (Disabled)
-        MR->>TTV: ctx.send("Заказ музыки за баллы сейчас не доступен.")
-    else Награда активна
+        MR->>TTV: ctx.send("Channel points music requests are currently disabled.")
+    else Reward Enabled
         Redis-->>MR: 1 (Enabled)
-        MR->>MR: Сбор приоритетов со спец-флагом "p" (points)
+        MR->>MR: Collect badges with special "p" (points) flag
         MR->>Listener: safe_dispatch("new_order", NewOrderPayload)
-        Listener->>Rabbit: Publish OrderNew в "bot.twitch.order.new"
+        Listener->>Rabbit: Publish OrderNew to "bot.twitch.order.new"
     end
 ```
 
 ---
 
-### 4.3. Асинхронное уведомление о статусе заказа в чат
+### 4.3. Asynchronous Order Status Notification to Chat
 
 ```mermaid
 sequenceDiagram
@@ -208,9 +208,9 @@ sequenceDiagram
     participant Rabbit as RabbitMQ (main_exchange)
     participant Handlers as RabbitMQ Handlers (handlers.py)
     participant Bot as TwitchIO Bot Instance
-    actor Chatter as Зритель в чате
+    actor Chatter as Chatter in Twitch Chat
 
-    Backend->>Rabbit: Publish OrderUpdate в "bot.order.completed" | "bot.order.cancelled"
+    Backend->>Rabbit: Publish OrderUpdate to "bot.order.completed" | "bot.order.cancelled"
     Rabbit->>Handlers: order_status(message: OrderUpdate)
     Handlers->>Handlers: message.ack()
     Handlers->>Bot: bot.create_partialuser(user_id=owner_platform_id)
@@ -219,7 +219,7 @@ sequenceDiagram
 
 ---
 
-### 4.4. Жизненный цикл сервиса и регистрация стримеров (Startup & OAuth Flow)
+### 4.4. Service Startup & OAuth Bootstrapping Flow
 
 ```mermaid
 sequenceDiagram
@@ -230,103 +230,60 @@ sequenceDiagram
     participant Bot as Bot (AutoBot)
     participant Twitch as Twitch Helix API
 
-    Main->>Rabbit: broker.start() & подключение роутеров
+    Main->>Rabbit: broker.start() & connect routers
     Main->>Main: async_setup_wrapper() -> setup_bot()
-    Main->>Rabbit: RPC Request в "auth.user.twitch.all.request"
-    Rabbit->>Backend: Обработка запроса
-    Backend-->>Main: Список пользователей [Tokens(access_token, refresh_token, prefix, ...)]
+    Main->>Rabbit: RPC Request to "auth.user.twitch.all.request"
+    Rabbit->>Backend: Process request
+    Backend-->>Main: Return user list [Tokens(access_token, refresh_token, prefix, ...)]
     
-    loop Для каждого пользователя
+    loop For each streamer
         Main->>Bot: bot.add_token(access_token, refresh_token)
-        alt Токен валиден
-            Bot->>Twitch: Валидация токена
+        alt Valid Token
+            Bot->>Twitch: Validate token
             Twitch-->>Bot: Token OK
-            Bot->>Bot: Сохранение префикса в prefixes[platform_user_id]
-        else InvalidTokenException (токен отозван)
-            Bot->>Rabbit: Publish в "twitch.user.token.died" (оповещение бэкенда)
+            Bot->>Bot: Store prefix in prefixes[platform_user_id]
+        else InvalidTokenException (Revoked)
+            Bot->>Rabbit: Publish to "twitch.user.token.died" (Notify backend)
         end
     end
 
     Main->>Bot: bot.start(load_tokens=False, save_tokens=False)
-    Note over Bot: Бот слушает чаты всех активных стримеров
+    Note over Bot: Bot actively listens across all streamer channels
 ```
 
 ---
 
-## 5. Контракты очередей RabbitMQ (Message Contracts)
+## 5. RabbitMQ Message Contracts
 
-### 5.1. Входящие сообщения (Subscribers)
+### 5.1. Inbound Queues (Subscribers)
 
-| Очередь / Топик | Exchange | DTO / Тип | Описание |
+| Queue / Topic | Exchange | DTO / Type | Description |
 | :--- | :--- | :--- | :--- |
-| `bot.order.completed` | `main_exchange` (DIRECT) | `OrderUpdate` | Уведомление об успешном добавлении заказа в плейлист. |
-| `bot.order.cancelled` | `main_exchange` (DIRECT) | `OrderUpdate` | Уведомление об отмене заказа (черный список, невалидный URL, ошибка). |
-| `bot.order.partially_completed` | `main_exchange` (DIRECT) | `OrderUpdate` | Частичное выполнение заказа. |
-| `bot.twitch.connect.request` | `main_exchange` (DIRECT) | `Tokens` | Подключение нового стримера в рантайме (добавление токена и подписка на EventSub). |
-| `bot.twitch.disconnect` | `main_exchange` (DIRECT) | `str` (platform_user_id) | Отключение стримера и удаление его токена из `AutoBot`. |
-| `bot.twitch.settings` | `main_exchange` (DIRECT) | `SettingsConteiner` | Обновление пользовательских настроек бота (префикс команд). |
-| `auth.token.refreshed.twitch` | `topic_exchange` (TOPIC) | `Tokens` | Получение обновленных токенов от фонового воркера бэкенда. |
+| `bot.order.completed` | `main_exchange` (DIRECT) | `OrderUpdate` | Notification when order is accepted into playlist queue. |
+| `bot.order.cancelled` | `main_exchange` (DIRECT) | `OrderUpdate` | Notification when order is rejected (blacklist, invalid URL, error). |
+| `bot.order.partially_completed` | `main_exchange` (DIRECT) | `OrderUpdate` | Partial order execution notice. |
+| `bot.twitch.connect.request` | `main_exchange` (DIRECT) | `Tokens` | Dynamic streamer onboarding (registers OAuth token & EventSub). |
+| `bot.twitch.disconnect` | `main_exchange` (DIRECT) | `str` (platform_user_id) | Disconnect streamer and purge credentials from `AutoBot`. |
+| `bot.twitch.settings` | `main_exchange` (DIRECT) | `SettingsConteiner` | Update custom bot command prefixes. |
+| `auth.token.refreshed.twitch` | `topic_exchange` (TOPIC) | `Tokens` | Receive renewed tokens from backend worker. |
 
-### 5.2. Исходящие сообщения (Publishers / RPC)
+### 5.2. Outbound Queues (Publishers / RPC)
 
-| Очередь / Топик | Exchange | DTO / Payload | Описание |
+| Queue / Topic | Exchange | DTO / Payload | Description |
 | :--- | :--- | :--- | :--- |
-| `bot.twitch.order.new` | `main_exchange` (DIRECT) | `OrderNew` | Публикация нового заказа трека в пайплайн бэкенда. |
-| `auth.user.twitch.tokens.refreshed` | `main_exchange` (DIRECT) | `dict` (twitch_id, tokens) | Оповещение бэкенда о том, что TwitchIO автоматически обновил токен. |
-| `twitch.user.token.died` | `main_exchange` (DIRECT) | `dict` (platform_user_id, ...) | Оповещение об аннулировании токена стримера. |
-| `auth.user.twitch.all.request` | `main_exchange` (DIRECT) | RPC Request -> `list[Tokens]` | Запрос полного списка подключенных стримеров при старте бота. |
-| `playlist.settings.request` | `main_exchange` (DIRECT) | RPC Request -> `ReadPlaylistSettings` | Запрос настроек конкретного плейлиста (ACL). |
+| `bot.twitch.order.new` | `main_exchange` (DIRECT) | `OrderNew` | Submit track order into backend processing pipeline. |
+| `auth.user.twitch.tokens.refreshed` | `main_exchange` (DIRECT) | `dict` (twitch_id, tokens) | Inform backend that TwitchIO rotated OAuth credentials. |
+| `twitch.user.token.died` | `main_exchange` (DIRECT) | `dict` (platform_user_id, ...) | Notify backend of revoked authorization. |
+| `auth.user.twitch.all.request` | `main_exchange` (DIRECT) | RPC Request -> `list[Tokens]` | Fetch active streamer tokens on microservice startup. |
+| `playlist.settings.request` | `main_exchange` (DIRECT) | RPC Request -> `ReadPlaylistSettings` | Query target playlist constraints (ACL). |
 
 ---
 
-## 6. Ключи и структуры в Redis (Redis Key Schema)
+## 6. Redis Key Schema
 
-| Шаблон ключа | Тип | Назначение | Пример значения |
+| Key Pattern | Type | Purpose | Example Value |
 | :--- | :--- | :--- | :--- |
-| `{channel_name}:mr:enable` | `string` (`int`) | Флаг доступности текстовой команды `!mr` | `"1"` (включено), `"0"` (выключено) |
-| `{channel_name}_music_request_forpoints_enable` | `string` (`int`) | Флаг доступности заказа за баллы канала | `"1"`, `"0"` |
-| `{user_id}:{playlist_name}:settings` *(резерв)* | `string` (`JSON`) | Кэш настроек плейлиста и лимитов | `{"is_active": true, ...}` |
-| `{playlist_name}:cooldown:{yt_id}` *(резерв)* | `string` (с TTL) | Кулдаун повторного заказа одинакового видео | `"1"` |
-
----
-
-## 7. Анализ кода, технический аудит и рекомендации (Code Review & Improvements)
-
-В ходе архитектурного аудита кодовой базы `bot_ttv` выявлены следующие точки внимания и рекомендации по рефакторингу:
-
-### 7.1. Опечатки в наименованиях (Typos)
-1. **`src/config.py` и `src/bot_setup.py`**:
-   - Поле `TWICTH_CLIENT_SECRET` содержит опечатку. Рекомендуется переименовать в `TWITCH_CLIENT_SECRET`.
-2. **`src/adapters/_rabbit/broker.py`**:
-   - Очередь `auth_user_twitch_tokens_refreshed` названа `"auth.user.twtich.tokens.refreshed"` (с опечаткой `twtich`). Следует синхронизировать с бэкендом.
-
-### 7.2. Унификация формата приоритетов (`priority`)
-- В методе `mr` приоритеты собираются через двоеточие с полными названиями:
-  ```python
-  priority=":".join(["moderator", "vip"])  # -> "moderator:vip"
-  ```
-  При этом в коде присутствует опечатка: `"tartist"` вместо `"artist"`.
-- В методе `music_request_by_points` приоритеты собираются однобуквенно без разделителя:
-  ```python
-  priority="".join(["p", "b", "m"])  # -> "pbm"
-  ```
-- **Рекомендация**: унифицировать формат приоритетов к единому перечислению (например, `"points:moderator:vip"`), чтобы обработчик заказов на бэкенде применял консистентные правила расчета весов (`cost_mode: add/max`).
-
-### 7.3. Консистентность типов идентификаторов
-- В `music_request_by_points`:
-  ```python
-  broadcaster_id=int(ctx.channel.id),
-  chatter_id=int(ctx.author.id)
-  ```
-  В DTO `NewOrderPayload` поля объявлены как `str`. В Python/Pydantic v2 это может приводить к неявным конвертациям или ошибкам валидации.
-- **Рекомендация**: Всегда передавать `str(ctx.channel.id)` и `str(ctx.author.id)`.
-
-### 7.4. Стандартизация Redis-ключей
-- Ключи используют смешанный стиль: `{channel}:mr:enable` (с двоеточиями) и `{channel}_music_request_forpoints_enable` (со знаками подчеркивания). Кроме того, они завязаны на `channel_name` (который стример может сменить на Twitch), а не на постоянный `broadcaster_id`.
-- **Рекомендация**: перейти к ключам вида:
-  - `ttv:channel:{broadcaster_id}:mr_enabled`
-  - `ttv:channel:{broadcaster_id}:points_enabled`
-
-### 7.5. Очистка устаревшего SQLite-кода (Legacy Code Cleanup)
-- В модуле `src/utils.py` сохранились неиспользуемые методы (`get_user_id`, `get_twitch_id`, `setup_database`), а в корне сервиса находятся файлы `tokens.db`, `users.db`. В актуальной архитектуре хранилищем состояния и токенов является PostgreSQL бэкенда, доступный через RabbitMQ RPC.
-- **Рекомендация**: удалить неиспользуемые SQLite-функции и добавить временные SQLite-файлы в `.gitignore`.
+| `{channel_name}:mr:enable` | `string` (`int`) | Toggle text command `!mr` | `"1"` (enabled), `"0"` (disabled) |
+| `{channel_name}_music_request_forpoints_enable` | `string` (`int`) | Toggle Channel Points redemption | `"1"`, `"0"` |
+| `{user_id}:{playlist_name}:settings` *(reserved)* | `string` (`JSON`) | Cached playlist rules and duration caps | `{"is_active": true, ...}` |
+| `{playlist_name}:cooldown:{yt_id}` *(reserved)* | `string` (with TTL) | Track re-order cooldown timer | `"1"` |

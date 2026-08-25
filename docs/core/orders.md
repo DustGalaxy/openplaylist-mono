@@ -1,33 +1,33 @@
-# Подсистема заказов и обработки треков (Order & Track Request Pipeline)
+# Order & Track Request Pipeline Architecture
 
-Документация описывает архитектуру приема, валидации, расчета приоритетов, обработки и смены треков в проекте **OpenPlaylist**.
-
----
-
-## 1. Архитектурный обзор (Architecture Overview)
-
-Подсистема отвечает за жизненный цикл музыкальных заказов: от момента создания пользователем или донат-ботом до воспроизведения и логирования.
-
-1. **Прием и инициализация заказов (`order_service.py`)**:
-   - Извлечение метаданных (YouTube ID, названия, длительности, автора, источника).
-   - Поддержка единичных заказов и батчей (`start_from_target`).
-   - Валидация по правилам плейлиста (разрешенные источники `allow_sources`, черные списки `track_black_list`, максимальный размер плейлиста `max_playlist_size`).
-
-2. **Асинхронная обработка заказов (FastStream Worker `order.proccess`)**:
-   - Сообщения заказов попадают в очередь `order.proccess` (`main_exchange`).
-   - FastStream воркер (`order_proccess_handler.py`) батчами сохраняет треки в БД через `add_to_playlist_batch`.
-   - Публикация событийно-ориентированного события `InternalPlaylistEvent` (`event_type: TRACK_ADDED`) в `playlist_fanout_exchange`.
-
-3. **Смена состояний трека и вещание**:
-   - При смене трека (`playnow`, `next`, `skip`) воркер выбивает событие `InternalPlaylistEvent` в `playlist_fanout_exchange`.
-   - `callback_handler.py` подписывается на событие и отправляет клиентские Socket.IO команды: `add_track`, `delete_track`, `playnow`.
-   - `history_handler.py` фиксирует прослушивание трека в истории (`playback_history`).
+This document describes the track request intake, validation, priority calculation, queue scheduling, and transition lifecycle in the **OpenPlaylist** platform.
 
 ---
 
-## 2. Графики и диаграммы взаимодействия (System Diagrams)
+## 1. Architecture Overview
 
-### 2.1. Компонентный график обработки заказов (Data Flow Diagram)
+The order subsystem orchestrates the complete lifecycle of user track submissions—from arrival via Web UI or donation bots to active playback and historical analytics logging.
+
+1. **Order Intake & Initialization (`order_service.py`):**
+   - Media metadata extraction (YouTube ID, title, duration, author, platform source).
+   - Support for single track submissions and batch operations (`start_from_target`).
+   - Rule-based validation against playlist constraints (allowed sources `allow_sources`, blacklist filters `track_black_list`, maximum capacity `max_playlist_size`).
+
+2. **Asynchronous Order Ingestion (FastStream Worker `order.proccess`):**
+   - Inbound requests enter the durable RabbitMQ queue `order.proccess` (`main_exchange`).
+   - The FastStream worker (`order_proccess_handler.py`) persists tracks in batches to PostgreSQL via `add_to_playlist_batch`.
+   - Emits an asynchronous domain event `InternalPlaylistEvent` (`event_type: TRACK_ADDED`) into `playlist_fanout_exchange`.
+
+3. **Track Transitions & Broadcast:**
+   - On track changes (`playnow`, `next`, `skip`), the worker dispatches `InternalPlaylistEvent` to `playlist_fanout_exchange`.
+   - `callback_handler.py` consumes the event and broadcasts Socket.IO client updates: `add_track`, `delete_track`, `playnow`.
+   - `history_handler.py` records finished tracks into `playback_history` for analytics aggregation.
+
+---
+
+## 2. System Diagrams
+
+### 2.1. Order Processing Data Flow Diagram
 
 ```mermaid
 flowchart TB
@@ -79,12 +79,12 @@ flowchart TB
 
 ---
 
-### 2.2. Диаграмма последовательности: Создание заказа (Order Processing Sequence)
+### 2.2. Sequence Diagram: Order Processing
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Пользователь / Донатер
+    actor User as User / Donator
     participant UI as React UI / Bot
     participant API as FastAPI (/order/{playlist_id})
     participant Rabbit as RabbitMQ (main_exchange)
@@ -92,32 +92,32 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant Fanout as RabbitMQ (playlist_fanout_exchange)
     participant SIO as Socket.IO Server (/plst_upds)
-    actor Viewers as Все слушатели плейлиста
+    actor Viewers as All Playlist Viewers
 
-    User->>UI: Ввод ссылки/поиск трека
+    User->>UI: Submit link or search track
     UI->>API: POST /order/{playlist_id} (NewOrderPayload)
     API->>Rabbit: main_publisher.publish(payload, queue=order.proccess)
     API-->>UI: 202 Accepted ("order queued for processing")
 
     Rabbit->>Worker: _subscriber(payload)
-    Worker->>Worker: init_orders (парсинг URL & параметров)
-    Worker->>DB: add_to_playlist_batch (сохранение треков)
+    Worker->>Worker: init_orders (parse URL & params)
+    Worker->>DB: add_to_playlist_batch (save tracks)
     
     Worker->>Fanout: main_publisher.publish(InternalPlaylistEvent: TRACK_ADDED)
     
     Fanout->>SIO: callback_router (callback_handler.py)
     SIO->>Viewers: Emit add_track:{playlist_id} (OrderDomain)
-    Note over Viewers: Отображение нового трека в очереди плейлиста.
+    Note over Viewers: Realtime display of new queued track in UI.
 ```
 
 ---
 
-### 2.3. Диаграмма последовательности: Автопереход и сфера событий смены трека (Track Transition)
+### 2.3. Sequence Diagram: Track Transition & Event Broadcast
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Player as Владелец Плеера (UI)
+    actor Player as Player Owner (UI)
     participant UI as React UI (usePlaybackFeed)
     participant API as FastAPI (/playlist/{id}/playnow or /next)
     participant DB as PostgreSQL
@@ -126,17 +126,17 @@ sequenceDiagram
     participant History as history_handler.py
     participant SIO as Socket.IO Server
 
-    Player->>UI: Завершение воспроизведения (onEnded)
+    Player->>UI: Track playback finished (onEnded)
     UI->>API: POST /playlist/{id}/playnow (track_id)
     API->>DB: UPDATE current_playing_track
     
     API->>Fanout: Publish InternalPlaylistEvent (TRACK_PLAY / TRACK_LISTENED)
     
-    par Раздельная обработка доменных подписчиков
+    par Independent Domain Subscribers
         Fanout->>Callback: TRACK_LISTENED
         Callback->>SIO: delete_track / playnow
         SIO->>Player: Emit playnow:{playlist_id}
-    and Запись в историю
+    and Playback History Recording
         Fanout->>History: TRACK_PLAY
         History->>DB: upsert_entry (playback_history)
     end
@@ -144,7 +144,7 @@ sequenceDiagram
 
 ---
 
-### 2.4. Состояния заказа (Order Lifecycle State Machine)
+### 2.4. Order Lifecycle State Machine
 
 ```mermaid
 stateDiagram-v2
@@ -175,17 +175,17 @@ stateDiagram-v2
 
 ---
 
-## 3. Детальная спецификация моделей заказов
+## 3. Order Data Models
 
-### 3.1. Структура `OrderDomain` / `track_data`
-- `id`: UUID.
+### 3.1. Entity Schema `OrderDomain` / `track_data`
+- `id`: UUID primary key.
 - `playlist_id`: UUID.
-- `yt_video_id`: String (Идентификатор видео/аудио источника).
+- `yt_video_id`: String (Video/audio provider identifier).
 - `title`: String.
 - `author`: String.
-- `duration`: Float (Секунды).
+- `duration`: Float (Seconds).
 - `source`: Enum (`youtube`, `vk`, `web`, etc.).
-- `from_owner`: Boolean (Флаг заказа самим владельцем).
+- `from_owner`: Boolean (Whether ordered by the playlist owner).
 - `requester_nickname`: String | None.
-- `priority`: Integer (Рассчитывается на основе стоимости заказа).
+- `priority`: Integer (Calculated score based on donation value or user role).
 - `created_at`: Timestamp.

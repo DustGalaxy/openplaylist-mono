@@ -1,37 +1,37 @@
-# Подсистема управления плейлистами и модерации (Playlist & Permissions System)
+# Playlist & Permissions System Architecture
 
-Документация описывает архитектуру управления плейлистами, гибкую конфигурацию режимов воспроизведения, систему разграничения прав модераторов и генерацию токенов приглашения в проекте **OpenPlaylist**.
-
----
-
-## 1. Архитектурный обзор (Architecture Overview)
-
-Подсистема включает в себя функционал конструирования плейлистов и разграничения доступа:
-
-1. **Конфигуратор плейлиста и режимы работы (Playlist Settings)**:
-   - **Режимы воспроизведения (`mode`)**:
-     - `stream`:  Динамический поток заказов пользователей с черным списком и правилами с поддержкой фоновых треков (`background_track_ids`).
-     - `static`: Статический зафиксированный список воспроизведения.
-   - **Режимы стоимости заказов (`cost_mode`)**: `add` (суммирование стоимости) или `max` (выбор максимальной ставки).
-   - **Фильтры источников (`allow_sources`)**: Ограничения источников (YouTube, VK, Web, etc.).
-   - **Черные списки и фоновые треки**: `track_black_list` и `background_track_ids`.
-
-2. **Система модерации и прав доступа (Moderation & RBAC)**:
-   - **Единственный Владелец (Owner)**: Имеет абсолютные права над плейлистом (управление настройками, модераторами, очередью и плейбеком).
-   - **Модераторы (Moderators)**: Авторизованные пользователи с гранулярным набором прав:
-     - `can_manage_queue`: Добавление, удаление, перемещение треков в очереди.
-     - `can_manage_playback`: Управление воспроизведением (пауза, резюм, перемотка, Remote Control).
-     - `can_manage_settings`: Изменение настроек плейлиста (режимы, источники, правила).
-   - **Ссылки-приглашения (Moderator Tokens)**: Генерация одноразовых или многоразовых токенов доступа с ограниченным сроком действия (`expires_at`).
-
-3. **Защита доступа в FastAPI (`MODERATOR_ACCESS`)**:
-   - Внедрение зависимости `get_playlist_moderator_access`: извлечение токена из заголовока `X-Moderator-Token` или Query-параметра `token`, сопоставление с ролями пользователя и вычисление текущих прав (`ModeratorAccessInfo`).
+This document describes the playlist lifecycle architecture, configurable playback modes, moderator role-based access control (RBAC), and invite token mechanics in the **OpenPlaylist** platform.
 
 ---
 
-## 2. Графики и диаграммы взаимодействия (System Diagrams)
+## 1. Architecture Overview
 
-### 2.1. Компонентная архитектура управления плейлистами (Data Flow Diagram)
+The playlist subsystem encompasses custom queue construction, playback constraints, and granular access delegation:
+
+1. **Playlist Configuration & Operating Modes (Playlist Settings):**
+   - **Playback Modes (`mode`):**
+     - `stream`: Dynamic user donation/order stream with blacklist validation and background track failovers (`background_track_ids`).
+     - `static`: Fixed, predefined ordered track list.
+   - **Order Cost Calculation (`cost_mode`):** `add` (cumulative sum) or `max` (highest bid selection).
+   - **Source Restrictions (`allow_sources`):** Allowed media providers (YouTube, VK, Web, etc.).
+   - **Blacklists and Background Music:** `track_black_list` and `background_track_ids`.
+
+2. **Moderation System & RBAC:**
+   - **Single Owner:** Retains absolute administrative control over settings, moderators, queues, and playback streams.
+   - **Moderators:** Authenticated users granted granular permissions:
+     - `can_manage_queue`: Add, reorder, delete, and approve queued tracks.
+     - `can_manage_playback`: Remote playback control (pause, resume, seek, Remote Control mode).
+     - `can_manage_settings`: Modify playlist parameters (modes, sources, filters).
+   - **Invitation Links (Moderator Tokens):** Cryptographic single-use or reusable invite tokens with expiration limits (`expires_at`).
+
+3. **FastAPI Authorization Guard (`MODERATOR_ACCESS`):**
+   - Dependency `get_playlist_moderator_access`: extracts tokens from `X-Moderator-Token` header or query parameter `token`, verifies session identity, and calculates active capabilities (`ModeratorAccessInfo`).
+
+---
+
+## 2. System Diagrams
+
+### 2.1. Component Architecture (Data Flow Diagram)
 
 ```mermaid
 flowchart TB
@@ -83,41 +83,41 @@ flowchart TB
 
 ---
 
-### 2.2. Диаграмма последовательности: Создание и активация токена модератора (Moderator Token Activation)
+### 2.2. Sequence Diagram: Moderator Token Creation & Activation
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Owner as Владелец плейлиста
-    actor ModUser as Гость / Будущий модератор
+    actor Owner as Playlist Owner
+    actor ModUser as Guest / Future Moderator
     participant UI as React UI (TabModerators)
     participant API as FastAPI (/playlist/{id}/moderators/token)
     participant ModSvc as ModeratorService
     participant DB as PostgreSQL (playlist_moderator)
 
-    Owner->>UI: Создание приглашения (выбор прав & exp_time)
+    Owner->>UI: Create invite (select permissions & exp_time)
     UI->>API: POST /playlist/{id}/moderators/token (permissions, expires_at)
     API->>ModSvc: create_moderator_token(...)
-    ModSvc->>ModSvc: Генерация криптографического токена (secrets.token_urlsafe)
+    ModSvc->>ModSvc: Generate cryptographic token (secrets.token_urlsafe)
     ModSvc->>DB: INSERT INTO playlist_moderator (token, is_activated=false)
     API-->>UI: 200 OK + invite_link (e.g. /playlist/id?token=XYZ)
 
-    Note over Owner, ModUser: Передача ссылки модератору
-    ModUser->>UI: Переход по ссылке приглашения
+    Note over Owner, ModUser: Transfer link to moderator
+    ModUser->>UI: Navigate to invite URL
     UI->>API: POST /playlist/{id}/moderators/accept?token=XYZ
     API->>ModSvc: accept_moderator_token(token, mod_user_id)
     ModSvc->>DB: UPDATE playlist_moderator (user_id=mod_user_id, is_activated=true, token=null)
-    API-->>UI: 200 OK (Модератор привязан к учетной записи)
+    API-->>UI: 200 OK (Moderator account linked)
 ```
 
 ---
 
-### 2.3. Диаграмма последовательности: Изменение настроек плейлиста (Playlist Patch & Realtime Sync)
+### 2.3. Sequence Diagram: Playlist Patch & Realtime Sync
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Admin as Владелец / Модератор (can_manage_settings)
+    actor Admin as Owner / Moderator (can_manage_settings)
     participant UI as React UI (SettingsModal)
     participant API as FastAPI (PATCH /playlist/{id})
     participant Dep as MODERATOR_ACCESS
@@ -125,9 +125,9 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant Rabbit as RabbitMQ (main_publisher)
     participant SIO as Socket.IO Server (/plst_upds)
-    actor Viewers as Слушатели плейлиста
+    actor Viewers as Playlist Listeners
 
-    Admin->>UI: Изменение режима / правил / черного списка
+    Admin->>UI: Modify playback mode / rules / blacklist
     UI->>API: PATCH /playlist/{playlist_id} (PlaylistPatch payload)
     API->>Dep: get_playlist_moderator_access(playlist_id)
     Dep-->>API: ModeratorAccessInfo (can_manage_settings = true)
@@ -140,52 +140,52 @@ sequenceDiagram
 
     Rabbit->>SIO: FastStream worker (log_router / callback_router)
     SIO->>Viewers: Emit settings_changed:{playlist_id} (Partial<Playlist>)
-    Note over Viewers: Автоматическое обновление правил в UI клиентов.
+    Note over Viewers: Realtime client UI rule synchronization.
 ```
 
 ---
 
-### 2.4. Матрица уровней доступа и прав (Access Control Hierarchy)
+### 2.4. Access Control Hierarchy
 
 ```mermaid
 stateDiagram-v2
     [*] --> AnonymousRequest
 
-    state "Гость или Anon Viewer" as Anon {
+    state "Guest / Anonymous Viewer" as Anon {
         [*] --> CheckPublic
         CheckPublic --> PublicAccess: Playlist is public
         PublicAccess --> ViewTracks: View tracks and listen
         CheckPublic --> DenyAccess: Playlist is private
     }
 
-    state "Авторизованный Гость" as AuthGuest {
+    state "Authenticated User" as AuthGuest {
         [*] --> CheckOwnerOrMod
-        CheckOwnerOrMod --> CanRequestTracks: Can order tracks
+        CheckOwnerOrMod --> CanRequestTracks: Submit orders
     }
 
-    state "Модератор (Moderator)" as Mod {
+    state "Moderator (Staff)" as Mod {
         [*] --> CheckPermissions
         CheckPermissions --> QueueOps: Manage queue enabled
         CheckPermissions --> PlaybackOps: Manage playback enabled
         CheckPermissions --> SettingsOps: Manage settings enabled
     }
 
-    state "Владелец (Owner)" as Owner {
-        [*] --> FullAccess: Full control over settings and mods
+    state "Playlist Owner" as Owner {
+        [*] --> FullAccess: Unrestricted administrative authority
     }
 ```
 
 ---
 
-## 3. Детальная спецификация моделей и пермишенов
+## 3. Data Model Specifications
 
-### 3.1. Структура сущности `playlist_moderator`
+### 3.1. Entity Schema `playlist_moderator`
 
-- `id`: UUID.
+- `id`: UUID primary key.
 - `playlist_id`: UUID (Foreign Key -> `playlist.id`).
-- `user_id`: UUID | None (Заполняется при активации токена).
-- `token`: String | None (Уникальный одноразовый/многоразовый токен).
-- `permissions`: JSONB Объект:
+- `user_id`: UUID | None (Populated upon token acceptance).
+- `token`: String | None (Cryptographic single-use/multi-use string).
+- `permissions`: JSONB Object:
 
   ```json
   {
@@ -198,32 +198,31 @@ stateDiagram-v2
 - `is_activated`: Boolean.
 - `expires_at`: Timestamp | None.
 
-### 3.2. Права и проверки в API
+### 3.2. Authorization Enforcement in API Routes
 
-- **Владелец**: `is_owner = True` $\rightarrow$ все права в `ModeratorAccessInfo` устанавливаются в `True`.
-- **Проверка пермишенов в роутах**:
+- **Owner Resolution**: `is_owner = True` $\rightarrow$ sets all permissions in `ModeratorAccessInfo` to `True`.
+- **Route Guard Example**:
 
   ```python
   if not access.permissions.get("can_manage_settings", False):
-      raise HTTPException(status_code=403, detail="Moderator missing permissions")
+      raise HTTPException(status_code=403, detail="Moderator missing required permissions")
   ```
 
 ---
 
-## 4. Теги плейлистов (Playlist Tags & Discovery)
+## 4. Playlist Tags & Discovery
 
-Каждый плейлист поддерживает список нормализованных тегов (массивы строк `ARRAY(String)` в PostgreSQL) для каталогизации, поиска и фильтрации:
+Playlists support normalized tags (`ARRAY(String)` in PostgreSQL) for indexing and discovery:
 
-### 4.1. Валидация и нормализация тегов
-- Символы `#` и пробелы по краям автоматически обрезаются.
-- Теги приводятся к нижнему регистру для единообразного поиска.
-- Максимальная длина одного тега: 30 символов.
-- Максимальное количество тегов на плейлист: 10 тегов.
-- Дубликаты тегов автоматически устраняются с сохранением порядка.
+### 4.1. Validation & Normalization Rules
+- Leading `#` symbols and surrounding whitespace are stripped automatically.
+- Tags are lowercased for case-insensitive search.
+- Max tag length: 30 characters.
+- Max tags per playlist: 10 tags.
+- Duplicate tags are eliminated while preserving original order.
 
-### 4.2. Эндпоинты работы с тегами и каталогом
-- `GET /playlist?query={query}&tag={tag}`: Поиск публичных плейлистов по подстроке (в имени, описании, авторе, тегах) и/или фильтрация по конкретному тегу. Возвращает список `ReadPlaylistPreview` с включенным полем `tags`.
-- `GET /playlist/tags/popular?limit=20`: Получение списка наиболее популярных тегов среди публичных плейлистов с количеством использований (`tag`, `count`).
-- `POST /playlist`: Создание нового плейлиста с передачей поля `tags: list[str]`.
-- `PATCH /playlist/{id}`: Обновление тегов плейлиста через поле `tags: list[str]`.
-
+### 4.2. Endpoints
+- `GET /playlist?query={query}&tag={tag}`: Search public playlists with substring filtering across name, description, author, and tags. Returns `ReadPlaylistPreview` with `tags`.
+- `GET /playlist/tags/popular?limit=20`: Retrieves the most frequent tags among public playlists with usage counters (`tag`, `count`).
+- `POST /playlist`: Create a new playlist including `tags: list[str]`.
+- `PATCH /playlist/{id}`: Update playlist tags via `tags: list[str]`.
