@@ -236,6 +236,7 @@ export const postPlayNow = async (
 export const createNewPlaylist = async (
   name: string,
   description?: string,
+  tags?: Array<string>,
 ) => {
   const config = getConfig()
   const response = await apiClient(config.PLST_API_URL + ``, {
@@ -244,6 +245,7 @@ export const createNewPlaylist = async (
     data: {
       name: name,
       description: description,
+      tags: tags ?? [],
     },
   })
   return response.data
@@ -258,18 +260,40 @@ export const deletePlaylist = async (playlist_id: string) => {
   return response.status == 204
 }
 
-export const getPublicPlaylists = async (query: string) => {
+export const getPublicPlaylists = async (
+  query?: string,
+  tag?: string,
+): Promise<Array<ReadPlaylistPreview> | null> => {
   const config = getConfig()
-  const response = await apiClient(config.PLST_API_URL + `?query=${query}`, {
+  const params: Record<string, string> = {}
+  if (query && query.trim()) params.query = query.trim()
+  if (tag && tag.trim()) params.tag = tag.trim().replace(/^#/, '')
+
+  const response = await apiClient(config.PLST_API_URL, {
     method: 'GET',
     withCredentials: true,
+    params,
   }).catch((error) => {
-    if (error.response.status === 403) {
+    if (error?.response?.status === 403) {
       return null
     }
   })
   if (!response) return null
   return response.data
+}
+
+export const fetchPopularTags = async (
+  limit = 20,
+): Promise<Array<{ tag: string; count: number }>> => {
+  const config = getConfig()
+  const response = await apiClient(config.PLST_API_URL + `/tags/popular`, {
+    method: 'GET',
+    withCredentials: true,
+    params: { limit },
+  }).catch(() => {
+    return { data: [] }
+  })
+  return response.data ?? []
 }
 
 export const blockUser = async (

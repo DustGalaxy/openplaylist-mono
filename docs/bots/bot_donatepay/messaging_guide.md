@@ -1,45 +1,45 @@
-# Руководство по Messaging: AMQP Клиент и Command Handlers (для новичков)
+# Messaging Guide: AMQP Client & Command Handlers
 
-В данном руководстве подробно и простым языком разбирается, как устроен слой взаимодействия с брокером сообщений **RabbitMQ** в микросервисе `bot_donatepay`.
+This guide provides a comprehensive walkthrough of the message-driven communication layer built with **RabbitMQ** inside the `bot_donatepay` microservice.
 
-Мы детально разберем два ключевых файла:
-1. [`src/messaging/amqp-client.ts`](../../../bot_donatepay/src/messaging/amqp-client.ts) — шлюз для работы с RabbitMQ (подключение, очереди, отправка сообщений и RPC).
-2. [`src/messaging/command-handlers.ts`](../../../bot_donatepay/src/messaging/command-handlers.ts) — обработчики входящих команд от бэкенда (подключить/отключить стримера).
-
----
-
-## 1. Концепция: Что такое RabbitMQ и AMQP?
-
-### Простая аналогия: "Почтовая служба"
-
-Представьте, что ваше приложение — это сеть офисов:
-- **Бэкенд (Python/FastAPI)** — центральный офис управления.
-- **Бот DonatePay (Node.js/TypeScript)** — филиал, слушающий донаты стримеров.
-- **RabbitMQ** — городская почтовая служба, связывающая их.
-
-```
-[ Producer (Отправитель) ] 
-       │ 
-       ▼ (Отправляет письмо с адресом)
-[ Exchange (Сортировочный центр) ] 
-       │ 
-       ▼ (Раскладывает по правилам / routing key)
-[ Queue (Почтовый ящик) ] 
-       │ 
-       ▼ (Курьер забирает)
-[ Consumer (Получатель / Обработчик) ]
-```
-
-### Основные термины:
-1. **Producer (Продюсер/Отправитель):** Тот, кто создает сообщение (например, бот поймал донат с треком и отправляет его в систему).
-2. **Exchange (Обменник/Сортировочный центр):** Получает сообщения и решает, в какие очереди их направить на основе правил (routing key). В нашем боте используется `main_exchange` с типом `direct` (прямая доставка в очередь с тем же именем).
-3. **Queue (Очередь/Почтовый ящик):** Место на сервере RabbitMQ, где сообщения аккуратно лежат в порядке очереди (FIFO), пока их не заберет получатель.
-4. **Consumer (Консьюмер/Получатель):** Тот, кто слушает очередь и выполняет работу при поступлении письма.
-5. **Ack (Acknowledge / Расписка о получении):** Сигнал от получателя: *"Я успешно обработал сообщение, его можно удалить из очереди"*. Если получатель упадет до отправки `ack`, RabbitMQ не потеряет сообщение и передаст его снова.
+Key components covered:
+1. [`src/messaging/amqp-client.ts`](../../../bot_donatepay/src/messaging/amqp-client.ts) — RabbitMQ client gateway (connections, queues, publishers, and RPC mechanics).
+2. [`src/messaging/command-handlers.ts`](../../../bot_donatepay/src/messaging/command-handlers.ts) — Command handlers processing backend directives (connect/disconnect streamers).
 
 ---
 
-## 2. Общая архитектура взаимодействия
+## 1. Concepts: RabbitMQ & AMQP 0-9-1
+
+### Practical Analogy: "Postal Dispatch Network"
+
+Consider the distributed architecture as a network of coordinated offices:
+- **Backend (Python / FastAPI):** Central administration office.
+- **DonatePay Bot (Node.js / TypeScript):** External branch office monitoring live streamer donation streams.
+- **RabbitMQ:** High-speed postal dispatch system connecting them.
+
+```text
+[ Producer (Sender) ] 
+       │ 
+       ▼ (Dispatches letter with routing address)
+[ Exchange (Sorting Center) ] 
+       │ 
+       ▼ (Directs to destination according to routing key)
+[ Queue (Mailbox) ] 
+       │ 
+       ▼ (Courier pickup)
+[ Consumer (Worker / Handler) ]
+```
+
+### Core Terminology:
+1. **Producer:** Process creating and publishing messages (e.g., bot captures a donation with a YouTube URL and dispatches it to the system).
+2. **Exchange:** Message routing agent. In `bot_donatepay`, `main_exchange` uses `direct` routing (delivers directly to queues matching the routing key).
+3. **Queue:** Buffer storing messages sequentially (FIFO) until retrieved by workers.
+4. **Consumer:** Worker listening to a queue to process inbound payloads.
+5. **Ack (Acknowledgment):** Signal from the consumer: *"Message processed successfully, safe to purge from queue"*. If a worker crashes before sending `ack`, RabbitMQ re-queues the message to prevent data loss.
+
+---
+
+## 2. Interaction Sequence Diagram
 
 ```mermaid
 sequenceDiagram
@@ -49,35 +49,34 @@ sequenceDiagram
     participant R as RabbitMQ (main_exchange)
     participant BE as Backend (FastStream)
 
-    Note over B,BE: Сценарий: Старт и инициализация
-    B->>R: RPC Запрос всех пользователей (auth.user.donatepay.all.request)
-    R->>BE: Доставка запроса
-    BE-->>R: Ответ со списком пользователей и токенов
-    R-->>B: Доставка в replyQueue (по correlationId)
-    B->>D: Запуск сокет-стримов для каждого пользователя
+    Note over B,BE: Phase 1: Bootstrapping & Discovery
+    B->>R: RPC Request all users (auth.user.donatepay.all.request)
+    R->>BE: Forward request
+    BE-->>R: Return user list & access tokens
+    R-->>B: Deliver response to replyQueue (matching correlationId)
+    B->>D: Initialize WebSocket listener streams for each user
 
-    Note over D,BE: Сценарий: Поступил донат с треком
-    D->>B: WebSocket Event (Донат: 150 руб, "https://youtu.be/...")
-    B->>B: Извлечение ссылки на видео
-    B->>R: Публикация заказа в очередь bot.donatepay.order.new
-    R->>BE: Бэкенд забирает заказ и добавляет в очередь воспроизведения
+    Note over D,BE: Phase 2: Inbound Donation Stream
+    D->>B: WebSocket Event (Donation: 150 RUB, "https://youtu.be/...")
+    B->>B: Extract video URL & sanitize
+    B->>R: Publish order payload to bot.donatepay.order.new
+    R->>BE: Backend worker ingests order into playback queue
 
-    Note over BE,B: Сценарий: Стример подключил бота через UI
-    BE->>R: Команда в очередь bot.donatepay.connect.request
-    R->>B: ConnectCommandHandler обрабатывает сообщение
-    B->>D: Открытие нового Centrifuge сокета
-    B-->>R: RPC ответ (true / false) в replyTo
+    Note over BE,B: Phase 3: Dynamic Streamer Connection
+    BE->>R: Command published to bot.donatepay.connect.request
+    R->>B: ConnectCommandHandler processes message
+    B->>D: Open new Centrifuge WebSocket stream
+    B-->>R: RPC Response (true / false) to replyTo
 ```
 
 ---
 
-## 3. Разбор `AmqpClient` (`src/messaging/amqp-client.ts`)
+## 3. AMQP Client Architecture (`src/messaging/amqp-client.ts`)
 
-Класс `AmqpClient` берет на себя всю черновую работу по управлению протоколом AMQP.
+The `AmqpClient` class manages low-level AMQP connection lifecycles and channel topologies.
 
-### 3.1. Подключение и Confirm-канал
+### 3.1. Connection & Confirm Channels
 
-В конструктор передается конфигурация `config: AppConfig`:
 ```typescript
 public async connect(): Promise<void> {
   this.connection = await amqp.connect(this.config.rabbitUrl);
@@ -88,43 +87,41 @@ public async connect(): Promise<void> {
 ```
 
 > [!TIP]
-> **Почему `createConfirmChannel()`, а не обычный `createChannel()`?**
-> Обычный канал отправляет сообщение "в пустоту" (fire-and-forget). `ConfirmChannel` гарантирует, что брокер RabbitMQ прислал подтверждение о физической записи сообщения на диск или в память. Это предотвращает потерю донатов и заказов при сетевых сбоях.
+> **Why `createConfirmChannel()` over standard `createChannel()`?**  
+> Standard channels use fire-and-forget dispatch. `ConfirmChannel` guarantees that the RabbitMQ broker returns publisher confirms when messages are persisted to disk or buffer, preventing lost donations during network blips.
 
 ---
 
-### 3.2. Настройка топологии (`setupTopology`)
+### 3.2. Topology Setup (`setupTopology`)
 
-Топология — это схема связей между обменниками и очередями:
 ```typescript
 private async setupTopology(): Promise<void> {
-  // 1. Создаем (или проверяем наличие) обменника
+  // 1. Declare main direct exchange
   await this.channel.assertExchange(this.config.mainExchange, "direct", { durable: true });
 
-  // 2. Создаем очереди
+  // 2. Declare queues
   await this.channel.assertQueue(this.config.eventQueue, { durable: true });
   await this.channel.assertQueue(this.config.connectQueue, { durable: true });
   await this.channel.assertQueue(this.config.disconnectQueue, { durable: true });
 
-  // 3. Привязываем (биндим) очереди к обменнику
+  // 3. Bind queues to exchange
   await this.channel.bindQueue(this.config.eventQueue, this.config.mainExchange, this.config.eventQueue);
   await this.channel.bindQueue(this.config.connectQueue, this.config.mainExchange, this.config.connectQueue);
   await this.channel.bindQueue(this.config.disconnectQueue, this.config.mainExchange, this.config.disconnectQueue);
 
-  // 4. Ограничиваем нагрузку на воркера
+  // 4. Set worker prefetch buffer
   await this.channel.prefetch(1);
 }
 ```
 
-- `durable: true`: Очереди и сообщения сохраняются даже при перезапуске сервера RabbitMQ.
-- `prefetch(1)`: Говорит RabbitMQ: *"Не присылай мне следующее сообщение, пока я не отправлю `ack` за предыдущее"*. Это защищает воркера от зависания при наплыве сотен донатов.
+- `durable: true`: Preserves topology and messages across RabbitMQ broker restarts.
+- `prefetch(1)`: Instructs RabbitMQ not to dispatch new messages to this consumer until the previous message is acknowledged, preventing memory exhaustion under burst traffic.
 
 ---
 
-### 3.3. Публикация событий
+### 3.3. Event Publishing
 
-#### Отправка нового заказа (`publishOrderEvent`)
-Когда в стриме получен донат, вызывается метод:
+#### Track Order Dispatch (`publishOrderEvent`)
 ```typescript
 public publishOrderEvent(event: DonatePayNewOrderPayload): boolean {
   const payload = Buffer.from(JSON.stringify(event));
@@ -132,13 +129,12 @@ public publishOrderEvent(event: DonatePayNewOrderPayload): boolean {
     this.config.mainExchange,
     this.config.eventQueue, // routing key = "bot.donatepay.order.new"
     payload,
-    { persistent: true }    // Сообщение пишется на диск
+    { persistent: true }    // Enforce disk persistence
   );
 }
 ```
 
-#### Оповещение о протухшем токене (`publishTokenDied`)
-Если DonatePay вернул ошибку `401 Unauthorized` (стример отозвал API ключ), бот сообщает об этом бэкенду:
+#### Revoked Token Notification (`publishTokenDied`)
 ```typescript
 public publishTokenDied(event: TokenDiedPayload): boolean {
   const payload = Buffer.from(JSON.stringify(event));
@@ -150,15 +146,12 @@ public publishTokenDied(event: TokenDiedPayload): boolean {
   );
 }
 ```
-Бэкенд получит это событие и пометит интеграцию как отключенную, уведомив пользователя в веб-интерфейсе.
 
 ---
 
-### 3.4. Паттерн RPC (Remote Procedure Call) через RabbitMQ
+### 3.4. RabbitMQ RPC Pattern (Remote Procedure Call)
 
-Обычно HTTP работает как "запрос-ответ". Очереди сообщений же асинхронны (отправил и забыл). Как сделать "запрос-ответ" через очереди?
-
-Метод `requestAllUsers()` реализует классический паттерн **RabbitMQ RPC**:
+Method `requestAllUsers()` implements the standard **RabbitMQ RPC Pattern**:
 
 ```mermaid
 sequenceDiagram
@@ -166,90 +159,30 @@ sequenceDiagram
     participant Rabbit as RabbitMQ
     participant Backend as Backend
 
-    Bot->>Rabbit: Создать временную очередь (replyQueue: amq.gen-xyz)
-    Bot->>Rabbit: Опубликовать запрос в auth.user.donatepay.all.request<br/>(replyTo: amq.gen-xyz, correlationId: 12345)
-    Rabbit->>Backend: Доставить запрос
-    Backend->>Backend: Собрать токены из PostgreSQL
-    Backend->>Rabbit: Опубликовать ответ в amq.gen-xyz (correlationId: 12345)
-    Rabbit->>Bot: Доставить ответ из amq.gen-xyz
-    Bot->>Bot: Сопоставить correlationId и вернуть Promise.resolve()
-    Bot->>Rabbit: Удалить временную очередь
-```
-
-#### Код реализации:
-```typescript
-public async requestAllUsers(timeoutMs = 10000): Promise<UserTokensDto[]> {
-  // 1. Создаем временную эксклюзивную очередь (только для этого запроса)
-  const replyQueue = await this.channel.assertQueue("", {
-    exclusive: true,
-    autoDelete: true,
-  });
-
-  // 2. Генерируем уникальный номер "заказа" (correlationId)
-  const correlationId = crypto.randomUUID();
-
-  return new Promise<UserTokensDto[]>((resolve, reject) => {
-    let timer: NodeJS.Timeout;
-
-    // 3. Слушаем временную очередь ответа
-    const consumerPromise = this.channel!.consume(
-      replyQueue.queue,
-      (msg) => {
-        if (!msg) return;
-        // Проверяем, что ответ именно на наш запрос!
-        if (msg.properties.correlationId === correlationId) {
-          clearTimeout(timer);
-          try {
-            const rawUsers = JSON.parse(msg.content.toString());
-            resolve(rawUsers);
-          } catch (err) {
-            reject(err);
-          } finally {
-            // Удаляем временную очередь
-            this.channel?.deleteQueue(replyQueue.queue);
-          }
-        }
-      },
-      { noAck: true }
-    );
-
-    // 4. Таймаут, если бэкенд не ответил вовремя
-    timer = setTimeout(() => {
-      this.channel?.deleteQueue(replyQueue.queue);
-      reject(new Error(`Timeout (${timeoutMs}ms) waiting for users`));
-    }, timeoutMs);
-
-    // 5. Отправляем запрос с заголовками replyTo и correlationId
-    this.channel!.publish(
-      this.config.mainExchange,
-      this.config.allUsersRequestQueue,
-      Buffer.from(JSON.stringify({})),
-      {
-        replyTo: replyQueue.queue,
-        correlationId: correlationId,
-        persistent: false,
-      }
-    );
-  });
-}
+    Bot->>Rabbit: Assert temporary exclusive queue (replyQueue: amq.gen-xyz)
+    Bot->>Rabbit: Publish request to auth.user.donatepay.all.request<br/>(replyTo: amq.gen-xyz, correlationId: 12345)
+    Rabbit->>Backend: Deliver request
+    Backend->>Backend: Query tokens from PostgreSQL
+    Backend->>Rabbit: Publish response to amq.gen-xyz (correlationId: 12345)
+    Rabbit->>Bot: Deliver response from amq.gen-xyz
+    Bot->>Bot: Match correlationId and resolve Promise
+    Bot->>Rabbit: Delete temporary queue
 ```
 
 ---
 
-## 4. Разбор `Command Handlers` (`src/messaging/command-handlers.ts`)
+## 4. Command Handlers (`src/messaging/command-handlers.ts`)
 
-### Зачем нужен паттерн Command Handler?
-Вместо того чтобы писать огромную функцию с сотней условий `if/else` или `switch(command)`, логика каждой команды изолируется в свой отдельный класс:
-- `ConnectCommandHandler` — знает всё о том, как подключить пользователя.
-- `DisconnectCommandHandler` — знает всё о том, как отключить пользователя.
-
-Каждый хэндлер тестируется независимо и имеет одну четкую ответственность (**Single Responsibility Principle**).
+### Why Command Handlers?
+Isolating inbound command logic into dedicated single-responsibility classes ensures modularity and testability:
+- `ConnectCommandHandler`: Manages dynamic streamer stream initialization.
+- `DisconnectCommandHandler`: Manages graceful stream termination.
 
 ---
 
 ### 4.1. `ConnectCommandHandler`
 
-Слушает очередь `bot.donatepay.connect.request`.
+Listens to `bot.donatepay.connect.request`:
 
 ```typescript
 export class ConnectCommandHandler {
@@ -266,20 +199,15 @@ export class ConnectCommandHandler {
     try {
       const payload = JSON.parse(msg.content.toString());
 
-      // 1. Поддержка разных форматов входных данных (DTO)
       let connData: ConnectionData | null = null;
 
-      // Стандартный формат: { platform_user_id, access_token, user_id }
       if (payload.platform_user_id && payload.access_token) {
         connData = {
           user_id: payload.user_id || payload.platform_user_id,
           platform_user_id: payload.platform_user_id,
           access_token: payload.access_token,
-          // ...
         };
-      } 
-      // Legacy формат подписки: { action: "subscribe", channel: "$public:123", token: "..." }
-      else if (payload.action === "subscribe" && payload.token && payload.channel) {
+      } else if (payload.action === "subscribe" && payload.token && payload.channel) {
         const platformUserId = payload.channel.replace("$public:", "");
         connData = {
           user_id: payload.user_id || platformUserId,
@@ -288,15 +216,13 @@ export class ConnectCommandHandler {
         };
       }
 
-      // 2. Запуск сокет-стрима через StreamManager
       if (connData) {
         success = await this.streamManager.startStream(connData);
       }
     } catch (err: any) {
-      this.logger.error("Ошибка команды подключения:", err.message);
+      this.logger.error("Connect command error:", err.message);
     }
 
-    // 3. Если вызывающая сторона ждала RPC ответ — отправляем результат
     if (msg.properties.replyTo) {
       this.amqpClient.sendRpcReply(
         msg.properties.replyTo,
@@ -305,7 +231,6 @@ export class ConnectCommandHandler {
       );
     }
 
-    // 4. Обязательно подтверждаем обработку сообщения!
     this.amqpClient.ack(msg);
     return success;
   }
@@ -316,12 +241,7 @@ export class ConnectCommandHandler {
 
 ### 4.2. `DisconnectCommandHandler`
 
-Слушает очередь `bot.donatepay.disconnect`.
-
-Главная особенность — гибкая нормализация (санитизация) входных данных. Сообщение может прийти в виде:
-1. Обычной строки: `"903168"` или `"$public:903168"`
-2. JSON объекта: `{"platform_user_id": "903168"}`
-3. JSON канала: `{"channel": "$public:903168"}`
+Listens to `bot.donatepay.disconnect`:
 
 ```typescript
 export class DisconnectCommandHandler {
@@ -331,7 +251,6 @@ export class DisconnectCommandHandler {
     let success = false;
     try {
       const contentStr = msg.content.toString();
-      // Очистка от префикса $public: и лишних кавычек
       let platformUserId = contentStr.replace(/"/g, "").replace("$public:", "").trim();
 
       try {
@@ -344,18 +263,16 @@ export class DisconnectCommandHandler {
           platformUserId = String(parsed.channel).replace("$public:", "").trim();
         }
       } catch {
-        // Если это была простая не-JSON строка, значение уже очищено выше
+        // Plain string handling
       }
 
       if (platformUserId) {
-        // Останавливаем стрим в StreamManager
         success = this.streamManager.stopStream(platformUserId);
       }
     } catch (err: any) {
-      this.logger.error("Ошибка отключения:", err.message);
+      this.logger.error("Disconnect command error:", err.message);
     }
 
-    // Отправляем RPC ответ, если требовался
     if (msg.properties.replyTo) {
       this.amqpClient.sendRpcReply(
         msg.properties.replyTo,
@@ -364,7 +281,6 @@ export class DisconnectCommandHandler {
       );
     }
 
-    // Подтверждаем получение
     this.amqpClient.ack(msg);
     return success;
   }
@@ -373,54 +289,11 @@ export class DisconnectCommandHandler {
 
 ---
 
-## 5. Памятка и частые ошибки (Best Practices)
+## 5. Best Practices & Reliability
 
-| Правило | Почему это важно |
+| Practice | Rationale |
 | :--- | :--- |
-| **Всегда вызывайте `ack(msg)`** | Если забыть вызвать `ack(msg)`, сообщение останется в статусе `Unacked`. При перезапуске воркера оно вернется в очередь, а при `prefetch(1)` воркер вообще заблокируется навсегда. |
-| **Используйте `try/catch` внутри хэндлера** | Нельзя допускать падения консьюмера из-за битого JSON. Если JSON сломан, логируем ошибку, отправляем `ack(msg)` (чтобы выбросить мусор) и продолжаем работу. |
-| **Пользуйтесь интерфейсами (`IAmqpClient`)** | Внедрение зависимостей (Dependency Injection) через интерфейсы позволяет тестировать хэндлеры за 2 миллисекунды без запуска реального брокера RabbitMQ. |
-| **Не блокируйте Event Loop** | Вся работа с очередями и парсингом асинхронна (`async/await`), что гарантирует высокую производительность Node.js. |
-
----
-
-## 6. Пример Unit-теста для хэндлера
-
-Благодаря архитектуре с внедрением зависимостей протестировать хэндлер очень просто:
-
-```typescript
-it("подключает пользователя и шлет RPC ответ", async () => {
-  // 1. Создаем мок клиента AMQP
-  const replies: any[] = [];
-  const acks: any[] = [];
-  const mockAmqp: IAmqpClient = {
-    sendRpcReply: (replyTo, corrId, data) => replies.push(data),
-    ack: (msg) => acks.push(msg),
-    // ...
-  };
-
-  // 2. Создаем мок менеджера стримов
-  const mockStreamManager = {
-    startStream: async () => true,
-  } as unknown as StreamManager;
-
-  const handler = new ConnectCommandHandler(mockAmqp, mockStreamManager);
-
-  // 3. Имитируем сообщение из RabbitMQ
-  const fakeMsg = {
-    content: Buffer.from(JSON.stringify({
-      platform_user_id: "12345",
-      access_token: "secret"
-    })),
-    properties: { replyTo: "reply-queue", correlationId: "id-1" },
-  } as amqp.ConsumeMessage;
-
-  // 4. Выполняем
-  const result = await handler.handle(fakeMsg);
-
-  // 5. Проверяем результат
-  assert.strictEqual(result, true);
-  assert.strictEqual(replies[0], true);
-  assert.strictEqual(acks.length, 1);
-});
-```
+| **Always invoke `ack(msg)`** | Unacknowledged messages remain locked in the queue and block future processing when `prefetch(1)` is active. |
+| **Internal `try/catch` wrappers** | Prevents consumer process termination on malformed JSON payloads. |
+| **Interface Abstractions (`IAmqpClient`)** | Enables isolated unit testing with mocks without spinning up real RabbitMQ containers. |
+| **Non-blocking Event Loop** | Pure async operations (`async/await`) maintain maximum Node.js I/O concurrency. |

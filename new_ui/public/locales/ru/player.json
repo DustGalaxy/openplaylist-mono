@@ -1,15 +1,56 @@
 {
   "controls": {
-    "mute": "Mute audio",
-    "next": "Next track",
-    "pause": "Pause",
-    "play": "Play",
-    "prev": "Previous track",
+    "mute": "Выключить звук",
+    "unmute": "Включить звук",
+    "next": "Следующий трек",
+    "prev": "Предыдущий трек",
+    "pause": "Пауза",
+    "play": "Воспроизведение",
     "repeat": "Повтор",
+    "repeatStatus": "Повтор: {{mode}}",
+    "repeatAll": "Повторять все",
+    "repeatOnce": "Повторять один трек",
+    "repeatOff": "Без повтора",
     "shuffle": "Случайный порядок",
-    "stop": "Stop playback",
-    "sync": "Request player sync",
-    "toggleVideo": "Toggle video player display",
-    "unmute": "Unmute audio"
+    "stop": "Остановить воспроизведение",
+    "sync": "Синхронизировать со стримом",
+    "toggleVideo": "Показать/скрыть видеоплеер",
+    "closeVideo": "Закрыть видеоплеер",
+    "openVideo": "Открыть видео",
+    "hideVideo": "Скрыть видео"
+  },
+  "trackInfo": {
+    "preview": "Предпросмотр",
+    "playlistTitle": "Плейлист: {{name}}",
+    "order": "Заказ: {{nickname}}",
+    "noTrack": "Нет трека"
+  },
+  "popover": {
+    "triggerAria": "Опции и очередь воспроизведения",
+    "title": "Опции воспроизведения",
+    "playerModeLabel": "Режим плеера",
+    "modes": {
+      "listen": "Слушаю",
+      "control": "Управление"
+    },
+    "modeHelp": {
+      "listen": "Локальный звук включен. Действия применяются только для вас.",
+      "control": "Локальный звук заглушен. Команды транслируются стримеру в OBS."
+    },
+    "channelSelectorLabel": "Канал стрима (Контекст)",
+    "ownChannel": "Мой канал (Собственный)",
+    "widgetBroadcastTitle": "Трансляция в виджет OBS",
+    "widgetBroadcastEnabled": "Включена (стрим слышит музыку)",
+    "widgetBroadcastDisabled": "Выключена",
+    "toggleWidgetBroadcastAria": "Переключить трансляцию в виджет",
+    "speedLabel": "Скорость:",
+    "stopPlaybackTitle": "Остановить воспроизведение",
+    "syncWithStreamTitle": "Синхронизировать со стримом",
+    "upNextTitle": "Далее в очереди",
+    "tracksCount": "{{count}} трек(-ов)",
+    "noUpNextTracks": "Нет следующих треков в очереди",
+    "trackRequester": "Заказ: {{nickname}}",
+    "removeFromQueue": "Удалить из очереди"
   }
 }
+

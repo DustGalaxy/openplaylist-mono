@@ -1,31 +1,31 @@
-# Подсистема логов и аудита плейлистов (Playlist Logs & Audit System)
+# Playlist Logs & Audit System Architecture
 
-Документация описывает архитектуру системы логирования событий плейлиста, фиксации действий операторов/модераторов, хранения аудита и трансляции в режиме реального времени в **OpenPlaylist**.
-
----
-
-## 1. Архитектурный обзор (Architecture Overview)
-
-Подсистема аудит-логов обеспечивает прозрачность управления плейлистом и позволяет владельцу и модераторам отслеживать все операционные действия в реальном времени.
-
-1. **Асинхронный перехват событий (`logs_handler.py`)**:
-   - Воркер FastStream подписывается на доменную шину `playlist_fanout_exchange` (очередь `internal.playlist.log`).
-   - Перехватывает все доменные события (`TRACK_ADDED`, `TRACK_REJECTED`, `TRACK_REMOVED`, `TRACK_PLAY`, `TRACK_SKIPPED`, `SETTINGS_CHANGED` и др.).
-   - Извлекает метаданные оператора (`_get_operator_payload`): имя, ID и уровень прав (`owner`, `moderator`, `none`).
-
-2. **Сервис логов и двойная доставка (`playlist_log_service.py`)**:
-   - Метод `log_and_emit()` выполняет две последовательные операции:
-     1. **Персистентность**: Запись структуры `PlaylistLogSchema` в таблицу `playlist_logs` (PostgreSQL).
-     2. **Realtime-вещание**: Вызов `sio_playlist_service.log()`, который отправляет Socket.IO эвент `log:{playlist_id}` на клиенты владельца и модераторов.
-
-3. **Интерфейс аудита на фронтенде (`LogPanel.tsx`)**:
-   - Панель логов в `new_ui` подписывается на события `log:{playlist_id}` и подгружает исторический журнал через REST API `GET /playlist/{playlist_id}/logs`.
+This document describes the event logging architecture, operator action recording, audit persistence, and real-time log distribution in **OpenPlaylist**.
 
 ---
 
-## 2. Графики и диаграммы взаимодействия (System Diagrams)
+## 1. Architecture Overview
 
-### 2.1. Компонентный график логирования и вещания (Data Flow Diagram)
+The audit logging subsystem ensures operational transparency, enabling playlist owners and moderators to monitor management actions in real time.
+
+1. **Asynchronous Event Ingestion (`logs_handler.py`):**
+   - The FastStream worker subscribes to the domain event bus `playlist_fanout_exchange` (queue `internal.playlist.log`).
+   - Intercepts all domain events (`TRACK_ADDED`, `TRACK_REJECTED`, `TRACK_REMOVED`, `TRACK_PLAY`, `TRACK_SKIPPED`, `SETTINGS_CHANGED`, etc.).
+   - Extracts operator metadata (`_get_operator_payload`): username, ID, and authorization level (`owner`, `moderator`, `none`).
+
+2. **Log Service & Dual Dispatch (`playlist_log_service.py`):**
+   - Method `log_and_emit()` executes two consecutive operations:
+     1. **Persistence:** Writes `PlaylistLogSchema` into PostgreSQL table `playlist_logs`.
+     2. **Realtime Broadcast:** Invokes `sio_playlist_service.log()`, emitting Socket.IO event `log:{playlist_id}` to connected owners and moderators.
+
+3. **Frontend Audit Interface (`LogPanel.tsx`):**
+   - The log panel in `new_ui` listens to live `log:{playlist_id}` broadcasts and paginates through historical records via REST API `GET /playlist/{playlist_id}/logs`.
+
+---
+
+## 2. System Diagrams
+
+### 2.1. Audit Logging Data Flow Diagram
 
 ```mermaid
 flowchart TB
@@ -62,17 +62,16 @@ flowchart TB
     LogSvc -->|5b. Emit Live Log Event| SIO
     
     SIO -->|6. Realtime Log Stream| LogPanel
-
 ```
 
 ---
 
-### 2.2. Диаграмма последовательности: Фиксация и отображение лога (Audit Log Flow)
+### 2.2. Sequence Diagram: Audit Log Processing & Broadcast
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Mod as Модератор (Operator)
+    actor Mod as Moderator (Operator)
     participant UI as React UI (LogPanel)
     participant API as FastAPI (/playlist/{id}/track/skip)
     participant Rabbit as RabbitMQ (playlist_fanout_exchange)
@@ -80,9 +79,9 @@ sequenceDiagram
     participant LogSvc as PlaylistLogService
     participant DB as PostgreSQL (playlist_logs)
     participant SIO as Socket.IO Server (/plst_upds)
-    actor Owner as Владелец плейлиста
+    actor Owner as Playlist Owner
 
-    Mod->>UI: Действие: Пропуск трека (Skip)
+    Mod->>UI: Action: Skip Track
     UI->>API: POST /playlist/{id}/track/skip
     API->>Rabbit: Publish InternalPlaylistEvent (TRACK_SKIPPED + EventOperator)
     API-->>UI: 200 OK
@@ -96,48 +95,48 @@ sequenceDiagram
     
     SIO->>Owner: Emit log:{playlist_id} (PlaylistLogSchema)
     SIO->>Mod: Emit log:{playlist_id} (PlaylistLogSchema)
-    Note over Owner, Mod: Мгновенное появление записи лога с пометкой [Moderator Nickname].
+    Note over Owner, Mod: Instant audit entry badge displaying [Moderator Nickname].
 ```
 
 ---
 
-### 2.3. Диаграмма последовательности: Загрузка исторического журнала (History Query Sequence)
+### 2.3. Sequence Diagram: Historical Log Query
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Owner as Владелец / Модератор
+    actor Owner as Owner / Moderator
     participant UI as React UI (LogPanel.tsx)
     participant API as FastAPI (GET /playlist/{playlist_id}/logs)
     participant LogSvc as PlaylistLogService
     participant DB as PostgreSQL (playlist_logs)
 
-    Owner->>UI: Открытие панели логов
+    Owner->>UI: Open audit logs panel
     UI->>API: GET /playlist/{playlist_id}/logs?page=1&limit=50
     API->>LogSvc: get_playlist_logs(db_session, playlist_id, limit, offset)
     LogSvc->>DB: SELECT * FROM playlist_logs WHERE playlist_id = :id ORDER BY created_at DESC
     DB-->>LogSvc: List[PlaylistLogDomain]
     LogSvc-->>API: ReadPlaylistLogDTO list
     API-->>UI: 200 OK (JSON Array of Logs)
-    Note over UI: Отрисовка списка историй с пагинацией.
+    Note over UI: Paginated log entries rendered in UI.
 ```
 
 ---
 
-### 2.4. Типы событий и классификация операторов (Log Event Classification)
+### 2.4. Log Event Classification
 
 ```mermaid
 stateDiagram-v2
     [*] --> EventCaptured: InternalPlaylistEvent Received
     
-    state "Классификация оператора" as OperatorType {
+    state "Operator Classification" as OperatorType {
         [*] --> CheckOperator
         CheckOperator --> OwnerOp: owner
         CheckOperator --> ModeratorOp: moderator
         CheckOperator --> PublicUserOp: none or requester
     }
 
-    state "Классификация типа лога" as LogEventType {
+    state "Event Type Classification" as LogEventType {
         [*] --> MatchEventType
         MatchEventType --> AddTrackLog: TRACK_ADDED
         MatchEventType --> RemoveTrackLog: TRACK_REMOVED
@@ -154,14 +153,14 @@ stateDiagram-v2
 
 ---
 
-## 3. Детальная спецификация моделей логов
+## 3. Data Model Specifications
 
-### 3.1. Структура таблицы `playlist_logs`
+### 3.1. Entity Schema `playlist_logs`
 - `id`: UUID (Primary Key).
-- `user_id`: UUID (ID владельца плейлиста).
+- `user_id`: UUID (Playlist owner ID).
 - `playlist_id`: UUID (Foreign Key -> `playlist.id`).
 - `event_type`: Enum (`ADD_TRACK`, `DELETE_TRACK`, `SKIP_TRACK`, `REJECT_TRACK`, `CHANGE_SETTINGS`, `BULK_DELETE_TRACKS`, `PLAY_NOW`).
-- `payload`: JSONB Объект:
+- `payload`: JSONB Object:
   ```json
   {
     "title": "Song Title",
@@ -176,6 +175,6 @@ stateDiagram-v2
   ```
 - `created_at`: Timestamp.
 
-### 3.2. Права доступа к логам
-- Получать исторические логи (`GET /playlist/{id}/logs`) могут только **Владелец** и **Модераторы** с соответствующим уровнем доступа.
-- Живой поток `log:{playlist_id}` транслируется в Socket.IO только авторизованным администраторам плейлиста.
+### 3.2. Access Control
+- Historical log queries (`GET /playlist/{id}/logs`) are restricted to the **Playlist Owner** and **Moderators**.
+- The realtime stream `log:{playlist_id}` is routed only to authenticated administrative clients.

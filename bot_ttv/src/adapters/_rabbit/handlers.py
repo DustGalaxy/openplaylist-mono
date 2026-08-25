@@ -1,8 +1,7 @@
-import json
-
 from faststream import Context
 from faststream.rabbit import RabbitRouter
 from faststream.rabbit.message import RabbitMessage
+
 from src.adapters._rabbit.broker import (
     bot_order_cancelled,
     bot_order_completed,
@@ -120,6 +119,9 @@ async def tokens_refreshed(message: RabbitMessage = Context()) -> None:
     if bot is None:
         return
 
-    event: Tokens = Tokens.model_validate_json(message.body)
+    try:
+        event: Tokens = Tokens.model_validate_json(message.body)
+        await bot.add_token(event.access_token, event.refresh_token, event)
+    except Exception as e:
+        LOGGER.error(f"Failed to process refreshed tokens: {e}")
 
-    await bot.add_token(event.access_token, event.refresh_token, event)

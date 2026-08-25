@@ -1,29 +1,29 @@
-# Подсистема авторизации и идентификации (Auth & Identity System)
+# Auth & Identity System Architecture
 
-Документация описывает архитектуру аутентификации, авторизации, управление сессиями, стратегии OAuth2/PKCE интеграций, механизмы разрешения коллизий учетных записей и защиту паролей в проекте **OpenPlaylist**.
-
----
-
-## 1. Архитектурный обзор (Architecture Overview)
-
-Подсистема авторизации состоит из 4 ключевых компонентов:
-
-1. **Безопасная классическая аутентификация (Argon2id + Email Verification)**:
-   - Использование криптографического алгоритма **Argon2id** (`argon2-cffi`) для хеширования паролей с проверкой необходимости перехеширования (`check_needs_rehash`).
-   - Двухэтапная регистрация с сохранением временного состояния пользователя в Redis (`email_new_user_data:{email}:{session_id}`) до подтверждения email.
-2. **Гибкая социальная авторизация (OAuth2 / PKCE + User Key)**:
-   - Паттерн **Strategy Manager** (`strategy_manager.py`) для взаимодействия с платформами: Twitch, Google, DonationAlerts, DonatePay, DonateX.
-   - Поддержка стандартов OAuth2 PKCE (`code_verifier`) и прямого ввода персональных ключей (`AuthFlow.USER_KEY`).
-3. **Многоуровневая обработка коллизий емейлов (Email Collision & Merge)**:
-   - Изоляция аккаунтов и безопасное слияние соцсетей через временные сессии в Redis (`link_sessions:{link_session_id}`).
-4. **Сессионная защита на JWT & HTTP-Only Cookies**:
-   - Генерация подписанных JWT-токенов (`HS256`), передаваемых в защищенных HTTP-Only сессионных куках (`httponly=True`, `secure=True`).
+This document describes the authentication, authorization, session management, OAuth2/PKCE integration strategies, account collision resolution, and password security in the **OpenPlaylist** platform.
 
 ---
 
-## 2. Графики и диаграммы взаимодействия (System Diagrams)
+## 1. Architecture Overview
 
-### 2.1. Компонентная архитектура подсистемы аутентификации (Data Flow Diagram)
+The authentication and identity subsystem consists of 4 core architectural modules:
+
+1. **Secure Classic Authentication (Argon2id + Email Verification):**
+   - Password hashing utilizing cryptographic **Argon2id** (`argon2-cffi`) with automatic parameter rehash verification (`check_needs_rehash`).
+   - Two-phase registration staging unconfirmed account records in Redis (`email_new_user_data:{email}:{session_id}`) until email link activation.
+2. **Pluggable Social Authentication (OAuth2 / PKCE + User Key):**
+   - **Strategy Manager Pattern** (`strategy_manager.py`) abstracting external platform handshakes: Twitch, Google, DonationAlerts, DonatePay, DonateX.
+   - Support for OAuth2 PKCE (`code_verifier`) and direct personal token ingestion (`AuthFlow.USER_KEY`).
+3. **Multi-Level Email Collision & Account Merging:**
+   - Account isolation with secure user-confirmed social profile merging coordinated via temporary Redis sessions (`link_sessions:{link_session_id}`).
+4. **Session Integrity via JWT & HTTP-Only Cookies:**
+   - Cryptographically signed JWT tokens (`HS256`/`RS256`) transported exclusively within secure HTTP-Only session cookies (`httponly=True`, `secure=True`).
+
+---
+
+## 2. System Diagrams
+
+### 2.1. Authentication Subsystem Architecture (Data Flow Diagram)
 
 ```mermaid
 flowchart TB
@@ -77,12 +77,12 @@ flowchart TB
 
 ---
 
-### 2.2. Диаграмма последовательности: Классическая регистрация и подтверждение Email (Registration Sequence)
+### 2.2. Sequence Diagram: Classic Registration & Email Confirmation
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Пользователь
+    actor User as User
     participant UI as React UI (/login)
     participant API as FastAPI (/login/register & /email_confirmation)
     participant Auth as AuthService
@@ -90,16 +90,16 @@ sequenceDiagram
     participant Email as Email Worker
     participant DB as PostgreSQL
 
-    User->>UI: Ввод username, email, password
+    User->>UI: Input username, email, password
     UI->>API: POST /login/register (username, email, password)
     API->>Auth: register_classic(email, password, username)
-    Auth->>Auth: Хеширование пароля через Argon2id
+    Auth->>Auth: Hash password via Argon2id
     Auth->>Redis: SET email_new_user_data:{email}:{session_id} (TTL: 24h)
     Auth->>Email: send_email(verification_link)
     API-->>UI: 202 Accepted ("need email confirmation")
 
-    Note over User, UI: Пользователь переходит по ссылке из письма
-    User->>UI: Переход по ссылке confirmation
+    Note over User, UI: User receives email and clicks confirmation link
+    User->>UI: Navigate to confirmation URL
     UI->>API: POST /login/email_confirmation (email, session_id)
     API->>Redis: GETDEL email_new_user_data:{email}:{session_id}
     Redis-->>API: user_data_json
@@ -111,12 +111,12 @@ sequenceDiagram
 
 ---
 
-### 2.3. Диаграмма последовательности: Социальная авторизация и разрешение коллизий (Social OAuth & Collision Resolution)
+### 2.3. Sequence Diagram: Social OAuth & Collision Resolution
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Пользователь
+    actor User as User
     participant UI as React UI
     participant API as FastAPI (/login/social & /resolve_email_colision)
     participant Strat as StrategyManager (Twitch/Google/DA)
@@ -124,34 +124,34 @@ sequenceDiagram
     participant Redis as Redis Cache
     participant DB as PostgreSQL
 
-    User->>UI: Клик "Войти через Twitch/Google"
-    UI->>Strat: Редирект на OAuth Provider (PKCE challenge)
-    Strat-->>UI: Возврат с authorization code
+    User->>UI: Click "Login with Twitch / Google"
+    UI->>Strat: Redirect to OAuth Provider (PKCE challenge)
+    Strat-->>UI: Redirect callback with authorization code
     UI->>API: POST /login/social/{platform} (code, code_verifier)
-    API->>Strat: Get user profile & tokens from OAuth Provider
+    API->>Strat: Fetch user profile & tokens from OAuth Provider
 
-    alt Уровень 1 & 2: Аккаунт привязан или найден по Email
+    alt Level 1 & 2: Account Linked or Email Match
         Strat-->>Auth: Profile & Tokens
         Auth->>DB: Upsert LinkedAccount & TokenVault
         Auth->>Auth: encode_jwt(user_id)
         API-->>UI: 200 OK + Set-Cookie: session_jwt
-    else Уровень 3: Коллизия Email с существующим пользователем
+    else Level 3: Email Collision with Existing Account
         Auth-->>API: raise NeedConfirmationException(data)
         API->>Redis: SET link_sessions:{link_session_id} (data, TTL 10m)
         API-->>UI: 202 NEED_CONFIRMATION + link_session_id + display_info
         
-        Note over User, UI: Показ модального окна разрешения коллизии
-        User->>UI: Выбор: "Объединить аккаунты" или "Создать новый"
+        Note over User, UI: Display Collision Resolution Dialog
+        User->>UI: Choose: "Merge Accounts" or "Create Separate Account"
         
         UI->>API: POST /login/resolve_email_colision (link_session_id, is_confirmed)
         API->>Redis: GETDEL link_sessions:{link_session_id}
         
-        alt is_confirmed = true (Объединить)
+        alt is_confirmed = true (Merge Accounts)
             API->>Auth: confirm_account_merge(data)
-            Auth->>DB: Привязка LinkedAccount к существующему user_id
-        else is_confirmed = false (Создать новый)
+            Auth->>DB: Bind LinkedAccount to existing user_id
+        else is_confirmed = false (Create New)
             API->>Auth: create_user + create_link
-            Auth->>DB: Создание нового AuthUser и LinkedAccount
+            Auth->>DB: Insert new AuthUser and LinkedAccount
         end
         
         Auth->>Auth: encode_jwt(user_id)
@@ -161,23 +161,23 @@ sequenceDiagram
 
 ---
 
-### 2.4. Матрица вариантов привязки и обработки уровней авторизации (Auth Levels Matrix)
+### 2.4. Authentication Level Resolution Matrix
 
 ```mermaid
 stateDiagram-v2
     [*] --> IncomingOAuthRequest
 
-    state "Уровень 1: Точный маппинг" as L1 {
+    state "Level 1: Exact Match" as L1 {
         IncomingOAuthRequest --> CheckLinkedAccount: Search by platform and user ID
         CheckLinkedAccount --> DirectLogin: LinkedAccount found
     }
 
-    state "Уровень 2: Совпадение по Email" as L2 {
-        CheckLinkedAccount --> CheckEmailMatch: Not found by user ID
+    state "Level 2: Verified Email Match" as L2 {
+        CheckLinkedAccount --> CheckEmailMatch: Not found by platform user ID
         CheckEmailMatch --> AutoLink: Email matches existing verified user
     }
 
-    state "Уровень 3: Коллизия Email" as L3 {
+    state "Level 3: Email Collision Confirmation" as L3 {
         CheckEmailMatch --> NeedConfirmation: Email matches but confirmation required
         NeedConfirmation --> StoreRedisSession: Save temporary session to Redis
         StoreRedisSession --> UserDecision
@@ -185,7 +185,7 @@ stateDiagram-v2
         UserDecision --> CreateSeparateUser: User rejects merge
     }
 
-    state "Уровень 4: Новый пользователь" as L4 {
+    state "Level 4: New User Registration" as L4 {
         CheckEmailMatch --> RegisterNewUser: Email not found in DB
         RegisterNewUser --> CreateUserAndLink: Create User, Link and Token Vault
     }
@@ -200,29 +200,29 @@ stateDiagram-v2
 
 ---
 
-## 3. Детальная спецификация компонентов и таблиц
+## 3. Data Model & Security Specifications
 
-### 3.1. Схема базы данных (PostgreSQL Models & Tables)
+### 3.1. Database Schema (PostgreSQL Models)
 
-1. **`auth_user` (`src/models/auth_user.py` / `src/orm/auth_user.py`)**:
+1. **`auth_user` (`src/models/auth_user.py` / `src/orm/auth_user.py`):**
    - `id`: UUID (Primary Key).
    - `email`: String (Unique, Indexed).
    - `username`: String (Unique, Indexed).
-   - `password`: String | None (Argon2id hash, null для социалок).
+   - `password`: String | None (Argon2id hash, null for OAuth-only users).
    - `email_confirmed`: Boolean.
    - `avatar_url`: String | None.
-   - `roles`: JSONB list (список ролей пользователя).
+   - `roles`: JSONB list (User roles array).
    - `created_at`, `updated_at`: Timestamp.
 
-2. **`linked_accounts` (`src/models/linked_accounts.py` / `src/orm/linked_accounts.py`)**:
+2. **`linked_accounts` (`src/models/linked_accounts.py` / `src/orm/linked_accounts.py`):**
    - `id`: UUID.
    - `user_id`: UUID (Foreign Key -> `auth_user.id`).
    - `platform`: Enum (`twitch`, `google`, `da`, `donatepay`, `donatex`).
-   - `platform_user_id`: String (Идентификатор пользователя на внешней платформе).
+   - `platform_user_id`: String (External user identifier).
    - `platform_username`: String.
    - `platform_email`: String | None.
 
-3. **`token_vault` (`src/models/token_vault.py` / `src/orm/token_vault.py`)**:
+3. **`token_vault` (`src/models/token_vault.py` / `src/orm/token_vault.py`):**
    - `id`: UUID.
    - `user_id`: UUID (Foreign Key -> `auth_user.id`).
    - `platform`: Enum.
@@ -230,27 +230,26 @@ stateDiagram-v2
    - `refresh_token`: Encrypted String | None.
    - `expires_at`: BigInteger Timestamp.
 
-### 3.2. Безопасность и алгоритмы шифрования
+### 3.2. Security & Cryptographic Standards
 
-- **Password Hashing**: `Argon2id` с параметрами по умолчанию от `argon2-cffi`. Проверка устаревания параметров через `hasher.check_needs_rehash(user.password)`.
-- **JWT Signatures**: `PyJWT` алгоритм `HS256`. Ключ `JWT_SECRET_KEY`, время жизни сессии задается `SESSION_LIVE_TIME` (по умолчанию 30 дней).
-- **Cookie Security**:
+- **Password Hashing**: `Argon2id` via `argon2-cffi`. Outdated hash parameters checked via `hasher.check_needs_rehash(user.password)`.
+- **JWT Signatures**: `PyJWT` algorithm `RS256` / `HS256`. Session validity configured by `SESSION_LIVE_TIME` (default: 30 days).
+- **Cookie Hardening**:
   - `name`: `settings.COOKIE_NAME`
-  - `httponly`: `True` (защита от XSS атак)
-  - `secure`: `True` (передача только по HTTPS)
+  - `httponly`: `True` (Protection against XSS token exfiltration)
+  - `secure`: `True` (Enforced HTTPS transmission)
   - `samesite`: `lax` / `strict`
 
-### 3.3. Брандмауэр и зависимость авторизации (`CURR_USER`)
+### 3.3. Route Authentication Guard (`CURR_USER`)
 
-В FastAPI эндпоинтах авторизация внедряется через зависимость:
+In FastAPI route endpoints, authentication is injected via dependency injection:
 
 ```python
 CURR_USER = Annotated[User, Depends(auth_service.get_current_user)]
 ```
 
-При каждом запросе:
-
-1. Зависимость `APIKeyCookie` извлекает токен из куки `settings.COOKIE_NAME`.
-2. `auth_service.get_current_user` декодирует JWT и сверяет подпись.
-3. Проверяется срок действия (`exp`).
-4. Объект пользователя вычитывается из базы данных / кеша и передается в обработчик маршрута.
+On every request:
+1. `APIKeyCookie` extracts the token from the secure cookie.
+2. `auth_service.get_current_user` decodes the JWT and validates signature integrity.
+3. Expiration claim (`exp`) is verified.
+4. User entity is fetched from the database / cache and supplied to the route handler.

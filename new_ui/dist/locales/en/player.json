@@ -1,15 +1,56 @@
 {
   "controls": {
     "mute": "Mute audio",
+    "unmute": "Unmute audio",
     "next": "Next track",
+    "prev": "Previous track",
     "pause": "Pause",
     "play": "Play",
-    "prev": "Previous track",
     "repeat": "Repeat",
+    "repeatStatus": "Repeat: {{mode}}",
+    "repeatAll": "Repeat all",
+    "repeatOnce": "Repeat one track",
+    "repeatOff": "Repeat off",
     "shuffle": "Shuffle",
     "stop": "Stop playback",
     "sync": "Request player sync",
     "toggleVideo": "Toggle video player display",
-    "unmute": "Unmute audio"
+    "closeVideo": "Close video player",
+    "openVideo": "Open video",
+    "hideVideo": "Hide video"
+  },
+  "trackInfo": {
+    "preview": "Preview",
+    "playlistTitle": "Playlist: {{name}}",
+    "order": "Order: {{nickname}}",
+    "noTrack": "No track"
+  },
+  "popover": {
+    "triggerAria": "Playback options & queue",
+    "title": "Playback Options",
+    "playerModeLabel": "Player Mode",
+    "modes": {
+      "listen": "Listen",
+      "control": "Control"
+    },
+    "modeHelp": {
+      "listen": "Local audio enabled. Actions apply only to you.",
+      "control": "Local audio muted. Commands are broadcast to the streamer in OBS."
+    },
+    "channelSelectorLabel": "Stream Channel (Context)",
+    "ownChannel": "My Channel (Owner)",
+    "widgetBroadcastTitle": "Broadcast to OBS Widget",
+    "widgetBroadcastEnabled": "Enabled (stream hears music)",
+    "widgetBroadcastDisabled": "Disabled",
+    "toggleWidgetBroadcastAria": "Toggle broadcast to widget",
+    "speedLabel": "Speed:",
+    "stopPlaybackTitle": "Stop playback",
+    "syncWithStreamTitle": "Sync with stream",
+    "upNextTitle": "Up Next in Queue",
+    "tracksCount": "{{count}} track(s)",
+    "noUpNextTracks": "No upcoming tracks in queue",
+    "trackRequester": "Ordered by: {{nickname}}",
+    "removeFromQueue": "Remove from queue"
   }
 }
+

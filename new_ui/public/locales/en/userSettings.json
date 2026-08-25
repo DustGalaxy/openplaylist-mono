@@ -143,6 +143,7 @@
     "tabs": {
       "account": "Account",
       "integrations": "Integrations",
+      "moderators": "Moderators",
       "profile": "Profile",
       "subscriptions": "Subscriptions",
       "widget": "OBS Widget"
@@ -152,6 +153,111 @@
       "cta": "Go to Login",
       "message": "You need to log in first to manage your account.",
       "title": "Settings"
+    },
+    "moderators": {
+      "title": "Channel Moderation (V2)",
+      "subtitle": "Manage moderators for your channel or activate an invitation token.",
+      "claimTokenBtn": "Activate Token",
+      "createTokenBtn": "Create Token Link",
+      "addByIdBtn": "Add by ID",
+      "moderatedChannelsTitle": "Channels you moderate:",
+      "channelOwner": "Channel: {{name}}",
+      "playerPerm": "🎛️ Player ",
+      "allPlaylistsPerm": "• All playlists",
+      "playlistsCountPerm": "• Playlists: {{count}}",
+      "statusActive": "Active",
+      "myModeratorsTitle": "My channel moderators:",
+      "loading": "Loading moderators...",
+      "noModerators": "You do not have any assigned moderators on your channel yet.",
+      "statusBound": "Linked",
+      "statusPending": "Pending activation",
+      "copyTokenTitle": "Copy token",
+      "tokenBtn": "Token",
+      "copyLinkTitle": "Copy invitation link",
+      "copyLinkBtn": "Copy Link",
+      "hidePlaylists": "Hide playlists",
+      "showPlaylists": "Playlists",
+      "revokeModTitle": "Revoke moderator",
+      "playerAndWidgetControl": "Player and widget control",
+      "accessAllPlaylists": "Access to ALL playlists",
+      "specificPlaylistsAccess": "Access to specific playlists",
+      "selectPlaylistPlaceholder": "Select playlist...",
+      "permTracks": "Tracks",
+      "permSettings": "Settings",
+      "grantAccessBtn": "Grant Access",
+      "noPlaylistAccessGranted": "No playlist permissions granted.",
+      "badgeTracks": "🎵 Tracks ",
+      "badgeSettings": "⚙️ Settings",
+      "revokePlaylistAccessTitle": "Revoke access",
+      "cancelBtn": "Cancel",
+      "defaultTokenName": "Stream Moderator",
+      "defaultDirectAddName": "Moderator",
+      "claimModal": {
+        "title": "Activate Moderator Token",
+        "subtitle": "Paste the token string or invitation link to connect to the streamer's channel.",
+        "inputLabel": "Token or Link",
+        "inputPlaceholder": "Paste token or link...",
+        "claimBtn": "Activate",
+        "claiming": "Activating..."
+      },
+      "createModal": {
+        "title": "Create Moderator Token Link",
+        "nameLabel": "Name / Description",
+        "namePlaceholder": "e.g. Chat Moderator",
+        "selectPlaylistsLabel": "Select playlists for access:",
+        "selectedCount": "Selected: {{count}}",
+        "noPlaylists": "You don't have any playlists yet",
+        "createBtn": "Create",
+        "creating": "Creating..."
+      },
+      "directAddModal": {
+        "title": "Add Moderator by ID",
+        "userIdLabel": "User ID (UUID)",
+        "userIdPlaceholder": "e.g. 123e4567-e89b-12d3-a456-426614174000",
+        "nameLabel": "Name / Note",
+        "namePlaceholder": "Moderator",
+        "addBtn": "Add",
+        "adding": "Adding..."
+      },
+      "success": {
+        "tokenCreated": "Moderator token created successfully",
+        "moderatorAdded": "Moderator added successfully",
+        "tokenClaimed": "Token activated successfully! You are now connected as a moderator.",
+        "moderatorRevoked": "Moderator revoked",
+        "playerRightsUpdated": "Player permissions updated",
+        "playlistRightsUpdated": "Playlist permissions updated",
+        "playlistAccessGranted": "Playlist access granted",
+        "playlistAccessRevoked": "Playlist access revoked",
+        "linkCopied": "Invitation link copied",
+        "tokenCopied": "Token copied"
+      },
+      "errors": {
+        "loadFailed": "Failed to load moderation data",
+        "tokenCreateFailed": "Failed to create token",
+        "userIdRequired": "Please provide a user ID",
+        "moderatorAddFailed": "Failed to add moderator",
+        "tokenRequired": "Please enter a moderator token",
+        "tokenClaimFailed": "Failed to activate token",
+        "moderatorRevokeFailed": "Failed to revoke moderator",
+        "rightsUpdateFailed": "Failed to update permissions",
+        "playlistAccessGrantFailed": "Failed to grant playlist access",
+        "playlistAccessRevokeFailed": "Failed to revoke playlist access"
+      }
+    },
+    "botSettings": {
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
+      "saveFailed": "Failed to save bot settings",
+      "saved": "Bot settings saved successfully",
+      "title": "Bot Settings",
+      "twitch": {
+        "prefix": {
+          "hint": "The character(s) that will prefix bot commands in Twitch chat. For example, if you set it to '!', viewers would use '!mr' to submit a track.",
+          "label": "Command prefix",
+          "placeholder": "Enter command prefix"
+        }
+      }
     },
     "widget": {
       "appearanceTitle": "Appearance",
@@ -180,5 +286,21 @@
       "textColor": "Text color",
       "title": "OBS Overlay Widget"
     }
+  },
+  "botSettings": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "saveFailed": "Failed to save bot settings",
+    "saved": "Bot settings saved successfully",
+    "title": "Bot Settings",
+    "twitch": {
+      "prefix": {
+        "hint": "The character(s) that will prefix bot commands in Twitch chat. For example, if you set it to '!', viewers would use '!mr' to submit a track.",
+        "label": "Command prefix",
+        "placeholder": "Enter command prefix"
+      }
+    }
   }
 }
+

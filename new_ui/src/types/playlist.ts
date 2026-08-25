@@ -258,6 +258,9 @@ export interface ReadPlaylistPreview {
   name: string
   description?: string | null
   favorites_count: number
+  tags?: Array<string>
+  now_playing?: string | null
+  track_count?: number
   created_at?: string
   updated_at?: string
 }

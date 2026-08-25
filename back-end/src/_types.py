@@ -2,6 +2,7 @@ from enum import StrEnum
 from typing import Literal
 
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # ==========================================
 # 1. ТИПЫ ИЗМЕНЕНИЙ (EVENT TYPES) AS ENUMS
@@ -264,5 +265,3 @@ DeleteStatus = Literal["removed", "listened", "skipped", "reported"]
 OrderStatus = Literal["processing", "completed", "cancelled"]
 
 Source = Literal["twitch", "youtube", "web", "da"]
-
-

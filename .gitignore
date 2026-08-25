@@ -1,29 +1,85 @@
-node_modules
-.DS_Store
-
-dist-ssr
-*.local
-count.txt
-.vscode/
-.nitro
-.tanstack
-raw/
-.venv
-venv/*
-__pycache__/*
-__pycache__*
+# ==========================================
+# Environment Variables & Secrets
+# ==========================================
+*.env
+*.env.*
+!.env.example
 *.pem
-*.log
+*.key
+*.crt
+*.com.json
+client_secret*.json
+*.googleusercontent.com.json
+acme.json
+letsencrypt/
+
+# ==========================================
+# Python & Virtual Environments
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+back-end/src/src.zip
+*.zip
+
+# ==========================================
+# Node.js, Frontend & Build Artifacts
+# ==========================================
+node_modules/
+build/
+*.local
+*.tsbuildinfo
+tsc-output.txt
+.nitro/
+.tanstack/
+raw/
+count.txt
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ==========================================
+# Databases & Runtime State
+# ==========================================
 *.db
 *.db-shm
 *.db-wal
-*.env
+*.sqlite
 *.sqlite3
-*.__pycache__
+*.tokens.json
+.tio.tokens.json
+tokens.db*
+
+# ==========================================
+# IDE & System
+# ==========================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
 .history/
-letsencrypt/acme.json
-back-end/src/src.zip
-*.com.json
-*.zip
-.pytest_cache
-bot_ttv/.tio.tokens.json
+*.log
+
+# ==========================================
+# Design & Scratch Canvas
+# ==========================================
+*.excalidraw
+*.debug-links.md
+.debug-links.md
+
+# ==========================================
+# Legacy / Hidden Subsystems
+# ==========================================
+front-end/

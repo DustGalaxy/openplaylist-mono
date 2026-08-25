@@ -1,18 +1,18 @@
-# 🔍 Комплексный аудит архитектуры: Связи, Потоки событий и Точки внимания
+# System Architecture Audit: Connections, Event Streams & Critical Path Analysis
 
-Документ содержит подробный анализ взаимодействия сервисов **OpenPlaylist Mono** (`new_ui`, `back-end`, `bot_ttv`, `RabbitMQ`, `Redis`, `PostgreSQL`, `Twitch API`), включая схемы потоков данных, очереди сообщений и точки внимания.
+This document provides an architectural audit of service relationships across the **OpenPlaylist Mono** repository (`new_ui`, `back-end`, `bot_ttv`, `RabbitMQ`, `Redis`, `PostgreSQL`, `Twitch API`), detailing data streams, messaging topologies, and operational resilience.
 
 ---
 
-## 1. Карта потоков данных и событий
+## 1. System Interaction Diagrams
 
-### 📌 Диаграмма 1: Авторизация и подключение каналов
+### Diagram 1: Authentication & Streamer Onboarding Flow
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Streamer as Стример (DustGalaxy)
-    actor Admin as Администратор
+    actor Streamer as Streamer (DustGalaxy)
+    actor Admin as System Administrator
     participant UI as new_ui / Admin View
     participant BE as back-end (FastAPI)
     participant DB as PostgreSQL
@@ -20,32 +20,32 @@ sequenceDiagram
     participant Bot as bot_ttv (TwitchIO 3)
     participant Twitch as Twitch Helix / EventSub
 
-    Note over Admin,Bot: 1. Авторизация сервисного бота (@nullablelive)
-    Admin->>UI: /admin/twitch_auth (Пресет "Bot Account")
+    Note over Admin,Bot: 1. Service Bot Account Authorization
+    Admin->>UI: /admin/twitch_auth (Preset "Bot Account")
     UI->>Twitch: OAuth (user:bot, user:write:chat, user:read:chat)
-    Twitch-->>BE: Callback -> Сохранение токена
+    Twitch-->>BE: Callback -> Persist tokens
     BE->>DB: TwitchAdminToken (is_active=True)
     BE->>RMQ: Publish "bot.twitch.connect.request" (Tokens DTO)
-    RMQ->>Bot: bot.add_token() [Зарегистрирован как bot_id: 1014404886]
+    RMQ->>Bot: bot.add_token() [Registered as bot_id: 1014404886]
 
-    Note over Streamer,Bot: 2. Подключение стримера на сайте
-    Streamer->>UI: Вход через Twitch (Безопасные скоупы: channel:bot, redemptions)
+    Note over Streamer,Bot: 2. Streamer Channel Connection
+    Streamer->>UI: Login via Twitch (Scopes: channel:bot, redemptions)
     UI->>BE: /auth/twitch/callback
     BE->>DB: LinkedAccount + TokenVault
     BE->>RMQ: Publish "bot.twitch.connect.request" (Tokens DTO)
     RMQ->>Bot: bot.add_token() + bot.multi_subscribe()
     Bot->>Twitch: Subscriptions: ChatMessage + ChannelPointsRedeemAdd
-    Bot->>Twitch: get_or_create_channel_reward() (Автосоздание награды за баллы)
+    Bot->>Twitch: get_or_create_channel_reward() (Automated points reward provisioning)
 ```
 
 ---
 
-### 📌 Диаграмма 2: Заказ трека за баллы канала (Channel Points)
+### Diagram 2: Channel Points Track Order Processing
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Viewer as Зритель в чате
+    actor Viewer as Chat Viewer
     participant Twitch as Twitch EventSub / Helix
     participant Bot as bot_ttv
     participant Redis as Redis Cache
@@ -54,32 +54,32 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant SIO as Socket.IO (Widget / UI)
 
-    Viewer->>Twitch: Выкуп награды "Заказ музыки" (YouTube URL)
+    Viewer->>Twitch: Redeem "Music Request" reward (YouTube URL)
     Twitch->>Bot: WebSocket -> event_custom_redemption_add
-    Bot->>Redis: Проверка статуса (!mr points on/off)
+    Bot->>Redis: Check status (!mr points on/off)
     
-    alt Невалидный URL или отключено
-        Bot->>Twitch: payload.refund() (Мгновенный возврат баллов)
-        Bot->>Twitch: Сообщение в чат об ошибке
-    else Валидный заказ
+    alt Invalid URL or Orders Disabled
+        Bot->>Twitch: payload.refund() (Immediate points refund)
+        Bot->>Twitch: Chat error notification
+    else Valid Order
         Bot->>RMQ: bot_twitch_order_new (TTVNewOrder + reward_id + redemption_id)
         RMQ->>BE: "order.proccess" (NewOrderPayload)
-        BE->>BE: order_service.init_orders() (Получение инфо о YouTube видео)
-        BE->>BE: validate_track() (Черный список, лимиты длительности)
-        BE->>DB: Сохранение трека в плейлист
-        BE->>SIO: TRACK_ADDED -> Обновление виджета на стриме
+        BE->>BE: order_service.init_orders() (Extract YouTube video info)
+        BE->>BE: validate_track() (Blacklist filters, duration caps)
+        BE->>DB: Save track into playlist
+        BE->>SIO: TRACK_ADDED -> Update stream overlay widget
         
-        Note over BE,Bot: ⚠️ КРИТИЧЕСКИЙ ЭТАП ОБРАТНОЙ СВЯЗИ
+        Note over BE,Bot: Asynchronous Feedback Stage
         BE-->>RMQ: Publish "bot.order.completed" / "bot.order.cancelled" (OrderUpdate)
         RMQ-->>Bot: order_status() handler
         Bot-->>Twitch: patch_custom_reward_redemption (FULFILLED / CANCELED)
-        Bot-->>Twitch: Сообщение в чат: "@viewer Трек успешно добавлен!"
+        Bot-->>Twitch: Send chat reply: "@viewer Track successfully added!"
     end
 ```
 
 ---
 
-### 📌 Диаграмма 3: Общая архитектура компонентов и шина RabbitMQ
+### Diagram 3: Distributed Messaging Architecture
 
 ```mermaid
 graph TD
@@ -132,46 +132,24 @@ graph TD
 
 ---
 
-## 2. Матрица очередей и событий RabbitMQ
+## 2. RabbitMQ Message & Event Matrix
 
-| Очередь / Топик | Exchange | DTO | Источник | Получатель | Назначение |
+| Queue / Topic | Exchange | DTO | Producer | Consumer | Purpose |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `bot.twitch.order.new` | `main_exchange` (DIRECT) | `TTVNewOrder` | `bot_ttv` | `back-end` | Передача нового заказа из Twitch в процессинг. |
-| `order.proccess` | `main_exchange` (DIRECT) | `NewOrderPayload` | `back-end` | `back-end` (Worker) | Инициализация и валидация трека. |
-| `internal.playlist.callback` | `playlist_fanout` (FANOUT) | `InternalPlaylistEvent` | `Worker` | `CallbackWorker` | Отправка событий через Socket.IO в UI/Виджет. |
-| `bot.twitch.connect.request` | `main_exchange` (DIRECT) | `Tokens` | `back-end` | `bot_ttv` | Подключение нового стримера/бота на лету. |
-| `bot.twitch.disconnect` | `main_exchange` (DIRECT) | `str` (user_id) | `back-end` | `bot_ttv` | Отключение канала и удаление подписок. |
-| `auth.user.twitch.tokens.refreshed` | `main_exchange` (DIRECT) | `TwitchTokenRefreshed` | `bot_ttv` | `back-end` | Обновление протухших токенов в БД. |
-| `bot.order.completed` ⚠️ | `main_exchange` (DIRECT) | `OrderUpdate` | `back-end` (Worker) | `bot_ttv` | Подтверждение заказа, закрытие награды (`FULFILLED`). |
-| `bot.order.cancelled` ⚠️ | `main_exchange` (DIRECT) | `OrderUpdate` | `back-end` (Worker) | `bot_ttv` | Отклонение заказа, возврат баллов (`CANCELED`). |
+| `bot.twitch.order.new` | `main_exchange` (DIRECT) | `TTVNewOrder` | `bot_ttv` | `back-end` | Dispatch Twitch chat/reward orders to backend. |
+| `order.proccess` | `main_exchange` (DIRECT) | `NewOrderPayload` | `back-end` | `back-end` (Worker) | Ingestion and playlist rule validation pipeline. |
+| `internal.playlist.callback` | `playlist_fanout` (FANOUT) | `InternalPlaylistEvent` | `Worker` | `CallbackWorker` | Dispatch Socket.IO live updates to UI and OBS. |
+| `bot.twitch.connect.request` | `main_exchange` (DIRECT) | `Tokens` | `back-end` | `bot_ttv` | Onboard streamer bot connection dynamically. |
+| `bot.twitch.disconnect` | `main_exchange` (DIRECT) | `str` (user_id) | `back-end` | `bot_ttv` | Remove channel subscriptions on account unlink. |
+| `auth.user.twitch.tokens.refreshed` | `main_exchange` (DIRECT) | `TwitchTokenRefreshed` | `bot_ttv` | `back-end` | Update renewed OAuth credentials in database. |
+| `bot.order.completed` | `main_exchange` (DIRECT) | `OrderUpdate` | `back-end` (Worker) | `bot_ttv` | Order accepted, fulfill Channel Points reward. |
+| `bot.order.cancelled` | `main_exchange` (DIRECT) | `OrderUpdate` | `back-end` (Worker) | `bot_ttv` | Order rejected, cancel/refund Channel Points. |
 
 ---
 
-## 3. Анализ текущего состояния системы
+## 3. System Strengths & Security Audit
 
-### ✅ Что работает идеально:
-1. **Безопасность скоупов**: Обычные стримеры выдают только `channel:bot` и права на баллы. Права писать от имени стримера убраны.
-2. **Админка**: В `/admin/twitch_auth` есть пресет для аккаунта бота (`user:bot`, `user:write:chat`, etc.) и автоотправка токена в RabbitMQ.
-3. **Автосоздание наград**: Бот автоматически создает кастомную награду *"Заказ музыки (OpenPlaylist)"* и сохраняет ее ID в Redis.
-4. **Управление стримером**: Команды `!mr points on/off/cost/title/prompt/link` работают напрямую из чата.
-5. **Слушатель EventSub**: Метод `event_custom_redemption_add` правильно обрабатывает `ChannelPointsRedemptionAdd` и мгновенно возвращает баллы при ошибках в URL.
-
----
-
-## 4. Обнаруженные критические точки внимания (Action Items)
-
-### 🔴 Точка 1: Отсутствие публикации `OrderUpdate` в бэкенде
-* **Где**: `back-end/src/adapters/_rabbit/worker/order_proccess_handler.py`.
-* **Суть**: Воркер бэкенда принимает заказ, проверяет его, добавляет в базу данных и рассылает сокеты, **но не отправляет** сообщение в очереди `bot.order.completed` или `bot.order.cancelled`.
-* **Последствия**:
-  1. В чате Twitch бот не пишет уведомление зрителям о принятии/отклонении трека.
-  2. Награда за баллы в Twitch Developer Console остается со статусом *"Unfulfilled"* (в ожидании) вместо *"FULFILLED"* (выполнено) или *"CANCELED"* (возвращено).
-
-### 🟡 Точка 2: Очистка текстового ввода YouTube URL
-* **Где**: `bot_ttv/src/components/music_request.py`.
-* **Суть**: При выкупе за баллы зритель может случайно написать `глянь трек https://youtu.be/xyz`.
-* **Решение**: Регулярное выражение `extract_youtube_video_id` надежно извлекает ID из любого текста, но URL для бэкенда лучше нормализовать как `https://www.youtube.com/watch?v={video_id}`.
-
-### 🟡 Точка 3: Синхронизация статусов стримера при перезапуске Redis
-* **Где**: Redis ключ `ttv:channel:{id}:reward_id`.
-* **Суть**: Если Redis очищается, бот при следующем старте заново опрашивает Twitch Helix API через `get_or_create_channel_reward`, находит созданную награду по названию и восстанавливает кеш без создания дубликатов.
+1. **Granular OAuth Scopes:** Streamers authorize strictly `channel:bot` and channel points scopes; identity rights to speak on behalf of the streamer are segregated.
+2. **Dedicated Administration:** `/admin/twitch_auth` maintains specialized presets for bot accounts (`user:bot`, `user:write:chat`), broadcasting tokens via RabbitMQ.
+3. **Automated Reward Management:** Automatic provisioning of custom Channel Points rewards with resilient recovery from Redis cache drops.
+4. **Resilient URL Parsing:** Regex extractors isolate video IDs from arbitrary chat sentences and normalize canonical YouTube URLs.

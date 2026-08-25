@@ -314,7 +314,8 @@ export default function Player({
               {!hidden && (
                 <Btn
                   onClick={() => setHidden(true)}
-                  aria-label={t('controls.closeVideo', 'Close video player')}
+                  aria-label={t('controls.closeVideo', 'Закрыть видеоплеер')}
+                  title={t('controls.closeVideo', 'Закрыть видеоплеер')}
                   className="absolute top-4 right-4 z-40 p-2 rounded-lg bg-level-2/90 text-text-main backdrop-blur-md border border-white/20 transition-all cursor-pointer shadow-lg"
                 >
                   <X className="size-5" />
@@ -441,22 +442,26 @@ export default function Player({
           <div className="min-w-0 flex flex-col flex-1 justify-center">
             <div className="flex items-center gap-1 min-w-0">
               {feed.feedId === 'single' ? (
-                <span className="inline-flex items-center text-[10px] font-bosemiboldld uppercase tracking-wider text-accent px-1.5 py-0.5 rounded bg-level-1 border border-accent/40 shrink-0">
-                  Предпросмотр
+                <span className="inline-flex items-center text-[10px] font-semibold uppercase tracking-wider text-accent px-1.5 py-0.5 rounded bg-level-1 border border-accent/40 shrink-0">
+                  {t('trackInfo.preview', 'Предпросмотр')}
                 </span>
               ) : (
                 playlist?.name && (
                   <span
                     className="inline-flex items-center text-[10px] font-semibold text-text-secondary px-1.5 py-0.5 rounded bg-level-1 border border-accent/20 shrink-0 max-w-[130px] truncate"
-                    title={`Плейлист: ${playlist.name}`}
+                    title={t('trackInfo.playlistTitle', 'Плейлист: {{name}}', {
+                      name: playlist.name,
+                    })}
                   >
                     {playlist.name}
                   </span>
                 )
               )}
               {track?.requester_nickname && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded  bg-level-1 border border-accent/20 font-semibold text-text-secondary truncate shrink-0">
-                  Заказ: {track.requester_nickname}
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-level-1 border border-accent/20 font-semibold text-text-secondary truncate shrink-0">
+                  {t('trackInfo.order', 'Заказ: {{nickname}}', {
+                    nickname: track.requester_nickname,
+                  })}
                 </span>
               )}
             </div>
@@ -464,7 +469,7 @@ export default function Player({
               className="text-xs sm:text-sm text-text-main truncate font-semibold tracking-tight"
               title={track?.title}
             >
-              {track?.title || 'Нет трека'}
+              {track?.title || t('trackInfo.noTrack', 'Нет трека')}
             </span>
             <div className="flex items-center gap-1.5 text-[11px] text-text-secondary truncate mt-0.5">
               <span className="truncate">
@@ -479,7 +484,8 @@ export default function Player({
           <Btn
             isActive={feed.shuffle}
             onClick={() => feed.setShuffle(!feed.shuffle)}
-            aria-label="Shuffle"
+            aria-label={t('controls.shuffle', 'Случайный порядок')}
+            title={t('controls.shuffle', 'Случайный порядок')}
             className={controBtnStyle}
           >
             <Shuffle className="size-4" />
@@ -488,7 +494,8 @@ export default function Player({
           {feed.capabilities.canSkip && (
             <Btn
               onClick={feed.prev}
-              aria-label="Previous track"
+              aria-label={t('controls.prev', 'Предыдущий трек')}
+              title={t('controls.prev', 'Предыдущий трек')}
               className={controBtnStyle}
             >
               <SkipBack className="size-4" />
@@ -497,7 +504,16 @@ export default function Player({
 
           <Btn
             onClick={() => feed.onPlayerStateChange(!feed.playing)}
-            aria-label={feed.playing ? 'Pause' : 'Play'}
+            aria-label={
+              feed.playing
+                ? t('controls.pause', 'Пауза')
+                : t('controls.play', 'Воспроизведение')
+            }
+            title={
+              feed.playing
+                ? t('controls.pause', 'Пауза')
+                : t('controls.play', 'Воспроизведение')
+            }
             className={cn(controBtnStyle, 'size-11 sm:size-12')}
           >
             {feed.playing ? (
@@ -510,7 +526,8 @@ export default function Player({
           {feed.capabilities.canSkip && (
             <Btn
               onClick={feed.next}
-              aria-label="Next track"
+              aria-label={t('controls.next', 'Следующий трек')}
+              title={t('controls.next', 'Следующий трек')}
               className={controBtnStyle}
             >
               <SkipForward className="size-4" />
@@ -520,7 +537,21 @@ export default function Player({
           <Btn
             onClick={cycleRepeat}
             isActive={feed.repeatMode !== 'none'}
-            aria-label={`Repeat: ${feed.repeatMode}`}
+            aria-label={t('controls.repeatStatus', 'Повтор: {{mode}}', {
+              mode:
+                feed.repeatMode === 'all'
+                  ? t('controls.repeatAll', 'Повторять все')
+                  : feed.repeatMode === 'once'
+                    ? t('controls.repeatOnce', 'Повторять один трек')
+                    : t('controls.repeatOff', 'Без повтора'),
+            })}
+            title={
+              feed.repeatMode === 'all'
+                ? t('controls.repeatAll', 'Повторять все')
+                : feed.repeatMode === 'once'
+                  ? t('controls.repeatOnce', 'Повторять один трек')
+                  : t('controls.repeatOff', 'Без повтора')
+            }
             className={controBtnStyle}
           >
             {feed.repeatMode === 'all' ? (
@@ -549,8 +580,13 @@ export default function Player({
                 }}
                 aria-label={
                   volume === 0
-                    ? t('controls.unmute', 'Unmute audio')
-                    : t('controls.mute', 'Mute audio')
+                    ? t('controls.unmute', 'Включить звук')
+                    : t('controls.mute', 'Выключить звук')
+                }
+                title={
+                  volume === 0
+                    ? t('controls.unmute', 'Включить звук')
+                    : t('controls.mute', 'Выключить звук')
                 }
                 className={controBtnStyle}
               >
@@ -583,9 +619,13 @@ export default function Player({
             isActive={!hidden}
             aria-label={t(
               'controls.toggleVideo',
-              'Toggle video player display',
+              'Показать/скрыть видеоплеер',
             )}
-            title={hidden ? 'Открыть видео' : 'Скрыть видео'}
+            title={
+              hidden
+                ? t('controls.openVideo', 'Открыть видео')
+                : t('controls.hideVideo', 'Скрыть видео')
+            }
             className={controBtnStyle}
           >
             <MonitorPlay className="size-4" />

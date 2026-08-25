@@ -1,7 +1,8 @@
 from enum import Enum
+from typing import Any
 from uuid import UUID
-from pydantic import BaseModel, ConfigDict
-from pydantic.fields import Field
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class Platform(Enum):
@@ -44,4 +45,11 @@ class Tokens(BaseModel):
     access_token: str
     refresh_token: str
     expires_at: int
-    bot_settings: TwitchBotSettings
+    bot_settings: TwitchBotSettings = Field(default_factory=TwitchBotSettings)
+
+    @field_validator("bot_settings", mode="before")
+    @classmethod
+    def validate_bot_settings(cls, v: Any) -> Any:
+        if v is None:
+            return TwitchBotSettings()
+        return v

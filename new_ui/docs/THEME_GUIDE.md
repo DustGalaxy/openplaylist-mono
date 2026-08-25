@@ -1,112 +1,73 @@
 # Theme Creation Guide (Color System v2)
 
-Профессиональный гайд по построению UI-тем. Архитектура токенов, цветовые гармонии, требования WCAG и антипаттерны — всё необходимое для создания согласованной и доступной темы.
+Design system guide for building balanced, accessible UI themes. Outlines token architecture, color harmonies, WCAG 2.1 contrast guidelines, and anti-patterns.
 
 ---
 
-## 01 — Архитектура: Структура токенов темы
+## 01 — Architecture: Theme Token Structure
 
-Тема состоит из 7 токенов с чёткой ролью. Токены не взаимозаменяемы — подмена одного другим нарушает визуальную иерархию.
+A theme comprises 7 tokens with distinct visual roles:
 
-* **`level1` (Базовый фон):** Самый тёмный (dark) или самый светлый (light) слой. Страница, канвас.
-* *Правило:* dark: $S = 20\text{–}55\%$, $L = 5\text{–}8\%$ · light: $L = 94\text{–}100\%$
+* **`level1` (Base Canvas):** The deepest dark or lightest light layer. Page canvas.
+  - *Dark rule:* $S = 20\text{–}55\%$, $L = 5\text{–}8\%$ · *Light rule:* $L = 94\text{–}100\%$
 
-* **`level2` (Фон поверхностей):** Фон карточек, панелей, сайдбара. Всегда поверх `level1`.
-* *Правило:* dark: $L$ на $5\text{–}8\%$ светлее `level1` · light: $L$ на $5\text{–}8\%$ темнее `level1`
+* **`level2` (Surface Layer):** Cards, panels, sidebars, modals. Always layered above `level1`.
+  - *Dark rule:* $L$ is $5\text{–}8\%$ lighter than `level1` · *Light rule:* $L$ is $5\text{–}8\%$ darker than `level1`
 
-* **`level3` (Акцентный цвет):** Кнопки, иконки, активные состояния. Опорная точка палитры.
-* *Правило:* Фиксирован. Вся остальная палитра строится вокруг него.
+* **`level3` (Primary Accent):** Buttons, active controls, icons, focus rings. Anchor point of the palette.
+  - *Rule:* Fixed anchor. Surrounding palettes derive from its Hue.
 
-* **`level4` (Подложка):** Полупрозрачная подложка. Выделения, hover-состояния, tint-карточки.
-* *Правило:* `= level3 + opacity 0.10–0.18`. Не кастомный цвет.
+* **`level4` (Tint Overlay):** Translucent backdrop for selections, hover states, tint cards.
+  - *Rule:* `= level3 + opacity 0.10–0.18`. Not a disconnected custom color.
 
-* **`textMain` (Основной текст):** Заголовки, тело, важные данные.
-* *Правило:* Контраст к `level2`: $\ge 7.0:1$ (WCAG AAA)
+* **`textMain` (Primary Text):** Headings, body text, critical data.
+  - *Rule:* Contrast against `level2`: $\ge 7.0:1$ (WCAG AAA)
 
-* **`textSecondary` (Вторичный текст):** Подписи, метки, описания.
-* *Правило:* Контраст к `level2`: $\ge 4.5:1$ (WCAG AA)
+* **`textSecondary` (Secondary Text):** Labels, subtitles, timestamps, descriptions.
+  - *Rule:* Contrast against `level2`: $\ge 4.5:1$ (WCAG AA)
 
-* **`textPlaceholder` (Плейсхолдер):** Плейсхолдеры и hint-текст. Всегда производный от `textMain`.
-* *Правило:* `= textMain + opacity 0.35–0.45`. Никогда отдельный самостоятельный цвет.
+* **`textPlaceholder` (Placeholder Text):** Form placeholders and hints.
+  - *Rule:* `= textMain + opacity 0.35–0.45`. Always derived from `textMain`.
 
 ---
 
-## 02 — Процесс: Алгоритм построения темы
+## 02 — Construction Process & Color Harmonies
 
-1. Зафиксировать `level3` $\rightarrow$ 2. Определить гармонию $\rightarrow$ 3. Вывести фоны в HSL $\rightarrow$ 4. Подобрать текст $\rightarrow$ 5. Проверить контраст
+1. Anchor `level3` $\rightarrow$ 2. Define harmony $\rightarrow$ 3. Derive HSL surfaces $\rightarrow$ 4. Tint text $\rightarrow$ 5. Validate contrast
 
-### Шаг 1–2 · Гармония фонов
+### Harmonies for Surfaces
 
-Фоны не должны быть нейтральными. Hue `level1` и `level2` задаётся выбранной гармонией относительно Hue акцента.
+Surfaces should carry intentional tinting rather than neutral grayscale:
+* **Monochromatic:** Backgrounds share the exact Hue of `level3`, adjusting only Lightness and Saturation.
+* **Analogous:** Backgrounds shifted by $\pm 20\text{–}40^\circ$ on the color wheel.
+* **Split-Complementary:** Backgrounds shifted by $\sim 150^\circ$ from the accent, maximizing visual pop.
 
-* **Монохром:** Фоны — тот же Hue, что у `level3`. Меняется только Lightness.
-* *Пример:* $H=220 \rightarrow \text{level1: } hsl(220, 38\%, 7\%)$
-
-* **Аналог:** Фоны сдвинуты на $\pm 20\text{–}40^\circ$ от Hue акцента по цветовому кругу.
-* *Пример:* $H=330 \rightarrow \text{level2: } hsl(292, 34\%, 13\%)$
-
-* **Сплит-комплементар:** Фоны на $\sim 150^\circ$ от акцента. Высокий визуальный контраст, акцент «горит».
-* *Пример:* $H=30 \rightarrow \text{level2: } hsl(248, 28\%, 13\%)$
-
-### Шаг 3 · Диапазоны HSL для фонов
-
-HSL позволяет независимо управлять оттенком, насыщенностью и яркостью.
-
+### HSL Layer Ranges
 * **L1 (dark):** $L: 5\text{–}8\%$ · $S: 25\text{–}55\%$
-* **L2 (dark):** $L: 12\text{–}16\%$ · $S$: немного ниже L1
+* **L2 (dark):** $L: 12\text{–}16\%$ · $S$: slightly lower than L1
 * **L2 (light):** $L: 84\text{–}92\%$ · $S: 15\text{–}40\%$
 * **L1 (light):** $L: 94\text{–}100\%$ · $S: 0\text{–}20\%$
 
-> **Правило разницы между слоями:** `level1` и `level2` должны различаться на $\ge 5\text{–}6$ единиц Lightness и $\ge 3$ единицы Saturation. Меньшая разница — слои сливаются, поверхности не читаются.
-
-### Шаг 4 · Текст с тонированием
-
-`textMain` и `textSecondary` тонируются в сторону акцента — чистый белый/чёрный создаёт зрительное напряжение.
-
-* **Формула — dark-тема:**
-* `textMain` $\rightarrow$ `hsl(H±10, 60–100%, 93–97%)`
-* `textSecondary` $\rightarrow$ `hsl(H±15, 25–45%, 60–72%)` *(где H — Hue из level3)*
-
-* **Формула — light-тема:**
-* `textMain` $\rightarrow$ `hsl(H±10, 40–80%, 8–14%)`
-* `textSecondary` $\rightarrow$ `hsl(H±15, 20–38%, 30–46%)`
-
 ---
 
-## 03 — Доступность: Требования WCAG 2.1
+## 03 — Accessibility & WCAG 2.1 Requirements
 
-Контраст проверяется через относительную яркость (relative luminance), не визуально. Значения ниже приведены для основного тела текста (размер $\ge 16\text{px}$ или bold $\ge 14\text{px}$).
-
-| Пара цветов | Минимум | Уровень | Применение |
+| Color Pair | Minimum Ratio | Level | Target Element |
 | --- | --- | --- | --- |
-| `textMain` на `level2` | 7.0:1 | **WCAG AAA** | Тело, заголовки |
-| `textSecondary` на `level2` | 4.5:1 | **WCAG AA** | Подписи, метки |
-| white на `level3` | 3.0:1 | **WCAG AA Large** | Текст кнопок $\ge 18\text{px}$ / bold $14\text{px}$ |
-| `textMain` на `level1` | 4.5:1 | **WCAG AA** | Текст вне карточек |
-| `level3` на `level2` | 3.0:1 | **WCAG AA Large** | Границы, иконки, декор |
-
-> **Критично для тёплых акцентов:** Оранж, жёлтый и светло-зелёный имеют высокую luminance. Белый текст на них часто не проходит даже 3:1. Всегда проверяй формулой WCAG 2.1, не на глаз.
+| `textMain` on `level2` | 7.0:1 | **WCAG AAA** | Headings, body text |
+| `textSecondary` on `level2` | 4.5:1 | **WCAG AA** | Labels, captions |
+| White on `level3` | 3.0:1 | **WCAG AA Large** | Button text $\ge 18\text{px}$ / bold $14\text{px}$ |
+| `textMain` on `level1` | 4.5:1 | **WCAG AA** | Canvas body text |
+| `level3` on `level2` | 3.0:1 | **WCAG AA Large** | Borders, active indicators |
 
 ---
 
-## 04 — Ошибки: Антипаттерны
+## 04 — Checklist Before Publication
 
-* **Нейтральные фоны:** `level1`/`level2` в чистом сером (`#1a1a1a`) без тонирования. Акцент «висит в воздухе». Каждый фон должен нести оттенок, связанный с гармонией акцента.
-* **`level2` неотличим от `level1`:** Разница $< 4\%$ по Lightness — карточки и страница сливаются. Минимум: 5–6 единиц $L$ и ощутимое различие по Saturation.
-* **Чистый белый / чёрный текст:** `#ffffff` на тёмной теме и `#000000` на светлой вызывают зрительное напряжение. `textMain` всегда получает тинт в сторону Hue акцента.
-* **`textSecondary` слишком близко или далеко от `textMain`:** Разница $L < 15\%$ — иерархия не читается. Разница $L > 40\%$ — secondary пропадает. Оптимум: 60–72% $L$ (dark) или 30–46% $L$ (light).
-* **Инвертированный порядок в light-теме:** `level1` = белый ($100\%\ L$), `level2` = чуть серее ($96\%\ L$) $\rightarrow$ карточки «утоплены» вместо того, чтобы быть приподняты. В light-теме `level2` всегда темнее `level1`.
-* **`textPlaceholder` как отдельный цвет:** Кастомный цвет для плейсхолдеров нарушает иерархию. `textPlaceholder = textMain + opacity`, всегда.
-
----
-
-## 05 — Чеклист: Финальная проверка перед публикацией
-
-* [ ] Hue `level1`/`level2` не нейтральный — связан с `level3` через выбранную гармонию.
-* [ ] `level2` отличается от `level1` на $\ge 5\%\ L$ и $\ge 3\%\ S$.
+* [ ] Surfaces `level1`/`level2` are tinted relative to `level3` Hue.
+* [ ] `level2` separates from `level1` by $\ge 5\%\ L$ and $\ge 3\%\ S$.
 * [ ] `textMain` / `level2` $\ge 7:1$ · `textSecondary` / `level2` $\ge 4.5:1$.
-* [ ] Белый текст на `level3` $\ge 3:1$ — проверено формулой, не визуально.
-* [ ] `textMain` тонирован в сторону Hue `level3`, не чистый белый/чёрный.
-* [ ] `textPlaceholder` = `textMain` + opacity 0.35–0.45, не отдельный цвет.
-* [ ] `level4` = `level3` + opacity 0.10–0.18, не кастомный цвет.
-* [ ] В light-теме: `level2` темнее `level1` (карточки приподняты над фоном).
+* [ ] White on `level3` $\ge 3:1$ verified via WCAG luminance calculation.
+* [ ] `textMain` tinted toward `level3` Hue rather than plain `#ffffff` / `#000000`.
+* [ ] `textPlaceholder` = `textMain` + opacity 0.35–0.45.
+* [ ] `level4` = `level3` + opacity 0.10–0.18.

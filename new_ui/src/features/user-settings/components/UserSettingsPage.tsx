@@ -101,7 +101,7 @@ export function UserSettingsPage({
       icon: '🔔',
     },
     { id: 'widget', label: t('settings.tabs.widget'), icon: '🖼️' },
-    { id: 'moderators', label: 'Модераторы', icon: '🛡️' },
+    { id: 'moderators', label: t('settings.tabs.moderators', 'Модераторы'), icon: '🛡️' },
   ]
 
   const handleOAuthRedirect = useOAuthUrl()

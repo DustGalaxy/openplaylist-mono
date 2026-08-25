@@ -146,6 +146,42 @@
         animation-play-state: running;
       }
 
+      /* Пауза: останавливаем вращение и тонарм, показываем бейдж паузы */
+      .track-card.paused .vinyl-disk,
+      .track-card.paused .vinyl-needle {
+        animation-play-state: paused;
+      }
+
+      .pause-badge {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: 44%;
+        height: 44%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(18, 18, 18, 0.85);
+        border-radius: 50%;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #ffb703;
+      }
+
+      .pause-icon {
+        width: 50%;
+        height: 50%;
+      }
+
+      .track-card.paused .pause-badge {
+        opacity: 1;
+        transform: scale(1);
+      }
+
       @keyframes spin {
         0% {
           transform: rotate(0deg);
@@ -230,6 +266,17 @@
               <circle cx="23" cy="5" r="1" fill="#fff" />
             </g>
           </svg>
+          <div class="pause-badge">
+            <svg
+              class="pause-icon"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect x="6" y="4" width="4" height="16" rx="1.5" />
+              <rect x="14" y="4" width="4" height="16" rx="1.5" />
+            </svg>
+          </div>
         </div>
         <div class="track-info">
           <div id="track-title"></div>
@@ -286,6 +333,7 @@
       socket.on('current_track', (data) => {
         if (data && data.title) {
           cardEl.classList.remove('active')
+          cardEl.classList.remove('paused')
 
           setTimeout(() => {
             titleEl.innerText = data.title
@@ -310,6 +358,31 @@
 
             cardEl.classList.add('active')
           }, 300)
+        } else {
+          // Нет трека -> плавно скрываем карточку
+          cardEl.classList.remove('active')
+          cardEl.classList.remove('paused')
+          setTimeout(() => {
+            if (!cardEl.classList.contains('active')) {
+              titleEl.innerText = ''
+              titleEl.style.animation = 'none'
+            }
+          }, 500)
+        }
+      })
+
+      socket.on('pause', (data) => {
+        if (typeof data === 'string') {
+          try {
+            data = JSON.parse(data)
+          } catch (e) {}
+        }
+        if (data && typeof data.is_paused === 'boolean') {
+          if (data.is_paused) {
+            cardEl.classList.add('paused')
+          } else {
+            cardEl.classList.remove('paused')
+          }
         }
       })
 
@@ -330,6 +403,7 @@
         statusEl.classList.remove('connected')
         statusEl.classList.add('error')
         cardEl.classList.remove('active')
+        cardEl.classList.remove('paused')
       })
     </script>
   </body>

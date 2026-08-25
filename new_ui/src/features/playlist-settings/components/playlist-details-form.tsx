@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { DialogDescription } from '@/components/ui/dialog'
+import { TagInput } from '@/components/ui/tag-input'
 import { usePlaylistStore } from '@/stores/playlistStore'
 import { usePlaylistViewLoaded } from '@/features/united-playlist/context/playlist-view-context'
 import { useFeatureTranslation } from '@/lib/i18n/featureTranslation'
@@ -20,6 +21,18 @@ export default function PlaylistDetailsForm() {
   const [description, setDescription] = React.useState(
     playlist.description ?? '',
   )
+  const [tags, setTags] = React.useState<string[]>(playlist.tags ?? [])
+
+  React.useEffect(() => {
+    if (playlist.tags) {
+      setTags(playlist.tags)
+    }
+  }, [playlist.tags])
+
+  const handleTagsChange = (newTags: string[]) => {
+    setTags(newTags)
+    patchDebounced(playlist.id, { tags: newTags })
+  }
 
   return (
     <div className="p-3 border border-accent/60 rounded-md bg-level-1 space-y-3.5 shadow-xs">
@@ -99,6 +112,15 @@ export default function PlaylistDetailsForm() {
           {t('playlistSettings.details.descriptionHelp')}
         </DialogDescription>
       </div>
+
+      {/* Tags Input */}
+      <TagInput
+        tags={tags}
+        onChange={handleTagsChange}
+        label={t('playlistSettings.tags.label', 'Tags')}
+        placeholder={t('playlistSettings.tags.placeholder', 'Add tag... (e.g. lofi, gaming, chill)')}
+        hint={t('playlistSettings.tags.hint', 'Add tags to help viewers find your playlist in search')}
+      />
     </div>
   )
 }

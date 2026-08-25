@@ -1,101 +1,98 @@
-# Концепция: Выделенный User Player и Модерация Канала V2 (Редакция V3)
+# Architecture Concept: Dedicated User Player & Channel Moderation V2 (Revision V3)
 
-> **Статус документа:** Финальная архитектурная спецификация (RFC V3)  
-> **Дата обновления:** 18 августа 2026 г.  
-> **Область изменений:** `back-end`, `new_ui`, `docs`, `adapters (_sio, _rabbit, _fastapi)`, `bot_ttv`
-
----
-
-## 1. Введение и Ключевые Принципы V2
-
-По результатам детального обсуждения фиксируем согласованные архитектурные постулаты:
-
-1. **UserPlayer — чистый Redis State (1:1 к стримеру):**
-   * Все оперативное состояние (`player:{owner_id}`) хранится исключительно в **Redis Hash** (с TTL).
-   * **Простой бутстрап:** Если плеер в Redis пуст, сервер просто возвращает `None` (или `{ status: "idle" }`). Никаких скрытых сайд-эффектов или авто-выборов треков из базы.
-2. **Отказ от `show_in_widget` в модели плейлиста:**
-   * Так как плеер теперь привязан 1:1 к пользователю, виджет стрима (`/widget`) транслирует состояние `UserPlayer` стримера.
-   * Поле `show_in_widget` в таблице `playlists`, DTO и интерфейсе настроек плейлиста **становится избыточным и удаляется**.
-3. **Идентификация источников через `CLIENT_ID`:**
-   * Каждое действие клиента (Play, Pause, Seek, Volume, Mute) обязательно сопровождается заголовком / полем `client_id`.
-   * При получении событий по WebSocket клиент сравнивает `incoming.client_id !== CLIENT_ID`, что исключает зацикливание, лишние ре-рендеры и конфликты между вкладками.
-4. **Клиентская логика переключения треков (Client-Driven Skip):**
-   * Сервер не считает очереди и не содержит отдельного эндпоинта `/skip`.
-   * Клиентский стор (знающий сортировку, режим плейлиста и текущие фильтры) сам вычисляет следующий `track_id` и отправляет команду `play_track({ track_id, playlist_id, client_id })`.
-5. **Плейлист = Очередь (Queue):**
-   * Плейлист сам по себе является очередью. Порядок воспроизведения задается сортировкой (`cost_mode`, `priority`, `created_at`).
-6. **Режим воспроизведения (`stream`, `flow`, `static`) принадлежит Плейлисту:**
-   * Плеер воспроизводит трек по правилам того плейлиста, которому принадлежит этот трек (`track.playlist_id`).
+> **Document Status:** Final Architecture Specification (RFC V3)  
+> **Target Subsystems:** `back-end`, `new_ui`, `docs`, `adapters (_sio, _rabbit, _fastapi)`, `bot_ttv`
 
 ---
 
-## 2. Архитектура Состояния: Redis DAL & Простое Чтение
+## 1. Introduction & Core Principles (V2)
 
-### 2.1. Структура Ключа `player:{owner_id}` в Redis
-```
-Redis Hash: player:{owner_id} (TTL: 7 дней с авто-продлением при активности)
-├── owner_id              : UUID (владелец плеера / стример)
-├── active_playlist_id    : UUID (плейлист текущего трека)
-├── current_track_id      : UUID (ID играющего трека)
+1. **UserPlayer — Pure Redis State (1:1 per Streamer):**
+   * All volatile operational playback state (`player:{owner_id}`) resides exclusively in **Redis Hash** (with TTL).
+   * **Simple Bootstrapping:** If the player key in Redis is empty, the server returns `None` (or `{ status: "idle" }`). No hidden side effects or auto-selection of arbitrary database tracks.
+2. **Deprecation of `show_in_widget` in Playlist Model:**
+   * Because playback is associated 1:1 with the streamer user, the stream overlay widget (`/widget`) directly mirrors the streamer's `UserPlayer`.
+   * The `show_in_widget` column in the `playlists` table, DTOs, and playlist settings UI **is obsolete and removed**.
+3. **Source Identification via `CLIENT_ID`:**
+   * Every client action (Play, Pause, Seek, Volume, Mute) carries a unique `client_id`.
+   * Upon receiving WebSocket events, clients check `incoming.client_id !== CLIENT_ID`, eliminating infinite feedback loops, redundant re-renders, and cross-tab race conditions.
+4. **Client-Driven Track Transitions (Client-Driven Skip):**
+   * The backend does not compute queue order or expose an ambiguous `/skip` endpoint.
+   * The client-side store (aware of sorting, playlist mode, and active filters) calculates the next `track_id` and dispatches `play_track({ track_id, playlist_id, client_id })`.
+5. **Playlist = Queue:**
+   * The playlist itself acts as the queue. Order is determined by playlist sort rules (`cost_mode`, `priority`, `created_at`).
+6. **Playback Mode (`stream`, `flow`, `static`) Belongs to the Playlist:**
+   * The player renders the track adhering to the constraints of the playlist that owns that track (`track.playlist_id`).
+
+---
+
+## 2. State Architecture: Redis DAL & Simple Fetch
+
+### 2.1. Redis Key Schema `player:{owner_id}`
+```text
+Redis Hash: player:{owner_id} (TTL: 7 days with sliding refresh on activity)
+├── owner_id              : UUID (Streamer / Player owner)
+├── active_playlist_id    : UUID (Playlist containing active track)
+├── current_track_id      : UUID (Active playing track UUID)
 ├── current_track_data    : JSON { id, title, duration, yt_video_id, requester_nickname, note, ... }
-├── position              : float (секунда воспроизведения, например 42.5)
+├── position              : float (Playback offset in seconds, e.g. 42.5)
 ├── is_paused             : "1" | "0"
-├── volume                : int (0-100, громкость в виджете)
-├── broadcast_to_widget   : "1" | "0" (транслировать ли в OBS-виджет)
-├── last_client_id        : string (client_id последнего инициатора)
+├── volume                : int (0-100, widget master volume)
+├── broadcast_to_widget   : "1" | "0" (Whether output is broadcast to OBS overlay)
+├── last_client_id        : string (client_id of last modifier)
 └── updated_at            : ISO timestamp
 ```
 
-### 2.2. Простое получение состояния (State Fetch)
-* **Запрос:** `GET /player/{owner_id}/state` или Socket.IO `on_connect / player_subscribe`.
-* **Логика:**
-  1. Сервер делает `HGETALL player:{owner_id}` в Redis.
-  2. Если ключ существует $\rightarrow$ возвращает актуальный объект `PlayerState`.
-  3. Если ключ пуст $\rightarrow$ возвращает `None` (плеер в режиме ожидания `idle`, ничего не играет).
+### 2.2. State Fetch Flow
+* **Request:** `GET /player/{owner_id}/state` or Socket.IO `on_connect / player_subscribe`.
+* **Flow:**
+  1. Server issues `HGETALL player:{owner_id}` in Redis.
+  2. If key exists $\rightarrow$ returns active `PlayerState` object.
+  3. If key is empty $\rightarrow$ returns `None` (player is in `idle` standby).
 
 ---
 
-## 3. Флоу Управления и Роли Модератора (UX & Client Flow)
+## 3. Moderation & Remote Control Flow
 
-### 3.1. Выбор Контекста Управления (Target Context)
-В шапке и плеере пользователь выбирает целевой канал:
-* **`Контекст:`** `[ 👤 Мой канал ▼ ]` / `[ 🎮 Стример @GwinGlade (Модератор) ▼ ]`.
+### 3.1. Target Context Selection
+In the header and player bar, users can switch the active management context:
+* **`Context:`** `[ 👤 My Channel ▼ ]` / `[ 🎮 Streamer @GwinGlade (Moderator) ▼ ]`.
 
-### 3.2. Сценарий: Запуск трека модератором
-1. Модератор выбирает контекст: **`@GwinGlade`**.
-2. В интерфейсе отображаются плейлисты стримера `@GwinGlade`, на которые у модератора есть права `can_manage_tracks`.
-3. Модератор кликает **Play** на треке:
-   * Клиент отправляет: `POST /player/{owner_id}/play`  
+### 3.2. Scenario: Moderator Launches a Track
+1. Moderator chooses context: **`@GwinGlade`**.
+2. Interface displays playlists owned by `@GwinGlade` where the moderator holds `can_manage_tracks`.
+3. Moderator clicks **Play** on a track:
+   * Client sends: `POST /player/{owner_id}/play`  
      `{ track_id: "...", playlist_id: "...", client_id: "abc-123" }`.
-   * Сервер проверяет права: пользователь — владелец или активный модератор с `can_control_player`.
-   * Сервер сохраняет состояние в `player:@GwinGlade` и рассылает Socket.IO событие `player_track_change`.
-   * **OBS-виджет стримера:** запускает проигрывание аудио.
-   * **UI модератора:** обновляет прогресс-бар и информацию о треке. Локальный звук в браузере модератора **заглушен (Muted)**.
+   * Server validates permissions: caller is owner or active moderator with `can_control_player`.
+   * Server updates Redis `player:@GwinGlade` and broadcasts Socket.IO event `player_track_change`.
+   * **Streamer OBS Widget:** Starts playing audio in the broadcast stream.
+   * **Moderator UI:** Updates progress bar and track metadata. Local browser audio in the moderator tab remains **Muted**.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Mod as Модератор (UI)
+    actor Mod as Moderator (UI)
     participant API as Backend (/player & SIO)
     participant Redis as Redis (player:owner_id)
-    participant OBS as OBS Studio Widget (Стример)
+    participant OBS as OBS Studio Widget (Streamer)
 
-    Note over Mod: Выбран контекст: @StreamerNick<br/>CLIENT_ID = "mod-tab-1"
+    Note over Mod: Context selected: @StreamerNick<br/>CLIENT_ID = "mod-tab-1"
     Mod->>API: POST /player/{owner_id}/play { track_id, playlist_id, client_id }
-    API->>API: Проверка прав модератора
+    API->>API: Verify moderator permissions
     API->>Redis: HSET player:{owner_id} (track_data, pos: 0, is_paused: 0, client_id)
     API->>OBS: emit("player_track_change", { track_data, client_id })
     API->>Mod: emit("player_track_change", { track_data, client_id })
     
-    Note over OBS: Виджет видит incoming.client_id !== my_id -> играет звук
-    Note over Mod: Модератор видит incoming.client_id === my_id -> UI обновлен, звук muted
+    Note over OBS: Widget receives incoming.client_id !== my_id -> plays audio
+    Note over Mod: Moderator receives incoming.client_id === my_id -> UI updated, audio muted
 ```
 
 ---
 
-## 4. Модель Модерации и Безопасность (RBAC V2)
+## 4. Moderation Model & Permissions (RBAC V2)
 
-### 4.1. Разделение Прав: Аккаунт vs Плейлист
+### 4.1. Permission Hierarchy: Account vs Playlist
 
 ```mermaid
 classDiagram
@@ -122,42 +119,41 @@ classDiagram
     ChannelModerator "1" --> "*" ModeratorPlaylistAccess : granular access
 ```
 
-### 4.2. Гранулярность прав на Плейлист
-1. `can_manage_tracks` (управление треками в очереди):
-   * Добавление треков, удаление треков, изменение приоритетов / сортировки.
-2. `can_manage_settings` (настройки валидации плейлиста):
-   * Редактирование лимитов длительности трека, цены заказа, черных списков авторов/слов для этого конкретного плейлиста.
+### 4.2. Playlist-Level Granularity
+1. `can_manage_tracks` (queue management):
+   * Add tracks, delete tracks, reorder / change priority.
+2. `can_manage_settings` (playlist rules & validation):
+   * Edit duration limits, order pricing, author/word blacklists for the specific playlist.
 3. `can_delete_playlist`:
-   * **Заблокировано для модераторов.** Удаление плейлиста доступно **только владельцу (Owner)**.
+   * **Restricted to Owner only.** Moderators cannot delete playlists.
 
-### 4.3. Безопасность и Изоляция `allow_sources`
-* **Правило:** Вкладка `allow_sources` (OAuth интеграции стримера: Spotify, Twitch, DA) для модератора **отображается в режиме строгого Read-Only или скрывается**, предотвращая утечку и модификацию личных привязок стримера.
+### 4.3. Security & Isolation of `allow_sources`
+* **Rule:** The `allow_sources` configuration (streamer OAuth integrations: Spotify, Twitch, DonationAlerts) is rendered in strict **Read-Only** mode or hidden from moderators, preventing unauthorized token modification.
 
 ---
 
-## 5. Компактный PlayerBar и новый фид `useUpNextFeed`
+## 5. Ergonomic PlayerBar & `useUpNextFeed`
 
-### 5.1. Макет нового PlayerBar V2
-```
+### 5.1. PlayerBar Layout
+```text
 +-------------------------------------------------------------------------------------------------------------------------+
 | [▶/❚❚] [⏮] [⏭]  01:24 ━━━━●────────── 03:45  [🔊 80%]  |  [🎵 Track Title - Artist]         | [👤 @StreamerNick ▼]     |
-| [🔁] [🔀]                                              |  Заказ: @ViewerNick (150★ DA)      | [📡 В виджет: ВКЛ 🟢]    |
-|                                                         |  "Поставь для хорошего настроения"| [📋 След. треки (3) ▼]   |
+| [🔁] [🔀]                                              |  Ordered by: @ViewerNick (150★ DA) | [📡 Broadcast OBS: ON 🟢]|
+|                                                         |  "Play this for good vibes!"      | [📋 Up Next (3) ▼]       |
 +-------------------------------------------------------------------------------------------------------------------------+
 ```
 
-### 5.2. Новый фид `useUpNextFeed` (Превью следующих треков)
-* Для реализации компактного выпадающего списка «Следующие треки» создается специализированный хук `useUpNextFeed`:
-  * Отслеживает `active_playlist_id` и `current_track_id` в сторе.
-  * Вычисляет следующие $N$ треков очереди с учетом текущего режима плейлиста и сортировки.
-  * Предоставляет быстрые экшены: `skipToTrack(trackId)`, `removeTrack(trackId)` прямо из поповера в один клик.
+### 5.2. `useUpNextFeed` Hook (Up Next Preview)
+* Dedicated hook `useUpNextFeed` for the compact "Up Next" dropdown:
+  * Tracks `active_playlist_id` and `current_track_id` in the store.
+  * Calculates the next $N$ upcoming tracks based on playlist sort mode.
+  * Exposes one-click inline actions: `skipToTrack(trackId)`, `removeTrack(trackId)` directly inside the popover.
 
 ---
 
-## 6. Спецификация API с поддержкой `client_id`
+## 6. API Specification with `client_id` Support
 
-### 6.1. HTTP / REST API (`/player`)
-Все команды передают `client_id` для предотвращения эхо-лупов:
+### 6.1. REST API (`/player`)
 * `GET /player/{owner_id}/state` $\rightarrow$ `PlayerState | null`
 * `POST /player/{owner_id}/play` $\rightarrow$ `{ track_id, playlist_id, client_id }`
 * `POST /player/{owner_id}/pause` $\rightarrow$ `{ is_paused: bool, client_id }`
@@ -165,11 +161,9 @@ classDiagram
 * `POST /player/{owner_id}/volume` $\rightarrow$ `{ volume: int, client_id }`
 * `POST /player/{owner_id}/broadcast_widget` $\rightarrow$ `{ enabled: bool, client_id }`
 
-*(Примечание: эндпоинт `/skip` исключен — клиент сам вызывает `/play` со следующим вычисленным `track_id`)*
-
-### 6.2. Socket.IO События
-* **Комната:** `player:{owner_id}`.
-* **Эмиты:**
+### 6.2. Socket.IO Events
+* **Room:** `player:{owner_id}`.
+* **Emits:**
   * `player_state`: `{ state: PlayerState | null, client_id: string }`
   * `player_track_change`: `{ track: Track, playlist_id: string, client_id: string }`
   * `player_pause`: `{ is_paused: boolean, position: float, client_id: string }`
@@ -178,31 +172,14 @@ classDiagram
 
 ---
 
-## 7. Удаление устаревших элементов (Cleanup & Deprecation)
+## 7. Architecture Decisions Matrix
 
-1. **База данных PostgreSQL:**
-   * Удаление столбца `show_in_widget` из таблицы `playlists` (миграция Alembic).
-2. **DTO & Backend:**
-   * Удаление `show_in_widget` из `PlaylistSchema`, `PlaylistCreate`, `PlaylistPatch`.
-   * Удаление логики поиска стрим-плейлиста по флагу `show_in_widget` в `stream_service.py` / `widget_handler.py`.
-3. **Frontend `new_ui`:**
-   * Удаление чекбокса «Показывать в виджете» из `tabBasic.tsx` в настройках плейлиста.
-   * Удаление `show_in_widget` из типов TypeScript `Playlist`.
-
----
-
-## 8. Сводная Матрица Решений
-
-| Тема / Вопрос | Принятое решение |
+| Topic | Decision |
 | :--- | :--- |
-| **Бутстрап первого состояния** | Если `player:{owner_id}` в Redis отсутствует, возвращаем `None` / `idle`. Без побочных запросов в БД. |
-| **`show_in_widget`** | **Удаляется** из БД, моделей и UI. Виджет напрямую слушает `UserPlayer` стримера. |
-| **Дедупликация и `client_id`** | Все команды и события снабжаются `client_id`. Клиенты игнорируют собственные эхо-события. |
-| **Логика Skip** | Клиентский расчет следующего трека $\rightarrow$ вызов `/play` с конкретным `track_id`. |
-| **Фид следующих треков** | Хук `useUpNextFeed` в UI для компактного дропдауна Up Next (3 трека). |
-| **Хранилище плеера** | Полностью в **Redis** (`player:{owner_id}`). |
-| **Безопасность `allow_sources`** | Личные OAuth интеграции стримера скрыты от модератора или доступны в Read-Only. |
-| **Редизайн PlayerBar** | Компактная эргономичная плашка, детали заказа (ник, донат, записка), превью 3 следующих треков. |
-
----
-*Документ актуализирован в редакции V3.*
+| **Initial State Bootstrapping** | If `player:{owner_id}` in Redis is missing, return `None` / `idle`. No DB side-effects. |
+| **`show_in_widget` Removal** | **Removed** from database, DTOs, and UI. Widget directly tracks streamer's `UserPlayer`. |
+| **Deduplication & `client_id`** | Every command and event includes `client_id`. Clients ignore self-originated echo events. |
+| **Skip Logic** | Client-side calculation of next track $\rightarrow$ invoke `/play` with target `track_id`. |
+| **Up Next Feed** | Hook `useUpNextFeed` in UI powering compact 3-track Up Next dropdown. |
+| **Player State Storage** | Fully in **Redis** (`player:{owner_id}`). |
+| **Security for `allow_sources`** | Streamer personal OAuth integrations hidden or Read-Only for moderators. |

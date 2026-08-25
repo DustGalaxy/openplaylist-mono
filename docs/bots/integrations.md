@@ -1,34 +1,34 @@
-# Подсистема интеграций и ботов (External Integrations & Bots System)
+# External Integrations & Bots Architecture
 
-Документация описывает микросервисную архитектуру сторонних ботов (Twitch, DonationAlerts, DonatePay, DonateX), механизмы автообновления токенов и трансфер заказов из донат-сервисов в **OpenPlaylist**.
-
----
-
-## 1. Архитектурный обзор (Architecture Overview)
-
-Подсистема интеграций представляет собой совокупность микросервисов-ботов, взаимодействующих с бэкэндом через асинхронный брокер **RabbitMQ**.
-
-1. **Экосистема Ботов (Bot Microservices)**:
-   - **`bot_da`**: Бот платформы **DonationAlerts** (слушает донат-алерты, алерты сообщений).
-   - **`bot_twitch` (`bot_ttv`)**: Бот платформы **Twitch** (чат-команды, баллы канала / Channel Points, модерация).
-   - **`bot_donatepay`**: Бот платформы **DonatePay**.
-   - **`bot_donatex`**: Бот платформы **DonateX**.
-
-2. **Очереди взаимодействия в RabbitMQ (`queues.py`)**:
-   - `bot.{platform}.connect.request`: Запрос на подключение бота к платформе пользователя.
-   - `bot.{platform}.connect.response`: Ответ бота о статусе подключения.
-   - `bot.{platform}.order.new`: Новый заказ трека из сообщения доната/чата.
-   - `bot.{platform}.ack.connection`: Подтверждение активной связи с ботом.
-   - `bot.{platform}.disconnect`: Запрос на отключение бота.
-
-3. **Автообновление токенов интеграций**:
-   - Очереди `auth.user.{platform}.tokens.refreshed` транслируют новые пары Access/Refresh токенов после автоматического обновления истекших сессий.
+This document describes the microservices architecture of external streaming and donation bots (Twitch, DonationAlerts, DonatePay, DonateX), automated token refreshing, and donation media intake in **OpenPlaylist**.
 
 ---
 
-## 2. Графики и диаграммы взаимодействия (System Diagrams)
+## 1. Architecture Overview
 
-### 2.1. Компонентная архитектура интеграций (Data Flow Diagram)
+The integration layer consists of decoupled autonomous bot microservices communicating with the core backend through **RabbitMQ (AMQP 0-9-1)** and **FastStream**.
+
+1. **Bot Microservices Ecosystem:**
+   - **`bot_da`:** **DonationAlerts** listener microservice (Centrifugo WebSocket for donations and chat alerts).
+   - **`bot_ttv`:** **Twitch** interaction microservice (chat commands, Channel Points redemptions, subscriber priority queues).
+   - **`bot_donatepay`:** **DonatePay** high-throughput TypeScript microservice.
+   - **`bot_donatex`:** **DonateX** SignalR Core microservice.
+
+2. **RabbitMQ Messaging Topology (`queues.py`):**
+   - `bot.{platform}.connect.request`: Inbound command to start listening on behalf of a streamer.
+   - `bot.{platform}.connect.response`: Outbound status confirmation from the bot.
+   - `bot.{platform}.order.new`: Normalized track request extracted from donation/chat messages.
+   - `bot.{platform}.ack.connection`: Active connection heartbeat and state acknowledgment.
+   - `bot.{platform}.disconnect`: Inbound command to terminate bot session.
+
+3. **Automated Token Vault & Refresh:**
+   - The queue `auth.user.{platform}.tokens.refreshed` streams renewed Access/Refresh token pairs after proactive background refreshes before session expiry.
+
+---
+
+## 2. System Diagrams
+
+### 2.1. Integration Component Topology (Data Flow Diagram)
 
 ```mermaid
 flowchart TB
@@ -78,12 +78,12 @@ flowchart TB
 
 ---
 
-### 2.2. Диаграмма последовательности: Подключение донат-бота (Bot Connection Sequence)
+### 2.2. Sequence Diagram: Bot Connection Flow
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Стример (Владелец)
+    actor User as Streamer (Owner)
     participant UI as React UI (Integration Page)
     participant API as FastAPI (/user/bots/da/connect)
     participant Rabbit as RabbitMQ (bot.da.connect.request)
@@ -91,7 +91,7 @@ sequenceDiagram
     participant DA as DonationAlerts Centrifugo WebSocket
     participant SIO as Socket.IO Server (Root Namespace)
 
-    User->>UI: Клик "Подключить DonationAlerts Бота"
+    User->>UI: Click "Connect DonationAlerts Bot"
     UI->>API: POST /user/bots/da/connect (platform_user_id)
     API->>Rabbit: Publish bot.da.connect.request (user_id, platform_user_id, token_vault)
     API-->>UI: 200 OK ("Bot connect request dispatched")
@@ -103,39 +103,39 @@ sequenceDiagram
     Bot->>Rabbit: Publish bot.da.ack.connection (user_id, platform_user_id)
     Rabbit->>SIO: FastStream worker / notification_handler
     SIO->>UI: Emit ack_bot_connected:da (platform_user_id)
-    Note over UI: Показ зеленым индикатором: "Бот подключен и слушает донаты"
+    Note over UI: Status badge updates to green: "Bot active & listening for donations".
 ```
 
 ---
 
-### 2.3. Диаграмма последовательности: Заказ трека через донат (Donation Track Order Flow)
+### 2.3. Sequence Diagram: Donation Track Order Processing
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Donator as Зритель / Донатер
+    actor Donator as Viewer / Donator
     participant DA as DonationAlerts Platform
     participant Bot as bot_da Service
     participant Rabbit as RabbitMQ (order.proccess)
     participant Backend as FastStream Order Pipeline
     participant DB as PostgreSQL
-    actor Streamer as Стример (React UI)
+    actor Streamer as Streamer (React UI)
 
-    Donator->>DA: Отправка доната с сообщением: "https://youtu.be/xyz Сделай громче!"
+    Donator->>DA: Send donation with message: "https://youtu.be/xyz Crank it up!"
     DA->>Bot: WebSocket Event: Donation Received (amount, message, username)
     
-    Bot->>Bot: Извлечение ссылки на YouTube (regex URL parser)
+    Bot->>Bot: Extract YouTube URL (regex URL parser)
     Bot->>Rabbit: Publish NewOrderPayload (yt_url, amount, requester_nickname, playlist_id)
     
     Rabbit->>Backend: FastStream order_proccess_handler
-    Backend->>Backend: Расчет приоритета (cost_mode: add/max на основе amount)
-    Backend->>DB: Сохранение трека в очередь плейлиста
-    Backend-->>Streamer: WebSocket Event: add_track (Отображение донат-трека)
+    Backend->>Backend: Calculate priority (cost_mode: add/max based on amount)
+    Backend->>DB: Save track into playlist queue
+    Backend-->>Streamer: WebSocket Event: add_track (Live UI update)
 ```
 
 ---
 
-### 2.4. Состояния соединения бота (Bot Connection State Machine)
+### 2.4. Bot Connection State Machine
 
 ```mermaid
 stateDiagram-v2
@@ -158,18 +158,18 @@ stateDiagram-v2
 
 ---
 
-## 3. Детальная спецификация очередей ботов
+## 3. Queue Contracts & Data Models
 
-### 3.1. Структура сообщений `bot.{platform}.connect.request`
+### 3.1. Message Schema `bot.{platform}.connect.request`
 
-- `user_id`: UUID пользователя в OpenPlaylist.
+- `user_id`: UUID of OpenPlaylist user.
 - `platform`: Enum (`da`, `twitch`, `donatepay`, `donatex`).
-- `platform_user_id`: Идентификатор аккаунта стримера на платформе.
-- `access_token`: Зашифрованный токен авторизации из `TokenVault`.
-- `refresh_token`: Токен обновления.
+- `platform_user_id`: External platform account ID.
+- `access_token`: Encrypted token from `TokenVault`.
+- `refresh_token`: Encrypted refresh token.
 
-### 3.2. Автоматическое обновление токенов
+### 3.2. Automated Token Refresh Lifecycle
 
-- Фоновая задача `src/tasks/tokens.py` регулярно проверяет время жизни токенов в `TokenVault`.
-- Если `expires_at < now()`, выполняются OAuth-запросы на refresh и результат публикуется в очередей `auth.user.{platform}.tokens.refreshed`.
-- Боты перехватывают новые токены на лету без разрыва соединения WebSocket.
+- Background task `src/tasks/tokens.py` scans expiring tokens in `TokenVault`.
+- If `expires_at < now()`, OAuth refresh requests execute and the new credentials publish to `auth.user.{platform}.tokens.refreshed`.
+- Connected bot microservices update authentication headers on the fly without disconnecting the WebSocket connection.
