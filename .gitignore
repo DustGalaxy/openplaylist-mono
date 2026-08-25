@@ -26,3 +26,4 @@ back-end/src/src.zip
 *.com.json
 *.zip
 .pytest_cache
+bot_ttv/.tio.tokens.json
